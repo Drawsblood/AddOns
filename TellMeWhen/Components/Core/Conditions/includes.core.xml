@@ -1,0 +1,12 @@
+<Ui>
+
+<!-- 
+<Include file="Config.xml"/>
+ -->
+ 
+<Script file="Conditions.lua"/>
+
+
+<Include file="Categories\includes.core.xml"/>
+
+</Ui>

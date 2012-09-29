@@ -1,0 +1,18 @@
+## Interface: 50001
+## Title: LushGearSwap
+## SavedVariablesPerCharacter: LushGearSwapIDS, LushGearSwap_Options, LushGearSwap_EmulatedSetsMax, LushGearSwap_NumEmulatedSets, LushGearSwap_EmulatedSetsTable, LushGearSwap_KeyBindings
+## Notes: Advances the default Blizzard Equipment manager.
+
+Localization\Localization.deDE.lua
+Localization\Localization.koKR.lua
+Localization\Localization.enUS.lua
+Localization\Global_Localization.lua
+
+LushGearSwap_Globals.lua
+LushGearSwap_EMHook.lua
+LushGearSwap.lua
+
+Plugins\LushGearSwap_Keybind.lua
+Plugins\LushGearSwap_ClientSet.lua
+
+LushGearSwapOptions\LushGearSwapOptions.xml

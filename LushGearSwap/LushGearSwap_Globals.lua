@@ -1,0 +1,1 @@
+LushGearSwapFrame = CreateFrame("Frame", "LushGearSwapFrame")
