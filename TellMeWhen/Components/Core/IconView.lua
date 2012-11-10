@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -180,6 +180,7 @@ IconView:ImplementsModule("GroupModule_GroupPosition", 1, true)
 
 IconView:ImplementsModule("IconModule_IconEventClickHandler", 2, true)
 IconView:ImplementsModule("IconModule_IconEventOtherShowHideHandler", 2.5, true)
+IconView:ImplementsModule("IconModule_IconEventConditionHandler", 2.7, true)
 IconView:ImplementsModule("IconModule_RecieveSpellDrags", 3, true)
 IconView:ImplementsModule("IconModule_IconDragger", 4, true)
 IconView:ImplementsModule("IconModule_GroupMover", 5, true)

@@ -39,8 +39,8 @@ L["ERROR_MISSINGFILE_NOREQ"] = [[A complete restart of WoW may be required to fu
 Would you like to restart WoW now?]]
 L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 
-L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen while in combat."
-L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that while in combat."
+L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen in combat if the %q option isn't enabled (type '/tmw options')."
+L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that in combat if the %q option isn't enabled (type '/tmw options')."
 
 L["SAFESETUP_TRIGGERED"] = "Running safe & slow setup..."
 L["SAFESETUP_COMPLETE"] = "Safe & slow setup complete."
@@ -69,7 +69,7 @@ L["ICONMENU_CHOOSENAME2"] = "Choose spell(s) to check"
 L["ICONMENU_CHOOSENAME_WPNENCH"] = "Choose enchant(s) to check"
 L["ICONMENU_CHOOSENAME_WPNENCH_DESC"] = [=[Enter the name(s) the weapon enchants you want this icon to monitor. You can add multiple entries by separating them with semicolons (;).
 
-|cFFFF5959IMPORTANT|r: Enchant names must be entered exactly as they appear on the tooltip of your weapon while the enchant is active (e.g. "Flametongue", not "Flametongue Weapon").]=]
+|cFFFF5959IMPORTANT|r: Enchant names must be entered exactly as they appear on the tooltip of your weapon while the enchant is active (e.g. "%s", not "%s").]=]
 
 L["ICONMENU_CHOOSENAME_ITEMSLOT2"] = "Choose item(s) to check"
 L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"] = [=[Enter the Name, ID, or equipment slot of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equipment slots) by separating them with semicolons (;).
@@ -88,7 +88,7 @@ L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to m
 
 |cff7fffffShift-click|r spells/items/chat links or drag spells/items to insert them into this editbox.]=]
 L["CHOOSENAME_DIALOG_PETABILITIES"] = "|cFFFF5959PET ABILITIES|r must use SpellIDs."
-L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what the cooldown that you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
+L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
 L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
 
 L["CHOOSEICON"] = "Choose an icon to check"
@@ -130,8 +130,9 @@ L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks temporary weapon enchants.]=]
 
 L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_TOTEM_DESC"] = [[Tracks your totems.]]
-L["ICONMENU_GHOUL"] = "Non-MoG ghoul"
+L["ICONMENU_GHOUL"] = "Non-%s ghoul"
 L["ICONMENU_GHOUL_DESC"] = [[Tracks your ghoul if you don't have the %s talent.]]
+L["ICONMENU_RUNEOFPOWER_DESC"] = [[Tracks the runes from the %s talent.]]
 L["ICONMENU_MUSHROOMS"] = "%s"
 L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
 
@@ -161,8 +162,8 @@ L["ICONMENU_CNDTIC_ICONMENUTOOLTIP"] = "(%d |4Condition:Conditions;)"
 L["ICONMENU_DR"] = "Diminishing Returns"
 L["ICONMENU_DR_DESC"] = [=[Tracks the length and extent of diminishing returns.]=]
 
-L["ICONMENU_LIGHTWELL"] = "Lightwell"
-L["ICONMENU_LIGHTWELL_DESC"] = [=[Tracks the duration and charges of your lightwell.]=]
+--L["ICONMENU_LIGHTWELL"] = "Lightwell" -- defined in static formats
+L["ICONMENU_LIGHTWELL_DESC"] = [=[Tracks the duration and charges of your %s.]=]
 
 L["ICONMENU_RUNES"] = "Rune Cooldown"
 L["ICONMENU_RUNES_DESC"] = [[Tracks rune cooldowns]]
@@ -307,8 +308,12 @@ L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
 L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual display of the remaining cooldown/duration on the icon.
 
 This is only applicable if OmniCC (or similar) is installed.]]
+L["ICONMENU_SHOWTIMERTEXT_NOOCC"] = "Show ElvUI timer text"
+L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"] = [[Check this option to display ElvUI's textual display of the remaining cooldown/duration on the icon.
+
+This setting only affects ElvUI's timer. If you have another addon that provides timers (like OmniCC), you can control those timers with the %q setting. It is not recommended to have both of these settings enabled.]]
 L["ICONMENU_ALLOWGCD"] = "Allow Global Cooldown"
-L["ICONMENU_ALLOWGCD_DESC"] = [[Check this option to allow the timer to react to and show the gloal cooldown instead of simply ignoring it.]]
+L["ICONMENU_ALLOWGCD_DESC"] = [[Check this option to allow the timer to react to and show the global cooldown instead of simply ignoring it.]]
 
 L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar that is overlaid across the top half of the icon that will indicate the power still needed to cast the spell (or the power that you have when 'Fill bars up' is checked)"
 L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar that is overlaid across the bottom half of the icon that will indicate the cooldown/duration remaining (or the time that has passed if 'Fill bars up' is checked)"
@@ -365,6 +370,8 @@ L["WATER"] = "Water"
 L["AIR"] = "Air"
 L["MUSHROOMS"] = "Mushrooms to check"
 L["MUSHROOM"] = "Mushroom %d"
+L["RUNESOFPOWER"] = "Runes to check"
+L["RUNEOFPOWER"] = "Rune %d"
 L["GENERICTOTEM"] = "Totem %d"
 L["RUNES"] = "Rune(s) to check"
 
@@ -455,6 +462,8 @@ L["ICONMENU_SHOWSTACKS"] = "Show stacks"
 L["ICONMENU_SHOWSTACKS_DESC"] = "Check this to show the number of stacks of the item you have."
 L["ICONMENU_STEALABLE"] = "Only stealable"
 L["ICONMENU_STEALABLE_DESC"] = "Check this to only show buffs that can be spellstolen. Best used when checking for the 'Magic' dispel type"
+L["ICONMENU_HIDENOUNITS"] = "Hide if no units"
+L["ICONMENU_HIDENOUNITS_DESC"] = "Check this to cause the icon to hide if all the units that this icon is checking have been invalidated because of unit conditions and/or units not existing."
 L["ICONMENU_ONLYBAGS"] = "Only if in bags"
 L["ICONMENU_ONLYBAGS_DESC"] = "Check this to make the icon show only if the item is in your bags (or equipped). If 'Only if equipped' is enabled, this is also forcibly enabled."
 L["ICONMENU_ONLYSEEN"] = "Only if seen"
@@ -518,6 +527,14 @@ L["UIPANEL_TOOLTIP_GROUPRESET"] = "Reset this group's position and scale"
 L["UIPANEL_ALLRESET"] = "Reset all"
 L["UIPANEL_TOOLTIP_ALLRESET"] = "Reset ALL SETTINGS of ALL ICONS AND GROUPS, as well as any other settings."
 L["UIPANEL_LOCKUNLOCK"] = "Lock/Unlock AddOn"
+L["UIPANEL_COMBATCONFIG"] = "Allow config in combat"
+L["UIPANEL_COMBATCONFIG_DESC"] = [[Enable this to allow configuration of TellMeWhen while in combat.
+
+Note that this will force the options module to be loaded all the time, resulting in increased memory usage and slightly longer load times.
+
+This option is account-wide - all of your profiles will use this setting.
+
+Changes will only be reflected after you reload your UI.]]
 L["UIPANEL_BARTEXTURE"] = "Bar Texture"
 L["UIPANEL_BARIGNOREGCD"] = "Bars Ignore GCD"
 L["UIPANEL_BARIGNOREGCD_DESC"] = "If checked, cooldown bars will not change values if the cooldown triggered is a global cooldown"
@@ -562,7 +579,7 @@ L["UIPANEL_GROUPSORT_SORTASCENDING_DESC"] = "Check to sort this attribute from l
 L["UIPANEL_GROUPSORT_SORTDESCENDING"] = "High"
 L["UIPANEL_GROUPSORT_SORTDESCENDING_DESC"] = "Check to sort this attribute from high to low values."
 
-L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|tThis sort method is diabled because a method above it is sorting by Icon ID, so this method will never be reached and used in sorting."
+L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|tThis sort method is disabled because a method above it is sorting by Icon ID, so this method will never be reached and used in sorting."
 
 L["UIPANEL_GROUPSORT_id"] = "Icon ID"
 L["UIPANEL_GROUPSORT_id_DESC"] = "Sorts the group by the ID numbers of its icons."
@@ -745,7 +762,7 @@ L["TEXTLAYOUTS_DEFAULTS_WRAPPER"] = "Default: %s"
 L["TEXTLAYOUTS_LAYOUTSETTINGS"] = "Layout Settings"
 L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"] = "Click to configure the text layout %q."
 
-L["TEXTLAYOUTS_ERROR_FALLBACK"] = [[The text layout this icon is supposed to use could not be found. A default layout until the layout can be found, or until the layout is changed.
+L["TEXTLAYOUTS_ERROR_FALLBACK"] = [[The text layout for this icon could not be found. A default layout will be used until the intended layout can be found, or until a different layout is selected.
 
 (Did you delete the layout? Or did you import this icon without importing the layout it used?)]]
 
@@ -874,9 +891,24 @@ L["CONDITIONPANEL_ICON_SHOWN"] = "Shown"
 L["CONDITIONPANEL_ICON_HIDDEN"] = "Hidden"
 L["CONDITIONPANEL_ICON_DESC"] = [=[The condition checks whether the icon specified is shown or hidden.
 
-If you don't want to display the icons that are being checked, check %q in the icon editor of the icon being checked.
+If you don't want to display the icon being checked, check %q in the icon editor of that icon.
 
 The group of the icon being checked must be shown in order to check the icon, even if the condition is set to false.]=]
+
+L["CONDITIONPANEL_ICONSHOWNTIME"] = "Icon Shown Time"
+L["CONDITIONPANEL_ICONSHOWNTIME_DESC"] = [=[The condition checks how long the icon specified has been shown.
+
+If you don't want to display the icon being checked, check %q in the icon editor of that icon.
+
+The group of the icon being checked must be shown in order to check the icon.]=]
+
+L["CONDITIONPANEL_ICONHIDDENTIME"] = "Icon Hidden Time"
+L["CONDITIONPANEL_ICONHIDDENTIME_DESC"] = [=[The condition checks how long the icon specified has been hidden.
+
+If you don't want to display the icon being checked, check %q in the icon editor of that icon.
+
+The group of the icon being checked must be shown in order to check the icon.]=]
+
 L["CONDITIONPANEL_RUNES_DESC"] = [=[Use this condition type to only show the icon when the selected runes are available.
 
 Each rune is a check button. A check mark will require that the rune be usable, an 'X' will require that the rune be unusable, no mark will ignore the rune.
@@ -914,6 +946,7 @@ L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"
 L["CONDITIONPANEL_GROUPTYPE"] = "Group Type"
 L["CONDITIONPANEL_SWIMMING"] = "Swimming"
 L["CONDITIONPANEL_RESTING"] = "Resting"
+L["CONDITIONPANEL_INPETBATTLE"] = "In pet battle"
 L["CONDITIONPANEL_MANAUSABLE"] = "Spell Usable (Mana/Energy/etc.)"
 L["CONDITIONPANEL_SPELLRANGE"] = "Spell in range of unit"
 L["CONDITIONPANEL_ITEMRANGE"] = "Item in range of unit"
@@ -922,6 +955,13 @@ L["CONDITIONPANEL_PETMODE"] = "Pet attack mode"
 L["CONDITIONPANEL_PETTREE"] = "Pet talent tree"
 L["CONDITIONPANEL_PETSPEC"] = "Pet specialization"
 L["CONDITIONPANEL_TRACKING"] = "Tracking active"
+L["CONDITIONPANEL_BLIZZEQUIPSET"] = "Equipment set equipped"
+L["CONDITIONPANEL_BLIZZEQUIPSET_DESC"] = "Checks whether or not you have a specific Blizzard equipment manager set equipped."
+L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT"] = "Equipment set name"
+L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT_DESC"] = [[Enter the name of the Blizzard equipment set that you wish to check.
+
+Only one equipment set may be entered, and it is |cFFFF5959CASE SENSITIVE|r]]
+L["EQUIPSETTOCHECK"] = "Equipment set to check (|cFFFF5959CASE SENSITIVE|r)"
 L["ONLYCHECKMINE"] = "Only Check Mine"
 L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check for buffs/debuffs that you casted"
 L["LUACONDITION"] = "Lua (Advanced)"
@@ -990,8 +1030,11 @@ L["ITEMINBAGS"] = "Item count (includes charges)"
 L["ITEMEQUIPPED"] = "Item is equipped"
 L["ITEMCOOLDOWN"] = "Item cooldown"
 L["SPELLCOOLDOWN"] = "Spell cooldown"
+L["SPELLCHARGES_FULLYCHARGED"] = "Fully charged"
 L["SPELLCHARGES"] = "Spell charges"
-L["SPELLCHARGES_DESC"] = "Tracks the charges of a spell like %q or %q."
+L["SPELLCHARGES_DESC"] = "Tracks the charges of a spell like %s or %s."
+L["SPELLCHARGETIME"] = "Spell charge time"
+L["SPELLCHARGETIME_DESC"] = "Tracks the time remaining until a spell like %s or %s will regenerate one charge."
 L["SPELLREACTIVITY"] = "Spell reactivity"
 L["MP5"] = "%d MP5"
 L["REACTIVECNDT_DESC"] = "This condition only checks the reactive state of the ability, not the cooldown of it."
@@ -1058,7 +1101,13 @@ L["OVERWRITEGROUP"] = "|cFFFF5959Overwrite|r Group: %s"
 L["MAKENEWGROUP"] = "|cff59ff59Create|r New Group"
 
 
-L["CONFIGPANEL_LISTING_TOOLTIP"] = "|cff7fffffClick|r to jump to panel."
+--[=[L["CNDT_SLIDER_DESC_BASE"] = [[|cff7fffffMousewheel|r to adjust.
+|cff7fffffShift-Mousewheel|r to adjust x10.
+|cff7fffffControl-Mousewheel|r to adjust x60.
+|cff7fffffControl-Shift-Mousewheel|r to adjust x600.]]]=]
+L["CNDT_SLIDER_DESC_CLICKSWAP_TOMANUAL"] = [[|cff7fffffRight-Click|r to switch to manual input.]]
+L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER"] = [[|cff7fffffRight-Click|r to switch to slider input.]]
+L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"] = [[Only manual input is allowed for values over %s (Blizzard's sliders can behave strangely with large values.)]]
 
 
 L["IconModule_IconContainer_MasqueIconContainer"] = "Icon Container"
@@ -1071,11 +1120,19 @@ L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar"
 
 
 L["GROUPADDONSETTINGS"] = "Group Settings"
+L["GROUPADDONSETTINGS_DESC"] = [[Configure settings for this group, other groups, and all other general addon settings.]]
 L["CONDITIONS"] = "Conditions"
+L["ICONCONDITIONS_DESC"] = "Configure conditions that allow you to fine-tune when this icon is shown."
 L["GROUPCONDITIONS"] = "Group Conditions"
+L["GROUPCONDITIONS_DESC"] = "Configure conditions that allow you to fine-tune when this group is shown."
+
+L["EVENTCONDITIONS"] = "Event Conditions"
+L["EVENTCONDITIONS_DESC"] = "Click to configure a set of conditions that will trigger this event when they begin passing."
+L["EVENTCONDITIONS_TAB_DESC"] = "Configure a set of conditions that will trigger an event when they begin passing."
 
 L["UNITCONDITIONS"] = "Unit Conditions"
 L["UNITCONDITIONS_DESC"] = "Click to configure a set of conditions that each unit will have to pass in order to be checked."
+L["UNITCONDITIONS_TAB_DESC"] = "Configure conditions that each unit will have to pass in order to be checked."
 L["UNITCONDITIONS_STATICUNIT"] = "<Icon Unit>"
 L["UNITCONDITIONS_STATICUNIT_DESC"] = "Causes the condition to check each unit that the icon is checking."
 L["UNITCONDITIONS_STATICUNIT_TARGET"] = "<Icon Unit>'s target"
@@ -1083,6 +1140,7 @@ L["UNITCONDITIONS_STATICUNIT_TARGET_DESC"] = "Causes the condition to check the 
 
 
 L["MAIN"] = "Main"
+L["MAIN_DESC"] = "Contains the main options for this icon."
 L["UNNAMED"] = "((Unnamed))"
 
 
@@ -1273,6 +1331,18 @@ L["SOUND_EVENT_ONLEFTCLICK_DESC"] = [[This event triggers when you |cff7fffffLef
 L["SOUND_EVENT_ONRIGHTCLICK"] = "On Right Click"
 L["SOUND_EVENT_ONRIGHTCLICK_DESC"] = [[This event triggers when you |cff7fffffRight-click|r the icon while icons are locked.]]
 
+L["SOUND_EVENT_ONCONDITION"] = "On Condition Set Passing"
+L["SOUND_EVENT_ONCONDITION_DESC"] = "This event triggers when a set of conditions that you can configure for this event begin passing."
+
+L["SOUND_EVENT_ONEVENTSRESTORED"] = "On Icon Setup"
+L["SOUND_EVENT_ONEVENTSRESTORED_DESC"] = [[This event triggers immediately after this icon has been setup.
+
+This mainly happens when you leave configuration mode, but it also happens when entering/leaving a zone among several other things.
+
+This may also be thought of as a "soft reset" of the icon.
+
+This event may be useful in creating a default animation state for the icon.]]
+
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
 L["SOUND_EVENT_DISABLEDFORTYPE_DESC2"] = [[This event is not available for the current icon configuration.
@@ -1295,6 +1365,7 @@ NOTE: WoW must be restarted before it will recognize files that did not exist wh
 L["SOUND_TAB"] = "Sound"
 
 L["EVENTS_TAB"] = "Events"
+L["EVENTS_TAB_DESC"] = "Configure triggers for sounds, text ouput, and animations."
 L["EVENTS_HANDLERS_HEADER"] = "Icon Event Handlers"
 L["EVENTS_HANDLERS_ADD"] = "Add Event Handler..."
 L["EVENTS_HANDLERS_ADD_DESC"] = "|cff7fffffClick|r to choose an event handler to add to this icon."
@@ -1658,10 +1729,6 @@ L["HELP_MS_NOFOUND"] = [[The ability %q could not be found on your action bars.
 
 Ensure that the ability is on your action bars, in its default state, and that it is not only a macro that is putting the spell on your action bars. Otherwise, this icon will not function properly.]]
 
-L["HELP_ICD_NATURESGRACE"] = [[Trying to track the cooldown of %s?
-
-It is recommended that you change the icon type to %q instead, which will track resets in the cooldown triggered by eclipse state changes.]]
-
 L["HELP_IMPORT_CURRENTPROFILE"] = [[Trying to move or copy an icon from this profile to another icon slot?
 
 You can do so easily by |cff7fffffRight-clicking and dragging|r the icon (hold down the mouse button) to another slot. When you release the mouse button, a menu will appear with many options.
@@ -1720,7 +1787,7 @@ L["IncreasedSPsix"] = "Increased Spellpower (6%)"
 L["IncreasedSPten"] = "Increased Spellpower (10%)"
 L["IncreasedPhysHaste"] = "Increased Physical Haste"
 L["IncreasedSpellHaste"] = "Increased Spell Haste"
-L["BurstHaste"] = "Heroism/Bloodlust"
+--L["BurstHaste"] = "Heroism/Bloodlust" -- defined in static formats
 L["BonusStamina"] = "Increased Stamina"
 L["BurstManaRegen"] = "Burst Mana Regen"
 L["PhysicalDmgTaken"] = "Physical Damage Taken"

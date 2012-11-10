@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -24,6 +24,7 @@ local CooldownSweep = TMW:NewClass("IconModule_CooldownSweep", "IconModule")
 CooldownSweep:RegisterIconDefaults{
 	ShowTimer = false,
 	ShowTimerText = false,
+	ShowTimerTextnoOCC = false,
 	ClockGCD = false,
 }
 
@@ -40,16 +41,24 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			setting = "ShowTimerText",
 			title = TMW.L["ICONMENU_SHOWTIMERTEXT"],
 			tooltip = TMW.L["ICONMENU_SHOWTIMERTEXT_DESC"],
-			--[[disabled = function()
-				return not (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC") or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true))
-			end,]]
 		},
 		{
 			setting = "ClockGCD",
 			title = TMW.L["ICONMENU_ALLOWGCD"],
 			tooltip = TMW.L["ICONMENU_ALLOWGCD_DESC"],
 			disabled = function(self)
-				return not TMW.CI.ics.ShowTimer and not TMW.CI.ics.ShowTimerText
+				return not TMW.CI.ics.ShowTimer and not TMW.CI.ics.ShowTimerText and not TMW.CI.ics.ShowTimerTextnoOCC
+			end,
+		},
+		{
+			setting = "ShowTimerTextnoOCC",
+			title = TMW.L["ICONMENU_SHOWTIMERTEXT_NOOCC"],
+			tooltip = TMW.L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"],
+			hidden = function()
+				return not IsAddOnLoaded("ElvUI")
+			end,
+			disabled = function(self)
+				return not TMW.CI.ics.ShowTimer
 			end,
 		},
 	})
@@ -122,8 +131,11 @@ end
 function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
 	self.ShowTimerText = icon.ShowTimerText
+	self.ShowTimerTextnoOCC = icon.ShowTimerTextnoOCC
 	self.ClockGCD = icon.ClockGCD
-	self.cooldown.noCooldownCount = not icon.ShowTimerText
+	
+	self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
+	self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
 	
 	local attributes = icon.attributes
 	

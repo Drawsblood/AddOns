@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -46,23 +46,12 @@ function Env.CooldownDuration(spell)
 	return 0
 end
 
-local GetItemCooldown = GetItemCooldown
-function Env.ItemCooldownDuration(itemID)
-	local start, duration = GetItemCooldown(itemID)
-	if duration then
-		return ((duration == 0 or OnGCD(duration)) and 0) or (duration - (TMW.time - start))
+function Env.RechargeDuration(spell)
+	local charges, maxCharges, start, duration = GetSpellCharges(spell)
+	if charges and charges ~= maxCharges then
+		return (duration == 0 and 0) or (duration - (TMW.time - start))
 	end
 	return 0
-end
-
-local IsUsableSpell = IsUsableSpell
-function Env.ReactiveHelper(NameFirst, Checked)
-	local usable, nomana = IsUsableSpell(NameFirst)
-	if Checked then
-		return usable or nomana
-	else
-		return usable
-	end
 end
 
 
@@ -70,7 +59,6 @@ local ConditionCategory = CNDT:GetCategory("SPELLSABILITIES", 4, L["CNDTCAT_SPEL
 
 ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 	text = L["SPELLCOOLDOWN"],
-	categorySpacebefore = true,
 	range = 30,
 	step = 0.1,
 	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
@@ -122,6 +110,9 @@ ConditionCategory:RegisterCondition(2,	 "SPELLCDCOMP", {
 		end
 	]],
 })
+
+ConditionCategory:RegisterSpacer(2.4)
+
 ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
 	text = L["SPELLCHARGES"],
 	tooltip = L["SPELLCHARGES_DESC"],
@@ -144,6 +135,41 @@ ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
 	end,
 	hidden = not TMW.ISMOP,		
 })
+ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
+	text = L["SPELLCHARGETIME"],
+	tooltip = L["SPELLCHARGETIME_DESC"],
+	range = 30,
+	step = 0.1,
+	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	useSUG = "spell",
+	unit = PLAYER,
+	texttable = setmetatable({[0] = CNDT.COMMON.formatSeconds(0).." ("..L["SPELLCHARGES_FULLYCHARGED"]..")"}, {__index = CNDT.COMMON.formatSeconds}),
+	icon = "Interface\\Icons\\ability_warlock_handofguldan",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = [[RechargeDuration(c.NameFirst) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
+			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE"),
+			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_CHARGES")
+	end,
+	anticipate = [[
+		local _, _, start, duration = GetSpellCharges(c.NameFirst)
+		local VALUE = duration and start + (duration - c.Level) or huge
+	]],
+})
+
+ConditionCategory:RegisterSpacer(2.7)
+
+local IsUsableSpell = IsUsableSpell
+function Env.ReactiveHelper(NameFirst, Checked)
+	local usable, nomana = IsUsableSpell(NameFirst)
+	if Checked then
+		return usable or nomana
+	else
+		return usable
+	end
+end
 
 ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 	text = L["SPELLREACTIVITY"],
@@ -224,6 +250,15 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 })
 
 ConditionCategory:RegisterSpacer(10)
+
+local GetItemCooldown = GetItemCooldown
+function Env.ItemCooldownDuration(itemID)
+	local start, duration = GetItemCooldown(itemID)
+	if duration then
+		return ((duration == 0 or OnGCD(duration)) and 0) or (duration - (TMW.time - start))
+	end
+	return 0
+end
 
 ConditionCategory:RegisterCondition(11,	 "ITEMCD", {
 	text = L["ITEMCOOLDOWN"],
@@ -464,6 +499,41 @@ ConditionCategory:RegisterCondition(24,	 "TOTEM4", {
 ConditionCategory:RegisterSpacer(30)
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+Env.UnitCast = function(unit, level, matchname)
+	local name, _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
+	if not name then
+		name, _, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
+	end
+	name = strlowerCache[name]
+	if matchname == "" and name then
+		matchname = name
+	end
+	if level == 0 then -- only interruptible
+		return not notInterruptible and name == matchname
+	elseif level == 1 then -- present
+		return name == matchname
+	else -- absent
+		return name ~= matchname
+	end
+end
+Env.UnitCastTime = function(unit, level, matchname)
+	local name, _, _, _, _, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+	if not name then
+		name, _, _, _, _, endTime, _, notInterruptible = UnitChannelInfo(unit)
+	end
+	name = strlowerCache[name]
+	if matchname == "" and name then
+		matchname = name
+	end
+	local remaining = endTime and endTime/1000 - TMW.time or 0
+	if level == 0 then -- only interruptible
+		return not notInterruptible and name == matchname and remaining or 0
+	elseif level == 1 then -- present
+		return name == matchname and remaining or 0
+	else -- absent
+		return name ~= matchname and remaining or 0
+	end
+end
 ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	text = L["ICONMENU_CAST"],
 	min = 0,
@@ -479,25 +549,6 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_CASTTOMATCH", "CONDITIONPANEL_CASTTOMATCH_DESC") editbox.label = L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
 	useSUG = true,
-	Env = {
-		UnitCast = function(unit, level, matchname)
-			local name, _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
-			if not name then
-				name, _, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
-			end
-			name = strlowerCache[name]
-			if matchname == "" and name then
-				matchname = name
-			end
-			if level == 0 then -- only interruptible
-				return not notInterruptible and (name == matchname)
-			elseif level == 1 then -- present
-				return (name == matchname)
-			else
-				return not (name == matchname) -- absent
-			end
-		end,
-	},
 	funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameName))]], -- LOWER is some gsub magic
 	events = function(ConditionObject, c)
 		-- holy shit... need i say more?

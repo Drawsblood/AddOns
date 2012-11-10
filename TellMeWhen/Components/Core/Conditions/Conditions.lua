@@ -474,6 +474,27 @@ Env = {
 
 	TMW = TMW,
 	GCDSpell = TMW.GCDSpell,
+	
+	-- These are here as a primitive security measure to prevent some of the most basic forms of malicious Lua conditions.
+	-- This list isn't even exhaustive, but its a start.
+    CancelLogout = error,
+    DownloadSettings = error,
+    ForceLogout = error,
+    ForceQuit = error,
+    Logout = error,
+    Quit = error,
+    ReloadUI = error,
+    Screenshot = error,
+    SetEuropeanNumbers = error,
+    SetUIVisibility = error,
+    UploadSettings = error,
+    DeleteCursorItem = error,
+    ClearCursor = error,
+    AcceptDuel = error,
+    CancelDuel = error,
+    StartDuel = error,
+    DeleteGMTicket = error,
+
 } CNDT.Env = Env
 
 TMW:RegisterCallback("TMW_ONUPDATE_PRE", function(event, time_arg)
@@ -497,7 +518,8 @@ Env.SemicolonConcatCache = setmetatable(
 })
 
 
-local function formatSeconds(seconds, arg2)
+CNDT.COMMON = {}
+function CNDT.COMMON.formatSeconds(seconds, arg2)
 	if type(seconds) == "table" then -- if i set it directly as a metamethod
 		seconds = arg2
 	end
@@ -517,9 +539,9 @@ local function formatSeconds(seconds, arg2)
 	if h >= 1 then return format("%d:%02d:%s", h, m, s) end
 	return format("%d:%s", m, s)
 end
+local formatSeconds = CNDT.COMMON.formatSeconds
 
 -- preset text tables that are frequently used
-CNDT.COMMON = {}
 CNDT.COMMON.commanumber = function(k)
 	k = gsub(k, "(%d)(%d%d%d)$", "%1,%2", 1)
 	local found
@@ -644,6 +666,54 @@ local function strWrap(string)
 	end
 end
 
+local function SetupItemIDReplacer()
+	local hasZeroes = true
+	local function metamethod(self, name)
+		local id = TMW:GetItemIDs(nil, name, 1)
+		if not id then
+			id = 0
+		end
+		if id == 0 then
+			hasZeroes = true
+		end
+		self[name] = id
+		return id
+	end
+	Env.ItemLookup = setmetatable({}, {__index = metamethod})
+	local ItemLookup = Env.ItemLookup
+	
+	CNDT:RegisterEvent("BAG_UPDATE", function()
+		if hasZeroes then
+			hasZeroes = false
+			for k, v in pairs(ItemLookup) do
+				if v == 0 then
+					v = metamethod(ItemLookup, k)
+				end
+				if v == 0 then
+					hasZeroes = true
+				end
+			end
+		end
+	end)
+	
+	SetupItemIDReplacer = nil
+end
+
+function CNDT:GetItemIDRefForConditionChecker(name)
+	if name == ";" or name == 0 then
+		return 0
+	end
+	local id = TMW:GetItemIDs(nil, name, 1)
+	if id and id ~= 0 then
+		return id
+	end
+	if SetupItemIDReplacer then
+		SetupItemIDReplacer()
+	end
+	local _ = Env.ItemLookup[name]
+	return "ItemLookup[" .. strWrap(name) .. "]"
+end
+
 function CNDT:GetUnit(setting)
 	return TMW.UNITS:GetOriginalUnitTable(setting)[1] or ""
 end
@@ -687,14 +757,17 @@ function CNDT:DoConditionSubstitutions(conditionData, condition, thisstr)
 	gsub("c.Level", 		conditionData.percent and condition.Level/100 or condition.Level):
 	gsub("c.Checked", 		tostring(condition.Checked)):
 	gsub("c.Operator", 		condition.Operator):
+	
 	gsub("c.NameFirst2", 	strWrap(TMW:GetSpellNames(nil, name2, 1))): --Name2 must be before Name
 	gsub("c.NameName2", 	strWrap(TMW:GetSpellNames(nil, name2, 1, 1))):
-	gsub("c.ItemID2", 		strWrap(TMW:GetItemIDs(nil, name2, 1))):
+	gsub("c.ItemID2", 		CNDT:GetItemIDRefForConditionChecker(name2)):
+	gsub("c.Name2Raw", 		strWrap(condition.Name2)):
 	gsub("c.Name2", 		strWrap(name2)):
 
 	gsub("c.NameFirst", 	strWrap(TMW:GetSpellNames(nil, name, 1))):
 	gsub("c.NameName", 		strWrap(TMW:GetSpellNames(nil, name, 1, 1))):
-	gsub("c.ItemID", 		strWrap(TMW:GetItemIDs(nil, name, 1))):
+	gsub("c.ItemID", 		CNDT:GetItemIDRefForConditionChecker(name)):
+	gsub("c.NameRaw", 		strWrap(condition.Name)):
 	gsub("c.Name", 			strWrap(name)):
 
 	gsub("c.True", 			tostring(condition.Level == 0)):
@@ -842,8 +915,9 @@ function ConditionObject:OnNewInstance(Conditions, conditionString)
 	for n, condition in TMW:InNLengthTable(Conditions) do
 		types = types .. "_" .. condition.Type
 	end
+	self.funcIdentifier = types
 	
-	local func, err = loadstring(conditionString, "Condition" .. types)
+	local func, err = loadstring(conditionString, "Condition" .. self.funcIdentifier)
 	if func then
 		func = setfenv(func, TMW.CNDT.Env)
 		self.CheckFunction = setfenv(func, TMW.CNDT.Env)
@@ -935,23 +1009,20 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 	end
 	
 	-- Begin creating the final string that will be used to make the function.
-	local funcstr = [[
-	if not event then
-		return
-	elseif (]]
+	local funcstr = "if not event then return \r\n elseif ( \r\n"
 	
 	-- Compile all of the arg checker strings into one single composite that can be checked in an (if ... then) statement.
 	local argCheckerStringComposite = ""
 	for argCheckerString in pairs(argCheckerStrings) do
 		if argCheckerString ~= "" then
-			argCheckerStringComposite = argCheckerStringComposite .. [[(]] .. argCheckerString .. [[) or ]]
+			argCheckerStringComposite = argCheckerStringComposite .. "    (" .. argCheckerString .. ") or \r\n"
 		end
 	end
 	
 	if argCheckerStringComposite ~= "" then
 		-- If any arg checkers were added to the composite (it isnt a blank string),
 		-- trim off the final ") or " at the end of it.
-		argCheckerStringComposite = argCheckerStringComposite:sub(1, -5)
+		argCheckerStringComposite = argCheckerStringComposite:sub(1, -6) .. "\r\n"
 	else
 		-- The arg checker string should never ever be blank. Raise an error if it was.
 		TMW:Error("The arg checker string compiled for ConditionObject %s was blank. This should not have happened.", tostring(self))
@@ -979,11 +1050,11 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 	
 	-- Set the variables that accept the args to the vararg with all of the function input,
 	-- and tack on the body of the function
-	funcstr = argHeader .. [[ = ...
-	]] .. funcstr
+	funcstr = argHeader .. " = ... \r\n" .. funcstr
 
+	funcstr = funcstr:gsub("	", "    ") -- tabs to spaces
 	
-	local func, err = loadstring(funcstr, tostring(self) .. " Condition Events")
+	local func, err = loadstring(funcstr, "ConditionEvents" .. self.funcIdentifier)
 	if func then
 		func = setfenv(func, Env)
 	elseif err then
@@ -1122,6 +1193,7 @@ function ConditionObject:GetUnitChangedEventString(unit)
 end
 
 
+	
 local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor"){
 	status = "ready",
 	
@@ -1140,14 +1212,6 @@ local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor"){
 		
 		self.status = "loaded"
 	end,
-	ResetModifiableConditionsBase = function(self)
-		self.ModifiableConditionsBase.n = 0
-		for k, v in pairs(self.ModifiableConditionsBase) do
-			if type(k) == "number" then
-				TMW:CopyTableInPlaceWithMeta(TMW.Condition_Defaults["**"], v)
-			end
-		end
-	end,
 	GetPostUserModifiableConditions = function(self)
 		-- Returns a copy of the settings table that was defined through :LoadConditions()
 		-- that can be modified without changing user settings. If this modified version of the conditions is created,
@@ -1156,13 +1220,8 @@ local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor"){
 		if self.ModifiableConditions then
 			return self.ModifiableConditions
 		end
-		if not self.ModifiableConditionsBase then
-			self.ModifiableConditionsBase = TMW:CopyWithMetatable(self.Conditions)
-		end
-		
-		self:ResetModifiableConditionsBase()
-		
-		self.ModifiableConditions = TMW:CopyTableInPlaceWithMeta(self.Conditions, self.ModifiableConditionsBase)
+	
+		self.ModifiableConditions = TMW:CopyWithMetatable(self.Conditions)
 		self.ConditionsToConstructWith = self.ModifiableConditions
 		
 		return self.ModifiableConditions
@@ -1213,10 +1272,6 @@ local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor"){
 		self.Conditions = nil
 		self.ConditionsToConstructWith = nil
 		self.ModifiableConditions = nil
-		
-		if self.ModifiableConditionsBase then
-			self:ResetModifiableConditionsBase()
-		end
 		
 		self.status = "ready"
 	end,
@@ -1470,7 +1525,7 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	TMW:ValidateType("GetSettings", "conditionSetData", data.GetSettings, "function")
 	
 	TMW:ValidateType("iterFunc", "conditionSetData", data.iterFunc, "function")
-	TMW:ValidateType("iterArgs", "conditionSetData", data.iterArgs, "table;nil")
+	TMW:ValidateType("iterArgs", "conditionSetData", data.iterArgs, "table")
 	
 	TMW:ValidateType("useDynamicTab", "conditionSetData", data.useDynamicTab, "boolean;nil")
 	TMW:ValidateType("GetTab", "conditionSetData", data.GetTab, "function;nil")
@@ -1499,9 +1554,11 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	
 	ConditionSets[identifier] = data
 	
-	TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
-		CNDT:SetTabText(identifier)
-	end)
+	if not data.useDynamicTab then
+		TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
+			CNDT:SetTabText(identifier)
+		end)
+	end
 end
 function CNDT:RegisterConditionImplementingClass(className)
 	TMW:ValidateType("2 (className)", "CNDT:RegisterConditionImplementingClass()", className, "string")
@@ -1535,6 +1592,7 @@ CNDT:RegisterConditionSet("Icon", {
 		return TMW.IE.IconConditionTab
 	end,
 	tabText = L["CONDITIONS"],
+	tabTooltip = L["ICONCONDITIONS_DESC"],
 })
 
 CNDT:RegisterConditionImplementingClass("Group")
@@ -1558,6 +1616,7 @@ CNDT:RegisterConditionSet("Group", {
 		return TMW.IE.GroupConditionTab
 	end,
 	tabText = L["GROUPCONDITIONS"],
+	tabTooltip = L["GROUPCONDITIONS_DESC"],
 })
 
 TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)

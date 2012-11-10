@@ -21,7 +21,6 @@ L["BonusAgiStr"] = "Agilité/Force augmentée"
 L["BonusArmor"] = "Armure augmentée"
 L["BonusMana"] = "Réserve de Mana augmentée"
 L["BonusStamina"] = "Endurance augmentée"
-L["BurstHaste"] = "Burst de hâte"
 L["BurstManaRegen"] = "Burst de Regen Mana"
 L["CASTERFORM"] = "Forme de lanceur de sorts"
 L["CHOOSENAME_DIALOG"] = "Entrer le nom ou l'id du Sort/Capacité/Objet/Buff/Débuff attribué à cette icône. Vous pouvez ajouter de multiples buffs/débuffs en les séparant avec ';'." -- Needs review

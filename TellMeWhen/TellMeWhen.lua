@@ -27,15 +27,14 @@ local DRData = LibStub("DRData-1.0", true)
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
-TELLMEWHEN_VERSION = "6.0.3"
-TELLMEWHEN_VERSION_MINOR = strmatch(" 6.0.3", " r%d+") or ""
+TELLMEWHEN_VERSION = "6.0.4"
+TELLMEWHEN_VERSION_MINOR = strmatch(" r653", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60345 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60447 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
 
-TMW.ALLOW_LOCKDOWN_CONFIG = true
 
 -- GLOBALS: TellMeWhen, LibStub
 -- GLOBALS: TellMeWhenDB, TellMeWhen_Settings
@@ -123,18 +122,22 @@ TMW.strlowerCache = setmetatable(
 	end,
 }) local strlowerCache = TMW.strlowerCache
 
-TMW.SpellTextures = setmetatable(
-{
+TMW.SpellTexturesMetaIndex = {}
+TMW.SpellTexturesBase = {
 	--hack for pvp tinkets
 	[42292] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
 	[strlowerCache[GetSpellInfo(42292)]] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
-},
+}
+local SpellTexturesMetaIndex = TMW.SpellTexturesMetaIndex
+local SpellTexturesBase = TMW.SpellTexturesBase
+TMW.SpellTextures = setmetatable(
+CopyTable(SpellTexturesBase),
 {
 	__index = function(t, name)
 		if not name then return end
 
 		-- rawget the strlower because hardcoded entries (talents, mainly) are put into the table as lowercase
-		local tex = rawget(t, strlowerCache[name]) or GetSpellTexture(name)
+		local tex = rawget(t, strlowerCache[name]) or GetSpellTexture(name) or SpellTexturesMetaIndex[name] or rawget(SpellTexturesMetaIndex, strlowerCache[name])
 
 		t[name] = tex
 		return tex
@@ -1173,13 +1176,14 @@ TMW.Defaults = {
 		HasImported			= false,
 		ConfigWarning		= true,
 		VersionWarning		= true,
+		AllowCombatConfig	= false,
 	},
 	profile = {
 	--	Version			= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
 		Locked			= 	false,
 		NumGroups		=	1,
 		Interval		=	UPD_INTV,
-		--EffThreshold	=	15,
+		EffThreshold	=	15,
 		TextureName		= 	"Blizzard",
 		DrawEdge		=	not TMW.ISMOP and false,
 		SoundChannel	=	"SFX",
@@ -1351,15 +1355,15 @@ TMW.BE = TMW.ISMOP and {
 		ReducedPhysicalDone = "115798;50256;24423",
 		ReducedCastingSpeed = "31589;73975;5761;109466;50274;90314;126402;58604",
 		ReducedHealing		= "115804",
-		Stunned				= "_1833;_408;_91800;_113801;5211;_56;9005;22570;19577;24394;56626;44572;_853;64044;_20549;46968;132168;_30283;_7922;50519;91797;_89766;54786;105593;120086;117418;115001;_131402;108194;117526;105771;_122242;113953;118905;119392;119381",
+		Stunned				= "_1833;_408;_91800;_113801;5211;_56;9005;22570;19577;24394;56626;44572;_853;64044;_20549;46968;132168;_30283;_7922;50519;91797;_89766;54786;105593;120086;117418;115001;_131402;108194;117526;105771;_122242;113953;118905;119392;119381;118271",
 		Incapacitated		= "20066;1776;_6770;115078",
 		Rooted				= "_339;_122;_64695;_19387;33395;_4167;54706;50245;90327;16979;45334;_87194;63685;102359;_128405;116706;123407;115197",
 		Disarmed			= "_51722;_676;64058;50541;91644;117368",
 		Silenced			= "_47476;_78675;_34490;_55021;_15487;_1330;_24259;_18498;_25046;31935;31117;102051;116709",
 		Shatterable			= "122;33395;_44572;_82691", -- by algus2
-		Disoriented			= "_19503;31661;_2094;_51514;90337;88625",
-		Slowed				= "_116;_120;_13810;_5116;_8056;_3600;_1715;_12323;116095;_110300;_20170;_115180;45524;_18223;_15407;_3409;26679;_58180;61391;44614;_7302;_8034;_63529;_15571;_7321;_7992;123586;47960", -- by algus2 
-		Feared				= "_5782;5246;_8122;10326;1513;111397;_5484;_6789;_87204;20511;112928;113004;113792",
+		Disoriented			= "_19503;31661;_2094;_51514;90337;88625;105421;99",
+		Slowed				= "_116;_120;_13810;_5116;_8056;_3600;_1715;_12323;116095;_110300;_20170;_115180;45524;_18223;_15407;_3409;26679;_58180;61391;44614;_7302;_8034;_63529;_15571;_7321;_7992;123586;47960;129923", -- by algus2 
+		Feared				= "_5782;5246;_8122;10326;1513;111397;_5484;_6789;_87204;20511;112928;113004;113792;113056",
 		Bleeding			= "_1822;_1079;9007;33745;1943;_703;_115767;89775;_11977;106830;77758",
 		
 		-- EXISTING WAS CHECKED, DIDN'T LOOK FOR NEW ONES YET:
@@ -1370,13 +1374,13 @@ TMW.BE = TMW.ISMOP and {
 	},
 	buffs = {
 		-- NEW IN 6.0.0:
-		IncreasedMastery	= "19740;116956;93435;128997",
+		IncreasedMastery	= "19740;116956;93435;127830",
 		IncreasedSP			= "1459;61316;77747;109773;126309",
 		
 		-- VERIFIED 6.0.0:
 		IncreasedAP			= "57330;19506;6673",
 		IncreasedPhysHaste  = "55610;113742;30809;128432;128433",
-		IncreasedStats		= "1126;115921;20217;90363",
+		IncreasedStats		= "1126;117666;20217;90363",
 		BonusStamina		= "21562;103127;469;90364",
 		IncreasedSpellHaste = "24907;15473;51470",
 		IncreasedCrit		= "24932;1459;61316;97229;24604;90309;126373;126309;116781",
@@ -1398,7 +1402,6 @@ TMW.BE = TMW.ISMOP and {
 		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
 		Tier12Interrupts	= "_97202;_100094",
 	},
-	dr = {},
 } or
 {
 	--Most of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
@@ -1461,7 +1464,6 @@ TMW.BE = TMW.ISMOP and {
 		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
 		Tier12Interrupts	= "_97202;_100094",
 	},
-	dr = {},
 }
 
 TMW.CompareFuncs = {
@@ -1655,9 +1657,12 @@ function TMW:CopyTableInPlaceWithMeta(src, dest, allowUnmatchedSourceTables)
 	local metatemp = getmetatable(src) -- lets not go overwriting random metatables
 	setmetatable(src, getmetatable(dest))
 	for k in pairs(src) do
-		if dest[k] and type(dest[k]) == "table" and type(src[k]) == "table" then
+		if type(dest[k]) == "table" and type(src[k]) == "table" then
 			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
-		elseif type(src[k]) ~= "table" or allowUnmatchedSourceTables then
+		elseif allowUnmatchedSourceTables and type(dest[k]) ~= "table" and type(src[k]) == "table" then
+			dest[k] = {}
+			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
+		elseif type(src[k]) ~= "table" then
 			dest[k] = src[k]
 		end
 	end
@@ -1712,17 +1717,17 @@ function TMW:OnInitialize()
 		return -- if required, return here
 	end
 
-	if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MISSING" then
-		TMW.Warn("TellMeWhen no longer supports ButtonFacade. If you wish to continue to skin your icons, please upgrade to ButtonFacade's successor, Masque.")
-	end
-
-	TMW:ProcessEquivalencies()
-
 	--------------- Events/OnUpdate ---------------
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TMW:RegisterEvent("PLAYER_LOGIN")
+
+	if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MISSING" then
+		TMW.Warn("TellMeWhen no longer supports ButtonFacade. If you wish to continue to skin your icons, please upgrade to ButtonFacade's successor, Masque.")
+	end
+
+	TMW:ProcessEquivalencies()
 end
 
 function TMW:Initialize()
@@ -1766,7 +1771,6 @@ function TMW:Initialize()
 
 	
 	
-	
 	--------------- Communications ---------------
 	
 	-- Channel TMW is used for sharing data.
@@ -1790,13 +1794,11 @@ function TMW:OnProfile()
 
 	TMW:Update()
 	
-	if TMW.CompileOptions then
+	if TMW.IE then
 		TMW:CompileOptions() -- redo groups in the options
+		
+		TMW.IE:Load(1)
 	end
-	
-	-- LoadFirstValidIcon must happen through a timer to avoid interference with AceConfigDialog callbacks getting broken when
-	-- we reload the icon editor. (AceConfigDialog-3.0\AceConfigDialog-3.0-57.lua:804: attempt to index field "rootframe" (a nil value))
-	TMW.IE:ScheduleTimer("LoadFirstValidIcon", 0.1)
 end
 
 TMW.DatabaseCleanups = {
@@ -1908,6 +1910,9 @@ function TMW:UpdateNormally()
 		TMW:LoadOptions()
 	end
 	
+	wipe(SpellTextures)
+	SpellTextures = TMW:CopyTableInPlaceWithMeta(SpellTexturesBase, SpellTextures)
+	
 	TMW:Fire("TMW_GLOBAL_UPDATE") -- the placement of this matters. Must be after options load, but before icons are updated
 
 	-- Add a very small amount so that we don't call the same icon multiple times
@@ -1960,8 +1965,8 @@ local function OnUpdateDuringCoroutine(self)
 	
 	CoroutineStartTime = debugprofilestop()
 	
-	if not TMW.db.profile.Locked then
-		TMW:LoadOptions()
+	if not IsAddOnLoaded("TellMeWhen_Options") then
+		error("TellMeWhen_Options was not loaded before a coroutine update happened. It is supposed to load before PLAYER_ENTERING_WORLD if the AllowCombatConfig setting is enabled!")
 	end
 	
 	if NumCoroutinesQueued == 0 then
@@ -2025,6 +2030,17 @@ TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
 		elseif not TMW.Locked then
 			TMW:LockToggle()
 		end
+	end
+end)
+local hasRan
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+	if hasRan then
+		return
+	end
+	hasRan = true
+	if TMW.db.global.AllowCombatConfig then
+		TMW.ALLOW_LOCKDOWN_CONFIG = true
+		TMW:LoadOptions()
 	end
 end)
 end
@@ -2113,7 +2129,10 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		[50028] = {
 			icon = function(self, ics)
 				local Events = ics.Events
-				for _, eventSettings in ipairs(Events) do -- dont use InNLengthTable here
+				
+				-- dont use InNLengthTable here
+				--(we need to make sure to do it to everything, not just events that are currently valid. Just in case...)
+				for _, eventSettings in ipairs(Events) do
 					local eventData = TMW.EventList[eventSettings.Event]
 					if eventData and eventData.applyDefaultsToSetting then
 						eventData.applyDefaultsToSetting(eventSettings)
@@ -2141,13 +2160,11 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 			end,
 		},
 		[47320] = {
-			icon = function(self, ics)
-				for _, Event in TMW:InNLengthTable(ics.Events) do
-					-- these numbers got really screwy (0.8000000119), put then back to what they should be (0.8)
-					Event.Duration 	= Event.Duration  and tonumber(format("%0.1f",	Event.Duration))
-					Event.Magnitude = Event.Magnitude and tonumber(format("%1f",	Event.Magnitude))
-					Event.Period  	= Event.Period    and tonumber(format("%0.1f",	Event.Period))
-				end
+			iconEventHandler = function(self, eventSettings)
+				-- these numbers got really screwy (0.8000000119), put then back to what they should be (0.8)
+				eventSettings.Duration 	= eventSettings.Duration  and tonumber(format("%0.1f",	eventSettings.Duration))
+				eventSettings.Magnitude = eventSettings.Magnitude and tonumber(format("%1f",	eventSettings.Magnitude))
+				eventSettings.Period  	= eventSettings.Period    and tonumber(format("%0.1f",	eventSettings.Period))
 			end,
 		},
 		[47002] = {
@@ -2318,7 +2335,66 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 			end,
 		},
 		[41301] = {
+			stances = {
+				{class = "WARRIOR", 	id = 2457}, 	-- Battle Stance
+				{class = "WARRIOR", 	id = 71}, 		-- Defensive Stance
+				{class = "WARRIOR", 	id = 2458}, 	-- Berserker Stance
+
+				{class = "DRUID", 		id = 5487}, 	-- Bear Form
+				{class = "DRUID", 		id = 768}, 		-- Cat Form
+				{class = "DRUID", 		id = 1066}, 	-- Aquatic Form
+				{class = "DRUID", 		id = 783}, 		-- Travel Form
+				{class = "DRUID", 		id = 24858}, 	-- Moonkin Form
+				{class = "DRUID", 		id = 33891}, 	-- Tree of Life
+				{class = "DRUID", 		id = 33943}, 	-- Flight Form
+				{class = "DRUID", 		id = 40120}, 	-- Swift Flight Form
+
+				{class = "PRIEST", 		id = 15473}, 	-- Shadowform
+
+				{class = "ROGUE", 		id = 1784}, 	-- Stealth
+
+				{class = "HUNTER", 		id = 82661}, 	-- Aspect of the Fox
+				{class = "HUNTER", 		id = 13165}, 	-- Aspect of the Hawk
+				{class = "HUNTER", 		id = 5118}, 	-- Aspect of the Cheetah
+				{class = "HUNTER", 		id = 13159}, 	-- Aspect of the Pack
+				{class = "HUNTER", 		id = 20043}, 	-- Aspect of the Wild
+
+				{class = "DEATHKNIGHT", id = 48263}, 	-- Blood Presence
+				{class = "DEATHKNIGHT", id = 48266}, 	-- Frost Presence
+				{class = "DEATHKNIGHT", id = 48265}, 	-- Unholy Presence
+
+				{class = "PALADIN", 	id = 19746}, 	-- Concentration Aura
+				{class = "PALADIN", 	id = 32223}, 	-- Crusader Aura
+				{class = "PALADIN", 	id = 465}, 		-- Devotion Aura
+				{class = "PALADIN", 	id = 19891}, 	-- Resistance Aura
+				{class = "PALADIN", 	id = 7294}, 	-- Retribution Aura
+
+				{class = "WARLOCK", 	id = 47241}, 	-- Metamorphosis
+			},
+	
+			setupcsn = function(self)
+				self.CSN = {
+					[0]	= NONE,
+				}
+
+				for _, stanceData in ipairs(self.stances) do
+					if stanceData.class == pclass then
+						local stanceName = GetSpellInfo(stanceData.id)
+						tinsert(self.CSN, stanceName)
+					end
+				end
+
+				for i, stanceName in pairs(self.CSN) do
+					self.CSN[stanceName] = i
+				end
+
+			end,
+
 			group = function(self, gs)
+				if not self.CSN then
+					self:setupcsn()
+				end
+				
 				local Conditions = gs.Conditions
 
 				if gs.NotInVehicle then
@@ -2330,8 +2406,8 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				if gs.Stance then
 					local nume = {}
 					local numd = {}
-					for id = 0, #TMW.CSN do
-						local sn = TMW.CSN[id]
+					for id = 0, #self.CSN do
+						local sn = self.CSN[id]
 						local en = gs.Stance[sn]
 						if en == false then
 							tinsert(numd, id)
@@ -2341,7 +2417,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 					end
 					if #nume ~= 0 then
 						local start = #Conditions + 1
-						if #nume <= ceil(#TMW.CSN/2) then
+						if #nume <= ceil(#self.CSN/2) then
 
 							for _, value in ipairs(nume) do
 								local condition = Conditions[#Conditions + 1]
@@ -2445,15 +2521,76 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 					TMW.db.profile.Font.Outline = "THICKOUTLINE"
 				end
 			end,
+			
+			stances = {
+				{class = "WARRIOR", 	id = 2457}, 	-- Battle Stance
+				{class = "WARRIOR", 	id = 71}, 		-- Defensive Stance
+				{class = "WARRIOR", 	id = 2458}, 	-- Berserker Stance
+
+				{class = "DRUID", 		id = 5487}, 	-- Bear Form
+				{class = "DRUID", 		id = 768}, 		-- Cat Form
+				{class = "DRUID", 		id = 1066}, 	-- Aquatic Form
+				{class = "DRUID", 		id = 783}, 		-- Travel Form
+				{class = "DRUID", 		id = 24858}, 	-- Moonkin Form
+				{class = "DRUID", 		id = 33891}, 	-- Tree of Life
+				{class = "DRUID", 		id = 33943}, 	-- Flight Form
+				{class = "DRUID", 		id = 40120}, 	-- Swift Flight Form
+
+				{class = "PRIEST", 		id = 15473}, 	-- Shadowform
+
+				{class = "ROGUE", 		id = 1784}, 	-- Stealth
+
+				{class = "HUNTER", 		id = 82661}, 	-- Aspect of the Fox
+				{class = "HUNTER", 		id = 13165}, 	-- Aspect of the Hawk
+				{class = "HUNTER", 		id = 5118}, 	-- Aspect of the Cheetah
+				{class = "HUNTER", 		id = 13159}, 	-- Aspect of the Pack
+				{class = "HUNTER", 		id = 20043}, 	-- Aspect of the Wild
+
+				{class = "DEATHKNIGHT", id = 48263}, 	-- Blood Presence
+				{class = "DEATHKNIGHT", id = 48266}, 	-- Frost Presence
+				{class = "DEATHKNIGHT", id = 48265}, 	-- Unholy Presence
+
+				{class = "PALADIN", 	id = 19746}, 	-- Concentration Aura
+				{class = "PALADIN", 	id = 32223}, 	-- Crusader Aura
+				{class = "PALADIN", 	id = 465}, 		-- Devotion Aura
+				{class = "PALADIN", 	id = 19891}, 	-- Resistance Aura
+				{class = "PALADIN", 	id = 7294}, 	-- Retribution Aura
+
+				{class = "WARLOCK", 	id = 47241}, 	-- Metamorphosis
+			},
+	
+			setupcsn = function(self)
+				self.CSN = {
+					[0]	= NONE,
+				}
+
+				for _, stanceData in ipairs(self.stances) do
+					if stanceData.class == pclass then
+						local stanceName = GetSpellInfo(stanceData.id)
+						tinsert(self.CSN, stanceName)
+					end
+				end
+
+				for i, stanceName in pairs(self.CSN) do
+					self.CSN[stanceName] = i
+				end
+
+			end,
+
 			group = function(self, gs)
 				gs.LBFGroup = nil
+				
+				if not self.CSN then
+					self:setupcsn()
+				end
+				
 				if gs.Stance then
 					for k, v in pairs(gs.Stance) do
-						if TMW.CSN[k] then
+						if self.CSN[k] then
 							if v then -- everything switched in this version
-								gs.Stance[TMW.CSN[k]] = false
+								gs.Stance[self.CSN[k]] = false
 							else
-								gs.Stance[TMW.CSN[k]] = true
+								gs.Stance[self.CSN[k]] = true
 							end
 							gs.Stance[k] = nil
 						end
@@ -2839,7 +2976,9 @@ function TMW:PLAYER_ENTERING_WORLD()
 	if not TMW.debug then
 		-- Don't send version broadcast messages in developer mode.
 		
-		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
+		if IsInGuild() then
+			TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
+		end
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
@@ -2849,12 +2988,12 @@ end
 function TMW:PLAYER_LOGIN()
 	if TMW.ISMOP then
 		TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-	else
-		TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
-		TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
 	end
+	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
+	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
+--	end
 	
-	-- Yeah,  I do it twice. Masque is a heap of broken shit and doesn't work unless its done twice.
+	-- Yeah,  I do it twice. Masque is a heap of broken shit and doesn't work unless its done twice. (Maybe??)
 	TMW:Update()
 	--TMW:Update()
 end
@@ -2870,7 +3009,7 @@ function TMW:PLAYER_SPECIALIZATION_CHANGED()
 				local name, tex = GetTalentInfo(talent)
 				local lower = name and strlowerCache[name]
 				if lower then
-					SpellTextures[lower] = tex
+					SpellTexturesMetaIndex[lower] = tex
 				end
 			end
 		else
@@ -2879,7 +3018,7 @@ function TMW:PLAYER_SPECIALIZATION_CHANGED()
 					local name, tex = GetTalentInfo(tab, talent)
 					local lower = name and strlowerCache[name]
 					if lower then
-						SpellTextures[lower] = tex
+						SpellTexturesMetaIndex[lower] = tex
 					end
 				end
 			end
@@ -2890,40 +3029,11 @@ end
 
 function TMW:ProcessEquivalencies()
 	for dispeltype, icon in pairs(TMW.DS) do
-	--	SpellTextures[dispeltype] = icon
-		SpellTextures[strlower(dispeltype)] = icon
+	--	SpellTexturesMetaIndex[dispeltype] = icon
+		SpellTexturesMetaIndex[strlower(dispeltype)] = icon
 	end
-
-	if DRData then
-		local myCategories = {
-			ctrlstun		= "DR-ControlledStun",
-			scatters		= "DR-Scatter",
-			fear 			= "DR-Fear",
-			rndstun			= "DR-RandomStun",
-			silence			= "DR-Silence",
-			banish 			= "DR-Banish",
-			mc 				= "DR-MindControl",
-			entrapment		= "DR-Entrapment",
-			taunt 			= "DR-Taunt",
-			disarm			= "DR-Disarm",
-			horror			= "DR-Horrify",
-			cyclone			= "DR-Cyclone",
-			disorient		= "DR-Disorient",
-			ctrlroot		= "DR-ControlledRoot",
-			dragons			= "DR-DragonsBreath",
-			bindelemental	= "DR-BindElemental",
-			charge			= "DR-Charge",
-			iceward			= "DR-IceWard",
-		}
-		
-		local dr = TMW.BE.dr
-		for spellID, category in pairs(DRData.spells) do
-			local k = myCategories[category] or TMW:Error("The DR category %q is undefined!", category)
-			if k then
-				dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
-			end
-		end
-	end
+	
+	TMW:Fire("TMW_EQUIVS_PROCESSING")
 
 	TMW.OldBE = CopyTable(TMW.BE)
 	for category, b in pairs(TMW.OldBE) do
@@ -2939,8 +3049,8 @@ function TMW:ProcessEquivalencies()
 					if name then
 						TMW:LowerNames(name) -- this will insert the spell name into the table of spells for capitalization restoration.
 						str = gsub(str, id, name)
-						SpellTextures[realID] = tex
-						SpellTextures[strlowerCache[name]] = tex
+						SpellTexturesMetaIndex[realID] = tex
+						SpellTexturesMetaIndex[strlowerCache[name]] = tex
 
 					else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
 						
@@ -3081,6 +3191,17 @@ TMW:RegisterUpgrade(50020, {
 	end,
 })
 
+TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)
+	if type == "icon" then
+		local ics, groupID, iconID = ...
+		
+		-- delegate to events
+		for eventID, eventSettings in TMW:InNLengthTable(ics.Events) do
+			TMW:DoUpgrade("iconEventHandler", version, eventSettings, eventID, groupID, iconID)
+		end
+	end
+end)
+
 function TMW:GetEventHandler(eventHandlerName)
 	return EventHandler.instancesByName[eventHandlerName]
 end
@@ -3164,7 +3285,7 @@ TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 
 			if thisHasEventHandlers then
 				TMW:Fire("TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE", icon, event, eventSettings)
-					
+				
 				icon.EventHandlersSet[event] = true
 				icon.EventsToFire = icon.EventsToFire or {}
 			end
@@ -3187,17 +3308,13 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function(event, time, Locked)
 	wipe(QueuedIcons)
 end)
 
-local runEvents = 1
-local runEventsTimerHandler
-function TMW:RestoreEvents()
-	runEvents = 1
-end
-TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function()
+
+TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)
 	-- make sure events dont fire while, or shortly after, we are setting up
-	runEvents = nil
+	icon.runEvents = nil
 	
-	TMW:CancelTimer(runEventsTimerHandler, 1)
-	runEventsTimerHandler = TMW:ScheduleTimer("RestoreEvents", UPD_INTV*2.1)
+	TMW:CancelTimer(icon.runEventsTimerHandler, 1)
+	icon.runEventsTimerHandler = TMW.ScheduleTimer(icon, "RestoreEvents", UPD_INTV*2.1)
 end)
 
 
@@ -3459,9 +3576,8 @@ function Group.Setup_Conditions(group)
 		-- If the group is set to only show in combat, add a condition to handle it.
 		if group.OnlyInCombat then
 			local combatCondition = ConditionObjectConstructor:Modify_WrapExistingAndAppendNew()
-			combatCondition.Type = "COMBAT"		
+			combatCondition.Type = "COMBAT"
 		end
-		
 		-- Modifications are done. Construct the ConditionObject
 		group.ConditionObject = ConditionObjectConstructor:Construct()
 		
@@ -3564,6 +3680,7 @@ local Icon = TMW:NewClass("Icon", "Button", "UpdateTableManager", "GenericModule
 Icon:UpdateTable_Set(IconsToUpdate)
 Icon.IsIcon = true
 Icon.attributes = {}
+Icon.runEvents = 1
 	
 function Icon.OnNewInstance(icon, ...)
 	local _, name, group, _, iconID = ... -- the CreateFrame args
@@ -3695,10 +3812,23 @@ function Icon.QueueEvent(icon, arg1)
 	QueuedIcons[#QueuedIcons + 1] = icon
 end
 
+function Icon.RestoreEvents(icon)
+	icon.runEvents = 1
+	icon.runEventsTimerHandler = nil
+	if icon.EventHandlersSet.OnEventsRestored and Locked then
+		icon:QueueEvent("OnEventsRestored")
+		icon:ProcessQueuedEvents()
+	end
+end
+
+function Icon.IsInRange(icon)
+	return icon:GetID() <= icon.group.Rows*icon.group.Columns
+end
+
 function Icon.IsValid(icon)
 	-- checks if the icon should be in the list of icons that can be checked in metas/conditions
 
-	return icon.Enabled and icon:GetID() <= icon.group.Rows*icon.group.Columns and icon.group:IsValid()
+	return icon.Enabled and icon:IsInRange() and icon.group:IsValid()
 end
 
 Icon.Update_Method = "auto"
@@ -3858,7 +3988,7 @@ function Icon.ProcessQueuedEvents(icon)
 					shouldProcess = conditionResult
 				end
 
-				if shouldProcess and runEvents and icon.attributes.shown then
+				if shouldProcess and icon.runEvents and icon.attributes.shown then
 					local EventHandler = TMW:GetEventHandler(EventSettings.Type, true)
 					if EventHandler then
 						local handled = EventHandler:HandleEvent(icon, EventSettings)
@@ -4232,7 +4362,6 @@ TMW:NewClass("GenericComponent"){
 		
 		self.IconEvents[#self.IconEvents + 1] = eventData
 	end,
-	
 }
 
 TMW:NewClass("IconComponent", "GenericComponent"){
@@ -5087,17 +5216,22 @@ function IconType:DragReceived(icon, t, data, subType, param4)
 		return
 	end
 
-	local _, spellID
+	local _, input
 	if data == 0 and type(param4) == "number" then
-		spellID = param4
+		input = GetSpellInfo(param4)
 	else
-		_, spellID = GetSpellBookItemInfo(data, subType)
-		if not spellID then
+		local type
+		type, input = GetSpellBookItemInfo(data, subType)
+		if not input then
 			return
+		end
+		
+		if type == "SPELL" then
+			input = GetSpellBookItemName(data, subType)
 		end
 	end
 
-	ics.Name = TMW:CleanString(ics.Name .. ";" .. spellID)
+	ics.Name = TMW:CleanString(ics.Name .. ";" .. input)
 	return true -- signal success
 end
 
@@ -5230,7 +5364,10 @@ function IconType:SetModuleAllowance(moduleName, allow)
 	end
 end
 
-
+IconType:RegisterIconEvent(111, "OnEventsRestored", {
+	text = L["SOUND_EVENT_ONEVENTSRESTORED"],
+	desc = L["SOUND_EVENT_ONEVENTSRESTORED_DESC"],
+})
 
 IconType:UsesAttributes("alpha")
 IconType:UsesAttributes("alphaOverride")
@@ -5361,7 +5498,7 @@ function TMW:EquivToTable(name)
 end
 TMW:MakeFunctionCached(TMW, "EquivToTable")
 
-function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations)
+function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations, allowRenaming)
 	local buffNames = TMW:SplitNames(setting) -- get a table of everything
 
 	--INSERT EQUIVALENCIES
@@ -5399,7 +5536,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	if hash then
 		local hash = {}
 		for k, v in ipairs(buffNames) do
-			if toname then
+			if toname and (allowRenaming or tonumber(v)) then
 				v = GetSpellInfo(v or "") or v -- turn the value into a name if needed
 			end
 
@@ -5411,12 +5548,16 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	if toname then
 		if firstOnly then
 			local ret = buffNames[1] or ""
-			ret = GetSpellInfo(ret) or ret -- turn the first value into a name and return it
+			if (allowRenaming or tonumber(ret)) then
+				ret = GetSpellInfo(ret) or ret -- turn the first value into a name and return it
+			end
 			if icon then ret = TMW:LowerNames(ret) end
 			return ret
 		else
 			for k, v in ipairs(buffNames) do
-				buffNames[k] = GetSpellInfo(v or "") or v --convert everything to a name
+				if (allowRenaming or tonumber(v)) then
+					buffNames[k] = GetSpellInfo(v or "") or v --convert everything to a name
+				end
 			end
 			if icon then TMW:LowerNames(buffNames) end
 			return buffNames
@@ -5428,7 +5569,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	end
 	return buffNames
 end
-TMW:MakeFunctionCached(TMW, "GetSpellNames")
+--TMW:MakeFunctionCached(TMW, "GetSpellNames")
 
 function TMW:GetSpellDurations(icon, setting)
 	local NameArray = TMW:GetSpellNames(icon, setting, nil, nil, nil, 1)
@@ -5684,6 +5825,9 @@ function TMW:LockToggle()
 end
 
 function TMW:SlashCommand(str)
+	if not TMW.Initialized then
+		return
+	end
 	
 	local cmd, arg2, arg3 = TMW:GetArgs(str, 3)
 	cmd = strlower(cmd or "")

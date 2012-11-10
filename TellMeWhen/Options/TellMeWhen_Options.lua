@@ -289,7 +289,7 @@ function TMW:SetUIDropdownText(frame, value, tbl, text)
 			for icon in TMW:InIcons() do
 				if icon:GetName() == value then
 					local g, i = strmatch(value, "TellMeWhen_Group(%d+)_Icon(%d+)")
-					UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(tonumber(g), tonumber(i), icon))
+					UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(tonumber(g), tonumber(i), icon:GetSettings()))
 					return icon
 				end
 			end
@@ -991,7 +991,7 @@ local colorIconTypeTemplate = {
 				if this == "GLOBAL" then
 					t = L["COLOR_HEADER_DEFAULT"]
 				else
-					t = L["COLOR_HEADER"]:format(TMW.Types[this].name)
+					t = L["COLOR_HEADER"]:format(TMW.Types[this].name, "?")-- 2nd param is to prevent errors incase StaticFormats errors
 				end
 				return t .. "\r\n"
 			end,
@@ -1052,6 +1052,19 @@ function TMW:CompileOptions()
 					end,
 					get = function(info) return TMW.db.profile[info[#info]] end,
 					args = {
+						AllowCombatConfig = {
+							name = L["UIPANEL_COMBATCONFIG"],
+							desc = L["UIPANEL_COMBATCONFIG_DESC"],
+							type = "toggle",
+							order = 2.5,
+							confirm = function(info)
+								return not TMW.db.global[info[#info]]
+							end,
+							set = function(info, val)
+								TMW.db.global[info[#info]] = val
+							end,
+							get = function(info) return TMW.db.global[info[#info]] end,
+						},
 						Locked = {
 							name = L["UIPANEL_LOCKUNLOCK"],
 							desc = L["UIPANEL_SUBTEXT2"],
@@ -1065,13 +1078,13 @@ function TMW:CompileOptions()
 							dialogControl = 'LSM30_Statusbar',
 							values = LSM:HashTable("statusbar"),
 						},
-						--[[sliders = {
+						sliders = {
 							type = "group",
 							order = 9,
 							name = "",
 							guiInline = true,
 							dialogInline = true,
-							args = {]]
+							args = {
 								Interval = {
 									name = L["UIPANEL_UPDATEINTERVAL"],
 									desc = L["UIPANEL_TOOLTIP_UPDATEINTERVAL"],
@@ -1082,7 +1095,7 @@ function TMW:CompileOptions()
 									step = 0.01,
 									bigStep = 0.01,
 								},
-								--[[EffThreshold = {
+								EffThreshold = {
 									name = L["UIPANEL_EFFTHRESHOLD"],
 									desc = L["UIPANEL_EFFTHRESHOLD_DESC"],
 									type = "range",
@@ -1090,13 +1103,9 @@ function TMW:CompileOptions()
 									min = 0,
 									max = 40,
 									step = 1,
-									
-									-- I really doubt that anyone uses this setting at all.
-									-- Going to hide it and see if anyone complains.
-									hidden = true,
 								},
 							},
-						},]]
+						},
 						checks = {
 							type = "group",
 							order = 21,
@@ -1111,12 +1120,12 @@ function TMW:CompileOptions()
 									order = 1,
 									hidden = true,
 								},
-								DrawEdge = { -- Cooldown:SetDrawEdge was removed in MoP
+								DrawEdge = {
 									name = L["UIPANEL_DRAWEDGE"],
 									desc = L["UIPANEL_DRAWEDGE_DESC"],
 									type = "toggle",
 									order = 40,
-									hidden = TMW.ISMOP,
+									hidden = TMW.ISMOP, -- Cooldown:SetDrawEdge was removed in MoP
 								},
 								SoundChannel = {
 									name = L["SOUND_CHANNEL"],
@@ -1185,14 +1194,14 @@ function TMW:CompileOptions()
 							style = "dropdown",
 							order = 30,
 						},
-						resetall = {
+						--[[resetall = {
 							name = L["UIPANEL_ALLRESET"],
 							desc = L["UIPANEL_TOOLTIP_ALLRESET"],
 							type = "execute",
 							order = 51,
 							confirm = true,
 							func = function() TMW.db:ResetProfile() end,
-						},
+						},]]
 						importexport = importExportBoxTemplate,
 					},
 				},
@@ -1324,7 +1333,6 @@ function TMW:Group_Delete(groupID)
 		return
 	end
 
-	local needReloadIcon = groupID == TMW.CI.g
 	for id = groupID + 1, TMW.db.profile.NumGroups do
 		local source = "TellMeWhen_Group" .. id
 		local destination = "TellMeWhen_Group" .. id - 1
@@ -1334,22 +1342,16 @@ function TMW:Group_Delete(groupID)
 
 		-- check for any icons of a group.
 		TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
-		
-		needReloadIcon = needReloadIcon or groupID == TMW.CI.g
 	end
 
 	tremove(TMW.db.profile.Groups, groupID)
 	TMW.db.profile.NumGroups = TMW.db.profile.NumGroups - 1
 
 	TMW:Update()
-	IE:Load()
+	IE:Load(1)
 	TMW:CompileOptions()
 	IE:NotifyChanges()
 	CloseDropDownMenus()
-	
-	if needReloadIcon then
-		TMW.IE:LoadFirstValidIcon()
-	end
 end
 
 function TMW:Group_Add()
@@ -1386,13 +1388,9 @@ function TMW:Group_Swap(groupID1, groupID2)
 	Groups[groupID1], Groups[groupID2] = Groups[groupID2], Groups[groupID1]
     
     TMW:Update()
-	IE:Load()
+	IE:Load(1)
 	TMW:CompileOptions()
 	IE:NotifyChanges()
-	
-	if TMW.CI.g == groupID1 or TMW.CI.g == groupID2 then
-		TMW.IE:LoadFirstValidIcon()
-	end
 end
 
 
@@ -2108,7 +2106,14 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	end
 
 	local groupID, iconID = CI.g, CI.i
-	if not groupID or not iconID then return end
+	if not groupID or not iconID then
+		return
+	elseif
+		not CI.ic.group:IsValid()
+		or not CI.ic:IsInRange()
+	then
+		return IE:LoadFirstValidIcon()
+	end
 
 	-- This is really really important. The icon must be setup so that it has the correct components implemented
 	-- so that the correct config panels will be loaded and shown for the icon.
@@ -2148,8 +2153,7 @@ function IE:LoadFirstValidIcon()
 	for icon in TMW:InIcons() do
 		-- hack to get the first icon that exists and is shown
 		if icon:IsVisible() then
-			TMW.IE:Load(1, icon)
-			return
+			return IE:Load(1, icon)
 		end
 	end
 	
@@ -3483,13 +3487,15 @@ function EVENTS:SetupEventSettings()
 
 	local Settings = self:GetEventSettings()
 	local settingsUsedByEvent = eventData.settings
+	
+	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE")
 
 	--hide settings
-	EventSettings.Operator	 	 :Hide()
-	EventSettings.Value		 	 :Hide()
-	EventSettings.CndtJustPassed :Hide()
-	EventSettings.PassingCndt	 :Hide()
-	EventSettings.Icon			 :Hide()
+	EventSettings.Operator	 	 		:Hide()
+	EventSettings.Value		 	 		:Hide()
+	EventSettings.CndtJustPassed 		:Hide()
+	EventSettings.PassingCndt	 		:Hide()
+	EventSettings.Icon			 		:Hide()
 
 	--set settings
 	EventSettings.PassThrough	 :SetChecked(Settings.PassThrough)
@@ -3545,6 +3551,8 @@ function EVENTS:SetupEventSettings()
 	if v then
 		TMW:TT(EventSettings.Operator, v.tooltipText, nil, 1)
 	end
+	
+	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_POST")
 end
 
 function EVENTS:OperatorMenu_DropDown()
@@ -3607,7 +3615,7 @@ function EVENTS:IconMenu_DropDown()
 		for group, groupID in TMW:InGroups() do
 			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
-				info.text = TMW:GetGroupName(groupID, groupID, 1)
+				info.text = TMW:GetGroupName(groupID, groupID)
 				info.hasArrow = true
 				info.notCheckable = true
 				info.value = groupID

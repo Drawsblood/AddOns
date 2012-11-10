@@ -42,7 +42,6 @@ L["BOTTOM"] = "Внизу"
 L["BOTTOMLEFT"] = "Внизу слева"
 L["BOTTOMRIGHT"] = "Внизу справа"
 L["BUFFTOCHECK"] = "Бафф для проврки" -- Needs review
-L["BurstHaste"] = "+ к скорости атаки"
 L["BurstManaRegen"] = "+ к резкому восполнению маны"
 L["CASTERFORM"] = "Может произносить заклинания"
 L["CENTER"] = "В центре"

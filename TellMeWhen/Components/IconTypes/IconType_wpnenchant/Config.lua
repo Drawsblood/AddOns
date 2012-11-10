@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -118,7 +118,7 @@ function Module:OnInitialize()
 
 	self:Etc_DoItemLookups()
 
-	for k, id in pairs(self.SpellIDs) do
+	for _, id in pairs(self.SpellIDs) do
 		local name = GetSpellInfo(id)
 		for _, enchant in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
 			local dobreak
@@ -240,7 +240,7 @@ function Module:Etc_GetTexture(name)
 	end
 
 	name = strlower(name)
-	SpellTextures[name] = SpellTextures[name] or tex
+	TMW.SpellTexturesMetaIndex[name] = TMW.SpellTexturesMetaIndex[name] or tex
 
 	return tex or "Interface\\Icons\\INV_Misc_QuestionMark"
 end

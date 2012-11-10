@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -53,6 +53,7 @@ Type:RegisterIconDefaults{
 	Stealable				= false,     
 	ShowTTText				= false,     
 	OnlyMine				= false,
+	HideIfNoUnits			= false,
 }
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
@@ -103,6 +104,11 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			title = L["ICONMENU_STEALABLE"],
 			tooltip = L["ICONMENU_STEALABLE_DESC"],
 		},
+		{
+			setting = "HideIfNoUnits",
+			title = L["ICONMENU_HIDENOUNITS"],
+			tooltip = L["ICONMENU_HIDENOUNITS_DESC"],
+		},
 	})
 end)
 
@@ -116,7 +122,7 @@ Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	EFF_THR = 15 -- TMW.db.profile.EffThreshold
+	EFF_THR = TMW.db.profile.EffThreshold
 	DS = TMW.DS
 	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
 end)
@@ -308,6 +314,15 @@ local function Buff_OnUpdate(icon, time)
 			count, count,
 			id,
 			useUnit, nil
+		)
+	elseif not Units[1] and icon.HideIfNoUnits then
+		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
+			0,
+			icon.FirstTexture,
+			0, 0,
+			nil, nil,
+			icon.NameFirst,
+			nil, nil
 		)
 	else
 		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",

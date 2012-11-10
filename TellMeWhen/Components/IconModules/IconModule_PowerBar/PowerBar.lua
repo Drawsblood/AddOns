@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -124,7 +124,8 @@ function PowerBar:UpdateCost()
 		
 		powerType = powerType or defaultPowerType
 		if powerType ~= self.powerType then
-			local colorinfo = PowerBarColor[powerType]
+			local colorinfo = PowerBarColor[powerType] or PowerBarColor[defaultPowerType]
+			
 			bar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
 			self.powerType = powerType
 		end

@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -191,7 +191,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		end
 
 		-- Setup conditions
-		if Conditions then
+		if Conditions and Conditions.n > 0 then
 			for k, unit in ipairs(self.originalUnits) do
 				-- Get a constructor to make the ConditionObject
 				local ConditionObjectConstructor = self:Conditions_GetConstructor(Conditions)
@@ -312,7 +312,7 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 	end
 
 	--SUBSTITUTE RAID1-10 WITH RAID1;RAID2;RAID3;...RAID10
-	for wholething, unit, firstnum, lastnum, append in gmatch(unitSettings, "((%a+) ?(%d+) ?%- ?(%d+) ?([%a]*)) ?;?") do
+	for wholething, unit, firstnum, lastnum, append in gmatch(unitSettings, "(([%a%d]+) ?(%d+) ?%- ?(%d+) ?([%a%d]*)) ?;?") do
 		if unit and firstnum and lastnum then
 
 			if abs(lastnum - firstnum) > 100 then
@@ -599,6 +599,7 @@ do
 			return TellMeWhen_Unit and TellMeWhen_Unit:IsShown()
 		end,
 		tabText = L["UNITCONDITIONS"],
+		tabTooltip = L["UNITCONDITIONS_TAB_DESC"],
 		
 		ConditionTypeFilter = function(self, conditionData)
 			if conditionData.unit == nil then
@@ -607,19 +608,13 @@ do
 				return true
 			end
 		end,
-		TMW_CNDT_GROUP_TYPECHECK = function(self, event, conditionGroup, conditionData)
+		TMW_CNDT_GROUP_DRAWGROUP = function(self, event, conditionGroup, conditionData, conditionSettings)
 			if CNDT.CurrentConditionSet == self then
 				TMW.SUG:EnableEditBox(conditionGroup.Unit, "unitconditionunits", true)
 				TMW:TT(conditionGroup.Unit, "CONDITIONPANEL_UNIT", "ICONMENU_UNIT_DESC_UNITCONDITIONUNIT")
 			end
 		end,
-		--[[TMW_CNDT_CONDITION_ADDED = function(self, event, condition)
-			if CNDT.CurrentConditionSet == self then
-				-- DoStuff()
-			end
-		end,]]
 	}
-	TMW:RegisterCallback("TMW_CNDT_GROUP_TYPECHECK", ConditionSet)
-	--TMW:RegisterCallback("TMW_CNDT_CONDITION_ADDED", ConditionSet)
+	TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", ConditionSet)
 	CNDT:RegisterConditionSet("Unit", ConditionSet)
 end

@@ -207,6 +207,13 @@ function Type:Setup(icon, groupID, iconID)
 		icon:SetScript("OnEvent", ItemCooldown_OnEvent)
 		icon.ShouldUpdateIDs = true
 	else
+		for k, v in pairs(icon.NameArray) do
+			if v == 0 then
+				icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
+				icon:SetScript("OnEvent", ItemCooldown_OnEvent)
+				icon.ShouldUpdateIDs = true
+			end
+		end
 		for _, n in ipairs(splitNames) do
 			n = tonumber(strtrim(n))
 			if n and n <= INVSLOT_LAST_EQUIPPED then
@@ -261,9 +268,9 @@ end
 
 function Type:GuessIconTexture(ics)
 	if ics.Name and ics.Name ~= "" then
-		local name = TMW:GetSpellNames(nil, ics.Name, 1)
-		if name then
-			return GetItemIcon(name)
+		local id = TMW:GetItemIDs(nil, ics.Name, 1)
+		if id then
+			return GetItemIcon(id)
 		end
 	end
 end

@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -269,7 +269,8 @@ function TEXT:LoadConfig()
 			}
 			
 			local func = loadstring(DogTag:CreateFunctionFromCode(text, "TMW;Unit", kwargs))
-			func = func and func()
+			local success, newfunc = pcall(func)
+			func = func and success and newfunc
 			local tagError = func and TEXT:TestDogTagFunc(pcall(func, kwargs))
 			if tagError then
 				frame.Error:SetText("ERROR: " .. tagError)
@@ -1228,6 +1229,13 @@ local function generateArgFormattedTagString(tag, tagData)
 	return retstring
 end
 function Module:Entry_AddToList_1(f, tagName)
+
+	-- I have no idea why, but sometimes tagName isn't a string (usually its a number when this happens).
+	-- I haven't been able to reproduce it on demand, and it isn't critical, so just return earlier if it happens.
+	if type(tagName) ~= "string" then
+		return
+	end
+	
 	local tag = "[" .. tagName .. "]"
 	local colorized = DogTag:ColorizeCode(tag)
 	

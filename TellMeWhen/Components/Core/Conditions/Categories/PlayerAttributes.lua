@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -36,39 +36,48 @@ local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_AT
 ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 	text = L["CONDITIONPANEL_INSTANCETYPE"],
 	min = 0,
-	max = 9,
+	max = 11,
 	unit = false,
 	texttable = {
 		[0] = NONE,
 		[1] = BATTLEGROUND,
 		[2] = ARENA,
-		[3] = DUNGEON_DIFFICULTY1,
-		[4] = DUNGEON_DIFFICULTY2,
-		[5] = RAID_DIFFICULTY1,
-		[6] = RAID_DIFFICULTY2,
-		[7] = RAID_DIFFICULTY3,
-		[8] = RAID_DIFFICULTY4,
+		[3] = DUNGEON_DIFFICULTY_5PLAYER,
+		[4] = DUNGEON_DIFFICULTY_5PLAYER_HEROIC,
+		[5] = RAID_DIFFICULTY_10PLAYER,
+		[6] = RAID_DIFFICULTY_25PLAYER,
+		[7] = RAID_DIFFICULTY_10PLAYER_HEROIC,
+		[8] = RAID_DIFFICULTY_25PLAYER_HEROIC,
 		[9] = RAID_FINDER,
+		[10] = CHALLENGE_MODE,
+		[11] = RAID_DIFFICULTY_40PLAYER,
 	},
 	icon = "Interface\\Icons\\Spell_Frost_Stun",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		GetZoneType = function()
 			local _, z = IsInInstance()
+			local instanceDifficulty = GetInstanceDifficulty()
 			if z == "pvp" then
+				-- Battleground (1)
 				return 1
 			elseif z == "arena" then
+				-- Arena (2)
 				return 2
-			elseif z == "party" then
-				return 2 + GetInstanceDifficulty() --3-4
-			elseif z == "raid" then
-				if IsPartyLFG() then
-					return 9
-				else
-					return 4 + GetInstanceDifficulty() --5-8
-				end
-			else
+			elseif instanceDifficulty == 1 then
+				-- None (0)
 				return 0
+			else
+				-- 5 man normal (3)
+				-- 5 man heroic (4)
+				-- 10 man normal (5)
+				-- 25 man normal (6)
+				-- 10 man heroic (7)
+				-- 25 man heroic (8)
+				-- LFR (9)
+				-- Challenge Mode (10)
+				-- 40 man (11)
+				return 1 + instanceDifficulty --3-11
 			end
 		end,
 	},
@@ -157,6 +166,25 @@ ConditionCategory:RegisterCondition(5,	 "RESTING", {
 			ConditionObject:GenerateNormalEventString("PLAYER_UPDATE_RESTING"),
 			ConditionObject:GenerateNormalEventString("PLAYER_ENTERING_WORLD")
 	end,
+})
+ConditionCategory:RegisterCondition(5.2, "INPETBATTLE", {
+	text = L["CONDITIONPANEL_INPETBATTLE"],
+	min = 0,
+	max = 1,
+	texttable = CNDT.COMMON.bool,
+	nooperator = true,
+	unit = PLAYER,
+	icon = "Interface\\Icons\\pet_type_critter", --TODO: change and/or check to see if this works.
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		IsInBattle = C_PetBattles.IsInBattle,
+	},
+	funcstr = [[c.True == IsInBattle()]],
+	--[[events = function(ConditionObject, c) --TODO: find proper events for this
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_UPDATE_RESTING"),
+			ConditionObject:GenerateNormalEventString("PLAYER_ENTERING_WORLD")
+	end,]]
 })
 
 local NumShapeshiftForms
@@ -253,7 +281,7 @@ ConditionCategory:RegisterCondition(7,	 "SPEC", {
 	end,
 })
 
-if TMW.ISMOP then
+if TMW.ISMOP then -- ConditionCategory:RegisterCondition(8,	 "TREE", {
 	ConditionCategory:RegisterCondition(8,	 "TREE", {
 		text = L["UIPANEL_SPECIALIZATION"],
 		min = 1,
@@ -381,8 +409,6 @@ ConditionCategory:RegisterCondition(10,	 "PTSINTAL", {
 })
 
 
-
-
 local GetGlyphSocketInfo = GetGlyphSocketInfo
 function CNDT:GLYPH_UPDATED()
 	local GlyphLookup = Env.GlyphLookup
@@ -393,11 +419,11 @@ function CNDT:GLYPH_UPDATED()
 		local glyphID = tonumber(strmatch(link, "|H.-:(%d+)"))
 		
 		if glyphID then
-			GlyphLookup[glyphID] = true
+			GlyphLookup[glyphID] = 1
 			
 			local name = GetSpellInfo(spellID)
 			name = strlowerCache[name]
-			GlyphLookup[name] = true
+			GlyphLookup[name] = 1
 		end
 	end
 end
@@ -413,22 +439,21 @@ ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 	useSUG = "glyphs",
 	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[GlyphLookup[c.NameFirst] == c.True]],
+	funcstr = [[GlyphLookup[c.NameFirst] == c.1nil]],
 	Env = {
 		GlyphLookup = {},
 	},
 	events = function(ConditionObject, c)
 		-- this is handled externally because GlyphLookup is so extensive a process,
 		-- and if it does get stuck in an OnUpdate condition, it could be very bad.
-
 		CNDT:RegisterEvent("GLYPH_ADDED", 	 "GLYPH_UPDATED")
 		CNDT:RegisterEvent("GLYPH_DISABLED", "GLYPH_UPDATED")
 		CNDT:RegisterEvent("GLYPH_ENABLED",  "GLYPH_UPDATED")
 		CNDT:RegisterEvent("GLYPH_REMOVED",  "GLYPH_UPDATED")
 		CNDT:RegisterEvent("GLYPH_UPDATED",  "GLYPH_UPDATED")
 		CNDT:GLYPH_UPDATED()
-		-- we still only need to update the condition when glyphs change, though.
 		
+		-- we still only need to update the condition when glyphs change, though.
 		return
 			ConditionObject:GenerateNormalEventString("GLYPH_ADDED"),
 			ConditionObject:GenerateNormalEventString("GLYPH_DISABLED"),
@@ -592,6 +617,34 @@ ConditionCategory:RegisterCondition(16,	 "TRACKING", {
 		-- Tell the condition to also update when MINIMAP_UPDATE_TRACKING fires
 		return
 			ConditionObject:GenerateNormalEventString("MINIMAP_UPDATE_TRACKING")
+	end,
+})
+
+
+
+ConditionCategory:RegisterSpacer(17)
+
+
+ConditionCategory:RegisterCondition(18,	 "BLIZZEQUIPSET", {
+	text = L["CONDITIONPANEL_BLIZZEQUIPSET"],
+	tooltip = L["CONDITIONPANEL_BLIZZEQUIPSET_DESC"],
+	min = 0,
+	max = 1,
+	texttable = CNDT.COMMON.bool,
+	nooperator = true,
+	unit = PLAYER,
+	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_BLIZZEQUIPSET_INPUT", "CONDITIONPANEL_BLIZZEQUIPSET_INPUT_DESC") editbox.label = L["EQUIPSETTOCHECK"] end,
+	useSUG = "blizzequipset",
+	icon = "Interface\\Icons\\inv_box_04",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetEquipmentSetInfoByName = GetEquipmentSetInfoByName,
+	},
+	funcstr = [[select(3, GetEquipmentSetInfoByName(c.NameRaw)) == c.True]],
+	events = function(ConditionObject, c)
+		return
+			--ConditionObject:GenerateNormalEventString("EQUIPMENT_SWAP_FINISHED") -- this doesn't fire late enough to get updated returns from GetEquipmentSetInfoByName
+			ConditionObject:GenerateNormalEventString("BAG_UPDATE") -- this is slightly overkill, but it is the first event that fires when the return value of GetEquipmentSetInfoByName has changed
 	end,
 })
 

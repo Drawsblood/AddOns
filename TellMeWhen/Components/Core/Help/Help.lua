@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -32,7 +32,6 @@ HELP.Codes = {
 
 	"ICON_DR_MISMATCH",
 	"ICON_MS_NOTFOUND",
-	"ICON_ICD_NATURESGRACE",
 
 	"ICON_UNIT_MISSING",
 

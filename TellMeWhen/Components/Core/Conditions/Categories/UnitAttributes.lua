@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -27,7 +27,6 @@ local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_UNIT", 3, L["CNDTCAT_ATTR
 
 ConditionCategory:RegisterCondition(1,	 "EXISTS", {
 	text = L["CONDITIONPANEL_EXISTS"],
---	categorySpacebefore = true,
 	min = 0,
 	max = 1,
 	texttable = CNDT.COMMON.bool,
@@ -232,7 +231,7 @@ ConditionCategory:RegisterCondition(9,	 "NAME", {
 ConditionCategory:RegisterCondition(10,	 "LEVEL", {
 	text = L["CONDITIONPANEL_LEVEL"],
 	min = -1,
-	max = 90,
+	max = GetMaxPlayerLevel() + 3,
 	texttable = {[-1] = BOSS},
 	icon = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
 	tcoords = {0.05, 0.95, 0.03, 0.97},

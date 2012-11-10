@@ -1,6 +1,6 @@
 ﻿# Originally by Nephthys of Hyjal
 # Major Updates by Oozebull of Twisting Nether, Xenyr of Aszune, and Cybeloras of Detheroc/Mal'Ganis
-## X-Curse-Packaged-Version: 6.0.3
+## X-Curse-Packaged-Version: r653
 ## X-Curse-Project-Name: TellMeWhen
 ## X-Curse-Project-ID: tellmewhen
 ## X-Curse-Repository-ID: wow/tellmewhen/mainline
@@ -11,7 +11,7 @@
 ## X-Interface: 50001
 ## Title: TellMeWhen
 
-## Version: 6.0.3
+## Version: 6.0.4
 ## Author: Cybeloras of Detheroc/Mal'Ganis
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.

@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -23,7 +23,6 @@ local Env = CNDT.Env
 local min, format = min, format
 
 Env.UnitStat = UnitStat
-Env.UnitAttackPower = UnitAttackPower
 Env.UnitRangedAttackPower = UnitRangedAttackPower
 Env.UnitSpellHaste = UnitSpellHaste
 Env.GetMeleeHaste = GetMeleeHaste
@@ -41,7 +40,6 @@ local ConditionCategory = CNDT:GetCategory("STATS", 6, L["CNDTCAT_STATS"], true,
 ConditionCategory:RegisterCondition(1,	 "STRENGTH", {
 	text = _G["SPELL_STAT1_NAME"],
 	category = L["CNDTCAT_STATS"],
-	categorySpacebefore = true,
 	range = 5000,
 	unit = PLAYER,
 	texttable = CNDT.COMMON.commanumber,

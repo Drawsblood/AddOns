@@ -36,7 +36,6 @@ L["BonusStamina"] = "Erhöhte Ausdauer" -- Needs review
 L["BOTTOM"] = "unten"
 L["BOTTOMLEFT"] = "unten links"
 L["BOTTOMRIGHT"] = "unten rechts"
-L["BurstHaste"] = "Heldentum/Blutrausch" -- Needs review
 L["BurstManaRegen"] = "Stark erhöhte Mana Regeneration" -- Needs review
 L["CASTERFORM"] = "Zaubergestalt"
 L["CENTER"] = "Mitte" -- Needs review
@@ -108,7 +107,6 @@ L["CONDITIONPANEL_RUNES_DESC"] = "Diese Bedingung prüft den Zustand von Runen. 
 L["CONDITIONPANEL_SWIMMING"] = "Schwimmend" -- Needs review
 L["CONDITIONPANEL_TYPE"] = "Typ"
 L["CONDITIONPANEL_UNIT"] = "Einheit"
-L["CONDITIONPANEL_UNIT_DESC"] = "Bestimmt, welche Einheit geprüft werden soll. Einheiten können rechts per Dropdown-Box hinzugefügt werden, fortgeschrittene Nutzer können ihre eigene Einheiten manuell eingeben. Es können sowohl Standard-Einheiten (z.B. player) als auch freundliche Spielernamen (z.B. %s) verwendet werden." -- Needs review
 L["CONDITIONPANEL_VALUEN"] = "Wert"
 L["CONDITIONPANEL_VEHICLE"] = "Einheit kontrolliert Fahrzeug" -- Needs review
 L["CONDITIONS"] = "Bedingungen" -- Needs review
@@ -135,9 +133,6 @@ L["Disarmed"] = "Entwaffnet"
 L["Disease"] = "Krankheit"
 L["Disoriented"] = "Verwirrt"
 L["DR-MindControl"] = "Gedankenkontrolle" -- Needs review
-L["DROPDOWN_UNIT_DESC"] = [=[Von diesem Menü können Einheiten in die Editbox eingefügt werden. Bei Einheiten, die mit '|cFFFF0000#|r' enden, muss '|cFFFF0000#|r' mit einer entsprechended Nummer oder Spanne von Nummern ersetzt werden. Z.B. kann 'raid|cFFFF0000#|r mit 'raid25' ersetzt werden um das 25te Raidmitglied zu prüfen. Alternativ kann auch 'raid1-25' eingesetzt werden um die ersten 25 Raidmitglieder zu prüfen.
-
-Für weitere Informationen über Einheiten besuchen Sie: http://www.wowpedia.org/UnitId]=] -- Needs review
 L["EARTH"] = "Erde" -- Needs review
 L["ECLIPSE_DIRECTION"] = "Finsternis Richtung"
 L["elite"] = "Elite"

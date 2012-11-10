@@ -54,13 +54,21 @@ function Type:DragReceived(icon, t, data, subType)
 	if t == "spell" then
 		local _
 		if data == 0 and type(param4) == "number" then
-			input = param4
+			input = GetSpellInfo(param4)
 		else
-			_, input = GetSpellBookItemInfo(data, subType)
+			local type
+			type, input = GetSpellBookItemInfo(data, subType)
 			if not input then
 				return
 			end
+			
+			if type == "SPELL" then
+				input = GetSpellBookItemName(data, subType)
+			end
 		end
+	
+	
+	
 		newType = "cooldown"
 	elseif t == "item" then
 		input = data

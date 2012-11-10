@@ -27,7 +27,6 @@ L["BOTTOMRIGHT"] = "우측 하단" -- Needs review
 L["BUFFTOCHECK"] = "체크할 강화 효과" -- Needs review
 L["BUFFTOCOMP1"] = "비교할 첫번째 강화 효과 " -- Needs review
 L["BUFFTOCOMP2"] = "비교할 두번째 강화 효과 " -- Needs review
-L["BurstHaste"] = "영웅심/피의 욕망" -- Needs review
 L["BurstManaRegen"] = "마나 회복 충만" -- Needs review
 L["CACHINGSPEED"] = "프레임당 주문:" -- Needs review
 L["CASTERFORM"] = "인간형" -- Needs review
