@@ -1,0 +1,13 @@
+v1.2
+*Added support for new TradeSKillMaster application data format.
+*Updated for MoP.
+*Fixed a few minor bugs.
+
+v1.1
+*Added support for region data.
+*Updated tooltip to be less crowded.
+*Tooltip now includes standard deviation (similar to wowuction.com).
+*Many other minor bug fixes and improvements.
+
+v1.0
+*First Release Version!
