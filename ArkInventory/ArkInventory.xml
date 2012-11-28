@@ -237,7 +237,7 @@
 
 	<Button virtual="true" name="ARKINV_TemplateButtonItem" inherits="ContainerFrameItemButtonTemplate" hidden="true">
 		
-		<NormalTexture name="$parentNormalTexture" urgency="5" file="" />
+		<NormalTexture name="$parentNormalTexture" urgency="5" file="Interface\Buttons\UI-PassiveHighlight" />
 		
 		<Frames>
 			
@@ -425,7 +425,7 @@
 
 	<Button virtual="true" name="ARKINV_TemplateButtonItemTainted" inherits="ContainerFrameItemButtonTemplate" hidden="true">
 		
-		<NormalTexture name="$parentNormalTexture" urgency="5" file="" />
+		<NormalTexture name="$parentNormalTexture" urgency="5" file="Interface\Buttons\UI-PassiveHighlight" />
 		
 		<Layers>
 			<Layer level="OVERLAY">
@@ -568,7 +568,7 @@
 	
 	<Button virtual="true" name="ArkInventory_ChangerPlayerMainTemplate" inherits="PaperDollItemSlotButtonTemplate">
 	
-		<NormalTexture name="$parentNormalTexture" file="" />
+		<NormalTexture name="$parentNormalTexture" file="Interface\Buttons\UI-PassiveHighlight" />
 		
 		<Frames>
 			<Frame name="$parentArkBorder" inherits="ARKINV_Border" />
