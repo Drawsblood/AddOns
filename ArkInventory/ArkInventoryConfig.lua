@@ -1,3 +1,13 @@
+local _G = _G
+local select = _G.select
+local pairs = _G.pairs
+local ipairs = _G.ipairs
+local string = _G.string
+local type = _G.type
+local error = _G.error
+local table = _G.table
+
+
 --[[
 	
 	info.options = the options table
@@ -613,6 +623,116 @@ function ArkInventory.ConfigInternal( )
 								},
 							},
 						},
+						battlepet = {
+							order = 400,
+							name = ArkInventory.Localise["BATTLEPET"],
+							type = "group",
+							inline = true,
+							args = {
+								custom = {
+									order = 100,
+									name = ArkInventory.Localise["CUSTOM"],
+									type = "group",
+									inline = true,
+									args = {
+										enabled = {
+											order = 100,
+											name = ArkInventory.Localise["ENABLED"],
+											desc = ArkInventory.Localise["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_CUSTOM_ENABLE_TEXT"],
+											type = "toggle",
+											get = function( info )
+												return ArkInventory.db.global.option.tooltip.battlepet.enable
+											end,
+											set = function( info, v )
+												
+												ArkInventory.db.global.option.tooltip.battlepet.enable = v
+												ArkInventory.BlizzardAPIHookBattlepetTooltip( v )
+											end,
+										},
+										source = {
+											order = 200,
+											name = SOURCES,
+											desc = ArkInventory.Localise["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_SOURCE_TEXT"],
+											type = "toggle",
+											hidden = function( )
+												return not ArkInventory.db.global.option.tooltip.battlepet.enable
+											end,
+											get = function( info )
+												return ArkInventory.db.global.option.tooltip.battlepet.source
+											end,
+											set = function( info, v )
+												ArkInventory.db.global.option.tooltip.battlepet.source = v
+											end,
+										},
+										description = {
+											order = 300,
+											name = ArkInventory.Localise["DESCRIPTION"],
+											desc = ArkInventory.Localise["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_DESCRIPTION_TEXT"],
+											type = "toggle",
+											hidden = function( )
+												return not ArkInventory.db.global.option.tooltip.battlepet.enable
+											end,
+											get = function( info )
+												return ArkInventory.db.global.option.tooltip.battlepet.description
+											end,
+											set = function( info, v )
+												ArkInventory.db.global.option.tooltip.battlepet.description = v
+											end,
+										},
+									},
+								},
+								mouseover = {
+									order = 200,
+									name = ArkInventory.Localise["MOUSEOVER"],
+									type = "group",
+									inline = true,
+									args = {
+										enabled = {
+											order = 100,
+											name = ArkInventory.Localise["ENABLED"],
+											desc = ArkInventory.Localise["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_MOUSEOVER_ENABLE_TEXT"],
+											type = "toggle",
+											get = function( info )
+												return ArkInventory.db.global.option.tooltip.battlepet.mouseover.enable
+											end,
+											set = function( info, v )
+												ArkInventory.db.global.option.tooltip.battlepet.mouseover.enable = v
+											end,
+										},
+										source = {
+											order = 200,
+											name = SOURCES,
+											desc = ArkInventory.Localise["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_SOURCE_TEXT"],
+											type = "toggle",
+											hidden = function( )
+												return not ArkInventory.db.global.option.tooltip.battlepet.mouseover.enable
+											end,
+											get = function( info )
+												return ArkInventory.db.global.option.tooltip.battlepet.mouseover.source
+											end,
+											set = function( info, v )
+												ArkInventory.db.global.option.tooltip.battlepet.mouseover.source = v
+											end,
+										},
+										description = {
+											order = 300,
+											name = ArkInventory.Localise["DESCRIPTION"],
+											desc = ArkInventory.Localise["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_DESCRIPTION_TEXT"],
+											type = "toggle",
+											hidden = function( )
+												return not ArkInventory.db.global.option.tooltip.battlepet.mouseover.enable
+											end,
+											get = function( info )
+												return ArkInventory.db.global.option.tooltip.battlepet.mouseover.description
+											end,
+											set = function( info, v )
+												ArkInventory.db.global.option.tooltip.battlepet.mouseover.description = v
+											end,
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 				bugfix = {
@@ -844,6 +964,26 @@ function ArkInventory.ConfigInternal( )
 									end,
 									set = function( info, v )
 										ArkInventory.db.global.option.message.translation.final = v
+									end,
+								},
+							},
+						},
+						battlepet = {
+							order = 200,
+							name = PET_BATTLE_INFO,
+							type = "group",
+							inline = true,
+							args = {
+								opponent = {
+									order = 100,
+									name = ArkInventory.Localise["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT"],
+									desc = ArkInventory.Localise["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT_TEXT"],
+									type = "toggle",
+									get = function( info )
+										return ArkInventory.db.global.option.message.battlepet.opponent
+									end,
+									set = function( info, v )
+										ArkInventory.db.global.option.message.battlepet.opponent = v
 									end,
 								},
 							},
@@ -1090,7 +1230,7 @@ function ArkInventory.ConfigInternal( )
 		categories = {
 			cmdHidden = true,
 			order = 800,
-			name = ArkInventory.Localise["CONFIG_CATEGORY"],
+			name = ArkInventory.Localise["CATEGORIES"],
 			type = "group",
 			childGroups = "tab",
 			args = { },
@@ -2257,7 +2397,7 @@ function ArkInventory.ConfigInternalSettings( path )
 											set = function( info, v )
 												local loc_id = ConfigGetNodeArg( info, #info - 5 )
 												ArkInventory.LocationOptionSetReal( loc_id, "changer", "highlight", "show", v )
-												ArkInventory.ItemCategoryClear( nil, nil, true )
+												ArkInventory.ItemCacheClear( )
 												ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Refresh )
 											end,
 										},
@@ -2306,7 +2446,7 @@ function ArkInventory.ConfigInternalSettings( path )
 											set = function( info, v )
 												local loc_id = ConfigGetNodeArg( info, #info - 5 )
 												ArkInventory.LocationOptionSetReal( loc_id, "changer", "freespace", "show", v )
-												ArkInventory.ItemCategoryClear( nil, nil, true )
+												ArkInventory.ItemCacheClear( )
 												ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Refresh )
 											end,
 										},
@@ -2970,6 +3110,28 @@ function ArkInventory.ConfigInternalSettings( path )
 						ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Refresh )
 					end,
 				},
+				scale = {
+					order = 600,
+					name = ArkInventory.Localise["SCALE"],
+					type = "range",
+					min = 0.25,
+					max = 4,
+					step = 0.05,
+					get = function( info )
+						local loc_id = ConfigGetNodeArg( info, #info - 2 )
+						return ArkInventory.LocationOptionGetReal( loc_id, "slot", "scale" ) or 1
+					end,
+					set = function( info, v )
+						local v = math.floor( v / 0.05 ) * 0.05
+						if v < 0.25 then v = 0.25 end
+						if v > 4 then v = 4 end
+						local loc_id = ConfigGetNodeArg( info, #info - 2 )
+						if ArkInventory.LocationOptionGetReal( loc_id, "slot", "scale" ) ~= v then
+							ArkInventory.LocationOptionSetReal( loc_id, "slot", "scale", v )
+							ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
+						end
+					end,
+				},
 				
 				cooldown = {
 					order = 550,
@@ -3230,7 +3392,6 @@ function ArkInventory.ConfigInternalSettings( path )
 								local loc_id = ConfigGetNodeArg( info, #info - 3 )
 								ArkInventory.LocationOptionSetReal( loc_id, "slot", "empty", "clump", v )
 								ArkInventory.ItemCacheClear( )
-								ArkInventory.ItemCategoryClear( nil, nil, true )
 								ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
 							end,
 						},
@@ -3678,7 +3839,7 @@ function ArkInventory.ConfigInternalSortingCustom( path )
 			end,
 			set = function( info, v )
 				local id = ConfigGetNodeArg( info, #info - 1 )
-				ArkInventory.db.global.option.sort.data[id].name = strtrim( v )
+				ArkInventory.db.global.option.sort.data[id].name = string.trim( v )
 				ArkInventory.ConfigInternalSorting( )
 			end,
 		},
@@ -3861,23 +4022,23 @@ function ArkInventory.ConfigInternalLDBMounts( path )
 	local companionType = "MOUNT"
 	
 	local args3 = { }
-	for k, mountType in pairs( { "ground", "flying", "water" } ) do
+	for k, mountType in pairs( ArkInventory.Const.MountTypes ) do
 		
 		args3[mountType] = {
 			order = k,
-			name = ArkInventory.Localise[string.upper( string.format( "LDB_MOUNTS_%s", mountType ) )],
+			name = ArkInventory.Localise[string.upper( string.format( "LDB_MOUNTS_TYPE_%s", mountType ) )],
 			type = "select",
 			values = function( info )
 				
 				local companionIndex = ConfigGetNodeArg( info, #info - 2 )
 				local companionID, companionName, companionSpellID, texture, active = GetCompanionInfo( companionType, companionIndex )
-				local companionData = ArkInventory.Const.CompanionData[companionSpellID]
+				local companionData = ArkInventory.Global.Companion.MOUNT[companionSpellID]
 				
 				local t = { }
 				t[1] = ArkInventory.Localise["NO"]
 				t[2] = ArkInventory.Localise["YES"]
 				
-				if companionData.corrected and companionData.speed[mountType] then
+				if companionData.corrected and companionData.capable[mountType] then
 					t[3] = ArkInventory.Localise["DEFAULT"]
 				end
 				
@@ -3888,7 +4049,7 @@ function ArkInventory.ConfigInternalLDBMounts( path )
 				
 				local companionIndex = ConfigGetNodeArg( info, #info - 2 )
 				local companionID, companionName, companionSpellID, texture, active = GetCompanionInfo( companionType, companionIndex )
-				local companionData = ArkInventory.Const.CompanionData[companionSpellID]
+				local companionData = ArkInventory.Global.Companion.MOUNT[companionSpellID]
 				
 				if not not companionData.usable[mountType] then
 					return 2
@@ -3912,7 +4073,7 @@ function ArkInventory.ConfigInternalLDBMounts( path )
 				
 				ArkInventory.db.char.option.ldb.mounts[mountType].selected[companionSpellID] = nil
 				
-				ArkInventory.CompanionDataCorrect( )
+				ArkInventory.MountDataUpdate( )
 				
 				ArkInventory.LDB.Mounts:Update( )
 				
@@ -3945,13 +4106,13 @@ function ArkInventory.ConfigInternalLDBMounts( path )
 	
 	
 	
-	for k, mountType in pairs( { "ground", "flying", "water", "nodata" } ) do
+	for k, mountType in pairs( { "l", "a", "u", "x" } ) do
 		
 		path[mountType] = {
 			order = k,
 			cmdHidden = true,
 			type = "group",
-			name = ArkInventory.Localise[string.upper( string.format( "LDB_MOUNTS_%s", mountType ) )],
+			name = ArkInventory.Localise[string.upper( string.format( "LDB_MOUNTS_TYPE_%s", mountType ) )],
 			arg = mountType,
 		}
 		
@@ -3966,7 +4127,7 @@ function ArkInventory.ConfigInternalLDBMountsUpdate( path, args2 )
 	local companionType = "MOUNT"
 	
 	
-	for _, mountType in pairs( { "ground", "flying", "water", "nodata" } ) do
+	for _, mountType in pairs( { "l", "a", "u", "x" } ) do
 		
 		if not path[mountType].args then
 			path[mountType].args = { }
@@ -3977,16 +4138,16 @@ function ArkInventory.ConfigInternalLDBMountsUpdate( path, args2 )
 		for companionIndex = 1, n do
 			
 			local companionID, companionName, companionSpellID, texture, active = GetCompanionInfo( companionType, companionIndex )
-			local companionData = ArkInventory.Const.CompanionData[companionSpellID]
+			local companionData = ArkInventory.Global.Companion.MOUNT[companionSpellID]
 			local mountKey = tostring( companionIndex )
 			
 			local ok = false
 			
-			if ( not ok ) and ( mountType ~="nodata" ) and ( companionData.usable[mountType] ) then
+			if ( not ok ) and ( mountType == companionData.mt ) then
 				ok = true
 			end
 			
-			if ( not ok ) and ( mountType == "nodata" ) and ( companionData.unknown or companionData.corrected ) then
+			if ( not ok ) and ( mountType == "x" ) and ( companionData.unknown or companionData.corrected ) then
 				ok = true
 			end
 			

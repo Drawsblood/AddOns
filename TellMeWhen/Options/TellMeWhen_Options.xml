@@ -535,7 +535,7 @@
 				local height = self:GetHeight()
 				self.percentage = height/(yrange+height)
 
-				self.ScrollBar.Thumb:SetHeight(height*self.percentage)
+				self.ScrollBar.Thumb:SetHeight(max(height*self.percentage, 15))
 
 				self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(self:GetVerticalScroll()*self.percentage))
 			</OnScrollRangeChanged>
@@ -605,25 +605,76 @@
 				<Layers>
 					<Layer level="BACKGROUND">
 						<Texture name="$parentBackdrop" setAllPoints="true" parentKey="Backdrop" >
-							<Color r="0.2" g="0.2" b="0.2"/>
+							<Color r="0.15" g="0.15" b="0.15" a="1"/>
+					
+							<Gradient orientation="HORIZONTAL">
+								<MinColor r="1" g="1" b="1" a="1"/>
+								<MaxColor r="0.6" g="0.6" b="0.6" a="1"/>
+							</Gradient>
 						</Texture>
 					</Layer>
 				</Layers>
 				
 				<Frames>
-					<Frame name="$parentThumb" parentKey="Thumb" >
+					<Button name="$parentThumb" parentKey="Thumb" >
 						<Anchors>
 							<Anchor point="LEFT"/>
 							<Anchor point="RIGHT"/>
 						</Anchors>
+						
+						<NormalTexture setAllPoints="true">
+							<Color r="0.6" g="0.6" b="0.6" a="1"/>
+							
+							<Gradient orientation="HORIZONTAL">
+								<MinColor r="1" g="1" b="1" a="1"/>
+								<MaxColor r="0.6" g="0.6" b="0.6" a="1"/>
+							</Gradient>
+						</NormalTexture>
+						<HighlightTexture setAllPoints="true" alpha="0.25">
+							<Color r=".1" g="1" b="1"/>
+						</HighlightTexture>
+						<PushedTexture setAllPoints="true" >
+							<Color r="0.8" g="0.8" b="0.8" a="1"/>
+							
+							<Gradient orientation="HORIZONTAL">
+								<MinColor r="1" g="1" b="1" a="1"/>
+								<MaxColor r="0.6" g="0.6" b="0.6" a="1"/>
+							</Gradient>
+						</PushedTexture>
+						
 						<Layers>
-							<Layer level="OVERLAY">
-								<Texture name="Texture" setAllPoints="true">
-									<Color r="0.35" g="0.35" b="0.35"/>
+							<Layer level="OVERLAY">							
+								<Texture name="$parenttick1">
+									<Color r="0.2" g="0.2" b="0.2"/>
+									<Size y="1"/>
+					
+									<Anchors>
+										<Anchor point="LEFT" x="1"/>
+										<Anchor point="RIGHT" x="-1"/>
+									</Anchors>
+								</Texture>
+								<Texture>
+									<Color r="0.2" g="0.2" b="0.2"/>
+									<Size y="1"/>
+									<Anchors>
+										<Anchor point="LEFT" x="1"/>
+										<Anchor point="RIGHT" x="-1"/>
+										<Anchor point="BOTTOM" relativeTo="$parenttick1" relativePoint="TOP" y="2"/>
+									</Anchors>
+								</Texture>
+								
+								<Texture>
+									<Color r="0.2" g="0.2" b="0.2"/>
+									<Size y="1"/>
+					
+									<Anchors>
+										<Anchor point="LEFT" x="1"/>
+										<Anchor point="RIGHT" x="-1"/>
+										<Anchor point="TOP" relativeTo="$parenttick1" relativePoint="BOTTOM" y="-2"/>
+									</Anchors>
 								</Texture>
 							</Layer>
 						</Layers>
-						
 						<Scripts>
 							<OnLoad>
 								self:RegisterForDrag("LeftButton")
@@ -632,9 +683,13 @@
 								self.IsScrolling = true
 								_, self.startY = GetCursorPosition()
 								self.startHeight = select(5, self:GetPoint(1))
+								self:SetButtonState("PUSHED")
+								self:LockHighlight()
 							</OnDragStart>
 							<OnDragStop>
 								self.IsScrolling = false
+								self:SetButtonState("NORMAL")
+								self:UnlockHighlight()
 							</OnDragStop>
 							<OnUpdate>
 								if self.IsScrolling then
@@ -660,7 +715,7 @@
 							</OnUpdate>
 						</Scripts>
 					
-					</Frame>
+					</Button>
 				</Frames>
 				<Scripts>
 					<OnMouseWheel>
@@ -701,18 +756,31 @@
 			<Button name="$parentClickInterceptor" parentKey="clickinterceptor">
 				<Scripts>
 					<OnLoad>
-						self:SetAllPoints(self:GetParent().text)
+						self.parent = self:GetParent()
+						self:SetAllPoints(self.parent.text)
 					</OnLoad>
 					<OnEnter>
-						self:GetParent():LockHighlight()
-						self:GetParent():GetScript("OnEnter")(self:GetParent())
+						--if self.parent.LockHighlight then
+							self.parent:LockHighlight()
+						--end
+						
+						local OnEnter = self.parent:GetScript("OnEnter")
+						if OnEnter then
+							OnEnter(self.parent)
+						end
 					</OnEnter>
 					<OnLeave>
-						self:GetParent():UnlockHighlight()
-						self:GetParent():GetScript("OnLeave")(self:GetParent())
+						--if self.parent.UnlockHighlight then
+							self.parent:UnlockHighlight()
+						--end
+						
+						local OnLeave = self.parent:GetScript("OnLeave")
+						if OnLeave then
+							OnLeave(self.parent)
+						end
 					</OnLeave>
 					<OnClick>
-						self:GetParent():Click(button)
+						self.parent:Click(button)
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -847,6 +915,7 @@
 			</OnClick>
 			<OnShow>
 				PanelTemplates_TabResize(self, -6)
+				self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
 			</OnShow>
 			<OnHide>
 				self:SetWidth(TMW.IE.CONST.TAB_OFFS_X)
@@ -910,7 +979,7 @@
 		<Size x="60" y="15"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall">
+				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
 					</Anchors>
@@ -1126,7 +1195,7 @@
 					</OnMouseUp>
 				</Scripts>
 
-				<NormalTexture file=""/>
+				<NormalTexture />
 				<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 				<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
 			</Button>
@@ -1504,10 +1573,11 @@
 		</Scripts>
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+		<HighlightTexture alphaMode="ADD" alpha="0.1">
+			<Color r="1" g="1" b="1"/>
 			<Anchors>
-				<Anchor point="TOPLEFT" y="-1"/>
-				<Anchor point="BOTTOMRIGHT" y="1"/>
+				<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
+				<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
 			</Anchors>
 		</HighlightTexture>
 
@@ -1701,7 +1771,6 @@
 		</Layers>
 		
 		<Frames>
-			 
 			<Button name="$parentTab1" parentKey="MainTab"				inherits="TellMeWhen_TabTemplate">
 				<Scripts>
 					<OnLoad>
@@ -1790,10 +1859,10 @@
 					
 					<Frame name="$parentPanelsRight" parentKey="PanelsRight">
 						<Anchors>
-							<Anchor point="LEFT" relativePoint="TOP" x="6"/>
+							<Anchor point="LEFT" relativePoint="TOP" x="5"/>
 							<Anchor point="TOP" y="-35"/>
 							<Anchor point="BOTTOM" y="3"/>
-							<Anchor point="RIGHT" x="-7"/>
+							<Anchor point="RIGHT" x="-9"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -1957,10 +2026,11 @@
 								ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
 							</OnClick>
 						</Scripts>
-						<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+						<HighlightTexture alphaMode="ADD" alpha="0.1">
+							<Color r="1" g="1" b="1"/>
 							<Anchors>
-								<Anchor point="TOPLEFT" y="-1"/>
-								<Anchor point="BOTTOMRIGHT" y="1"/>
+								<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
+								<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
 							</Anchors>
 						</HighlightTexture>
 					</Button>
@@ -2186,7 +2256,7 @@
 				<Scripts>
 					<OnLoad>
 						self:RegisterForDrag("LeftButton")
-						self:SetScale(0.77)
+						self:SetScale(0.75)
 
 						local AceGUI = LibStub("AceGUI-3.0", true)
 						local Type, Version = "TMWGroupOptions", 1

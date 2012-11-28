@@ -1,0 +1,27 @@
+## Interface: 50001
+## Title: Gara'jalAnnounce
+## Description: Automatically generate and announce optimal spirit totem assignments during the Gara'jal encounter in Mogu'shan Vaults. 
+## Notes: Automatically generate and announce optimal spirit totem assignments during the Gara'jal encounter in Mogu'shan Vaults. 
+## Author: oscarucb
+## Credits: 
+## Version: 1.7.1
+## X-Build: 38
+## X-ReleaseDate: 2012-11-14T19:51:48Z
+## X-Revision: $Revision: 16 $
+## X-Embeds: Ace3, LibDataBroker-1.1, LibDBIcon-1.0
+## OptionalDeps: Ace3, LibDataBroker-1.1, LibDBIcon-1.0
+## SavedVariables: GarajalAnnounceDB 
+## SavedVariablesPerCharacter: 
+## LoadManagers: AddonLoader
+## X-LoadOn-Instance: true
+## X-LoadOn-Slash: /garajalannounce, /ga
+## X-Curse-Packaged-Version: 1.7.1
+## X-Curse-Project-Name: Gara'jalAnnounce
+## X-Curse-Project-ID: garajalannounce
+## X-Curse-Repository-ID: wow/garajalannounce/mainline
+
+embeds.xml
+
+locale.lua
+
+core.lua

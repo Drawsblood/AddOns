@@ -128,7 +128,6 @@ L["CHOOSEICON_DESC"] = [=[|cff7fffffClick|r para elegir un icono/grupo.
 L["CHOOSENAME_DIALOG"] = [=[Introduzca el Nombre o ID de lo que quiera que vigile este icono. Puede añadir múltiples entradas (cualquier combinación de nombres, IDs y equivalentes) separándolas con punto y coma (;)
 
 Haga |cff7fffffShift-click|r en hechizos/objetos/enlaces de chat o arrastre hechizos/objetos para insertarlos en esta caja de texto.]=]
-L["CHOOSENAME_DIALOG_CNDTIC"] = "Introduzca el Nombre o ID del hechizo que tiene la textura que quiere usar. También puede introducir una ruta de textura, como 'Interface/Icons/spell_nature_healingtouch', o simplemente 'spell_nature_healingtouch' si la ruta es 'Interface/Icons'"
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Conjuntos de Hechizos/Tipos de Disipación Predefinidos"
 L["CHOOSENAME_DIALOG_MSCD"] = "Introduzca el Nombre o ID del tiempo de reutilización que quiere que este icono compruebe. Sólo el primer hechizo/objeto será comprobado - Las listas delimitadas por punto y coma no son válidas para este tipo de icono. " -- Needs review
 L["CHOOSENAME_DIALOG_PETABILITIES"] = "Se deben usar IDs de hechizo para las |cFFFF5959HABILIDADES DE MASCOTA|r "
@@ -547,14 +546,14 @@ L["DR-RandomStun"] = "Aturdimientos aleatorios"
 L["DR-Scatter"] = "Disparo de dispersión"
 L["DR-Silence"] = "Silencios"
 L["DR-Taunt"] = "Provocaciones"
-L["DT_DOC_Destination"] = "Devuelve la unidad de destino del último Evento de Combate que el icono procesó. Uso recomendado en conjunción con la etiqueta [Name] (Esta etiqueta sólo debería usarse con iconos de tipo %s)"
+L["DT_DOC_Destination"] = "Devuelve la unidad de destino del último Evento de Combate que el icono procesó. Uso recomendado en conjunción con la etiqueta [Name] (Esta etiqueta sólo debería usarse con iconos de tipo %s)" -- Needs review
 L["DT_DOC_Duration"] = "Devuelve la duración restante actualmente en el icono. Se recomienda que dé formato a esto con [TMWFormatDuration]"
 L["DT_DOC_Extra"] = "Devuelve el hechizo extra del último Evento de Combate que procesó el icono. (Esta etiqueta sólo debería usarse con iconos de tipo %s)"
 L["DT_DOC_IsShown"] = "Devuelve si un icono es mostrado o no."
 L["DT_DOC_Name"] = "Devuelve el nombre de la unidad. Esta es una versión mejorada de la etiqueta [Name] por defecto proporcionada por DogTag. El color por defecto será el establecido en las opciones principales de TMW."
 L["DT_DOC_Opacity"] = "Devuelve la opacidad de un icono. El valor de retorno está entre 0 y 1."
 L["DT_DOC_PreviousUnit"] = "Devuelve la unidad o el nombre de la unidad que el icono ha comprobado antes de la actual unidad. Recomendado usar junto con la etiqueta [Name]."
-L["DT_DOC_Source"] = "Devuelve la unidad fuente del último Evento de Combate que el icono procesó. Recomendado usar junto con la etiqueta [Name]. (Esta etiqueta sólo debería usarse con iconos de tipo %s)"
+L["DT_DOC_Source"] = "Devuelve la unidad fuente del último Evento de Combate que el icono procesó. Recomendado usar junto con la etiqueta [Name]. (Esta etiqueta sólo debería usarse con iconos de tipo %s)" -- Needs review
 L["DT_DOC_Spell"] = "Devuelve el hechizo u objeto para el que el icono está mostrando datos. "
 L["DT_DOC_Stacks"] = "Devuelve las acumulaciones actuales del icono"
 L["DT_DOC_TMWFormatDuration"] = "Devuelve una cadena formateada por el formato de tiempo de TellMeWhen. Alternativa a [FormatDuration]."
@@ -796,7 +795,7 @@ Debe introducir, en la caja de edición %q, el nombre de hechizo/ID de:
 |cff7fffff1)|r La ventaja/desventaja que usted gana cuando el tiempo de reutilización interno es activado, ó
 |cff7fffff2)|r El hechizo que hace daño (compruebe su registro de combate), ó
 |cff7fffff3)|r El efecto energizador (compruebe su registro de combate), ó
-|cff7fffff3)|r El hechizo que activó la invocación (compruebe su registro de combate).]=]
+|cff7fffff3)|r El hechizo que activó la invocación (compruebe su registro de combate).]=] -- Needs review
 L["ICONMENU_ICDBDE"] = "Ventaja/Desventaja/Daño/Energización/Invocación"
 L["ICONMENU_ICD_DESC"] = [=[Sigue el tiempo de reutilización de un proc o un efecto similar. 
 
@@ -946,8 +945,8 @@ L["IconModule_CooldownSweepCooldown"] = "Barrido de Tiempo de Reutilización"
 L["IconModule_IconContainer_MasqueIconContainer"] = "Contenedor de Iconos"
 L["IconModule_IconContainer_MasqueIconContainer_DESC"] = "Contiene las partes principales del icono, como la textura"
 L["IconModule_PowerBar_OverlayPowerBar"] = "Barra de Poder Superpuesta"
-L["IconModule_Texture_ColoredTexture"] = "Textura"
-L["IconModule_TimerBar_BarDisplayTimerBar"] = "Barra de Temporizador"
+L["IconModule_Texture_ColoredTexture"] = "Textura" -- Needs review
+L["IconModule_TimerBar_BarDisplayTimerBar"] = "Barra de Temporizador" -- Needs review
 L["IconModule_TimerBar_OverlayTimerBar"] = "Barra de Temporizador Superpuesta"
 L["ICONTOCHECK"] = "Icono a comprobar"
 L["ICON_TOOLTIP1"] = "TellMeWhen"
@@ -1366,9 +1365,9 @@ L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"] = "Pulse para configurar el diseño de text
 L["TEXTLAYOUTS_NOEDIT_DESC"] = [=[Este diseño de texto es un diseño por defecto que viene estándar con TellMeWhen y no puede ser modificado. 
 
 Si desea modificarlo, por favor clónelo. ]=]
-L["TEXTLAYOUTS_POINT_DESC"] = "El punto del display de texto que será anclado al icono. "
+L["TEXTLAYOUTS_POINT_DESC"] = "El punto del display de texto que será anclado al icono. " -- Needs review
 L["TEXTLAYOUTS_POSITIONSETTINGS"] = "Ajustes de Posición"
-L["TEXTLAYOUTS_RELATIVEPOINT_DESC"] = "El punto del icono que será anclado a"
+L["TEXTLAYOUTS_RELATIVEPOINT_DESC"] = "El punto del icono que será anclado a" -- Needs review
 L["TEXTLAYOUTS_RENAME"] = "Renombrar Diseño"
 L["TEXTLAYOUTS_RENAME_DESC"] = "Renombre este diseño a un nombre que describa su función para que pueda identificarlo fácilmente."
 L["TEXTLAYOUTS_RENAMESTRING"] = "Renombrar Display"

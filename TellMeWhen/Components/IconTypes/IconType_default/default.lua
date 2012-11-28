@@ -20,7 +20,6 @@ local print = TMW.print
 local Type = TMW.Classes.IconType:New("")
 Type.name = L["ICONMENU_TYPE"]
 Type.spaceafter = true
-Type.HideBars = true
 Type.NoColorSettings = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
@@ -52,22 +51,23 @@ function Type:DragReceived(icon, t, data, subType)
 
 	local newType, input
 	if t == "spell" then
-		local _
 		if data == 0 and type(param4) == "number" then
+			-- I don't remember the purpose of this anymore.
+			-- It handles some special sort of spell, though, and is required.
 			input = GetSpellInfo(param4)
 		else
-			local type
-			type, input = GetSpellBookItemInfo(data, subType)
-			if not input then
+			local type, baseSpellID = GetSpellBookItemInfo(data, subType)
+			
+			if not baseSpellID or type ~= "SPELL" then
 				return
 			end
 			
-			if type == "SPELL" then
-				input = GetSpellBookItemName(data, subType)
-			end
+			
+			local currentSpellName = GetSpellBookItemName(data, subType)		
+			local baseSpellName = GetSpellInfo(baseSpellID)
+			
+			input = baseSpellName or currentSpellName
 		end
-	
-	
 	
 		newType = "cooldown"
 	elseif t == "item" then

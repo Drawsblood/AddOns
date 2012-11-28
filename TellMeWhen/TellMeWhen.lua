@@ -21,17 +21,15 @@ TellMeWhen = TMW
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 --L = setmetatable({}, {__index = function() return ("| ! "):rep(12) end}) -- stress testing for text widths
 TMW.L = L
-local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local AceDB = LibStub("AceDB-3.0")
-local DRData = LibStub("DRData-1.0", true)
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
-TELLMEWHEN_VERSION = "6.0.4"
-TELLMEWHEN_VERSION_MINOR = strmatch(" r653", " r%d+") or ""
+TELLMEWHEN_VERSION = "6.1.0"
+TELLMEWHEN_VERSION_MINOR = strmatch(" 6.1.0", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60447 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 61022 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
 
@@ -49,23 +47,18 @@ local GetItemInfo, GetInventoryItemID, GetItemIcon =
       GetItemInfo, GetInventoryItemID, GetItemIcon
 local GetActiveTalentGroup, GetPrimaryTalentTree, GetNumTalentTabs, GetNumTalents, GetTalentInfo =
       GetActiveTalentGroup, GetPrimaryTalentTree, GetNumTalentTabs, GetNumTalents, GetTalentInfo
-local UnitPower, UnitClass, UnitGUID, UnitName, UnitInBattleground, UnitInRaid, UnitExists =
-      UnitPower, UnitClass, UnitGUID, UnitName, UnitInBattleground, UnitInRaid, UnitExists
+local UnitPower, UnitClass, UnitGUID, UnitName =
+      UnitPower, UnitClass, UnitGUID, UnitName
 local GetPartyAssignment, IsInGuild =
       GetPartyAssignment, IsInGuild
-local GetNumBattlefieldScores, GetBattlefieldScore =
-      GetNumBattlefieldScores, GetBattlefieldScore
 local GetCursorPosition, GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn =
       GetCursorPosition, GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn
-local IsInGroup, IsInRaid, GetNumGroupMembers = -- MoP functions
-	  IsInGroup, IsInRaid, GetNumGroupMembers
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, next, assert, pcall, error, getmetatable, setmetatable, date, CopyTable, table, loadstring, rawset, debugstack =
       tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, next, assert, pcall, error, getmetatable, setmetatable, date, CopyTable, table, loadstring, rawset, debugstack
 local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, min, max, ceil, floor, abs, random =
       strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, min, max, ceil, floor, abs, random
 local _G, GetTime =
       _G, GetTime
-local CL_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
 local tostringall = tostringall
 local bitband = bit.band
 local huge = math.huge
@@ -85,6 +78,13 @@ TMW.ISNOTMOP = not TMW.ISMOP and true or nil
 local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
+TMW.UnitAura = _G.UnitAura
+if clientVersion < 50100 then
+	function TMW.UnitAura(...)
+		local a, b, c, d, e, f, g, h, i, j, k, l, m = UnitAura(...)
+		return a, b, c, d, e, f, g, h, i, j, k, l, m, select(15, UnitAura(...))
+	end
+end
 
 --TODO: (misplaced note) export any needed text layouts with icons that need them
 
@@ -279,7 +279,9 @@ function TMW.get(value, ...)
 	end
 end
 
-
+function TMW.NULLFUNC()
+	-- Do nothing
+end
 
 
 
@@ -391,9 +393,9 @@ end
 
 do -- TMW.generateGUID(length)
 	local chars = {}
-	for i = 33, 122 do
-		if i ~= 94 and charbyte ~= 96 then
-			chars[#chars + 1] = strchar(i)    
+	for charbyte = 33, 122 do
+		if charbyte ~= 94 and charbyte ~= 96 then
+			chars[#chars + 1] = strchar(charbyte)    
 		end 
 	end
 	
@@ -1351,7 +1353,7 @@ TMW.BE = TMW.ISMOP and {
 		-- VERIFIED 6.0.0:
 		ReducedArmor		= "113746",
 		PhysicalDmgTaken	= "81326;35290;50518;57386;55749",
-		SpellDamageTaken	= "58410;1490;34889;24844",
+		SpellDamageTaken	= "93068;_1490;34889;24844;116202",
 		ReducedPhysicalDone = "115798;50256;24423",
 		ReducedCastingSpeed = "31589;73975;5761;109466;50274;90314;126402;58604",
 		ReducedHealing		= "115804",
@@ -1512,7 +1514,7 @@ function TMW:MakeFunctionCached(obj, method)
         obj[method] = wrapper
     end
 
-    return wrapper
+    return wrapper, cache
 end
 
 function TMW:MakeSingleArgFunctionCached(obj, method)
@@ -1817,9 +1819,16 @@ function TMW:ShutdownProfile()
 	end
 end
 
+function TMW:ScheduledUpdateHandler()
+	if TMW:CheckCanDoLockedAction(false) then
+		TMW:Update()
+	else
+		TMW:ScheduleUpdate(5)
+	end
+end
 function TMW:ScheduleUpdate(delay)
 	TMW:CancelTimer(updatehandler, 1)
-	updatehandler = TMW:ScheduleTimer("Update", delay or 1)
+	updatehandler = TMW:ScheduleTimer("ScheduledUpdateHandler", delay or 1)
 end
 
 function TMW:OnCommReceived(prefix, text, channel, who)
@@ -1940,8 +1949,10 @@ function TMW:UpdateNormally()
 end
 
 do -- TMW:UpdateViaCoroutine()
--- Blizzard's execution cap in combat is 200ms. We will be extra safe and go for 100ms.
-local COROUTINE_MAX_TIME_PER_FRAME = 100
+-- Blizzard's execution cap in combat is 200ms.
+-- We will be extra safe and go for 100ms.
+-- But actually, we will use 50ms, because somehow we are still getting extremely rare 'script ran too long' errors
+local COROUTINE_MAX_TIME_PER_FRAME = 50
 
 local NumCoroutinesQueued = 0
 local CoroutineStartTime
@@ -2032,17 +2043,20 @@ TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
 		end
 	end
 end)
-local hasRan
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	if hasRan then
-		return
-	end
-	hasRan = true
-	if TMW.db.global.AllowCombatConfig then
-		TMW.ALLOW_LOCKDOWN_CONFIG = true
-		TMW:LoadOptions()
-	end
-end)
+
+do
+	local hasRan
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+		if hasRan then
+			return
+		end
+		hasRan = true
+		if TMW.db.global.AllowCombatConfig then
+			TMW.ALLOW_LOCKDOWN_CONFIG = true
+			TMW:LoadOptions()
+		end
+	end)
+end
 end
 TMW.Update = TMW.UpdateNormally
 
@@ -2955,9 +2969,21 @@ function TMW:DoValidityCheck()
 end
 
 function TMW.OnGCD(d)
-	if d <= 1 then return true end -- a cd of 1 (or less) is always a GCD (or at least isn't worth showing)
-	if GCD > 1.7 then return false end -- weed out a cooldown on the GCD spell that might be an interupt (counterspell, mind freeze, etc)
-	return GCD == d and d > 0 -- if the duration passed in is the same as the GCD spell, and the duration isnt zero, then it is a GCD
+	if d == 0.001 then
+		-- A cd of 0.001 is Blizzard's terrible way of indicating that something's cooldown hasn't started,
+		-- but is still unusable, and has a cooldown pending. It should not be considered a GCD.
+		return false
+	elseif d <= 1 then
+		-- A cd of 1 (or less) is always a GCD (or at least isn't worth showing)
+		return true
+	elseif GCD > 1.7 then
+		-- Weed out a cooldown on the GCD spell that might be an interupt (counterspell, mind freeze, etc)
+		return false
+	else
+		-- If the duration passed in is the same as the GCD spell,
+		-- and the duration isnt zero, then it is a GCD
+		return GCD == d and d > 0 
+	end
 end
 
 function TMW.SpellHasNoMana(spell)
@@ -2981,7 +3007,10 @@ function TMW:PLAYER_ENTERING_WORLD()
 		end
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
-		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
+		if clientVersion < 50100 then
+			-- Seems to be removed in WoW 5.1?
+			TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
+		end
 	end
 end
 
@@ -2991,11 +3020,11 @@ function TMW:PLAYER_LOGIN()
 	end
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
---	end
 	
-	-- Yeah,  I do it twice. Masque is a heap of broken shit and doesn't work unless its done twice. (Maybe??)
+	-- Yeah,  I do it twice. Masque is a heap of broken shit and doesn't work unless its done twice.
+	-- Especially when logging in while in combat with the Allow Config in Combat option disabled
 	TMW:Update()
-	--TMW:Update()
+	TMW:Update()
 end
 
 
@@ -3792,7 +3821,9 @@ function Icon.GetActiveModuleChildrenNames(icon)
 	for moduleName, Module in pairs(icon.Modules) do
 		if Module.IsImplemented then
 			for name in pairs(Module.anchorableChildren) do
-				tinsert(activeModuleChildren, moduleName .. name)
+				local frameName = moduleName .. name
+				assert(_G[icon:GetName() .. frameName], ("Couldn't find frame named %q"):format(frameName))
+				tinsert(activeModuleChildren, frameName)
 			end
 		end
 	end
@@ -5216,19 +5247,23 @@ function IconType:DragReceived(icon, t, data, subType, param4)
 		return
 	end
 
-	local _, input
+	local input
 	if data == 0 and type(param4) == "number" then
+		-- I don't remember the purpose of this anymore.
+		-- It handles some special sort of spell, though, and is required.
 		input = GetSpellInfo(param4)
 	else
-		local type
-		type, input = GetSpellBookItemInfo(data, subType)
-		if not input then
+		local type, baseSpellID = GetSpellBookItemInfo(data, subType)
+		
+		if not baseSpellID or type ~= "SPELL" then
 			return
 		end
 		
-		if type == "SPELL" then
-			input = GetSpellBookItemName(data, subType)
-		end
+		
+		local currentSpellName = GetSpellBookItemName(data, subType)		
+		local baseSpellName = GetSpellInfo(baseSpellID)
+		
+		input = baseSpellName or currentSpellName
 	end
 
 	ics.Name = TMW:CleanString(ics.Name .. ";" .. input)
@@ -5243,7 +5278,7 @@ function IconType:GetIconMenuText(data)
 end
 
 function IconType:Register(order)
-	TMW:ValidateType("2 (order)", "IconView:Register(order)", order, "number")
+	TMW:ValidateType("2 (order)", "IconType:Register(order)", order, "number")
 	
 	local typekey = self.type
 	
@@ -5569,7 +5604,17 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	end
 	return buffNames
 end
---TMW:MakeFunctionCached(TMW, "GetSpellNames")
+do
+	-- We need to wipe the cache on every TMW_GLOBAL_UPDATE because of issues with
+	-- spells that replace other spells in different specs, like Corruption/Immolate.
+	-- TMW_GLOBAL_UPDATE might fire a little too often for this, but it is a surefire way to prevent issues that should
+	-- hold up through out all future game updates because TMW_GLOBAL_UPDATE should always react to any changes in spec/talents/etc
+	
+	local _, cache = TMW:MakeFunctionCached(TMW, "GetSpellNames")
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+		wipe(cache)
+	end)
+end
 
 function TMW:GetSpellDurations(icon, setting)
 	local NameArray = TMW:GetSpellNames(icon, setting, nil, nil, nil, 1)
@@ -5733,7 +5778,7 @@ function TMW:GetTexturePathFromSetting(setting)
 				return SpellTextures[setting]
 			end
 			if strfind(setting, "[\\/]") then -- if there is a slash in it, then it is probably a full path
-				return setting
+				return setting:gsub("/", "\\")
 			else
 				-- if there isn't a slash in it, then it is probably be a wow icon in interface\icons.
 				-- it still might be a file in wow's root directory, but fuck, there is no way to tell for sure

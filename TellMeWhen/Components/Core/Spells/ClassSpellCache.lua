@@ -169,10 +169,17 @@ TMW:RegisterCallback("TMW_DB_INITIALIZED", ClassSpellCache)
 local RequestedFrom = {}
 local commThrowaway = {}
 
+local commRecievedQueue = {}
+
 function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 	if prefix ~= self.CONST.COMM_SLUG
 	or who == UnitName("player")
 	then
+		return
+	end
+	
+	if InCombatLockdown() then
+		tinsert(commRecievedQueue, {prefix, text, channel, who})
 		return
 	end
 	
@@ -228,10 +235,22 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 	end
 end
 
+ClassSpellCache:RegisterEvent("PLAYER_REGEN_ENABLED", function()
+	if not InCombatLockdown() then
+		for k, data in pairs(commRecievedQueue) do
+			ClassSpellCache:OnCommReceived(unpack(data))
+		end
+		wipe(commRecievedQueue)
+	end
+end)
+
 function ClassSpellCache:PLAYER_ENTERING_WORLD()
 	self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "RAID")
 	self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "PARTY")
-	self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "BATTLEGROUND")
+	if clientVersion < 50100 then
+		-- Seems to be removed in WoW 5.1?
+		self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "BATTLEGROUND")
+	end
 end
 
 

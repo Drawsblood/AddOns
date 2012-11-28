@@ -38,7 +38,6 @@ L["CHECKORDER_ICONDESC"] = "Defina a ordem que os ícones dentro deste group ser
 L["CHOOSENAME_DIALOG"] = [=[Digite o nome ou ID do que você quer neste ícone para monitor. Você pode adicionar várias entradas (qualquer combinação de nomes, IDs e equivalências), separando-os com ponto e vírgula (;).
 
 Você pode clicar em habilidades/itens/links do chat com shift ou arrastar habilidades/itens para inserí-los nesta caixa de edição.]=] -- Needs review
-L["CHOOSENAME_DIALOG_CNDTIC"] = "Insira o nome ou ID do feitiço que tem a textura que você queria usar. Você pode também inserir o caminho da textura, tal como 'Interface/Icons/spell_nature_healingtouch', ou apenas 'spell_nature_healingtouch' se o caminho é 'Interface/Icons'" -- Needs review
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Conj. de Magias/Tipos de Dispell" -- Needs review
 L["CHOOSENAME_DIALOG_MSCD"] = "Insira o nome ou ID de qual recarregamento este ícone monitore.Apenas o primeiro feitiço/item serão verificados - lista delimitada por ponto e virgula não serão validos para este tipo de ícone." -- Needs review
 L["CHOOSENAME_DIALOG_PETABILITIES"] = "|cFFFF5959HABILIDADES DE PETS|r devem usar o ID da habilidade. "

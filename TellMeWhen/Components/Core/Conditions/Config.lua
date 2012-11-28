@@ -87,7 +87,7 @@ function CNDT:LoadConfig(conditionSetName)
 		if conditionSetName then
 			TMW.IE.DynamicConditionTab:Show()
 		
-			-- Only click the tab if we are manually loading the conditionSet (should only happen on user input)
+			-- Only click the tab if we are manually loading the conditionSet (should only happen on user input/hardware event)
 			TMW.IE:TabClick(TMW.IE.DynamicConditionTab)
 		end
 	else
@@ -101,12 +101,14 @@ function CNDT:LoadConfig(conditionSetName)
 	
 	TMW.HELP:Hide("CNDT_UNIT_MISSING")
 	
-	for i = CNDT.settings.n + 1, #CNDT do
+	local n = CNDT.settings.n
+	
+	for i = n + 1, #CNDT do
 		CNDT[i]:Hide()
 	end
 		
-	if CNDT.settings.n > 0 then
-		CNDT:CreateGroups(CNDT.settings.n+1)
+	if n > 0 then
+		CNDT:CreateGroups(n+1)
 
 		for i in TMW:InNLengthTable(CNDT.settings) do
 			CNDT[i]:Show()
@@ -114,7 +116,11 @@ function CNDT:LoadConfig(conditionSetName)
 		end
 	end
 	
-	CNDT:AddRemoveHandler()
+	local AddCondition = TellMeWhen_IconEditor.Conditions.Groups.AddCondition
+	AddCondition:SetPoint("TOPLEFT", CNDT[n+1])
+	AddCondition:SetPoint("TOPRIGHT", CNDT[n+1])
+	
+	CNDT:ColorizeParentheses()
 end
 
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function()
@@ -124,6 +130,8 @@ TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function()
 end)
 
 
+
+-- Dynamic Conditions Tab handling
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED_CHANGED", function(event, icon)
 	if TMW.IE.CurrentTab == TMW.IE.DynamicConditionTab then
 		TMW.IE:TabClick(TMW.IE.MainTab)
@@ -153,13 +161,6 @@ f:SetScript("OnUpdate", function()
 end)
 
 
-function CNDT:Clear()
-	for i=1, #CNDT do
-		CNDT[i]:Hide()
-	end
-	CNDT:AddRemoveHandler()
-end
-TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED_CHANGED", "Clear", CNDT)
 
 function CNDT:GetTabText(conditionSetName)
 	local ConditionSet = CNDT.ConditionSets[conditionSetName] or CNDT.CurrentConditionSet
@@ -198,6 +199,8 @@ function CNDT:SetTabText(conditionSetName)
 	end
 end
 
+
+
 function CNDT:ValidateLevelForCondition(level, conditionType)
 	local conditionData = CNDT.ConditionsByType[conditionType]
 	
@@ -212,18 +215,20 @@ function CNDT:ValidateLevelForCondition(level, conditionType)
 	level = floor(level * (1/step) + 0.5) / (1/step)
 	
 	-- Constrain to min/max
-	local vmin = conditionData.min
-	local vmax = conditionData.max
+	local vmin = get(conditionData.min or 0)
+	local vmax = get(conditionData.max)
 	if vmin and level < vmin then
 		level = vmin
 	elseif vmax and level > vmax then
 		level = vmax
 	end
 	
-	level = max(level, 0)
+	--level = max(level, 0)
 	
 	return level
 end
+
+
 
 ---------- Dropdowns ----------
 local addedThings = {}
@@ -465,11 +470,11 @@ CNDT.colors = setmetatable(
 		"|cff0026ff",
 		"|cffff004d",
 		"|cff009bff",
-		"|cffff00c2",
 		"|cffe9ff00",
 		"|cff00ff7c",
 		"|cffff6700",
 		"|cffaf79ff",
+		"|cffff00c2",
 	},
 	{ __index = function(t, k)
 		-- start reusing colors
@@ -550,52 +555,6 @@ end
 
 
 ---------- Condition Groups ----------
-function CNDT:AddRemoveHandler()
-	local i=1
-	CNDT[1].Up:Hide()
-	while CNDT[i] do
-		CNDT[i].CloseParenthesis:Show()
-		CNDT[i].OpenParenthesis:Show()
-		CNDT[i].Down:Show()
-		if CNDT[i+1] then
-			if CNDT[i]:IsShown() then
-				CNDT[i+1].AddDelete:Show()
-			else
-				CNDT[i]:Hide()
-				CNDT[i+1].AddDelete:Hide()
-				CNDT[i+1]:Hide()
-				if i > 1 then
-					CNDT[i-1].Down:Hide()
-				end
-			end
-		else -- this handles the last one in the frame
-			if CNDT[i]:IsShown() then
-				CNDT:CreateGroups(i+1)
-			else
-				if i > 1 then
-					CNDT[i-1].Down:Hide()
-				end
-			end
-		end
-		i=i+1
-	end
-
-	local n = 1
-	while CNDT[n] and CNDT[n]:IsShown() do
-		n = n + 1
-	end
-	n = n - 1
-
-	if n < 3 then
-		for i = 1, n do
-			CNDT[i].CloseParenthesis:Hide()
-			CNDT[i].OpenParenthesis:Hide()
-		end
-	end
-
-	CNDT:ColorizeParentheses()
-end
-
 function CNDT:CreateGroups(num)
 	local start = #CNDT + 1
 
@@ -631,9 +590,9 @@ function CndtGroup:OnNewInstance()
 
 	self:SetPoint("TOPLEFT", CNDT[ID-1], "BOTTOMLEFT", 0, -14.5)
 
-	local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
+	--[[local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
 	self.AddDelete:ClearAllPoints()
-	self.AddDelete:SetPoint(p, CNDT[ID], rp, x, y)
+	self.AddDelete:SetPoint(p, CNDT[ID], rp, x, y)]]
 	
 	self:Hide()
 	
@@ -746,13 +705,49 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			CndtGroup.CloseParenthesis[k]:SetChecked(conditionSettings.PrtsAfter >= k)
 		end
 	end
+	
+	if CNDT.settings.n >= 3 then
+		CndtGroup.CloseParenthesis:Show()
+		CndtGroup.OpenParenthesis:Show()
+	else
+		CndtGroup.CloseParenthesis:Hide()
+		CndtGroup.OpenParenthesis:Hide()
+	end
+	
+	if CndtGroup:GetID() == 3 and CndtGroup:IsVisible() then
+		TMW.HELP:Show("CNDT_PARENTHESES_FIRSTSEE", nil, CNDT[1].OpenParenthesis, 0, 0, TMW.L["HELP_CNDT_PARENTHESES_FIRSTSEE"])
+	end
+end)
+TMW.HELP:NewCode("CNDT_PARENTHESES_FIRSTSEE", 101, true)
+
+-- Up/Down
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+
+	local ID = CndtGroup:GetID()
+	local n = CNDT.settings.n
+	
+	if ID == 1 then
+		CndtGroup.Up:Hide()
+	else
+		CndtGroup.Up:Show()
+	end
+	if ID == n then
+		CndtGroup.Down:Hide()
+	else
+		CndtGroup.Down:Show()
+	end
 end)
 
 -- And/Or
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 
 	CndtGroup.AndOr:SetValue(conditionSettings.AndOr)
+	
+	if CndtGroup:GetID() == 2 and CndtGroup:IsVisible() then
+		TMW.HELP:Show("CNDT_ANDOR_FIRSTSEE", nil, CndtGroup.AndOr, 0, 0, TMW.L["HELP_CNDT_ANDOR_FIRSTSEE"])
+	end
 end)
+TMW.HELP:NewCode("CNDT_ANDOR_FIRSTSEE", 100, true)
 
 -- Second Row
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
@@ -826,11 +821,13 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		else
 			CndtGroup.TextValue:SetText(L["CONDITIONPANEL_VALUEN"])
 			
-			local val = conditionSettings.Level
-			CndtGroup.ValText:SetText(get(conditionData.texttable, val) or val)
-			CndtGroup.ValText:Show()
 			
 			CndtGroup:SetSliderMinMax(conditionSettings.Level or 0)
+			
+			local val = conditionSettings.Level
+			
+			CndtGroup.ValText:SetText(get(conditionData.texttable, val) or val)
+			CndtGroup.ValText:Show()
 			
 			-- If neither the slider or input box are already shown, show the slider
 			-- (don't show the slider unconditionally because otherwise every time :LoadAndDraw() is called the editbox will be hidden)
@@ -888,13 +885,8 @@ function CndtGroup:UpOrDown(delta)
 	CNDT:LoadConfig()
 end
 
-function CndtGroup:AddDeleteHandler()
-	if self:IsShown() then
-		CNDT:DeleteCondition(CNDT.settings, self:GetID())
-	else
-		CNDT:AddCondition(CNDT.settings)
-	end
-	CNDT:AddRemoveHandler()
+function CndtGroup:DeleteHandler()
+	CNDT:DeleteCondition(CNDT.settings, self:GetID())
 	CNDT:LoadConfig()
 end
 
@@ -942,7 +934,11 @@ function CndtGroup:SetSliderMinMax(level)
 	if level then
 		Slider:SetValue(level)
 		SliderInputBox:SetText(level)
+		
+		self:GetConditionSettings().Level = level
 	end
+	
+	return level
 end
 
 function CndtGroup:GetSliderEditBoxAllowance()

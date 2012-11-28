@@ -30,30 +30,42 @@ CooldownSweep:RegisterIconDefaults{
 
 CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings", function(self)
 	self.Header:SetText(L["CONFIGPANEL_TIMER_HEADER"])
+	TMW.HELP:NewCode("IE_TIMERTEXTHANDLER_MISSING", nil, true)
+	
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 2,
 		{
 			setting = "ShowTimer",
-			title = TMW.L["ICONMENU_SHOWTIMER"],
-			tooltip = TMW.L["ICONMENU_SHOWTIMER_DESC"],
+			title = L["ICONMENU_SHOWTIMER"],
+			tooltip = L["ICONMENU_SHOWTIMER_DESC"],
 		},
 		{
 			setting = "ShowTimerText",
-			title = TMW.L["ICONMENU_SHOWTIMERTEXT"],
-			tooltip = TMW.L["ICONMENU_SHOWTIMERTEXT_DESC"],
+			title = L["ICONMENU_SHOWTIMERTEXT"],
+			tooltip = L["ICONMENU_SHOWTIMERTEXT_DESC"],
+			OnClick = function(self)
+				if TMW.CI.ics.ShowTimerText then
+					if	not (OmniCC or IsAddOnLoaded("OmniCC")) -- Tukui is handled by OmniCC == true
+					and	not IsAddOnLoaded("tullaCC")
+					and	not LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true)
+					then
+					 TMW.HELP:Show("IE_TIMERTEXTHANDLER_MISSING", nil, self, 0, 0, L["HELP_IE_TIMERTEXTHANDLER_MISSING"])
+					end
+				end			
+			end,
 		},
 		{
 			setting = "ClockGCD",
-			title = TMW.L["ICONMENU_ALLOWGCD"],
-			tooltip = TMW.L["ICONMENU_ALLOWGCD_DESC"],
+			title = L["ICONMENU_ALLOWGCD"],
+			tooltip = L["ICONMENU_ALLOWGCD_DESC"],
 			disabled = function(self)
 				return not TMW.CI.ics.ShowTimer and not TMW.CI.ics.ShowTimerText and not TMW.CI.ics.ShowTimerTextnoOCC
 			end,
 		},
 		{
 			setting = "ShowTimerTextnoOCC",
-			title = TMW.L["ICONMENU_SHOWTIMERTEXT_NOOCC"],
-			tooltip = TMW.L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"],
+			title = L["ICONMENU_SHOWTIMERTEXT_NOOCC"],
+			tooltip = L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"],
 			hidden = function()
 				return not IsAddOnLoaded("ElvUI")
 			end,
@@ -64,6 +76,12 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 	})
 end)
 
+
+TMW:RegisterUpgrade(60436, {
+	icon = function(self, ics)
+		ics.ShowTimerTextnoOCC = ics.ShowTimerText
+	end,
+})
 
 TMW:RegisterUpgrade(60315, {
 	icon = function(self, ics)
@@ -134,8 +152,23 @@ function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimerTextnoOCC = icon.ShowTimerTextnoOCC
 	self.ClockGCD = icon.ClockGCD
 	
+	local tukui = IsAddOnLoaded("Tukui")
+	local elvui = IsAddOnLoaded("ElvUI")
+	
+	if tukui then
+		-- Tukui forcibly disables its own timers if OmniCC is installed.
+		self.cooldown.noCooldownCount = not icon.ShowTimerText
+		self.cooldown.noOCC = not icon.ShowTimerText
+	elseif elvui then
+		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
+		self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
+	else
+		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
+	end
+	--[[
 	self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 	self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
+	]]
 	
 	local attributes = icon.attributes
 	

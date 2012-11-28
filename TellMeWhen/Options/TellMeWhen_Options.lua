@@ -89,6 +89,12 @@ local points = {
 	BOTTOMRIGHT = L["BOTTOMRIGHT"],
 } TMW.points = points
 
+TMW.justifyPoints = {
+	LEFT = L["LEFT"],
+	CENTER = L["CENTER"],
+	RIGHT = L["RIGHT"],
+}
+
 local operators = {
 	{ tooltipText = L["CONDITIONPANEL_EQUALS"], 		value = "==", 	text = "==" },
 	{ tooltipText = L["CONDITIONPANEL_NOTEQUAL"], 	 	value = "~=", 	text = "~=" },
@@ -705,37 +711,6 @@ TMW.GroupConfigTemplate = {
 						return gs.SettingsPerView[gs.View][info[#info]]
 					end,
 				},
-				--[==[Type = {
-					name = L["UIPANEL_GROUPTYPE"],
-					desc = L["UIPANEL_GROUPTYPE_DESC"],
-					type = "group",
-					dialogInline = true,
-					guiInline = true,
-					order = 23,
-					get = function(info)
-						local g = findid(info)
-						return TMW.db.profile.Groups[g][info[#info-1]] == info[#info]
-					end,
-					set = function(info)
-						local g = findid(info)
-						TMW.db.profile.Groups[g][info[#info-1]] = info[#info]
-						TMW[g]:Setup()
-					end,
-					args = {
-						icon = {
-							name = L["UIPANEL_GROUPTYPE_ICON"],
-							desc = L["UIPANEL_GROUPTYPE_ICON_DESC"],
-							type = "toggle",
-							order = 1,
-						},
-						bar = {
-							name = L["UIPANEL_GROUPTYPE_BAR"],
-							desc = L["UIPANEL_GROUPTYPE_BAR_DESC"],
-							type = "toggle",
-							order = 2,
-						},
-					}
-				},]==]
 				
 				CheckOrder = {
 					name = L["CHECKORDER"],
@@ -761,6 +736,31 @@ TMW.GroupConfigTemplate = {
 					},  
 					style = "dropdown",
 					order = 27,
+				},
+				View = {
+					name = L["UIPANEL_GROUPTYPE"],
+					desc = L["UIPANEL_GROUPTYPE_DESC"],
+					type = "group",
+					dialogInline = true,
+					guiInline = true,
+					order = 30,
+					get = function(info)
+						local g = findid(info)
+						return TMW.db.profile.Groups[g][info[#info-1]] == info[#info]
+					end,
+					set = function(info)
+						local g = findid(info)
+						TMW.db.profile.Groups[g][info[#info-1]] = info[#info]
+						
+						-- This intentional. Double setup is needed for dealing with Masque bullshit,
+						-- Second setup is addon-wide so that all icons and groups can become aware of the new view if needed.
+						TMW[g]:Setup()
+						TMW:Update()
+						
+						IE:Load(1)
+						TMW:CompileOptions()
+					end,
+					args = {}
 				},
 				moveup = {
 					name = L["UIPANEL_GROUPMOVEUP"],
@@ -829,6 +829,40 @@ TMW.GroupConfigTemplate = {
 	}
 }
 
+local addGroupFunctionGroup = {
+	type = "group",
+	name = L["UIPANEL_ADDGROUP"],
+	dialogInline = true,
+	guiInline = true,
+	order = 40,
+	args = {},
+}
+local addGroupButton = {
+	name = function(info)
+		return TMW.Views[info[#info]].name
+	end,
+	desc = L["UIPANEL_ADDGROUP_DESC"],
+	type = "execute",
+	width = "double",
+	order = function(info)
+		return TMW.Views[info[#info]].order
+	end,
+	func = function(info)
+		TMW:Group_Add(info[#info])
+	end,
+}
+local viewSelectToggle = {
+	name = function(info)
+		return TMW.Views[info[#info]].name
+	end,
+	desc = function(info)
+		return TMW.Views[info[#info]].desc
+	end,
+	type = "toggle",
+	order = function(info)
+		return TMW.Views[info[#info]].order
+	end,
+}
 
 local colorOrder = {
 	"CBS",
@@ -1140,12 +1174,12 @@ function TMW:CompileOptions()
 									},
 									order = 41,
 								},
-								ColorNames = {
+								--[[ColorNames = {
 									name = L["COLORNAMES"],
 									desc = L["COLORNAMES_DESC"],
 									type = "toggle",
 									order = 42,
-								},
+								},]]
 								--[[AlwaysSubLinks = {
 									-- unused
 									name = L["ALWAYSSUBLINKS"],
@@ -1226,29 +1260,13 @@ function TMW:CompileOptions()
 					end,
 					get = function(info) return TMW.db.profile.Groups[findid(info)][info[#info]] end,
 					args = {
-						addgroup = {
-							name = L["UIPANEL_ADDGROUP"],
-							desc = L["UIPANEL_ADDGROUP_DESC"],
-							type = "execute",
-							width = "double",
-							order = 41,
-							handler = TMW,
-							func = "Group_Add",
-						},
+						addgroup = addGroupFunctionGroup,
 						importexport = importExportBoxTemplate,
 						addgroupgroup = {
 							type = "group",
 							name = L["UIPANEL_ADDGROUP"],
 							args = {
-								addgroup = {
-									name = L["UIPANEL_ADDGROUP"],
-									desc = L["UIPANEL_ADDGROUP_DESC"],
-									type = "execute",
-									width = "double",
-									order = 41,
-									handler = TMW,
-									func = "Group_Add",
-								},
+								addgroup = addGroupFunctionGroup,
 								importexport = importExportBoxTemplate,
 							},
 						},
@@ -1265,6 +1283,12 @@ function TMW:CompileOptions()
 			--hidden = function() return IE.ExportBox:IsVisible() end,
 		}
 		TMW.OptionsTable.args.profiles.args.importexport = importExportBoxTemplate
+	end
+
+	-- Dynamic Icon View Settings --
+	for view in pairs(TMW.Views) do
+		TMW.GroupConfigTemplate.args.main.args.View.args[view] = viewSelectToggle
+		addGroupFunctionGroup.args[view] = addGroupButton
 	end
 
 	-- Dynamic Group Settings --
@@ -1313,11 +1337,41 @@ function TMW:CompileOptions()
 	
 	TMW:Fire("TMW_CONFIG_MAIN_OPTIONS_COMPILE", TMW.OptionsTable)
 
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW Options", TMW.OptionsTable)
-	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMW Options", 781, 512)
+	
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW IEOptions", TMW.OptionsTable)
+	
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW Options", TMW.OptionsTable)
+	if not TMW.defaultSizeOfTMWOptionsSet then
+		-- Make sure that this only happens once because otherwise the window
+		-- gets resized even if users have adjusted the size of the window.
+		TMW.defaultSizeOfTMWOptionsSet = 1
+		LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMW Options", 781, 512)
+	end
+	
 	if not TMW.AddedToBlizz then
 		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TMW Options", L["ICON_TOOLTIP1"])
+		
+		if TMW.AddedToBlizz and not TMW.ALLOW_LOCKDOWN_CONFIG then
+			local canShow = true
+			
+			IE:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+				canShow = false
+				TMW.AddedToBlizz:Hide()
+			end)
+			
+			IE:RegisterEvent("PLAYER_REGEN_ENABLED", function()
+				canShow = true
+				if InterfaceOptionsFramePanelContainer.displayedPanel == TMW.AddedToBlizz then
+					TMW.AddedToBlizz:Show()
+				end
+			end)
+
+			TMW.AddedToBlizz:HookScript("OnShow", function(self)
+				if not canShow then
+					self:Hide()
+				end
+			end)
+		end
 	end
 end
 
@@ -1354,10 +1408,18 @@ function TMW:Group_Delete(groupID)
 	CloseDropDownMenus()
 end
 
-function TMW:Group_Add()
+function TMW:Group_Add(view)
 	local groupID = TMW.db.profile.NumGroups + 1
 	TMW.db.profile.NumGroups = groupID
-	TMW.db.profile.Groups[TMW.db.profile.NumGroups].Enabled = true
+	TMW.db.profile.Groups[groupID].Enabled = true
+	if view then
+		TMW.db.profile.Groups[groupID].View = view
+		
+		local viewData = TMW.Views[view]
+		if viewData and viewData.Group_OnCreate then
+			viewData:Group_OnCreate(TMW.db.profile.Groups[groupID])
+		end
+	end
 	TMW:Update()
 
 	TMW:CompileOptions()
@@ -1717,9 +1779,11 @@ ID:RegisterIconDragHandler(40,	-- Split
 		ID.srcicon.group.Icons[ID.srcicon:GetID()] = nil
 
 		-- preserve buff/debuff/other types textures
-		group[1]:SetInfo("texture", ID.srcicon.attributes.texture)
+		if group and group[1] then
+			group[1]:SetInfo("texture", ID.srcicon.attributes.texture)
+		end
 
-		local srcicon, desticon = tostring(ID.srcicon), tostring(group[1])
+		local srcicon, desticon = tostring(ID.srcicon), tostring("TellMeWhen_Group" .. groupID .. "_Icon1")
 
 		TMW:ReconcileData(srcicon, desticon)
 
@@ -1788,16 +1852,20 @@ function IE:OnInitialize()
 	IE.historyState = 0
 
 	TMW:NewClass("IconEditor_Resizer_ScaleX_SizeY", "Resizer_Generic"){
-		tooltipText = TMW.L["RESIZE_TOOLTIP"],
+		tooltipText = L["RESIZE_TOOLTIP"],
 		UPD_INTV = 1,
-		tooltipTitle = TMW.L["RESIZE"],
+		tooltipTitle = L["RESIZE"],
 		
 		OnEnable = function(self)
-			self.resizeButton:Show()
+			self:Show()
+			self.resizeButton:HookScript("OnShow", function(self)
+				self:SetFrameLevel(self:GetParent():GetFrameLevel() + 5)
+			end)
+			TMW:TT(self.resizeButton, self.tooltipTitle, self.tooltipText, 1, 1)
 		end,
 		
 		OnDisable = function(self)
-			self.resizeButton:Hide()
+			self:Hide()
 		end,	
 		
 		SizeUpdate = function(resizeButton)
@@ -1862,7 +1930,7 @@ function IE:OnInitialize()
 	}
 
 	self.resizer = TMW.Classes.IconEditor_Resizer_ScaleX_SizeY:New(self)
-	self.resizer:Show()
+	self.resizer:OnEnable()
 	self.resizer.resizeButton:SetScale(2)
 	
 	TMW:Fire("TMW_OPTIONS_LOADED")
@@ -1941,6 +2009,7 @@ function IE:RegisterTab(tab, attachedFrame)
 	else
 		tab:SetPoint("LEFT", IE.Tabs[id - 1], "RIGHT", IE.CONST.TAB_OFFS_X, 0)
 	end
+	
 	IE.Tabs[id] = tab
 	tab:SetID(id)
 	tab.attachedFrame = attachedFrame
@@ -1990,7 +2059,8 @@ function IE:PositionPanels()
 			frame = IE.AllDisplayPanels[panelInfo.xmlTemplateName]
 			
 			if not frame then
-				frame = CreateFrame("Frame", panelInfo.xmlTemplateName, parent, panelInfo.xmlTemplateName)
+				local _
+				_, frame = TMW.safecall(CreateFrame, "Frame", panelInfo.xmlTemplateName, parent, panelInfo.xmlTemplateName)
 				--frame:SetScale(0.9)
 				IE.AllDisplayPanels[panelInfo.xmlTemplateName] = frame
 			end
@@ -2005,23 +2075,23 @@ function IE:PositionPanels()
 			end
 		end
 		
-		local R, G, B
-		
-		if type(parent[#parent]) == "table" then
-			frame:SetPoint("TOP", parent[#parent], "BOTTOM", 0, -11)
-		else
-			frame:SetPoint("TOP", 0, -10)
-		end
-		parent[#parent + 1] = frame
-		
-		local hue = 1/1.5
-		
-		frame.Background:SetTexture(hue, hue, hue)
-		frame.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
-		
-		frame:Show()
-		
-		TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
+		if frame then
+			if type(parent[#parent]) == "table" then
+				frame:SetPoint("TOP", parent[#parent], "BOTTOM", 0, -11)
+			else
+				frame:SetPoint("TOP", 0, -10)
+			end
+			parent[#parent + 1] = frame
+			
+			local hue = 1/1.5
+			
+			frame.Background:SetTexture(hue, hue, hue)
+			frame.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
+			
+			frame:Show()
+			
+			TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
+		end	
 	end	
 	
 	local IE_FL = IE:GetFrameLevel()
@@ -2316,7 +2386,7 @@ TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
 		get(self.data.OnClick, self, button) 
 	end,
 	OnCreate = function(self)
-		self.text:SetText(self.data.label or self.data.title)
+		self.text:SetText(get(self.data.label or self.data.title))
 		self:SetMotionScriptsWhileDisabled(true)
 	end,
 	
@@ -2945,7 +3015,8 @@ function IE:Type_DropDown()
 	local groupID, iconID = CI.g, CI.i
 
 	for _, Type in ipairs(TMW.OrderedTypes) do -- order in the order in which they are loaded in the .toc file
-		if not Type.hidden then
+		local tempshow = CI.ics.Type == Type.type and Type.hidden
+		if tempshow or not Type.hidden then
 			if Type.spacebefore then
 				TMW.AddDropdownSpacer()
 			end
@@ -2961,6 +3032,8 @@ function IE:Type_DropDown()
 			info.checked = (info.value == TMW.db.profile.Groups[groupID].Icons[iconID].Type)
 			info.func = IE.Type_Dropdown_OnClick
 			info.arg1 = Type
+			info.disabled = tempshow
+			info.tooltipWhileDisabled = true
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 			if Type.spaceafter then
@@ -2983,14 +3056,15 @@ end
 
 
 ---------- Tooltips ----------
-local cachednames = {}
+--local cachednames = {}
 function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
 	local text = TMW:CleanString(Name)
 	
 	local SoI = CI.ics.Type == "item" and "item" or "spell"
 	
-	if cachednames[CI.ics.Type .. SoI .. text] then return cachednames[CI.ics.Type .. SoI .. text] end
+	-- Note 11/12/12 (WoW 5.0.4) - caching causes incorrect results with "replacement spells" after switching specs like the corruption/immolate pair 
+	--if cachednames[CI.ics.Type .. SoI .. text] then return cachednames[CI.ics.Type .. SoI .. text] end
 
 	local tbl
 	local GetSpellInfo = GetSpellInfo
@@ -3047,7 +3121,7 @@ function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 	end
 	wipe(tiptemp)
 	str = strtrim(str, "\r\n ;")
-	cachednames[CI.ics.Type .. SoI .. text] = str
+	--cachednames[CI.ics.Type .. SoI .. text] = str
 	return str
 end
 
@@ -3867,11 +3941,11 @@ function EVENTS:ChooseEvent(id)
 	for i, frame in ipairs(self.EventList) do
 		frame.selected = nil
 		frame:UnlockHighlight()
-		frame:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+		frame:GetHighlightTexture():SetAlpha(0.1)
 	end
 	eventFrame.selected = 1
 	eventFrame:LockHighlight()
-	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	eventFrame:GetHighlightTexture():SetAlpha(0.2)
 
 	IE.Events.ScrollFrame.adjustmentQueued = true
 	

@@ -1,3 +1,12 @@
+local _G = _G
+local select = _G.select
+local pairs = _G.pairs
+local ipairs = _G.ipairs
+local string = _G.string
+local type = _G.type
+local error = _G.error
+local table = _G.table
+
 
 function ArkInventory.CategoryRenumber( cat_old, cat_new )
 	
@@ -510,16 +519,21 @@ function ArkInventory.ConvertOldOptions( )
 		
 		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_CHAR"], UnitName( "player" ), upgrade_version ) )
 		
-		if ArkInventory.db.char.option.ldb.currency and ArkInventory.db.char.option.ldb.currency.tracked then
-			for k, v in pairs( ArkInventory.db.char.option.ldb.currency.tracked ) do
-				if v then
-					ArkInventory.db.char.option.ldb.tracking.currency.tracked[k] = v
+		if ArkInventory.db.char.option.ldb then
+		
+			if ArkInventory.db.char.option.ldb.currency and ArkInventory.db.char.option.ldb.currency.tracked then
+				for k, v in pairs( ArkInventory.db.char.option.ldb.currency.tracked ) do
+					if v then
+						ArkInventory.db.char.option.ldb.tracking.currency.tracked[k] = v
+					end
 				end
 			end
-		end
-		ArkInventory.db.char.option.ldb.currency = nil
+			
+			ArkInventory.db.char.option.ldb.currency = nil
 		
-		ArkInventory.db.char.option.ldb.ammo = nil
+			ArkInventory.db.char.option.ldb.ammo = nil
+			
+		end
 		
 		
 		ArkInventory.db.char.option.version = upgrade_version
@@ -545,16 +559,20 @@ function ArkInventory.ConvertOldOptions( )
 		
 		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_CHAR"], UnitName( "player" ), upgrade_version ) )
 		
-		if ArkInventory.db.char.option.ldb.mounts.ground.track then
-			ArkInventory.db.char.option.ldb.mounts.ground.track = nil
-		end
+		if ArkInventory.db.char.option.ldb and ArkInventory.db.char.option.ldb.mounts then
+			
+			if ArkInventory.db.char.option.ldb.mounts.ground and ArkInventory.db.char.option.ldb.mounts.ground.track then
+				ArkInventory.db.char.option.ldb.mounts.ground.track = nil
+			end
 		
-		if ArkInventory.db.char.option.ldb.mounts.flying.track then
-			ArkInventory.db.char.option.ldb.mounts.flying.track = nil
-		end
-		
-		if ArkInventory.db.char.option.ldb.mounts.water.track then
-			ArkInventory.db.char.option.ldb.mounts.water.track = nil
+			if ArkInventory.db.char.option.ldb.mounts.flying and ArkInventory.db.char.option.ldb.mounts.flying.track then
+				ArkInventory.db.char.option.ldb.mounts.flying.track = nil
+			end
+			
+			if ArkInventory.db.char.option.ldb.mounts.water and ArkInventory.db.char.option.ldb.mounts.water.track then
+				ArkInventory.db.char.option.ldb.mounts.water.track = nil
+			end
+			
 		end
 		
 		
@@ -699,17 +717,80 @@ function ArkInventory.ConvertOldOptions( )
 	upgrade_version = 30309
 	if ArkInventory.db.global.option.version < upgrade_version then
 		
-		ArkInventory.EraseSavedData( nil, nil, false )
+		
 		
 		ArkInventory.db.global.option.version = upgrade_version
 		
 	end
 	
 	
+	upgrade_version = 30311
+	if ArkInventory.db.char.option.version < upgrade_version then
+		
+		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_CHAR"], UnitName( "player" ), upgrade_version ) )
+		
+		-- erase any previously selected pets
+		for k in pairs( ArkInventory.db.char.option.ldb.pets.selected ) do
+			ArkInventory.db.char.option.ldb.pets.selected[k] = nil
+		end
+		
+		for k in pairs( ArkInventory.db.char.option.ldb.tracking.currency.tracked ) do
+			ArkInventory.db.char.option.ldb.tracking.currency.tracked[k] = false
+		end
+		
+		ArkInventory.db.char.option.version = upgrade_version
+		
+	end
+	
+	upgrade_version = 30313
+	if ArkInventory.db.realm.player.version < upgrade_version then
+		
+		ArkInventory.EraseSavedData( )
+		
+		ArkInventory.db.realm.player.version = upgrade_version
+		
+	end
+	
+	upgrade_version = 30316
+	if ArkInventory.db.realm.player.version < upgrade_version then
+		
+		ArkInventory.EraseSavedData( nil, ArkInventory.Const.Location.Pet, true )
+		ArkInventory.EraseSavedData( nil, ArkInventory.Const.Location.Mount, true )
+		
+		ArkInventory.db.realm.player.version = upgrade_version
+		
+	end
+	
+	if ArkInventory.db.char.option.version < upgrade_version then
+		
+		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_CHAR"], UnitName( "player" ), upgrade_version ) )
+		
+		if ArkInventory.db.char and ArkInventory.db.char.option and ArkInventory.db.char.option.ldb and ArkInventory.db.char.option.ldb.mounts then
+			
+			if ArkInventory.db.char.option.ldb.mounts.ground then
+				ArkInventory.db.char.option.ldb.mounts.l = ArkInventory.db.char.option.ldb.mounts.ground
+				ArkInventory.db.char.option.ldb.mounts.ground = nil
+			end
+			
+			if ArkInventory.db.char.option.ldb.mounts.flying then
+				ArkInventory.db.char.option.ldb.mounts.a = ArkInventory.db.char.option.ldb.mounts.flying
+				ArkInventory.db.char.option.ldb.mounts.flying = nil
+			end
+			
+			if ArkInventory.db.char.option.ldb.mounts.water then
+				ArkInventory.db.char.option.ldb.mounts.u = ArkInventory.db.char.option.ldb.mounts.water
+				ArkInventory.db.char.option.ldb.mounts.water = nil
+			end
+			
+		end
+		
+		ArkInventory.db.char.option.version = upgrade_version
+		
+	end
 	
 	
 	
-
+	
 	
 	
 	ArkInventory.db.profile.option.category["0:0"] = nil

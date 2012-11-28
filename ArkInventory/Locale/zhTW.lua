@@ -35,7 +35,7 @@ if not L then return end
 	
 	
 --	location names
-	L["LOCATION_ALL"] = "全部"
+--	L["LOCATION_ACCOUNT"] = ""
 	L["LOCATION_BANK"] = "銀行"
 	L["LOCATION_WEARING"] = "裝備"
 	
@@ -71,8 +71,6 @@ if not L then return end
 	
 --	system category descriptions
 	L["CATEGORY_SYSTEM_CORE_MATS"] = "原始材料"
-	L["CATEGORY_SYSTEM_EQUIPMENT"] = "裝備 (未綁定)"
-	L["CATEGORY_SYSTEM_EQUIPMENT_SOULBOUND"] = "裝備 (已綁定)"
 	
 	
 --	consumable category descriptions
@@ -141,8 +139,10 @@ if not L then return end
 	L["MENU_ITEM_DEBUG_BAG"] = "背包"
 	L["MENU_ITEM_DEBUG_SLOT"] = "空格"
 	L["MENU_ITEM_DEBUG_BAG_TYPE"] = "背包類型"
+--	L["MENU_ITEM_DEBUG_PET_ID"] = ""
+--	L["MENU_ITEM_DEBUG_PET_SPECIES"] = ""
 	L["MENU_ITEM_DEBUG_AI_ID_SHORT"] = "簡短ID"
-	L["MENU_ITEM_DEBUG_AI_ID_CACHE"] = "快取ID"
+	L["MENU_ITEM_DEBUG_CACHE"] = "快取ID"
 --	L["MENU_ITEM_DEBUG_AI_ID_RULE"] = ""
 	L["MENU_ITEM_DEBUG_AI_ID_CATEGORY"] = "AI類別ID"
 	L["MENU_ITEM_DEBUG_LVL_ITEM"] = "物品等級 (Stat)"
@@ -160,7 +160,6 @@ if not L then return end
 	
 --	bar menu
 	L["MENU_BAR_TITLE"] = "分組 %1$s 選項"
-	L["MENU_BAR_CATEGORY"] = "類別"
 	L["MENU_BAR_CATEGORY_TEXT"] = "指定 %1$s 到此分組"
 	L["MENU_BAR_CATEGORY_CURRENT"] = "目前使用"
 	L["MENU_BAR_CATEGORY_ASSIGN"] = "可使用類別"
@@ -222,6 +221,10 @@ if not L then return end
 --	L["CONFIG_SYSTEM_TOOLTIP_FACTION_ONLY"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_FACTION_ONLY_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_VAULT_TEXT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_SOURCE_TEXT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_DESCRIPTION_TEXT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_CUSTOM_ENABLE_TEXT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_MOUSEOVER_ENABLE_TEXT"] = ""
 	
 	L["CONFIG_SYSTEM_BUGFIX"] = "除錯/規避錯誤"
 	L["CONFIG_SYSTEM_BUGFIX_TEXT"] = "切換除錯或規避錯誤的程式碼"
@@ -246,6 +249,8 @@ if not L then return end
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_INTERIM_TEXT"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_FINAL"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_FINAL_TEXT"] = ""
+--	L["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT"] = ""
+--	L["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT_TEXT"] = ""
 	
 	
 --	configuration options > auto
@@ -429,8 +434,6 @@ if not L then return end
 	
 	
 --	configuration options > categories
-	L["CONFIG_CATEGORY"] = "類別"
-	
 	L["CONFIG_CATEGORY_CUSTOM"] = "自訂類別"
 --	L["CONFIG_CATEGORY_DELETED"] = ""
 	
@@ -470,7 +473,6 @@ if not L then return end
 	L["RULE_FAILED_ARGUMENT_IS_NIL"] = "%1$s( ... ), 參數 %2$i 為零"
 	L["RULE_FAILED_ARGUMENT_IS_INVALID"] = "%1$s( ... ), 參數 %2$i 不是 %3$s"
 --	L["RULE_FAILED_ARGUMENT_NONE_SPECIFIED"] = ""
---	L["RULE_FAILED_ADDON_NOT_LOADED"] = ""
 	
 	
 --	new item indicators
@@ -505,18 +507,25 @@ if not L then return end
 	
 	
 --	misc chat stuff
-	L["UPGRADE_PROFILE"] = "升級設定檔「%1$s」到%2$.4f"
-	L["UPGRADE_GLOBAL"] = "升級全域資料%1$s至v%2$.4f"
-	L["UPGRADE_CHAR"] = "升級角色資料%1$s至v%2$.4f"
+	L["UPGRADE_PROFILE"] = "升級設定檔「%1$s」到%2$df"
+	L["UPGRADE_GLOBAL"] = "升級全域資料%1$s至v%2$df"
+	L["UPGRADE_CHAR"] = "升級角色資料%1$s至v%2$d"
 	
 	L["MISC_ALERT"] = "警告！"
 	L["MISC_ALERT_FRAMELEVEL_1"] = "除錯完成"
 	L["MISC_ALERT_FRAMELEVEL_2"] = "%1$s視窗的框架層級是%2$s，已經被設為%3$s以確保它能正常運作。除錯儀式會吸引雷格大神，抱歉。"
 	
+--	L["BATTLEPET_OPPONENT_IMMUNE"] = ""
+--	L["BATTLEPET_OPPONENT_KNOWN_MAX"] = ""
+--	L["BATTLEPET_OPPONENT_KNOWN"] = ""
+--	L["BATTLEPET_OPPONENT_UNKNOWN"] = ""
+--	L["BATTLEPET_OPPONENT_UPGRADE"] = ""
+	
 	
 --	item count tooltip
 	L["TOOLTIP_COUNT_ME"] = " > "
 --	L["TOOLTIP_VAULT_TABS"] = ""
+--	L["TOOLTIP_GOLD_AMOUNT"] = ""
 	
 	
 --	generic menu text
@@ -580,6 +589,7 @@ if not L then return end
 	L["CLICK_TO_DESELECT"] = "單擊取消選擇"
 --	L["CLICK_TO_IGNORE"] = ""
 	L["ORDER"] = "順序"
+--	L["MOUSEOVER"] = ""
 	
 	
 -- libdatabroker
@@ -593,7 +603,9 @@ if not L then return end
 	L["LDB_TRACKING_CURRENCY"] = "兌換通貨 / 徽章"
 	L["LDB_PETS_SUMMON"] = "召喚寵物"
 	L["LDB_MOUNTS_NOT_HERE"] = "不管你的坐騎在這裡是否可用"
---	L["LDB_MOUNTS_GROUND"] = ""
+--	L["LDB_MOUNTS_TYPE_L"] = ""
+--	L["LDB_MOUNTS_TYPE_U"] = ""
+--	L["LDB_MOUNTS_TYPE_S"] = ""
 	L["LDB_MOUNTS_FLYING_DISMOUNT"] = "在飛行中卸載"
 	L["LDB_MOUNTS_FLYING_DISMOUNT_TEXT"] = "啟用 = 允許你在飛行中下坐騎。\n\n停用 = 你需要在地面上，才可以下坐騎"
 	L["LDB_MOUNTS_FLYING_DISMOUNT_WARNING"] = "您目前正在飛行，請選擇一個降落地點"
