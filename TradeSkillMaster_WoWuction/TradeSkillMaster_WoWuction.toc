@@ -1,11 +1,11 @@
-## Interface: 50001
+## Interface: 50100
 ## Title: |cff00ff00TradeSkillMaster_WoWuction|r
 ## Notes: Gets data from wowuction.com in game for use by other TSM modules.
 ## Author: Sapu94
-## Version: v1.2.5
+## Version: v1.2.6
 ## SavedVariables: TradeSkillMaster_WoWuctionDB
 ## Dependency: TradeSkillMaster
-## X-Curse-Packaged-Version: v1.2.5
+## X-Curse-Packaged-Version: v1.2.6
 ## X-Curse-Project-Name: TradeSkillMaster_WoWuction
 ## X-Curse-Project-ID: tradeskillmaster_wowuction
 ## X-Curse-Repository-ID: wow/tradeskillmaster_wowuction/mainline

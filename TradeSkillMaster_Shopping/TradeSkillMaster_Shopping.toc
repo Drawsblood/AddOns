@@ -1,11 +1,11 @@
-## Interface: 50001
+## Interface: 50100
 ## Title: |cff00ff00TradeSkillMaster_Shopping|r
 ## Notes: Provides an auction house search UI which allows easily viewing, buying, and posting items.
 ## Author: Sapu94
 ## Dependencies: TradeSkillMaster
-## Version: v1.3.11
+## Version: v1.3.12
 ## SavedVariables: TradeSkillMaster_ShoppingDB
-## X-Curse-Packaged-Version: v1.3.11
+## X-Curse-Packaged-Version: v1.3.12
 ## X-Curse-Project-Name: TradeSkillMaster_Shopping
 ## X-Curse-Project-ID: tradeskillmaster_shopping
 ## X-Curse-Repository-ID: wow/tradeskillmaster_shopping/mainline

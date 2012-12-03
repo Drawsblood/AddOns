@@ -1,0 +1,78 @@
+------------------------------------------------------------------------
+r574 | oscarucb | 2012-11-29 02:46:57 +0000 (Thu, 29 Nov 2012) | 1 line
+Changed paths:
+   A /tags/5.2.9 (from /trunk:573)
+
+Tagging as 5.2.9
+------------------------------------------------------------------------
+r573 | oscarucb | 2012-11-28 04:38:50 +0000 (Wed, 28 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/Buffs.lua
+
+remove Aspect of the Fox
+
+------------------------------------------------------------------------
+r571 | oscarucb | 2012-11-28 00:28:27 +0000 (Wed, 28 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/RaidBuffStatus.toc
+
+5.1 toc bump
+------------------------------------------------------------------------
+r569 | oscarucb | 2012-11-14 01:16:37 +0000 (Wed, 14 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/Core.lua
+
+ticket 368: fix auto-accept B.net friends
+
+------------------------------------------------------------------------
+r568 | oscarucb | 2012-11-13 22:49:01 +0000 (Tue, 13 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/Core.lua
+
+ticket 368: Fix Auto-Accept Invites from B.net 
+
+------------------------------------------------------------------------
+r567 | oscarucb | 2012-11-12 20:41:20 +0000 (Mon, 12 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/Buffs.lua
+
+ticket 367: normalize food quality for Epicurean racial and MoP stam bonus
+
+------------------------------------------------------------------------
+r566 | oscarucb | 2012-11-12 20:40:52 +0000 (Mon, 12 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/Config.lua
+
+add an /rbs config command
+
+------------------------------------------------------------------------
+r564 | oscarucb | 2012-11-12 06:41:43 +0000 (Mon, 12 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/Core.lua
+
+fix a lua error in last
+
+------------------------------------------------------------------------
+r563 | oscarucb | 2012-11-11 15:10:51 +0000 (Sun, 11 Nov 2012) | 3 lines
+Changed paths:
+   M /trunk/Config.lua
+   M /trunk/Core.lua
+
+add an option to disable announce for non-lead
+suppress feast expiration messages when the feast can't feed the whole raid
+
+------------------------------------------------------------------------
+r562 | oscarucb | 2012-11-10 02:53:25 +0000 (Sat, 10 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/Core.lua
+
+tickt 366: fix spam filter for feast announces to prevent duplicates
+
+------------------------------------------------------------------------
+r560 | oscarucb | 2012-10-31 13:46:55 +0000 (Wed, 31 Oct 2012) | 2 lines
+Changed paths:
+   M /trunk/Core.lua
+
+fix raid announces for soulwell and mage table
+
+------------------------------------------------------------------------

@@ -20,6 +20,7 @@ if not L then return end
 L["Accounting"] = true
 L["TradeSkillMaster_Accounting has detected that you have MySales installed. Would you like to transfer your data over to Accounting?"] = true
 L["Sold (Avg Price): %s (%s)"] = true
+L["Last Sold:"] = true
 L["Purchased (Avg Price): %s (%s)"] = true
 L["Purchased (Smart Avg): %s (%s)"] = true
 L["Starting to import MySales data. This requires building a large cache of item names which will take about 20-30 seconds. Please be patient."] = true

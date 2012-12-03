@@ -1,11 +1,11 @@
-## Interface: 50001
+## Interface: 50100
 ## Title: Shadowed Unit Frames
-## Notes: As with every other SUF note, this isn't telling you something useful. You should probably not be reading it still.
+## Notes: Now with 90% more shadows than the leading competitors
 ## Author: Shadowed
-## Version: v3.7.1
+## Version: v3.7.3
 ## SavedVariables: ShadowedUFDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, Clique
-## X-Curse-Packaged-Version: v3.7.1
+## X-Curse-Packaged-Version: v3.7.3
 ## X-Curse-Project-Name: Shadowed Unit Frames
 ## X-Curse-Project-ID: shadowed-unit-frames
 ## X-Curse-Repository-ID: wow/shadowed-unit-frames/mainline

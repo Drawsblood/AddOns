@@ -1,0 +1,8 @@
+2012-11-27  sylvanaar  <sylvanaar@mindspring.com>
+
+[c997b2d8ee38] [3.5.3]
+* modules/ChannelSticky.lua:
+
+smartgroup chat commmand conflicts with group loot command. just removing smart group.
+
+

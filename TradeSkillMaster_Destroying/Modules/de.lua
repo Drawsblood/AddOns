@@ -88,10 +88,12 @@ function de:getSafeTable()
                     {
                         cols = {
                                 {
-                                    value = function(itemString, quality ) 
+                                    value = function(itemString) 
                                         if itemString then 
                                             local _,_,quality = GetItemInfo(itemString)
-                                            return "|cff"..qualityColors[quality]..GetItemInfo(itemString).."|r" 
+											if qualityColors[quality] and GetItemInfo(itemString) then
+												return "|cff"..qualityColors[quality]..GetItemInfo(itemString).."|r" 
+											end
                                         end 
                                     end,
                                     args = {itemString, quality},

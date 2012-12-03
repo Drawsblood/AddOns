@@ -106,7 +106,11 @@ bagEvent:SetScript("OnShow",function(self)
         self.timeout = TSM.db.global.DefaultTimeOut
     else
         self:RegisterEvent("BAG_UPDATE")
-        self.timeout = .2
+		if m.srcString == "mail" then
+			self.timeout = TSM.db.global.DefaultTimeOut
+		else
+			self.timeout = .2
+		end
     end
     self.timeLeft = self.timeout     
 end)
@@ -149,7 +153,11 @@ timeout:SetScript("OnShow",function(self)
         self.timeout = 2
     else
         self:RegisterEvent("BAG_UPDATE")
-        self.timeout = .2
+		if m.srcString == "mail" then
+			self.timeout = TSM.db.global.DefaultTimeOut
+		else
+			self.timeout = .2
+		end
     end
     self.timeLeft = self.timeout     
 end)
@@ -189,7 +197,7 @@ end
 function move:moveStuff(grp,src,dest)
         
     if not move:areBanksVisible() then return end
-    
+
     m.grp = grp
     m.src = src
     m.dest = dest
@@ -260,15 +268,15 @@ function move:getGroupTable(grpName,src,isGuildBank)
             if data then
                 return TSM.data:unIndexTableWarehousing(data),TSM.data:ScanSrc(src)
             end
-        elseif string.lower(module) == "auctioning" then
+        elseif string.lower(module) == "auctioning groups" then
             local data = TSMAPI:GetData("auctioningGroups")
             if data[grp] then 
                 return TSM.data:unIndexTableAuctioning2(src,data[grp]),TSM.data:ScanSrc(src)
             end
-        elseif string.lower(module) == "categories" then
+        elseif string.lower(module) == "auctioning categories" then
             local data = TSMAPI:GetData("auctioningCategories")
-            if data[grp] then 
-                return --not done yet
+            if data[grp] then
+                return TSM.data:unIndexTableAuctioning3(src,data[grp]),TSM.data:ScanSrc(src)
             end
         elseif string.lower(module) == "crafting" then
             local data = TSMAPI:GetData("shopping", grp)
@@ -348,8 +356,13 @@ function move:areBanksVisible()
         return true
     elseif (LUIBank and LUIBank:IsVisible())then
         return true
-    elseif (ElvUINormBag1_1 and ElvUINormBag1_1:IsVisible())then
-        return true
+	elseif (TukuiBank and TukuiBank:IsShown()) then
+		return true
+	elseif (ElvUI_BankContainerFrame and ElvUI_BankContainerFrame:IsVisible()) then
+		return true
+	elseif (AdiBagsContainer1 and AdiBagsContainer1.isBank and AdiBagsContainer1:IsVisible()) or
+			(AdiBagsContainer2 and AdiBagsContainer2.isBank and AdiBagsContainer2:IsVisible()) then
+		return true
     end
     bagEvent:Hide()
     TSM:Print("Canceled")

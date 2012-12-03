@@ -29,29 +29,34 @@ L["Add item to shopping list"] = "添加项目到购买列表" -- Needs review
 L["Add Item to Shopping List"] = "添加项目到购买列表" -- Needs review
 L["Additional Options:"] = "其他选项：" -- Needs review
 L["Add Search Term"] = "添加搜索词" -- Needs review
+-- L["A disenchant search will look for auctions which can be purchased and disenchanted for a profit."] = ""
 L["Are you sure you want to delete the selected profile?"] = "确认想要删除选中配置吗？" -- Needs review
 -- L["Auction Buyout:"] = ""
 -- L["Auction Buyout (Stack Price):"] = ""
 L["Auction Duration"] = "拍卖时长" -- Needs review
 -- L["Auction Item Price"] = ""
 -- L["Auction not found. Restarting search."] = ""
+-- L["Auction not found. Skipped."] = ""
 L["Auctions"] = "拍卖" -- Needs review
 -- L["Auction Stack Price"] = ""
 -- L["Automatically Expand Single Result"] = ""
+-- L["A vendor search will look for auctions which can be purchased and then sold to a vendor for a profit."] = ""
 L["Below are some general options for the Shopping module."] = "下面是购买模块的一些常规选项。" -- Needs review
+-- L["Below are various special searches that TSM_Shopping can perform. The scans will use data from your most recent scan (or import) if the data is less than an hour old. Data can come from TSM_AuctionDB or TSM_WoWuction. Otherwise, they will do a scan of the entire AH which may take several minutes."] = ""
 L["Bid Percent"] = "竞价百分百" -- Needs review
 L["Cancel"] = "取消" -- Needs review
 L["Canceling"] = "取消中" -- Needs review
 -- L["Cannot change current item while scanning."] = ""
 -- L["Cannot create auction with 0 buyout."] = ""
--- L["|cff99ffffRecent Searches"] = ""
 --[==[ L[ [=[|cffffbb11No dealfinding or shopping lists found. You can create shopping/dealfinding lists through the TSM_Shopping options.
 
 TIP: You can search for multiple items at a time by separating them with a semicolon. For example: "volatile life; volatile earth; volatile water"|r]=] ] = "" ]==]
---[==[ L[ [=[|cffffff00Inline Filters:|r You can easily add common search filters to your search such as rarity, level, and item type. For example '|cff99ffffarmor/leather/epic/85/i350/i377|r' will search for all leather armor of epic quality that requires level 85 and has an ilvl between 350 and 377 inclusive. Also, '|cff99ffffinferno ruby/exact|r' will display only raw inferno rubys (none of the cuts).
+--[==[ L[ [=[|cffffff00Inline Filters:|r You can easily add common search filters to your search such as rarity, level, and item type. For example '%sarmor/leather/epic/85/i350/i377|r' will search for all leather armor of epic quality that requires level 85 and has an ilvl between 350 and 377 inclusive. Also, '%sinferno ruby/exact|r' will display only raw inferno rubys (none of the cuts).
 ]=] ] = "" ]==]
---[==[ L[ [=[|cffffff00Multiple Search Terms:|r You can search for multiple things at once by simply separated them with a ';'. For example '|cff99ffffelementium ore; obsidium ore|r' will search for both elementium and obsidium ore.
+--[==[ L[ [=[|cffffff00Multiple Search Terms:|r You can search for multiple things at once by simply separated them with a ';'. For example '%selementium ore; obsidium ore|r' will search for both elementium and obsidium ore.
 ]=] ] = "" ]==]
+--[==[ L[ [=[Click on an item to search for it.
+Shift-click to post it at the listed item value.]=] ] = "" ]==]
 -- L["Click on this icon to enter disenchanting mode."] = ""
 L["Click on this icon to enter milling mode."] = "点击此按钮进入研磨模式" -- Needs review
 -- L["Click on this icon to enter prospecting mode."] = ""
@@ -78,7 +83,11 @@ L["Delete List"] = "删除列表" -- Needs review
 -- L["Destroying Results Default Sort (requires reload)"] = ""
 -- L["Determines what percent of the buyout price Shopping will use for the starting bid when posting auctions."] = ""
 L["Did not add search term \"%s\". Already in this list."] = "没添加搜索词“%s”，已在此列表中。" -- Needs review
+-- L["Disenchantable Armor"] = ""
+-- L["Disenchantable Weapons"] = ""
 L["Disenchanting"] = "分解" -- Needs review
+-- L["Disenchant Search"] = ""
+-- L["% Disenchant Value"] = ""
 -- L["Enter the search term you would list to add below. You can add multiple search terms at once by separating them with semi-colons. For example, \"elementium ore; volatile\""] = ""
 --[==[ L[ [=[Enter what you want to search for in this box. You can also use the following options for more complicated searches.
 ]=] ] = "" ]==]
@@ -97,12 +106,13 @@ L["General Options"] = "常规选项" -- Needs review
 -- L["Here, you can remove items from this list."] = ""
 -- L["Here, you can remove search terms from this list."] = ""
 -- L["Here, you can set the maximum price you want to pay for each item in this list."] = ""
--- L["Hide Results Above Dealfinding Price"] = ""
--- L["Hide Saved Searches"] = ""
+-- L["Hide Items in Auctioning Groups"] = ""
 -- L["How long auctions should be posted for."] = ""
 -- L["How much to undercut other auctions by, format is in \"#g#s#c\", \"50g30s\" means 50 gold, 30 silver."] = ""
+-- L["If checked, items which are in Auctioning groups will not be shown in the quick posting window."] = ""
 -- L["If checked, only 5/10/15/20 stacks of ore and herbs will be shown."] = ""
 -- L["If checked, only 5/10/15/20 stacks of ore and herbs will be shown. Note that this setting is the same as the one that shows up when you run a Destroying search."] = ""
+-- L["If checked, the quick posting window will automatically open by default."] = ""
 -- L["If checked, the results of a dealfinding scan will include items above the maximum price. This can be useful if you sometimes want to buy items that are just above your max price."] = ""
 -- L["If there are none of an item on the auction house, Shopping will use this percentage of the fallback price source for the default post price."] = ""
 -- L["If there are none of an item on the auction house, Shopping will use this price source for the default post price."] = ""
@@ -131,6 +141,7 @@ L["Invalid money format entered, should be \"#g#s#c\", \"25g4s50c\" is 25 gold, 
 -- L["Items"] = ""
 -- L["Item Settings"] = ""
 L["Item to Add"] = "可添加项目" -- Needs review
+-- L["Last Scan"] = ""
 -- L["Left-Click: |cffffffffRun this recent search.|r"] = ""
 -- L["Left-Click: |cffffffffRun this shopping/dealfinding list.|r"] = ""
 -- L["List Data"] = ""
@@ -151,12 +162,18 @@ L["New"] = "新建" -- Needs review
 -- L["New Dealfinding List"] = ""
 L["New List Name"] = "新建列表名称" -- Needs review
 -- L["No items found that can be turned into:"] = ""
+-- L["Nothing below dealfinding price from last scan."] = ""
+-- L["Nothing below vendor price from last scan."] = ""
 -- L["Nothing to search for."] = ""
+-- L["Nothing worth disechanting from last scan."] = ""
 -- L["No valid search terms. Aborting search."] = ""
 -- L["Only even stacks (5/10/15/20) of this item will be purchased. This is useful for buying herbs / ore to mill / prospect."] = ""
+-- L["Open Quick Auctions Window by Default"] = ""
 -- L["Opens a new window that allows you to import a dealfinding list."] = ""
 -- L["Opens a new window that allows you to import a shopping list."] = ""
 L["Options"] = "选项" -- Needs review
+-- L["Over an hour ago"] = ""
+-- L["Performing a full scan due to no recent scan data being available. This may take several minutes."] = ""
 L["Post"] = "发布" -- Needs review
 L["Posting"] = "上架" -- Needs review
 L["Posting Options"] = "上架选项" -- Needs review
@@ -174,6 +191,11 @@ L["Profiles"] = "配置" -- Needs review
 -- L["Prospecting"] = ""
 -- L["Purchasing"] = ""
 -- L["Quantity Needed:"] = ""
+-- L["Quick Posting"] = ""
+-- L["Quick Posting Options"] = ""
+-- L["Quick Post Max Stack Size"] = ""
+-- L["Quick Post Price Source"] = ""
+-- L["Recent Searches"] = ""
 -- L["Remove"] = ""
 -- L["Remove Item"] = ""
 -- L["Remove Search Term"] = ""
@@ -182,13 +204,15 @@ L["Reset Profile"] = "重置配置" -- Needs review
 L["Reset the current profile back to its default values, in case your configuration is broken, or you simply want to start over."] = "重置当前配置到默认值，如果你的设置损坏或想重新设置时可用。" -- Needs review
 -- L["Right-Click: |cffffffffCreate shopping list from this recent search.|r"] = ""
 -- L["Right-Click: |cffffffffOpen the options for this shopping/dealfinding list|r"] = ""
+-- L["Saved Searches"] = ""
 -- L["Scanning"] = ""
--- L["Scanning page %s of %s for filter: %s"] = ""
 -- L["Scanning page %s of %s for filter %s of %s..."] = ""
+-- L["Scanning page %s of %s for filter %s of %s: %s"] = ""
 -- L["Searching for item..."] = ""
--- L["Search Mode: |cff99ffffDestroying Search|r"] = ""
--- L["Search Mode: |cff99ffffRegular Search|r"] = ""
+-- L["Search Mode: %sDestroying Search|r"] = ""
+-- L["Search Mode: %sRegular Search|r"] = ""
 L["Search Results Default Sort (requires reload)"] = "搜索结果默认排序(需要重载)" -- Needs review
+-- L["Search Results Market Value Price Source"] = ""
 -- L["Secondary Filter"] = ""
 -- L["Select all the professions for which you would like to buy materials."] = ""
 -- L["Select Mode"] = ""
@@ -205,22 +229,30 @@ L["Shop for materials required by the Crafting queue."] = "购买制造队列缺
 L["Shopping List Name"] = "购物清单名称" -- Needs review
 -- L["Shopping Lists"] = ""
 L["Shopping Options"] = "购买选项" -- Needs review
+-- L["Shopping - Quick Posting"] = ""
+-- L["Show/Hide the quick posting frame. This frame shows all the items in your bags and allows you to quickly post them."] = ""
 -- L["Show/Hide the saved searches frame. This frame shows all your recent searches as well as your shopping and dealfinding lists."] = ""
--- L["Showing summary of all |cff99ffff%s|r auctions for \"|cff99ffffDealfinding Search|r\""] = ""
--- L["Showing summary of all |cff99ffff%s|r auctions for list \"|cff99ffff%s|r\""] = ""
--- L["Showing summary of all |cff99ffff%s|r auctions that match filter \"|cff99ffff%s|r\""] = ""
--- L["Show Saved Searches"] = ""
+-- L["Show/Hide the special searches frame. This frame shows all the special searches such as vendor, disenchanting, resale, and more."] = ""
+-- L["Showing summary of all %s auctions for list \"%s\""] = ""
+-- L["Showing summary of all %s auctions for \"%sDealfinding Search|r\""] = ""
+-- L["Showing summary of all %s auctions that match filter \"%s\""] = ""
+-- L["Show Results Above Dealfinding Price"] = ""
 -- L["%s is already in a dealfinding list and has been removed from this list."] = ""
 -- L["%s item(s) will be removed (already in a dealfinding list)"] = ""
 L["Skipped the following search term because it's invalid."] = "已跳过一下不可用的扫描" -- Needs review
 -- L["Skipped the following search term because it's too long. Blizzard does not allow search terms over 63 characters."] = ""
+-- L["%s minute(s), %s second(s) ago with %s"] = ""
+-- L["Special Searches"] = ""
 -- L["Specifies the default sorting for results in the \"Destroying\" feature."] = ""
 L["Specifies the default sorting for results in the \"Search\" feature."] = "指定“搜索”功能中结果的默认排序方式" -- Needs review
+-- L["Specifies the market value price source for results in the \"Search\" feature."] = ""
+-- L["Specifies the price source listed in the quick post window. This is the price used when you shift-click on an item."] = ""
+-- L["%s removed from recent searches."] = ""
 -- L["Stack Info:"] = ""
 -- L["Stack Size"] = ""
 -- L["stacks of"] = ""
 -- L["Starts a dealfinding search which searches for all your dealfinding lists at once."] = ""
--- L["Summary of all |cff99ffff%s|r auctions that can be turned into:"] = ""
+-- L["Summary of all %s auctions that can be turned into:"] = ""
 -- L["Switch List Type"] = ""
 -- L["Switch Type"] = ""
 -- L["The data you are trying to import is invalid."] = ""
@@ -228,6 +260,7 @@ L["The item you entered was invalid. See the tooltip for the \"%s\" editbox for 
 -- L["The list you are trying to import is not a dealfinding list. Please use the shopping list import feature instead."] = ""
 -- L["The list you are trying to import is not a shopping list. Please use the dealfinding list import feature instead."] = ""
 -- L["The options below control the \"Post\" button that is shown at the bottom of the auction frame inside the \"Search\" feature."] = ""
+-- L["The options below control the \"Quick Posting\" window that is shown on the right of auction frame inside the \"Search\" feature. When you shift-click on an item within this window, it will be posted according to the settings below as well as the duration and bid percent settings set in the \"Post Options\" section below."] = ""
 L["This is the maximum price you want to pay per item (NOT per stack) for this item. You will be prompted to buy all items on the AH that are below this price."] = "这是你愿意为此物品支付的最高单价(非每叠),当交易行物品价格低于此价格时你会收到购买提示." -- Needs review
 -- L["This item is already in the \"%s\" Dealfinding List."] = ""
 -- L["This item is already in this group."] = ""
@@ -235,6 +268,7 @@ L["This is the maximum price you want to pay per item (NOT per stack) for this i
 --[==[ L[ [=[Total value of your auctions: %s
 Incoming gold: %s]=] ] = "" ]==]
 -- L["Transforming"] = ""
+-- L["Unknown"] = ""
 -- L["Unknown Filter"] = ""
 -- L["Use the box below to create a new dealfinding list. A dealfinding list is a list of items along with a max price you'd like to pay for each item. This is the equivalent of a \"snatch list\"."] = ""
 -- L["Use the box below to create a new shopping list. A shopping list is a list of items and search terms you frequently search for."] = ""
@@ -245,6 +279,10 @@ NOTE: Doing so will remove all item settings from the list! This cannot be undon
 
 NOTE: Doing so will remove all search terms from this list as well as any items that are already in a dealfinding list! This cannot be undone.]=] ] = "" ]==]
 -- L["Use this checkbox to temporarily modify the post duration. You can change the default value in the Shopping options."] = ""
+-- L["% Vendor Price"] = ""
+-- L["Vendor Search"] = ""
+-- L["WARNING: No recent scan data found. Scans may take several minutes."] = ""
+-- L["When you shift-click an item in the quick post window, a single auction will be created in as large a stack as possible, up to this stack size."] = ""
 -- L["Which list to add this item to."] = ""
 -- L["You can change the active database profile, so you can have different settings for every character."] = ""
 -- L["You can either create a new profile by entering a name in the editbox, or choose one of the already exisiting profiles."] = ""

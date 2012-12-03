@@ -2,31 +2,31 @@ local L = LibStub("AceLocale-3.0"):NewLocale("IceHUD", "frFR")
 if not L then return end
 
 L["1 combo point: yellow, 5 combo points: red"] = "1 point de combo: jaune, 5 points de combo: rouge"
-L["1 lacerate: yellow, 5 lacerates: red"] = "Une lacération: jaune, 5 lacération: rouge" -- Needs review
-L["1 maelstrom: yellow, 5 maelstroms: red"] = "1 maelström: jaune, 5 maelström: rouge" -- Needs review
+L["1 lacerate: yellow, 5 lacerates: red"] = "1 lacération : jaune, 5 lacérations : rouge"
+L["1 maelstrom: yellow, 5 maelstroms: red"] = "1 maelström : jaune, 5 maelströms : rouge"
 L["1 sunder: yellow, 5 sunders: red"] = "1 fracasser armure: jaune, 5 fracasser armure: rouge"
-L["Abbreviate estimated health"] = "Estimation raccourcie des points de vie" -- Needs review
-L["Abbreviate health"] = "Points de vie raccourcis" -- Needs review
+L["Abbreviate estimated health"] = "Estimation abrégée des points de vie" -- Needs review
+L["Abbreviate health"] = "Points de vie abrégés"
 L["A custom bar has been created and can be configured through Module Settings => MyCustomBar. It is highly recommended that you change the bar name of this module so that it's easier to identify."] = "A custom bar has been created and can be configured through Module Settings => MyCustomBar. It is highly recommended that you change the bar name of this module so that it's easier to identify." -- Requires localization
 L["A custom cooldown bar has been created and can be configured through Module Settings => MyCustomCD. It is highly recommended that you change the bar name of this module so that it's easier to identify."] = "A custom cooldown bar has been created and can be configured through Module Settings => MyCustomCD. It is highly recommended that you change the bar name of this module so that it's easier to identify." -- Requires localization
 L["A custom counter has been created and can be configured through Module Settings => MyCustomCounter. It is highly recommended that you change the bar name of this module so that it's easier to identify."] = "A custom counter has been created and can be configured through Module Settings => MyCustomCounter. It is highly recommended that you change the bar name of this module so that it's easier to identify." -- Requires localization
 L["A custom health bar has been created and can be configured through Module Settings => MyCustomHealth. It is highly recommended that you change the bar name of this module so that it's easier to identify."] = "A custom health bar has been created and can be configured through Module Settings => MyCustomHealth. It is highly recommended that you change the bar name of this module so that it's easier to identify." -- Requires localization
 L["A custom mana bar has been created and can be configured through Module Settings => MyCustomMana. It is highly recommended that you change the bar name of this module so that it's easier to identify."] = "A custom mana bar has been created and can be configured through Module Settings => MyCustomMana. It is highly recommended that you change the bar name of this module so that it's easier to identify." -- Requires localization
-L["Adjusts the size of the aura icon for this bar"] = "Ajuster la taille de l'icône de la barre" -- Needs review
-L["Adjust the horizontal position of the aura icon"] = "Ajuster le positionnement horizontale de l'icône " -- Needs review
-L["Adjust the vertical placement of this bar"] = "Ajuster le positionnement vertical de la barre" -- Needs review
-L["Adjust the vertical position of the aura icon"] = "Ajuster le positionnement vertical de l'icône" -- Needs review
+L["Adjusts the size of the aura icon for this bar"] = "Ajuster la taille de l'icône de l'aura pour cette barre"
+L["Adjust the horizontal position of the aura icon"] = "Ajuster le positionnement horizontale de l'icône de l'aura "
+L["Adjust the vertical placement of this bar"] = "Ajuster le positionnement vertical de cette barre"
+L["Adjust the vertical position of the aura icon"] = "Ajuster le positionnement vertical de l'icône de l'aura"
 L["Advanced Bar Settings"] = "Paramètres avancés des barres"
 L["Aggro Indicator alpha"] = "Transparence de l'indicateur de menace"
 L["Aggro indicator alpha (0 is disabled)"] = "Transparence de l'indicateur de menace (0 pour le désactiver)"
 L["Alert Party"] = "Alerte de groupe"
-L["Allow click casting"] = "Autorise de cliquer pour lancer un sort" -- Needs review
+L["Allow click casting"] = "Autorise de cliquer pour lancer un sort"
 L["Allow click-targeting"] = "Autorise de cliquer pour cibler"
 L["Allow click-targeting in combat"] = "Autorise de cliquer pour cibler en combat"
 L["Allow mouse interaction"] = "Allow mouse interaction" -- Requires localization
 L["Alpha in combat"] = "Transparence en combat"
 L["Alpha OOC and not full"] = "Transparence hors-combat et vide" -- Needs review
-L["Alpha OOC and Target"] = "Transparence hors-combat et cible" -- Needs review
+L["Alpha OOC and Target"] = "OOC excessif et ciblage" -- Needs review
 L["Alpha out of combat"] = "Transparence hors-combat"
 L["Also show numeric"] = "Also show numeric" -- Requires localization
 L["Always display bar"] = "Toujours afficher la barre"
@@ -55,11 +55,11 @@ L["Bar alpha Out Of Combat with target accuired or bar not full (Target takes pr
 L["Bar alpha Out Of Combat with target accuired (takes precedence over Not Full)"] = "Bar alpha Out Of Combat with target accuired (takes precedence over Not Full)" -- Requires localization
 L["Bar Background Blend Mode"] = "Bar Background Blend Mode" -- Requires localization
 L["Bar background visible"] = "Bar background visible" -- Requires localization
-L["Bar Blend Mode"] = "Leisten Füllmethode" -- Needs review
+L["Bar Blend Mode"] = "Mode de fusion de barre" -- Needs review
 L["Bar color"] = "Bar color" -- Requires localization
-L["Bar Font Bold"] = "Leisten Schriftart fett" -- Needs review
-L["Bar Font Size"] = "Leisten Schriftgröße" -- Needs review
-L["Bar Height"] = "Leisten Höhe" -- Needs review
+L["Bar Font Bold"] = "Barre des polices en gras" -- Needs review
+L["Bar Font Size"] = "Taille de la barre des polices" -- Needs review
+L["Bar Height"] = "Hauteur de barre" -- Needs review
 L["Bar horizontal adjust"] = "Bar horizontal adjust" -- Requires localization
 L["Bar name"] = "Bar name" -- Requires localization
 L["Bar Proportion"] = "Bar Proportion" -- Requires localization

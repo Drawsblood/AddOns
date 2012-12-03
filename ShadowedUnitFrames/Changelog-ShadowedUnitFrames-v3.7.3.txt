@@ -1,0 +1,14 @@
+tag v3.7.3
+15edb36f8added6fe8ef9c781c642015907d9c26
+Shadowed <shadowed.wow@gmail.com>
+2012-11-27 16:51:19 -0800
+
+Tagging as release 3.7.3
+
+
+--------------------
+
+Shadowed:
+	- Fixed a 5.1.0 compatibility check for Chi
+	- Typo
+	- Bump TOC to 50100

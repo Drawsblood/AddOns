@@ -181,7 +181,7 @@ function Scan:ScanCrafts()
 			if TSM.mode == "Enchanting" and TSM:IsEnchant(tsLink) then
 				dataTemp.mats[TSM.Enchanting.vellumID] = 1
 				local velName = GetItemInfo(TSM.Enchanting.vellumID) or (GetLocale() == "enUS" and "Enchanting Vellum")
-				matsTemp[TSM.Enchanting.vellumID] = {name=name, cost=5}
+				matsTemp[TSM.Enchanting.vellumID] = {name=velName, cost=5}
 			end
 			
 			local valid = false

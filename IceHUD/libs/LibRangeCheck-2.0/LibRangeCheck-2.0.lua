@@ -1,6 +1,6 @@
 --[[
 Name: LibRangeCheck-2.0
-Revision: $Revision: 124 $
+Revision: $Revision: 127 $
 Author(s): mitch0
 Website: http://www.wowace.com/projects/librangecheck-2-0/
 Description: A range checking library based on interact distances and spell ranges
@@ -41,7 +41,7 @@ License: Public Domain
 -- @class file
 -- @name LibRangeCheck-2.0
 local MAJOR_VERSION = "LibRangeCheck-2.0"
-local MINOR_VERSION = tonumber(("$Revision: 124 $"):match("%d+")) + 100000
+local MINOR_VERSION = tonumber(("$Revision: 127 $"):match("%d+")) + 100000
 
 local lib, oldminor = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
 if not lib then
@@ -294,7 +294,8 @@ local HarmItems = {
         28767, -- The Decapitator
     },
     [45] = {
-        32698, -- Wrangling Rope
+--        32698, -- Wrangling Rope
+        23836, -- Goblin Rocket Launcher
     },
     [60] = {
         32825, -- Soul Cannon

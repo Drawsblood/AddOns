@@ -3,8 +3,10 @@
 ]]
 
 ShadowUF = select(2, ...)
+ShadowUF.is510 = select(4, GetBuildInfo()) > 50001
+
 local L = ShadowUF.L
-ShadowUF.dbRevision = 28
+ShadowUF.dbRevision = 29
 ShadowUF.playerUnit = "player"
 ShadowUF.enabledUnits = {}
 ShadowUF.modules = {}
@@ -85,6 +87,19 @@ end
 
 function ShadowUF:CheckUpgrade()
 	local revision = self.db.profile.revision or self.dbRevision
+
+	if( revision <= 28 ) then
+		self.db.profile.units.target.indicators.questBoss = {enabled = true, anchorPoint = "BR", size = 22, x = 9, y = 24, anchorTo = "$parent"}
+		self.db.profile.units.focus.indicators.questBoss = {enabled = false, anchorPoint = "BR", size = 22, x = 7, y = 14, anchorTo = "$parent"}
+
+		for unit, config in pairs(self.db.profile.units) do
+			for key, module in pairs(ShadowUF.modules) do
+				if( config[key] and ( module.moduleHasBar or module.isComboPoints or config[key].isBar or config[key].order ) ) then
+					config[key].height = config[key].height or 0.40
+				end
+			end
+		end
+	end
 
 	if( revision <= 27 ) then
 		self.db.profile.healthColors.aggro = CopyTable(self.db.profile.healthColors.hostile)
@@ -365,6 +380,7 @@ function ShadowUF:LoadUnitDefaults()
 	self.defaults.profile.units.focus.enabled = true
 	self.defaults.profile.units.focus.fader = {enabled = false, combatAlpha = 1.0, inactiveAlpha = 0.60}
 	self.defaults.profile.units.focus.indicators.lfdRole = {enabled = false, size = 0, x = 0, y = 0}
+	self.defaults.profile.units.focus.indicators.questBoss = {enabled = true, size = 0, x = 0, y = 0}
 	-- FOCUSTARGET
 	self.defaults.profile.units.focustarget.enabled = true
 	self.defaults.profile.units.focustarget.fader = {enabled = false, combatAlpha = 1.0, inactiveAlpha = 0.60}
@@ -372,6 +388,7 @@ function ShadowUF:LoadUnitDefaults()
 	self.defaults.profile.units.target.enabled = true
 	self.defaults.profile.units.target.comboPoints = {enabled = true, isBar = true}
 	self.defaults.profile.units.target.indicators.lfdRole = {enabled = false, size = 0, x = 0, y = 0}
+	self.defaults.profile.units.target.indicators.questBoss = {enabled = true, size = 0, x = 0, y = 0}
 	-- TARGETTARGET/TARGETTARGETTARGET
 	self.defaults.profile.units.targettarget.enabled = true
 	self.defaults.profile.units.targettargettarget.enabled = true
@@ -597,11 +614,11 @@ function ShadowUF:HideBlizzardFrames()
 			end)
 			
 			hideRaid()
-			CompactRaidFrameContainer:SetScript("OnShow", hideRaid)
-			CompactRaidFrameManager:SetScript("OnShow", hideRaid)
+			CompactRaidFrameContainer:HookScript("OnShow", hideRaid)
+			CompactRaidFrameManager:HookScript("OnShow", hideRaid)
 
-		elseif( not ShadowUF.db.profile.hidden.raid ) then
-			CompactRaidFrameManager:SetFrameStrata("DIALOG")
+		-- elseif( not ShadowUF.db.profile.hidden.raid ) then
+		--	CompactRaidFrameManager:SetFrameStrata("DIALOG")
 		end
 	end
 

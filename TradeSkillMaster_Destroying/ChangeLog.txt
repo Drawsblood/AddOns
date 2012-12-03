@@ -1,3 +1,8 @@
+v1.2.7
+*Took care of a ticket
+*Updated the TOC 
+*Fixed a minor GUI bug
+
 v1.2.1
 *The safe table is back
 

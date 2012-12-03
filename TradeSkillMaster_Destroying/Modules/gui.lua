@@ -181,7 +181,7 @@ local function drawDE_UI (container)
 					colorGreen = 0,
 					colorBlue = 0,
                 },
-                Spacer,
+                -- Spacer,
                 {	--button
                     type = "Button",
                     text = L["Display the Destroyer"],

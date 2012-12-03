@@ -1,4 +1,4 @@
-## Interface: 50001
+## Interface: 50100
 ## Title: |cff00ff00TradeSkillMaster_Destroying|r
 ## Notes: Helps mill herbs and prospect ore at super speed! YAY!!
 ## Author: Geemoney
@@ -18,6 +18,10 @@
 ## X-Curse-Project-ID: tradeskillmaster_destroying
 ## X-Curse-Repository-ID: wow/tradeskillmaster_destroying/mainline
 ## X-Curse-Packaged-Version: v1.2.6
+## X-Curse-Project-Name: TradeSkillMaster_Destroying
+## X-Curse-Project-ID: tradeskillmaster_destroying
+## X-Curse-Repository-ID: wow/tradeskillmaster_destroying/mainline
+## X-Curse-Packaged-Version: v1.2.7
 ## X-Curse-Project-Name: TradeSkillMaster_Destroying
 ## X-Curse-Project-ID: tradeskillmaster_destroying
 ## X-Curse-Repository-ID: wow/tradeskillmaster_destroying/mainline

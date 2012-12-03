@@ -359,7 +359,7 @@ function Search:UpdateListsST(st)
 		local text = "|cff99ff99"..listName.."|r"
 		tinsert(lists, {listName=listName, text=text})
 	end
-	sort(lists, function(a, b) return a.listName < b.listName end)
+	sort(lists, function(a, b) return strlower(a.listName) < strlower(b.listName) end)
 	
 	
 	local rows = {}

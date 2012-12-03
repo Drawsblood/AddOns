@@ -17,66 +17,19 @@ local isExpanded = {
     crafting = false
 }
 
-local buttonBackdrop = {
-	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-	edgeSize = 12,
-	insets = {left = 0, right = 0, top = 0, bottom = 0},
-} 
-
---
---Stolen from TSMMainFrame
---
-local function ApplyButtonTextures(button)
-
-	local normalTex = button:CreateTexture()
-	normalTex:SetTexture("Interface\\Buttons\\UI-AttributeButton-Encourage-Hilight")
-	normalTex:SetPoint("TOPRIGHT", button, "TOPRIGHT", -5, -5)
-	normalTex:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 5, 5)
-	normalTex:SetTexCoord(0.041, 0.975, 0.129, 1.00)
-	button:SetNormalTexture(normalTex)
-	
-	local disabledTex = button:CreateTexture()
-	disabledTex:SetTexture("Interface\\Buttons\\UI-AttributeButton-Encourage-Hilight")
-	disabledTex:SetPoint("TOPRIGHT", button, "TOPRIGHT", -5, -5)
-	disabledTex:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 5, 5)
-	disabledTex:SetVertexColor(0.1, 0.1, 0.1, 1)
-	disabledTex:SetTexCoord(0.049, 0.931, 0.008, 0.121)
-	button:SetDisabledTexture(disabledTex)
-	
-	local highlightTex = button:CreateTexture()
-	highlightTex:SetTexture("Interface\\Buttons\\UI-AttributeButton-Encourage-Hilight")
-	highlightTex:SetPoint("TOPRIGHT", button, "TOPRIGHT", -5, -5)
-	highlightTex:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 5, 5)
-	highlightTex:SetTexCoord(0, 1, 0, 1)
-	highlightTex:SetVertexColor(0.9, 0.9, 0.9, 0.9)
-	button:SetHighlightTexture(highlightTex)
-	
-	local pressedTex = button:CreateTexture()
-	pressedTex:SetTexture("Interface\\Buttons\\UI-AttributeButton-Encourage-Hilight")
-	pressedTex:SetPoint("TOPRIGHT", button, "TOPRIGHT", -5, -5)
-	pressedTex:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 5, 5)
-	pressedTex:SetVertexColor(1, 1, 1, 0.5)
-	pressedTex:SetTexCoord(0.035, 0.981, 0.014, 0.670)
-	button:SetPushedTextOffset(0, -1)
-	button:SetPushedTexture(pressedTex)
-end
 local function createButton(text, parent, func)
-    local btn = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+    local btn = TSMAPI.GUI:CreateButton(container, 15, "Button")
     btn:SetText(text)
     btn:SetHeight(20)
     btn:SetWidth(150)
-    btn:SetBackdrop(buttonBackdrop)
-    ApplyButtonTextures(btn)
     return btn
 end
 
 local function createCloseButton(text, parent, func)
-    local btn = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+    local btn = TSMAPI.GUI:CreateButton(container, 15, "Button")
     btn:SetText(text)
-    btn:SetHeight(20)
-    btn:SetWidth(20)
-    btn:SetBackdrop(buttonBackdrop)
-    ApplyButtonTextures(btn)
+    btn:SetHeight(16)
+    btn:SetWidth(16)
     return btn
 end
 
@@ -107,12 +60,10 @@ local function DoCellUpdate(_, cellFrame, _, _, _, rowNum, _, isVisible, st)
 
     -- make the icon if it doesn't already exist
     if not cellFrame.icon then
-            local icon = CreateFrame("Button", nil, cellFrame)
+            local icon = TSMAPI.GUI:CreateButton(cellFrame, 12, "Button")
             icon:SetPoint("TOPLEFT")
             icon:SetPoint("BOTTOMRIGHT")
-            icon:SetNormalTexture("Interface\\Buttons\\UI-PlusButton-UP")
-            icon:SetPushedTexture("Interface\\Buttons\\UI-PlusButton-DOWN")
-            icon:SetHighlightTexture("Interface\\Buttons\\UI-PlusButton-Hilight", "ADD")
+            icon:SetText("+")
             icon:SetScript("OnClick", function(self)
                 -- they clicked the icon!
                 local data = st:GetRow(rowNum)
@@ -135,13 +86,9 @@ local function DoCellUpdate(_, cellFrame, _, _, _, rowNum, _, isVisible, st)
             -- set the texture of the icon to either a plus or minus as appropriate
             local data = st:GetRow(rowNum)
             if isExpanded[strlower(data.name)] then
-                    cellFrame.icon:SetNormalTexture("Interface\\Buttons\\UI-MinusButton-UP")
-                    cellFrame.icon:SetPushedTexture("Interface\\Buttons\\UI-MinusButton-DOWN")
-                    cellFrame.icon:SetHighlightTexture("Interface\\Buttons\\UI-MinusButton-Hilight", "ADD")
+                    cellFrame.icon:SetText("-")
             else
-                    cellFrame.icon:SetNormalTexture("Interface\\Buttons\\UI-PlusButton-UP")
-                    cellFrame.icon:SetPushedTexture("Interface\\Buttons\\UI-PlusButton-DOWN")
-                    cellFrame.icon:SetHighlightTexture("Interface\\Buttons\\UI-PlusButton-Hilight", "ADD")
+                cellFrame.icon:SetText("+")
             end
     else
             -- not a title row so hide the icon
@@ -161,14 +108,22 @@ function bankui:getBankFrame(bank)
         return BankFrame
     elseif (famBankFrame and famBankFrame:IsVisible()) then
         return famBankFrame
-    elseif (ARKINV_Frame4 and ARKINV_Frame4:IsVisible()) then 
+    elseif (ARKINV_Frame4 and ARKINV_Frame4:IsVisible()) then
         return ARKINV_Frame4
     elseif (ARKINV_Frame3 and ARKINV_Frame3:IsVisible())then
         return ARKINV_Frame3
-     elseif (TukuiBank and TukuiBank:IsVisible())then
+	elseif (OneBankFrame and OneBankFrame:IsVisible()) then
+		return OneBankFrame
+    elseif (TukuiBank and TukuiBank:IsShown()) then
         return TukuiBank
-     elseif (LUIBank and LUIBank:IsVisible())then
+    elseif (ElvUI_BankContainerFrame and ElvUI_BankContainerFrame:IsVisible()) then
+        return ElvUI_BankContainerFrame
+    elseif (LUIBank and LUIBank:IsVisible())then
         return LUIBank
+	elseif (AdiBagsContainer1 and AdiBagsContainer1.isBank and AdiBagsContainer1:IsVisible()) then
+		return AdiBagsContainer1
+	elseif (AdiBagsContainer2 and AdiBagsContainer2.isBank and AdiBagsContainer2:IsVisible()) then
+		return AdiBagsContainer2
     end
     
     return nil
@@ -177,6 +132,7 @@ end
 function bankui:getFrame(frameType)
     
     container = CreateFrame("Frame", nil, UIParent)
+    TSMAPI.Design:SetFrameBackdropColor(container)
     container:Raise()
     
     --size--
@@ -193,23 +149,15 @@ function bankui:getFrame(frameType)
     container:SetScript("OnMouseUp", container.StopMovingOrSizing)
 
     --clamp to bankframe--
-    if frameType and frameType:IsVisible() then
-        container:SetPoint("TOPLEFT", frameType, "TOPRIGHT", 40, -10)
+	if frameType == (AdiBagsContainer1 or AdiBagsContainer2) and frameType:IsVisible() then
+		container:SetPoint("TOPRIGHT", frameType, "TOPLEFT", -10, 0)
+	elseif frameType == GuildBankFrame and frameType:IsVisible() then
+		container:SetPoint("TOPLEFT", frameType, "TOPRIGHT", 40, 0)
+    elseif frameType and frameType:IsVisible() then
+        container:SetPoint("TOPLEFT", frameType, "TOPRIGHT", 10, 0)
     else
         container:SetPoint("TOPLEFT", 500,-100, "TOPRIGHT", 40, 0)
     end
-    
-    container:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8X8",
-        tile = false,
-        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        edgeSize = 24,
-        insets = {left = 4, right = 4, top = 4, bottom = 4},
-    })
- 
-    container:SetBackdropColor(0, 0, 0.05, 1)
-    container:SetBackdropBorderColor(0,0,1,1)
-    
     
     local function SizerSE_OnMouseDown(frame)
         frame:GetParent():StartSizing("BOTTOMRIGHT")
@@ -246,48 +194,35 @@ function bankui:getFrame(frameType)
     
     --titlebar--
     container.titleBar = CreateFrame("Frame", nil, container)
-    container.titleBar:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8X8",
-        tile = false,
-        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        edgeSize = 24,
-        insets = {left = 4, right = 4, top = 4, bottom = 4}
-    })
-    
-    container.titleBar:SetBackdropColor(0, 0, 0.05, 1)
-    container.titleBar:SetBackdropBorderColor(0,0,1,1)
+    TSMAPI.Design:SetFrameBackdropColor(container.titleBar)
+    local title = TSMAPI.GUI:CreateTitleLabel(container.titleBar, 18)
 
+    title:SetText(L["Warehousing"])
+    container.title = title
     container.titleBar:SetWidth(250)
-    container.titleBar:SetHeight(30)
+    container.titleBar:SetHeight(18)
+    container.titleBar:SetPoint("TOP", 0, -3)
+    container.title:SetPoint("TOP", 0, 0)
 
-    container.titleBar:SetPoint("TOP", 0, 12)
-
-    container.title = container.titleBar:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    container.title:SetPoint("TOP", 0, -10)
-    container.title:SetText(L["TradeSkillMaster_Warehousing"])
-    
-    container.btnClose = createCloseButton(" X",container,nil)
-    container.btnClose:SetPoint("BOTTOMLEFT", container, "TOPRIGHT", -25, -15)
+    container.btnClose = createCloseButton("X",container,nil)
+    container.btnClose:SetPoint("BOTTOMLEFT", container, "TOPRIGHT", -20, -20)
     
     --ScrollTable--
     bankui:DrawScrollFrame(container)
     
     --Buttons--
     container.btnToBank = createButton(L["Move Group To Bank"],container,nil)
-    container.btnToBank:SetPoint("BOTTOMLEFT", container, "BOTTOMLEFT", 50, 80)
-    
-    
+    container.btnToBank:SetPoint("BOTTOM", container, "BOTTOM", 0, 80)
+
     container.btnToBags = createButton(L["Move Group To Bags"],container,nil)
-    container.btnToBags:SetPoint("BOTTOMLEFT", container, "BOTTOMLEFT", 50, 60)
-   
-    
+    container.btnToBags:SetPoint("BOTTOM", container, "BOTTOM", 0, 60)
+
     container.btnEmpty = createButton(L["Empty Bags"],container,nil)
-    container.btnEmpty:SetPoint("BOTTOMLEFT", container, "BOTTOMLEFT", 50, 30)
-    
-   
+    container.btnEmpty:SetPoint("BOTTOM", container, "BOTTOM", 0, 30)
+
     container.btnRestore = createButton(L["Restore Bags"],container,nil)
-    container.btnRestore:SetPoint("BOTTOMLEFT", container, "BOTTOMLEFT", 50, 10)
-    
+    container.btnRestore:SetPoint("BOTTOM", container, "BOTTOM", 0, 10)
+
     bankui:updateButtons()
     
     return container
@@ -354,16 +289,16 @@ function bankui:DrawScrollFrame (container)
         return colInfo
     end
 
-    bagST = TSMAPI:CreateScrollingTable(GetSTColInfo(container:GetWidth()))
+    bagST = TSMAPI:CreateScrollingTable(GetSTColInfo(container:GetWidth()), true)
     bagST:EnableSelection(true)
     bagST.frame:SetParent(container)
     bagST.frame:SetPoint("BOTTOMLEFT", container, 10, container:GetHeight()*.25)
-    bagST.frame:SetPoint("TOPRIGHT", container, -10, -30)
+    bagST.frame:SetPoint("TOPRIGHT", container, -10, -35)
     bagST.frame:SetScript("OnSizeChanged", function(_,width, height)
             bagST:SetDisplayCols(GetSTColInfo(width))
             bagST:SetDisplayRows(floor(height/ROW_HEIGHT), ROW_HEIGHT)
-        end)
-        
+    end)
+
     bankui:updateST()  
     
     bagST:RegisterEvents({
@@ -402,13 +337,26 @@ function bankui:updateST()
             table.insert (stTable, bankui:createRow(t.name,"Warehousing:"..t.name,false))
         end
     end
-    
-    table.insert (stTable,  bankui:createRow(L["Auctioning"],"Auctioning",true))
-    if isExpanded["auctioning"] then
+
+    table.insert (stTable,  bankui:createRow(L["Auctioning Categories"],"Auctioning Categories",true))
+    if isExpanded["auctioning categories"] then
+
+        local data = TSMAPI:GetData("auctioningCategories")
+        if data then
+            for name, t in pairs(data) do
+                table.insert (stTable, bankui:createRow(name,"Auctioning Categories:"..name,false))
+            end
+        else
+            TSM:Print("Auctioning may not be installed.")
+        end
+    end
+
+    table.insert (stTable,  bankui:createRow(L["Auctioning Groups"],"Auctioning Groups",true))
+    if isExpanded["auctioning groups"] then
         local data = TSMAPI:GetData("auctioningGroups")
         if data then
             for name, t in pairs(data) do
-                table.insert (stTable, bankui:createRow(name,"Auctioning:"..name,false))
+                table.insert (stTable, bankui:createRow(name,"Auctioning Groups:"..name,false))
             end
         else
             TSM:Print("Auctioning may not be installed.")
@@ -424,6 +372,7 @@ function bankui:updateST()
             end
         end
     end
+    sort(stTable, function(a, b) return strlower(a.name) < strlower(b.name) end)
     bagST:SetData(stTable)
     bagST:Refresh()
 end

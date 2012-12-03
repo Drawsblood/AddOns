@@ -128,30 +128,74 @@ end
 
 function data:unIndexTableAuctioning2(src,t)
     local grp = {}
-    local tmp = {}
     local bagState = TSM.db.factionrealm.PlayerBagState
+	local playerMail = TSMAPI:GetData("playermail")
     
-    for id in pairs(t) do 
-        if not tmp[id] then tmp[id] = 0 end
-        
+    for id in pairs(t) do
         local needed = TSMAPI:GetData("auctioningPostCount", id)
+		local mail = playerMail[id]
         local auctions = TSMAPI:GetData("totalplayerauctions", id)
         local q = 0
-        
-        if auctions and needed then
-            if bagState[id] then 
-                q = needed - (auctions + bagState[id])
-            else 
-                q = needed - auctions  
-            end
-        elseif needed then
-            q = needed
-        end
+
+		if auctions and mail and needed then
+			if bagState[id] then
+				q = needed - (auctions + mail + bagState[id])
+			else
+				q = needed - (auctions + mail)
+			end
+		elseif auctions and needed then
+			if bagState[id] then
+				q = needed - (auctions + bagState[id])
+			else
+				q = needed - auctions
+			end
+		elseif needed then
+			q = needed
+		end
         
         if ( q > 0 )then
             table.insert(grp, {item = id, quantity =  q} )
         end
     end
+
+    return grp
+end
+
+function data:unIndexTableAuctioning3(src, t)
+    local grp = {}
+    local bagState = TSM.db.factionrealm.PlayerBagState
+	local playerMail = TSMAPI:GetData("playermail")
+
+	for grps in pairs(t) do
+		local data = TSMAPI:GetData("auctioningGroupItems", grps)
+		for _, id in pairs(data) do
+			local needed = TSMAPI:GetData("auctioningPostCount", id)
+			local mail = playerMail[id]
+			local auctions = TSMAPI:GetData("totalplayerauctions", id)
+			local q = 0
+
+			if auctions and mail and needed then
+				if bagState[id] then
+					q = needed - (auctions + mail + bagState[id])
+				else
+					q = needed - (auctions + mail)
+				end
+			elseif auctions and needed then
+				if bagState[id] then
+					q = needed - (auctions + bagState[id])
+				else
+					q = needed - auctions
+				end
+			elseif needed then
+				q = needed
+			end
+
+			if ( q > 0 )then
+				table.insert(grp, {item = id, quantity =  q} )
+			end
+		end
+	end
+
 
     return grp
 end

@@ -2473,6 +2473,65 @@ function Config:DrawCategoryManagement(container, category)
 		end
 	end
 
+	local keylist = {"noCancel", "undercut", "postTime", "bidPercent", "fallback", "fallbackPercent",
+		"fallbackPriceMethod", "fallbackCap", "threshold", "thresholdPercent","thresholdPriceMethod",
+		"postCap", "perAuction", "perAuctionIsCap", "ignoreStacksOver", "ignoreStacksUnder", "reset",
+		"resetPrice", "disabled", "minDuration", "searchTerm", "resetEnabled", "resetMaxCost","resetMaxCostPercent",
+		"resetMaxCostPriceMethod", "resetMinProfit", "resetMinProfitPercent", "resetMinProfitPriceMethod",
+		"resetMaxQuantity", "resetResolution", "resetMaxPricePer", "resetResolutionPercent", "ignoreRandomEnchant"}
+
+	local function RemoveCategoryOverrides(notConfirmed)
+		if notConfirmed then
+			-- Popup Confirmation Window used in this module
+			StaticPopupDialogs["TSM.RemoveCategoryOverrides.DeleteConfirm"] = StaticPopupDialogs["TSM.RemoveCategoryOverrides.DeleteConfirm"] or {
+				text = L["Are you SURE you want to remove all category overrides in this category?"],
+				button1 = YES,
+				button2 = CANCEL,
+				timeout = 0,
+				whileDead = true,
+				hideOnEscape = true,
+				OnCancel = false,
+			}
+			StaticPopupDialogs["TSM.RemoveCategoryOverrides.DeleteConfirm"].OnAccept = function() RemoveCategoryOverrides() end,
+			TSMAPI:ShowStaticPopupDialog("TSM.RemoveCategoryOverrides.DeleteConfirm")
+			return
+		end
+
+		for _, key in pairs(keylist) do
+			if TSM.db.profile[key][category] then
+			TSM.db.profile[key][category] = nil
+			end
+		end
+
+	end
+
+	local function RemoveGroupOverrides(notConfirmed)
+		if notConfirmed then
+			-- Popup Confirmation Window used in this module
+			StaticPopupDialogs["TSM.RemoveGroupOverrides.DeleteConfirm"] = StaticPopupDialogs["TSM.RemoveGroupOverrides.DeleteConfirm"] or {
+				text = L["Are you SURE you want to remove all group overrides in this category?"],
+				button1 = YES,
+				button2 = CANCEL,
+				timeout = 0,
+				whileDead = true,
+				hideOnEscape = true,
+				OnCancel = false,
+			}
+			StaticPopupDialogs["TSM.RemoveGroupOverrides.DeleteConfirm"].OnAccept = function() RemoveGroupOverrides() end,
+			TSMAPI:ShowStaticPopupDialog("TSM.RemoveGroupOverrides.DeleteConfirm")
+			return
+		end
+
+		for group in pairs(TSM.db.profile.categories[category]) do
+			for _, key in pairs(keylist) do
+				if TSM.db.profile[key][group] then
+					TSM.db.profile[key][group] = nil
+				end
+			end
+		end
+	end
+
+
 	local page = {
 		{	-- scroll frame to contain everything
 			type = "ScrollFrame",
@@ -2520,6 +2579,31 @@ function Config:DrawCategoryManagement(container, category)
 							relativeWidth = 0.7,
 							callback = function() CreateShoppingListFromCategory() end,
 							tooltip = L["Creates a shopping list that contains all the items which are in this category. There is no confirmation or popup window for this."],
+						},
+					},
+				},
+				{
+					type = "InlineGroup",
+					layout = "flow",
+					title = L["Reset"],
+					children = {
+						{
+							type = "Button",
+							text = L["Remove Category Overrides"],
+							relativeWidth = 0.45,
+							callback = RemoveCategoryOverrides,
+							tooltip = L["Remove all overrides for this category - resets to fallback settings for groups, this cannot be undone!"],
+						},
+						{
+							type = "Label",
+							relativeWidth = 0.09,
+						},
+						{
+							type = "Button",
+							text = L["Remove Group Overrides"],
+							relativeWidth = 0.45,
+							callback = RemoveGroupOverrides,
+							tooltip = L["Remove all overrides for groups in this category - resets to category overrides, this cannot be undone!"],
 						},
 					},
 				},

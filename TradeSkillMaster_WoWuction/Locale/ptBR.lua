@@ -16,13 +16,18 @@ local L = LibStub("AceLocale-3.0"):NewLocale("TradeSkillMaster_WoWuction", "ptBR
 if not L then return end
 
 L["No wowuction data found. Go to the \"Data Export\" page for your realm on wowuction.com to download data."] = "Nenhum dado do WoWuction encontrado. Vá à página \"Data Export\" para o seu reino em wowuction.com para fazer download dos dados." -- Needs review
+-- L["Realm Last Scan Min Buyout:"] = ""
+-- L["Realm Market Value:"] = ""
+-- L["Realm Median Price:"] = ""
+-- L["Region Avg Daily Quantity:"] = ""
+-- L["Region Market Value:"] = ""
+-- L["Region Median Price:"] = ""
 L["Toggles TSM_WoWuction Tooltips"] = "Ativa as dicas do TSM_WoWuction" -- Needs review
 L["Tooltips are now disabled."] = "Dicas desativadas." -- Needs review
 L["Tooltips are now enabled."] = "Dicas ativadas." -- Needs review
-L["WoWuction - Market Value"] = "WoWuction - Valor de Mercado" -- Needs review
-L["WoWuction Market Value:"] = "WoWuction Valor de Mercado:" -- Needs review
-L["WoWuction - Median Price"] = "WoWuction - Preço Mediano" -- Needs review
-L["WoWuction Median Price:"] = "WoWuction Preço Mediano:" -- Needs review
-L["WoWuction Min Buyout:"] = "WoWuction Arremate Mín:" -- Needs review
-L["WoWuction - Minimum Buyout"] = "WoWuction - Arremate Mínimo" -- Needs review
+-- L["WoWuction Realm Last Scan Min Buyout"] = ""
+-- L["WoWuction Realm Market Value"] = ""
+-- L["WoWuction Realm Median Price"] = ""
+-- L["WoWuction Region Market Value"] = ""
+-- L["WoWuction Region Median Price"] = ""
  

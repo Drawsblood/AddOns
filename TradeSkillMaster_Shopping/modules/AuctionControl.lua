@@ -119,7 +119,7 @@ function AuctionControl:IsConfirmationVisible()
 end
 
 local function ValidateAuction(index, list)
-	local itemString, count, buyout, data
+	local itemString, count, buyout, data, _
 	if type(list) == "table" then
 		itemString, count, buyout = unpack(list)
 	elseif type(list) == "string" then

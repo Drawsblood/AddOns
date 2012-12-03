@@ -158,6 +158,16 @@ function TSM:DoDBCleanUp()
 			end
 		end
 	end
+	
+	-- added with patch 5.1 to clean up crappy battle pet links with a ton of pointless trailing zeros
+	for groupName, items in pairs(TSM.db.profile.groups) do
+		local newItems = {}
+		for item in pairs(items) do
+			item = gsub(item, ":0+$", ":0")
+			newItems[item] = true
+		end
+		TSM.db.profile.groups[groupName] = newItems
+	end
 end
 
 local GOLD_TEXT = "|cffc29918g|r"
@@ -563,7 +573,7 @@ function TSM.AuctionSTRightClickCallback(parent, itemLink)
 	TSM:UpdateItemReverseLookup()
 	for groupName, items in pairs(TSM.db.profile.groups) do
 		auctioningGroupList[groupName] = groupName
-		if Config:GetBoolConfigValue(groupName, "ignoreRandomEnchant", true) then
+		if TSM.Config:GetBoolConfigValue(groupName, "ignoreRandomEnchant", true) then
 			local safeItemID = TSMAPI:GetSafeItemID(itemString)
 			for groupItemString in pairs(items) do
 				if TSMAPI:GetSafeItemID(groupItemString) == safeItemID then

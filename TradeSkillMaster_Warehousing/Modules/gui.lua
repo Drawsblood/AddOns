@@ -48,8 +48,8 @@ local function getHelpString3()
     return
        "\n"..L["Guild Bank"]..":\n"..
         L["   By default there is a four secound timeout when moving items from the guildbank.  This is nessary to "]..
-        L["to ensure consistent results.  If you feel then need you can adjust this.  The timeout can be no less then"]..
-        L["one secound and no greater then five.  Be warned I make no promises if you do decide to adjust this.  You have been warned."]
+        L["to ensure consistent results.  If you feel then need you can adjust this.  The timeout can be no less than "]..
+        L["one second and no greater then five.  Be warned I make no promises if you do decide to adjust this.  You have been warned."]
 end
 
 local function getHelpString4()

@@ -126,15 +126,23 @@ function TSM:LoadTooltip(itemID)
 	
 		local text = {}
 		local sellRecords = TSM.Util:GetRecords("sold", itemString)
-		if TSM.db.factionrealm.tooltip.sale and sellRecords then
-			local totalPrice, totalNum = 0, 0
-			for _, record in ipairs(sellRecords) do
-				totalNum = totalNum + record.quantity
-				totalPrice = totalPrice + record.price*record.quantity
-			end
-			
-			tinsert(text, format(L["Sold (Avg Price): %s (%s)"], "|cffffffff"..totalNum.."|r", (TSM:FormatTextMoney(totalPrice/totalNum) or "?")))
-		end
+        if TSM.db.factionrealm.tooltip.sale and sellRecords then
+            local totalPrice, totalNum = 0, 0
+            local lastSold
+            for _, record in ipairs(sellRecords) do
+                totalNum = totalNum + record.quantity
+                totalPrice = totalPrice + record.price*record.quantity
+                if (record.time and record.time > (lastSold or 0)) then
+                    lastSold = record.time
+                end
+            end
+
+            tinsert(text, format(L["Sold (Avg Price): %s (%s)"], "|cffffffff"..totalNum.."|r", (TSM:FormatTextMoney(totalPrice/totalNum) or "?")))
+            if lastSold then
+                local timeDiff = SecondsToTime(time()-lastSold)
+                tinsert(text, L["Last Sold:"].." |cffffffff"..format(L["%s ago"], timeDiff))
+            end
+        end
 		
 		local buyRecords = TSM.Util:GetRecords("buy", itemString)
 		if TSM.db.factionrealm.tooltip.purchase and buyRecords then

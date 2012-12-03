@@ -30,7 +30,7 @@ function Data:Initialize()
 				TSM.db.profile[data.name] = {}
 			end
 		end
-	
+
 		-- load all the crafts into Data.crafts
 		TSM.db.profile[data.name] = TSM.db.profile[data.name] or {}
 		Data[data.name] = TSM.db.profile[data.name]
@@ -64,6 +64,16 @@ function Data:Initialize()
 					mat.customID = nil
 					mat.customMultiplier = nil
 					mat.customValue = nil
+				end
+				-- fix for wrong vellum name
+				local velName = GetItemInfo(TSM.Enchanting.vellumID) or (GetLocale() == "enUS" and "Enchanting Vellum")
+				if velName then
+					if itemID == TSM.Enchanting.vellumID then
+						if mat.name ~= velName then
+							mat.name = velName
+						end
+					end
+
 				end
 			else
 				tinsert(unusedMats, itemID)

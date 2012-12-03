@@ -56,7 +56,7 @@ local function GetItemString(itemLink)
 	
 	local itemInfo = {strfind(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%-?%d*):?(%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")}
 	if not itemInfo[11] then return end
-	if not tonumber(itemInfo[11]) then itemInfo[11] = 0 end
+	itemInfo[11] = tonumber(itemInfo[11]) or 0
 	
 	return table.concat(itemInfo, ":", 4, 11)
 end

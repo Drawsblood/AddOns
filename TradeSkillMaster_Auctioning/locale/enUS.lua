@@ -283,6 +283,13 @@ L["Create Shopping List from Category"] = true
 L["Creates a shopping list that contains all the items which are in this category. There is no confirmation or popup window for this."] = true
 L["Uncategorized Groups:"] = true
 L["Groups in this Category:"] = true
+L["Remove Category Overrides"] = true
+L["Remove all overrides for this category - resets to fallback settings for groups, this cannot be undone!"] = true
+L["Remove Group Overrides"] = true
+L["Remove all overrides for groups in this category - resets to category overrides, this cannot be undone!"] = true
+L["Reset"] = true
+L["Are you SURE you want to remove all category overrides in this category?"] = true
+L["Are you SURE you want to remove all group overrides in this category?"] = true
 
 -- GUI.lua
 
