@@ -1,0 +1,79 @@
+------------------------------------------------------------------------
+r205 | oscarucb | 2012-11-28 00:20:35 +0000 (Wed, 28 Nov 2012) | 1 line
+Changed paths:
+   A /tags/5.0.1 (from /trunk:204)
+
+Tagging as 5.0.1
+------------------------------------------------------------------------
+r204 | oscarucb | 2012-11-28 00:09:49 +0000 (Wed, 28 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/SavedInstances.toc
+
+5.1 toc bump
+------------------------------------------------------------------------
+r203 | oscarucb | 2012-11-27 03:26:46 +0000 (Tue, 27 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+fix Drak'Tharon: ticket 105 deDE
+
+------------------------------------------------------------------------
+r202 | oscarucb | 2012-11-26 14:37:33 +0000 (Mon, 26 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+drycoded fix to ticket 103
+
+------------------------------------------------------------------------
+r199 | oscarucb | 2012-11-24 13:27:34 +0000 (Sat, 24 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+   M /trunk/config.lua
+
+add option to always show current character
+
+------------------------------------------------------------------------
+r198 | oscarucb | 2012-11-24 13:13:29 +0000 (Sat, 24 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+ticket 89: add raid ID display to heroic raid lockout tooltip
+
+------------------------------------------------------------------------
+r197 | oscarucb | 2012-11-24 13:02:10 +0000 (Sat, 24 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+cosmetic improvements to lockout tooltip
+
+------------------------------------------------------------------------
+r195 | oscarucb | 2012-11-24 06:07:34 +0000 (Sat, 24 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+fix LFR: Terrace of Endless Springs
+
+------------------------------------------------------------------------
+r194 | oscarucb | 2012-11-23 03:33:20 +0000 (Fri, 23 Nov 2012) | 3 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+   M /trunk/config.lua
+
+initial support for world boss tracking
+drycoded fix for TeS LFR glitch
+
+------------------------------------------------------------------------
+r192 | oscarucb | 2012-11-20 21:33:57 +0000 (Tue, 20 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+fix a minor bug in last
+
+------------------------------------------------------------------------
+r191 | oscarucb | 2012-11-20 00:59:58 +0000 (Tue, 20 Nov 2012) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+ticket 99: reorder addon:FindInstance passes to correctly handle Scharlachrote Kloster on deDE
+
+------------------------------------------------------------------------

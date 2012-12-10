@@ -1,0 +1,45 @@
+## Interface: 50100
+## Title: SavedInstances
+## Notes: Tracks raid/instance lockouts on your characters, related currencies and cooldowns.
+## Author: oscarucb
+## Version: 5.0.1
+## X-Build: 204
+## X-ReleaseDate: 2012-11-28T00:09:49Z
+## X-Revision: $Revision: 204 $
+## X-AceForum: 14896
+## X-License: BSD
+## X-Category: Raid
+## OptionalDeps: Ace3, CallbackHandler-1.0, LibDataBroker-1.1, LibDBIcon-1.0, LibQTip-1.0
+#@no-lib-strip@
+## X-Embeds: Ace3, CallbackHandler-1.0, LibDataBroker-1.1, LibDBIcon-1.0, LibQTip-1.0
+#@end-no-lib-strip@ 
+## SavedVariables: SavedInstancesDB
+# ## LoadManagers: AddonLoader
+## X-LoadOn-Always: delayed
+## X-Curse-Packaged-Version: 5.0.1
+## X-Curse-Project-Name: SavedInstances
+## X-Curse-Project-ID: saved_instances
+## X-Curse-Repository-ID: wow/saved_instances/mainline
+
+
+#@no-lib-strip@
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\AceAddon-3.0\AceAddon-3.0.xml
+libs\AceEvent-3.0\AceEvent-3.0.xml
+libs\AceTimer-3.0\AceTimer-3.0.xml
+libs\AceGUI-3.0\AceGUI-3.0.xml
+libs\AceConfig-3.0\AceConfig-3.0.xml
+libs\LibQTip-1.0\lib.xml
+#@end-no-lib-strip@ 
+
+libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+
+#@no-lib-strip@
+libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+#@end-no-lib-strip@ 
+
+locale.lua
+
+SavedInstances.lua
+config.lua

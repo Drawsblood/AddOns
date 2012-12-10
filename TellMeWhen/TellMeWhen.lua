@@ -25,10 +25,10 @@ local AceDB = LibStub("AceDB-3.0")
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
-TELLMEWHEN_VERSION = "6.1.0"
-TELLMEWHEN_VERSION_MINOR = strmatch(" 6.1.0", " r%d+") or ""
+TELLMEWHEN_VERSION = "6.1.1"
+TELLMEWHEN_VERSION_MINOR = strmatch(" 6.1.1", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61022 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61103 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -78,12 +78,18 @@ TMW.ISNOTMOP = not TMW.ISMOP and true or nil
 local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
+
+TMW.CONST = {}
+TMW.CONST.CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT"
+
+
 TMW.UnitAura = _G.UnitAura
 if clientVersion < 50100 then
 	function TMW.UnitAura(...)
 		local a, b, c, d, e, f, g, h, i, j, k, l, m = UnitAura(...)
 		return a, b, c, d, e, f, g, h, i, j, k, l, m, select(15, UnitAura(...))
 	end
+	TMW.CONST.CHAT_TYPE_INSTANCE_CHAT = "BATTLEGROUND"
 end
 
 --TODO: (misplaced note) export any needed text layouts with icons that need them
@@ -151,6 +157,7 @@ TMW.isNumber = setmetatable(
 {}, {
 	__mode = "kv",
 	__index = function(t, i)
+		if not i then return false end
 		local o = tonumber(i) or false
 		t[i] = o
 		return o
@@ -1858,11 +1865,22 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 	end
 end
 
-
+local updateInProgress, shouldSafeUpdate
 function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	time = GetTime()
 	TMW.time = time
 
+	if updateInProgress then
+		-- If the previous update cycle didn't finish (updateInProgress is still true)
+		-- then we should enable safecalling icon updates in order to prevent catastrophic failure of the whole addonVersion
+		-- if only one icon or icon type is malfunctioning.
+		if not shouldSafeUpdate then
+			TMW:Debug("Update error detected. Switching to safe update mode!")
+		end
+		shouldSafeUpdate = true
+	end
+	updateInProgress = true
+	
 	TMW:Fire("TMW_ONUPDATE_PRE", time, Locked)
 	
 	if LastUpdate <= time - UPD_INTV then
@@ -1882,9 +1900,16 @@ function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				end
 			end
 	
-			for i = 1, #IconsToUpdate do
-				--local icon = IconsToUpdate[i]
-				IconsToUpdate[i]:Update()
+			if shouldSafeUpdate then
+				for i = 1, #IconsToUpdate do
+					local icon = IconsToUpdate[i]
+					safecall(icon.Update, icon)
+				end
+			else
+				for i = 1, #IconsToUpdate do
+					--local icon = IconsToUpdate[i]
+					IconsToUpdate[i]:Update()
+				end
 			end
 
 			for g = 1, #TMW do
@@ -1899,6 +1924,8 @@ function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_POST", time, Locked)
 	end
 
+	updateInProgress = nil
+	
 	TMW:Fire("TMW_ONUPDATE_POST", time, Locked)
 end
 
@@ -1971,6 +1998,8 @@ local function CheckCoroutineTermination(...)
 end
 
 local function OnUpdateDuringCoroutine(self)
+	-- This is an OnUpdate script, but don't be too concerned with performance because it is only using
+	-- when lock toggling in combat. Safety of the code (don't let it error!) is far more important than performance here.
 	time = GetTime()
 	TMW.time = time
 	
@@ -3007,10 +3036,7 @@ function TMW:PLAYER_ENTERING_WORLD()
 		end
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
-		if clientVersion < 50100 then
-			-- Seems to be removed in WoW 5.1?
-			TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
-		end
+		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
 	end
 end
 

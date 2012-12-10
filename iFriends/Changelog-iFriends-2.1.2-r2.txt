@@ -1,0 +1,28 @@
+------------------------------------------------------------------------
+r38 | grdn | 2012-12-07 06:51:02 +0000 (Fri, 07 Dec 2012) | 1 line
+Changed paths:
+   A /tags/2.1.2-r2 (from /trunk:35)
+
+See rev 35
+------------------------------------------------------------------------
+r35 | grdn | 2012-12-07 06:42:00 +0000 (Fri, 07 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/iFriends.lua
+
+- Changed the way the update notice is displayed
+------------------------------------------------------------------------
+r33 | grdn | 2012-12-07 06:36:20 +0000 (Fri, 07 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/Columns.lua
+   M /trunk/iFriends.toc
+
+- Completely removed the need for LibBabble-Zone-3.0 since it is deprecated. Now using the new LibTourist API instead
+------------------------------------------------------------------------
+r31 | grdn | 2012-12-02 21:58:54 +0000 (Sun, 02 Dec 2012) | 2 lines
+Changed paths:
+   M /trunk/iFriends.toc
+
+- Updated to TOC 5.1
+- fixed a version bug, changed 2.0.10 to 2.1.0 :)
+------------------------------------------------------------------------

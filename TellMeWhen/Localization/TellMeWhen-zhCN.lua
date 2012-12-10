@@ -1114,7 +1114,7 @@ L["LOSECONTROL_ICONTYPE_DESC"] = "检测那些造成你角色失去控制的效�
 L["LOSECONTROL_INCONTROL"] = "在控制中"
 L["LOSECONTROL_TYPE_DESC_USEUNKNOWN"] = "注意:图标无法判断这个失去控制的类型是否已使用." -- Needs review
 L["LOSECONTROL_TYPE_MAGICAL_IMMUNITY"] = "魔法免疫"
-L["LOSECONTROL_TYPE_SCHOOLLOCK"] = "法术类别已锁定"
+L["LOSECONTROL_TYPE_SCHOOLLOCK"] = "被锁定法术类别" -- Needs review
 L["LUACONDITION"] = "Lua(高玩级)"
 L["LUACONDITION_DESC"] = [=[此条件类型允许你使用Lua语言来评估一个条件的状态.(非高玩慎入!)
 

@@ -1101,11 +1101,11 @@ L["LOSECONTROL_CONTROLLOST"] = "失去控制" -- Needs review
 L["LOSECONTROL_DROPDOWNLABEL"] = "失去控制類型" -- Needs review
 L["LOSECONTROL_DROPDOWNLABEL_DESC"] = "選擇你需要作用於此圖示的失去控制的類型." -- Needs review
 L["LOSECONTROL_ICONTYPE"] = "失去控制" -- Needs review
-L["LOSECONTROL_ICONTYPE_DESC"] = "檢查那些造成你角色失去控制的效果. " -- Needs review
+L["LOSECONTROL_ICONTYPE_DESC"] = "檢查那些造成你失去角色控制權的效果. " -- Needs review
 L["LOSECONTROL_INCONTROL"] = "在控制中"
 L["LOSECONTROL_TYPE_DESC_USEUNKNOWN"] = "注意:圖示無法判斷這個失去控制的類型是否已使用. " -- Needs review
 L["LOSECONTROL_TYPE_MAGICAL_IMMUNITY"] = "魔法免疫"
-L["LOSECONTROL_TYPE_SCHOOLLOCK"] = "法術類別已鎖定"
+L["LOSECONTROL_TYPE_SCHOOLLOCK"] = "被鎖定法術類別" -- Needs review
 L["LUACONDITION"] = "Lua(進階)"
 L["LUACONDITION_DESC"] = [=[此條件類型允許你使用Lua語言來評估一個條件的狀態.
 

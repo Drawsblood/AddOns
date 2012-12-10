@@ -1,0 +1,41 @@
+local AddonName = ...;
+local L = LibStub("AceLocale-3.0"):NewLocale(AddonName, "ptBR")
+
+if not L then return end
+
+L["Addon update available!"] = "Addon update available!" -- Requires localization
+L["Available columns"] = "Colunas Dispon\195\173veis" -- Needs review
+L["Broadcast"] = true -- Needs review
+L["By Class"] = "Por Classe" -- Needs review
+L["By Difficulty"] = "Por Dificuldade" -- Needs review
+L["By Faction"] = "Por Fac\195\167\195\163o" -- Needs review
+L["By Hostility"] = "Por Hostilidade" -- Needs review
+L["By Threshold"] = "Por Limite" -- Needs review
+L["Center"] = "Centro" -- Needs review
+L["Column"] = "Coluna" -- Needs review
+L["Displays the BattleTag of your Battle.net friends."] = "Displays the BattleTag of your Battle.net friends." -- Requires localization
+L["Displays the class of your friends. Choose whether to show the class name or the class icon."] = "Displays the class of your friends. Choose whether to show the class name or the class icon." -- Requires localization
+L["Displays the individual note of your friends."] = "Displays the individual note of your friends." -- Requires localization
+L["Displays the last broadcast message of your Battle.net friends."] = "Displays the last broadcast message of your Battle.net friends." -- Requires localization
+L["Displays the level of your friends."] = "Displays the level of your friends." -- Requires localization
+L["Displays the logged on realm of your Battle.net friends."] = "Displays the logged on realm of your Battle.net friends." -- Requires localization
+L["Displays the name of your friends. In addition, a short info is shown if they are AFK or DND."] = "Displays the name of your friends. In addition, a short info is shown if they are AFK or DND." -- Requires localization
+L["Displays the race of your Battle.net friends."] = "Displays the race of your Battle.net friends." -- Requires localization
+L["Displays the RealID of your Battle.net friends."] = "Displays the RealID of your Battle.net friends." -- Requires localization
+L["Displays the zone of your friends."] = "Displays the zone of your friends." -- Requires localization
+L["Display the number of your Battle.net friends on the plugin"] = "Display the number of your Battle.net friends on the plugin" -- Requires localization
+L["Display WoW Friends in another Tooltip"] = "Display WoW Friends in another Tooltip" -- Requires localization
+L["Enable Script"] = "Enable Script" -- Requires localization
+L["Game/Realm"] = "Jogo/Realm" -- Needs review
+L["General Options"] = "General Options" -- Requires localization
+L["If activated, clicking on the given cell will result in something special."] = "If activated, clicking on the given cell will result in something special." -- Requires localization
+L["iFriends provides some pre-layoutet columns for character names, zones, etc. In order to display them in the tooltip, write their names in the desired order into the beneath input."] = "iFriends prov\195\170 algumas colunas pr\195\169-formatadas por nomes de personagem, zonas, etc. Para mostra-las no quadro de dicas, escreva seus nomes na ordem desejada dentro da entrada abaixo." -- Needs review
+L["Invalid column name!"] = "Nome de coluna inv\195\161lido!" -- Needs review
+L["Justification"] = "Justifica\195\167\195\163o" -- Needs review
+L["Left"] = "Esquerdo" -- Needs review
+L["Note"] = "Nota" -- Needs review
+L["RealID"] = true -- Needs review
+L["Right"] = "Direita" -- Needs review
+L["Show Label"] = "Mostrar R\195\179tulo" -- Needs review
+L["Tooltip Options"] = "Tooltip Options" -- Requires localization
+L["Use Icon"] = "Usar \195\141cone" -- Needs review

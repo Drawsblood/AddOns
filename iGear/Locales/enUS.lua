@@ -1,0 +1,42 @@
+local AddonName = ...;
+local L = LibStub("AceLocale-3.0"):NewLocale(AddonName, "enUS", true)
+
+L["Action"] = true
+L["Addon update available!"] = true
+L["At Bank"] = true
+L["Auto Repair"] = true
+L["BackSlot"] = "Back"
+L["ChestSlot"] = "Chest"
+L["Conflicts"] = true
+L["En"] = true
+L["Eq"] = true
+L["Equip"] = true
+L["FeetSlot"] = "Feet"
+L["Finger0Slot"] = "Finger"
+L["Finger1Slot"] = "Finger"
+L["Ge"] = true
+L["HandsSlot"] = "Hands"
+L["HeadSlot"] = "Head"
+L["If Action is set to Auto Repair, trys using Guild money for repairs. If it fails, falls back to your money!"] = true
+L["In Bags"] = true
+L["Inventory"] = true
+L["LegsSlot"] = "Legs"
+L["MainHandSlot"] = "Mainhand"
+L["Missing Enchants"] = true
+L["Missing Equip"] = true
+L["Missing Gems"] = true
+L["NeckSlot"] = "Neck"
+L["Popup Dialog"] = true
+L["RangedSlot"] = "Ranged"
+L["Required level in order to check for equip conflicts"] = true
+L["SecondaryHandSlot"] = "Offhand"
+L["ShoulderSlot"] = "Shoulder"
+L["Total Cost"] = true
+L["Trinket0Slot"] = "Trinket"
+L["Trinket1Slot"] = "Trinket"
+L["Try Guild Repair"] = true
+L["WaistSlot"] = "Waist"
+L["Who is paying the bill?"] = true
+L["WristSlot"] = "Wrist"
+
+
