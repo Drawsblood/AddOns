@@ -1,0 +1,126 @@
+------------------------------------------------------------------------
+r278 | tomber | 2012-12-11 06:05:03 +0000 (Tue, 11 Dec 2012) | 3 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Highlights.lua
+   M /trunk/Nest.lua
+   M /trunk/Raven_Options/Options.lua
+
+Tweak to Tukui skinning so that selecting "None" for the icon border color scheme will use the original color set by Tukui's frame API (this means that the different default colors used by Tukui and ElvUI are each applied correctly).
+
+Cleaned up setting options a bit more to disable unavailable skinning options in cases where Tukui or Masque are enabled.
+------------------------------------------------------------------------
+r277 | tomber | 2012-12-10 16:34:02 +0000 (Mon, 10 Dec 2012) | 3 lines
+Changed paths:
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Default icon border color set to white for backward compatibility.
+Modified Defaults tab skin-related options so that settings that are not enabled (due to other settings) are correctly disabled.
+Note: I have tried to ensure backward compatibility for the new skinning options and welcome feedback about differences found during alpha/beta testing.
+------------------------------------------------------------------------
+r276 | tomber | 2012-12-10 05:59:50 +0000 (Mon, 10 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Nest.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Add setting for default icon border color in the new Skin Options section of the Defaults tab. This allows you to set the color for icon borders when the Icon Border color scheme is set to "None". This may require Masque users who previously set the default icon border using the Masque interface to use this setting instead (although that is not clear given variation in Masque skins and how Masque itself works as well).
+------------------------------------------------------------------------
+r275 | tomber | 2012-12-08 16:45:03 +0000 (Sat, 08 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Nest.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Added pixel perfect sizing and positioning option for bars and icons. This option is enabled by default with the Tukui skin. However, while it improves appearance significantly and most people will probably want to enable it, the option is not enabled by default for other users because it may affect relative positioning with other UI elements.
+------------------------------------------------------------------------
+r274 | tomber | 2012-12-07 19:39:17 +0000 (Fri, 07 Dec 2012) | 2 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Nest.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Add support for skinning Tukui. Detects if Tukui frame API has been installed and, by default, auto enables the special case skinning code (this should allow it to work for other addons that are related to Tukui). Optionally uses Tukui chat frame font for labels, time, icon count. Tukui support can be enabled/disabled on the Defaults tab (options are only displayed when Tukui is detected).
+Fix timeline backdrop bug with incorrect initialization of color.
+------------------------------------------------------------------------
+r273 | tomber | 2012-12-04 16:20:57 +0000 (Tue, 04 Dec 2012) | 5 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Nest.lua
+   M /trunk/Raven_Options/Options.lua
+
+Add Trim Icon Texture option when Hide Custom Border is enabled on the Defaults tab. This new option supports improved skinning when using Tukui and other addons that use similar skinning methods.
+
+Changed OmniCC detection to work for other addons that simply set the global OmniCC (previously required OmniCC addon itself to be loaded).
+
+Remove obsolete option to set draw edge for clock animation (underlying support was removed by Blizzard).
+------------------------------------------------------------------------
+r272 | tomber | 2012-12-01 16:36:31 +0000 (Sat, 01 Dec 2012) | 2 lines
+Changed paths:
+   M /trunk/Bars.lua
+
+Show max number of charges on cooldown ready custom bars.
+Fix issue with buff/debuff ready bars not showing when other players buffs/debuffs are present, even if they don't meet criteria for display.
+------------------------------------------------------------------------
+r271 | tomber | 2012-11-28 16:45:59 +0000 (Wed, 28 Nov 2012) | 5 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+   M /trunk/Raven.toc
+   M /trunk/Raven_Options/Raven_Options.toc
+
+Fix monk chi detection.
+Hide border around icons when there is no icon texture.
+Disable right-click on totems because underlying API, DestroyTotem, is now blocked to addons.
+Slightly improve response time for totem changes.
+Change version number for 5.1 compatibility.
+------------------------------------------------------------------------
+r270 | tomber | 2012-11-20 23:56:57 +0000 (Tue, 20 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/Bars.lua
+
+Fix issue with ghost bars always being enabled for custom bar groups.
+------------------------------------------------------------------------
+r269 | tomber | 2012-11-19 23:13:48 +0000 (Mon, 19 Nov 2012) | 3 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+On Spells tab, add option to override icon used for a given spell name with the icon for a different spell (specified by name or using the #12345 specific spell id convention).
+
+Add new icon border option that can be used to set different border colors for player spells and non-player spells. The "Player" option on the Appearance tab colors player icon borders to the foreground color and non-player icon borders to the background color. This is primarily intended for icon-oriented bar groups.
+------------------------------------------------------------------------
+r268 | tomber | 2012-11-19 00:17:37 +0000 (Mon, 19 Nov 2012) | 7 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+   M /trunk/Raven_Options/Options.lua
+
+Added ghost bars. Options are on bar group General tab (to apply to all bars) and on custom bar group individual bar options (to apply to specific bars). Note that the expiration time options (e.g., color change to bar/label/time) now can be set to 0 so they affect ghost bars. 
+
+Added enrage filter to buffs for auto bar groups.
+
+Added option to enter specialization number instead of name for condition testing specialization.
+
+Added support for profession cooldowns (e.g., Lifeblood, Survey).
+------------------------------------------------------------------------
+r267 | tomber | 2012-11-01 03:58:07 +0000 (Thu, 01 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/Conditions.lua
+
+Fix error in condition.lua that prevented tests from being run. Replaces previous build.
+------------------------------------------------------------------------
