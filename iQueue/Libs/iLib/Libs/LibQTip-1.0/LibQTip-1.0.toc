@@ -12,7 +12,7 @@
 ## X-Curse-Project-Name: LibQTip-1.0
 ## X-Curse-Project-ID: libqtip-1-0
 ## X-Curse-Repository-ID: wow/libqtip-1-0/mainline
-## X-Curse-Packaged-Version: r42
+## X-Curse-Packaged-Version: r52
 ## X-Curse-Project-Name: iLib
 ## X-Curse-Project-ID: ilib
 ## X-Curse-Repository-ID: wow/ilib/mainline

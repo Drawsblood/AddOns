@@ -1,0 +1,19 @@
+------------------------------------------------------------------------
+r25 | thaoky | 2012-11-29 16:20:22 +0000 (Thu, 29 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/DataStore_Achievements.toc
+
+5.1 ToC update
+------------------------------------------------------------------------
+r24 | thaoky | 2012-11-28 17:57:50 +0000 (Wed, 28 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/DataStore_Achievements.lua
+
+Scanning tabards temporarily disabled.
+------------------------------------------------------------------------
+r23 | thaoky | 2012-09-13 17:54:32 +0000 (Thu, 13 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/DataStore_Achievements.lua
+
+Fixed usage of underscore in the code.
+------------------------------------------------------------------------

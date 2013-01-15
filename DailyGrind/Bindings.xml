@@ -1,0 +1,14 @@
+﻿<Bindings>
+  <Binding name="Toggle Daily Grind" header="DAILYGRIND">
+    DailyGrind:Toggle();
+    DEFAULT_CHAT_FRAME:AddMessage(addonAbbr.." "..DailyGrind:GetStatus());
+  </Binding>
+  <Binding name="Enable Daily Grind" header="DAILYGRIND">
+    DailyGrind:SetEnabled(true);
+    DEFAULT_CHAT_FRAME:AddMessage(addonAbbr.." "..DailyGrind:GetStatus());
+  </Binding>
+  <Binding name="Disable Daily Grind" header="DAILYGRIND">
+    DailyGrind:SetEnabled(false);
+    DEFAULT_CHAT_FRAME:AddMessage(addonAbbr.." "..DailyGrind:GetStatus());
+  </Binding>
+</Bindings>

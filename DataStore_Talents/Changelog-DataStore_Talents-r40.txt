@@ -1,0 +1,13 @@
+------------------------------------------------------------------------
+r40 | thaoky | 2012-11-29 16:28:35 +0000 (Thu, 29 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/DataStore_Talents.toc
+
+5.1 ToC update
+------------------------------------------------------------------------
+r39 | thaoky | 2012-09-13 17:57:42 +0000 (Thu, 13 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/DataStore_Talents.lua
+
+Fixed usage of underscore in the code.
+------------------------------------------------------------------------

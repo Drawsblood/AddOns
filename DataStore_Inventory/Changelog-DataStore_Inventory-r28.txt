@@ -1,0 +1,17 @@
+------------------------------------------------------------------------
+r28 | thaoky | 2012-11-29 16:27:59 +0000 (Thu, 29 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/DataStore_Inventory.toc
+
+5.1 ToC update
+------------------------------------------------------------------------
+r27 | thaoky | 2012-09-02 10:39:44 +0000 (Sun, 02 Sep 2012) | 3 lines
+Changed paths:
+   M /trunk/DataStore_Inventory.toc
+   A /trunk/Locales/itIT.lua
+   M /trunk/locale.xml
+
+5.0.001 Commit
+
+Added support for itIT
+------------------------------------------------------------------------

@@ -1,0 +1,16 @@
+------------------------------------------------------------------------
+r26 | thaoky | 2012-11-29 16:28:08 +0000 (Thu, 29 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/DataStore_Mails.toc
+
+5.1 ToC update
+------------------------------------------------------------------------
+r25 | thaoky | 2012-09-02 10:40:56 +0000 (Sun, 02 Sep 2012) | 2 lines
+Changed paths:
+   M /trunk/DataStore_Mails.toc
+   A /trunk/Locales/itIT.lua
+   M /trunk/locale.xml
+
+5.0.001 Commit
+Added support for itIT
+------------------------------------------------------------------------

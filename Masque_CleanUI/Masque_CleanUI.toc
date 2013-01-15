@@ -1,0 +1,8 @@
+## Interface: 50100
+## Title: Masque: Clean UI
+## Author: Nirriti@Kath'goroth
+## Version: 5.8
+## Notes: Masque Skin for the CleanUI look and feel
+## Dependencies: Masque
+
+Masque_CleanUI.lua

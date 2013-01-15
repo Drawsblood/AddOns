@@ -44,9 +44,9 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 8187 $"):sub(12, -3)),
-	DisplayVersion = "4.11.6", -- the string that is shown as version
-	ReleaseRevision = 8187 -- the revision of the latest stable version that is available
+	Revision = tonumber(("$Revision: 8421 $"):sub(12, -3)),
+	DisplayVersion = "5.1.0", -- the string that is shown as version
+	ReleaseRevision = 8421 -- the revision of the latest stable version that is available
 }
 
 -- Legacy crap; that stupid "Version" field was never a good idea.
@@ -350,11 +350,11 @@ do
 	end
 
 	function argsMT.__index:GetSrcCreatureID()
-		return tonumber(self.sourceGUID:sub(7, 10), 16) or 0
+		return tonumber(self.sourceGUID:sub(6, 10), 16) or 0
 	end
 	
 	function argsMT.__index:GetDestCreatureID()
-		return tonumber(self.destGUID:sub(7, 10), 16) or 0
+		return tonumber(self.destGUID:sub(6, 10), 16) or 0
 	end
 	
 	local function handleEvent(self, event, ...)
@@ -838,7 +838,7 @@ SlashCmdList["DEADLYBOSSMODS"] = function(msg)
 		end
 		local timer = tonumber(cmd:sub(6)) or 5
 		local timer = timer * 60
-		local channel = (IsInRaid() and "RAID_WARNING") or "PARTY"
+		local channel = (IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and "INSTANCE_CHAT") or (IsInRaid() and "RAID_WARNING") or "PARTY"
 		DBM:CreatePizzaTimer(timer, DBM_CORE_TIMER_BREAK, true)
 		DBM:Unschedule(SendChatMessage)
 		SendChatMessage(DBM_CORE_BREAK_START:format(timer/60), channel)
@@ -852,7 +852,7 @@ SlashCmdList["DEADLYBOSSMODS"] = function(msg)
 			return DBM:AddMsg(DBM_ERROR_NO_PERMISSION)
 		end
 		local timer = tonumber(cmd:sub(5)) or 10
-		local channel = (IsInRaid() and "RAID_WARNING") or "PARTY"
+		local channel = (IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and "INSTANCE_CHAT") or (IsInRaid() and "RAID_WARNING") or "PARTY"
 		DBM:CreatePizzaTimer(timer, DBM_CORE_TIMER_PULL, true)
 		DBM:Unschedule(SendChatMessage)
 		SendChatMessage(DBM_CORE_ANNOUNCE_PULL:format(timer), channel)
@@ -1042,6 +1042,7 @@ end
 do
 	local ignore, cancel
 	StaticPopupDialogs["DBM_CONFIRM_IGNORE"] = {
+		preferredIndex = STATICPOPUP_NUMDIALOGS,
 		text = DBM_PIZZA_CONFIRM_IGNORE,
 		button1 = YES,
 		button2 = NO,
@@ -1050,8 +1051,7 @@ do
 			DBM.Bars:CancelBar(cancel)
 		end,
 		timeout = 0,
-		hideOnEscape = 1,
-		preferredIndex = 3,
+		hideOnEscape = 1
 	}
 
 	DEFAULT_CHAT_FRAME:HookScript("OnHyperlinkClick", function(self, link, string, button, ...)
@@ -1436,6 +1436,7 @@ end
 do
 	local function showOldVerWarning()
 		StaticPopupDialogs["DBM_OLD_VERSION"] = {
+			preferredIndex = STATICPOPUP_NUMDIALOGS,
 			text = DBM_CORE_ERROR_DBMV3_LOADED,
 			button1 = DBM_CORE_OK,
 			OnAccept = function()
@@ -1444,8 +1445,7 @@ do
 			end,
 			timeout = 0,
 			exclusive = 1,
-			whileDead = 1,
-			preferredIndex = 3,
+			whileDead = 1
 		}
 		StaticPopup_Show("DBM_OLD_VERSION")
 	end
@@ -1580,7 +1580,7 @@ function DBM:UPDATE_MOUSEOVER_UNIT()
 	if IsInInstance() or UnitIsDead("player") or UnitIsDead("mouseover") then return end--If you're in an instance no reason to waste cpu. If THE BOSS dead, no reason to load a mod for it. To prevent rare lua error, needed to filter on player dead.
 	local guid = UnitGUID("mouseover")
 	if guid and (bit.band(guid:sub(1, 5), 0x00F) == 3 or bit.band(guid:sub(1, 5), 0x00F) == 5) then
-		local cId = tonumber(guid:sub(7, 10), 16)
+		local cId = tonumber(guid:sub(6, 10), 16)
 		if (cId == 17711 or cId == 18728) and not IsAddOnLoaded("DBM-Outlands") then--Burning Crusade World Bosses: Doomwalker and Kazzak
 			for i, v in ipairs(DBM.AddOns) do
 				if v.modId == "DBM-Outlands" then
@@ -1617,7 +1617,7 @@ function DBM:PLAYER_TARGET_CHANGED()
 	if IsInInstance() or UnitIsDead("target") then return end--If you're in an instance no reason to waste cpu. If it's dead, no reason to load a mod for it.
 	local guid = UnitGUID("target")
 	if guid and (bit.band(guid:sub(1, 5), 0x00F) == 3 or bit.band(guid:sub(1, 5), 0x00F) == 5) then
-		local cId = tonumber(guid:sub(7, 10), 16)
+		local cId = tonumber(guid:sub(6, 10), 16)
 		if (cId == 17711 or cId == 18728) and not IsAddOnLoaded("DBM-Outlands") then
 			for i, v in ipairs(DBM.AddOns) do
 				if v.modId == "DBM-Outlands" then
@@ -1905,6 +1905,7 @@ do
 		local accessList
 		
 		StaticPopupDialogs["DBM_INSTANCE_ID_PERMISSION"] = {
+			preferredIndex = STATICPOPUP_NUMDIALOGS,
 			text = DBM_REQ_INSTANCE_ID_PERMISSION,
 			button1 = YES,
 			button2 = NO,
@@ -1920,8 +1921,7 @@ do
 			noCancelOnReuse = 1,
 			multiple = 1,
 			showAlert = 1,
-			whileDead = 1,
-			preferredIndex = 3,
+			whileDead = 1
 		}
 		
 		syncHandlers["IR"] = function(sender)
@@ -2266,7 +2266,7 @@ do
 			local id = (i == 0 and "target") or uId..i.."target"
 			local guid = UnitGUID(id)
 			if guid and (bit.band(guid:sub(1, 5), 0x00F) == 3 or bit.band(guid:sub(1, 5), 0x00F) == 5) then
-				local cId = tonumber(guid:sub(7, 10), 16)
+				local cId = tonumber(guid:sub(6, 10), 16)
 				targetList[cId] = id
 			end
 		end
@@ -2347,7 +2347,7 @@ do
 			local bossUnitId = "boss"..i
 			local bossExists = UnitExists(bossUnitId)
 			local bossGUID = bossExists and not UnitIsDead(bossUnitId) and UnitGUID(bossUnitId) -- check for UnitIsVisible maybe?
-			local bossCId = bossGUID and tonumber(bossGUID:sub(7, 10), 16)
+			local bossCId = bossGUID and tonumber(bossGUID:sub(6, 10), 16)
 			if bossCId and (type(cId) == "number" and cId == bossCId or type(cId) == "table" and checkEntry(cId, bossCId)) then
 				return true
 			end
@@ -2447,6 +2447,8 @@ function checkWipe(confirm)
 	if #inCombat > 0 then
 		local wipe = true
 		if IsInScenarioGroup() then -- prevent wipe on ghost in Scenario Group.
+			wipe = false
+		elseif IsEncounterInProgress() then
 			wipe = false
 		else
 			local uId = (IsInRaid() and "raid") or "party"
@@ -2569,7 +2571,7 @@ function DBM:StartCombat(mod, delay, synced)
 end
 
 function DBM:UNIT_HEALTH(uId)
-	local cId = UnitGUID(uId) and tonumber(UnitGUID(uId):sub(7, 10), 16)
+	local cId = UnitGUID(uId) and tonumber(UnitGUID(uId):sub(6, 10), 16)
 	if not cId then
 		return
 	end
@@ -2807,7 +2809,7 @@ end
 
 function DBM:UNIT_DIED(args)
 	if bit.band(args.destGUID:sub(1, 5), 0x00F) == 3 or bit.band(args.destGUID:sub(1, 5), 0x00F) == 5  then
-		self:OnMobKill(tonumber(args.destGUID:sub(7, 10), 16))
+		self:OnMobKill(tonumber(args.destGUID:sub(6, 10), 16))
 	end
 end
 DBM.UNIT_DESTROYED = DBM.UNIT_DIED
@@ -2929,20 +2931,27 @@ end
 
 do
 	local function requestTimers()
-		local uId = (IsInRaid() and "raid") or "party"
-		for i = 0, math.max(GetNumGroupMembers(), GetNumSubgroupMembers()) do
-			local id = (i == 0 and "player") or uId..i
-			if UnitAffectingCombat(id) and not UnitIsDeadOrGhost(id) then
+		if #inCombat == 0 then
+			if IsEncounterInProgress() then
 				DBM:RequestTimers()
-				break
+			else
+				local uId = (IsInRaid() and "raid") or "party"
+				for i = 0, math.max(GetNumGroupMembers(), GetNumSubgroupMembers()) do
+					local id = (i == 0 and "player") or uId..i
+					if UnitAffectingCombat(id) and not UnitIsDeadOrGhost(id) then
+						DBM:RequestTimers()
+						break
+					end
+				end
 			end
 		end
 	end
 
 	function DBM:PLAYER_ENTERING_WORLD()
-		if #inCombat == 0 then
-			DBM:Schedule(3.5, requestTimers) -- not sure how late or early PLAYER_ENTERING_WORLD fires. Since boss mod loading takes 3 sec after entering zone, delays more will be good?
-		end
+		DBM:Schedule(6, requestTimers) -- Time recovery. 3.5 sec too early if you have slow machine. try multiple check
+		DBM:Schedule(10, requestTimers)
+		DBM:Schedule(14, requestTimers)
+		DBM:Schedule(18, requestTimers)
 --		self:LFG_UPDATE()
 --		self:Schedule(10, function() if not DBM.Options.HelpMessageShown then DBM.Options.HelpMessageShown = true DBM:AddMsg(DBM_CORE_NEED_SUPPORT) end end)
 		self:Schedule(10, function() if not DBM.Options.SettingsMessageShown then DBM.Options.SettingsMessageShown = true DBM:AddMsg(DBM_HOW_TO_USE_MOD) end end)
@@ -2985,6 +2994,10 @@ do
 	
 	-- sender is a presenceId for real id messages, a character name otherwise
 	local function onWhisper(msg, sender, isRealIdMessage)
+		-- ignore oQueue messages
+		if msg and msg:sub(1, 3) == "OQ," then
+			return
+		end
 		if msg == "status" and #inCombat > 0 and DBM.Options.StatusEnabled then
 			if not difficultyText then -- prevent error when timer recovery function worked and etc (StartCombat not called)
 				difficultyText = select(2, DBM:GetCurrentInstanceDifficulty())
@@ -3403,41 +3416,39 @@ end
 
 function bossModPrototype:GetUnitCreatureId(uId)
 	local guid = UnitGUID(uId)
-	return (guid and (tonumber(guid:sub(7, 10), 16))) or 0
+	return (guid and (tonumber(guid:sub(6, 10), 16))) or 0
 end
 
 function bossModPrototype:GetCIDFromGUID(guid)
-	return (guid and (tonumber(guid:sub(7, 10), 16))) or 0
+	return (guid and (tonumber(guid:sub(6, 10), 16))) or 0
 end
+
+local bossTargetuIds = {
+	[1] = "target",
+	[2] = "focus",
+	[3] = "boss1",
+	[4] = "boss2",
+	[5] = "boss3",
+	[6] = "boss4",
+	[7] = "boss5"
+}
 
 function bossModPrototype:GetBossTarget(cid)
 	cid = cid or self.creatureId
-	local name, realm, uid
-	if self:GetUnitCreatureId("target") == cid then
-		name, realm = UnitName("targettarget")
-		uid = "targettarget"
-	elseif self:GetUnitCreatureId("focus") == cid then	-- we check our own focus frame, maybe the boss is there ;)
-		name, realm = UnitName("focustarget")
-		uid = "focustarget"
-	elseif self:GetUnitCreatureId("boss1") == cid then
-		name, realm = UnitName("boss1target")
-		uid = "boss1target"
-	elseif self:GetUnitCreatureId("boss2") == cid then
-		name, realm = UnitName("boss2target")
-		uid = "boss2target"
-	elseif self:GetUnitCreatureId("boss3") == cid then
-		name, realm = UnitName("boss3target")
-		uid = "boss3target"
-	elseif self:GetUnitCreatureId("boss4") == cid then
-		name, realm = UnitName("boss4target")
-		uid = "boss4target"
-	elseif self:GetUnitCreatureId("boss5") == cid then
-		name, realm = UnitName("boss5target")
-		uid = "boss5target"
-	elseif IsInRaid() then
+	local name, uid
+	for i, uId in ipairs(bossTargetuIds) do
+		if self:GetUnitCreatureId(uId) == cid then
+			name = DBM:GetUnitFullName(uId.."target")
+			uid = uId.."target"
+			break
+		end
+	end
+	if name and uid then return name, uid end
+	-- failed to detect from default uIds, scan all group members's target.
+	if IsInRaid() then
 		for i = 1, GetNumGroupMembers() do
 			if self:GetUnitCreatureId("raid"..i.."target") == cid then
-				name, realm = UnitName("raid"..i.."targettarget")
+				name = DBM:GetUnitFullName("raid"..i.."targettarget")
 				uid = "raid"..i.."targettarget"
 				break
 			end
@@ -3445,16 +3456,13 @@ function bossModPrototype:GetBossTarget(cid)
 	elseif IsInGroup() then
 		for i = 1, GetNumSubgroupMembers() do
 			if self:GetUnitCreatureId("party"..i.."target") == cid then
-				name, realm = UnitName("party"..i.."targettarget")
+				name = DBM:GetUnitFullName("party"..i.."targettarget")
 				uid = "party"..i.."targettarget"
 				break
 			end
 		end
 	end
-	if name and realm then
-		name = name.."-"..realm
-	end
-	return name, uid	
+	return name, uid
 end
 
 function bossModPrototype:GetThreatTarget(cid)
@@ -4880,7 +4888,7 @@ end
 function bossModPrototype:GetBossHPString(cId)
 	for i = 1, 5 do
 		local guid = UnitGUID("boss"..i)
-		if guid and tonumber(guid:sub(7, 10), 16) == cId then
+		if guid and tonumber(guid:sub(6, 10), 16) == cId then
 			return math.floor(UnitHealth("boss"..i) / UnitHealthMax("boss"..i) * 100) .. "%"
 		end
 	end
@@ -4888,7 +4896,7 @@ function bossModPrototype:GetBossHPString(cId)
 	for i = 0, math.max(GetNumGroupMembers(), GetNumSubgroupMembers()) do
 		local unitId = ((i == 0) and "target") or idType..i.."target"
 		local guid = UnitGUID(unitId)
-		if guid and (tonumber(guid:sub(7, 10), 16)) == cId then
+		if guid and (tonumber(guid:sub(6, 10), 16)) == cId then
 			return math.floor(UnitHealth(unitId)/UnitHealthMax(unitId) * 100).."%"
 		end
 	end

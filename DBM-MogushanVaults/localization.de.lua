@@ -65,7 +65,17 @@ L:SetMiscLocalization({
 ----------------------
 L = DBM:GetModLocalization(687)
 
+L:SetWarningLocalization({
+	DarknessSoon		= "Schild der Dunkelheit in %d Sekunden"
+})
+
+L:SetTimerLocalization({
+	timerUSRevive		= "Unsterblicher Schatten Neuformung"
+})
+
 L:SetOptionLocalization({
+	DarknessSoon		= "Zeige Vorwarnungscountdown für $spell:117697 (5s zuvor)",
+	timerUSRevive		= "Zeige Zeit bis sich $spell:117506 neu formen",
 	RangeFrame			= "Zeige Abstandsfenster (8m)"
 })
 
@@ -86,7 +96,6 @@ L:SetTimerLocalization({
 L:SetOptionLocalization({
 	specWarnDespawnFloor	= "Zeige Spezialwarnung bevor der Boden (Energievortex) verschwindet",
 	timerDespawnFloor		= "Zeige Zeit bis der Boden (Energievortex) verschwindet",
-	SetIconOnCreature		= "Setze Zeichen auf $journal:6193",
 	SetIconOnDestabilized	= DBM_CORE_AUTO_ICONS_OPTION_TEXT:format(132226)
 })
 
@@ -98,6 +107,7 @@ L= DBM:GetModLocalization(677)
 
 L:SetOptionLocalization({
 	InfoFrame		= "Zeige Infofenster für Spieler, welche von $spell:116525 betroffen sind",
+	CountOutCombo	= "Zähle akkustisch die Anzahl der $journal:5673 Wirkungen\nHINWEIS: Dafür ist derzeit nur die weibliche Stimme verfügbar.",
 	ArrowOnCombo	= "Zeige DBM-Pfeil während $journal:5673  HINWEIS: Nimmt an,\ndass sich der Tank vor dem Boss befindet und alle anderen dahinter."
 })
 

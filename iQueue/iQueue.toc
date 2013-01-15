@@ -1,11 +1,11 @@
 ## Interface: 50100
 ## Title: i|cffffffaaQueue|r
-## Version: 2.0.3
+## Version: 2.0.5
 ## Notes: The ultimate LFD and PvP Queue LDB addon!
 ## Author: grdn
 ## SavedVariables: iQueueDB
 ## OptionalDeps: Ace3, iLib, LibCrayon-3.0
-## X-Curse-Packaged-Version: 2.0.3-release3
+## X-Curse-Packaged-Version: 2.0.5
 ## X-Curse-Project-Name: iQueue
 ## X-Curse-Project-ID: iqueue
 ## X-Curse-Repository-ID: wow/iqueue/mainline

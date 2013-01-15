@@ -1,0 +1,8 @@
+## Interface: 50001
+## Title: Masque - Darkscail
+## Version: 1
+## Notes: Darkscail skin for Masque
+## Author: firebunny - Outland EU
+## X-Category: Action Bars
+## Dependencies Masque
+Skins.lua

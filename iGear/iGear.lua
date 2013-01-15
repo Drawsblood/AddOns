@@ -8,6 +8,7 @@ LibStub("AceBucket-3.0"):Embed(iGear);
 
 local L = LibStub("AceLocale-3.0"):GetLocale(AddonName);
 
+local Dialog = LibStub("LibDialog-1.0");
 local LibCrayon = LibStub("LibCrayon-3.0");
 
 local _G = _G;
@@ -19,6 +20,26 @@ local format = _G.string.format;
 
 LibStub("iLib"):Register(AddonName, nil, iGear);
 
+local DialogTable = {
+	text = "",
+	on_show = function(self)
+		if( iGear:MerchantCanGuildRepair() ) then
+			self.buttons[2]:Enable();
+		else
+			self.buttons[2]:Disable();
+		end
+	end,
+	buttons = {
+		{text = _G.PLAYER, on_click = function()
+			iGear:MerchantDoRepair();
+		end},
+		{text = _G.GUILD, on_click = function()
+			iGear:MerchantDoGuildRepair();
+		end},
+		{text = _G.CANCEL},
+	},
+};
+Dialog:Register("iGearRepair", DialogTable);
 
 -----------------------------------------
 -- Variables, functions and colors
@@ -52,30 +73,31 @@ local COLOR_GOLD = "|cfffed100%s|r";
 --  - b  9: indicates whether an item is equipped in the slot
 --  - s 10: stores the itemlink of the weared item in this slot
 --  - b 11: indicates whether the slot must be equipped or not
---  - b 12: indicates whether the Slot is used by the class or not
 local EquipSlots = {
---   1           				2  3      4  5  6  7      8  9      10, 11		 12
-	{"HeadSlot",					0, true,  0, 0, 0, false, 0, false, "", true,  true},	-- 1
-	{"NeckSlot",					0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 2
-	{"ShoulderSlot",			0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 3
-	{"BackSlot",					0, false, 0, 0, 0, true,  0, false, "", true,  true},	-- 4
-	{"ChestSlot",					0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 5
+--   1           				2  3      4  5  6  7      8  9      10, 11
+	{"HeadSlot",					0, true,  0, 0, 0, false, 0, false, "", true},	-- 1
+	{"NeckSlot",					0, false, 0, 0, 0, false, 0, false, "", true},	-- 2
+	{"ShoulderSlot",			0, true,  0, 0, 0, true,  0, false, "", true},	-- 3
+	{"BackSlot",					0, false, 0, 0, 0, true,  0, false, "", true},	-- 4
+	{"ChestSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 5
 	--{"ShirtSlot" ... }
 	--{"TabardSlot" ... }
-	{"WristSlot",					0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 6
-	{"HandsSlot",					0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 7
-	{"WaistSlot",					0, true,  0, 0, 0, false, 0, false, "", true,  true},	-- 8
-	{"LegsSlot",					0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 9
-	{"FeetSlot",					0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 10
-	{"Finger0Slot",				0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 11
-	{"Finger1Slot",				0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 12
-	{"Trinket0Slot",			0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 13
-	{"Trinket1Slot",			0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 14
-	{"MainHandSlot",			0, true,  0, 0, 0, true,  0, false, "", false, false},-- 15
-	{"SecondaryHandSlot",	0, true,  0, 0, 0, true,  0, false, "", false, false},-- 16
+	{"WristSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 6
+	{"HandsSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 7
+	{"WaistSlot",					0, true,  0, 0, 0, false, 0, false, "", true},	-- 8
+	{"LegsSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 9
+	{"FeetSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 10
+	{"Finger0Slot",				0, false, 0, 0, 0, false, 0, false, "", true},	-- 11
+	{"Finger1Slot",				0, false, 0, 0, 0, false, 0, false, "", true},	-- 12
+	{"Trinket0Slot",			0, false, 0, 0, 0, false, 0, false, "", true},	-- 13
+	{"Trinket1Slot",			0, false, 0, 0, 0, false, 0, false, "", true},	-- 14
+	{"MainHandSlot",			0, true,  0, 0, 0, true,  0, false, "", true},	-- 15
+	{"SecondaryHandSlot",	0, true,  0, 0, 0, true,  0, false, "", false},	-- 16
 	-- the ranged slot got completely removed
 	--{"RangedSlot",				0, true,  0, 0, 0, true,  0, false, "", false, false}	-- 17
 };
+
+ES=EquipSlots;
 
 do
 	local mt = {
@@ -91,7 +113,6 @@ do
 			elseif( k == "equipped" ) then return t[9]
 			elseif( k == "link" ) then return t[10]
 			elseif( k == "mustEquip" ) then return t[11]
-			elseif( k == "used" ) then return t[12]
 			end
 		end,
 		__newindex = function(t, k, v)
@@ -106,8 +127,7 @@ do
 			elseif( k == "enchant" ) then slot = 8
 			elseif( k == "equipped" ) then slot = 9
 			elseif( k == "link" ) then slot = 10
-			elseif( k == "mustEquip" ) then slot = 11
-			-- 12: what the hell...?!
+			elseif( k == "mustEquip" ) then slot = 11;
 			end
 			
 			if( slot ) then
@@ -210,7 +230,6 @@ function iGear:EventHandler()
 	
 	local isEquipped, repCosts, durability, enchant;
 	
-	self:CheckWeaponSlots();
 	self:ScanBagsForRepCosts();
 	if( isBanking ) then
 		self:ScanBagsForRepCosts(true);
@@ -249,6 +268,8 @@ function iGear:EventHandler()
 		end
 	end
 	
+	self:CheckWeaponSlots();
+	
 	self:UpdateBroker();
 	self:CheckTooltips("Main");
 end
@@ -267,9 +288,7 @@ function iGear:MerchantInteraction(isMerchant)
 	if( isRepairing ) then
 		self:MerchantAutoRepair();
 	else
-		if( _G.StaticPopup_FindVisible("IGEAR_AUTOREPAIR") ) then
-			_G.StaticPopup_Hide("IGEAR_AUTOREPAIR");
-		end
+		Dialog:Dismiss("iGearRepair");
 	end
 	
 	self:CheckTooltips("Main");
@@ -287,14 +306,14 @@ function iGear:MerchantAutoRepair()
 			self:MerchantDoRepair();
 		end
 	else
-		_G.StaticPopupDialogs["IGEAR_AUTOREPAIR"].text =
-			("%s\n%s: %s"):format(L["Who is paying the bill?"], L["Total Cost"], self:FormatMoney(RepairCosts + BagRepairCosts));
-		_G.StaticPopup_Show("IGEAR_AUTOREPAIR");
+		DialogTable.text = ("%s\n%s: %s"):format(L["Who is paying the bill?"], L["Total Cost"], self:FormatMoney(RepairCosts + BagRepairCosts));
+		Dialog:Spawn("iGearRepair");
 	end
 end
 
 function iGear:MerchantDoRepair()
 	_G.RepairAllItems();
+	print(L["Total Cost"]..": "..(self:FormatMoney(RepairCosts + BagRepairCosts)));
 end
 
 function iGear:MerchantCanGuildRepair()
@@ -304,6 +323,7 @@ end
 function iGear:MerchantDoGuildRepair()
 	if( self:MerchantCanGuildRepair() ) then
 		_G.RepairAllItems(1);
+		print(L["Total Cost"]..": "..(self:FormatMoney(RepairCosts + BagRepairCosts)));
 		return;
 	end
 	
@@ -341,45 +361,85 @@ do
 	local MH = EquipSlots[15];
 	local OH = EquipSlots[16];
 	
-	-- Two Hand OR Main/Off Hand:	Warrior, Paladin, DeathKnight, Priest, Mage, Warlock, Druid, Shaman, Monk
-	-- Just Mainhand:							Hunter
-	-- Main/Off Hand:							Rogue
-	
+	local function check_weapon(invtype)
+		local mainhand = select(9, _G.GetItemInfo(MH.link));
+		
+		-- data is not fully loaded
+		if( MH.equipped and not mainhand ) then
+			LibStub("AceTimer-3.0"):ScheduleTimer(iGear.EventHandler, 0.5, iGear); -- didn't want to add AceTimer to my addon object
+			return false;
+		end
+		
+		return mainhand == invtype;
+	end
+
 	function iGear:CheckWeaponSlots()
-		MH.mustEquip = false;
+		MH.mustEquip = true;
 		OH.mustEquip = false;
 		
-		-----------------------
-		-- these two are easy!
+		-- rogues always need to wear a second weapon
 		if( class == "ROGUE" ) then
-			MH.mustEquip = true;
 			OH.mustEquip = true;
-		elseif( class == "HUNTER" ) then
-			MH.mustEquip = true;
-		--end easiness :D
-		-----------------------
-		else
-			local _, _, _, _, _, _, _, _, mh, _, _ = _G.GetItemInfo(MH.link);
-			
-			if( mh == "INVTYPE_2HWEAPON" ) then
-				MH.mustEquip = true;
-				
-				if( class == "WARRIOR" and _G.GetSpecialization() == 2 ) then -- Furor warriors have TitanGrip
-					OH.mustEquip = true;
+			return;
+		end -- tested
+		
+		local spec = _G.GetSpecialization();
+		local is_twohand = check_weapon("INVTYPE_2HWEAPON");
+		
+		-- fury warriors always can wear two weapons, arms warrior is forced to wear twohand
+		if( class == "WARRIOR" ) then
+			if( spec == 2 ) then -- fury
+				OH.mustEquip = true;
+				return;
+			elseif( spec == 1 and not is_twohand ) then -- arms
+				MH.equipped = false;
+				return;
+			else -- prot
+				OH.mustEquip = true;
+				return;
+			end
+		end -- tested
+		
+		-- hunters are forced to use a ranged weapon in order to use their skills
+		if( class == "HUNTER" ) then
+			if( not check_weapon("INVTYPE_RANGEDRIGHT") ) then
+				MH.equipped = false;
+			end
+			return;
+		end -- tested
+		
+		-- retri paladins need a twohand weapon, all others onehand and shield or at least offhand
+		if( class == "PALADIN" ) then
+			if( spec == 3 ) then -- retri
+				if( not is_twohand ) then
+					MH.equipped = false;
 				end
 			else
-				MH.mustEquip = true;
 				OH.mustEquip = true;
 			end
-			
-			-- mh isn't set, that means the UI isn't fully loaded and values are wrong
-			-- We give the UI half a second to load until we reload this! :)
-			if( not mh ) then
-				LibStub("AceTimer-3.0"):ScheduleTimer(self.EventHandler, 0.5, self); -- didn't want to add AceTimer to my addon object
+			return;
+		end -- tested
+		
+		-- death knights wear twohand weapons, frost may dual weild
+		if( class == "DEATHKNIGHT" ) then
+			if( not is_twohand ) then
+				if( spec == 2 ) then -- frost
+					OH.mustEquip = true;
+				else
+					MH.equipped = false;
+				end
 			end
-		end
+			return;
+		end -- tested
+		
+		-- default rule for all other classes and/or specs
+		-- when not wearing a twohand (staff, ...), something in the offhand is needed
+		if( not is_twohand ) then
+			OH.mustEquip = true;
+		end -- tested on mage
+		
+		-- the last rule is applied on monks, too, since they can choose themselves if they wanna dual weild or not
 	end
-	
 end
 
 -----------------------
@@ -472,29 +532,35 @@ end
 -- This frame is a fake GameTooltip object which allows us to scan data from it
 _G.CreateFrame("GameTooltip", "iGearScanTip", _G.UIParent, "GameTooltipTemplate");
 
-function iGear:GetNumMissingGems(slot)
-	local stats = _G.GetItemStats(slot.link);
-	if( type(stats) ~= "table" ) then
-		return 0;
-	end
+do
+	local stats = {};
 	
-	local iter, missing = 1, 0;
-	local gem;
-	
-	for k, v in pairs(stats) do
-		if( strsub(k, 0, 12) == 'EMPTY_SOCKET' ) then
-			gem = _G.GetItemGem(slot.link, iter);
-			
-			if( not gem ) then
-				missing = missing + v;
-			end
-			
-			gem = nil;
-			iter = iter + 1;
+	function iGear:GetNumMissingGems(slot)
+		_G.wipe(stats);
+		_G.GetItemStats(slot.link, stats);
+		
+		if( #stats < 1 ) then
+			return 0;
 		end
+		
+		local iter, missing = 1, 0;
+		local gem;
+		
+		for k, num_gems in pairs(stats) do
+			if( k:sub(1, 12) == "EMPTY_SOCKET" ) then
+				for i = 1, num_gems do
+					gem = _G.GetItemGem(slot.link, iter);
+					
+					if( not gem ) then
+						missing = missing + 1;
+					end
+					iter = iter + 1;
+				end
+			end
+		end
+		
+		return missing;
 	end
-	
-	return missing;
 end
 
 function iGear:GetItemEquippedAndCost(slotID)
@@ -758,28 +824,3 @@ function iGear:UpdateTooltip(tip)
 		end
 	end
 end
-
----------------------
--- Final stuff
----------------------
-
-_G.StaticPopupDialogs["IGEAR_AUTOREPAIR"] = {
-	preferredIndex = 3, -- apparently avoids some UI taint
-	button1 = _G.PLAYER,
-	button2 = _G.CANCEL,
-	button3 = _G.GUILD,
-	showAlert = 1,
-	timeout = 0,
-	hideOnEscape = true,
-	OnShow = function(self)
-		if( not iGear:MerchantCanGuildRepair() ) then
-			self.button3:Disable();
-		end
-	end,
-	OnAccept = function()
-		iGear:MerchantDoRepair();
-	end,
-	OnAlt = function()
-		iGear:MerchantDoGuildRepair();
-	end,
-};

@@ -13,7 +13,7 @@ local maxdiff = 10 -- max number of instance difficulties
 local maxcol = 4 -- max columns per player+instance
 
 addon.svnrev = {}
-addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 203 $"):match("%d+"))
+addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 214 $"):match("%d+"))
 
 -- local (optimal) references to provided functions
 local table, math, bit, string, pairs, ipairs, unpack, strsplit, time, type, wipe, tonumber, select, strsub = 
@@ -73,7 +73,13 @@ local currency = {
   396, -- Valor Points
   392, -- Honor Points
   390, -- Conquest Points
+  738, -- Lesser Charm of Good Fortune
+  697, -- Elder Charm of Good Fortune
+  402, -- Ironpaw Token
+  81, -- Epicurean Award
+  515, -- Darkmoon Prize Ticket
 }
+addon.currency = currency
 
 addon.LFRInstances = { 
   [416] = { total=4, base=1 }, -- The Siege of Wyrmrest Temple
@@ -135,6 +141,7 @@ vars.defaultDB = {
 				-- PlayedLevel: integer
 				-- PlayedTotal: integer
 				-- Money: integer
+				-- Zone: string
 
 				-- currency: key: currencyID  value:
 				    -- amount: integer
@@ -206,8 +213,6 @@ vars.defaultDB = {
 		TrackDeserter = true,
 		Currency395 = true, -- Justice Points 
 		Currency396 = true, -- Valor Points
-		Currency392 = false, -- Honor Points
-		Currency390 = false, -- Conquest Points
 		CurrencyMax = false,
 		CurrencyEarned = true,
 	},
@@ -371,6 +376,23 @@ function addon:GetNextDarkmoonResetTime()
   ret = ret - offset
   return ret
 end
+end
+
+function addon:QuestCount(toonname)
+  local t = vars and vars.db.Toons and vars.db.Toons[toonname]
+  if not t then return 0,0 end
+  local dailycount, weeklycount = 0,0
+  -- ticket 96: GetDailyQuestsCompleted() is unreliable, the response is laggy and it fails to count some quests
+  for _,info in pairs(t.Quests) do
+    if info.isDaily then 
+      dailycount = dailycount + 1
+    else
+      weeklycount = weeklycount + 1
+    end
+  end
+  dailycount = math.max(t.DailyCount, dailycount) -- include unrecorded quests (completed while addon was off)
+  t.DailyCount = dailycount
+  return dailycount, weeklycount
 end
 
 -- local addon functions below
@@ -894,7 +916,7 @@ function addon:UpdateToonData()
 	  end
 	end
 	local dc = GetDailyQuestsCompleted()
-	if dc > 0 then -- zero during logout
+	if dc > t.DailyCount then -- zero during logout, and may undercount quests
 	  t.DailyCount = dc
 	end
 	t.currency = t.currency or {}
@@ -911,12 +933,11 @@ function addon:UpdateToonData()
         if not addon.logout then
 	  t.Money = GetMoney()
 	end
+	local zone = GetRealZoneText()
+	if zone and #zone > 0 then
+	  t.Zone = zone
+	end
 end
-
-local special_weekly_defaults = {
-     -- Darkmoon Faire "weekly" quests
-     [29433] = true, -- Test Your Strength
-  }
 
 function addon:QuestIsDarkmoonMonthly()
   if QuestIsDaily() then return false end
@@ -961,16 +982,8 @@ local function SI_GetQuestReward()
                    ["isDaily"] = isDaily, 
 		   ["Expires"] = expires,
 		   ["Zone"] = GetRealZoneText() }
-  if isDaily then
-    local c = 0 -- ticket 96: GetDailyQuestsCompleted() unreliable
-    for _,info in pairs(t.Quests) do
-      if info.isDaily then 
-        c = c + 1
-      end
-    end
-    debug("DailyCount: "..t.DailyCount.." => "..c)
-    t.DailyCount = c
-  end
+  local dc, wc = addon:QuestCount(thisToon)
+  debug("DailyCount: "..dc.."  WeeklyCount: "..wc)
 end
 hooksecurefunc("GetQuestReward", SI_GetQuestReward)
 
@@ -997,6 +1010,9 @@ local function ShowToonTooltip(cell, arg, ...)
 	if t.Money then
 	  indicatortip:AddLine(MONEY,GetMoneyString(t.Money))
 	end
+	if t.Zone then
+	  indicatortip:AddLine(ZONE,t.Zone)
+	end
 	if t.PlayedTotal and t.PlayedLevel and ChatFrame_TimeBreakDown then
 	  --indicatortip:AddLine((TIME_PLAYED_TOTAL):format((TIME_DAYHOURMINUTESECOND):format(ChatFrame_TimeBreakDown(t.PlayedTotal))))
 	  --indicatortip:AddLine((TIME_PLAYED_LEVEL):format((TIME_DAYHOURMINUTESECOND):format(ChatFrame_TimeBreakDown(t.PlayedLevel))))
@@ -1016,6 +1032,10 @@ local function ShowQuestTooltip(cell, arg, ...)
 	indicatortip:Clear()
 	indicatortip:SetHeaderFont(tooltip:GetHeaderFont())
 	indicatortip:AddHeader(ClassColorise(vars.db.Toons[toon].Class, toon), qstr)
+	if isDaily then
+	  indicatortip:AddLine(YELLOWFONT .. L["Time Left"] .. ":" .. FONTEND,
+	      SecondsToTime(addon:GetNextDailyResetTime() - time()))
+	end
         local ql = {}
         for id,qi in pairs(vars.db.Toons[toon].Quests) do
           if (not isDaily) == (not qi.isDaily) then
@@ -1617,9 +1637,11 @@ function core:Refresh()
             local truename, instance = addon:LookupInstance(id, nil, true)
             instance[thisToon] = instance[thisToon] or temp[truename] or { }
 	    local info = instance[thisToon][2] or {}
-	    wipe(info)
             instance[thisToon][2] = info
-  	    info.Expires = weeklyreset
+	    if not (info.Expires and info.Expires < (time() + 300)) then -- ticket 109: don't refresh expiration close to reset
+	      wipe(info)
+  	      info.Expires = weeklyreset
+	    end
             info.ID = -1*numEncounters
 	    for i=1, numEncounters do
 	      local bossName, texture, isKilled = GetLFGDungeonEncounterInfo(id, i);
@@ -1630,7 +1652,8 @@ function core:Refresh()
 
         local quests = GetQuestsCompleted()
         for _,einfo in pairs(addon.WorldBosses) do
-           if quests and quests[einfo.quest] and weeklyreset then
+           if weeklyreset and (IsQuestFlaggedCompleted(einfo.quest) or 
+	      (quests and quests[einfo.quest])) then
              local truename = einfo.name
              local instance = vars.db.Instances[truename] 
              instance[thisToon] = instance[thisToon] or temp[truename] or { }
@@ -2017,20 +2040,14 @@ function core:ShowTooltip(anchorframe)
 	end
 
         do
-                local weeklycnt = localarr("weeklycnt")
                 local showd, showw 
                 for toon, t in cpairs(vars.db.Toons) do
-			weeklycnt[toon] = 0
-			for _,qi in pairs(t.Quests) do
-				if not qi.isDaily then
-					weeklycnt[toon] = weeklycnt[toon] + 1
-				end
-                        end
-                        if t.DailyCount > 0 and (vars.db.Tooltip.TrackDailyQuests or showall) then
+                        local dc, wc = addon:QuestCount(toon)
+                        if dc > 0 and (vars.db.Tooltip.TrackDailyQuests or showall) then
                                 showd = true
                                 addColumns(columns, toon, tooltip)
                         end
-                        if weeklycnt[toon] > 0 and (vars.db.Tooltip.TrackWeeklyQuests or showall) then
+                        if wc > 0 and (vars.db.Tooltip.TrackWeeklyQuests or showall) then
                                 showw = true
                                 addColumns(columns, toon, tooltip)
                         end
@@ -2045,15 +2062,16 @@ function core:ShowTooltip(anchorframe)
                         showw = tooltip:AddLine(YELLOWFONT .. L["Weekly Quests"] .. FONTEND)
                 end
                 for toon, t in cpairs(vars.db.Toons) do
-                        if showd and columns[toon..1] and t.DailyCount > 0 then
-				local qstr = t.DailyCount
+                        local dc, wc = addon:QuestCount(toon)
+                        if showd and columns[toon..1] and dc > 0 then
+				local qstr = dc
                                 tooltip:SetCell(showd, columns[toon..1], ClassColorise(t.Class,qstr), "CENTER",maxcol)
                                 tooltip:SetCellScript(showd, columns[toon..1], "OnEnter", ShowQuestTooltip, {toon,qstr.." "..L["Daily Quests"],true})
                                 tooltip:SetCellScript(showd, columns[toon..1], "OnLeave",
                                                              function() indicatortip:Hide(); GameTooltip:Hide() end)
                         end
-                        if showw and columns[toon..1] and weeklycnt[toon] > 0 then
-				local qstr = weeklycnt[toon]
+                        if showw and columns[toon..1] and wc > 0 then
+				local qstr = wc
                                 tooltip:SetCell(showw, columns[toon..1], ClassColorise(t.Class,qstr), "CENTER",maxcol)
                                 tooltip:SetCellScript(showw, columns[toon..1], "OnEnter", ShowQuestTooltip, {toon,qstr.." "..L["Weekly Quests"],false})
                                 tooltip:SetCellScript(showw, columns[toon..1], "OnLeave",
@@ -2070,9 +2088,12 @@ function core:ShowTooltip(anchorframe)
    	    for toon, t in cpairs(vars.db.Toons) do
 		-- ci.name, ci.amount, ci.earnedThisWeek, ci.weeklyMax, ci.totalMax
                 local ci = t.currency and t.currency[idx] 
-		local gotsome = ((ci.earnedThisWeek or 0) > 0 and (ci.weeklyMax or 0) > 0) or
+		local gotsome
+		if ci then
+		  gotsome = ((ci.earnedThisWeek or 0) > 0 and (ci.weeklyMax or 0) > 0) or
 		                ((ci.amount or 0) > 0 and showall)
 		       -- or ((ci.amount or 0) > 0 and ci.weeklyMax == 0 and t.Level == maxlvl)
+		end
 		if ci and gotsome then
 		  addColumns(columns, toon, tooltip)
 		end

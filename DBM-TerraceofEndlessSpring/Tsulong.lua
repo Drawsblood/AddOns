@@ -1,12 +1,13 @@
 local mod	= DBM:NewMod(742, "DBM-TerraceofEndlessSpring", nil, 320)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 8186 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 8411 $"):sub(12, -3))
 mod:SetCreatureID(62442)--62919 Unstable Sha, 62969 Embodied Terror
 mod:SetModelID(42532)
 mod:SetReCombatTime(60)--fix lfr combat re-starts after killed.
 
 mod:RegisterCombat("combat")
+mod:RegisterKill("yell", L.Victory)
 
 mod:RegisterEventsInCombat(
 	"SPELL_AURA_APPLIED",
@@ -41,14 +42,17 @@ local specWarnLightOfDay				= mod:NewSpecialWarningSpell("ej6551", mod:IsHealer(
 local timerNightCD						= mod:NewNextTimer(121, "ej6310", nil, nil, nil, 130013)
 local timerSunbeamCD					= mod:NewCDTimer(41, 122789)
 local timerShadowBreathCD				= mod:NewCDTimer(28, 122752, nil, mod:IsTank() or mod:IsHealer())
-local timerNightmaresCD					= mod:NewCDTimer(15.5, 122770)
+local timerNightmaresCD					= mod:NewNextTimer(15.5, 122770)
 local timerDarkOfNightCD				= mod:NewCDTimer(30.5, "ej6550", nil, nil, nil, 130013)
 local timerDayCD						= mod:NewNextTimer(121, "ej6315", nil, nil, nil, 122789)
 local timerSummonUnstableShaCD			= mod:NewCDTimer(18, "ej6320", nil, nil,nil, "Interface\\Icons\\achievement_raid_terraceofendlessspring04")
 local timerSummonEmbodiedTerrorCD		= mod:NewCDTimer(41, "ej6316", nil, nil, nil, "Interface\\Icons\\achievement_raid_terraceofendlessspring04")
 local timerTerrorizeCD					= mod:NewNextTimer(14, 123012)--Besides being cast 14 seconds after they spawn, i don't know if they recast it if they live too long, their health was too undertuned to find out.
 local timerSunBreathCD					= mod:NewCDTimer(29, 122855)
+local timerBathedinLight				= mod:NewBuffFadesTimer(6, 122858, nil, mod:IsHealer())
 --local timerLightOfDayCD					= mod:NewCDTimer(30.5, "ej6551", nil, mod:IsHealer(), nil, 123716)--Don't have timing for this yet, heroic logs i was sent always wiped VERY early in light phase.
+
+local countdownNightmares				= mod:NewCountdown(15.5, 122770, false)
 
 local berserkTimer						= mod:NewBerserkTimer(490)--a little over 8 min, basically 3rd dark phase is auto berserk.
 
@@ -115,7 +119,8 @@ end
 
 function mod:OnCombatStart(delay)
 	timerShadowBreathCD:Start(8.5-delay)
-	timerNightmaresCD:Start(13.5-delay)
+	timerNightmaresCD:Start(15-delay)
+	countdownNightmares:Start(15-delay)
 	timerDayCD:Start(-delay)
 	if not self:IsDifficulty("lfr25") then
 		berserkTimer:Start(-delay)
@@ -130,9 +135,11 @@ function mod:SPELL_AURA_APPLIED(args)
 		if args:IsPlayer() and (args.amount or 1) >= 9 and (args.amount or 1) % 3 == 0  then
 			specWarnDreadShadows:Show(args.amount)
 		end
-	elseif args:IsSpellID(123012) and args:GetDestCreatureID() == 42832 then
+	elseif args:IsSpellID(123012) and args:GetDestCreatureID() == 62442 then
 		warnTerrorize:Show(args.destName)
 		specWarnTerrorize:Show(args.destName)
+	elseif args:IsSpellID(122858) and args:IsPlayer() then
+		timerBathedinLight:Start()
 	end
 end
 mod.SPELL_AURA_APPLIED_DOSE = mod.SPELL_AURA_APPLIED
@@ -151,7 +158,8 @@ function mod:SPELL_CAST_SUCCESS(args)
 		timerShadowBreathCD:Start()
 --"<267.3 22:12:00> [CLEU] SPELL_CAST_SUCCESS#false#0xF150F3EA00000157#Tsulong#68168#0#0x0000000000000000#nil#-2147483648#-2147483648#124176#Gold Active#1", -- [44606]
 --"<267.4 22:12:01> [CHAT_MSG_MONSTER_YELL] CHAT_MSG_MONSTER_YELL#I thank you, strangers. I have been freed.#Tsulong#####0#0##0#4654##0#false#false", -- [44649]
-	elseif args:IsSpellID(124176) then
+-- 124176 seems not always fires. 123630 seems that followed by after kill events?
+	elseif args:IsSpellID(124176, 123630) then
 		DBM:EndCombat(self)
 	end
 end
@@ -171,10 +179,12 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		targetScansDone = 0
 		self:TargetScanner()
 		timerNightmaresCD:Start()
+		countdownNightmares:Start(15.5)
 	elseif spellId == 123252 and self:AntiSpam(2, 2) then--Dread Shadows Cancel (Sun Phase)
 		timerShadowBreathCD:Cancel()
 		timerSunbeamCD:Cancel()
 		timerNightmaresCD:Cancel()
+		countdownNightmares:Cancel()
 		timerDarkOfNightCD:Cancel()
 		warnDay:Show()
 		timerSunBreathCD:Start()
@@ -189,7 +199,8 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 --		timerLightOfDayCD:Cancel()
 		warnNight:Show()
 		timerShadowBreathCD:Start(10)
-		timerNightmaresCD:Start(16)
+		timerNightmaresCD:Start()
+		countdownNightmares:Start(15.5)
 		timerDayCD:Start()
 		if self:IsDifficulty("heroic10", "heroic25") then
 --			timerDarkOfNightCD:Start(10-delay)--Not enough information yet, no logs of this phase starting anywhere but combat start, and those timers differ. This might have first cast IMMEDIATELY on phase start like day does

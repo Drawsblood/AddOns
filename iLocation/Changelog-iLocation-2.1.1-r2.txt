@@ -1,0 +1,38 @@
+------------------------------------------------------------------------
+r19 | grdn | 2012-12-20 15:10:03 +0000 (Thu, 20 Dec 2012) | 1 line
+Changed paths:
+   A /tags/2.1.1-r2 (from /trunk:17)
+
+- Adding new iLib
+------------------------------------------------------------------------
+r17 | grdn | 2012-12-07 08:11:56 +0000 (Fri, 07 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/iLocation.lua
+   M /trunk/iLocation.toc
+
+- Fixed a little bug with localization
+------------------------------------------------------------------------
+r15 | grdn | 2012-12-07 08:06:17 +0000 (Fri, 07 Dec 2012) | 4 lines
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/Config.lua
+   M /trunk/Locales/deDE.lua
+   M /trunk/Locales/enUS.lua
+   M /trunk/iLocation.lua
+   M /trunk/iLocation.toc
+
+- Changes the way the user is informed about addon updates
+- Added an option to hide coordinates from the ldb
+- Completely removed LibBabble-Zone-3.0 from iLocation, as LibTourist-3.0 now does the localization stuff
+- Added "Current Battle Pet Level"
+------------------------------------------------------------------------
+r13 | grdn | 2012-12-03 14:48:37 +0000 (Mon, 03 Dec 2012) | 2 lines
+Changed paths:
+   M /trunk/Locales/deDE.lua
+   M /trunk/Locales/enUS.lua
+   M /trunk/iLocation.lua
+   M /trunk/iLocation.toc
+
+- Updated TOC to 5.1
+- Added recommended Battle Pet Zones
+------------------------------------------------------------------------

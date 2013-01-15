@@ -1,0 +1,19 @@
+------------------------------------------------------------------------
+r20 | thaoky | 2012-11-29 16:20:49 +0000 (Thu, 29 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/DataStore_Characters.toc
+
+5.1 ToC update
+------------------------------------------------------------------------
+r19 | thaoky | 2012-09-02 10:34:31 +0000 (Sun, 02 Sep 2012) | 4 lines
+Changed paths:
+   M /trunk/DataStore_Characters.lua
+   M /trunk/DataStore_Characters.toc
+   A /trunk/Locales/itIT.lua
+   M /trunk/locale.xml
+
+5.0.001 Commit
+
+MoP Fixes
+Support for itIT.
+------------------------------------------------------------------------

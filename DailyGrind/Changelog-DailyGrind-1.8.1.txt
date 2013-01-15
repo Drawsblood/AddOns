@@ -1,0 +1,36 @@
+------------------------------------------------------------------------
+r125 | deldinor | 2012-11-27 20:42:21 +0000 (Tue, 27 Nov 2012) | 1 line
+Changed paths:
+   A /tags/1.8.1 (from /trunk:124)
+
+Tagging as 1.8.1
+------------------------------------------------------------------------
+r124 | deldinor | 2012-11-27 20:40:15 +0000 (Tue, 27 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/DailyGrind.toc
+
+Version increment for compatibility with 5.1
+------------------------------------------------------------------------
+r122 | deldinor | 2012-10-28 18:46:42 +0000 (Sun, 28 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/Blacklist.lua
+   M /trunk/DailyGrind.lua
+   M /trunk/DailyGrind.toc
+   M /trunk/NpcBlacklist.lua
+   M /trunk/Rewards.lua
+   M /trunk/SupportFunctions.lua
+
+Few minor refactoring and cleanup. Output message modifications.
+------------------------------------------------------------------------
+r120 | deldinor | 2012-10-27 01:47:44 +0000 (Sat, 27 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/DailyGrind.lua
+
+Removed debug flags.
+------------------------------------------------------------------------
+r118 | deldinor | 2012-10-27 01:42:59 +0000 (Sat, 27 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/DailyGrind.lua
+
+Fixed regression issue with recording quests in the history. Reported as "9 - Which Berries? Witchberries."
+------------------------------------------------------------------------

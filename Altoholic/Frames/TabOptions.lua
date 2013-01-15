@@ -124,6 +124,24 @@ local support = {
 
 -- this content will be subject to frequent changes, do not bother translating it !!
 local whatsnew = {
+	{	name = "5.0.002 Changes",
+		bulletedList = {
+			"Integrated the Void Storage to the container's UI (Characters -> Containers).",
+			"Added Mists of Pandaria factions (Grids -> Reputations).",
+			"Added Mists of Pandaria archaeology artefacts (Grids -> Archaeology).",
+			"Added Mists of Pandaria crafts for each professions (Grids -> Tradeskills).",
+			"Fixed a few Lua errors related to Battle Pets. They are temporarily NOT scanned at the Auction House.",
+		},
+	},
+	{	name = "5.0.001d Changes",
+		bulletedList = {
+			"Fixed tooltips sometime being incorrect in Grids -> reputations & currencies.",
+			"Fixed potential tainting issues due to the usage of the underscore in the code.",
+			"Cleared a few source files that were no longer used.",
+			"Fixed scanning of partially completed achievements.",
+			"Fixed Lua errors that appeared in 5.0.5 due to a wrong spell ID for fishing.",
+		},
+	},
 	{	name = "5.0.001c Changes",
 		bulletedList = {
 			"Fixed tooltip showing 'No data' for herbalism in the Skills pane.. for good this time !",

@@ -1,0 +1,16 @@
+------------------------------------------------------------------------
+r38 | thaoky | 2012-11-29 16:27:51 +0000 (Thu, 29 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/DataStore.toc
+
+5.1 ToC update
+------------------------------------------------------------------------
+r37 | thaoky | 2012-09-02 10:20:17 +0000 (Sun, 02 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/DataStore.lua
+   M /trunk/DataStore.toc
+   A /trunk/Locales/itIT.lua
+   M /trunk/locale.xml
+
+5.0.001 Commit
+------------------------------------------------------------------------

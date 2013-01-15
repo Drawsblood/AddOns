@@ -1,0 +1,59 @@
+------------------------------------------------------------------------
+r216 | oscarucb | 2013-01-09 22:31:27 +0000 (Wed, 09 Jan 2013) | 1 line
+Changed paths:
+   A /tags/5.1.0 (from /trunk:215)
+
+Tagging as 5.1.0
+------------------------------------------------------------------------
+r214 | oscarucb | 2013-01-08 12:12:11 +0000 (Tue, 08 Jan 2013) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+tweak to last
+
+------------------------------------------------------------------------
+r213 | oscarucb | 2013-01-08 01:09:39 +0000 (Tue, 08 Jan 2013) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+add zone to toon info
+
+------------------------------------------------------------------------
+r211 | oscarucb | 2013-01-05 19:45:07 +0000 (Sat, 05 Jan 2013) | 3 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+   M /trunk/config.lua
+
+add lesser/greater charms, by popular demand
+and a few other potentially useful currencies
+
+------------------------------------------------------------------------
+r210 | oscarucb | 2013-01-05 16:29:45 +0000 (Sat, 05 Jan 2013) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+drycoded fix to ticket 109: LFR not resetting while logged in
+
+------------------------------------------------------------------------
+r209 | oscarucb | 2012-12-27 14:47:31 +0000 (Thu, 27 Dec 2012) | 3 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+tweak the daily quest accounting
+handle some cases where the counter may appear incorrectly
+
+------------------------------------------------------------------------
+r207 | oscarucb | 2012-12-09 21:46:38 +0000 (Sun, 09 Dec 2012) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+make world boss kill detection more responsive
+
+------------------------------------------------------------------------
+r206 | oscarucb | 2012-12-03 13:12:51 +0000 (Mon, 03 Dec 2012) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+add a timer to the daily tooltip
+
+------------------------------------------------------------------------

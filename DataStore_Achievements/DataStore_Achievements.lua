@@ -62,17 +62,17 @@ end
 local CriteriaCache = {}
 
 local function ScanTabards()
-	local TABARDS_ACHIEVEMENT_ID = 621
-	local NUM_TABARDS = 89
+	-- local TABARDS_ACHIEVEMENT_ID = 621
+	-- local NUM_TABARDS = 89
 	
-	for i = 1, NUM_TABARDS do
-		local _, _, _, _, _, _, _, _, _, criteriaID = GetAchievementCriteriaInfo(TABARDS_ACHIEVEMENT_ID, i)
-		if criteriaID then
-			local _, _, isCompleted = GetAchievementCriteriaInfoByID(TABARDS_ACHIEVEMENT_ID, criteriaID)
+	-- for i = 1, NUM_TABARDS do
+		-- local _, _, _, _, _, _, _, _, _, criteriaID = GetAchievementCriteriaInfo(TABARDS_ACHIEVEMENT_ID, i)
+		-- if criteriaID then
+			-- local _, _, isCompleted = GetAchievementCriteriaInfoByID(TABARDS_ACHIEVEMENT_ID, criteriaID)
 
-			addon.ThisCharacter.Tabards[criteriaID] = (isCompleted == true) and true or nil
-		end
-	end
+			-- addon.ThisCharacter.Tabards[criteriaID] = (isCompleted == true) and true or nil
+		-- end
+	-- end
 end
 
 local function ScanSingleAchievement(id, isCompleted, month, day, year, flags, wasEarnedByMe)

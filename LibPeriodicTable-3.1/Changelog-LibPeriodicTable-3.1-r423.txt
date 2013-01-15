@@ -1,0 +1,85 @@
+------------------------------------------------------------------------
+r423 | ckaotik | 2012-12-30 11:06:14 +0000 (Sun, 30 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/LibPeriodicTable-3.1-ClassSpell/LibPeriodicTable-3.1-ClassSpell.lua
+   M /trunk/LibPeriodicTable-3.1-Consumable/LibPeriodicTable-3.1-Consumable.lua
+   M /trunk/LibPeriodicTable-3.1-CurrencyItems/LibPeriodicTable-3.1-CurrencyItems.lua
+   M /trunk/LibPeriodicTable-3.1-Gear/LibPeriodicTable-3.1-Gear.lua
+   M /trunk/LibPeriodicTable-3.1-InstanceLoot/LibPeriodicTable-3.1-InstanceLoot.lua
+   M /trunk/LibPeriodicTable-3.1-InstanceLootHeroic/LibPeriodicTable-3.1-InstanceLootHeroic.lua
+   M /trunk/LibPeriodicTable-3.1-InstanceLootLFR/LibPeriodicTable-3.1-InstanceLootLFR.lua
+   M /trunk/LibPeriodicTable-3.1-Misc/LibPeriodicTable-3.1-Misc.lua
+   M /trunk/LibPeriodicTable-3.1-Reputation/LibPeriodicTable-3.1-Reputation.lua
+   M /trunk/LibPeriodicTable-3.1-Tradeskill/LibPeriodicTable-3.1-Tradeskill.lua
+   M /trunk/LibPeriodicTable-3.1-TradeskillLevels/LibPeriodicTable-3.1-TradeskillLevels.lua
+   M /trunk/LibPeriodicTable-3.1-TradeskillResultMats/LibPeriodicTable-3.1-TradeskillResultMats.lua
+   M /trunk/LibPeriodicTable-3.1-TransmogSet/LibPeriodicTable-3.1-TransmogSet.lua
+   M /trunk/data.lua
+   M /trunk/dataminer.lua
+
+Full reparse. Fixed zone detection in miner. Added some more transmog sets.
+------------------------------------------------------------------------
+r422 | Gazmik | 2012-12-18 23:51:44 +0000 (Tue, 18 Dec 2012) | 7 lines
+Changed paths:
+   M /trunk/LibPeriodicTable-3.1-Consumable/LibPeriodicTable-3.1-Consumable.lua
+   M /trunk/data.lua
+
+Added most of the Mists of Pandaria foods:
+
+Includes new categories:
+- Consumable.Food.Edible.Fish.Mana and Consumable.Food.Edible.Meat.Mana for a couple of foods that fit in those pet food categories but only restore mana (not health)
+- Consumable.Food.Inedible.Fruit for all the stuff you grow on your farm and cook with. (The USDA says some fruits are vegetables. Blizz says all vegetables are fruit!)
+- Consumable.Food.Cheese.Combo didn't exist before but has something in it now
+- Consumable.Food.Buff.Parry is a new kind of buff food
+------------------------------------------------------------------------
+r421 | muffinmanken | 2012-12-16 00:05:48 +0000 (Sun, 16 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/LibPeriodicTable-3.1-Consumable/LibPeriodicTable-3.1-Consumable.lua
+   M /trunk/LibPeriodicTable-3.1-Misc/LibPeriodicTable-3.1-Misc.lua
+   M /trunk/data.lua
+
+Added MoP flasks and more openables
+------------------------------------------------------------------------
+r420 | muffinmanken | 2012-12-14 22:12:27 +0000 (Fri, 14 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/LibPeriodicTable-3.1-Misc/LibPeriodicTable-3.1-Misc.lua
+   M /trunk/data.lua
+
+Openable: Silkworm Cocoon, Greater Cache of Treasures, and Treasures of the Vale
+------------------------------------------------------------------------
+r419 | muffinmanken | 2012-12-14 19:57:07 +0000 (Fri, 14 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/LibPeriodicTable-3.1-Misc/LibPeriodicTable-3.1-Misc.lua
+   M /trunk/data.lua
+
+Openable: Silkworm Cocoon and Greater Cache of Treasures
+------------------------------------------------------------------------
+r418 | muffinmanken | 2012-12-03 11:43:08 +0000 (Mon, 03 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/LibPeriodicTable-3.1-Misc/LibPeriodicTable-3.1-Misc.lua
+   M /trunk/data.lua
+
+More cleanup on  Misc.Usable.Quest
+------------------------------------------------------------------------
+r417 | muffinmanken | 2012-12-03 11:26:10 +0000 (Mon, 03 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/LibPeriodicTable-3.1-Misc/LibPeriodicTable-3.1-Misc.lua
+   M /trunk/data.lua
+
+More cleanup on  Misc.Usable.Quest and StartsQuest items
+------------------------------------------------------------------------
+r416 | muffinmanken | 2012-11-29 02:02:05 +0000 (Thu, 29 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/LibPeriodicTable-3.1-Misc/LibPeriodicTable-3.1-Misc.lua
+   M /trunk/data.lua
+
+Updated Quest and StartsQuest items
+------------------------------------------------------------------------
+r415 | ckaotik | 2012-11-28 23:14:48 +0000 (Wed, 28 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/LibPeriodicTable-3.1-Reputation/LibPeriodicTable-3.1-Reputation.lua
+   M /trunk/data.lua
+   M /trunk/dataminer.lua
+
+Fixed wrong standing id introduced in Reputation.Reward mining.
+------------------------------------------------------------------------

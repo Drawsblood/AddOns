@@ -1,0 +1,74 @@
+------------------------------------------------------------------------
+r284 | stanzilla | 2012-11-27 20:59:29 +0000 (Tue, 27 Nov 2012) | 1 line
+Changed paths:
+   A /tags/1.4.7.8 (from /trunk:283)
+
+Tagging as 1.4.7.8 with Monk Chi fixes. Stop crying Affinitii.
+------------------------------------------------------------------------
+r283 | stanzilla | 2012-11-27 20:43:01 +0000 (Tue, 27 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/Prototypes.lua
+
+SPELL_POWER_CHI is the new SPELL_POWER_LIGHT_FORCE
+------------------------------------------------------------------------
+r282 | stanzilla | 2012-11-27 19:27:53 +0000 (Tue, 27 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/WeakAuras.toc
+   M /trunk/WeakAurasModelPaths/WeakAurasModelPaths.toc
+   M /trunk/WeakAurasOptions/WeakAurasOptions.toc
+   M /trunk/WeakAurasTutorials/WeakAurasTutorials.toc
+
+5.1 TOC
+------------------------------------------------------------------------
+r281 | dridzt | 2012-11-16 12:22:30 +0000 (Fri, 16 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/WeakAurasOptions/WeakAurasOptions.lua
+
+- Fix so WeakAuras options can't get shown off-screen (wasn't likely in normal play but could happen if the user changed resolution or ui scale between logons)
+------------------------------------------------------------------------
+r279 | dridzt | 2012-10-30 13:19:18 +0000 (Tue, 30 Oct 2012) | 3 lines
+Changed paths:
+   M /trunk/WeakAurasOptions/WeakAurasOptions.lua
+   M /trunk/WeakAurasTutorials/WeakAurasTutorials.toc
+
+- Tweak icon browser layout in options so the scrollframe doesn't overlap the buttons (Custom Icon).
+- Fix/pretify user information messages for optional modules failing to load.
+- Fix tutorials so they work from a fresh login and not only after a /reload.
+------------------------------------------------------------------------
+r278 | dridzt | 2012-10-29 22:49:37 +0000 (Mon, 29 Oct 2012) | 7 lines
+Changed paths:
+   M /trunk/Prototypes.lua
+   M /trunk/Transmission.lua
+   M /trunk/Types.lua
+   M /trunk/WeakAuras.lua
+
+- Remove player pet from combat check (it looks like UnitAffectingCombat doesn't return proper value for pets in PLAYER_REGEN_ENABLED)
+- Change initialization of non-static game data like specializations, to PLAYER_LOGIN (ticket 372)
+- Do the same for forms instead of creating an unthrottled OnUpdate that likely never stops for some users (1.4.7.5 and previous?)
+- Get specialization info from classid not player.
+- Apply the in combat options handling to Imports started from WeakAura chat links as well.
+- Fix and pretify the info message when an optional module can't be loaded.
+- Attempt to fix the "Ignore Rune CD" option not working (needs verification)
+------------------------------------------------------------------------
+r277 | dridzt | 2012-10-28 05:20:54 +0000 (Sun, 28 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/RegionTypes/aurabar.lua
+
+- Fix ticket 365 (blank vertical progress bars) and guard against missing textures.
+------------------------------------------------------------------------
+r275 | dridzt | 2012-10-27 18:50:23 +0000 (Sat, 27 Oct 2012) | 3 lines
+Changed paths:
+   M /trunk/Prototypes.lua
+   M /trunk/WeakAuras.lua
+   M /trunk/WeakAurasOptions/WeakAurasOptions.lua
+
+- Fix corrupted data for time remaining / stacks (ticket 366)
+- Fix some tonumber() sanity checks to perform the intended function of number check and not type check.
+- Validate numeric input controls in options so this particular user error can't happen again.
+------------------------------------------------------------------------
+r274 | mirrormn | 2012-10-26 04:12:06 +0000 (Fri, 26 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/WeakAuras.lua
+
+Added ASCII art to the source code. Most useful commit ever!
+------------------------------------------------------------------------
