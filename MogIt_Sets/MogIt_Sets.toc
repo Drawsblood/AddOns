@@ -1,0 +1,18 @@
+﻿## Interface: 50100
+## Title: MogIt_Sets
+## Notes: Sets module for MogIt
+## Author: Aelobin (The Maelstrom EU) & Lombra (Defias Brotherhood EU)
+## Version: 2.1.1
+## LoadOnDemand: 1
+## RequiredDeps: MogIt
+## X-MogItModuleVersion: 1
+## X-Curse-Packaged-Version: v2.1.1
+## X-Curse-Project-Name: MogIt_Sets
+## X-Curse-Project-ID: mogit_sets
+## X-Curse-Repository-ID: wow/mogit_sets/mainline
+
+MogIt_Sets.lua
+Cloth.lua
+Leather.lua
+Mail.lua
+Plate.lua
