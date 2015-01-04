@@ -44,15 +44,17 @@ if L then
 L["custom_off_fel_marker"] = "魔能散射：邪能标记"
 L["custom_off_fel_marker_desc"] = [=[使用 {rt1}{rt2}{rt3} 标记魔能散射：邪能，需要权限。
 |cFFFF0000团队中只有1名应该启用此选项以防止标记冲突。|r]=]
-L["dominating_power_bar"] = "史诗溢流能量攻击 (%d)"
+L["dominating_power_bar"] = "统御之力 (%d)"
 L["fire_bar"] = "全体爆炸！"
-L["overwhelming_energy_bar"] = "溢流能量攻击 (%d)"
+L["overwhelming_energy_bar"] = "溢流能量 (%d)"
 
 end
 
 L = BigWigs:NewBossLocale("Imperator Mar'gok", "zhCN")
 if L then
-L["add_death_soon"] = "即将 奥术畸兽！"
+L["add_death_soon"] = "小怪即将死亡！"
+L["adds"] = "拜夜信徒"
+L["adds_desc"] = "拜夜信徒进入战斗计时器。"
 L["branded_say"] = "%s (%d) %d码"
 L["custom_off_branded_marker"] = "烙印标记"
 L["custom_off_branded_marker_desc"] = [=[使用 {rt3}{rt4} 标记烙印目标，需要权限。
@@ -60,6 +62,7 @@ L["custom_off_branded_marker_desc"] = [=[使用 {rt3}{rt4} 标记烙印目标，
 L["custom_off_fixate_marker"] = "锁定标记"
 L["custom_off_fixate_marker_desc"] = [=[使用 {rt1}{rt2} 标记高里亚战争法师的锁定目标，需要权限。
 |cFFFF0000团队中只有1名应该启用此选项以防止标记冲突。|r]=]
+L["gaze_target_message"] = ">你< 深渊凝视！"
 L["phase4_trigger"] = "你根本不了解你所染指的力量，马尔高克。"
 L["slow_fixate"] = "减速+锁定"
 

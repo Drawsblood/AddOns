@@ -20,7 +20,7 @@ local CreateFrame, error, setmetatable, UIParent = CreateFrame, error, setmetata
 if not LibStub then error("LibCandyBar-3.0 requires LibStub.") end
 local cbh = LibStub:GetLibrary("CallbackHandler-1.0")
 if not cbh then error("LibCandyBar-3.0 requires CallbackHandler-1.0") end
-local lib, old = LibStub:NewLibrary("LibCandyBar-3.0", 81) -- Bump minor on changes
+local lib, old = LibStub:NewLibrary("LibCandyBar-3.0", 82) -- Bump minor on changes
 if not lib then return end
 lib.callbacks = lib.callbacks or cbh:New(lib)
 local cb = lib.callbacks
@@ -52,6 +52,7 @@ local function stopBar(bar)
 	if bar.data then wipe(bar.data) end
 	if bar.funcs then wipe(bar.funcs) end
 	bar.running = nil
+	bar.paused = nil
 	bar:Hide()
 end
 
@@ -220,6 +221,21 @@ function barPrototype:Start()
 	self.updater:SetScript("OnLoop", self.isApproximate and barUpdateApprox or barUpdate)
 	self.updater:Play()
 	self:Show()
+end
+--- Pauses a running bar
+function barPrototype:Pause()
+	if not self.paused then
+		self.updater:Pause()
+		self.paused = true
+	end
+end
+--- Resumes a paused bar
+function barPrototype:Resume()
+	if self.paused then
+		self.exp = GetTime() + self.remaining
+		self.updater:Play()
+		self.paused = nil
+	end
 end
 --- Stops the bar.
 -- This will stop the bar, fire the LibCandyBar_Stop callback, and recycle the bar into the candybar pool.

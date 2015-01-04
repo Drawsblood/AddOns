@@ -129,6 +129,15 @@ L["This may impact performance and loading time on low end machines"] = true
 L["You will need to log into each of your characters with Macro Toolkit enabled to update Macro Toolkit's copy of that character's macros"] = true
 L["This will remove Macro Toolkit's copy of all your character specific Macros. The macros themselves will not be affected."] = true
 L["Summon random favourite mount"] = true
+L["Print a message"] = true
+L["Enable data broker"] = true
+L["Enable certain types of macro to be called via a data broker addon"] = true
+L["Add broker"] = true
+L["Remove broker"] = true
+L["Do not skin for ElvUI"] = true
+L["Requires a UI reload to take effect"] = true
+L["Conditional execution"] = true
+L["Cannot execute secure commands"] = true
 
 --conditions
 L["Condition Builder"] = true

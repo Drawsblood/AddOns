@@ -67,6 +67,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_REMOVED", "CrystallineBarrageRemoved", 162346)
 	self:Log("SPELL_PERIODIC_DAMAGE", "CrystallineBarrageDamage", 162370)
 	self:Log("SPELL_PERIODIC_MISSED", "CrystallineBarrageDamage", 162370)
+	self:Log("SPELL_ABSORBED", "CrystallineBarrageDamage", 162370)
 	self:Log("SPELL_CAST_START", "TectonicUpheaval", 162475)
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "Split", "boss1", "boss2", "boss3")
 	-- Earthwarper
@@ -84,8 +85,8 @@ function mod:OnEngage()
 
 	wipe(marked)
 	--self:CDBar(162346, 6) -- Crystalline Barrage
-	self:CDBar("adds", 11, -10061, "spell_shadow_raisedead") -- Earthwarper
-	self:CDBar("adds", 21, -10062, "ability_warrior_endlessrage") -- Berserker
+	self:CDBar("adds", 14, -10061, "spell_shadow_raisedead") -- Earthwarper
+	self:CDBar("adds", 24, -10062, "ability_warrior_endlessrage") -- Berserker
 
 	if not self:LFR() then
 		self:Berserk(self:Mythic() and 480 or 600)
@@ -173,6 +174,9 @@ function mod:Split(unit, spellName, _, _, spellId)
 	if spellId == 140562 then -- Break Player Targetting (cast when Tectus/Shards die)
 		self:StopBar(-10061) -- Earthwarper
 		self:StopBar(-10062) -- Berserker
+		if not self:Mythic() then
+			self:UnregisterEvent("CHAT_MSG_MONSTER_YELL")
+		end
 		--self:CDBar(162346, 8) -- Crystalline Barrage 7-12s, then every ~20s, 2-5s staggered
 	end
 end

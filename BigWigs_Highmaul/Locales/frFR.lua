@@ -44,6 +44,7 @@ if L then
 L["custom_off_fel_marker"] = "Marquage Projection de magie : Gangrène"
 L["custom_off_fel_marker_desc"] = [=[Marque les cibles de Projection de magie : Gangrène avec {rt1}{rt2}{rt3}. Nécessite d'être assistant ou chef de raid.
 |cFFFF0000Seule 1 personne du raid doit activer ceci afin d'éviter les conflits de marquage.|r]=]
+L["dominating_power_bar"] = "Impact boules MC (%d)"
 L["fire_bar"] = "Tout le monde explose !"
 L["overwhelming_energy_bar"] = "Impact des boules (%d)"
 
@@ -52,6 +53,8 @@ end
 L = BigWigs:NewBossLocale("Imperator Mar'gok", "frFR")
 if L then
 L["add_death_soon"] = "Mort de l'add imminente !"
+L["adds"] = "Fidèle corrompu par la nuit" -- Needs review
+L["adds_desc"] = "Délais avant que des Fidèles corrompus par la nuit ne se joignent au combat." -- Needs review
 L["branded_say"] = "%s (%d) %dm"
 L["custom_off_branded_marker"] = "Marquage Marqué"
 L["custom_off_branded_marker_desc"] = [=[Marque les cibles de Marqué avec {rt3}{rt4}. Nécessite d'être assistant ou chef de raid.
@@ -59,6 +62,7 @@ L["custom_off_branded_marker_desc"] = [=[Marque les cibles de Marqué avec {rt3}
 L["custom_off_fixate_marker"] = "Marquage Fixer"
 L["custom_off_fixate_marker_desc"] = [=[Marque les cibles de Fixer du Mage de guerre gorien avec {rt1}{rt2}. Nécessite d'être assistant ou chef de raid.
 |cFFFF0000Seule 1 personne du raid doit activer ceci afin d'éviter les conflits de marquage.|r]=]
+L["gaze_target_message"] = "Un Aperçu de la folie VOUS cible !" -- Needs review
 L["slow_fixate"] = "Lenteur+Fixer"
 
 end

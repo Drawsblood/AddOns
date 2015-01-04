@@ -832,6 +832,19 @@ function MT:CreateMTFrame()
 			MT.SP:Show()
 		end)
 
+	local mtbrokericon = CreateFrame("Frame", "MacroToolkitBrokerIcon", mtframe)
+	mtbrokericon:SetSize(32, 16)
+	MT.brokericon = mtbrokericon:CreateTexture(nil, "ARTWORK")
+	MT.brokericon:SetPoint("TOPLEFT", mtbrokericon, "TOPLEFT")
+	MT.brokericon:SetPoint("BOTTOMRIGHT", mtbrokericon, "BOTTOMLEFT", 16, 0)
+	mtbrokericon:SetPoint("RIGHT", mtcancelbutton, "LEFT", -15, -6)
+	mtbrokericon:SetScript("OnLeave", GameTooltip_Hide)
+	local mtbbutton = CreateFrame("Button", "MacroToolkitBrokerButton", mtbrokericon)
+	mtbbutton:SetSize(16, 16)
+	mtbbutton:SetPoint("LEFT", MT.brokericon, "RIGHT")
+	mtbbutton:SetScript("OnLeave", GameTooltip_Hide)
+	mtbrokericon:Hide()
+	
 	local mterroricon = CreateFrame("Frame", "MacroToolkitErrorIcon", mtframe)
 	mterroricon:SetSize(16, 16)
 	local mteit = mterroricon:CreateTexture(nil, "ARTWORK")
@@ -851,17 +864,53 @@ function MT:CreateMTFrame()
 	return mtframe
 end
 
+function MT:UpdateIcon(this, justicon)
+	local index, icon = select(3, string.find(this:GetName(), "MTSB(%d+)"))
+	index = MT:GetExMacroIndex(index)
+	if not index then return end
+	local macro, isspell, item = this:GetAttribute("macrotext"), false, ""
+	local mtext = {strsplit("\n", macro)}
+	for _, mline in ipairs(mtext) do
+		local _, _, cmd, args = MT:ParseMacro(mline)
+		if MT:IsCast(cmd) or MT:IsCastSequence(cmd) then
+			local spell, target = SecureCmdOptionParse(args)
+			if MT:IsCastSequence(cmd) then
+				local idx, it, sp = QueryCastSequence(spell)
+				spell = sp or it
+				if string.sub(spell, 1, 1) == "!" then spell = string.sub(spell, 2) end
+			end
+			if spell then
+				_, _, icon = GetSpellInfo(spell)
+				if icon then
+					if not justicon then SetMacroSpell(index, spell, target) end
+					isspell = true
+					break
+				elseif item == "" then
+					item = spell
+				end
+			end
+		end
+	end
+	if not isspell then
+		icon = GetItemIcon(item)
+		if not justicon then SetMacroItem(index, item) end
+	end
+	if justicon then return icon end
+end
+
 function MT:CreateSecureFrames()
 	for b = 1, _G.MAX_ACCOUNT_MACROS + _G.MAX_CHARACTER_MACROS do
-		local frame = CreateFrame("Button", format("MTSB%d", b), nil, "SecureActionButtonTemplate")
+		local frame = CreateFrame("Button", format("MTSB%d", b), nil, "SecureActionButtonTemplate, SecureHandlerBaseTemplate")
 		_G[format("MTSB%d", b)] = _G[format("MTSB%d", b)]
 		frame:SetID(b)
 		frame:SetAttribute("type", "macro")
 		frame:SetAttribute("macrotext", "")
+		frame.MTUpdateIcon = function(this) MT:UpdateIcon(this) end
+		frame:WrapScript(frame, "OnClick", "self:CallMethod('MTUpdateIcon')")
 	end
 	--extra macros
 	for b = 1001, 1000 + _G.MAX_ACCOUNT_MACROS do
-		local frame = CreateFrame("Button", format("MTSB%d", b), nil, "SecureActionButtonTemplate")
+		local frame = CreateFrame("Button", format("MTSB%d", b), nil, "SecureActionButtonTemplate, SecureHandlerBaseTemplate")
 		_G[format("MTSB%d", b)] = _G[format("MTSB%d", b)]
 		frame:SetID(b)
 		frame:SetAttribute("type", "macro")

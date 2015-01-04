@@ -4,7 +4,7 @@ local strsplit, select, wipe, tonumber, tostring = strsplit, select, wipe, tonum
 local GetSpellInfo, GetItemInfo = GetSpellInfo, GetItemInfo, IsHelpfulSpell, IsHarmfulSpell
 local _G = _G
 local L = MT.L
-MT.clist = {cast={}, script={}, click={}, console={}, target={}, castsequence={}}
+MT.clist = {cast={}, script={}, click={}, console={}, target={}, castsequence={}, stopmacro={}}
 
 local function trim(s) return string.match(s, "^%s*(.*%S)") or "" end
 local function escape(s) return (s:gsub("[%-%.%+%[%]%(%)%$%^%%%?%*]","%%%1"):gsub("%z","%%z")) end
@@ -46,6 +46,7 @@ function MT:BuildCommandList()
 				if cglobal == "SLASH_CONSOLE" then table.insert(MT.clist.console, string.sub(v, 2)) end
 				if cglobal == "SLASH_TARGET" then table.insert(MT.clist.target, string.sub(v, 2)) end
 				if cglobal == "SLASH_CLICK" then table.insert(MT.clist.click, string.sub(v, 2)) end
+				if cglobal == "SLASH_STOPMACRO" then table.insert(MT.clist.stopmacro, string.sub(v, 2)) end
 			end
 		end
 	end
@@ -217,6 +218,11 @@ local function isClick(command) for _, c in ipairs(MT.clist.click) do if c == co
 local function isConsole(command) for _, c in ipairs(MT.clist.console) do if c == command then return true end end end
 local function isTarget(command) for _, c in ipairs(MT.clist.target) do if c == command then return true end end end
 local function isCastSequence(command) for _, c in ipairs(MT.clist.castsequence) do if c == command then return true end end end
+
+function MT:IsCast(command) return isCast(command) end
+function MT:IsStopMacro(command) for _, c in ipairs(MT.clist.stopmacro) do if c == command then return true end end end
+function MT:IsTarget(command) return isTarget(command) end
+function MT:IsCastSequence(command) return isCastSequence(command) end
 
 local function validateParameters(parameters, commandtext)
 	local c = format("|c%s", MT.db.profile.stringcolour)

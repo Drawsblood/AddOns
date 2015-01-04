@@ -5,6 +5,7 @@ MT.skinned = {}
 
 function MT:Skin(frame)
 	if not IsAddOnLoaded("ElvUI") then return end
+	if MT.db.profile.noskin then return end
 	if not MT.skinned[frame:GetName()] then
 		MT:LoadElvSkin(frame)
 		MT.skinned[frame:GetName()] = true
@@ -18,7 +19,7 @@ function MT:LoadElvSkin(frame)
 	if E.private.skins.blizzard.enable ~= true or E.private.skins.blizzard.macro ~= true then return end
 	local buttons
 
-	if frame == MacroToolkitFrame then
+	if frame == MacroToolkitFrame then	
 		S:HandleCloseButton(MacroToolkitFrameCloseButton)
 		S:HandleScrollBar(MacroToolkitButtonScrollScrollBar)
 		S:HandleScrollBar(MacroToolkitScrollFrameScrollBar)

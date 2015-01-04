@@ -3,8 +3,10 @@ local MT = MacroToolkit
 MT.LS = LibStub
 MT.L = MT.LS("AceLocale-3.0"):GetLocale("MacroToolkit")
 MT.AIS = MT.LS("LibAdvancedIconSelector-MTK")
+MT.LDB = MT.LS("LibDataBroker-1.1")
 MT.slash = string.sub(_G.SLASH_CAST1, 1, 1)
 MT.click = _G.SLASH_CLICK1
+MT.target = _G.SLASH_TARGET1
 local L = MT.L
 local SendChatMessage, format = SendChatMessage, format
 
@@ -31,6 +33,8 @@ MT.scripts = {
 	{L["No food buff"],"mtnb","buff"},
 	{L["No flask"],"mtnf","buff"},
 	{L["Summon random favourite mount"],"mtfm"},
+	{L["Print a message"],"mtp"},
+	{L["Conditional execution"], "mtc"},
 }
 
 MT.slots = {

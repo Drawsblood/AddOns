@@ -1091,6 +1091,31 @@ function boss:StopBar(text, player)
 	end
 end
 
+function boss:PauseBar(text)
+	local msg = type(text) == "number" and spells[text] or text
+	self:SendMessage("BigWigs_PauseBar", self, msg)
+	self:SendMessage("BigWigs_StopEmphasize", self, msg)
+end
+
+function boss:ResumeBar(text)
+	local msg = type(text) == "number" and spells[text] or text
+	self:SendMessage("BigWigs_ResumeBar", self, msg)
+	if checkFlag(self, key, C.EMPHASIZE) then
+		local barTime = self:BarTimeLeft(msg)
+		if barTime > 0 then
+			self:SendMessage("BigWigs_StartEmphasize", self, msg, barTime)
+		end
+	end
+end
+
+function boss:BarTimeLeft(text)
+	local bars = core:GetPlugin("Bars")
+	if bars then
+		return bars:GetBarTimeLeft(self, type(text) == "number" and spells[text] or text)
+	end
+	return 0
+end
+
 -- ICONS
 function boss:PrimaryIcon(key, player)
 	if key and not checkFlag(self, key, C.ICON) then return end
