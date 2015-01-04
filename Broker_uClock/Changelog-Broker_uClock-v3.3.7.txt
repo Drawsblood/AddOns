@@ -1,0 +1,15 @@
+tag v3.3.7
+9af242fb02f2dc18b99d2578a94418734672b472
+Ethan Centaurai <ethancentaurai@outlook.com>
+2014-10-16 16:00:13 +0100
+
+Tagging as v3.3.7.
+
+
+--------------------
+
+Ethan Centaurai:
+	- Bump Interface number to 60000.
+	- Ignore the Lib directory.
+	- Deleted gitattributes.
+	- Disabled manual changelog.

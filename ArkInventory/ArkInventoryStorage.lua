@@ -1,4 +1,4 @@
-local _G = _G
+﻿local _G = _G
 local select = _G.select
 local pairs = _G.pairs
 local ipairs = _G.ipairs
@@ -10,24 +10,23 @@ local table = _G.table
 local ArkInventoryScanCleanupList = { }
 
 function ArkInventory.EraseSavedData( player_id, loc_id, silent )
+
+	-- /run ArkInventory.EraseSavedData( )
 	
 	--ArkInventory.Output( "EraseSavedData( ", player_id, ", ", loc_id, ", ", silent, " )" )
 	
 	local rescan
 	
-	-- erase tooltip cache
+	-- erase item/tooltip cache
+	ArkInventory.Table.Clean( ArkInventory.Global.Cache.ItemCountTooltip, nil, true )
 	ArkInventory.Table.Clean( ArkInventory.Global.Cache.ItemCountRaw, nil, true )
 	ArkInventory.Table.Clean( ArkInventory.Global.Cache.ItemCount, nil, true )
 	
 	-- erase data
-	for pk, pv in pairs( ArkInventory.db.realm.player.data ) do
+	for pk, pv in pairs( ArkInventory.db.global.player.data ) do
 		
-		if ( player_id == nil ) or ( string.lower( pk ) == string.lower( player_id ) ) then
-
-			if ( string.lower( pk ) == string.lower( UnitName( "player" ) ) ) then
-				rescan = true
-			end
-		
+		if ( not player_id ) or ( pk == player_id ) then
+			
 			for lk, lv in pairs( pv.location ) do
 				
 				if ( loc_id == nil ) or ( lk == loc_id ) then
@@ -47,24 +46,24 @@ function ArkInventory.EraseSavedData( player_id, loc_id, silent )
 					
 					ArkInventory.Frame_Main_DrawStatus( lk, ArkInventory.Const.Window.Draw.Recalculate )
 					if ArkInventory.Global.Location[lk] and not silent then
-						ArkInventory.Output( "Saved ", string.lower( ArkInventory.Global.Location[lk].Name ), " data for ", pv.info.name, " has been erased" )
+						ArkInventory.Output( "Saved ", string.lower( ArkInventory.Global.Location[lk].Name ), " data for ", pk, " has been erased" )
 					end
 					
 				end
 				
 			end
 			
-			
-			if ( loc_id == nil ) or ( ( loc_id == ArkInventory.Const.Location.Vault ) and ( pv.info.class == "GUILD" ) ) then
-				-- wipe entire player sent so wipe info, also if location is vault then wipe the info as well
-				table.wipe( pv.info )
+			if pk == ArkInventory.Global.Me.info.player_id then
+				rescan = true
+			else
+				if ( loc_id == nil ) or ( ( loc_id == ArkInventory.Const.Location.Vault ) and ( pv.info.class == "GUILD" ) ) then
+					table.wipe( pv.info )
+				end
 			end
-			
 			
 		end
 		
 	end
-	
 	
 	if rescan then
 		-- current player was wiped, need to rescan
@@ -189,23 +188,26 @@ end
 
 function ArkInventory.PlayerInfoSet( )
 	
+	-- /run ArkInventory.Output( ArkInventory.Global.Me.info )
+	
 	--ArkInventory.Output( "PlayerInfoSet" )
 	
-	local r = GetRealmName( )
-	local f, f2 = UnitFactionGroup( "player" )
 	local n = UnitName( "player" )
+	local r = GetRealmName( )
 	
-	ArkInventory.Global.Me = ArkInventory.db.realm.player.data[n]
+	local id = string.format( "%s%s%s", n, ArkInventory.Const.PlayerIDTag, r )
+	ArkInventory.Global.Me = ArkInventory.db.global.player.data[id]
 	
 	local p = ArkInventory.Global.Me.info
 	
-	p.player_id = n
-	
-	p.realm = r
-	p.faction = f
-	p.faction_local = f2
 	p.name = n
+	p.realm = r
+	p.player_id = id
+	p.faction, p.faction_local = UnitFactionGroup( "player" )
 	
+	if p.faction_local == "" then
+		p.faction_local = FACTION_STANDING_LABEL4
+	end
 	
 	-- WARNING, most of this stuff is not available upon first login, even when the mod gets to OnEnabled (ui reloads are fine), and some are not available on logout
 	
@@ -219,66 +221,46 @@ function ArkInventory.PlayerInfoSet( )
 		p.money = m
 	end
 	
+--[[
 	if p.class == "WARLOCK" then
 		ArkInventory.db.global.option.tracking.items[6265] = true
 	end
-	
+]]--	
 	
 	-- ACCOUNT
-	local n = ArkInventory.PlayerIDAccount( )
-	local pj = ArkInventory.db.realm.player.data[n].info
+	local id = ArkInventory.PlayerIDAccount( )
+	local ac = ArkInventory.db.global.player.data[id].info
 	
-	pj.player_id = n
-	pj.class_local, pj.class = "Account", "ACCOUNT"
-	pj.realm = p.realm
-	pj.faction = p.faction
-	pj.faction_local = p.faction_local
-	pj.name = "Account"
-	pj.level = pj.level or 1
-	
+	ac.name = "Account"
+	ac.realm = p.realm
+	ac.player_id = id
+	ac.faction = p.faction
+	ac.faction_local = p.faction_local
+	ac.class = "ACCOUNT"
+	ac.class_local = "Account"
+	ac.level = ac.level or 1
 	
 	-- VAULT
 	if not ArkInventory.LocationIsMonitored( ArkInventory.Const.Location.Vault ) then
 		
-		p.guild = nil
 		p.guild_id = nil
 		
 	else
 		
-		--ArkInventory.Output( "IsInGuild=[", IsInGuild( ), "], g=[", p.guild, "]" )
-		p.guild = GetGuildInfo( "player" )
+		local gn, _, _, grealm = GetGuildInfo( "player" )
+		--ArkInventory.Output( "IsInGuild=[", IsInGuild( ), "], g=[", gn, "], r=[", grealm, "]" )
 		
-		if not p.guild then
+		if not gn then
 			
-			p.guild = nil
-			p.guild_id = nil
+			if IsInGuild( ) then
+				--ArkInventory.OutputWarning( "you are in a guild but no guild name was found, using previous data" )
+			else
+				p.guild_id = nil
+			end
 			
 		else
 			
-			p.guild_id = string.format( "%s%s", ArkInventory.Const.GuildTag, p.guild )
-			
-			local n = string.format( "%s%s", ArkInventory.Const.GuildTag, p.guild )
-			local g = ArkInventory.db.realm.player.data[n].info
-			
-			g.player_id = n
-			g.class_local, g.class = GUILD, "GUILD"
-			
-			g.realm = p.realm
-			g.faction = p.faction
-			g.faction_local = p.faction_local
-			g.name = p.guild
-			
-			g.guild = p.guild
-			g.guild_id = p.guild_id
-			
-			g.level = GetGuildLevel( )
-			
-			g.money = g.money or 0
-			
-			if ArkInventory.Global.Mode.Vault then
-				-- only update when actually at the guild bank
-				g.money = GetGuildBankMoney( ) or 0
-			end
+			p.guild_id = string.format( "%s%s%s%s", ArkInventory.Const.GuildTag, gn, ArkInventory.Const.PlayerIDTag, grealm or r )
 			
 		end
 		
@@ -288,18 +270,52 @@ function ArkInventory.PlayerInfoSet( )
 	
 end
 
+function ArkInventory.VaultInfoSet( )
+	
+	local n, _, _, r = GetGuildInfo( "player" )
+	local cp = ArkInventory.Global.Me.info
+	
+	if n then
+		
+		local id = string.format( "%s%s%s%s", ArkInventory.Const.GuildTag, n, ArkInventory.Const.PlayerIDTag, r or cp.realm )
+		
+		local g = ArkInventory.db.global.player.data[id].info
+		
+		g.name = n
+		g.realm = r or cp.realm
+		g.player_id = id
+		g.faction = cp.faction
+		g.faction_local = cp.faction_local
+		g.class = "GUILD"
+		g.class_local = GUILD
+		
+		g.guild_id = id
+		g.level = 1 --GetGuildLevel( )
+		g.money = GetGuildBankMoney( ) or 0
+		
+		cp.guild_id = id
+		
+	else
+		
+		cp.guild_id = nil
+		
+	end
+	
+end
+
 function ArkInventory.PlayerInfoGet( id )
 	
 	if id == nil then
 		return
 	end
 	
-	return ArkInventory.db.realm.player.data[id]
+	return ArkInventory.db.global.player.data[id]
 	
 end
 
 function ArkInventory.PlayerIDAccount( )
-	return "!ACCOUNT"
+	local a = "!ACCOUNT"
+	return string.format( "%s%s%s", a, ArkInventory.Const.PlayerIDTag, a )
 end
 
 function ArkInventory:LISTEN_STORAGE_EVENT( msg, arg1, arg2, arg3, arg4 )
@@ -353,7 +369,7 @@ function ArkInventory:LISTEN_PLAYER_MONEY( )
 	ArkInventory.PlayerInfoSet( )
 	
 	-- set saved money amount here as well
-	ArkInventory.db.realm.player.data[UnitName( "player" )].info.money = GetMoney( )
+	ArkInventory.Global.Me.info.money = GetMoney( )
 	
 	ArkInventory.LDB.Money:Update( )
 	
@@ -386,6 +402,21 @@ function ArkInventory:LISTEN_COMBAT_LEAVE( )
 	--ArkInventory.Output( "LISTEN_COMBAT_LEAVE" )
 	
 	ArkInventory.Global.Mode.Combat = false
+	
+	if ( ArkInventory.Global.LeaveCombatRun.PetJournal ) then
+		ArkInventory.Global.LeaveCombatRun.PetJournal = false
+		ArkInventory:SendMessage( "LISTEN_PETJOURNAL_RELOAD_BUCKET", "RESCAN" )
+	end
+	
+	if ( ArkInventory.Global.LeaveCombatRun.MountJournal ) then
+		ArkInventory.Global.LeaveCombatRun.MountJournal = false
+		ArkInventory:SendMessage( "LISTEN_MOUNTJOURNAL_RELOAD_BUCKET", "RESCAN" )
+	end
+	
+	if ( ArkInventory.Global.LeaveCombatRun.Toybox ) then
+		ArkInventory.Global.LeaveCombatRun.Toybox = false
+		ArkInventory:SendMessage( "LISTEN_TOYBOX_RELOAD_BUCKET", "RESCAN" )
+	end
 	
 	for loc_id in pairs( ArkInventory.Global.Location ) do
 		
@@ -466,6 +497,7 @@ function ArkInventory:LISTEN_BAG_LOCK( event, arg1, arg2 )
 			if arg1 == GetInventorySlotInfo( slotName ) then
 				local loc_id, bag_id = ArkInventory.BagID_Internal( blizzard_id )
 				ArkInventory.ObjectLockChanged( loc_id, bag_id, nil )
+				ArkInventory.RestackResume( loc_id )
 			end
 		end
 	
@@ -479,7 +511,6 @@ function ArkInventory:LISTEN_BAG_LOCK( event, arg1, arg2 )
 				-- item lock
 				local loc_id, bag_id = ArkInventory.BagID_Internal( arg1 )
 				ArkInventory.ObjectLockChanged( loc_id, bag_id, arg2 )
-				--ArkInventory.RestackResume( loc_id )
 			else
 				-- bag lock
 				local loc_id, bag_id = ArkInventory.BagID_Internal( arg2 - count + NUM_BAG_SLOTS )
@@ -491,7 +522,7 @@ function ArkInventory:LISTEN_BAG_LOCK( event, arg1, arg2 )
 			-- item lock
 			local loc_id, bag_id = ArkInventory.BagID_Internal( arg1 )
 			ArkInventory.ObjectLockChanged( loc_id, bag_id, arg2 )
-			--ArkInventory.RestackResume( loc_id )
+			ArkInventory.RestackResume( loc_id )
 			
 		end
 	
@@ -590,27 +621,47 @@ end
 
 function ArkInventory:LISTEN_BANK_SLOT( )
 
-	-- player just purchased a bank bag slot
-	
 	--ArkInventory.Output( "LISTEN_BANK_SLOT" )
 	
-	for x = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
-		ArkInventory:SendMessage( "LISTEN_BAG_UPDATE_BUCKET", x )
-	end
-
+	-- player just purchased a bank bag slot, re-scan and force a reload
+	
+	ArkInventory.ScanLocation( ArkInventory.Const.Location.Bank )
+	ArkInventory.Frame_Main_Generate( ArkInventory.Const.Location.Bank, ArkInventory.Const.Window.Draw.Refresh )
+	
 end
 
+function ArkInventory:LISTEN_BANK_TAB( event )
+	
+	--ArkInventory.Output( "LISTEN_BANK_TAB" )
+	
+	-- player just purchased a bank tab, re-scan and force a reload
+	
+	if event == "REAGENTBANK_PURCHASED" then
+		ArkInventory:UnregisterEvent( "REAGENTBANK_PURCHASED" )
+		ArkInventory.ScanLocation( ArkInventory.Const.Location.Bank )
+		ArkInventory.Frame_Main_Generate( ArkInventory.Const.Location.Bank, ArkInventory.Const.Window.Draw.Refresh )
+	end
+	
+end
+
+function ArkInventory:LISTEN_BANK_TAB_REAGENT_UPDATE( event, arg1 )
+
+	--ArkInventory.Output( "LISTEN_BANK_TAB_REAGENT_UPDATE( ", arg1, " ) " )
+
+	ArkInventory:SendMessage( "LISTEN_BAG_UPDATE_BUCKET", REAGENTBANK_CONTAINER )
+	
+end
 
 function ArkInventory:LISTEN_VAULT_ENTER( )
 	
 	--ArkInventory.Output( "LISTEN_VAULT_ENTER" )
 	
 	local loc_id = ArkInventory.Const.Location.Vault
-
+	
 	ArkInventory.Global.Mode.Vault = true
 	ArkInventory.Global.Location[loc_id].isOffline = false
 	
-	ArkInventory.PlayerInfoSet( )
+	ArkInventory.VaultInfoSet( )
 	
 	ArkInventory.ScanVaultHeader( )
 	
@@ -669,10 +720,10 @@ function ArkInventory:LISTEN_VAULT_UPDATE_BUCKET( )
 	--ArkInventory.Output( "LISTEN_VAULT_UPDATE_BUCKET" )
 	
 	local loc_id = ArkInventory.Const.Location.Vault
-
+	
 	ArkInventory.ScanVault( )
 	ArkInventory.ScanVaultHeader( )
-
+	
 	ArkInventory.RestackResume( ArkInventory.Const.Location.Vault )
 	
  	-- instant sorting enabled
@@ -682,19 +733,17 @@ function ArkInventory:LISTEN_VAULT_UPDATE_BUCKET( )
 	
 end
 
-function ArkInventory:LISTEN_VAULT_UPDATE( event, ... )
+function ArkInventory:LISTEN_VAULT_UPDATE( event )
 	
-	--local tab = ...
-	--ArkInventory.Output( "LISTEN_VAULT_UPDATE: ", tab )
+	--ArkInventory.Output( "LISTEN_VAULT_UPDATE" )
 	
 	ArkInventory:SendMessage( "LISTEN_VAULT_UPDATE_BUCKET" )
 	
 end
 
-function ArkInventory:LISTEN_VAULT_LOCK( event, ... )
-
-	--local tab = ...
-	--ArkInventory.Output( "LISTEN_VAULT_LOCK: ", tab )
+function ArkInventory:LISTEN_VAULT_LOCK( event )
+	
+	--ArkInventory.Output( "LISTEN_VAULT_LOCK" )
 	
 	local loc_id = ArkInventory.Const.Location.Vault
 	local bag_id = GetCurrentGuildBankTab( )
@@ -702,8 +751,8 @@ function ArkInventory:LISTEN_VAULT_LOCK( event, ... )
 	for slot_id = 1, ArkInventory.Global.Location[loc_id].maxSlot[bag_id] or 0 do
 		ArkInventory.ObjectLockChanged( loc_id, bag_id, slot_id )
 	end
-
-	--ArkInventory.RestackResume( ArkInventory.Const.Location.Vault )
+	
+	ArkInventory.RestackResume( ArkInventory.Const.Location.Vault )
 	
 end
 
@@ -713,7 +762,7 @@ function ArkInventory:LISTEN_VAULT_MONEY( )
 
 	local loc_id = ArkInventory.Const.Location.Vault
 	
-	ArkInventory.PlayerInfoSet( )
+	ArkInventory.VaultInfoSet( )
 	
 end
 
@@ -729,18 +778,16 @@ function ArkInventory:LISTEN_VAULT_TABS( )
 	
 end
 
-function ArkInventory:LISTEN_VAULT_LOG( event, ... )
+function ArkInventory:LISTEN_VAULT_LOG( event )
 
-	--local tab = ...
 	--ArkInventory.Output( "LISTEN_VAULT_LOG: ", tab )
 	
 	ArkInventory.Frame_Vault_Log_Update( )
 	
 end
 
-function ArkInventory:LISTEN_VAULT_INFO( event, ... )
+function ArkInventory:LISTEN_VAULT_INFO( event )
 
-	--local tab = ...
 	--ArkInventory.Output( "LISTEN_VAULT_INFO: ", tab )
 	
 	ArkInventory.Frame_Vault_Info_Update( )
@@ -754,7 +801,7 @@ function ArkInventory:LISTEN_VOID_UPDATE_BUCKET( )
 	
 	local loc_id = ArkInventory.Const.Location.Void
 
-	ArkInventory.ScanVoidStorage( )
+	ArkInventory.ScanLocation( loc_id )
 	
  	-- instant sorting enabled
 	if ArkInventory.LocationOptionGet( loc_id, "sort", "instant" ) then
@@ -763,7 +810,7 @@ function ArkInventory:LISTEN_VOID_UPDATE_BUCKET( )
 	
 end
 
-function ArkInventory:LISTEN_VOID_UPDATE( event, ... )
+function ArkInventory:LISTEN_VOID_UPDATE( event )
 	
 	--ArkInventory.Output( "LISTEN_VOID_UPDATE: ", arg1, ", ", arg2, ", ", arg3 )
 	
@@ -859,7 +906,7 @@ function ArkInventory:LISTEN_MAIL_UPDATE_BUCKET( )
 	
 	--ArkInventory.Output( "LISTEN_MAIL_UPDATE_BUCKET" )
 	
-	ArkInventory.ScanMail( )
+	ArkInventory.ScanMailInbox( )
 	
 end
 
@@ -867,7 +914,7 @@ function ArkInventory:LISTEN_MAIL_UPDATE_MASSIVE_BUCKET( )
 	
 	--ArkInventory.Output( "LISTEN_MAIL_UPDATE_BUCKET" )
 	
-	ArkInventory.ScanMail( true )
+	ArkInventory.ScanMailInbox( true )
 	
 end
 
@@ -879,6 +926,109 @@ function ArkInventory:LISTEN_MAIL_UPDATE( )
 	
 end
 
+
+local smd = { } -- sent mail data
+
+function ArkInventory:LISTEN_MAIL_SEND_SUCCESS( )
+	
+	--ArkInventory.Output( "MAIL_SEND_SUCCESS( ", smd, " )" )
+	
+	ArkInventory.ScanMailSentData( )
+	
+end
+
+function ArkInventory.HookMailSend( ... )
+	
+	if not ArkInventory:IsEnabled( ) then return end
+	
+	--ArkInventory.Output( "HookMailSend( )" )
+	
+	table.wipe( smd )
+	
+	local recipient, subject, body = ...
+	local n, r = strsplit( "-", recipient )
+	r = r or GetRealmName( )
+	
+	local id = string.format( "%s%s%s", n, ArkInventory.Const.PlayerIDTag, r )
+	local known = false
+	for k in pairs( ArkInventory.db.global.player.data ) do
+		if string.lower( k ) == string.lower( id ) then
+			known = true
+			id = k
+			break
+		end
+	end
+	
+	if not known or not ArkInventory.db.global.player.data[id].info.name then
+		return
+	end
+	
+	-- known character, store sent mail data
+	
+	smd.id = id
+	smd.sender = ArkInventory.Global.Me.info.id
+	smd.age = ArkInventory.ItemAgeUpdate( )
+	
+	local name, texture, count
+	for x = 1, ATTACHMENTS_MAX_SEND do
+		
+		name, texture, count = GetSendMailItem( x )
+		
+		if name then
+			smd[x] = { n = name, c = count, h = GetSendMailItemLink( x ) }
+		end
+		
+	end
+	
+end
+
+function ArkInventory.HookMailReturn( index )
+	
+	if not ArkInventory:IsEnabled( ) then return end
+	
+	--ArkInventory.Output( "HookMailReturn( ", index, " )" )
+	
+	table.wipe( smd )
+	
+	local _, _, recipient = GetInboxHeaderInfo( index )
+	
+	local n, r = strsplit( "-", recipient )
+	r = r or GetRealmName( )
+	
+	local id = string.format( "%s%s%s", n, ArkInventory.Const.PlayerIDTag, r )
+	local known = false
+	for k in pairs( ArkInventory.db.global.player.data ) do
+		if string.lower( k ) == string.lower( id ) then
+			known = true
+			id = k
+			break
+		end
+	end
+	
+	if not known or not ArkInventory.db.global.player.data[id].info.name then
+		return
+	end
+	
+	-- known character, store sent mail data
+	
+	smd.id = id
+	smd.sender = ArkInventory.Global.Me.info.id
+	smd.age = ArkInventory.ItemAgeUpdate( )
+	
+	local name, texture, count
+	for x = 1, ATTACHMENTS_MAX_RECEIVE do
+		
+		name, texture, count = GetInboxItem( index, x )
+		
+		if name then
+			smd[x] = { n = name, c = count, h = GetInboxItemLink( index, x ) }
+		end
+		
+	end
+	
+	ArkInventory.ScanMailSentData( )
+	
+end
 
 function ArkInventory:LISTEN_TRADE_ENTER( )
 
@@ -1013,169 +1163,6 @@ function ArkInventory:LISTEN_MERCHANT_LEAVE_BUCKET( )
 	
 end
 
-function ArkInventory:LISTEN_COMPANION_UPDATE( event )
-	
-	--ArkInventory.Output( "LISTEN_COMPANION_UPDATE( ", event, " )" )
-	
-	--local loc_id
-	
---	loc_id = ArkInventory.Const.Location.Pet
---	ArkInventory.MountDataUpdate( )
---	ArkInventory.ScanLocation( loc_id )
---	ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Recalculate )
-	
-	local loc_id = ArkInventory.Const.Location.Mount
-	ArkInventory.ScanLocation( loc_id )
-	ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Recalculate )
-	ArkInventory.MountDataUpdate( )
-	
-end
-
-
-
-function ArkInventory:LISTEN_BATTLEPET_UPDATE( )
-	
-	--ArkInventory.Output( "LISTEN_BATTLEPET_UPDATE" )
-	
-	local loc_id = ArkInventory.Const.Location.Pet
-	ArkInventory.ScanLocation( loc_id )
-	--ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Recalculate )
-	
-	ArkInventory.LDB.Pets:Update( )
-	ArkInventory.MountDataUpdate( )
-	
-end
-
-function ArkInventory:LISTEN_BATTLEPET_RELOAD_BUCKET( )
-	
-	--ArkInventory.Output( "LISTEN_BATTLEPET_RELOAD_BUCKET" )
-	ArkInventory.Lib.Pet:LoadPets( )
-	
-end
-
-function ArkInventory:LISTEN_BATTLEPET_RELOAD( event )
-	
-	--ArkInventory.Output( "LISTEN_BATTLEPET_RELOAD( ", event, " )" )
-	ArkInventory:SendMessage( "LISTEN_BATTLEPET_RELOAD_BUCKET" )
-	
-end
-
-function ArkInventory:LISTEN_PET_BATTLE_OPENING_DONE( event )
-	
-	--ArkInventory.Output( "LISTEN_PET_BATTLE_OPENING_DONE" )
-	
-	if not ArkInventory.db.global.option.message.battlepet.opponent then return end
-	
-	local player = 2
-	local opponents = C_PetBattles.GetNumPets( player )
-	
---	if opponents > 1 then
-		ArkInventory.Output( "--- --- --- --- --- --- ---" )
---	end
-	
-	for i = 1, opponents do
-		
-		local name = C_PetBattles.GetName( player, i )
-		
-		local speciesID = C_PetBattles.GetPetSpeciesID( player, i )
-		local level = C_PetBattles.GetLevel( player, i )
-		local rarity = C_PetBattles.GetBreedQuality( player, i )
-		local health = C_PetBattles.GetMaxHealth( player, i )
-		local power = C_PetBattles.GetPower( player, i )
-		local speed = C_PetBattles.GetSpeed( player, i )
-		
-		local h = ""
-		local owned = ""
-		
-		local name2, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique = C_PetJournal.GetPetInfoBySpeciesID( speciesID )
-		
-		if C_PetBattles.IsWildBattle( ) then
-			--ArkInventory.Output( "wild battle" )
-			rarity = ( rarity and ( rarity - 1 ) ) or -1
-		else
-			--ArkInventory.Output( "pvp/trainer battle" )
-			if isWild and canBattle then
-				--ArkInventory.Output( "wild pet" )
-				rarity = ( rarity and ( rarity - 1 ) ) or -1
-			else
-				--ArkInventory.Output( "system pet" )
-				rarity = -1
-			end
-		end
-		
-		h = string.format( "%s|Hbattlepet:%s:%s:%s:%s:%s:%s:|h[%s]|h|r", select( 5, ArkInventory.GetItemQualityColor( rarity ) ), speciesID, level, rarity, health, power, speed, name )
-		
-		if ( not canBattle ) then
-			
-			-- opponent cannot battle (and yet it is)
-			if C_PetBattles.IsWildBattle( ) then
-				-- wild battle, so its one of the secondary non-capturabe opponents
-				owned = string.format( "%s- %s", YELLOW_FONT_COLOR_CODE, ArkInventory.Localise["BATTLEPET_OPPONENT_IMMUNE"] )
-			else
-				-- trainer pets
-			end
-			
-		else
-			
-			local count = ArkInventory.ObjectCountGet( h )
-			
-			if ArkInventory.Table.IsEmpty( count ) then
-				
-				owned = string.format( "%s- %s", RED_FONT_COLOR_CODE, ArkInventory.Localise["BATTLEPET_OPPONENT_UNKNOWN"] )
-				
-			else
-				
-				local acn = ArkInventory.PlayerIDAccount( ) 
-				count = ( count[acn] and count[acn].location and count[acn].location[ArkInventory.Const.Location.Pet] ) or 0
-				
-				if count >= ArkInventory.Const.MAX_PET_SAVED_SPECIES then
-					
-					owned = string.format( "- %s", ArkInventory.Localise["BATTLEPET_OPPONENT_KNOWN_MAX"] )
-					
-				elseif C_PetBattles.IsWildBattle( ) then
-					
-					local upgrade = false
-					
-					for _, pid in ArkInventory.Lib.Pet:IteratePetIDs( ) do
-						local sid = C_PetJournal.GetPetInfoByPetID( pid )
-						if ( sid == speciesID ) then
-							local q = ( select( 5, C_PetJournal.GetPetStats( pid ) ) ) - 1
-							--local mh = C_PetJournal.GetBattlePetLink( pid )
-							--ArkInventory.Output( "s=[", speciesID, "], ", h, ", [", rarity, "] / ", mh, " [", q, "]" )
-							if ( rarity >= q ) then
-								upgrade = true
-							end
-							
-							if string.len( owned ) < 2 then
-								owned = string.format( "- %s ", ArkInventory.Localise["BATTLEPET_OPPONENT_UPGRADE"] )
-								--owned = string.format( "- " )
-							end
-							
-							owned = string.format( "%s%s", owned, C_PetJournal.GetBattlePetLink( pid ) )
-							
-						end
-					end
-					
-					if not upgrade then
-						owned = ""
-					end
-					
-				end
-				
-			end
-			
-		end
-		
-		ArkInventory.Output( YELLOW_FONT_COLOR_CODE, ArkInventory.Localise["BATTLEPET"], " #", i, ": ", h, " ", YELLOW_FONT_COLOR_CODE, owned )
-		
-	end
-	
-end
-
-
-
-
-
 function ArkInventory:LISTEN_CURRENCY_UPDATE( )
 
 	--ArkInventory.Output( "LISTEN_CURRENCY_UPDATE" )
@@ -1252,6 +1239,7 @@ end
 
 function ArkInventory:LISTEN_ZONE_CHANGED_BUCKET( )
 	--ArkInventory.LDB.Mounts:Update( )
+	ArkInventory.ScanMountJournal( )
 end
 
 function ArkInventory:LISTEN_ZONE_CHANGED( )
@@ -1268,11 +1256,12 @@ function ArkInventory:LISTEN_ACTIONBAR_UPDATE_USABLE( event )
 	ArkInventory:SendMessage( "LISTEN_ACTIONBAR_UPDATE_USABLE_BUCKET", 1 )
 end
 
+--[[
 function ArkInventory:LISTEN_UNIT_POWER_BUCKET( )
 	
 	--ArkInventory.Output( "LISTEN_UNIT_POWER_BUCKET" )
 	
-	if ArkInventory.Global.Me.info.class == "WARLOCK" and ArkInventory.db.char.option.ldb.tracking.item.tracked[6265] then
+	if ArkInventory.Global.Me.info.class == "WARLOCK" and ArkInventory.Global.Me.ldb.tracking.item.tracked[6265] then
 		-- update count for lock shards
 		ArkInventory.LDB.Tracking_Item:Update( )
 	end
@@ -1282,6 +1271,7 @@ end
 function ArkInventory:LISTEN_UNIT_POWER( )
 	ArkInventory:SendMessage( "LISTEN_UNIT_POWER_BUCKET", 1 )
 end
+]]--
 
 function ArkInventory:LISTEN_SPELLS_CHANGED_BUCKET( )
 	
@@ -1353,12 +1343,14 @@ end
 
 function ArkInventory.BagType( blizzard_id )
 	
-	assert( blizzard_id ~= nil, "code failure: blizard_id is nil" )
+	assert( blizzard_id ~= nil, "code failure: blizzard_id is nil" )
 	
 	if blizzard_id == BACKPACK_CONTAINER then
 		return ArkInventory.Const.Slot.Type.Bag
 	elseif blizzard_id == BANK_CONTAINER then
 		return ArkInventory.Const.Slot.Type.Bag
+	elseif blizzard_id == REAGENTBANK_CONTAINER then
+		return ArkInventory.Const.Slot.Type.ReagentBank
 	end
 	
 	local loc_id, bag_id = ArkInventory.BagID_Internal( blizzard_id )
@@ -1375,6 +1367,8 @@ function ArkInventory.BagType( blizzard_id )
 		return ArkInventory.Const.Slot.Type.Critter
 	elseif loc_id == ArkInventory.Const.Location.Mount then
 		return ArkInventory.Const.Slot.Type.Mount
+	elseif loc_id == ArkInventory.Const.Location.Toybox then
+		return ArkInventory.Const.Slot.Type.Toybox
 	elseif loc_id == ArkInventory.Const.Location.Token then
 		return ArkInventory.Const.Slot.Type.Currency
 	elseif loc_id == ArkInventory.Const.Location.Auction then
@@ -1474,7 +1468,6 @@ function ArkInventory.Scan( bagTable )
 	for _, blizzard_id in pairs( bagTable ) do
 		
 		--local t1 = GetTime( )
-		--ArkInventory.Output( "scan location[", loc_id, "] inititated" )
 		
 		local loc_id = ArkInventory.BagID_Internal( blizzard_id )
 		
@@ -1493,15 +1486,19 @@ function ArkInventory.Scan( bagTable )
 			end
 		elseif loc_id == ArkInventory.Const.Location.Mail then
 			if not processed[loc_id] then
-				ArkInventory.ScanMail( )
+				ArkInventory.ScanMailInbox( )
 			end
 		elseif loc_id == ArkInventory.Const.Location.Pet then
 			if not processed[loc_id] then
-				ArkInventory.ScanBattlePet( )
+				ArkInventory.ScanPetJournal( )
 			end
 		elseif loc_id == ArkInventory.Const.Location.Mount then
 			if not processed[loc_id] then
-				ArkInventory.ScanMount( )
+				ArkInventory.ScanMountJournal( )
+			end
+		elseif loc_id == ArkInventory.Const.Location.Toybox then
+			if not processed[loc_id] then
+				ArkInventory.ScanToybox( )
 			end
 		elseif loc_id == ArkInventory.Const.Location.Token then
 			if not processed[loc_id] then
@@ -1520,9 +1517,7 @@ function ArkInventory.Scan( bagTable )
 				ArkInventory.ScanTradeskill( )
 			end
 		elseif loc_id == ArkInventory.Const.Location.Void then
-			if not processed[loc_id] then
-				ArkInventory.ScanVoidStorage( )
-			end
+			ArkInventory.ScanVoidStorage( blizzard_id )
 		else
 			error( string.format( "code failure: uncoded location [%s] for bag [%s]", loc_id, blizzard_id ) )
 		end
@@ -1543,26 +1538,21 @@ function ArkInventory.ScanBag( blizzard_id )
 	local loc_id, bag_id = ArkInventory.BagID_Internal( blizzard_id )
 	
 	if not loc_id then
-		ArkInventory.OutputWaring( "aborted scan of bag [", blizzard_id, "], unknown bag id" )
+		ArkInventory.OutputWarning( "aborted scan of bag [", blizzard_id, "], unknown bag id" )
 		return
 	else
-		--ArkInventory.OutputWaring( "found bag id [", blizzard_id, "] in location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "]" )
-	end
-	
-	if loc_id == ArkInventory.Const.Location.Bank and ArkInventory.Global.Mode.Bank == false then
-		--ArkInventory.OutputWaring( "aborted scan of bag id [", blizzard_id, "], not at bank" )
-		return
+		--ArkInventory.OutputWarning( "found bag id [", blizzard_id, "] in location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "]" )
 	end
 	
 	local cp = ArkInventory.Global.Me
 	
 	if not ArkInventory.LocationIsMonitored( loc_id ) then
-		--ArkInventory.OutputWaring( "aborted scan of bag id [", blizzard_id, "], location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "] is not being monitored" )
+		--ArkInventory.OutputWarning( "aborted scan of bag id [", blizzard_id, "], location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "] is not being monitored" )
 		return
 	end
 	
 	--ArkInventory.Output( "scaning: ", ArkInventory.Global.Location[loc_id].Name, " [", loc_id, ".", bag_id, "] - [", blizzard_id, "]" )
-
+	
 	
 	local count = 0
 	local empty = 0
@@ -1572,13 +1562,13 @@ function ArkInventory.ScanBag( blizzard_id )
 	local h = nil
 	local rarity = 0
 	
-	if loc_id == ArkInventory.Const.Location.Bag then
+	if ( loc_id == ArkInventory.Const.Location.Bag ) then
 		
 		count = GetContainerNumSlots( blizzard_id )
 		
-		if blizzard_id == BACKPACK_CONTAINER then
+		if ( blizzard_id == BACKPACK_CONTAINER ) then
 			
-			if not count or count == 0 then
+			if ( not count ) or ( count == 0 ) then
 				if ArkInventory.db.global.option.bugfix.zerosizebag.alert then
 					ArkInventory.OutputWarning( "Aborted scan of bag ", blizzard_id, ", location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "] size returned was ", count, ", rescan has been scheduled for 10 seconds.  This warning can be disabled in the config menu" )
 				end
@@ -1600,7 +1590,7 @@ function ArkInventory.ScanBag( blizzard_id )
 				
 			else
 				
-				if not count or count == 0 then
+				if ( not count ) or ( count == 0 ) then
 					if ArkInventory.db.global.option.bugfix.zerosizebag.alert then
 						ArkInventory.OutputWarning( "Aborted scan of bag ", blizzard_id, ", location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "] size returned was ", count, ", rescan has been scheduled for 10 seconds.  This warning can be disabled in the config menu" )
 					end
@@ -1620,10 +1610,10 @@ function ArkInventory.ScanBag( blizzard_id )
 
 	
 	if loc_id == ArkInventory.Const.Location.Bank then
-	
+		
 		count = GetContainerNumSlots( blizzard_id )
 		
-		if blizzard_id == BANK_CONTAINER then
+		if blizzard_id == REAGENTBANK_CONTAINER then
 			
 			if not count or count == 0 then
 				if ArkInventory.db.global.option.bugfix.zerosizebag.alert then
@@ -1633,47 +1623,74 @@ function ArkInventory.ScanBag( blizzard_id )
 				return
 			end
 			
-			texture = ArkInventory.Global.Location[loc_id].Texture
-			status = ArkInventory.Const.Bag.Status.Active
-			
-		else
-			
-			if blizzard_id - NUM_BAG_SLOTS > GetNumBankSlots( ) then
-			
+			if IsReagentBankUnlocked( ) then
+				texture = ArkInventory.Global.Location[loc_id].Texture
+				status = ArkInventory.Const.Bag.Status.Active
+			else
+				count = 0
 				texture = ArkInventory.Const.Texture.Empty.Bag
 				status = ArkInventory.Const.Bag.Status.Purchase
+			end
+			
+		elseif ArkInventory.Global.Mode.Bank == true then
+			
+			if blizzard_id == BANK_CONTAINER then
+				
+				if not count or count == 0 then
+					if ArkInventory.db.global.option.bugfix.zerosizebag.alert then
+						ArkInventory.OutputWarning( "Aborted scan of bag ", blizzard_id, ", location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "] size returned was ", count, ", rescan has been scheduled for 10 seconds.  This warning can be disabled in the config menu" )
+					end
+					ArkInventory:SendMessage( "LISTEN_RESCAN_LOCATION_BUCKET", loc_id )
+					return
+				end
+				
+				texture = ArkInventory.Global.Location[loc_id].Texture
+				status = ArkInventory.Const.Bag.Status.Active
 				
 			else
 				
-				h = GetInventoryItemLink( "player", ContainerIDToInventoryID( blizzard_id ) )
+				if blizzard_id - NUM_BAG_SLOTS > GetNumBankSlots( ) then
 				
-				if not h then
-					
 					texture = ArkInventory.Const.Texture.Empty.Bag
-					status = ArkInventory.Const.Bag.Status.Empty
+					status = ArkInventory.Const.Bag.Status.Purchase
 					
 				else
 					
-					if not count or count == 0 then
-						if ArkInventory.db.global.option.bugfix.zerosizebag.alert then
-							ArkInventory.OutputWarning( "Aborted scan of bag ", blizzard_id, ", location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "] size returned was ", count, ", rescan has been scheduled for 10 seconds.  This warning can be disabled in the config menu" )
+					h = GetInventoryItemLink( "player", ContainerIDToInventoryID( blizzard_id ) )
+					
+					if not h then
+						
+						texture = ArkInventory.Const.Texture.Empty.Bag
+						status = ArkInventory.Const.Bag.Status.Empty
+						
+					else
+						
+						if not count or count == 0 then
+							if ArkInventory.db.global.option.bugfix.zerosizebag.alert then
+								ArkInventory.OutputWarning( "Aborted scan of bag ", blizzard_id, ", location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "] size returned was ", count, ", rescan has been scheduled for 10 seconds.  This warning can be disabled in the config menu" )
+							end
+							ArkInventory:SendMessage( "LISTEN_RESCAN_LOCATION_BUCKET", loc_id )
+							return
 						end
-						ArkInventory:SendMessage( "LISTEN_RESCAN_LOCATION_BUCKET", loc_id )
-						return
+						
+						texture = ArkInventory.ObjectInfoTexture( h )
+						status = ArkInventory.Const.Bag.Status.Active
+						rarity = ArkInventory.ObjectInfoQuality( h )
+						
 					end
 					
-					texture = ArkInventory.ObjectInfoTexture( h )
-					status = ArkInventory.Const.Bag.Status.Active
-					rarity = ArkInventory.ObjectInfoQuality( h )
-					
 				end
-				
-			end
-
-		end
-
-	end
 	
+			end
+		
+		else
+			
+			--ArkInventory.OutputWarning( "aborted scan of bag id [", blizzard_id, "], not at bank" )
+			return
+			
+		end
+		
+	end
 	
 	local bag = cp.location[loc_id].bag[bag_id]
 	
@@ -1694,6 +1711,16 @@ function ArkInventory.ScanBag( blizzard_id )
 		changed_bag = true
 	end
 	
+	if bt == ArkInventory.Const.Slot.Type.Unknown then
+		
+		if ArkInventory.TranslationsLoaded then
+			-- print the warning only after the translations are loaded
+			ArkInventory.OutputWarning( "aborted scan of bag [", bag_id, "] in location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "] type is unknown, queuing for rescan" )
+		end
+		ArkInventory:SendMessage( "LISTEN_BAG_UPDATE_BUCKET", blizzard_id )
+		
+	else
+	
 	for slot_id = 1, bag.count do
 		
 		if not bag.slot[slot_id] then
@@ -1707,8 +1734,8 @@ function ArkInventory.ScanBag( blizzard_id )
 		local i = bag.slot[slot_id]
 		
 		local texture, count, locked, rarity, readable, lootable, h, filtered = GetContainerItemInfo( blizzard_id, slot_id )
-		local ab = false
-		local sb = false
+		local ab = nil
+		local sb = nil
 		
 		if h then
 			
@@ -1717,17 +1744,17 @@ function ArkInventory.ScanBag( blizzard_id )
 			for _, v in pairs( ArkInventory.Const.Accountbound ) do
 				if ( v and ArkInventory.TooltipContains( ArkInventory.Global.Tooltip.Scan, string.format( "^%s$", v ) ) ) then
 					--ArkInventory.Output( loc_id, ".", bag_id, ".", slot_id, " = ", h, " - ", v )
-					ab = true
-					sb = true
+					ab = 1
+					sb = 1
 					break
 				end
 			end
 			
-			if ( not sb ) then
+			if ( not ab ) then
 				for _, v in pairs( ArkInventory.Const.Soulbound ) do
 					if ( v and ArkInventory.TooltipContains( ArkInventory.Global.Tooltip.Scan, string.format( "^%s$", v ) ) ) then
 						--ArkInventory.Output( loc_id, ".", bag_id, ".", slot_id, " = ", h, " - ", v )
-						sb = true
+						sb = 1
 						break
 					end
 				end
@@ -1744,7 +1771,7 @@ function ArkInventory.ScanBag( blizzard_id )
 			
 		end
 		
-		local changed_item, new = ArkInventory.ScanChanged( i, h, sb, count )
+		local changed_item = ArkInventory.ScanChanged( i, h, sb, count )
 		
 		i.h = h
 		i.ab = ab
@@ -1753,8 +1780,6 @@ function ArkInventory.ScanBag( blizzard_id )
 		i.count = count
 		
 		if changed_item then
-			
-			i.new = new
 			
 			i.age = ArkInventory.ItemAgeUpdate( )
 			
@@ -1770,13 +1795,15 @@ function ArkInventory.ScanBag( blizzard_id )
 		end
 		
 	end
-
-	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
+	
+	end
+	
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
 	
 end
 
 function ArkInventory.ScanVault( )
-
+	
 	--ArkInventory.Output( GREEN_FONT_COLOR_CODE, "ScanVault( )" )
 	
 	if ArkInventory.Global.Mode.Vault == false then
@@ -1806,7 +1833,6 @@ function ArkInventory.ScanVault( )
 	
 	--ArkInventory.Output( GREEN_FONT_COLOR_CODE, "scaning: ", ArkInventory.Global.Location[loc_id].Name, " [", loc_id, ".", bag_id, "] - [", blizzard_id, "]" )
 	
-	
 	local bag = cp.location[loc_id].bag[bag_id]
 	
 	local old_bag_count = bag.count
@@ -1816,10 +1842,12 @@ function ArkInventory.ScanVault( )
 	bag.empty = 0
 	bag.type = ArkInventory.Const.Slot.Type.Bag
 	
+	local blizzard_container_width = NUM_SLOTS_PER_GUILDBANK_GROUP
+	local blizzard_container_depth = NUM_GUILDBANK_COLUMNS
+	
 	if bag_id <= GetNumGuildBankTabs( ) then
 		
-		local name, icon, isViewable, canDeposit, numWithdrawals, remainingWithdrawals = GetGuildBankTabInfo( bag_id )
-		
+		local name, icon, canView, canDeposit, numWithdrawals, remainingWithdrawals, filtered = GetGuildBankTabInfo( bag_id )
 		bag.name = name
 		bag.texture = icon
 		bag.count = MAX_GUILDBANK_SLOTS_PER_TAB
@@ -1827,7 +1855,7 @@ function ArkInventory.ScanVault( )
 		
 	end
 	
-	local isViewable, canDeposit = select( 3, GetGuildBankTabInfo( bag_id ) )
+	local canView, canDeposit = select( 3, GetGuildBankTabInfo( bag_id ) )
 
 	local changed_bag = false
 	if old_bag_count ~= bag.count or old_bag_status ~= bag.status then
@@ -1845,11 +1873,11 @@ function ArkInventory.ScanVault( )
 		end
 		
 		local i = bag.slot[slot_id]
-		i.display_id = 14 * ( ( slot_id - 1 ) % 7 ) + math.floor( ( slot_id - 1 ) / 7 ) + 1
+		i.did = blizzard_container_width * ( ( slot_id - 1 ) % blizzard_container_depth ) + math.floor( ( slot_id - 1 ) / blizzard_container_depth ) + 1
 		
 		local texture, count = GetGuildBankItemInfo( bag_id, slot_id )
 		local h = nil
-		local sb = false
+		local sb = nil
 		
 		if texture then
 			
@@ -1874,7 +1902,7 @@ function ArkInventory.ScanVault( )
 		end
 		
 		
-		local changed_item, new = ArkInventory.ScanChanged( i, h, sb, count )
+		local changed_item = ArkInventory.ScanChanged( i, h, sb, count )
 		
 		if changed_item then
 			
@@ -1883,9 +1911,7 @@ function ArkInventory.ScanVault( )
 			i.h = h
 			i.count = count
 			i.sb = sb
-			
 			i.q = ArkInventory.ObjectInfoQuality( h )
-			i.new = new
 			
 			if not changed_bag then
 				ArkInventory.Frame_Item_Update( loc_id, bag_id, slot_id )
@@ -1898,44 +1924,32 @@ function ArkInventory.ScanVault( )
 		
 	end
 	
-	cp.location[loc_id].slot_count = ArkInventory.Table.Sum( cp.location[loc_id].bag, function( a ) return a.count end )
-	
 	if changed_bag then
 		ArkInventory:SendMessage( "LISTEN_STORAGE_EVENT", ArkInventory.Const.Event.BagUpdate, loc_id, bag_id, ArkInventory.Const.Window.Draw.Recalculate )
 	else
 		ArkInventory:SendMessage( "LISTEN_STORAGE_EVENT", ArkInventory.Const.Event.BagUpdate, loc_id, bag_id, ArkInventory.Const.Window.Draw.Refresh )
 	end
 	
-	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
 	
 end
 
 function ArkInventory.ScanVaultHeader( )
 	
-	--ArkInventory.Output( "ScanVaultHeader( ) start" )
+--	ArkInventory.Output( "ScanVaultHeader( ) start" )
 	
 	if ArkInventory.Global.Mode.Vault == false then
 		--ArkInventory.Output( "aborted scan of tab headers, not at vault" )
 		return
 	end
 	
---	if bag_id < 1 or bag_id > MAX_GUILDBANK_TABS then
-		--ArkInventory.Output( "aborted scan of tab ", bag_id, " header, invalid tab id" )
---		return
---	end
-	
-	if not IsInGuild( ) or not ArkInventory.Global.Me.info.guild_id then
-		--ArkInventory.Output( "aborted scan of tab headers, not in a guild" )
-		return
-	end
-	
 	local cp = ArkInventory.PlayerInfoGet( ArkInventory.Global.Me.info.guild_id )
-	
-	--ArkInventory.Output( "scaning tab headers" )
 	
 	local loc_id = ArkInventory.Const.Location.Vault
 	
 	for bag_id = 1, MAX_GUILDBANK_TABS do
+		
+		--ArkInventory.Output( "scaning tab header: ", bag_id )
 		
 		local bag = cp.location[loc_id].bag[bag_id]
 	
@@ -1943,7 +1957,7 @@ function ArkInventory.ScanVaultHeader( )
 	
 		if bag_id <= GetNumGuildBankTabs( ) then
 			
-			local name, icon, isViewable, canDeposit, numWithdrawals, remainingWithdrawals = GetGuildBankTabInfo( bag_id )
+			local name, icon, canView, canDeposit, numWithdrawals, remainingWithdrawals = GetGuildBankTabInfo( bag_id )
 			
 			--ArkInventory.Output( "tab = ", bag_id, ", icon = ", icon )
 			
@@ -1953,7 +1967,7 @@ function ArkInventory.ScanVaultHeader( )
 			
 			-- from Blizzard_GuildBankUI.lua - GuildBankFrame_UpdateTabs( )
 			local access = GUILDBANK_TAB_FULL_ACCESS
-			if not isViewable then
+			if not canView then
 				access = ArkInventory.Localise["VAULT_TAB_ACCESS_NONE"]
 			elseif ( not canDeposit and numWithdrawals == 0 ) then
 				access = GUILDBANK_TAB_LOCKED
@@ -1997,7 +2011,7 @@ function ArkInventory.ScanVaultHeader( )
 	
 	ArkInventory.Frame_Changer_Update( loc_id, bag_id )
 	
-	--ArkInventory.Output( "ScanVaultHeader( ", bag_id, " ) end" )
+	--ArkInventory.Output( "ScanVaultHeader( ) end" )
 	
 end
 
@@ -2040,8 +2054,8 @@ function ArkInventory.ScanWearing( )
 		
 		local inv_id = GetInventorySlotInfo( v )
 		local h = GetInventoryItemLink( "player", inv_id )
-		local ab = false
-		local sb = false
+		local ab = nil
+		local sb = nil
 		local count = 1
 		
 		if h then
@@ -2050,8 +2064,8 @@ function ArkInventory.ScanWearing( )
 			
 			for _, v in pairs( ArkInventory.Const.Accountbound ) do
 				if ( v and ArkInventory.TooltipContains( ArkInventory.Global.Tooltip.Scan, string.format( "^%s$", v ) ) ) then
-					ab = true
-					sb = true
+					ab = 1
+					sb = 1
 					break
 				end
 			end
@@ -2059,7 +2073,7 @@ function ArkInventory.ScanWearing( )
 			if ( not sb ) then
 				for _, v in pairs( ArkInventory.Const.Soulbound ) do
 					if ( v and ArkInventory.TooltipContains( ArkInventory.Global.Tooltip.Scan, string.format( "^%s$", v ) ) ) then
-						sb = true
+						sb = 1
 						break
 					end
 				end
@@ -2072,7 +2086,7 @@ function ArkInventory.ScanWearing( )
 		end
 
 		
-		local changed_item, new = ArkInventory.ScanChanged( i, h, sb, count )
+		local changed_item = ArkInventory.ScanChanged( i, h, sb, count )
 
 		if changed_item or i.loc_id == nil then
 		
@@ -2086,9 +2100,7 @@ function ArkInventory.ScanWearing( )
 			i.count = count
 			i.ab = ab
 			i.sb = sb
-			
 			i.q = ArkInventory.ObjectInfoQuality( h )
-			i.new = new
 		
 			ArkInventory.Frame_Item_Update( loc_id, bag_id, slot_id )
 			ArkInventory:SendMessage( "LISTEN_CHANGER_UPDATE_BUCKET", loc_id )
@@ -2101,19 +2113,17 @@ function ArkInventory.ScanWearing( )
 	
 	end
 	
-	cp.location[loc_id].slot_count = bag.count
-	
-	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
 	
 end
 
-function ArkInventory.ScanMail( )
+function ArkInventory.ScanMailInbox( )
 	
 	local blizzard_id = ArkInventory.Const.Offset.Mail + 1
 	
 	local loc_id, bag_id = ArkInventory.BagID_Internal( blizzard_id )
-
-	-- mailbox can be scanned from anywhere, just uses data from when it was last opened
+	
+	-- mailbox can be scanned from anywhere, just uses data from when it was last opened but dont bother unless its actually open
 	if ArkInventory.Global.Mode.Mail == false then
 		--ArkInventory.Output( RED_FONT_COLOR_CODE, "aborted scan of mailbox, not at mailbox" )
 		return
@@ -2140,34 +2150,35 @@ function ArkInventory.ScanMail( )
 	
 	
 	local slot_id = 0
+	local name, texture, count
 	
-	for msg_id = 1, GetInboxNumItems( ) do
+	for index = 1, GetInboxNumItems( ) do
 	
-		--ArkInventory.Output( "scanning message ", msg_id )
+		--ArkInventory.Output( "scanning message ", index )
 		
-		local _, _, _, _, _, _, daysLeft, hasItem, _, wasReturned, _, canReply, _ = GetInboxHeaderInfo( msg_id )
-		
-		--if ( daysLeft >= 1 ) then
---			daysLeft = string.format( "%s%s%s%s", GREEN_FONT_COLOR_CODE, string.format( DAYS_ABBR, floor(daysLeft) ), " ", FONT_COLOR_CODE_CLOSE )
-		--else
---			daysLeft = string.format( "%s%s%s", RED_FONT_COLOR_CODE, SecondsToTime( floor( daysLeft * 24 * 60 * 60 ) ), FONT_COLOR_CODE_CLOSE )
-		--end
-		
-		--local expires_d = floor( daysLeft )
-		--local expires_s = ( daysLeft - floor( daysLeft ) ) * 24 * 60* 60
-		--local purge = not not ( wasReturned ) or ( not canReply )
+		local _, _, _, _, _, _, daysLeft, hasItem, _, wasReturned, _, canReply, _ = GetInboxHeaderInfo( index )
 		
 		if hasItem then
 		
-			--ArkInventory.Output( "message ", msg_id, " has item(s)" )
+			--if ( daysLeft >= 1 ) then
+--			daysLeft = string.format( "%s%s%s%s", GREEN_FONT_COLOR_CODE, string.format( DAYS_ABBR, floor(daysLeft) ), " ", FONT_COLOR_CODE_CLOSE )
+			--else
+--			daysLeft = string.format( "%s%s%s", RED_FONT_COLOR_CODE, SecondsToTime( floor( daysLeft * 24 * 60 * 60 ) ), FONT_COLOR_CODE_CLOSE )
+			--end
+		
+			--local expires_d = floor( daysLeft )
+			--local expires_s = ( daysLeft - floor( daysLeft ) ) * 24 * 60* 60
+			--local purge = not not ( wasReturned ) or ( not canReply )
+		
+			--ArkInventory.Output( "message ", index, " has item(s)" )
 			
-			for attachment_id = 1, ATTACHMENTS_MAX_RECEIVE do
+			for x = 1, ATTACHMENTS_MAX_RECEIVE do
 				
-				local name, _, count = GetInboxItem( msg_id, attachment_id ) -- rarity is bugged, always returns -1
+				name, texture, count = GetInboxItem( index, x ) -- rarity is bugged, always returns -1
 				
-				if ( name ) then
+				if name then
 					
-					--ArkInventory.Output( "message ", msg_id, ", attachment ", attachment_id, " = ", name, " x ", count, " / (", { GetInboxItemLink( msg_id, attachment_id ) }, ")" )
+					--ArkInventory.Output( "message ", index, ", attachment ", x, " = ", name, " x ", count, " / (", { GetInboxItemLink( index, x ) }, ")" )
 					
 					slot_id = slot_id + 1
 					
@@ -2181,19 +2192,19 @@ function ArkInventory.ScanMail( )
 					
 					local i = bag.slot[slot_id]
 					
-					local h = GetInboxItemLink( msg_id, attachment_id )
-					local hasCooldown, speciesID, level, breedQuality, maxHealth, power, speed, name = ArkInventory.Global.Tooltip.Scan:SetInboxItem( msg_id, attachment_id )
+					local h = GetInboxItemLink( index, x )
+					local hasCooldown, speciesID, level, breedQuality, maxHealth, power, speed, name = ArkInventory.Global.Tooltip.Scan:SetInboxItem( index, x )
 					if speciesID then
 						h = ArkInventory.BattlepetBaseHyperlink( speciesID, level, breedQuality, maxHealth, power, speed, name )
 					end
 					
-					local sb = false -- always false, might be boa but sort that out if its looted
+					local sb = nil -- always false, might be boa but sort that out if its looted
 					
 					if h then
 						bag.count = bag.count + 1
 					end
 					
-					local changed_item, new = ArkInventory.ScanChanged( i, h, sb, count )
+					local changed_item = ArkInventory.ScanChanged( i, h, sb, count )
 					
 					i.h = h
 					i.sb = sb
@@ -2201,11 +2212,8 @@ function ArkInventory.ScanMail( )
 					if changed_item then
 						
 						i.age = ArkInventory.ItemAgeUpdate( )
-						
 						i.count = count
-						
 						i.q = ArkInventory.ObjectInfoQuality( h )
-						i.new = new
 						
 						ArkInventory.Frame_Main_DrawStatus( loc_id, ArkInventory.Const.Window.Draw.Refresh )
 						
@@ -2219,199 +2227,108 @@ function ArkInventory.ScanMail( )
 		
 	end
 
-	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
-
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
+	
+	
+	-- clear cached mail sent from other known characters
+	
+	blizzard_id = ArkInventory.Const.Offset.Mail + 2
+	
+	loc_id, bag_id = ArkInventory.BagID_Internal( blizzard_id )
+	
+	bag = cp.location[loc_id].bag[bag_id]
+	
+	old_bag_count = bag.count
+	bag.count = 0
+	bag.empty = 0
+	bag.type = ArkInventory.Const.Slot.Type.Mail
+	bag.status = ArkInventory.Const.Bag.Status.Active
+	
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
+	
 end
 
-function ArkInventory.ScanMount( )
+function ArkInventory.ScanMailSentData( )
 	
-	--ArkInventory.Output( "ScanMount( ) start" )
-	
-	local type_id = "MOUNT"
-	
-	local blizzard_id = ArkInventory.Const.Offset.Mount + 1
+	local blizzard_id = ArkInventory.Const.Offset.Mail + 2
 	
 	local loc_id, bag_id = ArkInventory.BagID_Internal( blizzard_id )
 	
-	if not ArkInventory.LocationIsMonitored( loc_id ) then
-		--ArkInventory.Output( RED_FONT_COLOR_CODE, "aborted scan of bag id [", blizzard_id, "], location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "] is not being monitored" )
-		return
-	end
-	
 	--ArkInventory.Output( GREEN_FONT_COLOR_CODE, "scaning: ", ArkInventory.Global.Location[loc_id].Name, " [", loc_id, ".", bag_id, "] - [", blizzard_id, "]" )
 	
-	local player_id = ArkInventory.PlayerIDAccount( )
-	local cp = ArkInventory.PlayerInfoGet( player_id )
+	local cp = ArkInventory.PlayerInfoGet( smd.id )
+	if not cp then
+		return
+	end
 	
 	local bag = cp.location[loc_id].bag[bag_id]
 	
 	local old_bag_count = bag.count
 	
-	bag.count = GetNumCompanions( type_id ) or 0
 	bag.empty = 0
-	bag.type = ArkInventory.BagType( blizzard_id )
+	bag.type = ArkInventory.Const.Slot.Type.Mail
 	bag.status = ArkInventory.Const.Bag.Status.Active
 	
-	local companionID, name, spellID, texture, active, mountFlags
+	local slot_id = bag.count
 	
-	local companionData = ArkInventory.Global.Companion.MOUNT
-	table.wipe( companionData )
-	local companionEntry
-	
-	for slot_id = 1, bag.count do
+	local name, texture, count, quality
+	for x = 1, ATTACHMENTS_MAX do
 		
-		if not bag.slot[slot_id] then
-			bag.slot[slot_id] = {
-				loc_id = loc_id,
-				bag_id = bag_id,
-				slot_id = slot_id,
-			}
-		end
+		if smd[x] then
 		
-		local i = bag.slot[slot_id]
-		
-		companionID, name, spellID, texture, active, mountFlags = GetCompanionInfo( type_id, slot_id )
-		
-		companionData[spellID] = { capable = { }, usable = { } }
-		companionEntry = companionData[spellID]
-		
-		local h = GetSpellLink( spellID )
-		local sb = true
-		local count = 1
-		
-		--ArkInventory.Output( "type=[", type_id, "], slot=[", slot_id, "] link=", h, "." )
-		
-		local changed_item, new = ArkInventory.ScanChanged( i, h, sb, count )
-		
-		i.h = h
-		i.count = count
-		i.ab = true
-		i.sb = sb
-		i.type = type_id
-		
-		i.q = 1
-		
-		if ( bit.band( mountFlags, 0x02 ) == 0x02 ) then
-			--flying
-			i.mt = "a"
-			companionEntry.mt = "a"
-		elseif ( bit.band( mountFlags, 0x01 ) == 0x01 ) then
-			-- ground
-			i.mt = "l"
-			companionEntry.mt = "l"
-		elseif ( bit.band( mountFlags, 0x08 ) == 0x08 ) then
-			-- underwater
-			i.mt = "u"
-			companionEntry.mt = "u"
-		else
-			i.mt = nil
-			companionEntry.mt = "x"
-		end
-		
-		
-		if changed_item then
+			slot_id = slot_id + 1
+			bag.count = slot_id
 			
-			i.age = ArkInventory.ItemAgeUpdate( )
+			if not bag.slot[slot_id] then
+				bag.slot[slot_id] = {
+					loc_id = loc_id,
+					bag_id = bag_id,
+					slot_id = slot_id,
+				}
+			end
 			
-			i.new = new
+			local i = bag.slot[slot_id]
 			
-			i.texture = texture
+			local h = smd[x].h
+			local sb = nil -- always false, might be boa but sort that out if its looted
+			local count = smd[x].c
+			
+			local changed_item = ArkInventory.ScanChanged( i, h, sb, count )
+			
+			i.h = h
+			i.sb = sb
+			i.age = smd[x].age
+			i.count = count
+			i.q = ArkInventory.ObjectInfoQuality( h )
+			i.sdr = smd[x].sender
 			
 			ArkInventory.Frame_Main_DrawStatus( loc_id, ArkInventory.Const.Window.Draw.Refresh )
 			
 		end
 		
-		companionEntry.corrected = nil
-		
-		if ( bit.band( mountFlags, 0x02 ) == 0x02 ) then
-			companionEntry.capable.a = true
-		end
-		
-		if ( bit.band( mountFlags, 0x01 ) == 0x01 ) then
-			companionEntry.capable.l = true
-		end
-			
-		if ( bit.band( mountFlags, 0x09 ) ~= 0x09 ) then
-			companionEntry.capable.u = true
-		end
-		
-		
-		
-		companionEntry.usable = {
-			l = ( not not companionEntry.capable.l ),
-			a = ( not not companionEntry.capable.a ),
-			u = ( not not companionEntry.capable.u ),
-		}
-		
 	end
 	
-	--[[
-		local spells = { }
-		
-		if IsSpellKnown( 33943 ) then
-			bag.count = bag.count + 1
-			spells[33943] = bag.count
-			--ArkInventory.Output( "i know flight form" )
-		end
-		
-		if IsSpellKnown( 40120 ) then
-			bag.count = bag.count + 1
-			spells[40120] = bag.count
-			--ArkInventory.Output( "i know swift flight form" )
-		end
-		
-		for spell_id, slot_id in pairs( spells ) do
-			
-			if not bag.slot[slot_id] then
-				bag.slot[slot_id] = { }
-			end
-			
-			local i = bag.slot[slot_id]
-			
-			local h = GetSpellLink( spell_id )
-			local sb = true
-			local count = 1
-			
-			--ArkInventory.Output( "type=[", type_id, "], slot=[", slot_id, "] link=", h, "." )
-			
-			local changed_item, new = ArkInventory.ScanChanged( i, h, sb, count )
-			
-			if changed_item or i.loc_id == nil then
-				
-				i.age = ArkInventory.ItemAgeUpdate( )
-				
-				i.loc_id = loc_id
-				i.bag_id = bag_id
-				i.slot_id = slot_id
-				
-				i.h = h
-				i.count = count
-				i.sb = sb
-				
-				i.q = 1
-				i.new = new
-				
-				i.type = "SPELL"
-				i.texture = select( 3, GetSpellInfo( spell_id ) )
-				
-				ArkInventory.Frame_Main_DrawStatus( loc_id, ArkInventory.Const.Window.Draw.Refresh )
-				
-			end
-			
-		end
-	]]--
-	
-	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
-	
-	ArkInventory.MountDataUpdate( )
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
 	
 end
 
-function ArkInventory.ScanBattlePet( )
+function ArkInventory.ScanMountJournal( )
 	
-	--ArkInventory.Output( "ScanBattlePet( ) start" )
+	--ArkInventory.Output( "ScanMountJournal( ) start" )
 	
-	local blizzard_id = ArkInventory.Const.Offset.Pet + 1
+	if ( not ArkInventory.MountJournal.JournalIsReady( ) ) then
+		--ArkInventory.Output( "mount journal not ready" )
+		ArkInventory:SendMessage( "LISTEN_MOUNTJOURNAL_RELOAD_BUCKET", "RESCAN" )
+		return
+	end
+	--ArkInventory.Output( "mount journal ready" )
+	
+	if ( ArkInventory.MountJournal.GetCount( ) == 0 ) then
+		--ArkInventory.Output( "no mounts" )
+		return
+	end
+	
+	local blizzard_id = ArkInventory.Const.Offset.Mount + 1
 	local loc_id, bag_id = ArkInventory.BagID_Internal( blizzard_id )
 	
 	if not ArkInventory.LocationIsMonitored( loc_id ) then
@@ -2433,35 +2350,114 @@ function ArkInventory.ScanBattlePet( )
 	bag.type = ArkInventory.BagType( blizzard_id )
 	bag.status = ArkInventory.Const.Bag.Status.Active
 	
-	local companionData = ArkInventory.Global.Companion.CRITTER
-	table.wipe( companionData )
-	
-	--ArkInventory.Output( "scanning pets" )
+	--ArkInventory.Output( "scanning mounts [", ArkInventory.MountJournal.data.owned, "]" )
 	
 	local slot_id = 0
-	local old_level
-	local rarity, speciesID, customName, level, isWild, canBattle, tradable
+	
+	for _, md in ArkInventory.MountJournal.Iterate( ) do
+		
+		if md.owned then
+			
+			slot_id = slot_id + 1
+			
+			if not bag.slot[slot_id] then
+				bag.slot[slot_id] = {
+					loc_id = loc_id,
+					bag_id = bag_id,
+					slot_id = slot_id,
+				}
+			end
+			
+			local i = bag.slot[slot_id]
+			local h = md.link
+			local sb = 1
+			local count = 1
+			
+			ArkInventory.ScanChanged( i, h, sb, count )
+			
+			i.h = h
+			i.count = count
+			i.ab = 1
+			i.sb = sb
+			i.q = 1
+			
+			i.index = md.index
+			i.fav = md.fav
+			
+			if changed_item then
+				
+				i.texture = texture
+				
+				ArkInventory.Frame_Main_DrawStatus( loc_id, ArkInventory.Const.Window.Draw.Refresh )
+				
+			end
+			
+		end
+		
+	end
+	
+	ArkInventory.CompanionDataUpdate( )
+	
+	bag.count = slot_id
+	
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
+	
+	ArkInventory.LDB.Mounts.Cleanup( )
+	
+	--ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Refresh )
+	
+	--ArkInventory.Output( "ScanMountJournal( ) end" )
+	
+end
+
+function ArkInventory.ScanPetJournal( )
+	
+	--ArkInventory.Output( "ScanPetJournal( ) start" )
+	
+	local blizzard_id = ArkInventory.Const.Offset.Pet + 1
+	local loc_id, bag_id = ArkInventory.BagID_Internal( blizzard_id )
+	
+	local player_id = ArkInventory.PlayerIDAccount( )
+	local cp = ArkInventory.PlayerInfoGet( player_id )
+	
+	local bag = cp.location[loc_id].bag[bag_id]
+	
+	bag.count = 0
+	bag.empty = 0
+	bag.type = ArkInventory.BagType( blizzard_id )
+	bag.status = ArkInventory.Const.Bag.Status.Active
+	
+	
+	if ( not ArkInventory.PetJournal.JournalIsReady( ) ) then
+		--ArkInventory.Output( "pet journal not ready" )
+		ArkInventory:SendMessage( "LISTEN_PETJOURNAL_RELOAD_BUCKET", "RESCAN" )
+		return
+	end
+	--ArkInventory.Output( "pet journal ready" )
+	
+	if ( ArkInventory.PetJournal.GetCount( ) == 0 ) then
+		--ArkInventory.Output( "no pets" )
+		return
+	end
+	
+	if not ArkInventory.LocationIsMonitored( loc_id ) then
+		--ArkInventory.Output( RED_FONT_COLOR_CODE, "aborted scan of bag id [", blizzard_id, "], location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "] is not being monitored" )
+		return
+	end
+	
+	--ArkInventory.Output( GREEN_FONT_COLOR_CODE, "scaning: ", ArkInventory.Global.Location[loc_id].Name, " [", loc_id, ".", bag_id, "] - [", blizzard_id, "]" )
+	
+	
+	--ArkInventory.Output( "scanning pets [", ArkInventory.PetJournal.data.owned, "]" )
+	
+	local slot_id = 0
 	
 	cp.info.level = 1
 	
-	for _, petID in ArkInventory.Lib.Pet:IteratePetIDs( ) do
-		
-		companionData[petID] = true
-		
-		local h = C_PetJournal.GetBattlePetLink( petID )
-		
-		rarity = select( 5, C_PetJournal.GetPetStats( petID ) )
-		
-		speciesID, customName, level, _, _, _, _, _, _, _, _, _, _, isWild, canBattle, tradable = C_PetJournal.GetPetInfoByPetID( petID )
-		level = level or 1
-		
-		if cp.info.level < level then
-			-- save highest pet level for tint unusable
-			cp.info.level = level
-		end
+	for _, pd in ArkInventory.PetJournal.Iterate( ) do
 		
 		slot_id = slot_id + 1
-	
+		
 		if not bag.slot[slot_id] then
 			bag.slot[slot_id] = {
 				loc_id = loc_id,
@@ -2472,49 +2468,126 @@ function ArkInventory.ScanBattlePet( )
 		
 		local i = bag.slot[slot_id]
 		
-		if isWild and canBattle then
-			rarity = ( rarity and ( rarity - 1 ) ) or -1
-		else
-			rarity = -1
+		local h = pd.link
+		--ArkInventory.Output( gsub( h, "|", "*" ) )
+		
+		local level = pd.level or 1
+		
+		if cp.info.level < level then
+			-- save highest pet level for tint unusable
+			cp.info.level = level
 		end
 		
-		
-		local sb = ( ( not tradable ) and true ) or nil
 		local count = 1
+		local sb = ( ( not pd.sd.tradable ) and 1 ) or nil
 		
-		local changed_item, new = ArkInventory.ScanChanged( i, h, sb, count )
+		ArkInventory.ScanChanged( i, h, sb, count )
 		
 		i.h = h
-		
-		i.ab = true
+		i.ab = 1
 		i.sb = sb
-		
-		i.q = rarity
-		
+		i.q = pd.rarity
 		i.count = count
-		
-		i.pid = petID
-		i.bp = ( canBattle and true ) or nil
-		i.wp = ( isWild and true ) or nil
-		i.cn = customName
-		
-		if changed_item then
-			
---			i.age = ArkInventory.ItemAgeUpdate( )
-			
---			i.new = new
-			
-			ArkInventory.Frame_Main_DrawStatus( loc_id, ArkInventory.Const.Window.Draw.Refresh )
-			
-		end
+		i.guid = pd.guid
+		i.bp = ( pd.sd.canBattle and 1 ) or nil
+		i.wp = ( pd.sd.isWild and 1 ) or nil
+		i.cn = pd.cn
+		i.index = pd.index
+		i.fav = pd.fav
 		
 	end
 	
 	bag.count = slot_id
 	
-	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
 	
-	--ArkInventory.Output( "ScanBattlePet( ) end" )
+	ArkInventory.CompanionDataUpdate( )
+	
+	--ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Refresh )
+	
+	--ArkInventory.Output( "ScanPetJournal( ) end" )
+	
+end
+
+function ArkInventory.ScanToybox( )
+	
+	--ArkInventory.Output( "ScanToybox( ) start" )
+	
+	if ( not ArkInventory.Toybox.JournalIsReady( ) ) then
+		--ArkInventory.Output( "toybox journal not ready" )
+		ArkInventory:SendMessage( "LISTEN_TOYBOX_RELOAD_BUCKET", "RESCAN" )
+		return
+	end
+	--ArkInventory.Output( "toybox journal ready" )
+	
+	if ( ArkInventory.Toybox.GetCount( ) == 0 ) then
+		--ArkInventory.Output( "no toys" )
+		return
+	end
+	
+	local blizzard_id = ArkInventory.Const.Offset.Toybox + 1
+	local loc_id, bag_id = ArkInventory.BagID_Internal( blizzard_id )
+	
+	if not ArkInventory.LocationIsMonitored( loc_id ) then
+		--ArkInventory.Output( RED_FONT_COLOR_CODE, "aborted scan of bag id [", blizzard_id, "], location ", loc_id, " [", ArkInventory.Global.Location[loc_id].Name, "] is not being monitored" )
+		return
+	end
+	
+	--ArkInventory.Output( GREEN_FONT_COLOR_CODE, "scaning: ", ArkInventory.Global.Location[loc_id].Name, " [", loc_id, ".", bag_id, "] - [", blizzard_id, "]" )
+	
+	local player_id = ArkInventory.PlayerIDAccount( )
+	local cp = ArkInventory.PlayerInfoGet( player_id )
+	
+	local bag = cp.location[loc_id].bag[bag_id]
+	
+	bag.count = 0
+	bag.empty = 0
+	bag.type = ArkInventory.BagType( blizzard_id )
+	bag.status = ArkInventory.Const.Bag.Status.Active
+	
+	--ArkInventory.Output( "scanning toybox [", ArkInventory.Toybox.data.owned, "]" )
+	
+	local slot_id = 0
+	
+	for _, td in ArkInventory.Toybox.Iterate( ) do
+		
+		slot_id = slot_id + 1
+		
+		if not bag.slot[slot_id] then
+			bag.slot[slot_id] = {
+				loc_id = loc_id,
+				bag_id = bag_id,
+				slot_id = slot_id,
+			}
+		end
+		
+		local i = bag.slot[slot_id]
+		
+		local h = td.link
+		local sb = 1
+		local count = 1
+		
+		ArkInventory.ScanChanged( i, h, sb, count )
+		
+		i.h = h
+		i.count = count
+		i.ab = 1
+		i.sb = sb
+		i.q = 1
+		
+		i.index = td.index
+		i.item = td.item
+		i.fav = td.fav
+		
+	end
+	
+	bag.count = slot_id
+	
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
+	
+	--ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Refresh )
+	
+	--ArkInventory.Output( "ScanToybox( ) end" )
 	
 end
 
@@ -2577,12 +2650,9 @@ function ArkInventory.ScanCurrency( )
 			end
 			
 			local i = bag.slot[slot_id]
-			
-			local sb = true
-			
+			local sb = 1
 			local h = GetCurrencyListLink( j )
-			
-			local changed_item, new = ArkInventory.ScanChanged( i, h, sb, count )
+			local changed_item = ArkInventory.ScanChanged( i, h, sb, count )
 			
 			i.h = h
 			i.count = count
@@ -2591,9 +2661,7 @@ function ArkInventory.ScanCurrency( )
 			if changed_item or i.loc_id == nil then
 				
 				i.age = ArkInventory.ItemAgeUpdate( )
-				
 				i.q = ArkInventory.ObjectInfoQuality( h )
-				i.new = new
 				
 				ArkInventory.Frame_Main_DrawStatus( loc_id, ArkInventory.Const.Window.Draw.Refresh )
 				
@@ -2605,7 +2673,7 @@ function ArkInventory.ScanCurrency( )
 	
 	bag.count = slot_id
 
-	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
 	
 	-- token "bag" blizzard is using (mapped to our second bag)
 	bag_id = 2
@@ -2619,7 +2687,7 @@ end
 
 local CanUseVoidStorage = CanUseVoidStorage or ArkInventory.HookDoNothing
 
-function ArkInventory.ScanVoidStorage( )
+function ArkInventory.ScanVoidStorage( blizzard_id )
 	
 	--ArkInventory.Output( "ScanVoidStorage" )
 	
@@ -2633,7 +2701,6 @@ function ArkInventory.ScanVoidStorage( )
 		return
 	end
 	
-	local blizzard_id = ArkInventory.Const.Offset.Void + 1
 	local loc_id, bag_id = ArkInventory.BagID_Internal( blizzard_id )
 	
 	if not ArkInventory.LocationIsMonitored( loc_id ) then
@@ -2652,6 +2719,9 @@ function ArkInventory.ScanVoidStorage( )
 	bag.type = ArkInventory.BagType( blizzard_id )
 	bag.status = ArkInventory.Const.Bag.Status.Active
 	
+	local blizzard_container_width = 10
+	local blizzard_container_depth = 8
+
 	for slot_id = 1, bag.count do
 		
 		if not bag.slot[slot_id] then
@@ -2659,14 +2729,22 @@ function ArkInventory.ScanVoidStorage( )
 		end
 		
 		local i = bag.slot[slot_id]
-		i.display_id = 10 * ( ( slot_id - 1 ) % 8 ) + math.floor( ( slot_id - 1 ) / 8 ) + 1
+		i.did = blizzard_container_width * ( ( slot_id - 1 ) % blizzard_container_depth ) + math.floor( ( slot_id - 1 ) / blizzard_container_depth ) + 1
 		
-		local item_id, texture, locked = GetVoidItemInfo( slot_id )
-		local h = GetVoidItemHyperlinkString( slot_id )
+		local item_id, texture, locked, recentDeposit, isFiltered, q = GetVoidItemInfo( bag_id, slot_id )
+		
+		local h = nil
+		
+		if item_id then
+			h = select( 2, ArkInventory.ObjectInfo( "item:" .. item_id ) )
+		end
+		
+		
 		local count = 1
-		local sb = true
+		local sb = 1
 		
 		if h then
+			
 			
 		else
 			
@@ -2675,7 +2753,7 @@ function ArkInventory.ScanVoidStorage( )
 		end
 		
 		
-		local changed_item, new = ArkInventory.ScanChanged( i, h, sb, count )
+		local changed_item = ArkInventory.ScanChanged( i, h, sb, count )
 
 		if changed_item or i.loc_id == nil then
 			
@@ -2688,9 +2766,7 @@ function ArkInventory.ScanVoidStorage( )
 			i.h = h
 			i.count = count
 			i.sb = sb
-			
-			i.q = ArkInventory.ObjectInfoQuality( h )
-			i.new = new
+			i.q = q
 			
 			ArkInventory.Frame_Item_Update( loc_id, bag_id, slot_id )
 			ArkInventory:SendMessage( "LISTEN_CHANGER_UPDATE_BUCKET", loc_id )
@@ -2701,9 +2777,7 @@ function ArkInventory.ScanVoidStorage( )
 		
 	end
 	
-	cp.location[loc_id].slot_count = bag.count
-	
-	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
 	
 end
 
@@ -2752,6 +2826,7 @@ function ArkInventory.ScanChanged( old, h, sb, count )
 			
 			-- different item
 			ArkInventory.ItemCacheClear( h )
+			ArkInventory.ItemCacheClear( old.h )
 			ArkInventory.ScanCleanupCount( old.h, old.loc_id )
 			ArkInventory.ScanCleanupCount( h, old.loc_id )
 			
@@ -2803,18 +2878,22 @@ function ArkInventory.ScanCleanupCount( h, loc_id )
 	
 end
 
-function ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
+function ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
 	
-	local old_bag_count = old_bag_count or bag.count
+	local num_slots = #bag.slot
+	--ArkInventory.Output( "cleanup: loc=", loc_id, ", bag=", bag_id, ", count=", num_slots, " / ", bag.count )
 	
 	-- remove unwanted slots
-	if old_bag_count > bag.count then
-		for slot_id = bag.count + 1, old_bag_count do
+	if num_slots > bag.count then
+		
+		for slot_id = bag.count + 1, num_slots do
 			
 			if bag.slot[slot_id] and bag.slot[slot_id].h then
 				ArkInventory.ScanCleanupCount( bag.slot[slot_id].h, loc_id )
 			end
 			
+			--ArkInventory.Output( "wiped bag ", bag_id, " slot ", slot_id )
+			table.wipe( bag.slot[slot_id] )
 			bag.slot[slot_id] = nil
 			
 		end
@@ -2824,15 +2903,17 @@ function ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
 	for h, loc in pairs( ArkInventoryScanCleanupList ) do
 		for loc_id in pairs( loc ) do
 			--ArkInventory.Output( "reset count for ", h, " at loc ", loc_id )
-			ArkInventory.ObjectCountClear( h, loc_id )
+			ArkInventory.ObjectCountClear( h, cp.info.player_id, loc_id )
 		end
 	end
 	
 	table.wipe( ArkInventoryScanCleanupList )
 	
+	-- recalculate total slots
+	cp.location[loc_id].slot_count = ArkInventory.Table.Sum( cp.location[loc_id].bag, function( a ) return a.count end )
+	
 	-- if bag size has changed, let the changer window know
-	if old_bag_count ~= bag.count then
-		cp.location[loc_id].slot_count = ArkInventory.Table.Sum( cp.location[loc_id].bag, function( a ) return a.count end )
+	if num_slots ~= bag.count then
 		ArkInventory:SendMessage( "LISTEN_STORAGE_EVENT", ArkInventory.Const.Event.BagUpdate, loc_id, bag_id, ArkInventory.Const.Window.Draw.Recalculate )
 	end
 	
@@ -2898,7 +2979,7 @@ function ArkInventory.ScanAuction( massive )
 		local h = GetAuctionItemLink( "owner", slot_id )
 		local name, texture, count, rarity, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highestBidder, owner, sold = GetAuctionItemInfo( "owner", slot_id )
 		local duration = GetAuctionItemTimeLeft( "owner", slot_id )
-		local sb = false
+		local sb = nil
 		
 		--ArkInventory.Output( "auction ", slot_id, " / ", h, " / ", sold )
 		
@@ -2911,7 +2992,7 @@ function ArkInventory.ScanAuction( massive )
 		
 		--ArkInventory.Output( "auction ", slot_id, " = ", h, " x ", count )
 		
-		local changed_item, new = ArkInventory.ScanChanged( i, h, sb, count )
+		local changed_item = ArkInventory.ScanChanged( i, h, sb, count )
 		
 		if changed_item then
 			
@@ -2921,7 +3002,6 @@ function ArkInventory.ScanAuction( massive )
 			i.count = count
 			i.sb = sb
 			i.q = ArkInventory.ObjectInfoQuality( h )
-			i.new = new
 			
 			if duration == 1 then
 				-- Short (less than 30 minutes)
@@ -2943,7 +3023,7 @@ function ArkInventory.ScanAuction( massive )
 		
 	end
 	
-	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
+	ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
 	
 end
 
@@ -2967,7 +3047,7 @@ function ArkInventory.ScanAuctionExpire( )
 			
 			if ( i.expires and ( i.expires < current_time ) ) or ( i.age and ( i.age + 48 * 60 < current_time ) ) then
 				
-				ArkInventory.ObjectCountClear( i.h, nil )
+				ArkInventory.ObjectCountClear( i.h )
 				
 				table.wipe( i )
 				
@@ -3035,7 +3115,7 @@ function ArkInventory.ScanSpellbook( )
 			local h = GetSpellLink( slot_id + offset, "spell")
 			--local name, rank, icon, powerCost, isFunnel, powerType, castingTime, minRange, maxRange = GetSpellInfo( slot_id + offset, "spell")
 			local rarity = 1
-			local sb = true
+			local sb = 1
 			local count = 1
 			
 			--ArkInventory.Output( "spellbook ", bag_id, " / ", slot_id, " / ", h )
@@ -3045,7 +3125,7 @@ function ArkInventory.ScanSpellbook( )
 				h = nil
 			end
 			
-			local changed_item, new = ArkInventory.ScanChanged( i, h, sb, count )
+			local changed_item = ArkInventory.ScanChanged( i, h, sb, count )
 			
 			if changed_item or i.loc_id == nil then
 				
@@ -3059,7 +3139,6 @@ function ArkInventory.ScanSpellbook( )
 				i.count = count
 				i.sb = sb
 				i.q = ArkInventory.ObjectInfoQuality( h )
-				i.new = new
 				
 				ArkInventory.Frame_Main_DrawStatus( loc_id, ArkInventory.Const.Window.Draw.Refresh )
 				
@@ -3067,7 +3146,7 @@ function ArkInventory.ScanSpellbook( )
 			
 		end
 		
-		ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
+		ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
 		
 	end
 	
@@ -3205,7 +3284,7 @@ function ArkInventory.ScanTradeskill( )
 			
 			
 			local numSkills = GetNumTradeSkills( )
-			ArkInventory.Output( "tradeskill ", bag_id, " = ", name, ", ", numSkills )
+			--ArkInventory.Output( "tradeskill ", bag_id, " = ", name, ", ", numSkills )
 			
 			
 			
@@ -3227,7 +3306,7 @@ function ArkInventory.ScanTradeskill( )
 				local h --= GetSpellLink( slot_id + offset, "spell")
 				
 				local rarity = 1
-				local sb = true
+				local sb = 1
 				local count = 1
 				
 				
@@ -3250,7 +3329,6 @@ function ArkInventory.ScanTradeskill( )
 					i.count = count
 					i.sb = sb
 					i.q = ArkInventory.ObjectInfoQuality( h )
-					i.new = new
 					
 					ArkInventory.Frame_Main_DrawStatus( loc_id, ArkInventory.Const.Window.Draw.Refresh )
 					
@@ -3260,7 +3338,7 @@ function ArkInventory.ScanTradeskill( )
 			
 		end
 		
-		ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag, old_bag_count )
+		ArkInventory.ScanCleanup( cp, loc_id, bag_id, bag )
 		
 	end
 	
@@ -3283,9 +3361,9 @@ function ArkInventory.ObjectInfo( h )
 	
 	local class, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10 = ArkInventory.ObjectStringDecode( h )
 	
-	if class == "item" then
+	if ( class == "item" ) then
 		
-		local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo( v1 )
+		local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo( h )
 		
 		if itemTexture == nil then
 			itemTexture = GetItemIcon( h )
@@ -3295,9 +3373,25 @@ function ArkInventory.ObjectInfo( h )
 			itemName = string.match( h, "|h%[(.+)%]|h" )
 		end
 		
+		if ( ( itemRarity or 0 ) > 2 ) and ( ( itemEquipLoc or "" ) ~= "" ) then
+			
+			-- check for upgraded items via tooltip: Upgrade Level: v1/v2
+			ArkInventory.TooltipSetHyperlink( ArkInventory.Global.Tooltip.Scan, h )
+			local _, _, u1, u2 = ArkInventory.TooltipFind( ArkInventory.Global.Tooltip.Scan, ArkInventory.Localise["WOW_TOOLTIP_ITEMUPGRADELEVEL"], false, true )
+			
+			if u1 and u2 then
+				if ( itemRarity == 3 ) then
+					itemLevel = ( itemLevel or 0 ) + u1 * 8
+				elseif ( itemRarity == 4 ) then
+					itemLevel = ( itemLevel or 0 ) + u1 * 4
+				end
+			end
+			
+		end
+		
 		return class, itemLink, itemName, itemTexture, itemRarity or 0, itemLevel or 0, itemMinLevel or 0, itemType or "", itemSubType or "", itemStackCount or 1, itemEquipLoc or "", itemSellPrice or 0
 		
-	elseif class == "spell" then
+	elseif ( class == "spell" ) then
 		
 		local itemName, _, itemTexture = GetSpellInfo( v1 )
 		local itemLink = GetSpellLink( v1 )
@@ -3305,16 +3399,24 @@ function ArkInventory.ObjectInfo( h )
 		
 		return class, itemLink, itemName, itemTexture, itemRarity
 		
-	elseif class == "battlepet" then
+	elseif ( class == "battlepet" ) then
 		
-		local itemName, itemTexture, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique = C_PetJournal.GetPetInfoBySpeciesID( v1 )
---		v1=speciesID, v2=level, v3=rarity, v4=maxHealth, v5=power, v6=speed, v7=petID/customName
+		local sd = ArkInventory.PetJournal.GetSpeciesInfo( v1 )
+--		v1=speciesID, v2=level, v3=rarity, v4=maxHealth, v5=power, v6=speed, v7=GUID
 		
-		petType = _G["BATTLE_PET_NAME_" .. petType] or ""
+		local name = ""
+		local icon = ArkInventory.Const.Texture.Missing
+		local petType = 0
 		
-		return class, h, itemName, itemTexture, v3, v2, 0, petType, "", 1, "", 0, v1, v2, v4, v5, v6, v7, v8, v9, v10
+		if sd then
+			name = sd.name or name
+			icon = sd.icon or icon
+			petType = sd.petType or petType
+		end
 		
-	elseif class == "currency" then
+		return class, h, name, icon, v3, v2, 0, petType, "", 1, "", 0, v1, v2, v4, v5, v6, v7, v8, v9, v10
+		
+	elseif ( class == "currency" ) then
 		
 		-- v1=currencyID
 		
@@ -3336,14 +3438,13 @@ end
 
 function ArkInventory.ObjectStringDecode( h )
 	
-	-- item:itemId:enchantId:jewelId1:jewelId2:jewelId3:jewelId4:suffixId:uniqueId:linkLevel:reforgeId
-	-- battlepet:speciesID:level:rarity:health:power:speed:name/customname/petid
+	-- item:(1)itemID:(2)enchant:(3)gem1:(4)gem2:(5)gem3:(6)gem4:(7)suffix:(8)unique:(9)linklevel:(10)upgrade:(11)instanceDifficulty:(12)numBonusIDs:(13)bonusID1:(14)bonusID2:...
+	-- battlepet:(1)speciesID:(2)level:(3)rarity:(4)health:(5)power:(6)speed:(7)guid(BattlePet-[unknown]-[creatureID])
 	-- spell:spellID
 	-- currency:currencyID
 	
 	local s = string.match( ( h or "" ), "|H(.-)|h" ) or string.match( ( h or "" ), "^([a-z]-:.+)" ) or ""
-	local class, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10 = strsplit( ":", s )
-	
+	local class, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12 = strsplit( ":", s )
 	class = string.lower( class or "" )
 	
 	if class == "" then
@@ -3356,16 +3457,16 @@ function ArkInventory.ObjectStringDecode( h )
 	v4 = tonumber( v4 ) or 0
 	v5 = tonumber( v5 ) or 0
 	v6 = tonumber( v6 ) or 0
-	if ( class == "battlepet" ) then
-		-- custom name for battlepet, so dont convert it to a number
-	else
+	if ( class ~= "battlepet" ) then
 		v7 = tonumber( v7 ) or 0
 	end
 	v8 = tonumber( v8 ) or 0
 	v9 = tonumber( v9 ) or 0
 	v10 = tonumber( v10 ) or 0
+	v11 = tonumber( v11 ) or 0
+	v12 = tonumber( v12 ) or 0
 	
-	return class, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10
+	return class, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12
 	
 end
 
@@ -3427,8 +3528,6 @@ end
 
 function ArkInventory.InventoryIDGet( loc_id, bag_id )
 	
-	local inv_id = nil
-	
 	local blizzard_id = ArkInventory.BagID_Blizzard( loc_id, bag_id )
 	
 	if blizzard_id == nil then
@@ -3436,12 +3535,20 @@ function ArkInventory.InventoryIDGet( loc_id, bag_id )
 	end
 	
 	if loc_id == ArkInventory.Const.Location.Bag and bag_id > 1 then
-		inv_id = ContainerIDToInventoryID( blizzard_id )
-	elseif loc_id == ArkInventory.Const.Location.Bank and bag_id > 1 then
-		inv_id = BankButtonIDToInvSlotID( blizzard_id, 1 )
+		
+		return ContainerIDToInventoryID( blizzard_id )
+		
+	elseif loc_id == ArkInventory.Const.Location.Bank then
+		
+		if bag_id == ArkInventory.Global.Location[loc_id].tabReagent then
+			
+		elseif bag_id > 1 then
+			
+			return ContainerIDToInventoryID( blizzard_id )
+			
+		end
+		
 	end
-	
-	return inv_id
 	
 end
 
@@ -3522,20 +3629,34 @@ function ArkInventory.ObjectIDCacheRule( loc_id, bag_id, sb, h )
 	
 end
 
-function ArkInventory.ObjectCountClear( search_id, loc_id, player_id )
+function ArkInventory.ObjectCountClear( search_id, player_id, loc_id )
 	
-	-- ItemCount is completely wiped to be rebuilt for the next tooltip
-	-- ItemCountRaw only wipes a particular players information
+	if search_id then
+		search_id = ArkInventory.ObjectIDTooltip( search_id )
+	end
 	
-	local search_id = ArkInventory.ObjectIDTooltip( search_id )
+	if (search_id ) and ( player_id ) and (loc_id ) then
+		
+		-- clear the current user, then move down and do the "shared" user
+		
+		if player_id == ArkInventory.PlayerIDAccount( ) or ( loc_id == ArkInventory.Const.Location.Vault ) or ( loc_id == ArkInventory.Const.Location.Pet ) or ( loc_id == ArkInventory.Const.Location.Mount ) or ( loc_id == ArkInventory.Const.Location.Toybox ) then
+			ArkInventory.ObjectCountClear( search_id, ArkInventory.Global.Me.info.player_id )
+		end
+		
+	end
 	
---	ArkInventory.Output( "ObjectCountClear( ", search_id, ", ", loc_id, ", ", player_id, " )" )
-	
-	if ( search_id ) and ( loc_id ) and ( player_id ) then
+	if ( search_id ) and ( player_id ) then
 		
 		-- reset count for a specific item for a specific player
+		--ArkInventory.Output( "ObjectCountClear( ", search_id, ", ", player_id )
 		
-		ArkInventory.Global.Cache.ItemCount[search_id] = nil
+		if ArkInventory.Global.Cache.ItemCountTooltip[player_id] then
+			ArkInventory.Global.Cache.ItemCountTooltip[player_id][search_id] = nil
+		end
+		
+		if ArkInventory.Global.Cache.ItemCount[player_id] then
+			ArkInventory.Global.Cache.ItemCount[player_id][search_id] = nil
+		end
 		
 		if ArkInventory.Global.Cache.ItemCountRaw[search_id] then
 			ArkInventory.Global.Cache.ItemCountRaw[search_id][player_id] = nil
@@ -3545,7 +3666,13 @@ function ArkInventory.ObjectCountClear( search_id, loc_id, player_id )
 			
 			for k in pairs( search_alt ) do
 				
-				ArkInventory.Global.Cache.ItemCount[k] = nil
+				if ArkInventory.Global.Cache.ItemCountTooltip[player_id] then
+					ArkInventory.Global.Cache.ItemCountTooltip[player_id][k] = nil
+				end
+				
+				if ArkInventory.Global.Cache.ItemCount[player_id] then
+					ArkInventory.Global.Cache.ItemCount[player_id][k] = nil
+				end
 				
 				if ArkInventory.Global.Cache.ItemCountRaw[k] then
 					ArkInventory.Global.Cache.ItemCountRaw[k][player_id] = nil
@@ -3559,151 +3686,146 @@ function ArkInventory.ObjectCountClear( search_id, loc_id, player_id )
 		
 	end
 	
-	if ( search_id ) and ( not loc_id ) then
+	if ( search_id ) and ( not player_id ) then
 		
-		-- reset count for a specific item
+		-- reset count for a specific item for all players
+		--ArkInventory.Output( "ObjectCountClear( ", search_id, " )" )
 		
-		ArkInventory.Global.Cache.ItemCount[search_id] = nil
+		for k, v in pairs( ArkInventory.Global.Cache.ItemCountTooltip ) do
+			v[search_id] = nil
+		end
+		
+		for k, v in pairs( ArkInventory.Global.Cache.ItemCount ) do
+			v[search_id] = nil
+		end
+		
 		ArkInventory.Global.Cache.ItemCountRaw[search_id] = nil
 		
+		-- erase item/tooltip cache
+		ArkInventory.Table.Clean( ArkInventory.Global.Cache.ItemCountTooltip, nil, true )
+		ArkInventory.Table.Clean( ArkInventory.Global.Cache.ItemCountRaw, nil, true )
+		ArkInventory.Table.Clean( ArkInventory.Global.Cache.ItemCount, nil, true )
+
 		return
 		
 	end
 	
-	if ( not search_id ) and ( not loc_id ) then
+	if ( not search_id ) and ( not player_id ) then
 		
-		-- wipe everything
+		--ArkInventory.Output( "wipe all item counts" )
+		ArkInventory.Output( "ObjectCountClear( )" )
+		
+		table.wipe( ArkInventory.Global.Cache.ItemCountTooltip )
 		
 		table.wipe( ArkInventory.Global.Cache.ItemCount )
-		table.wipe( ArkInventory.Global.Cache.ItemCountRaw )
+		
+		if ArkInventory.Global.Cache.ItemCountRaw[ArkInventory.Global.Me.info.player_id] then
+			table.wipe( ArkInventory.Global.Cache.ItemCountRaw[ArkInventory.Global.Me.info.player_id] )
+		end
 		
 		return
 		
 	end
-	
-	if ( not search_id ) then
-		return
-	end
-	
-	
-	-- search id and a location, work out player id and come back
-	
-	local cp = ArkInventory.Global.Me
-	
-	-- also clear the virtual user/location
-	if ( loc_id == ArkInventory.Const.Location.Vault ) then 
-		return ArkInventory.ObjectCountClear( search_id, true, cp.info.guild_id )
-	elseif ( loc_id == ArkInventory.Const.Location.Pet ) then
-		return ArkInventory.ObjectCountClear( search_id, true, ArkInventory.PlayerIDAccount( ) )
-	elseif ( loc_id == ArkInventory.Const.Location.Mount ) then
-		return ArkInventory.ObjectCountClear( search_id, true, ArkInventory.PlayerIDAccount( ) )
-	end
-	
-	ArkInventory.ObjectCountClear( search_id, true, cp.info.name )
 	
 end
 
-function ArkInventory.ObjectCountGet( search_id, just_me, ignore_vaults, ignore_other_faction )
+function ArkInventory.ObjectCountGetRaw( search_id )
 	
 	local search_id = ArkInventory.ObjectIDTooltip( search_id )
+--	ArkInventory.Output( "get raw count for [", search_id, "]" )
 	
-	--ArkInventory.Output( "get count for ", search_id )
-	
-	-- /run ArkInventory.Output( ArkInventory.Global.Cache.ItemCountRaw["battlepet:817"] )
-	if ( not ArkInventory.Global.Cache.ItemCountRaw[search_id] ) then
-		ArkInventory.Global.Cache.ItemCountRaw[search_id] = {
---		[player_id] = {
---			["location"] = {
---				[loc_id] = number (count),
---			},
---			["total"] = number,
---			["vault"] = boolean,
---			["tabs"] = string ("1, 2, 3, 4, 5, 6, 7, 8")
---			["faction"] = string (english),
---			["class"] = string (english),
---		},
-	}
+	if not ArkInventory.Global.Cache.ItemCountRaw[search_id] then
+		ArkInventory.Global.Cache.ItemCountRaw[search_id] = { }
 	end
 	
-	local cp = ArkInventory.Global.Me
 	local d = ArkInventory.Global.Cache.ItemCountRaw[search_id]
 	
 	local search_alt = ArkInventory.Const.ItemCrossReference[search_id]
+--	if search_alt then
+--		ArkInventory.Output( "alt search: ", search_id, " = ", search_alt )
+--	end
 	
-	-- build raw
-	for pn, pd in pairs( ArkInventory.db.realm.player.data ) do
+	local c, k, tabs
+	
+	for pid, pd in pairs( ArkInventory.db.global.player.data ) do
 		
-		if ( ( pd.info.name ) and ( not d[pn] ) ) or ( pd.info.class == "ACCOUNT" ) or ( cp.info.guild_id and ( cp.info.guild_id == pd.info.guild_id ) ) then
+		if pd.info.name then
 			
-			-- rebuild if missing, is account, or is users guild
+			if not d[pid] then
+				d[pid] = { ["vault"] = false, ["location"] = { }, ["faction"] = pd.info.faction, ["realm"] = pd.info.realm }
+			end
+			
+			--ArkInventory.Output( "rebuild ", search_id, " for ", pid )
 			
 			for l in pairs( ArkInventory.Global.Location ) do
 				
-				local ld = pd.location[l]
-				
-				--ArkInventory.Output( "scanning location [", l, "] for item [", search_id, "]" )
-				local c = 0
-				local k = false
-				local tabs = ""
-				
-				for b in pairs( ArkInventory.Global.Location[l].Bags ) do
+				if not d[pid].location[l] then
 					
-					local bd = ld.bag[b]
+					-- rebuild missing location data
 					
+					local ld = pd.location[l]
+					
+					--ArkInventory.Output( "scanning location [", l, "] for item [", search_id, "]" )
+					c = 0
 					k = false
+					tabs = ""
 					
-					if bd.h and search_id == ArkInventory.ObjectIDTooltip( bd.h ) then
-						--ArkInventory.Output( "found bag [", b, "] equipped" )
-						c = c + 1
-						k = true
-					end
-					
-					for s, sd in pairs( bd.slot ) do
+					for b in pairs( ArkInventory.Global.Location[l].Bags ) do
 						
-						if sd and sd.h then
+						local bd = ld.bag[b]
+						
+						k = false
+						
+						if bd.h and search_id == ArkInventory.ObjectIDTooltip( bd.h ) then
+							--ArkInventory.Output( "found bag [", b, "] equipped" )
+							c = c + 1
+							k = true
+						end
+						
+						for sn, sd in pairs( bd.slot ) do
 							
-							-- primary match
-							local oit = ArkInventory.ObjectIDTooltip( sd.h )
-							local match = ( search_id == oit )
-							
-							-- secondary match
-							if not match and search_alt then
-								for k in pairs( search_alt ) do
-									if k == oit then
-										match = true
-										break
+							if sd and sd.h then
+								
+								-- primary match
+								local oit = ArkInventory.ObjectIDTooltip( sd.h )
+								local matches = ( search_id == oit )
+								
+								-- secondary match
+								if not matches and search_alt then
+									for sa in pairs( search_alt ) do
+										if sa == oit then
+											matches = true
+											break
+										end
 									end
 								end
-							end
-							
-							if match then
-								--ArkInventory.Output( pn, " has ", sd.count, " x ", sd.h, " in loc[", l, "], bag [", b, "] slot [", s, "]" )
-								c = c + sd.count
-								k = true
+								
+								if matches then
+									--ArkInventory.Output( pid, " has ", sd.count, " x ", sd.h, " in loc[", l, "], bag [", b, "] slot [", sn, "]" )
+									c = c + sd.count
+									k = true
+								end
+								
 							end
 							
 						end
 						
+						if k and l == ArkInventory.Const.Location.Vault then
+							tabs = string.format( "%s%s, ", tabs, b )
+						end
+						
 					end
 					
-					if k and l == ArkInventory.Const.Location.Vault then
-						tabs = string.format( "%s%s, ", tabs, b )
+					if c > 0 then
+						
+						if pd.info.class == "GUILD" and l == ArkInventory.Const.Location.Vault then
+							d[pid].vault = true
+							d[pid].tabs = string.sub( tabs, 1, string.len( tabs ) - 2 )
+						end
+						
+						d[pid].location[l] = c
+						
 					end
-					
-				end
-				
-				if not d[pn] then
-					d[pn] = { ["vault"] = false, ["location"] = { }, ["total"] = 0, ["faction"] = pd.info.faction }
-				end
-				
-				if c > 0 then
-					
-					if l == ArkInventory.Const.Location.Vault then
-						d[pn].vault = true
-						d[pn].tabs = string.sub( tabs, 1, string.len( tabs ) - 2 )
-					end
-					
-					d[pn].location[l] = c
 					
 				end
 				
@@ -3713,23 +3835,50 @@ function ArkInventory.ObjectCountGet( search_id, just_me, ignore_vaults, ignore_
 		
 	end
 	
+end
+
+function ArkInventory.ObjectCountGet( search_id, player_id, just_me, ignore_vaults, ignore_other_faction, my_realm, include_crossrealm )
 	
-	-- check cached result already exists
-	if ArkInventory.Global.Cache.ItemCount[search_id] then
-		return ArkInventory.Global.Cache.ItemCount[search_id]
+	local search_id = ArkInventory.ObjectIDTooltip( search_id )
+	--ArkInventory.Output( "ObjectCountGet [", search_id, "] [", player_id, "]" )
+	
+	ArkInventory.ObjectCountGetRaw( search_id )
+	
+	local player_id = player_id or ArkInventory.Global.Me.info.player_id
+	
+	if not ArkInventory.Global.Cache.ItemCount[player_id] then
+		ArkInventory.Global.Cache.ItemCount[player_id] = { }
+	end
+	
+	if ArkInventory.Global.Cache.ItemCount[player_id][search_id] then
+		--ArkInventory.Output( "cached [", player_id, "] [", search_id, "]" )
+		return ArkInventory.Global.Cache.ItemCount[player_id][search_id]
 	else
-		ArkInventory.Global.Cache.ItemCount[search_id] = { }
+		ArkInventory.Global.Cache.ItemCount[player_id][search_id] = {
+--			["location"] = {
+--				[loc_id] = number (count),
+--			},
+--			["total"] = number,
+--			["vault"] = boolean,
+--			["tabs"] = string ("1, 2, 3, 4, 5, 6, 7, 8")
+--			["faction"] = string (system),
+--			["realm"] = string (system),
+--			["class"] = string (system),
+		}
 	end
 	
 	-- build return
-	local cp = ArkInventory.Global.Me
-	d = ArkInventory.Global.Cache.ItemCount[search_id]
+	local cp = ArkInventory.PlayerInfoGet( player_id )
+	
+	--ArkInventory.Output( "reference [", cp.info.name, "] [", cp.info.realm, "] [", cp.info.faction, "]" )
+	
+	local d = ArkInventory.Global.Cache.ItemCount[player_id][search_id]
 	
 	for rcn, rcd in pairs( ArkInventory.Global.Cache.ItemCountRaw[search_id] ) do
 		
-		if ( not ignore_other_faction ) or ( ignore_other_faction and ( ( rcd.faction == cp.info.faction ) or ( rcn == ArkInventory.PlayerIDAccount( ) ) ) ) then
-			
-			if ( not just_me ) or ( just_me and ( ( rcn == cp.info.name ) or ( rcn == ArkInventory.PlayerIDAccount( ) ) ) ) then
+		if ( rcn == ArkInventory.PlayerIDAccount( ) ) or ( not my_realm ) or ( ( my_realm and ( ( rcd.realm == cp.info.realm ) ) ) or ( my_realm and include_crossrealm and ArkInventory.IsConnectedRealm( rcd.realm, cp.info.realm ) ) ) then
+		if ( rcn == ArkInventory.PlayerIDAccount( ) ) or ( not ignore_other_faction ) or ( ignore_other_faction and ( ( rcd.faction == cp.info.faction ) ) ) then
+		if ( rcn == ArkInventory.PlayerIDAccount( ) ) or ( not just_me ) or ( just_me and ( ( rcn == cp.info.player_id ) ) ) then
 				
 				for l, c in pairs( rcd.location ) do
 					
@@ -3744,7 +3893,7 @@ function ArkInventory.ObjectCountGet( search_id, just_me, ignore_vaults, ignore_
 						if c > 0 then
 							
 							if not d[rcn] then
-								d[rcn] = { ["vault"] = rcd.vault, ["tabs"] = rcd.tabs, ["location"] = { }, ["total"] = 0, ["faction"] = rcd.faction, ["class"] = rcd.class }
+								d[rcn] = { ["vault"] = rcd.vault, ["tabs"] = rcd.tabs, ["location"] = { }, ["total"] = 0 } -- , ["realm"] = rcd.realm, ["faction"] = rcd.faction
 							end
 							
 							d[rcn].location[l] = c
@@ -3756,8 +3905,8 @@ function ArkInventory.ObjectCountGet( search_id, just_me, ignore_vaults, ignore_
 					
 				end
 				
-			end
-			
+		end
+		end
 		end
 		
 	end
@@ -3768,20 +3917,7 @@ function ArkInventory.ObjectCountGet( search_id, just_me, ignore_vaults, ignore_
 end
 
 function ArkInventory.BattlepetBaseHyperlink( ... )
-	local v = { ... } -- species, level, rarity, maxHealth, power, speed, name
+	local v = { ... } -- species, level, rarity, maxHealth, power, speed, name (not used)
 	--ArkInventory.Output( "[ ", v[1], " / ", v[2], " / ", v[3], " / ", v[4], " / ", v[5], " / ", v[6], " / ", v[7], " ]" )
-	return string.format( "battlepet:%s:%s:%s:%s:%s:%s:%s", v[1] or 0, v[2] or 0, v[3] or 0, v[4] or 0, v[5] or 0, v[6] or 0, v[7] or "" )
-end
-
-function ArkInventory.BattlepetBaseHyperlinkFromPetID( petID )
-	if petID then
-		local speciesID, _, level, _, _, _, _, name, _, _, _, _, _, isWild, canBattle = C_PetJournal.GetPetInfoByPetID( petID )
-		local _, maxHealth, power, speed, rarity = C_PetJournal.GetPetStats( petID )
-		if isWild and canBattle then
-			rarity = ( rarity and ( rarity - 1 ) ) or -1
-		else	
-			rarity = -1
-		end
-		return string.format( "%s|H%s|h[%s]|h|r", select( 5, ArkInventory.GetItemQualityColor( rarity ) ), ArkInventory.BattlepetBaseHyperlink( speciesID, level, rarity, maxHealth, power, speed, name ), name )
-	end
+	return string.format( "battlepet:%s:%s:%s:%s:%s:%s:0", v[1] or 0, v[2] or 0, v[3] or 0, v[4] or 0, v[5] or 0, v[6] or 0 )
 end

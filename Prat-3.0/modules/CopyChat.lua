@@ -97,6 +97,60 @@ L:AddLocale("enUS",
 }
 
 )
+L:AddLocale("itIT", 
+{
+	-- BBCode = "",
+	-- BOTTOMLEFT = "",
+	-- BOTTOMRIGHT = "",
+	-- buttonpos_desc = "",
+	-- buttonpos_name = "",
+	-- ChatFrame = "",
+	-- ["Copy all of the text in the selected chat frame into an edit box"] = "",
+	-- CopyChat = "",
+	-- ["Copy Text"] = "",
+	-- ["Copy Text Format"] = "",
+	-- ["Copy text from the active chat window."] = "",
+	-- ["Copy To Editbox"] = "",
+	-- HTML = "",
+	-- ["Message From : %s"] = "",
+	-- Plain = "",
+	-- ["Should the copied text be plain, or formatted so you can see the colors."] = "",
+	-- showbutton_desc = "",
+	-- showbutton_name = "",
+	-- [" Text"] = "",
+	-- TOPLEFT = "",
+	-- TOPRIGHT = "",
+	-- ["Wowace.com Forums"] = "",
+}
+
+)
+L:AddLocale("ptBR", 
+{
+	-- BBCode = "",
+	-- BOTTOMLEFT = "",
+	-- BOTTOMRIGHT = "",
+	-- buttonpos_desc = "",
+	-- buttonpos_name = "",
+	-- ChatFrame = "",
+	-- ["Copy all of the text in the selected chat frame into an edit box"] = "",
+	-- CopyChat = "",
+	-- ["Copy Text"] = "",
+	-- ["Copy Text Format"] = "",
+	-- ["Copy text from the active chat window."] = "",
+	-- ["Copy To Editbox"] = "",
+	-- HTML = "",
+	-- ["Message From : %s"] = "",
+	-- Plain = "",
+	-- ["Should the copied text be plain, or formatted so you can see the colors."] = "",
+	-- showbutton_desc = "",
+	-- showbutton_name = "",
+	-- [" Text"] = "",
+	-- TOPLEFT = "",
+	-- TOPRIGHT = "",
+	-- ["Wowace.com Forums"] = "",
+}
+
+)
 L:AddLocale("frFR",  
 {
 	BBCode = true,
@@ -209,9 +263,9 @@ L:AddLocale("ruRU",
 {
 	BBCode = true,
 	BOTTOMLEFT = "Снизу, Слева",
-	BOTTOMRIGHT = "Снизу, Справа", -- Needs review
-	buttonpos_desc = "Где на окне чата, чтобы показать копию кнопки", -- Needs review
-	buttonpos_name = "Кнопка Расположение", -- Needs review
+	BOTTOMRIGHT = "Снизу, Справа",
+	buttonpos_desc = "Где в окне чата показывать кнопку копирования",
+	buttonpos_name = "Положение кнопки",
 	ChatFrame = "Окно чата",
 	["Copy all of the text in the selected chat frame into an edit box"] = "Копировать весь текст из выбранного окна чата в поле ввода.",
 	CopyChat = true,
@@ -226,8 +280,8 @@ L:AddLocale("ruRU",
 	showbutton_desc = "Показывать кнопку копирования в окне чата",
 	showbutton_name = "Кнопка копирования",
 	[" Text"] = " Текст",
-	TOPLEFT = "Сверху, Слева", -- Needs review
-	TOPRIGHT = "Сверху, Справа", -- Needs review
+	TOPLEFT = "Сверху, Слева",
+	TOPRIGHT = "Сверху, Справа",
 	["Wowace.com Forums"] = "Форумы Wowace.com",
 }
 
@@ -486,9 +540,7 @@ function module:CopyLineFromPlayerlinkToEdit(origin_frame, ...)
     -- TODO: Consider just using self.clickedFrame (I dont remember why the other code is there)
     local frame = (origin_frame and origin_frame:GetObjectType() == "ScrollingMessageFrame" and origin_frame) or self.clickedframe
 
-    for i=1, #self.lines do
-        self.lines[i] = nil
-    end
+    wipe(self.lines)
 
     self:AddLines(self.lines, frame:GetRegions())
 
@@ -531,10 +583,8 @@ function module:CopyLineFromPlayerlink(origin_frame, ...)
 
     -- TODO: Consider just using self.clickedFrame (I dont remember why the other code is there)
     local frame = (origin_frame and origin_frame:GetObjectType() == "ScrollingMessageFrame" and origin_frame) or self.clickedframe
-    
-    for i=1, #self.lines do
-        self.lines[i] = nil
-    end
+
+    wipe(self.lines)
 
     self:AddLines(self.lines, frame:GetRegions())    
 
@@ -576,7 +626,7 @@ function module:StaticPopupCopyLine(sender, text)
             local editBox = _G[this:GetName().."WideEditBox"] or _G[this:GetName().."EditBox"]
             editBox:SetText(StaticPopupDialogs["COPY_LINE"].chattext);
             editBox:SetFocus();
-            editBox:HighlightText(0);
+            editBox:HighlightText(false);
 
             local button = _G[this:GetName().."Button2"];
             button:ClearAllPoints();

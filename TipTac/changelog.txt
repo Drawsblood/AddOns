@@ -1,3 +1,41 @@
+TipTac Changes | 2014 Oct 16
+----------------------------
+- Options: Fixed the issue that caused checkboxes not to save their state when checked.
+- TipTacItemRef: Updated the "GetUpgradedItemLevel" library. This update will again properly find the correct itemlevel of updated items.
+
+TipTac Changes | 2014 Oct 15
+----------------------------
+- TOC version has been changed to 60000 for the Warlords of Draenor 6.0.2 patch.
+- WoD Issue: Fixed an anchoring issue with the GameTooltip.
+- Added Class Icon option. This will display the class icon of players next to the tooltip. Find the checkbox toggle under the option dialog's "Icon" category.
+
+TipTac Changes | 2014 May 24
+----------------------------
+- TipTacItemRef: Updated the "GetUpgradedItemLevel.lua" library, to include the new upgrade IDs.
+
+TipTac Changes | 2013 Sep 21
+----------------------------
+- Changed the TOC version to 50400 for the 5.4 patch.
+- Tooltip height is now updated when a new line is added or removed. Before updates only occured on the configured update frequency. This should hopefully fix some issues where the health/power bars could overlap text in the tooltip.
+- Added option to hide the new realm text "Coalesced Realm (*)\nGroup, Whisper" as well as the future "Interactive Realm" text.
+
+TipTac Changes | 2013 May 22
+----------------------------
+- Changed the TOC version to 50300 for the 5.3 patch.
+- Updated TipTacItemRef addon.
+
+TipTac Changes | 2013 Apr 17
+----------------------------
+- Changed the TOC version to 50200 for the 5.2 patch.
+- Added experimental code to support the "Mary Sue Protocol", used by roleplaying addons. To enable, go options and set the "General -> Name Type" to "Mary Sue Protocol". As this is experimental, it will not work properly or maybe not at all, but I am interested in the initial feedback and help in how to get it working optimally.
+- Added a check for proper data when constructing battle pet tooltips, which could previously cause Lua errors in some cases.
+
+TipTac Changes | 2013 Feb 19
+----------------------------
+- Changed the TOC version to 50100 for the 5.1 patch.
+- Fixed an error for the health/power bar text when set to "Deficit", with the "Condensed Bar Values" option on.
+- The options configurations table is now accessible through Lua via "TipTacOptions.options".
+
 TipTac Changes | 2012 Oct 30
 ----------------------------
 - Added proper support for battle pet tooltips, such as pet type, as well as their actual combat level instead of critter level.

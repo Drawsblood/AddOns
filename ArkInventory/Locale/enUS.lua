@@ -1,4 +1,4 @@
-local L = LibStub( "AceLocale-3.0" ):NewLocale( "ArkInventory", "enUS", true, false )
+﻿local L = LibStub( "AceLocale-3.0" ):NewLocale( "ArkInventory", "enUS", true, false )
 if not L then return end
 
 -- post updated translations at http://groups.google.com/group/wow-arkinventory (modify this file and include as an attachment)
@@ -36,7 +36,6 @@ if not L then return end
 	
 --	location names
 	L["LOCATION_ACCOUNT"] = "Account"
-	L["LOCATION_BANK"] = "Bank"
 	L["LOCATION_WEARING"] = "Wearing"
 	
 	
@@ -46,13 +45,13 @@ if not L then return end
 	
 	
 --	status bar/bag text
-	L["STATUS_NO_DATA"] = "???"
+	L["STATUS_NO_DATA"] = "ERR"
 	L["STATUS_FULL"] = "Full"
-	L["STATUS_PURCHASE"] = "Buy" --PURCHASE
+	L["STATUS_PURCHASE"] = "Buy"
 	
 	
 --	restack
-	L["RESTACK"] = "Restack"
+--	L["RESTACK"] = "Restack"
 	L["RESTACK_TEXT"] = "consolidate items into as few stacks as possible and then try to fill up any empty slots in special bags where possible"
 	L["RESTACK_FAIL_WAIT"] = "A restack operation is already in progress please wait for completion"
 	L["RESTACK_FAIL_ACCESS"] = "You don't have enough authority to restack tab %2$s in the %1$s" -- %1$s = guild bank, %2$s = tab number
@@ -93,11 +92,13 @@ if not L then return end
 	L["STATUS_NAME_KEY"] = "Key"
 	L["STATUS_NAME_LEATHERWORKING"] = "Lthr"
 	L["STATUS_NAME_MAIL"] = "Mail"
-	L["STATUS_NAME_MINING"] = "Ore"
-	L["STATUS_NAME_MOUNT"] = "Mount"
+	L["STATUS_NAME_MINING"] = "Mng"
+	L["STATUS_NAME_MOUNT"] = "Mnt"
 	L["STATUS_NAME_TOKEN"] = "Tkn"
-	L["STATUS_NAME_TACKLE"] = "Tkl"
+	L["STATUS_NAME_TACKLE"] = "Fish"
 	L["STATUS_NAME_COOKING"] = "Cook"
+	L["STATUS_NAME_TOY"] = "Toy"
+	L["STATUS_NAME_REAGENTBANK"] = "Rgt"
 	
 	
 --	main menu
@@ -168,6 +169,7 @@ if not L then return end
 	L["MENU_BAR_CATEGORY_HIDDEN_TEXT"] = "click to toggle this categorys hidden status.\n\nitems in a hidden category will not display in normal mode"
 	L["MENU_BAR_CATEGORY_MOVE_START_TEXT"] = "click to move %1$s\n\nyou then need to click on the bar or an item in that bar where you want it to go and choose the complete option"
 	L["MENU_BAR_CATEGORY_MOVE_COMPLETE_TEXT"] = "click to move %1$s from bar %2$s to here (bar %3$s)"
+	L["MENU_BAR_BAG_ASSIGN_TEXT"] = "assign all slots from Bag %1$s to this bar"
 	L["MENU_BAR_OPTIONS"] = "Bar Options"
 	L["MENU_BAR_CLEAR_TEXT"] = "removes all categories (except the default category) and any sort method currently assigned to this bar"
 	L["MENU_BAR_INSERT_TEXT"] = "inserts a new empty bar here"
@@ -206,45 +208,57 @@ if not L then return end
 	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_MEDIUM"] = "MEDIUM"
 	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_HIGH"] = "HIGH"
 	
+	L["CONFIG_SYSTEM_RESTACK_TEXT"] = "Enabled: Use the new Blizzard Cleanup function\n\nDisabled: Use the old Restack function"
+	
 	L["CONFIG_SYSTEM_TOOLTIP"] = "Tooltips"
 	L["CONFIG_SYSTEM_TOOLTIP_ENABLE_TEXT"] = "display tooltips"
 	L["CONFIG_SYSTEM_TOOLTIP_EMPTY_ADD"] = "Empty Line"
 	L["CONFIG_SYSTEM_TOOLTIP_EMPTY_ADD_TEXT"] = "show an empty line between the basic tooltip text and any custom text to be added"
-	L["CONFIG_SYSTEM_TOOLTIP_ITEMCOUNT_ADD"] = "Item counts"
-	L["CONFIG_SYSTEM_TOOLTIP_ITEMCOUNT_ADD_TEXT"] = "show item counts in tooltips"
+	L["CONFIG_SYSTEM_TOOLTIP_ITEMCOUNT_ADD"] = "Item counts and Gold amounts"
+	L["CONFIG_SYSTEM_TOOLTIP_ITEMCOUNT_ADD_TEXT"] = "include item counts in tooltips"
 	L["CONFIG_SYSTEM_TOOLTIP_ITEMCOUNT_COLOUR_TEXT"] = "set the colour of the item count tooltip text"
-	L["CONFIG_SYSTEM_TOOLTIP_ITEMCOUNT_VAULT_TABS"] = "Show tabs"
-	L["CONFIG_SYSTEM_TOOLTIP_ITEMCOUNT_VAULT_TABS_TEXT"] = "show tab numbers for items found in a %1$s" -- %1$s = vault
+	L["CONFIG_SYSTEM_TOOLTIP_ITEMCOUNT_VAULT_TABS"] = "Tabs"
+	L["CONFIG_SYSTEM_TOOLTIP_ITEMCOUNT_VAULT_TABS_TEXT"] = "include tab numbers for items found in a %1$s" -- %1$s = vault
 	L["CONFIG_SYSTEM_TOOLTIP_SCALE_TEXT"] = "scales the game, reference and comparison tooltips (game wide)"
 	L["CONFIG_SYSTEM_TOOLTIP_CLASSCOLOUR_TEXT"] = "use class colours to colour player names"
 	L["CONFIG_SYSTEM_TOOLTIP_SELF_ONLY"] = "Self only"
-	L["CONFIG_SYSTEM_TOOLTIP_SELF_ONLY_TEXT"] = "only show data for the current character"
+	L["CONFIG_SYSTEM_TOOLTIP_SELF_ONLY_TEXT"] = "display data only for the current character"
+	L["CONFIG_SYSTEM_TOOLTIP_HIGHLIGHT"] = "Self Highlight"
+	L["CONFIG_SYSTEM_TOOLTIP_HIGHLIGHT_TEXT"] = "text to add to the front of the current characters name to make it more obvious in the list (limit of 3 characters)"
 	L["CONFIG_SYSTEM_TOOLTIP_FACTION_ONLY"] = "Faction only"
-	L["CONFIG_SYSTEM_TOOLTIP_FACTION_ONLY_TEXT"] = "only show data for the current faction"
+	L["CONFIG_SYSTEM_TOOLTIP_FACTION_ONLY_TEXT"] = "display data only for the current characters faction"
+	L["CONFIG_SYSTEM_TOOLTIP_REALM_ONLY"] = "Realm only"
+	L["CONFIG_SYSTEM_TOOLTIP_REALM_ONLY_TEXT"] = "display data only for the current characters realm"
+	L["CONFIG_SYSTEM_TOOLTIP_CROSSREALM"] = "Connected Realms"
+	L["CONFIG_SYSTEM_TOOLTIP_CROSSREALM_TEXT"] = "display data from realms connected to the current characters realm"
 	L["CONFIG_SYSTEM_TOOLTIP_VAULT_TEXT"] = "include data from %1$s" -- %1$s = vault
 	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_SOURCE_TEXT"] = "include source text in tooltip"
 	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_DESCRIPTION_TEXT"] = "include description text in tooltip"
 	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_CUSTOM_ENABLE_TEXT"] = "replace the in-built battlepet tooltip with custom tooltip to allow for item counts"
 	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_MOUSEOVER_ENABLE_TEXT"] = "include extra text in mouseover tooltips for player, npc and wild battlepets"
 	
-	L["CONFIG_SYSTEM_BUGFIX"] = "Bug Fixes / Workarounds"
-	L["CONFIG_SYSTEM_BUGFIX_TEXT"] = "toggle the code to fix or work around this issue"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL"] = "Frame Level"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_TEXT"] = "A bug in the blizzard CreateFrame API which can cause a frames background to appear above the foreground, item tooltips won't appear and it's impossible to click on anything in the window."
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_TEXT"] = "set how framelevel bug fix alerts are displayed"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE0"] = "Disabled"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE0_TEXT"] = "disables bug fix alerts from being displayed"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE1"] = "Short"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE1_TEXT"] = "displays the short text for bug fix alerts"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE2"] = "Full"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE2_TEXT"] = "displays the full text for bug fix alerts"
-	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG"] = "Zero Size Bag"
-	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG_TEXT"] = "A potential bug where zero or nil is returned for the size of a bag instead of it's correct size."
-	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG_ALERT_TEXT"] = "display alerts for this bug"
+	L["CONFIG_SYSTEM_WORKAROUND"] = "Workarounds"
+	L["CONFIG_SYSTEM_WORKAROUND_TEXT"] = "toggle the code to fix or work around this issue"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL"] = "Frame Level"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_TEXT"] = "A bug in the blizzard CreateFrame API which can cause a frames background to appear above the foreground, item tooltips won't appear and it's impossible to click on anything in the window."
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_TEXT"] = "set how framelevel bug fix alerts are displayed"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE0"] = "Disabled"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE0_TEXT"] = "disables bug fix alerts from being displayed"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE1"] = "Short"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE1_TEXT"] = "displays the short text for bug fix alerts"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE2"] = "Full"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE2_TEXT"] = "displays the full text for bug fix alerts"
+	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG"] = "Zero Size Bag"
+	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG_TEXT"] = "A potential bug where zero or nil is returned for the size of a bag instead of it's correct size."
+	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG_ALERT_TEXT"] = "display alerts for this bug"
+	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD"] = "In-Combat Yielding"
+	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD_ENABLED_TEXT"] = "toggle In-Combat yielding\n\nNote: Don't turn this off unless you have a very good reason to do so.  This is also a global variable and will be reset to Enabled at every UI Reload"
+	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD_COUNT_TEXT"] = "How many items to draw (whilst in combat) before yielding to avoid hitting the In-Combat script timer limit"
 	L["BUGFIX_TAINTED_ALERT_MOUSEOVER_TEXT"] = "this item frame was created while you\nwere in combat which has caused\nit to be tainted and cannot\nbe used until you leave combat"
 	L["BUGFIX_TAINTED_ALERT_OPEN_TEXT"] = "some of the item frames for this window were created while you were in combat which has caused them to be tainted and cannot be used until you leave combat"
 	
 	L["CONFIG_SYSTEM_MESSAGES"] = "Messages / Alerts"
+	L["CONFIG_SYSTEM_MESSAGES_RESTACK_TEXT"] = "Show restack notification messages for this location"
 	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION"] = "Translation"
 	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_INTERIM"] = "Interim"
 	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_INTERIM_TEXT"] = "Show message for each translation attempt"
@@ -252,6 +266,9 @@ if not L then return end
 	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_FINAL_TEXT"] = "Show final message for successful translation"
 	L["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT"] = "Opponent Details"
 	L["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT_TEXT"] = "Display Opponent Details upon entering a pet battle"
+	
+	L["CONFIG_SYSTEM_TIMERS"] = "Update Timers"
+	L["CONFIG_SYSTEM_TIMERS_TEXT"] = "use a custom value for the %1$s update timer"
 	
 	
 --	configuration options > auto
@@ -306,6 +323,7 @@ if not L then return end
 	L["CONFIG_SETTINGS_FRAME_SCALE_TEXT"] = "set the scale, making the window larger or smaller"
 	L["CONFIG_SETTINGS_FRAME_PADDING_TEXT"] = "set the amount of space to add between the window edge and the bars"
 	L["CONFIG_SETTINGS_FRAME_WIDTH_TEXT"] = "set the maximum number of items to display in a single row"
+	L["CONFIG_SETTINGS_FRAME_HEIGHT_TEXT"] = "set the maximum height of the container frame (pixels), if you have more items than will fit then the window will scroll, less items and it will shrink"
 	L["CONFIG_SETTINGS_FRAME_BACKGROUND_COLOUR_TEXT"] = "set the background colour of the main window"
 	L["CONFIG_SETTINGS_FRAME_BORDER_SHOW_TEXT"] = "display a border around the main window"
 	L["CONFIG_SETTINGS_FRAME_BORDER_STYLE_TEXT"] = "set the border style for the main window"
@@ -343,7 +361,6 @@ if not L then return end
 	L["CONFIG_SETTINGS_BARS_NAME_HEIGHT_TEXT"] = "set the amount of space allocated to display the bar name in"
 	L["CONFIG_SETTINGS_BARS_NAME_ANCHOR_TEXT"] = "set the anchor point of the bar name"
 	
-	L["CONFIG_SETTINGS_ITEMS"] = "Items"
 	L["CONFIG_SETTINGS_ITEMS_PADDING_TEXT"] = "set the amount of space to add between item slots"
 	L["CONFIG_SETTINGS_ITEMS_HIDDEN"] = "Show hidden"
 	L["CONFIG_SETTINGS_ITEMS_HIDDEN_TEXT"] = "show hidden categories"
@@ -387,52 +404,60 @@ if not L then return end
 	L["CONFIG_SETTINGS_EMPTY_COLOUR"] = "Slot colours"
 	L["CONFIG_SETTINGS_EMPTY_COLOUR_TEXT"] = "set the border and background colour for empty %1$s slots" -- %1$s = slot name
 	L["CONFIG_SETTINGS_EMPTY_STATUS"] = "Display Format"
+	L["CONFIG_SETTINGS_EMPTY_FIRST"] = "First Only"
+	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = "only show the first x amount of empty slots of each type (may require a refresh to update)\n\nset to zero to show all empty slots"
 	
 	
 -- sorting
-	L["CONFIG_SORTMETHOD"] = "Sort Methods"
+	L["CONFIG_SORTING"] = "Sorting"
 	
-	L["CONFIG_SORTMETHOD_SORT"] = "Sorting"
+	L["CONFIG_SORTING_SORT"] = "Sorting"
 	
-	L["CONFIG_SORTMETHOD_STYLE_TEXT"] = "choose how you want your items sorted"
-	L["CONFIG_SORTMETHOD_STYLE_BAGSLOT"] = "Bag / Slot"
-	L["CONFIG_SORTMETHOD_STYLE_BAGSLOT_TEXT"] = "sorts your items by bag and slot numbers"
-	L["CONFIG_SORTMETHOD_STYLE_USER"] = "User Defined"
-	L["CONFIG_SORTMETHOD_STYLE_USER_TEXT"] = "sorts your items the way you order it"
+	L["CONFIG_SORTING_METHOD"] = "Sort Method"
+	L["CONFIG_SORTING_METHODS"] = "Sort Methods"
+	L["CONFIG_SORTING_METHOD_TEXT"] = "choose how you want your items sorted"
+	L["CONFIG_SORTING_METHOD_BAGSLOT"] = "Bag / Slot"
+	L["CONFIG_SORTING_METHOD_BAGSLOT_TEXT"] = "sorts your items by bag and slot numbers"
+	L["CONFIG_SORTING_METHOD_USER"] = "User Defined"
+	L["CONFIG_SORTING_METHOD_USER_TEXT"] = "sorts your items the way you want"
 	
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME"] = "item name"
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_TEXT"] = "include item name when sorting"
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_REVERSE"] = "Use reversed names"
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_REVERSE_TEXT"] = "use reversed names when sorting.\n\neg Super Mana Potion becomes Potion Mana Super"
-	L["CONFIG_SORTMETHOD_INCLUDE_QUALITY"] = "item rarity"
-	L["CONFIG_SORTMETHOD_INCLUDE_QUALITY_TEXT"] = "include item rarity when sorting"
-	L["CONFIG_SORTMETHOD_INCLUDE_LOCATION"] = "item equip location"
-	L["CONFIG_SORTMETHOD_INCLUDE_LOCATION_TEXT"] = "include item equip locations when sorting.\n\nnote: only affects items that can be equipped"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMTYPE"] = "item type and subtype"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMTYPE_TEXT"] = "include item type and subtype when sorting."
-	L["CONFIG_SORTMETHOD_INCLUDE_CATEGORY"] = "item category"
-	L["CONFIG_SORTMETHOD_INCLUDE_CATEGORY_TEXT"] = "include item category in sorting your inventory"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMUSELEVEL"] = "item (use) level"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMUSELEVEL_TEXT"] = "include item (use) level when sorting."
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMSTATLEVEL"] = "item (stat) level"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMSTATLEVEL_TEXT"] = "include item (stat) level when sorting."
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMAGE"] = "item age"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMAGE_TEXT"] = "include item age when sorting."
-	L["CONFIG_SORTMETHOD_INCLUDE_VENDORPRICE"] = "vendor price"
-	L["CONFIG_SORTMETHOD_INCLUDE_VENDORPRICE_TEXT"] = "include vendor price (per current stack size) when sorting."
-	L["CONFIG_SORTMETHOD_INCLUDE_ID"] = "internal id"
-	L["CONFIG_SORTMETHOD_INCLUDE_ID_TEXT"] = "include internal id (class:id:soulbound) when sorting."
+	L["CONFIG_SORTING_BAG"] = "Bag Assignment"
+	L["CONFIG_SORTING_BAGS"] = "Bag Assignments"
+	L["CONFIG_SORTING_BAG_TEXT"] = "choose a Bag Assignment.\n\nAssigns all slots from a bag to a specific bar over-riding the item assignment"
 	
-	L["CONFIG_SORTMETHOD_DIRECTION_TEXT"] = "select what direction you want your items sorted in"
-	L["CONFIG_SORTMETHOD_ORDER"] = "Sort Order"
-	L["CONFIG_SORTMETHOD_MOVE_UP_TEXT"] = "moves %1$s up in the sort order"
-	L["CONFIG_SORTMETHOD_MOVE_DOWN_TEXT"] = "moves %1$s down in the sort order"
-	L["CONFIG_SORTMETHOD_NOT_INCLUDED"] = "* not currently included in sort*"
+	L["CONFIG_SORTING_INCLUDE_NAME"] = "item name"
+	L["CONFIG_SORTING_INCLUDE_NAME_TEXT"] = "include item name when sorting"
+	L["CONFIG_SORTING_INCLUDE_NAME_REVERSE"] = "Use reversed names"
+	L["CONFIG_SORTING_INCLUDE_NAME_REVERSE_TEXT"] = "use reversed names when sorting.\n\neg Super Mana Potion becomes Potion Mana Super"
+	L["CONFIG_SORTING_INCLUDE_QUALITY"] = "item rarity"
+	L["CONFIG_SORTING_INCLUDE_QUALITY_TEXT"] = "include item rarity when sorting"
+	L["CONFIG_SORTING_INCLUDE_LOCATION"] = "item equip location"
+	L["CONFIG_SORTING_INCLUDE_LOCATION_TEXT"] = "include item equip locations when sorting.\n\nnote: only affects items that can be equipped"
+	L["CONFIG_SORTING_INCLUDE_ITEMTYPE"] = "item type and subtype"
+	L["CONFIG_SORTING_INCLUDE_ITEMTYPE_TEXT"] = "include item type and subtype when sorting."
+	L["CONFIG_SORTING_INCLUDE_CATEGORY"] = "item category"
+	L["CONFIG_SORTING_INCLUDE_CATEGORY_TEXT"] = "include item category in sorting your inventory"
+	L["CONFIG_SORTING_INCLUDE_ITEMUSELEVEL"] = "item (use) level"
+	L["CONFIG_SORTING_INCLUDE_ITEMUSELEVEL_TEXT"] = "include item (use) level when sorting."
+	L["CONFIG_SORTING_INCLUDE_ITEMSTATLEVEL"] = "item (stat) level"
+	L["CONFIG_SORTING_INCLUDE_ITEMSTATLEVEL_TEXT"] = "include item (stat) level when sorting."
+	L["CONFIG_SORTING_INCLUDE_ITEMAGE"] = "item age"
+	L["CONFIG_SORTING_INCLUDE_ITEMAGE_TEXT"] = "include item age when sorting."
+	L["CONFIG_SORTING_INCLUDE_VENDORPRICE"] = "vendor price"
+	L["CONFIG_SORTING_INCLUDE_VENDORPRICE_TEXT"] = "include vendor price (per current stack size) when sorting."
+	L["CONFIG_SORTING_INCLUDE_ID"] = "internal id"
+	L["CONFIG_SORTING_INCLUDE_ID_TEXT"] = "include internal id (class:id:soulbound) when sorting."
 	
-	L["CONFIG_SORTMETHOD_ADD"] = "Add Sort Method"
-	L["CONFIG_SORTMETHOD_ADD_TEXT"] = "add new sort method"
-	L["CONFIG_SORTMETHOD_RENAME_TEXT"] = "rename this sort method"
-	L["CONFIG_SORTMETHOD_DELETE_TEXT"] = "delete this sort method"
+	L["CONFIG_SORTING_DIRECTION_TEXT"] = "select what direction you want your items sorted in"
+	L["CONFIG_SORTING_ORDER"] = "Sort Order"
+	L["CONFIG_SORTING_MOVE_UP_TEXT"] = "moves %1$s up in the sort order"
+	L["CONFIG_SORTING_MOVE_DOWN_TEXT"] = "moves %1$s down in the sort order"
+	L["CONFIG_SORTING_NOT_INCLUDED"] = "* not currently included in sort*"
+	
+	L["CONFIG_SORTING_ADD"] = "Add Sort Method"
+	L["CONFIG_SORTING_ADD_TEXT"] = "add new sort method"
+	L["CONFIG_SORTING_RENAME_TEXT"] = "rename this sort method"
+	L["CONFIG_SORTING_DELETE_TEXT"] = "delete this sort method"
 	
 	
 -- rules
@@ -479,7 +504,8 @@ if not L then return end
 	L["RULE_FAILED_FORMULA_NIL"] = "formula is missing"
 	L["RULE_FAILED_FORMULA_BAD"] = "invalid formula"
 	L["RULE_FAILED_ARGUMENT_IS_NIL"] = "%1$s( ... ), argument %2$i is nil"
-	L["RULE_FAILED_ARGUMENT_IS_INVALID"] = "%1$s( ... ), argument %2$i is not %3$s"
+	L["RULE_FAILED_ARGUMENT_IS_NOT"] = "%1$s( ... ), argument %2$i is not %3$s"
+	L["RULE_FAILED_ARGUMENT_IS_INVALID"] = "%1$s( ... ), argument %2$i is invalid"
 	L["RULE_FAILED_ARGUMENT_NONE_SPECIFIED"] = "%1$s( ... ), no arguments specified"
 	
 	
@@ -515,7 +541,7 @@ if not L then return end
 	
 	
 --	misc chat stuff
-	L["UPGRADE_PROFILE"] = "Upgrading profile data for [%1$s] to v%2$d" -- profile name, version
+	L["UPGRADE_PROFILE"] = "Upgrading profile data for [%1$s] to v%2$s" -- profile name, version
 	L["UPGRADE_GLOBAL"] = "Upgrading global %1$s data to v%2$d" -- profile type, version
 	L["UPGRADE_CHAR"] = "Upgrading character data for %1$s to v%2$d" -- character, version
 	
@@ -528,10 +554,13 @@ if not L then return end
 	L["BATTLEPET_OPPONENT_KNOWN"] = "Owned"
 	L["BATTLEPET_OPPONENT_UNKNOWN"] = "Not Owned"
 	L["BATTLEPET_OPPONENT_UPGRADE"] = "Upgrade?"
+	L["BATTLEPET_OPPONENT_FORMAT_STRONG"] = "%1$s (%2$s) Strengths" -- 1 = pet type, 2 = pet level
+	L["BATTLEPET_OPPONENT_FORMAT_WEAK"] = "%1$s (%2$s) Weaknesses" -- 1 = pet type, 2 = pet level
+	L["BATTLEPET_OPPONENT_FORMAT_ABILITY1"] = "%s or %s"
+	L["BATTLEPET_OPPONENT_FORMAT_ABILITY2"] = "%s, %s"
 	
 	
 --	item count tooltip
-	L["TOOLTIP_COUNT_ME"] = ">"
 	L["TOOLTIP_VAULT_TABS"] = "Tab"
 	L["TOOLTIP_GOLD_AMOUNT"] = "Amount"
 	
@@ -598,6 +627,10 @@ if not L then return end
 	L["CLICK_TO_IGNORE"] = "Click to ignore"
 	L["ORDER"] = "Order"
 	L["MOUSEOVER"] = "Mouse Over"
+	L["NO_DATA_AVAILABLE"] = "No Data Available"
+	L["TOOLTIP_PURCHASE_BANK_BAG_SLOT"] = "Click to purchase the next available bank bag slot."
+	L["TOOLTIP_PURCHASE_BANK_TAB_REAGENT"] = "Click to purchase the reagent bank tab."
+	L["HEIGHT"] = "Height"
 	
 	
 --	libdatabroker
@@ -614,6 +647,9 @@ if not L then return end
 	L["LDB_MOUNTS_TYPE_L"] = "Land"
 	L["LDB_MOUNTS_TYPE_U"] = "Underwater"
 	L["LDB_MOUNTS_TYPE_S"] = "Water Surface"
+	L["LDB_MOUNTS_TYPE_X"] = "Customised / Unknown"
+	L["LDB_MOUNTS_FLYING_USEFORLAND"] = "Use as Land Mounts"
+	L["LDB_MOUNTS_FLYING_USEFORLAND_TEXT"] = "uses your flying mounts as land mount choices"
 	L["LDB_MOUNTS_FLYING_DISMOUNT"] = "Dismount in flight"
 	L["LDB_MOUNTS_FLYING_DISMOUNT_TEXT"] = "Enabled = allows you to dismount while flying.\n\nDisabled = you need to land before you can dismount"
 	L["LDB_MOUNTS_FLYING_DISMOUNT_WARNING"] = "You are currently flying, please land to select another mount"
@@ -628,7 +664,6 @@ if not L then return end
 	L["LDB_COMPANION_RESTRICTED_ITEM"] = "Requires certain reagents"
 	L["LDB_COMPANION_RESTRICTED_EVENT"] = "Requires a specific event to be in progress"
 	L["LDB_COMPANION_RESTRICTED_UNKNOWN"] = "Unknown restriction"
-	L["LDB_COMPANION_NODATA"] = "No Data"
 	L["LDB_COMPANION_NODATA_TEXT"] = "\nNo data for companion %s [%s] was found.\n\nPlease let the author know both of the above values so they can update the code."
 	L["LDB_COMPANION_SELECT"] = "\nAdds the %s to the selected pool, limiting the companions that can be randomly summoned.\n\nIf all companions are selected then random mode will become enabled"
 	L["LDB_COMPANION_DESELECT"] = "\nRemoves the %s from the selected pool.\n\nIf all companions are deslected then random mode will become enabled"

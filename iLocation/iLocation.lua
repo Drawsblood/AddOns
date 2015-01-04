@@ -46,8 +46,12 @@ iLocation.ldb = LibStub("LibDataBroker-1.1"):NewDataObject(AddonName, {
 });
 
 iLocation.ldb.OnClick = function(_, button)
-	if( button == "RightButton" and not _G.IsModifierKeyDown() ) then
-		iLocation:OpenOptions();
+	if( not _G.IsModifierKeyDown() ) then
+		if( button == "LeftButton" ) then
+			_G.ToggleFrame(_G.WorldMapFrame);
+		elseif( button == "RightButton" ) then
+			iLocation:OpenOptions();
+		end
 	end
 end
 
@@ -131,11 +135,6 @@ local function calculate_pet_levels()
 end
 
 function iLocation:CalculateRecBPZones()
-	-- We require the PetJournal for many API functions
-	if( not _G.IsAddOnLoaded("Blizzard_PetJournal") ) then
-		_G.LoadAddOn("Blizzard_PetJournal");
-	end
-	
 	if( not DisplayBPZones ) then
 		return;
 	end
@@ -147,11 +146,9 @@ function iLocation:CalculateRecBPZones()
 	local low, high;
 	for zone in LibTourist:IterateZones() do
 		low, high = LibTourist:GetBattlePetLevel(zone);
-		if( low and not high ) then
-			high = low;
-		end
+		high = low and not high and low or high;
 		
-		if( low and ((petLowest - low) <= 1) and (high - petLowest <= 2) ) then
+		if( low and ((petLowest - low) <= 2) and (high - petLowest <= 2) ) then
 			table.insert(recBPZones, zone);
 		end
 	end

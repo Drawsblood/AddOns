@@ -1,6 +1,6 @@
-﻿-- (c) 2009-2012, all rights reserved.
--- $Revision: 1043 $
--- $Date: 2012-11-15 21:15:42 +1100 (Thu, 15 Nov 2012) $
+﻿-- (c) 2009-2014, all rights reserved.
+-- $Revision: 1288 $
+-- $Date: 2015-01-04 11:08:45 +1100 (Sun, 04 Jan 2015) $
 
 
 local _G = _G
@@ -42,11 +42,11 @@ function ArkInventoryRules.OnInitialize( )
 	-- scrap: http://wow.curse.com/downloads/wow-addons/details/scrap.aspx
 	if IsAddOnLoaded( "Scrap" ) then
 		
-		ArkInventory.Output( "enabling Scrap support" )
+		ArkInventory.Output( string.format( "%s: Scrap %s", ArkInventory.Localise["CONFIG_RULES"], ArkInventory.Localise["ENABLED"] ) )
 		
 		if IsAddOnLoaded( "Scrap_Merchant" ) then
 			if Scrap.ToggleJunk then
-				ArkInventory.Output( "enabling Scrap Merchant support" )
+				ArkInventory.Output( string.format( "%s: Scrap Merchant %s", ArkInventory.Localise["CONFIG_RULES"], ArkInventory.Localise["ENABLED"] ) )
 				ArkInventory.MySecureHook( Scrap, "ToggleJunk", ArkInventoryRules.ItemCacheClear )
 			end
 		end
@@ -56,7 +56,7 @@ function ArkInventoryRules.OnInitialize( )
 	-- selljunk: http://wow.curse.com/downloads/wow-addons/details/sell-junk.aspx
 	if IsAddOnLoaded( "SellJunk" ) then
 		if SellJunk.Add and SellJunk.Rem then
-			ArkInventory.Output( "enabling SellJunk support" )
+			ArkInventory.Output( string.format( "%s: SellJunk %s", ArkInventory.Localise["CONFIG_RULES"], ArkInventory.Localise["ENABLED"] ) )
 			ArkInventory.MySecureHook( SellJunk, "Add", ArkInventoryRules.ItemCacheClear )
 			ArkInventory.MySecureHook( SellJunk, "Rem", ArkInventoryRules.ItemCacheClear )
 		end
@@ -65,7 +65,7 @@ function ArkInventoryRules.OnInitialize( )
 	-- reagent restocker: http://wow.curse.com/downloads/wow-addons/details/reagent_restocker.aspx
 	if IsAddOnLoaded( "ReagentRestocker" ) then
 		if ReagentRestocker.addItemToSellingList and ReagentRestocker.deleteItem then
-			ArkInventory.Output( "enabling ReagentRestocker support" )
+			ArkInventory.Output( string.format( "%s: ReagentRestocker %s", ArkInventory.Localise["CONFIG_RULES"], ArkInventory.Localise["ENABLED"] ) )
 			ArkInventory.MySecureHook( ReagentRestocker, "addItemToSellingList", ArkInventoryRules.ItemCacheClear )
 			ArkInventory.MySecureHook( ReagentRestocker, "deleteItem", ArkInventoryRules.ItemCacheClear )
 		end
@@ -114,7 +114,7 @@ function ArkInventoryRules.OutfitterInitialize( ... )
 	
 	if Outfitter:IsInitialized( ) then
 		
-		ArkInventory.Output( "enabling Outfitter support" )
+		ArkInventory.Output( string.format( "%s: Outfitter %s", ArkInventory.Localise["CONFIG_RULES"], ArkInventory.Localise["ENABLED"] ) )
 		
 		Outfitter:RegisterOutfitEvent( "ADD_OUTFIT", ArkInventoryRules.ItemCacheClear )
 		Outfitter:RegisterOutfitEvent( "DELETE_OUTFIT", ArkInventoryRules.ItemCacheClear )
@@ -223,7 +223,7 @@ function ArkInventoryRules.System.id( ... )
 		if type( arg ) == "number" or type( arg ) == "string" then
 			arg = string.format( "item:%s:", arg )
 		else
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, string.format( "%s or %s", ArkInventory.Localise["STRING"], ArkInventory.Localise["NUMBER"] ) ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, string.format( "%s or %s", ArkInventory.Localise["STRING"], ArkInventory.Localise["NUMBER"] ) ), 0 )
 		end
 		
 		local e = string.sub( ArkInventory.ObjectIDInternal( ArkInventoryRules.Object.h ) .. ":", 1, string.len( arg ) )
@@ -265,7 +265,7 @@ function ArkInventoryRules.System.type( ... )
 			end
 			
 			if type( arg ) ~= "string" then
-				error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+				error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 			end
 			
 			if e == string.lower( string.trim( arg ) ) then
@@ -307,7 +307,7 @@ function ArkInventoryRules.System.subtype( ... )
 			end
 			
 			if type( arg ) ~= "string" then
-				error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+				error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 			end
 			
 			if e == string.lower( string.trim( arg ) ) then
@@ -360,7 +360,7 @@ function ArkInventoryRules.System.equip( ... )
 				end
 				
 				if type( arg ) ~= "string" then
-					error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+					error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 				end
 				
 				if e == string.lower( string.trim( arg ) ) then
@@ -402,7 +402,7 @@ function ArkInventoryRules.System.name( ... )
 		end
 		
 		if type( arg ) ~= "string" then
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 		end
 		
 		if string.find( e, string.lower( string.trim( arg ) ) ) then
@@ -451,7 +451,7 @@ function ArkInventoryRules.System.quality( ... )
 			
 		else
 			
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, string.format( "%s or %s", ArkInventory.Localise["STRING"], ArkInventory.Localise["NUMBER"] ) ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, string.format( "%s or %s", ArkInventory.Localise["STRING"], ArkInventory.Localise["NUMBER"] ) ), 0 )
 			
 		end
 		
@@ -482,7 +482,7 @@ function ArkInventoryRules.System.itemlevelstat( ... )
 	end
 	
 	if type( arg1 ) ~= "number" then
-		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
+		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
 	end
 	
 	if not arg2 then
@@ -490,7 +490,7 @@ function ArkInventoryRules.System.itemlevelstat( ... )
 	end
 	
 	if type( arg2 ) ~= "number" then
-		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, 2, ArkInventory.Localise["NUMBER"] ), 0 )
+		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, 2, ArkInventory.Localise["NUMBER"] ), 0 )
 	end
 	
 	local level = select( 6, ArkInventory.ObjectInfo( ArkInventoryRules.Object.h ) )
@@ -524,7 +524,7 @@ function ArkInventoryRules.System.itemleveluse( ... )
 	end
 	
 	if type( arg1 ) ~= "number" then
-		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
+		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
 	end
 	
 	if not arg2 then
@@ -532,7 +532,7 @@ function ArkInventoryRules.System.itemleveluse( ... )
 	end
 	
 	if type( arg2 ) ~= "number" then
-		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, 2, ArkInventory.Localise["NUMBER"] ), 0 )
+		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, 2, ArkInventory.Localise["NUMBER"] ), 0 )
 	end
 	
 	local level = select( 7, ArkInventory.ObjectInfo( ArkInventoryRules.Object.h ) ) or 0
@@ -568,7 +568,7 @@ function ArkInventoryRules.System.periodictable( ... )
 		end
 		
 		if type( arg ) ~= "string" then
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 		end
 		
 		if ArkInventory.Lib.PeriodicTable:ItemInSet( ArkInventoryRules.Object.h, string.trim( arg ) ) then
@@ -604,7 +604,7 @@ function ArkInventoryRules.System.tooltipgeneric( ... )
 		end
 		
 		if type( arg ) ~= "string" then
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 		end
 		
 		if ArkInventory.TooltipContains( ArkInventoryRules.Tooltip, string.trim( arg ) ) then
@@ -649,7 +649,7 @@ function ArkInventoryRules.System.tooltipslot( ... )
 		end
 		
 		if type( arg ) ~= "string" then
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 		end
 		
 		if ArkInventory.TooltipContains( ArkInventoryRules.Tooltip, string.trim( arg ) ) then
@@ -685,7 +685,7 @@ function ArkInventoryRules.System.outfit( ... )
 		end
 		
 		if type( arg ) ~= "string" then
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 		end
 		
 	end	
@@ -735,7 +735,7 @@ function ArkInventoryRules.System.outfit_outfitter( ... )
 		end
 		
 		if type( arg ) ~= "string" then
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 		end
 		
 		for _, o in pairs( Outfits ) do
@@ -793,7 +793,7 @@ function ArkInventoryRules.System.outfit_itemrack( ... )
 		end
 		
 		if type( arg ) ~= "string" then
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 		end
 		
 		for _, o in pairs( Outfits ) do
@@ -827,7 +827,7 @@ function ArkInventoryRules.System.outfit_blizzard( ... )
 		
 		for k, location in pairs( set ) do
 			
-			local wearing, bank, bags, slot, bag = EquipmentManager_UnpackLocation( location )
+			local wearing, bank, bags, void, slot, bag = EquipmentManager_UnpackLocation( location )
 			if wearing or bank or bags then
 				
 				local h
@@ -868,7 +868,7 @@ function ArkInventoryRules.System.outfit_blizzard( ... )
 		end
 		
 		if type( arg ) ~= "string" then
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 		end
 		
 		for _, o in pairs( Outfits ) do
@@ -898,7 +898,7 @@ function ArkInventoryRules.System.vendorpriceunder( ... )
 	end
 	
 	if type( arg1 ) ~= "number" then
-		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
+		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
 	end
 	
 	return ArkInventoryRules.System.vendorprice( 1, t )
@@ -920,7 +920,7 @@ function ArkInventoryRules.System.vendorpriceover( ... )
 	end
 	
 	if type( arg1 ) ~= "number" then
-		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
+		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
 	end
 	
 	return ArkInventoryRules.System.vendorprice( 0, t )
@@ -999,7 +999,7 @@ function ArkInventoryRules.System.characterlevelrange( ... )
 	end
 	
 	if type( arg1 ) ~= "number" then
-		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
+		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
 	end
 	
 	if not arg2 then
@@ -1007,7 +1007,7 @@ function ArkInventoryRules.System.characterlevelrange( ... )
 	end
 	
 	if type( arg2 ) ~= "number" then
-		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, 2, ArkInventory.Localise["NUMBER"] ), 0 )
+		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, 2, ArkInventory.Localise["NUMBER"] ), 0 )
 	end
 	
 	local clevel = UnitLevel( "player" )
@@ -1045,7 +1045,7 @@ function ArkInventoryRules.System.bag( ... )
 		end
 		
 		if type( arg ) ~= "number" then
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["NUMBER"] ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["NUMBER"] ), 0 )
 		end
 		
 		if arg == ArkInventoryRules.Object.bag_id then
@@ -1081,18 +1081,18 @@ function ArkInventoryRules.System.location( ... )
 		end
 		
 		if type( arg ) ~= "string" then
-			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
+			error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 		end
 		
 		
 		local k = string.lower( string.trim( arg ) )
 		if k == "bag" or k == string.lower( ArkInventory.Localise["LOCATION_BAG"] ) then
 			k = ArkInventory.Const.Location.Bag
-		elseif k == "bank" or k == string.lower( ArkInventory.Localise["LOCATION_BANK"] ) then
+		elseif k == "bank" or k == string.lower( ArkInventory.Localise["BANK"] ) then
 			k = ArkInventory.Const.Location.Bank
-		elseif k == "guild bank" or k == "vault" or k == string.lower( GUILD_BANK ) then
+		elseif k == "guild bank" or k == "vault" or k == string.lower( ArkInventory.Localise["GUILDBANK"] ) then
 			k = ArkInventory.Const.Location.Vault
-		elseif k == "mail" or k == string.lower( MAIL_LABEL ) then
+		elseif k == "mail" or k == string.lower( ArkInventory.Localise["MAIL"] ) then
 			k = ArkInventory.Const.Location.Mail
 		elseif k == "wearing" or k == "gear" or k == string.lower( ArkInventory.Localise["LOCATION_WEARING"] ) then
 			k = ArkInventory.Const.Location.Wearing
@@ -1142,7 +1142,7 @@ function ArkInventoryRules.System.count( ... )
 	end
 	
 	if type( arg1 ) ~= "number" then
-		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
+		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_NOT"], fn, 1, ArkInventory.Localise["NUMBER"] ), 0 )
 	end
 	
 	if ArkInventoryRules.Object.count >= arg1 then
@@ -1216,9 +1216,10 @@ function ArkInventoryRules.System.pettype( ... )
 		error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_NONE_SPECIFIED"], fn ), 0 )
 	end
 	
-	local e = string.lower( select( 8, ArkInventory.ObjectInfo( ArkInventoryRules.Object.h ) ) )
+	local e = select( 8, ArkInventory.ObjectInfo( ArkInventoryRules.Object.h ) )
+	e = string.lower( ArkInventory.PetJournal.PetTypeName( e ) )
 	
-	if e ~= "" then
+	if e then
 		
 		for ax = 1, ac do
 			
@@ -1229,14 +1230,10 @@ function ArkInventoryRules.System.pettype( ... )
 			end
 			
 			if type( arg ) == "number" then
-				arg = _G[string.format( "%s%s", "BATTLE_PET_NAME_", arg )]
+				arg = ArkInventory.PetJournal.PetTypeName( arg )
 				if not arg then
-					error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, "within acceptable range" ), 0 )
+					error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax ), 0 )
 				end
-			end
-			
-			if type( arg ) ~= "string" then
-				error( string.format( ArkInventory.Localise["RULE_FAILED_ARGUMENT_IS_INVALID"], fn, ax, ArkInventory.Localise["STRING"] ), 0 )
 			end
 			
 			if e == string.lower( string.trim( arg ) ) then
@@ -1639,15 +1636,15 @@ function ArkInventoryRules.Frame_Rules_Table_Refresh( frame )
 		end
 		
 		if not ignore then
-			table.insert( tt, { ["sorted"]=format( "%04i %04i", d.order or 0, k ), ["id"]=k, ["enabled"]=ArkInventory.db.profile.option.rule[k] or false, ["order"]=d.order or 0, ["name"]=d.name or "", ["formula"]=d.formula or "", ["damaged"]=d.damaged or false } )
+			tt[#tt + 1] = { ["sorted"]=format( "%04i %04i", d.order or 0, k ), ["id"]=k, ["enabled"]=ArkInventory.db.profile.option.rule[k] or false, ["order"]=d.order or 0, ["name"]=d.name or "", ["formula"]=d.formula or "", ["damaged"]=d.damaged or false }
 			tc = tc + 1
 		end
 
 	end
-
-
+	
+	
 	FauxScrollFrame_Update( _G[ft .. "Scroll"], tc, rows, height )
-
+	
 	if tc == 0 then
 		return
 	end
@@ -1671,15 +1668,15 @@ function ArkInventoryRules.Frame_Rules_Table_Refresh( frame )
 			_G[linename .. "Id"]:SetText( r.id )
 
 			if r.enabled then
-				_G[linename .. "T1"]:SetTexture( "Interface\\Icons\\Spell_ChargePositive" )
+				ArkInventory.SetTexture( _G[linename .. "T1"], "Interface\\Icons\\Spell_ChargePositive" )
 			else
-				_G[linename .. "T1"]:SetTexture( "Interface\\Icons\\Spell_ChargeNegative" )
+				ArkInventory.SetTexture( _G[linename .. "T1"], "Interface\\Icons\\Spell_ChargeNegative" )
 			end
 			
 			if r.damaged then
-				_G[linename .. "T2"]:SetTexture( "Interface\\Icons\\Spell_Shadow_DeathCoil" )
+				ArkInventory.SetTexture( _G[linename .. "T2"], "Interface\\Icons\\Spell_Shadow_DeathCoil" )
 			else
-				_G[linename .. "T2"]:SetTexture( 0, 0, 0, 0 )
+				ArkInventory.SetTexture( _G[linename .. "T2"], true, 0, 0, 0, 0 )
 			end
 
 			_G[linename .. "C1"]:SetText( r.id )
@@ -1741,10 +1738,10 @@ function ArkInventoryRules.Frame_Rules_Paint( )
 			style = ArkInventory.db.profile.option.ui.rules.background.style or ArkInventory.Const.Texture.BackgroundDefault
 			if style == ArkInventory.Const.Texture.BackgroundDefault then
 				colour = ArkInventory.db.profile.option.ui.rules.background.colour
-				obj:SetTexture( colour.r, colour.g, colour.b, colour.a )
+				ArkInventory.SetTexture( obj, true, colour.r, colour.g, colour.b, colour.a )
 			else
 				file = ArkInventory.Lib.SharedMedia:Fetch( ArkInventory.Lib.SharedMedia.MediaType.BACKGROUND, style )
-				obj:SetTexture( file )
+				ArkInventory.SetTexture( obj, file )
 			end
 		end
 		

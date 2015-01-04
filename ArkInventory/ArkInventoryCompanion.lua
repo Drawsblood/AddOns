@@ -1,4 +1,4 @@
-local _G = _G
+﻿local _G = _G
 local select = _G.select
 local pairs = _G.pairs
 local ipairs = _G.ipairs
@@ -6,24 +6,6 @@ local string = _G.string
 local type = _G.type
 local error = _G.error
 local table = _G.table
-
-
---[[
-ArkInventory.Global.Companion.MOUNT = {
-	[spellid] = {
-		capable = {
-			l = boolean
-			a = boolean
-			u = boolean
-		},
-		usable = {
-			l = boolean
-			a = boolean
-			u = boolean
-		},
-	}
- }
-]]--
 
 ArkInventory.Const.ItemCrossReference = {
 --[[
@@ -40,426 +22,460 @@ local TempData = { -- temporary table for item to spell translations.
 -- r = { restrictions }
 -- only zone based restrictions are checked
 
-[1132]={sid=580}, -- Horn of the Timber Wolf
-[2411]={sid=470}, -- Black Stallion Bridle
-[2414]={sid=472}, -- Pinto Bridle
-[5655]={sid=6648}, -- Chestnut Mare Bridle
-[5656]={sid=458}, -- Brown Horse Bridle
-[5665]={sid=6653}, -- Horn of the Dire Wolf
-[5668]={sid=6654}, -- Horn of the Brown Wolf
-[5864]={sid=6777}, -- Gray Ram
-[5872]={sid=6899}, -- Brown Ram
-[5873]={sid=6898}, -- White Ram
-[8563]={sid=10873}, -- Red Mechanostrider
-[8586]={sid=16084}, -- Whistle of the Mottled Red Raptor
-[8588]={sid=8395}, -- Whistle of the Emerald Raptor
-[8591]={sid=10796}, -- Whistle of the Turquoise Raptor
-[8592]={sid=10799}, -- Whistle of the Violet Raptor
-[8595]={sid=10969}, -- Blue Mechanostrider
-[8627]={sid=10787}, -- Reins of the Nightsaber / Black Nightsaber
-[8628]={sid=10792}, -- Reins of the Spotted Nightsaber / Spotted Panther
-[8629]={sid=10793}, -- Reins of the Striped Nightsaber
-[8631]={sid=8394}, -- Reins of the Striped Frostsaber
-[8632]={sid=10789}, -- Reins of the Spotted Frostsaber
-[12302]={sid=16056}, -- Reins of the Ancient Frostsaber
-[12303]={sid=16055}, -- Reins of the Nightsaber / Black Nightsaber
-[12330]={sid=16080}, -- Horn of the Red Wolf
-[12351]={sid=16081}, -- Horn of the Arctic Wolf / Winter Wolf
-[12353]={sid=16083}, -- White Stallion Bridle
-[12354]={sid=16082}, -- Palomino Bridle
-[13086]={sid=17229}, -- Reins of the Winterspring Frostsaber
-[13317]={sid=17450}, -- Whistle of the Ivory Raptor
-[13321]={sid=17453}, -- Green Mechanostrider
-[13322]={sid=17454}, -- Unpainted Mechanostrider
-[13326]={sid=15779}, -- White Mechanostrider Mod B
-[13327]={sid=17459}, -- Icy Blue Mechanostrider Mod A
-[13328]={sid=17461}, -- Black Ram
-[13329]={sid=17460}, -- Frost Ram
-[13331]={sid=17462}, -- Red Skeletal Horse
-[13332]={sid=17463}, -- Blue Skeletal Horse
-[13333]={sid=17464}, -- Brown Skeletal Horse
-[13334]={sid=17465}, -- Green Skeletal Warhorse
-[13335]={sid=17481}, -- Deathcharger's Reins / Rivendare's Deathcharger
-[15277]={sid=18989}, -- Gray Kodo
-[15290]={sid=18990}, -- Brown Kodo
-[15292]={sid=18991}, -- Green Kodo
-[15293]={sid=18992}, -- Teal Kodo
-[16339]={sid=16082}, -- Commander's Steed / Palomino
-[18766]={sid=23221}, -- Reins of the Swift Frostsaber
-[18767]={sid=23219}, -- Reins of the Swift Mistsaber
-[18772]={sid=23225}, -- Swift Green Mechanostrider
-[18773]={sid=23223}, -- Swift White Mechanostrider
-[18774]={sid=23222}, -- Swift Yellow Mechanostrider
-[18776]={sid=23227}, -- Swift Palomino
-[18777]={sid=23229}, -- Swift Brown Steed
-[18778]={sid=23228}, -- Swift White Steed
-[18785]={sid=23240}, -- Swift White Ram
-[18786]={sid=23238}, -- Swift Brown Ram
-[18787]={sid=23239}, -- Swift Gray Ram
-[18788]={sid=23241}, -- Swift Blue Raptor
-[18789]={sid=23242}, -- Swift Olive Raptor
-[18790]={sid=23243}, -- Swift Orange Raptor
-[18791]={sid=23246}, -- Purple Skeletal Warhorse
-[18793]={sid=23247}, -- Great White Kodo
-[18794]={sid=23249}, -- Great Brown Kodo
-[18795]={sid=23248}, -- Great Gray Kodo
-[18796]={sid=23250}, -- Horn of the Swift Brown Wolf
-[18797]={sid=23251}, -- Horn of the Swift Timber Wolf
-[18798]={sid=23252}, -- Horn of the Swift Gray Wolf
-[18902]={sid=23338}, -- Reins of the Swift Stormsaber
-[19029]={sid=23509}, -- Horn of the Frostwolf Howler
-[19030]={sid=23510}, -- Stormpike Battle Charger
-[19872]={sid=24242}, -- Swift Razzashi Raptor
-[19902]={sid=24252}, -- Swift Zulian Tiger
-[21176]={sid=26656}, -- Black Qiraji Resonating Crystal / Black Qiraji Battle Tank
-[21218]={sid=25953,r={zone = "AHNQIRAJ,AHNQIRAJ_RUINS"}}, -- Blue Qiraji Resonating Crystal / Blue Qiraji Battle Tank
-[21321]={sid=26054,r={zone = "AHNQIRAJ,AHNQIRAJ_RUINS"}}, -- Red Qiraji Resonating Crystal / Red Qiraji Battle Tank
-[21323]={sid=26056,r={zone = "AHNQIRAJ,AHNQIRAJ_RUINS"}}, -- Green Qiraji Resonating Crystal / Green Qiraji Battle Tank
-[21324]={sid=26055,r={zone = "AHNQIRAJ,AHNQIRAJ_RUINS"}}, -- Yellow Qiraji Resonating Crystal / Yellow Qiraji Battle Tank
-[23720]={sid=30174}, -- Riding Turtle
-[25470]={sid=32235}, -- Golden Gryphon
-[25471]={sid=32239}, -- Ebon Gryphon
-[25472]={sid=32240}, -- Snowy Gryphon
-[25473]={sid=32242}, -- Swift Blue Gryphon
-[25474]={sid=32243}, -- Tawny Wind Rider
-[25475]={sid=32244}, -- Blue Wind Rider
-[25476]={sid=32245}, -- Green Wind Rider
-[25477]={sid=32246}, -- Swift Red Wind Rider
-[25527]={sid=32289}, -- Swift Red Gryphon
-[25528]={sid=32290}, -- Swift Green Gryphon
-[25529]={sid=32292}, -- Swift Purple Gryphon
-[25531]={sid=32295}, -- Swift Green Wind Rider
-[25532]={sid=32296}, -- Swift Yellow Wind Rider
-[25533]={sid=32297}, -- Swift Purple Wind Rider
-[25596]={sid=32345}, -- Peep's Whistle / Peep the Phoenix Mount
-[28481]={sid=34406}, -- Brown Elekk
-[28915]={sid=39316}, -- Reins of the Dark Riding Talbuk
-[28927]={sid=34795}, -- Red Hawkstrider
-[28936]={sid=33660}, -- Swift Pink Hawkstrider
-[29102]={sid=34896}, -- Reins of the Cobalt War Talbuk
-[29103]={sid=34897}, -- Reins of the White War Talbuk
-[29104]={sid=34898}, -- Reins of the Silver War Talbuk
-[29105]={sid=34899}, -- Reins of the Tan War Talbuk
-[29220]={sid=35020}, -- Blue Hawkstrider
-[29221]={sid=35022}, -- Black Hawkstrider
-[29222]={sid=35018}, -- Purple Hawkstrider
-[29223]={sid=35025}, -- Swift Green Hawkstrider
-[29224]={sid=35027}, -- Swift Purple Hawkstrider
-[29227]={sid=34896}, -- Reins of the Cobalt War Talbuk
-[29228]={sid=34790}, -- Reins of the Dark War Talbuk
-[29229]={sid=34898}, -- Reins of the Silver War Talbuk
-[29230]={sid=34899}, -- Reins of the Tan War Talbuk
-[29231]={sid=34897}, -- Reins of the White War Talbuk
-[29465]={sid=22719}, -- Black Battlestrider
-[29466]={sid=22718}, -- Black War Kodo
-[29467]={sid=22720}, -- Black War Ram
-[29468]={sid=22717}, -- Black War Steed Bridle
-[29469]={sid=22724}, -- Horn of the Black War Wolf
-[29470]={sid=22722}, -- Red Skeletal Warhorse
-[29471]={sid=22723}, -- Reins of the Black War Tiger
-[29472]={sid=22721}, -- Whistle of the Black War Raptor
-[29743]={sid=35711}, -- Purple Elekk
-[29744]={sid=35710}, -- Gray Elekk
-[29745]={sid=35713}, -- Great Blue Elekk
-[29746]={sid=35712}, -- Great Green Elekk
-[29747]={sid=35714}, -- Great Purple Elekk
-[30480]={sid=36702}, -- Fiery Warhorse's Reins
-[30609]={sid=37015}, -- Swift Nether Drake
-[31829]={sid=39315}, -- Reins of the Cobalt Riding Talbuk
-[31830]={sid=39315}, -- Reins of the Cobalt Riding Talbuk
-[31831]={sid=39317}, -- Reins of the Silver Riding Talbuk
-[31832]={sid=39317}, -- Reins of the Silver Riding Talbuk
-[31833]={sid=39318}, -- Reins of the Tan Riding Talbuk
-[31834]={sid=39318}, -- Reins of the Tan Riding Talbuk
-[31835]={sid=39319}, -- Reins of the White Riding Talbuk
-[31836]={sid=39319}, -- Reins of the White Riding Talbuk
-[32314]={sid=39798}, -- Green Riding Nether Ray
-[32316]={sid=39801}, -- Purple Riding Nether Ray
-[32317]={sid=39800}, -- Red Riding Nether Ray
-[32318]={sid=39802}, -- Silver Riding Nether Ray
-[32319]={sid=39803}, -- Blue Riding Nether Ray
-[32458]={sid=40192}, -- Ashes of Al'ar
-[32768]={sid=41252}, -- Reins of the Raven Lord
-[32857]={sid=41513}, -- Reins of the Onyx Netherwing Drake
-[32858]={sid=41514}, -- Reins of the Azure Netherwing Drake
-[32859]={sid=41515}, -- Reins of the Cobalt Netherwing Drake
-[32860]={sid=41516}, -- Reins of the Purple Netherwing Drake
-[32861]={sid=41517}, -- Reins of the Veridian Netherwing Drake
-[32862]={sid=41518}, -- Reins of the Violet Netherwing Drake
+[1132]={sid=580,mt=0x01}, -- Horn of the Timber Wolf
+[2411]={sid=470,mt=0x01}, -- Black Stallion Bridle
+[2414]={sid=472,mt=0x01}, -- Pinto Bridle
+[5655]={sid=6648,mt=0x01}, -- Chestnut Mare Bridle
+[5656]={sid=458,mt=0x01}, -- Brown Horse Bridle
+[5665]={sid=6653,mt=0x01}, -- Horn of the Dire Wolf
+[5668]={sid=6654,mt=0x01}, -- Horn of the Brown Wolf
+[5864]={sid=6777,mt=0x01}, -- Gray Ram
+[5872]={sid=6899,mt=0x01}, -- Brown Ram
+[5873]={sid=6898,mt=0x01}, -- White Ram
+[8563]={sid=10873,mt=0x01}, -- Red Mechanostrider
+[8586]={sid=16084,mt=0x01}, -- Whistle of the Mottled Red Raptor
+[8588]={sid=8395,mt=0x01}, -- Whistle of the Emerald Raptor
+[8591]={sid=10796,mt=0x01}, -- Whistle of the Turquoise Raptor
+[8592]={sid=10799,mt=0x01}, -- Whistle of the Violet Raptor
+[8595]={sid=10969,mt=0x01}, -- Blue Mechanostrider
+[8627]={sid=10787,mt=0x01}, -- Reins of the Nightsaber / Black Nightsaber
+[8628]={sid=10792,mt=0x01}, -- Reins of the Spotted Nightsaber / Spotted Panther
+[8629]={sid=10793,mt=0x01}, -- Reins of the Striped Nightsaber
+[8631]={sid=8394,mt=0x01}, -- Reins of the Striped Frostsaber
+[8632]={sid=10789,mt=0x01}, -- Reins of the Spotted Frostsaber
+[12302]={sid=16056,mt=0x01}, -- Reins of the Ancient Frostsaber
+[12303]={sid=16055,mt=0x01}, -- Reins of the Nightsaber / Black Nightsaber
+[12330]={sid=16080,mt=0x01}, -- Horn of the Red Wolf
+[12351]={sid=16081,mt=0x01}, -- Horn of the Arctic Wolf / Winter Wolf
+[12353]={sid=16083,mt=0x01}, -- White Stallion Bridle
+[12354]={sid=16082,mt=0x01}, -- Palomino Bridle
+[13086]={sid=17229,mt=0x01}, -- Reins of the Winterspring Frostsaber
+[13317]={sid=17450,mt=0x01}, -- Whistle of the Ivory Raptor
+[13321]={sid=17453,mt=0x01}, -- Green Mechanostrider
+[13322]={sid=17454,mt=0x01}, -- Unpainted Mechanostrider
+[13326]={sid=15779,mt=0x01}, -- White Mechanostrider Mod B
+[13327]={sid=17459,mt=0x01}, -- Icy Blue Mechanostrider Mod A
+[13328]={sid=17461,mt=0x01}, -- Black Ram
+[13329]={sid=17460,mt=0x01}, -- Frost Ram
+[13331]={sid=17462,mt=0x01}, -- Red Skeletal Horse
+[13332]={sid=17463,mt=0x01}, -- Blue Skeletal Horse
+[13333]={sid=17464,mt=0x01}, -- Brown Skeletal Horse
+[13334]={sid=17465,mt=0x01}, -- Green Skeletal Warhorse
+[13335]={sid=17481,mt=0x01}, -- Deathcharger's Reins / Rivendare's Deathcharger
+[15277]={sid=18989,mt=0x01}, -- Gray Kodo
+[15290]={sid=18990,mt=0x01}, -- Brown Kodo
+[15292]={sid=18991,mt=0x01}, -- Green Kodo
+[15293]={sid=18992,mt=0x01}, -- Teal Kodo
+[16339]={sid=16082,mt=0x01}, -- Commander's Steed / Palomino
+[18766]={sid=23221,mt=0x01}, -- Reins of the Swift Frostsaber
+[18767]={sid=23219,mt=0x01}, -- Reins of the Swift Mistsaber
+[18772]={sid=23225,mt=0x01}, -- Swift Green Mechanostrider
+[18773]={sid=23223,mt=0x01}, -- Swift White Mechanostrider
+[18774]={sid=23222,mt=0x01}, -- Swift Yellow Mechanostrider
+[18776]={sid=23227,mt=0x01}, -- Swift Palomino
+[18777]={sid=23229,mt=0x01}, -- Swift Brown Steed
+[18778]={sid=23228,mt=0x01}, -- Swift White Steed
+[18785]={sid=23240,mt=0x01}, -- Swift White Ram
+[18786]={sid=23238,mt=0x01}, -- Swift Brown Ram
+[18787]={sid=23239,mt=0x01}, -- Swift Gray Ram
+[18788]={sid=23241,mt=0x01}, -- Swift Blue Raptor
+[18789]={sid=23242,mt=0x01}, -- Swift Olive Raptor
+[18790]={sid=23243,mt=0x01}, -- Swift Orange Raptor
+[18791]={sid=23246,mt=0x01}, -- Purple Skeletal Warhorse
+[18793]={sid=23247,mt=0x01}, -- Great White Kodo
+[18794]={sid=23249,mt=0x01}, -- Great Brown Kodo
+[18795]={sid=23248,mt=0x01}, -- Great Gray Kodo
+[18796]={sid=23250,mt=0x01}, -- Horn of the Swift Brown Wolf
+[18797]={sid=23251,mt=0x01}, -- Horn of the Swift Timber Wolf
+[18798]={sid=23252,mt=0x01}, -- Horn of the Swift Gray Wolf
+[18902]={sid=23338,mt=0x01}, -- Reins of the Swift Stormsaber
+[19029]={sid=23509,mt=0x01}, -- Horn of the Frostwolf Howler
+[19030]={sid=23510,mt=0x01}, -- Stormpike Battle Charger
+[19872]={sid=24242,mt=0x01}, -- Swift Razzashi Raptor
+[19902]={sid=24252,mt=0x01}, -- Swift Zulian Tiger
+[21176]={sid=26656,mt=0x01}, -- Black Qiraji Resonating Crystal / Black Qiraji Battle Tank
+[21218]={sid=25953,mt=0x01,r={zone = "AHNQIRAJ,AHNQIRAJ_RUINS"}}, -- Blue Qiraji Resonating Crystal / Blue Qiraji Battle Tank
+[21321]={sid=26054,mt=0x01,r={zone = "AHNQIRAJ,AHNQIRAJ_RUINS"}}, -- Red Qiraji Resonating Crystal / Red Qiraji Battle Tank
+[21323]={sid=26056,mt=0x01,r={zone = "AHNQIRAJ,AHNQIRAJ_RUINS"}}, -- Green Qiraji Resonating Crystal / Green Qiraji Battle Tank
+[21324]={sid=26055,mt=0x01,r={zone = "AHNQIRAJ,AHNQIRAJ_RUINS"}}, -- Yellow Qiraji Resonating Crystal / Yellow Qiraji Battle Tank
+[23720]={sid=30174,mt=0x01}, -- Riding Turtle
+[25470]={sid=32235,mt=0x02}, -- Golden Gryphon
+[25471]={sid=32239,mt=0x02}, -- Ebon Gryphon
+[25472]={sid=32240,mt=0x02}, -- Snowy Gryphon
+[25473]={sid=32242,mt=0x02}, -- Swift Blue Gryphon
+[25474]={sid=32243,mt=0x02}, -- Tawny Wind Rider
+[25475]={sid=32244,mt=0x02}, -- Blue Wind Rider
+[25476]={sid=32245,mt=0x02}, -- Green Wind Rider
+[25477]={sid=32246,mt=0x02}, -- Swift Red Wind Rider
+[25527]={sid=32289,mt=0x02}, -- Swift Red Gryphon
+[25528]={sid=32290,mt=0x02}, -- Swift Green Gryphon
+[25529]={sid=32292,mt=0x02}, -- Swift Purple Gryphon
+[25531]={sid=32295,mt=0x02}, -- Swift Green Wind Rider
+[25532]={sid=32296,mt=0x02}, -- Swift Yellow Wind Rider
+[25533]={sid=32297,mt=0x02}, -- Swift Purple Wind Rider
+[25596]={sid=32345,mt=0x02}, -- Peep's Whistle / Peep the Phoenix Mount
+[28481]={sid=34406,mt=0x01}, -- Brown Elekk
+[28915]={sid=39316,mt=0x01}, -- Reins of the Dark Riding Talbuk
+[28927]={sid=34795,mt=0x01}, -- Red Hawkstrider
+[28936]={sid=33660,mt=0x01}, -- Swift Pink Hawkstrider
+[29102]={sid=34896,mt=0x01}, -- Reins of the Cobalt War Talbuk
+[29103]={sid=34897,mt=0x01}, -- Reins of the White War Talbuk
+[29104]={sid=34898,mt=0x01}, -- Reins of the Silver War Talbuk
+[29105]={sid=34899,mt=0x01}, -- Reins of the Tan War Talbuk
+[29220]={sid=35020,mt=0x01}, -- Blue Hawkstrider
+[29221]={sid=35022,mt=0x01}, -- Black Hawkstrider
+[29222]={sid=35018,mt=0x01}, -- Purple Hawkstrider
+[29223]={sid=35025,mt=0x01}, -- Swift Green Hawkstrider
+[29224]={sid=35027,mt=0x01}, -- Swift Purple Hawkstrider
+[29227]={sid=34896,mt=0x01}, -- Reins of the Cobalt War Talbuk
+[29228]={sid=34790,mt=0x01}, -- Reins of the Dark War Talbuk
+[29229]={sid=34898,mt=0x01}, -- Reins of the Silver War Talbuk
+[29230]={sid=34899,mt=0x01}, -- Reins of the Tan War Talbuk
+[29231]={sid=34897,mt=0x01}, -- Reins of the White War Talbuk
+[29465]={sid=22719,mt=0x01}, -- Black Battlestrider
+[29466]={sid=22718,mt=0x01}, -- Black War Kodo
+[29467]={sid=22720,mt=0x01}, -- Black War Ram
+[29468]={sid=22717,mt=0x01}, -- Black War Steed Bridle
+[29469]={sid=22724,mt=0x01}, -- Horn of the Black War Wolf
+[29470]={sid=22722,mt=0x01}, -- Red Skeletal Warhorse
+[29471]={sid=22723,mt=0x01}, -- Reins of the Black War Tiger
+[29472]={sid=22721,mt=0x01}, -- Whistle of the Black War Raptor
+[29743]={sid=35711,mt=0x01}, -- Purple Elekk
+[29744]={sid=35710,mt=0x01}, -- Gray Elekk
+[29745]={sid=35713,mt=0x01}, -- Great Blue Elekk
+[29746]={sid=35712,mt=0x01}, -- Great Green Elekk
+[29747]={sid=35714,mt=0x01}, -- Great Purple Elekk
+[30480]={sid=36702,mt=0x01}, -- Fiery Warhorse's Reins
+[30609]={sid=37015,mt=0x02}, -- Swift Nether Drake
+[31829]={sid=39315,mt=0x01}, -- Reins of the Cobalt Riding Talbuk
+[31830]={sid=39315,mt=0x01}, -- Reins of the Cobalt Riding Talbuk
+[31831]={sid=39317,mt=0x01}, -- Reins of the Silver Riding Talbuk
+[31832]={sid=39317,mt=0x01}, -- Reins of the Silver Riding Talbuk
+[31833]={sid=39318,mt=0x01}, -- Reins of the Tan Riding Talbuk
+[31834]={sid=39318,mt=0x01}, -- Reins of the Tan Riding Talbuk
+[31835]={sid=39319,mt=0x01}, -- Reins of the White Riding Talbuk
+[31836]={sid=39319,mt=0x01}, -- Reins of the White Riding Talbuk
+[32314]={sid=39798,mt=0x02}, -- Green Riding Nether Ray
+[32316]={sid=39801,mt=0x02}, -- Purple Riding Nether Ray
+[32317]={sid=39800,mt=0x02}, -- Red Riding Nether Ray
+[32318]={sid=39802,mt=0x02}, -- Silver Riding Nether Ray
+[32319]={sid=39803,mt=0x02}, -- Blue Riding Nether Ray
+[32458]={sid=40192,mt=0x02}, -- Ashes of Al'ar
+[32768]={sid=41252,mt=0x01}, -- Reins of the Raven Lord
+[32857]={sid=41513,mt=0x02}, -- Reins of the Onyx Netherwing Drake
+[32858]={sid=41514,mt=0x02}, -- Reins of the Azure Netherwing Drake
+[32859]={sid=41515,mt=0x02}, -- Reins of the Cobalt Netherwing Drake
+[32860]={sid=41516,mt=0x02}, -- Reins of the Purple Netherwing Drake
+[32861]={sid=41517,mt=0x02}, -- Reins of the Veridian Netherwing Drake
+[32862]={sid=41518,mt=0x02}, -- Reins of the Violet Netherwing Drake
 -- item 33176 Flying Broom
 -- item 33182 Swift Flying Broom
 -- item 33183 Old Magic Broom
 -- item 33184 Swift Magic Broom
 -- item 33189 Rickety Magic Broom
-[33809]={sid=43688}, -- Amani War Bear
-[33976]={sid=43899}, -- Brewfest Ram
-[33977]={sid=43900}, -- Swift Brewfest Ram
-[33999]={sid=43927}, -- Cenarion War Hippogryph
-[34060]={sid=44153}, -- Flying Machine Control
-[34061]={sid=44151}, -- Turbo-Charged Flying Machine Control
-[34092]={sid=44744}, -- Merciless Nether Drake
-[34129]={sid=35028}, -- Swift Warstrider
-[35513]={sid=46628}, -- Swift White Hawkstrider
-[35906]={sid=48027}, -- Reins of the Black War Elekk
+[33809]={sid=43688,mt=0x01}, -- Amani War Bear
+[33976]={sid=43899,mt=0x01}, -- Brewfest Ram
+[33977]={sid=43900,mt=0x01}, -- Swift Brewfest Ram
+[33999]={sid=43927,mt=0x02}, -- Cenarion War Hippogryph
+[34060]={sid=44153,mt=0x02}, -- Flying Machine Control
+[34061]={sid=44151,mt=0x02}, -- Turbo-Charged Flying Machine Control
+[34092]={sid=44744,mt=0x02}, -- Merciless Nether Drake
+[34129]={sid=35028,mt=0x01}, -- Swift Warstrider
+[35513]={sid=46628,mt=0x01}, -- Swift White Hawkstrider
+[35906]={sid=48027,mt=0x01}, -- Reins of the Black War Elekk
 -- item 37011 Magic Broom
-[37012]={sid=48025}, -- The Horseman's Reins / Headless Horseman's Mount
-[37676]={sid=49193}, -- Vengeful Nether Drake
-[37719]={sid=49322}, -- Swift Zhevra
-[37827]={sid=50869}, -- Brewfest Kodo
-[37828]={sid=49379}, -- Great Brewfest Kodo
-[40775]={sid=54729}, -- Winged Steed of the Ebon Blade / Death Knight
-[41508]={sid=55531}, -- Mechano-hog
-[43516]={sid=58615}, -- Brutal Nether Drake
-[43599]={sid=58983}, -- Big Blizzard Bear
-[43951]={sid=59569}, -- Reins of the Bronze Drake
-[43952]={sid=59567}, -- Reins of the Azure Drake
-[43953]={sid=59568}, -- Reins of the Blue Drake
-[43954]={sid=59571}, -- Reins of the Twilight Drake
-[43955]={sid=59570}, -- Reins of the Red Drake
-[43956]={sid=59785}, -- Reins of the Black War Mammoth
-[43958]={sid=59799}, -- Reins of the Ice Mammoth
-[43959]={sid=61465}, -- Reins of the Grand Black War Mammoth
-[43961]={sid=61470}, -- Reins of the Grand Ice Mammoth
-[43962]={sid=54753}, -- Reins of the White Polar Bear
-[43986]={sid=59650}, -- Reins of the Black Drake
-[44077]={sid=59788}, -- Reins of the Black War Mammoth
-[44080]={sid=59797}, -- Reins of the Ice Mammoth
-[44083]={sid=61467}, -- Reins of the Grand Black War Mammoth
-[44086]={sid=61469}, -- Reins of the Grand Ice Mammoth
-[44151]={sid=59996}, -- Reins of the Blue Proto-Drake
-[44160]={sid=59961}, -- Reins of the Red Proto-Drake
-[44164]={sid=59976}, -- Reins of the Black Proto-Drake
-[44168]={sid=60002}, -- Reins of the Time-Lost Proto-Drake
-[44175]={sid=60021}, -- Reins of the Plagued Proto-Drake
-[44177]={sid=60024}, -- Reins of the Violet Proto-Drake
-[44178]={sid=60025}, -- Reins of the Albino Drake
+[37012]={sid=48025,mt=0x02}, -- The Horseman's Reins / Headless Horseman's Mount
+[37676]={sid=49193,mt=0x02}, -- Vengeful Nether Drake
+[37719]={sid=49322,mt=0x01}, -- Swift Zhevra
+[37827]={sid=50869,mt=0x01}, -- Brewfest Kodo
+[37828]={sid=49379,mt=0x01}, -- Great Brewfest Kodo
+[40775]={sid=54729,mt=0x02}, -- Winged Steed of the Ebon Blade / Death Knight
+[41508]={sid=55531,mt=0x01}, -- Mechano-hog
+[43516]={sid=58615,mt=0x02}, -- Brutal Nether Drake
+[43599]={sid=58983,mt=0x01}, -- Big Blizzard Bear
+[43951]={sid=59569,mt=0x02}, -- Reins of the Bronze Drake
+[43952]={sid=59567,mt=0x02}, -- Reins of the Azure Drake
+[43953]={sid=59568,mt=0x02}, -- Reins of the Blue Drake
+[43954]={sid=59571,mt=0x02}, -- Reins of the Twilight Drake
+[43955]={sid=59570,mt=0x02}, -- Reins of the Red Drake
+[43956]={sid=59785,mt=0x01}, -- Reins of the Black War Mammoth
+[43958]={sid=59799,mt=0x01}, -- Reins of the Ice Mammoth
+[43959]={sid=61465,mt=0x01}, -- Reins of the Grand Black War Mammoth
+[43961]={sid=61470,mt=0x01}, -- Reins of the Grand Ice Mammoth
+[43962]={sid=54753,mt=0x01}, -- Reins of the White Polar Bear
+[43986]={sid=59650,mt=0x02}, -- Reins of the Black Drake
+[44077]={sid=59788,mt=0x01}, -- Reins of the Black War Mammoth
+[44080]={sid=59797,mt=0x01}, -- Reins of the Ice Mammoth
+[44083]={sid=61467,mt=0x01}, -- Reins of the Grand Black War Mammoth
+[44086]={sid=61469,mt=0x01}, -- Reins of the Grand Ice Mammoth
+[44151]={sid=59996,mt=0x02}, -- Reins of the Blue Proto-Drake
+[44160]={sid=59961,mt=0x02}, -- Reins of the Red Proto-Drake
+[44164]={sid=59976,mt=0x02}, -- Reins of the Black Proto-Drake
+[44168]={sid=60002,mt=0x02}, -- Reins of the Time-Lost Proto-Drake
+[44175]={sid=60021,mt=0x02}, -- Reins of the Plagued Proto-Drake
+[44177]={sid=60024,mt=0x02}, -- Reins of the Violet Proto-Drake
+[44178]={sid=60025,mt=0x02}, -- Reins of the Albino Drake
 -- item 44221 Loaned Gryphon Reins
-[44223]={sid=60118}, -- Reins of the Black War Bear
-[44224]={sid=60119}, -- Reins of the Black War Bear
-[44225]={sid=60114}, -- Reins of the Armored Brown Bear
-[44226]={sid=60116}, -- Reins of the Armored Brown Bear
+[44223]={sid=60118,mt=0x01}, -- Reins of the Black War Bear
+[44224]={sid=60119,mt=0x01}, -- Reins of the Black War Bear
+[44225]={sid=60114,mt=0x01}, -- Reins of the Armored Brown Bear
+[44226]={sid=60116,mt=0x01}, -- Reins of the Armored Brown Bear
 -- item 44229 Loaned Wind Rider Reins
-[44230]={sid=59791}, -- Reins of the Wooly Mammoth
-[44231]={sid=59793}, -- Reins of the Wooly Mammoth
-[44234]={sid=61447}, -- Reins of the Traveler's Tundra Mammoth
-[44235]={sid=61425}, -- Reins of the Traveler's Tundra Mammoth
-[44413]={sid=60424}, -- Mekgineer's Chopper
-[44554]={sid=61451}, -- Flying Carpet
-[44558]={sid=61309}, -- Magnificent Flying Carpet
-[44689]={sid=61229}, -- Armored Snowy Gryphon
-[44690]={sid=61230}, -- Armored Blue Wind Rider
-[44707]={sid=61294}, -- Reins of the Green Proto-Drake
-[44842]={sid=61997}, -- Red Dragonhawk Mount
-[44843]={sid=61996}, -- Blue Dragonhawk Mount
-[45125]={sid=63232}, -- Stormwind Steed
-[45586]={sid=63636}, -- Ironforge Ram
-[45589]={sid=63638}, -- Gnomeregan Mechanostrider
-[45590]={sid=63639}, -- Exodar Elekk
-[45591]={sid=63637}, -- Darnassian Nightsaber
-[45592]={sid=63641}, -- Thunder Bluff Kodo
-[45593]={sid=63635}, -- Darkspear Raptor
-[45595]={sid=63640}, -- Orgrimmar Wolf
-[45596]={sid=63642}, -- Silvermoon Hawkstrider
-[45597]={sid=63643}, -- Forsaken Warhorse
-[45693]={sid=63796}, -- Mimiron's Head
-[45725]={sid=63844}, -- Argent Hippogryph
-[45801]={sid=63956}, -- Reins of the Ironbound Proto-Drake
-[45802]={sid=63963}, -- Reins of the Rusted Proto-Drake
-[46099]={sid=64658}, -- Horn of the Black Wolf
-[46100]={sid=64657}, -- White Kodo
-[46101]={sid=64656}, -- Blue Skeletal Warhorse
-[46102]={sid=64659}, -- Whistle of the Venomhide Ravasaur
-[46109]={sid=64731}, -- Sea Turtle
-[46171]={sid=65439}, -- Furious Gladiator's Frost Wyrm
-[46308]={sid=64977}, -- Black Skeletal Horse
-[46708]={sid=64927}, -- Deadly Gladiator's Frost Wyrm
-[46743]={sid=65644}, -- Swift Purple Raptor
-[46744]={sid=65638}, -- Swift Moonsaber
-[46745]={sid=65637}, -- Great Red Elekk
-[46746]={sid=65645}, -- White Skeletal Warhorse
-[46747]={sid=65642}, -- Turbostrider
-[46748]={sid=65643}, -- Swift Violet Ram
-[46749]={sid=65646}, -- Swift Burgundy Wolf
-[46750]={sid=65641}, -- Great Golden Kodo
-[46751]={sid=65639}, -- Swift Red Hawkstrider
-[46752]={sid=65640}, -- Swift Gray Steed
-[46813]={sid=66087}, -- Silver Covenant Hippogryph
-[46814]={sid=66088}, -- Sunreaver Dragonhawk
-[46815]={sid=66090}, -- Quel'dorei Steed
-[46816]={sid=66091}, -- Sunreaver Hawkstrider
-[47100]={sid=66847}, -- Reins of the Striped Dawnsaber
-[47101]={sid=66846}, -- Ochre Skeletal Warhorse
-[47179]={sid=66906}, -- Argent Charger / Paladin
-[47180]={sid=67466}, -- Argent Warhorse
-[47840]={sid=67336}, -- Relentless Gladiator's Frost Wyrm
-[49044]={sid=68057}, -- Swift Alliance Steed
-[49046]={sid=68056}, -- Swift Horde Wolf
-[49096]={sid=68187}, -- Crusader's White Warhorse
-[49098]={sid=68188}, -- Crusader's Black Warhorse
-[49282]={sid=51412}, -- Big Battle Bear
-[49283]={sid=42776}, -- Reins of the Spectral Tiger
-[49284]={sid=42777}, -- Reins of the Swift Spectral Tiger
-[49285]={sid=46197}, -- X-51 Nether-Rocket
-[49286]={sid=46199}, -- X-51 Nether-Rocket X-TREME
+[44230]={sid=59791,mt=0x01}, -- Reins of the Wooly Mammoth
+[44231]={sid=59793,mt=0x01}, -- Reins of the Wooly Mammoth
+[44234]={sid=61447,mt=0x01}, -- Reins of the Traveler's Tundra Mammoth
+[44235]={sid=61425,mt=0x01}, -- Reins of the Traveler's Tundra Mammoth
+[44413]={sid=60424,mt=0x02}, -- Mekgineer's Chopper
+[44554]={sid=61451,mt=0x02}, -- Flying Carpet
+[44558]={sid=61309,mt=0x02}, -- Magnificent Flying Carpet
+[44689]={sid=61229,mt=0x02}, -- Armored Snowy Gryphon
+[44690]={sid=61230,mt=0x02}, -- Armored Blue Wind Rider
+[44707]={sid=61294,mt=0x02}, -- Reins of the Green Proto-Drake
+[44842]={sid=61997,mt=0x02}, -- Red Dragonhawk Mount
+[44843]={sid=61996,mt=0x02}, -- Blue Dragonhawk Mount
+[45125]={sid=63232,mt=0x01}, -- Stormwind Steed
+[45586]={sid=63636,mt=0x01}, -- Ironforge Ram
+[45589]={sid=63638,mt=0x01}, -- Gnomeregan Mechanostrider
+[45590]={sid=63639,mt=0x01}, -- Exodar Elekk
+[45591]={sid=63637,mt=0x01}, -- Darnassian Nightsaber
+[45592]={sid=63641,mt=0x01}, -- Thunder Bluff Kodo
+[45593]={sid=63635,mt=0x01}, -- Darkspear Raptor
+[45595]={sid=63640,mt=0x01}, -- Orgrimmar Wolf
+[45596]={sid=63642,mt=0x01}, -- Silvermoon Hawkstrider
+[45597]={sid=63643,mt=0x01}, -- Forsaken Warhorse
+[45693]={sid=63796,mt=0x02}, -- Mimiron's Head
+[45725]={sid=63844,mt=0x02}, -- Argent Hippogryph
+[45801]={sid=63956,mt=0x02}, -- Reins of the Ironbound Proto-Drake
+[45802]={sid=63963,mt=0x02}, -- Reins of the Rusted Proto-Drake
+[46099]={sid=64658,mt=0x01}, -- Horn of the Black Wolf
+[46100]={sid=64657,mt=0x01}, -- White Kodo
+[46101]={sid=64656,mt=0x01}, -- Blue Skeletal Warhorse
+[46102]={sid=64659,mt=0x01}, -- Whistle of the Venomhide Ravasaur
+[46109]={sid=64731,mt=0x08}, -- Sea Turtle
+[46171]={sid=65439,mt=0x02}, -- Furious Gladiator's Frost Wyrm
+[46308]={sid=64977,mt=0x01}, -- Black Skeletal Horse
+[46708]={sid=64927,mt=0x02}, -- Deadly Gladiator's Frost Wyrm
+[46743]={sid=65644,mt=0x01}, -- Swift Purple Raptor
+[46744]={sid=65638,mt=0x01}, -- Swift Moonsaber
+[46745]={sid=65637,mt=0x01}, -- Great Red Elekk
+[46746]={sid=65645,mt=0x01}, -- White Skeletal Warhorse
+[46747]={sid=65642,mt=0x01}, -- Turbostrider
+[46748]={sid=65643,mt=0x01}, -- Swift Violet Ram
+[46749]={sid=65646,mt=0x01}, -- Swift Burgundy Wolf
+[46750]={sid=65641,mt=0x01}, -- Great Golden Kodo
+[46751]={sid=65639,mt=0x01}, -- Swift Red Hawkstrider
+[46752]={sid=65640,mt=0x01}, -- Swift Gray Steed
+[46813]={sid=66087,mt=0x02}, -- Silver Covenant Hippogryph
+[46814]={sid=66088,mt=0x02}, -- Sunreaver Dragonhawk
+[46815]={sid=66090,mt=0x01}, -- Quel'dorei Steed
+[46816]={sid=66091,mt=0x01}, -- Sunreaver Hawkstrider
+[47100]={sid=66847,mt=0x01}, -- Reins of the Striped Dawnsaber
+[47101]={sid=66846,mt=0x01}, -- Ochre Skeletal Warhorse
+[47179]={sid=66906,mt=0x01}, -- Argent Charger / Paladin
+[47180]={sid=67466,mt=0x01}, -- Argent Warhorse
+[47840]={sid=67336,mt=0x02}, -- Relentless Gladiator's Frost Wyrm
+[49044]={sid=68057,mt=0x01}, -- Swift Alliance Steed
+[49046]={sid=68056,mt=0x01}, -- Swift Horde Wolf
+[49096]={sid=68187,mt=0x01}, -- Crusader's White Warhorse
+[49098]={sid=68188,mt=0x01}, -- Crusader's Black Warhorse
+[49282]={sid=51412,mt=0x01}, -- Big Battle Bear
+[49283]={sid=42776,mt=0x01}, -- Reins of the Spectral Tiger
+[49284]={sid=42777,mt=0x01}, -- Reins of the Swift Spectral Tiger
+[49285]={sid=46197,mt=0x02}, -- X-51 Nether-Rocket
+[49286]={sid=46199,mt=0x02}, -- X-51 Nether-Rocket X-TREME
 -- item 49288 Little Ivory Raptor Whistle
 -- item 49289 Little White Stallion Bridle
-[49290]={sid=65917}, -- Magic Rooster Egg / Magic Rooster
-[49636]={sid=69395}, -- Reins of the Onyxian Drake
-[50250]={sid=71342}, -- Big Love Rocket
-[50435]={sid=71810}, -- Wrathful Gladiator's Frost Wyrm
-[50818]={sid=72286}, -- Invincible's Reins
-[51954]={sid=72808}, -- Reins of the Bloodbathed Frostbrood Vanquisher
-[51955]={sid=72807}, -- Reins of the Icebound Frostbrood Vanquisher
-[52200]={sid=73313}, -- Reins of the Crimson Deathcharger
-[54068]={sid=74918}, -- Wooly White Rhino
-[54069]={sid=74856}, -- Blazing Hippogryph
-[54465]={sid=75207,r={zone = "VASHJIR,KELPTHAR_FOREST,SHIMMERING_EXPANSE,ABYSSAL_DEPTHS"}}, -- Abyssal Seahorse
-[54797]={sid=75596}, -- Frosty Flying Carpet
-[54811]={sid=75614}, -- Celestial Steed
-[54860]={sid=75973}, -- X-53 Touring Rocket
-[60954]={sid=84751}, -- Fossilized Raptor
-[62298]={sid=90621}, -- Reins of the Golden King
-[62461]={sid=87090}, -- Goblin Trike Key
-[62462]={sid=87091}, -- Goblin Turbo-Trike Key
-[62900]={sid=88331}, -- Reins of the Volcanic Stone Drake
-[62901]={sid=88335}, -- Reins of the Drake of the East Wind
-[63039]={sid=88741}, -- Reins of the Drake of the West Wind
-[63040]={sid=88742}, -- Reins of the Drake of the North Wind
-[63041]={sid=88744}, -- Reins of the Drake of the South Wind
-[63042]={sid=88718}, -- Reins of the Phosphorescent Stone Drake
-[63043]={sid=88746}, -- Reins of the Vitreous Stone Drake
-[63044]={sid=88748}, -- Reins of the Brown Riding Camel
-[63045]={sid=88749}, -- Reins of the Tan Riding Camel
-[63046]={sid=88750}, -- Reins of the Grey Riding Camel
-[63125]={sid=88990}, -- Reins of the Dark Phoenix
-[64883]={sid=92155}, -- Scepter of Azj'Aqir / Ultramarine Qiraji Battle Tank
-[64998]={sid=92231}, -- Reins of the Spectral Steed
-[64999]={sid=92232}, -- Reins of the Spectral Wolf
-[65356]={sid=88741}, -- Reins of the Drake of the West Wind
-[65891]={sid=93326}, -- Vial of the Sands / Sandstone Drake
-[67107]={sid=93644}, -- Reins of the Kron'Kar Annihilator
-[67151]={sid=98718}, -- Reins of Poseidus / Subdued Seahorse
-[68008]={sid=93623}, -- Mottled Drake
-[68823]={sid=96491}, -- Armored Razzashi Raptor
-[68824]={sid=96499}, -- Swift Zulian Panther
-[68825]={sid=96503}, -- Amani Dragonhawk
-[69213]={sid=97359}, -- Flameward Hippogryph
-[69224]={sid=97493}, -- Smoldering Egg of Millagazor / Pureblood Fire Hawk
-[69226]={sid=97501}, -- Green Fire Hawk Mount / Green Fire Hawk
-[69228]={sid=97581}, -- Savage Raptor
-[69230]={sid=97560}, -- Corrupted Egg of Millagazor / Corrupted Fire Hawk
-[69747]={sid=98204}, -- Amani Battle Bear
-[69846]={sid=98727}, -- Winged Guardian
-[70909]={sid=100332}, -- Vicious War Steed
-[70910]={sid=100333}, -- Vicious War Wolf
-[71339]={sid=101282}, -- Vicious Gladiator's Twilight Drake
-[71665]={sid=101542}, -- Flametalon of Alysrazor
-[71718]={sid=101573}, -- Swift Shorestrider
-[71954]={sid=101821}, -- Ruthless Gladiator's Twilight Drake
-[72140]={sid=102346}, -- Swift Forest Strider
-[72146]={sid=102350}, -- Swift Lovebird
-[72575]={sid=102488}, -- White Riding Camel
-[72582]={sid=102514}, -- Corrupted Hippogryph
-[72582]={sid=102514}, -- Corrupted Hippogryph
-[73766]={sid=103081}, -- Darkmoon Dancing Bear
-[73838]={sid=103195}, -- Mountain Horse
-[73839]={sid=103196}, -- Swift Mountain Horse
-[74269]={sid=74856}, -- Blazing Hippogryph
-[76755]={sid=107203}, -- Tyrael's Charger
-[76889]={sid=107516}, -- Spectral Gryphon
-[76902]={sid=107517}, -- Spectral Wind Rider
-[77067]={sid=107842}, -- Reins of the Blazing Drake
-[77068]={sid=107844}, -- Reins of the Twilight Harbinger
-[77069]={sid=107845}, -- Life-Binder's Handmaiden
-[78919]={sid=110039}, -- Experiment 12-B
-[78924]={sid=110051}, -- Heart of the Aspects
-[79771]={sid=113120}, -- Feldrake
-[79802]={sid=113199}, -- Reins of the Jade Cloud Serpent
-[81354]={sid=118089}, -- Reins of the Azure Water Strider
-[81559]={sid=118737}, -- Pandaren Kite String
-[82453]={sid=120043}, -- Jeweled Onyx Panther
-[82765]={sid=120395}, -- Reins of the Green Dragon Turtle
-[82811]={sid=120822}, -- Reins of the Great Red Dragon Turtle
-[83086]={sid=121820}, -- Heart of the Nightwing / Obsidian Nightwing
-[83087]={sid=121838}, -- Ruby Panther
-[83088]={sid=121837}, -- Jade Panther
-[83089]={sid=121839}, -- Sunstone Panther
-[83090]={sid=121836}, -- Sapphire Panther
-[84101]={sid=122708}, -- Reins of the Grand Expedition Yak
-[84728]={sid=123160}, -- Reins of the Crimson Riding Crane
-[84753]={sid=123182}, -- Reins of the White Riding Yak
-[85262]={sid=123886}, -- Reins of the Amber Scorpion
-[85429]={sid=123993}, -- Reins of the Golden Cloud Serpent
-[85430]={sid=123992}, -- Reins of the Azure Cloud Serpent
-[85666]={sid=124408}, -- Reins of the Thundering Jade Cloud Serpent
-[85785]={sid=124550}, -- Cataclysmic Gladiator's Twilight Drake
-[85870]={sid=124659}, -- Imperial Quilen
-[87250]={sid=126507}, -- Depleted-Kyparium Rocket
-[87251]={sid=126508}, -- Geosynchronous World Spinner
-[87768]={sid=127154}, -- Reins of the Onyx Cloud Serpent
-[87769]={sid=127156}, -- Reins of the Crimson Cloud Serpent
-[87771]={sid=127158}, -- Reins of the Heavenly Onyx Cloud Serpent
-[87773]={sid=127161}, -- Reins of the Heavenly Crimson Cloud Serpent
-[87774]={sid=127164}, -- Reins of the Heavenly Golden Cloud Serpent
-[87775]={sid=127165}, -- Reins of the Heavenly Jade Cloud Serpent
-[87776]={sid=127169}, -- Reins of the Heavenly Azure Cloud Serpent
-[87777]={sid=127170}, -- Reins of the Astral Cloud Serpent
-[87781]={sid=127174}, -- Reins of the Azure Riding Crane
-[87782]={sid=127176}, -- Reins of the Golden Riding Crane
-[87783]={sid=127177}, -- Reins of the Regal Riding Crane
-[87784]={sid=127178}, -- Jungle Riding Crane
-[87785]={sid=127180}, -- Reins of the Albino Riding Crane
-[87786]={sid=127209}, -- Reins of the Black Riding Yak
-[87787]={sid=127213}, -- Reins of the Brown Riding Yak
-[87788]={sid=127216}, -- Reins of the Grey Riding Yak
-[87789]={sid=127220}, -- Reins of the Blonde Riding Yak
-[87791]={sid=127271}, -- Reins of the Crimson Water Strider
-[87792]={sid=127272}, -- Reins of the Orange Water Strider
-[87793]={sid=127274}, -- Reins of the Jade Water Strider
-[87794]={sid=127278}, -- Reins of the Golden Water Strider
-[87795]={sid=127286}, -- Reins of the Black Dragon Turtle
-[87796]={sid=127287}, -- Reins of the Blue Dragon Turtle
-[87797]={sid=127288}, -- Reins of the Brown Dragon Turtle
-[87799]={sid=127289}, -- Reins of the Purple Dragon Turtle
-[87800]={sid=127290}, -- Reins of the Red Dragon Turtle
-[87801]={sid=127293}, -- Reins of the Great Green Dragon Turtle
-[87802]={sid=127295}, -- Reins of the Great Black Dragon Turtle
-[87803]={sid=127302}, -- Reins of the Great Blue Dragon Turtle
-[87804]={sid=127308}, -- Reins of the Great Brown Dragon Turtle
-[87805]={sid=127310}, -- Reins of the Great Purple Dragon Turtle
-[89154]={sid=129552}, -- Reins of the Crimson Pandaren Phoenix
-[89304]={sid=129918}, -- Reins of the Thundering August Cloud Serpent
-[89305]={sid=129932}, -- Reins of the Green Shado-Pan Riding Tiger
-[89306]={sid=129935}, -- Reins of the Red Shado-Pan Riding Tiger
-[89307]={sid=129934}, -- Reins of the Blue Shado-Pan Riding Tiger
-[89362]={sid=130086}, -- Reins of the Brown Riding Goat
-[89363]={sid=130092}, -- Disc of the Red Flying Cloud
-[89390]={sid=130137}, -- Reins of the White Riding Goat
-[89391]={sid=130138}, -- Reins of the Black Riding Goat
-[89783]={sid=130965}, -- Son of Galleon's Saddle
-[89785]={sid=130985}, -- Pandaren Kite String
-[90655]={sid=132036}, -- Reins of the Thundering Ruby Cloud Serpent
-[90710]={sid=132117}, -- Reins of the Ashen Pandaren Phoenix
-[90711]={sid=132118}, -- Reins of the Emerald Pandaren Phoenix
-[90712]={sid=132119}, -- Reins of the Violet Pandaren Phoenix
-[91004]={sid=120395}, -- Reins of the Green Dragon Turtle
-[91005]={sid=127288}, -- Reins of the Brown Dragon Turtle
-[91006]={sid=127289}, -- Reins of the Purple Dragon Turtle
-[91007]={sid=127290}, -- Reins of the Red Dragon Turtle
-[91008]={sid=127286}, -- Reins of the Black Dragon Turtle
-[91009]={sid=127287}, -- Reins of the Blue Dragon Turtle
-[91010]={sid=120822}, -- Reins of the Great Red Dragon Turtle
-[91011]={sid=127295}, -- Reins of the Great Black Dragon Turtle
-[91012]={sid=127293}, -- Reins of the Great Green Dragon Turtle
-[91013]={sid=127302}, -- Reins of the Great Blue Dragon Turtle
-[91014]={sid=127308}, -- Reins of the Great Brown Dragon Turtle
-[91015]={sid=127310}, -- Reins of the Great Purple Dragon Turtle
-[91016]={sid=120822}, -- Reins of the Great Red Dragon Turtle
--- spell 5784 Felsteed
--- spell 13819 Warhorse
--- spell 23161 Dreadsteed
--- spell 23214 Charger
--- spell 33943 Flight Form
+[49290]={sid=65917,mt=0x01}, -- Magic Rooster Egg / Magic Rooster
+[49636]={sid=69395,mt=0x02}, -- Reins of the Onyxian Drake
+[50250]={sid=71342,mt=0x02}, -- Big Love Rocket
+[50435]={sid=71810,mt=0x02}, -- Wrathful Gladiator's Frost Wyrm
+[50818]={sid=72286,mt=0x02}, -- Invincible's Reins
+[51954]={sid=72808,mt=0x02}, -- Reins of the Bloodbathed Frostbrood Vanquisher
+[51955]={sid=72807,mt=0x02}, -- Reins of the Icebound Frostbrood Vanquisher
+[52200]={sid=73313,mt=0x01}, -- Reins of the Crimson Deathcharger
+[54068]={sid=74918,mt=0x01}, -- Wooly White Rhino
+[54069]={sid=74856,mt=0x02}, -- Blazing Hippogryph
+[54465]={sid=75207,mt=0x08,r={zone = "VASHJIR,KELPTHAR_FOREST,SHIMMERING_EXPANSE,ABYSSAL_DEPTHS"}}, -- Abyssal Seahorse
+[54797]={sid=75596,mt=0x02}, -- Frosty Flying Carpet
+[54811]={sid=75614,mt=0x02}, -- Celestial Steed
+[54860]={sid=75973,mt=0x02}, -- X-53 Touring Rocket
+[60954]={sid=84751,mt=0x01}, -- Fossilized Raptor
+[62298]={sid=90621,mt=0x01}, -- Reins of the Golden King
+[62461]={sid=87090,mt=0x01}, -- Goblin Trike Key
+[62462]={sid=87091,mt=0x01}, -- Goblin Turbo-Trike Key
+[62900]={sid=88331,mt=0x02}, -- Reins of the Volcanic Stone Drake
+[62901]={sid=88335,mt=0x02}, -- Reins of the Drake of the East Wind
+[63039]={sid=88741,mt=0x02}, -- Reins of the Drake of the West Wind
+[63040]={sid=88742,mt=0x02}, -- Reins of the Drake of the North Wind
+[63041]={sid=88744,mt=0x02}, -- Reins of the Drake of the South Wind
+[63042]={sid=88718,mt=0x02}, -- Reins of the Phosphorescent Stone Drake
+[63043]={sid=88746,mt=0x02}, -- Reins of the Vitreous Stone Drake
+[63044]={sid=88748,mt=0x01}, -- Reins of the Brown Riding Camel
+[63045]={sid=88749,mt=0x01}, -- Reins of the Tan Riding Camel
+[63046]={sid=88750,mt=0x01}, -- Reins of the Grey Riding Camel
+[63125]={sid=88990,mt=0x02}, -- Reins of the Dark Phoenix
+[64883]={sid=92155,mt=0x01}, -- Scepter of Azj'Aqir / Ultramarine Qiraji Battle Tank
+[64998]={sid=92231,mt=0x01}, -- Reins of the Spectral Steed
+[64999]={sid=92232,mt=0x01}, -- Reins of the Spectral Wolf
+[65356]={sid=88741,mt=0x02}, -- Reins of the Drake of the West Wind
+[65891]={sid=93326,mt=0x02}, -- Vial of the Sands / Sandstone Drake
+[67107]={sid=93644,mt=0x01}, -- Reins of the Kron'Kar Annihilator
+[67151]={sid=98718,mt=0x08}, -- Reins of Poseidus / Subdued Seahorse
+[68008]={sid=93623,mt=0x02}, -- Mottled Drake
+[68823]={sid=96491,mt=0x01}, -- Armored Razzashi Raptor
+[68824]={sid=96499,mt=0x01}, -- Swift Zulian Panther
+[68825]={sid=96503,mt=0x02}, -- Amani Dragonhawk
+[69213]={sid=97359,mt=0x02}, -- Flameward Hippogryph
+[69224]={sid=97493,mt=0x02}, -- Smoldering Egg of Millagazor / Pureblood Fire Hawk
+[69226]={sid=97501,mt=0x02}, -- Green Fire Hawk Mount / Green Fire Hawk
+[69228]={sid=97581,mt=0x01}, -- Savage Raptor
+[69230]={sid=97560,mt=0x02}, -- Corrupted Egg of Millagazor / Corrupted Fire Hawk
+[69747]={sid=98204,mt=0x01}, -- Amani Battle Bear
+[69846]={sid=98727,mt=0x02}, -- Winged Guardian
+[70909]={sid=100332,mt=0x01}, -- Vicious War Steed
+[70910]={sid=100333,mt=0x01}, -- Vicious War Wolf
+[71339]={sid=101282,mt=0x02}, -- Vicious Gladiator's Twilight Drake
+[71665]={sid=101542,mt=0x02}, -- Flametalon of Alysrazor
+[71718]={sid=101573,mt=0x01}, -- Swift Shorestrider
+[71954]={sid=101821,mt=0x02}, -- Ruthless Gladiator's Twilight Drake
+[72140]={sid=102346,mt=0x01}, -- Swift Forest Strider
+[72146]={sid=102350,mt=0x01}, -- Swift Lovebird
+[72575]={sid=102488,mt=0x01}, -- White Riding Camel
+[72582]={sid=102514,mt=0x02}, -- Corrupted Hippogryph
+[73766]={sid=103081,mt=0x01}, -- Darkmoon Dancing Bear
+[73838]={sid=103195,mt=0x01}, -- Mountain Horse
+[73839]={sid=103196,mt=0x01}, -- Swift Mountain Horse
+[74269]={sid=74856,mt=0x02}, -- Blazing Hippogryph
+[76755]={sid=107203,mt=0x02}, -- Tyrael's Charger
+[76889]={sid=107516,mt=0x02}, -- Spectral Gryphon
+[76902]={sid=107517,mt=0x02}, -- Spectral Wind Rider
+[77067]={sid=107842,mt=0x02}, -- Reins of the Blazing Drake
+[77068]={sid=107844,mt=0x02}, -- Reins of the Twilight Harbinger
+[77069]={sid=107845,mt=0x02}, -- Life-Binder's Handmaiden
+[78919]={sid=110039,mt=0x02}, -- Experiment 12-B
+[78924]={sid=110051,mt=0x02}, -- Heart of the Aspects
+[79771]={sid=113120,mt=0x02}, -- Feldrake
+[79802]={sid=113199,mt=0x02}, -- Reins of the Jade Cloud Serpent
+[81354]={sid=118089,mt=0x04}, -- Reins of the Azure Water Strider
+[81559]={sid=118737,mt=0x02}, -- Pandaren Kite String
+[82453]={sid=120043,mt=0x02}, -- Jeweled Onyx Panther
+[82765]={sid=120395,mt=0x01}, -- Reins of the Green Dragon Turtle
+[82811]={sid=120822,mt=0x01}, -- Reins of the Great Red Dragon Turtle
+[83086]={sid=121820,mt=0x02}, -- Heart of the Nightwing / Obsidian Nightwing
+[83087]={sid=121838,mt=0x02}, -- Ruby Panther
+[83088]={sid=121837,mt=0x02}, -- Jade Panther
+[83089]={sid=121839,mt=0x02}, -- Sunstone Panther
+[83090]={sid=121836,mt=0x02}, -- Sapphire Panther
+[84101]={sid=122708,mt=0x01}, -- Reins of the Grand Expedition Yak
+[84728]={sid=123160,mt=0x01}, -- Reins of the Crimson Riding Crane
+[84753]={sid=123182,mt=0x01}, -- Reins of the White Riding Yak
+[85262]={sid=123886,mt=0x01}, -- Reins of the Amber Scorpion
+[85429]={sid=123993,mt=0x02}, -- Reins of the Golden Cloud Serpent
+[85430]={sid=123992,mt=0x02}, -- Reins of the Azure Cloud Serpent
+[85666]={sid=124408,mt=0x02}, -- Reins of the Thundering Jade Cloud Serpent
+[85785]={sid=124550,mt=0x02}, -- Cataclysmic Gladiator's Twilight Drake
+[85870]={sid=124659,mt=0x02}, -- Imperial Quilen
+[87250]={sid=126507,mt=0x02}, -- Depleted-Kyparium Rocket
+[87251]={sid=126508,mt=0x02}, -- Geosynchronous World Spinner
+[87768]={sid=127154,mt=0x02}, -- Reins of the Onyx Cloud Serpent
+[87769]={sid=127156,mt=0x02}, -- Reins of the Crimson Cloud Serpent
+[87771]={sid=127158,mt=0x02}, -- Reins of the Heavenly Onyx Cloud Serpent
+[87773]={sid=127161,mt=0x02}, -- Reins of the Heavenly Crimson Cloud Serpent
+[87774]={sid=127164,mt=0x02}, -- Reins of the Heavenly Golden Cloud Serpent
+[87775]={sid=127165,mt=0x02}, -- Reins of the Heavenly Jade Cloud Serpent
+[87776]={sid=127169,mt=0x02}, -- Reins of the Heavenly Azure Cloud Serpent
+[87777]={sid=127170,mt=0x02}, -- Reins of the Astral Cloud Serpent
+[87781]={sid=127174,mt=0x01}, -- Reins of the Azure Riding Crane
+[87782]={sid=127176,mt=0x01}, -- Reins of the Golden Riding Crane
+[87783]={sid=127177,mt=0x01}, -- Reins of the Regal Riding Crane
+[87784]={sid=127178,mt=0x01}, -- Jungle Riding Crane
+[87785]={sid=127180,mt=0x01}, -- Reins of the Albino Riding Crane
+[87786]={sid=127209,mt=0x01}, -- Reins of the Black Riding Yak
+[87787]={sid=127213,mt=0x01}, -- Reins of the Brown Riding Yak
+[87788]={sid=127216,mt=0x01}, -- Reins of the Grey Riding Yak
+[87789]={sid=127220,mt=0x01}, -- Reins of the Blonde Riding Yak
+[87791]={sid=127271,mt=0x04}, -- Reins of the Crimson Water Strider
+[87792]={sid=127272,mt=0x04}, -- Reins of the Orange Water Strider
+[87793]={sid=127274,mt=0x04}, -- Reins of the Jade Water Strider
+[87794]={sid=127278,mt=0x04}, -- Reins of the Golden Water Strider
+[87795]={sid=127286,mt=0x01}, -- Reins of the Black Dragon Turtle
+[87796]={sid=127287,mt=0x01}, -- Reins of the Blue Dragon Turtle
+[87797]={sid=127288,mt=0x01}, -- Reins of the Brown Dragon Turtle
+[87799]={sid=127289,mt=0x01}, -- Reins of the Purple Dragon Turtle
+[87800]={sid=127290,mt=0x01}, -- Reins of the Red Dragon Turtle
+[87801]={sid=127293,mt=0x01}, -- Reins of the Great Green Dragon Turtle
+[87802]={sid=127295,mt=0x01}, -- Reins of the Great Black Dragon Turtle
+[87803]={sid=127302,mt=0x01}, -- Reins of the Great Blue Dragon Turtle
+[87804]={sid=127308,mt=0x01}, -- Reins of the Great Brown Dragon Turtle
+[87805]={sid=127310,mt=0x01}, -- Reins of the Great Purple Dragon Turtle
+[89154]={sid=129552,mt=0x02}, -- Reins of the Crimson Pandaren Phoenix
+[89304]={sid=129918,mt=0x02}, -- Reins of the Thundering August Cloud Serpent
+[89305]={sid=129932,mt=0x01}, -- Reins of the Green Shado-Pan Riding Tiger
+[89306]={sid=129935,mt=0x01}, -- Reins of the Red Shado-Pan Riding Tiger
+[89307]={sid=129934,mt=0x01}, -- Reins of the Blue Shado-Pan Riding Tiger
+[89362]={sid=130086,mt=0x01}, -- Reins of the Brown Riding Goat
+[89363]={sid=130092,mt=0x02}, -- Disc of the Red Flying Cloud
+[89390]={sid=130137,mt=0x01}, -- Reins of the White Riding Goat
+[89391]={sid=130138,mt=0x01}, -- Reins of the Black Riding Goat
+[89783]={sid=130965,mt=0x01}, -- Son of Galleon's Saddle
+[89785]={sid=130985,mt=0x02}, -- Pandaren Kite String
+[90655]={sid=132036,mt=0x02}, -- Reins of the Thundering Ruby Cloud Serpent
+[90710]={sid=132117,mt=0x02}, -- Reins of the Ashen Pandaren Phoenix
+[90711]={sid=132118,mt=0x02}, -- Reins of the Emerald Pandaren Phoenix
+[90712]={sid=132119,mt=0x02}, -- Reins of the Violet Pandaren Phoenix
+[91004]={sid=120395,mt=0x01}, -- Reins of the Green Dragon Turtle
+[91005]={sid=127288,mt=0x01}, -- Reins of the Brown Dragon Turtle
+[91006]={sid=127289,mt=0x01}, -- Reins of the Purple Dragon Turtle
+[91007]={sid=127290,mt=0x01}, -- Reins of the Red Dragon Turtle
+[91008]={sid=127286,mt=0x01}, -- Reins of the Black Dragon Turtle
+[91009]={sid=127287,mt=0x01}, -- Reins of the Blue Dragon Turtle
+[91010]={sid=120822,mt=0x01}, -- Reins of the Great Red Dragon Turtle
+[91011]={sid=127295,mt=0x01}, -- Reins of the Great Black Dragon Turtle
+[91012]={sid=127293,mt=0x01}, -- Reins of the Great Green Dragon Turtle
+[91013]={sid=127302,mt=0x01}, -- Reins of the Great Blue Dragon Turtle
+[91014]={sid=127308,mt=0x01}, -- Reins of the Great Brown Dragon Turtle
+[91015]={sid=127310,mt=0x01}, -- Reins of the Great Purple Dragon Turtle
+[91016]={sid=120822,mt=0x01}, -- Reins of the Great Red Dragon Turtle
+[108883]={sid=171844,mt=0x01}, -- Riding Harness / Dustmane Direwolf
+[115363]={sid=169952,mt=0x02}, -- Creeping Carpet
+[118676]={sid=175700,mt=0x02}, -- Reins of the Emerald Drake
+[116788]={sid=171845,mt=0x01}, -- Warlord's Deathwheel
+
+["S138424"]={sid=138424,mt=0x01}, -- Amber Primardial Direhorn
+["S148428"]={sid=148428,mt=0x01}, -- Ashhide Mushan Beast
+["S59572"]={sid=59572,mt=0x01}, -- Black Polar Bear
+["S138642"]={sid=138642,mt=0x01}, -- Black Primal Raptor
+["S138640"]={sid=138640,mt=0x01}, -- Bone-White Primal Raptor
+["S138643"]={sid=138643,mt=0x01}, -- Green Primal Raptor
+["S138641"]={sid=138641,mt=0x01}, -- Red Primal Raptor
+["S142641"]={sid=142641,mt=0x01}, -- Brawler's Burly Mushan Beast
+["S138423"]={sid=138423,mt=0x01}, -- Cobalt Primordial Direhorn
+["S138425"]={sid=138425,mt=0x01}, -- Slate Primordial Direhorn
+["S140250"]={sid=140250,mt=0x01}, -- Crimson Primordial Direhorn
+["S138426"]={sid=138426,mt=0x01}, -- Jade Primordial Direhorn
+["S102349"]={sid=102349,mt=0x01}, -- Swift Springstrider
+["S136471"]={sid=136471,mt=0x01}, -- Spawn of Horridon
+["S148417"]={sid=148417,mt=0x01}, -- Kor'kron Juggernaut
+["S148396"]={sid=148396,mt=0x01}, -- Kor'kron War Wolf
+
+["S142266"]={sid=142266,mt=0x02}, -- Armored Red Dragonhawk
+["S136400"]={sid=136400,mt=0x02}, -- Armored Skyscreamer
+["S139448"]={sid=139448,mt=0x02}, -- Clutch of Ji-Kun
+["S136505"]={sid=136505,mt=0x02}, -- Ghastly Charger
+["S135418"]={sid=135418,mt=0x02}, -- Grand Armored Wyvern
+["S136164"]={sid=136164,mt=0x02}, -- Grand Wyvern
+["S133023"]={sid=133023,mt=0x02}, -- Jade Pandaren Kite
+["S139442"]={sid=139442,mt=0x02}, -- Thundering Cobalt Cloud Serpent
+["S148476"]={sid=148476,mt=0x02}, -- Thundering Onyx Cloud Serpent
+["S148392"]={sid=148392,mt=0x02}, -- Spawn of Galakras
+["S134359"]={sid=134359,mt=0x02}, -- Sky Golem
+
+
+["S5784"]={sid=5784,mt=0x01}, -- Felsteed
+["S13819"]={sid=13819,mt=0x01}, -- Warhorse
+["S23161"]={sid=23161,mt=0x01}, -- Dreadsteed
+["S23214"]={sid=23214,mt=0x01}, -- Charger
+["S33943"]={sid=33943,mt=0x01}, -- Flight Form
 -- spell 34767 Summon Charger
 -- spell 34769 Summon Warhorse
 -- spell 40120 Swift Flight Form
@@ -469,6 +485,8 @@ local TempData = { -- temporary table for item to spell translations.
 -- spell 73629 Exarch's Elekk
 -- spell 73630 Great Exarch's Elekk
 -- spell 89520 Goblin Mini Hotrod
+
+-- pets (only the ones that come from items)
 [4401]={cid=2671}, -- Mechanical Squirrel Box / Mechanical Squirrel
 [8485]={cid=7385}, -- Cat Carrier (Bombay) / Bombay Cat
 [8486]={cid=7384}, -- Cat Carrier (Cornish Rex) / Cornish Rex Cat
@@ -733,6 +751,7 @@ local TempData = { -- temporary table for item to spell translations.
 [87526]={cid=64899}, -- Mechanical Pandaren Dragonling
 [88147]={cid=64232}, -- Singing Cricket Cage
 [88148]={cid=65314}, -- Jade Crane Chick
+[89367]={cid=66105}, -- Yu'lon Kite
 [89368]={cid=66104}, -- Chi-ji Kite
 [89587]={cid=61086}, -- Porcupette
 [89686]={cid=66450}, -- Jade Tentacle
@@ -747,18 +766,193 @@ local TempData = { -- temporary table for item to spell translations.
 -- spell 93461 Landro's Lil' XT
 -- spell 123212 Shore Crawler
 -- spell 123214 Gilnean Raven
+[90173]={cid=66950}, -- Pandaren Water Spirit
+[90177]={cid=66984}, -- Baneling
+[90897]={cid=48641}, -- Fox Kit
+[90900]={cid=67230}, -- Imperial Moth
+[90902]={cid=67233}, -- Imperial Silkworm
+[90953]={cid=68502}, -- Spectral Cub
+[91003]={cid=67319}, -- Darkmoon Hatchling
+[91031]={cid=67329}, -- Darkmoon Glowfly
+[91040]={cid=67332}, -- Darkmoon Eye
+[92707]={cid=68267}, -- Cinder Kitten
+[92798]={cid=68466}, -- Pandaren Fire Spirit
+[92799]={cid=68467}, -- Pandaren Air Spirit
+[92800]={cid=68468}, -- Pandaren Earth Spirit
+[93025]={cid=68601}, -- Clock'em
+[93029]={cid=68654}, -- Gluth's Bone / Stitched Pup
+[93030]={cid=68656}, -- Dusty Clutch of Eggs / Giant Bone Spider
+[93031]={cid=68655}, -- Mr. Bigglesworth
+[93032]={cid=68657}, -- Blighted Spore / Fungal Abomination
+[93033]={cid=68665}, -- Mark of Flame / Harbinger of Flame
+[93034]={cid=68664}, -- Blazing Rune / Corefire Imp
+[93035]={cid=68666}, -- Core of Hardened Ash / Ashstone Core
+[93036]={cid=68661}, -- Unscathed Egg / Untamed Hatchling
+[93037]={cid=68663}, -- Blackwing Banner / Death Talon Whelpguard
+[93038]={cid=68662}, -- Whistle of Chromatic Bone / Chrominius
+[93039]={cid=68660}, -- Viscidus Globule
+[93040]={cid=68659}, -- Anubisath Idol
+[93041]={cid=68658}, -- Jewel of Maddening Whispers / Mini Mindslayer
+[93669]={cid=69208}, -- Gusting Grimoire
+[94025]={cid=69649}, -- Red Panda
+[94124]={cid=69778}, -- Sunreaver Micro-Sentry
+[94125]={cid=69748}, -- Living Sandling
+[94126]={cid=69796}, -- Zandalari Kneebiter
+[94152]={cid=69820}, -- Son of Animus
+[94190]={cid=69848}, -- Spectral Porcupette
+[94208]={cid=69891}, -- Sunfur Panda
+[94209]={cid=69893}, -- Snowy Panda
+[94210]={cid=69892}, -- Mountain Panda
+[94573]={cid=70154}, -- Direhorn Runt
+[94574]={cid=70083}, -- Pygmy Direhorn
+[94595]={cid=70098}, -- Spawn of G'nathus
+[94835]={cid=70144}, -- Ji-Kun Hatchling
+[94903]={cid=70082}, -- Pierre
+[94932]={cid=70257}, -- Tiny Red Carp
+[94933]={cid=70258}, -- Tiny Blue Carp
+[94934]={cid=70259}, -- Tiny Green Carp
+[94935]={cid=70260}, -- Tiny White Carp
+[95422]={cid=70451}, -- Zandalari Anklerender
+[95423]={cid=70452}, -- Zandalari Footslasher
+[95424]={cid=70453}, -- Zandalari Toenibbler
+[95621]={cid=34587}, -- Warbot Ignition Key / Warbot
+[97548]={cid=71014}, -- Spiky Collar / Lil' Bad Wolf
+[97549]={cid=71015}, -- Instant Arcane Sanctum Security Kit / Menagerie Custodian
+[97550]={cid=71016}, -- Netherspace Portal-Stone / Netherspace Abyssal
+[97551]={cid=71033}, -- Satyr Charm / Fiendish Imp
+[97552]={cid=71017}, -- Shell of Tide-Calling / Tideskipper
+[97553]={cid=71018}, -- Tainted Core / Tainted Waveling
+[97554]={cid=71019}, -- Dripping Strider Egg / Coilfang Stalker
+[97555]={cid=71020}, -- Tiny Fel Engine Key / Pocket Reaver
+[97556]={cid=71021}, -- Crystal of the Void / Lesser Voidcaller
+[97557]={cid=71022}, -- Brilliant Phoenix Hawk Feather / Phoenix Hawk Hatchling
+[97558]={cid=71023}, -- Tito's Basket / Tito
+[97821]={cid=71159}, -- Gahz'rooki's Summoning Stone / Gahz'rooki
+[97959]={cid=71199}, -- Quivering Blob / Living Fluid
+[97960]={cid=71200}, -- Dark Quivering Blob / Viscous Horror
+[97961]={cid=71201}, -- Half-Empty Food Container / Filthling
+[98550]={cid=71488}, -- Blossoming Ancient
+[100905]={cid=71693}, -- Rascal-Bot
+[104156]={cid=73533}, -- Ashleaf Spriteling
+[104157]={cid=73534}, -- Azure Crane Chick
+[104158]={cid=73352}, -- Blackfuse Bombling
+[104202]={cid=73668}, -- Bonkers
+[106240]={cid=74402}, -- Alterac Brandy / Alterac Brew-Pup
+[116439]={cid=85872}, -- Blazing Cindercrawler
+[117354]={cid=86420}, -- Ancient Nest Guardian
+[118516]={cid=88807}, -- Argi
+[118599]={cid=83584}, -- Autumnal Sproutling
+[119148]={cid=85281}, -- Indentured Albino River Calf / Albino River Calf
+[119434]={cid=77021}, -- Albino Chimaeraling
+[119146]={cid=85014}, -- Bone Wasp
+[116403]={cid=85846}, -- Frightened Bush Chicken / Bush Chicken
+[102145]={cid=72462}, -- Chi-Chi, Hatchling of Chi-Ji
+[110721]={cid=79039}, -- Crazy Carrot
+[118106]={cid=86716}, -- Crimson Spore
+[116801]={cid=86061}, -- Cursed Birman
+[104160]={cid=73532}, -- Dandelion Frolicker
+[104161]={cid=73364}, -- Death Adder Hatchling
+[118709]={cid=88103}, -- Doom Bloom
+[115282]={cid=84885}, -- Draenei Micro Defender
+[119142]={cid=84885}, -- Draenei Micro Defender
+[109014]={cid=77137}, -- Dread Hatchling
+[104162]={cid=73350}, -- Droplet of Y'Shaarj
+[113216]={cid=82464}, -- Elekk Plushie
+[118921]={cid=88222}, -- Everbloom Peachick
+[119170]={cid=88490}, -- Eye of Observation
+[118578]={cid=87704}, -- Firewing
+[119149]={cid=83583}, -- Captured Forest Sproutling
+[117380]={cid=86422}, -- Frostwolf Ghostpup
+[119141]={cid=87111}, -- Frostwolf Pup
+[117564]={cid=85387}, -- Fruit Hunter
+[113623]={cid=83817}, -- Spectral Bell / Ghastly Kid
+[104163]={cid=73351}, -- Gooey Sha-ling
+[118517]={cid=88805}, -- Grommloc
+[104291]={cid=73730}, -- Swarmling of Gu'chi / Gu'chi Swarmling
+[104169]={cid=73359}, -- Gulp Froglet
+[104295]={cid=73732}, -- Harmonious Porcupette
+[118574]={cid=87669}, -- Hatespark the Tiny
+[119048]={cid=76873}, -- Hogs
+[118207]={cid=86879}, -- Hydraling
+[111660]={cid=77221}, -- Iron Starlette
+[104307]={cid=73738}, -- Jadefire Spirit
+[104164]={cid=73355}, -- Jademist Dancer
+[120051]={cid=88574}, -- Kaliri Hatchling
+[118597]={cid=83589}, -- Kelp Sproutling
+[117404]={cid=86445}, -- Land Shark
+[117528]={cid=86532}, -- Lanticore Spawnling
+[112057]={cid=80329}, -- Lifelike Mechanical Frostboar
+[103670]={cid=73011}, -- Lil' Bling
+[110684]={cid=78895}, -- Leftovers / Lil' Leftovers
+[116155]={cid=85710}, -- Lovebird Hatchling
+[101570]={cid=72160}, -- Moon Moon
+[101771]={cid=71942}, -- Xu-Fu, Cub of Xuen
+[102146]={cid=72464}, -- Zao, Calfling of Niuzao
+[102147]={cid=72463}, -- Yu'la, Broodling of Yu'lon
+[103637]={cid=73688}, -- Vengeful Porcupette
+[104159]={cid=73356}, -- Ruby Droplet
+[104165]={cid=73354}, -- Kovok
+[104166]={cid=73357}, -- Ominous Flame
+[104167]={cid=73367}, -- Skunky Alemental
+[104168]={cid=73366}, -- Spineclaw Crab
+[104317]={cid=73741}, -- Rotten Helper Box / Rotten Little Helper
+[104332]={cid=73809}, -- Sky Lantern
+[104333]={cid=73809}, -- Sky Lantern
+[106244]={cid=74405}, -- Murkalot's Flail / Murkalot
+[106256]={cid=74413}, -- Treasure Goblin's Pack / Treasure Goblin
+[111402]={cid=79410}, -- Mechanical Axebeak
+[111866]={cid=80101}, -- Royal Peacock
+[112699]={cid=81431}, -- Teroclaw Hatchling
+[113554]={cid=83562}, -- Zomstrok
+[113558]={cid=78421}, -- Weebomination
+[114834]={cid=84330}, -- Meadowstomper Calf
+[114919]={cid=84441}, -- Sea Calf
+[115301]={cid=84915}, -- Molten Corgi
+[115483]={cid=85284}, -- Sky-Bo
+[116064]={cid=85527}, -- Syd the Squid
+[116258]={cid=85773}, -- Mystical Spring Bouquet
+[116402]={cid=85231}, -- Stonegrinder
+[116756]={cid=85994}, -- Stout Alemental
+[116804]={cid=86067}, -- Widget the Departed
+[116815]={cid=86081}, -- Netherspawn, Spawn of Netherspawn
+[118101]={cid=86715}, -- Zangar Spore
+[118104]={cid=86717}, -- Umbrafen Spore
+[118105]={cid=86718}, -- Seaborne Spore
+[118518]={cid=88814}, -- ZZ02 / Unused
+[118577]={cid=87705}, -- Stormwing
+[118595]={cid=83594}, -- Nightshade Sproutling
+[118596]={cid=83592}, -- Sassy Sproutling
+[118598]={cid=83588}, -- Sun Sproutling
+[118600]={cid=83583}, -- Forest Sproutling
+[118919]={cid=85667}, -- Red Goren Egg / Ore Eater
+[118923]={cid=88225}, -- Sentinel's Companion
+[119112]={cid=88401}, -- Son of Sethe
+[119143]={cid=88401}, -- Son of Sethe
+[119150]={cid=88452}, -- Sky Fry
+[119328]={cid=84853}, -- Soul of the Forge
+[119431]={cid=88692}, -- Servant of Demidos
+[119467]={cid=88300}, -- Puddle Terror
+[119468]={cid=88367}, -- Sunfire Kaliri
+[120050]={cid=88573}, -- Veilwatcher Hatchling
+[120121]={cid=88830}, -- Trunks
+[120309]={cid=87257}, -- Glass of Warm Milk / Pygmy Cow
+[118675]={cid=7546}, -- Time-Locked Box / Bronze Whelpling
+-- pets up to patch 6.0.2
+
+[118106]={cid=86716}, -- Crimson Spore
+[118104]={cid=86717}, -- Umbrafen Spore
 
 }
 
 
 -- build pets and mounts array
 
-local function importMountCrossRefTable( )
+local function importCompanionCrossRefTable( )
 	
 	if not TempData then return end
 	
 	local key1, key2, speciesID
-	local mountData = ArkInventory.Global.Companion.MOUNT
+	local wipe = true
 	
 	for item, data in pairs( TempData ) do
 		
@@ -769,11 +963,10 @@ local function importMountCrossRefTable( )
 			
 			if ( data.cid ) and ( type( data.cid ) == "number" ) then
 				
-				speciesID = ArkInventory.Lib.Pet:GetSpeciesIDForCreatureID( data.cid )
+				speciesID = ArkInventory.PetJournal.GetSpeciesIDForCreatureID( data.cid )
 				if speciesID then
 					
 					key2 = string.format( "battlepet:%s", speciesID )
-					
 					if not ArkInventory.Const.ItemCrossReference[key1] then
 						ArkInventory.Const.ItemCrossReference[key1] = { }
 					end
@@ -784,9 +977,12 @@ local function importMountCrossRefTable( )
 					end
 					ArkInventory.Const.ItemCrossReference[key2][key1] = true
 					
+					data.cid = nil
+					
 				else
 					
 					--ArkInventory.Output( "unknown critter id ", data.cid )
+					wipe = false
 					
 				end
 				
@@ -806,64 +1002,32 @@ local function importMountCrossRefTable( )
 				end
 				ArkInventory.Const.ItemCrossReference[key2][key1] = true
 				
+				if data.mt then
+					-- store mount flag values
+					ArkInventory.MountJournal.StoreMountType( data.sid, data.mt )
+				end
+				
+				data.sid = nil
+				
 			end
 			
 		end
 		
-		-- add restrictions (mount spells only)
-		if data.sid and data.r then
-			if ( not mountData[data.sid] ) then
-				mountData[data.sid] = { }
-			end
-			mountData[data.sid].r = data.r
-		end
 		
 	end
 	
-	TempData = nil
+	if wipe then
+		table.wipe( TempData )
+		TempData = nil
+	end
 	
 end
 
 
-function ArkInventory.MountDataUpdate( )
+function ArkInventory.CompanionDataUpdate( )
 	
-	if not ArkInventory.TranslationsLoaded then return end
+	importCompanionCrossRefTable( )
 	
-	importMountCrossRefTable( )
-	
-	local mountData = ArkInventory.Global.Companion.MOUNT
-	local fixed = { }
-	
-	-- re-apply user corrections
-	for _, mountType in pairs( ArkInventory.Const.MountTypes ) do
-		
-		for spellID, newValue in pairs( ArkInventory.db.global.option.ldb.mounts[mountType].corrected ) do
-			
-			if not mountData[spellID] then
-				-- mising (corrected) companion from alt
-				mountData[spellID] = { unknown = true, capable = { }, usable = { } }
-			end
-			
-			mountData[spellID].corrected = true
-			mountData[spellID].usable[mountType] = newValue
-			
-			if ( not not mountData[spellID].capable[mountType] ) == ( not not newValue ) then
-				-- looks like we fixed the code, get rid of the user correction later on
-				fixed[spellID] = mountType
-			end
-			
-		end
-		
-	end
-	
-	-- remove any user corrections for things we've fixed
-	for spellID, mountType in pairs( fixed ) do
-		--ArkInventory.Output( "fixed ", mountType, " (", spellID, ") has been removed from user corrections" )
-		ArkInventory.db.global.option.ldb.mounts[mountType].corrected[spellID] = nil
-		mountData[spellID].corrected = nil
-	end
-	
-	table.wipe( fixed )
-	fixed = nil
+	ArkInventory.MountJournal.ApplyUserCorrections( )
 	
 end

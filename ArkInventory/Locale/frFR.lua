@@ -1,4 +1,4 @@
-local L = LibStub( "AceLocale-3.0" ):NewLocale( "ArkInventory", "frFR" )
+﻿local L = LibStub( "AceLocale-3.0" ):NewLocale( "ArkInventory", "frFR" )
 if not L then return end
 
 -- post updated translations at http://groups.google.com/group/wow-arkinventory (modify this file and include as an attachment)
@@ -36,7 +36,6 @@ if not L then return end
 	
 --	location names
 --	L["LOCATION_ACCOUNT"] = ""
-	L["LOCATION_BANK"] = "Banque"
 	L["LOCATION_WEARING"] = "Vêtements"
 	
 	
@@ -52,7 +51,7 @@ if not L then return end
 	
 	
 --	restack
-	L["RESTACK"] = "Empiler les objets"
+--	L["RESTACK"] = "Empiler les objets"
 	L["RESTACK_TEXT"] = "Empiler les objets pouvant l'être et essai de remplir les emplacements vide des sacs spéciaux"
 	L["RESTACK_FAIL_WAIT"] = "Une opération d'empilage est en cours, veuillez attendre qu'elle se termine"
 	L["RESTACK_FAIL_ACCESS"] = "Vous n'avez pas l'autorisation pour empiler le casier %2$s de la %1$s"
@@ -98,6 +97,7 @@ if not L then return end
 	L["STATUS_NAME_TOKEN"] = "Insigne"
 --	L["STATUS_NAME_TACKLE"] = ""
 --	L["STATUS_NAME_COOKING"] = ""
+--	L["STATUS_NAME_TOY"] = ""
 	
 	
 --	main menu
@@ -219,32 +219,42 @@ if not L then return end
 --	L["CONFIG_SYSTEM_TOOLTIP_CLASSCOLOUR_TEXT"] = ""
 	L["CONFIG_SYSTEM_TOOLTIP_SELF_ONLY"] = "Personnage seul"
 	L["CONFIG_SYSTEM_TOOLTIP_SELF_ONLY_TEXT"] = "Montrer la quantité d'objets seulement pour ce personnage"
+--	L["CONFIG_SYSTEM_TOOLTIP_HIGHLIGHT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_HIGHLIGHT_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_FACTION_ONLY"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_FACTION_ONLY_TEXT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_REALM_ONLY"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_REALM_ONLY_TEXT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_CROSSREALM"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_CROSSREALM_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_VAULT_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_SOURCE_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_DESCRIPTION_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_CUSTOM_ENABLE_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_MOUSEOVER_ENABLE_TEXT"] = ""
 	
-	L["CONFIG_SYSTEM_BUGFIX"] = "Corriger/Contourner le bogue"
-	L["CONFIG_SYSTEM_BUGFIX_TEXT"] = "Activer le code pour corriger ou contourner ce problème"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL"] = "FrameLevel"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_TEXT"] = "Un bogue dans l'API CreateFrame de Blizzard peut faire apparaitre le fond des cadres devant l'avant-plan, les fenêtres d'aide des objets n'apparaissent pas et il est impossible de cliquer sur quelque chose dans la fenêtre."
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_TEXT"] = "Définir comment sont afficher les alertes de la correction du bogue de FrameLevel"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE0"] = "Désactivée"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE0_TEXT"] = "Les alertes de la correction du bogue ne seront pas affichées"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE1"] = "Courte"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE1_TEXT"] = "Afficher un court texte des alertes de la correction du bogue"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE2"] = "Complète"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE2_TEXT"] = "Afficher le texte complet des alertes de la correction du bogue"
---	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG"] = ""
---	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG_TEXT"] = ""
---	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG_ALERT_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND"] = ""
+	L["CONFIG_SYSTEM_WORKAROUND_TEXT"] = "Activer le code pour corriger ou contourner ce problème"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL"] = "FrameLevel"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_TEXT"] = "Un bogue dans l'API CreateFrame de Blizzard peut faire apparaitre le fond des cadres devant l'avant-plan, les fenêtres d'aide des objets n'apparaissent pas et il est impossible de cliquer sur quelque chose dans la fenêtre."
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_TEXT"] = "Définir comment sont afficher les alertes de la correction du bogue de FrameLevel"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE0"] = "Désactivée"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE0_TEXT"] = "Les alertes de la correction du bogue ne seront pas affichées"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE1"] = "Courte"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE1_TEXT"] = "Afficher un court texte des alertes de la correction du bogue"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE2"] = "Complète"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE2_TEXT"] = "Afficher le texte complet des alertes de la correction du bogue"
+--	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG_ALERT_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD_ENABLED_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD_COUNT_TEXT"] = ""
 --	L["BUGFIX_TAINTED_ALERT_MOUSEOVER_TEXT"] = ""
 --	L["BUGFIX_TAINTED_ALERT_OPEN_TEXT"] = ""
 	
 --	L["CONFIG_SYSTEM_MESSAGES"] = ""
+--	L["CONFIG_SYSTEM_MESSAGES_RESTACK_TEXT"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_INTERIM"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_INTERIM_TEXT"] = ""
@@ -252,6 +262,9 @@ if not L then return end
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_FINAL_TEXT"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT_TEXT"] = ""
+	
+--	L["CONFIG_SYSTEM_TIMERS"] = ""
+--	L["CONFIG_SYSTEM_TIMERS_TEXT"] = ""
 	
 	
 --	configuration options > auto
@@ -264,6 +277,7 @@ if not L then return end
 	L["CONFIG_AUTO_OPEN_MERCHANT"] = "un marchand/vendeur"
 	L["CONFIG_AUTO_OPEN_TRADE"] = "la fenêtre d'échange"
 	L["CONFIG_AUTO_OPEN_AUCTION"] = "un hotel des ventes"
+--	L["CONFIG_AUTO_OPEN_VOID"] = ""
 	
 	L["CONFIG_AUTO_CLOSE"] = "Fermer le %2$s %1$s quand vous fermez %3$s"
 	L["CONFIG_AUTO_CLOSE_BANK"] = "la banque"
@@ -272,6 +286,7 @@ if not L then return end
 	L["CONFIG_AUTO_CLOSE_MERCHANT"] = "un marchand/vendeur"
 	L["CONFIG_AUTO_CLOSE_TRADE"] = "la fenêtre d'échange"
 	L["CONFIG_AUTO_CLOSE_AUCTION"] = "un hotel des ventes"
+--	L["CONFIG_AUTO_CLOSE_VOID"] = ""
 	L["CONFIG_AUTO_CLOSE_COMBAT"] = "entrez en combat"
 	
 	
@@ -304,6 +319,7 @@ if not L then return end
 	L["CONFIG_SETTINGS_FRAME_SCALE_TEXT"] = "Définir l'échelle. Agrandie ou diminue la taille de la fenêtre"
 	L["CONFIG_SETTINGS_FRAME_PADDING_TEXT"] = "Définir l'espace entre le bord de la fenêtre et les groupes"
 	L["CONFIG_SETTINGS_FRAME_WIDTH_TEXT"] = "Définir le nombre maximum d'objets à afficher sur une ligne"
+--	L["CONFIG_SETTINGS_FRAME_HEIGHT_TEXT"] = ""
 	L["CONFIG_SETTINGS_FRAME_BACKGROUND_COLOUR_TEXT"] = "Définir la couleur de fond de la fenêtre principale"
 	L["CONFIG_SETTINGS_FRAME_BORDER_SHOW_TEXT"] = "Afficher une bordure autour de la fenêtre principale"
 	L["CONFIG_SETTINGS_FRAME_BORDER_STYLE_TEXT"] = "Définir le style de la bordure de la fenêtre principale"
@@ -341,7 +357,6 @@ if not L then return end
 --	L["CONFIG_SETTINGS_BARS_NAME_HEIGHT_TEXT"] = ""
 --	L["CONFIG_SETTINGS_BARS_NAME_ANCHOR_TEXT"] = ""
 	
-	L["CONFIG_SETTINGS_ITEMS"] = "Objets"
 	L["CONFIG_SETTINGS_ITEMS_PADDING_TEXT"] = "Définir le nombre d'espace entre les emplacements d'objet"
 	L["CONFIG_SETTINGS_ITEMS_HIDDEN"] = "Montrer caché"
 	L["CONFIG_SETTINGS_ITEMS_HIDDEN_TEXT"] = "Montrer les catégories cachées"
@@ -385,52 +400,57 @@ if not L then return end
 	L["CONFIG_SETTINGS_EMPTY_COLOUR"] = "Couleurs d'emplacement"
 	L["CONFIG_SETTINGS_EMPTY_COLOUR_TEXT"] = "Définir la couleur de bordure et de fond des emplacements %1$s"
 --	L["CONFIG_SETTINGS_EMPTY_STATUS"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_FIRST"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = ""
 	
 	
 -- sorting
---	L["CONFIG_SORTMETHOD"] = ""
+--	L["CONFIG_SORTING"] = ""
 	
-	L["CONFIG_SORTMETHOD_SORT"] = "Tri"
+	L["CONFIG_SORTING_SORT"] = "Tri"
 	
-	L["CONFIG_SORTMETHOD_STYLE_BAGSLOT"] = "Sac / Emplacement"
-	L["CONFIG_SORTMETHOD_STYLE_BAGSLOT_TEXT"] = "Trier vos objets par sac et numéro d'emplacement"
-	L["CONFIG_SORTMETHOD_STYLE_USER"] = "Défini par l'utilisateur"
-	L["CONFIG_SORTMETHOD_STYLE_USER_TEXT"] = "Trier vos objets selon l'odre que vous avez défini"
-	L["CONFIG_SORTMETHOD_STYLE_TEXT"] = "Choisir comment vous voulez trier vos objets"
+	L["CONFIG_SORTING_METHOD_BAGSLOT"] = "Sac / Emplacement"
+	L["CONFIG_SORTING_METHOD_BAGSLOT_TEXT"] = "Trier vos objets par sac et numéro d'emplacement"
+	L["CONFIG_SORTING_METHOD_USER"] = "Défini par l'utilisateur"
+	L["CONFIG_SORTING_METHOD_USER_TEXT"] = "Trier vos objets selon l'odre que vous avez défini"
+	L["CONFIG_SORTING_METHOD_TEXT"] = "Choisir comment vous voulez trier vos objets"
 	
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME"] = "Nom d'objet"
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_TEXT"] = "Inclure le nom de l'objet dans le tri de l'inventaire"
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_REVERSE"] = "Ordre inversé des noms"
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_REVERSE_TEXT"] = "Utiliser l'ordre inverser des noms pour trier l'inventaire.\n\nex. Potion de Soins Majeure devient Majeure Soins de Potion"
-	L["CONFIG_SORTMETHOD_INCLUDE_QUALITY"] = "Rareté des objets"
-	L["CONFIG_SORTMETHOD_INCLUDE_QUALITY_TEXT"] = "Inclure la rareté des objets pour trier l'inventaire"
-	L["CONFIG_SORTMETHOD_INCLUDE_LOCATION"] = "Localisation d'équipement"
-	L["CONFIG_SORTMETHOD_INCLUDE_LOCATION_TEXT"] = "Inclure l'emplacement d'équipement des objets pour trier l'inventaire.\n\nNote : Affecte seulement les objets qui peuvent être équiper"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMTYPE"] = "Type et sous-type d'objet"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMTYPE_TEXT"] = "Inclure les type et sous-type des objets pour trier l'inventaire"
-	L["CONFIG_SORTMETHOD_INCLUDE_CATEGORY"] = "Catégorie d'objet"
-	L["CONFIG_SORTMETHOD_INCLUDE_CATEGORY_TEXT"] = "Inclure la catégorie des objets pour trier l'inventaire"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMUSELEVEL"] = "Niveau utilisable d'objet"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMUSELEVEL_TEXT"] = "Inclure le niveau utilisable des objets pour trier l'inventaire"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMSTATLEVEL"] = "Niveau statistique d'objet"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMSTATLEVEL_TEXT"] = "Inclure le niveau statistique des objets pour trier l'inventaire"
---	L["CONFIG_SORTMETHOD_INCLUDE_ITEMAGE"] = ""
---	L["CONFIG_SORTMETHOD_INCLUDE_ITEMAGE_TEXT"] = ""
-	L["CONFIG_SORTMETHOD_INCLUDE_VENDORPRICE"] = "Prix du vendeur"
-	L["CONFIG_SORTMETHOD_INCLUDE_VENDORPRICE_TEXT"] = "inclure le prix des vendeurs (par taille de pile) pour trier l'inventaire"
---	L["CONFIG_SORTMETHOD_INCLUDE_ID"] = ""
---	L["CONFIG_SORTMETHOD_INCLUDE_ID_TEXT"] = ""
+--	L["CONFIG_SORTING_BAG"] = ""
+--	L["CONFIG_SORTING_BAG_TEXT"] = ""
 	
-	L["CONFIG_SORTMETHOD_DIRECTION_TEXT"] = "Définir dans quel sens vous voulez trier vos objets"
-	L["CONFIG_SORTMETHOD_ORDER"] = "Ordre de tri"
-	L["CONFIG_SORTMETHOD_MOVE_UP_TEXT"] = "Déplacer %1$s vers le haut dans l'ordre de tri"
-	L["CONFIG_SORTMETHOD_MOVE_DOWN_TEXT"] = "Déplacer %1$s vers le bas dans l'ordre de tri"
-	L["CONFIG_SORTMETHOD_NOT_INCLUDED"] = "* Pas inclus actuellement dans le tri *"
+	L["CONFIG_SORTING_INCLUDE_NAME"] = "Nom d'objet"
+	L["CONFIG_SORTING_INCLUDE_NAME_TEXT"] = "Inclure le nom de l'objet dans le tri de l'inventaire"
+	L["CONFIG_SORTING_INCLUDE_NAME_REVERSE"] = "Ordre inversé des noms"
+	L["CONFIG_SORTING_INCLUDE_NAME_REVERSE_TEXT"] = "Utiliser l'ordre inverser des noms pour trier l'inventaire.\n\nex. Potion de Soins Majeure devient Majeure Soins de Potion"
+	L["CONFIG_SORTING_INCLUDE_QUALITY"] = "Rareté des objets"
+	L["CONFIG_SORTING_INCLUDE_QUALITY_TEXT"] = "Inclure la rareté des objets pour trier l'inventaire"
+	L["CONFIG_SORTING_INCLUDE_LOCATION"] = "Localisation d'équipement"
+	L["CONFIG_SORTING_INCLUDE_LOCATION_TEXT"] = "Inclure l'emplacement d'équipement des objets pour trier l'inventaire.\n\nNote : Affecte seulement les objets qui peuvent être équiper"
+	L["CONFIG_SORTING_INCLUDE_ITEMTYPE"] = "Type et sous-type d'objet"
+	L["CONFIG_SORTING_INCLUDE_ITEMTYPE_TEXT"] = "Inclure les type et sous-type des objets pour trier l'inventaire"
+	L["CONFIG_SORTING_INCLUDE_CATEGORY"] = "Catégorie d'objet"
+	L["CONFIG_SORTING_INCLUDE_CATEGORY_TEXT"] = "Inclure la catégorie des objets pour trier l'inventaire"
+	L["CONFIG_SORTING_INCLUDE_ITEMUSELEVEL"] = "Niveau utilisable d'objet"
+	L["CONFIG_SORTING_INCLUDE_ITEMUSELEVEL_TEXT"] = "Inclure le niveau utilisable des objets pour trier l'inventaire"
+	L["CONFIG_SORTING_INCLUDE_ITEMSTATLEVEL"] = "Niveau statistique d'objet"
+	L["CONFIG_SORTING_INCLUDE_ITEMSTATLEVEL_TEXT"] = "Inclure le niveau statistique des objets pour trier l'inventaire"
+--	L["CONFIG_SORTING_INCLUDE_ITEMAGE"] = ""
+--	L["CONFIG_SORTING_INCLUDE_ITEMAGE_TEXT"] = ""
+	L["CONFIG_SORTING_INCLUDE_VENDORPRICE"] = "Prix du vendeur"
+	L["CONFIG_SORTING_INCLUDE_VENDORPRICE_TEXT"] = "inclure le prix des vendeurs (par taille de pile) pour trier l'inventaire"
+--	L["CONFIG_SORTING_INCLUDE_ID"] = ""
+--	L["CONFIG_SORTING_INCLUDE_ID_TEXT"] = ""
 	
---	L["CONFIG_SORTMETHOD_ADD"] = ""
---	L["CONFIG_SORTMETHOD_ADD_TEXT"] = ""
---	L["CONFIG_SORTMETHOD_RENAME_TEXT"] = ""
---	L["CONFIG_SORTMETHOD_DELETE_TEXT"] = ""
+	L["CONFIG_SORTING_DIRECTION_TEXT"] = "Définir dans quel sens vous voulez trier vos objets"
+	L["CONFIG_SORTING_ORDER"] = "Ordre de tri"
+	L["CONFIG_SORTING_MOVE_UP_TEXT"] = "Déplacer %1$s vers le haut dans l'ordre de tri"
+	L["CONFIG_SORTING_MOVE_DOWN_TEXT"] = "Déplacer %1$s vers le bas dans l'ordre de tri"
+	L["CONFIG_SORTING_NOT_INCLUDED"] = "* Pas inclus actuellement dans le tri *"
+	
+--	L["CONFIG_SORTING_ADD"] = ""
+--	L["CONFIG_SORTING_ADD_TEXT"] = ""
+--	L["CONFIG_SORTING_RENAME_TEXT"] = ""
+--	L["CONFIG_SORTING_DELETE_TEXT"] = ""
 	
 	
 --	rules
@@ -477,6 +497,7 @@ if not L then return end
 	L["RULE_FAILED_FORMULA_NIL"] = "La formule est manquante"
 --	L["RULE_FAILED_FORMULA_BAD"] = ""
 --	L["RULE_FAILED_ARGUMENT_IS_NIL"] = ""
+--	L["RULE_FAILED_ARGUMENT_IS_NOT"] = ""
 --	L["RULE_FAILED_ARGUMENT_IS_INVALID"] = ""
 --	L["RULE_FAILED_ARGUMENT_NONE_SPECIFIED"] = ""
 	
@@ -526,10 +547,13 @@ if not L then return end
 --	L["BATTLEPET_OPPONENT_KNOWN"] = ""
 --	L["BATTLEPET_OPPONENT_UNKNOWN"] = ""
 --	L["BATTLEPET_OPPONENT_UPGRADE"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_STRONG"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_WEAK"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_ABILITY1"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_ABILITY2"] = ""
 	
 	
 --	item count tooltip
---	L["TOOLTIP_COUNT_ME"] = ""
 --	L["TOOLTIP_VAULT_TABS"] = ""
 --	L["TOOLTIP_GOLD_AMOUNT"] = ""
 	
@@ -596,6 +620,9 @@ if not L then return end
 --	L["CLICK_TO_IGNORE"] = ""	
 	L["ORDER"] = "Ordre"
 --	L["MOUSEOVER"] = ""
+--	L["NO_DATA_AVAILABLE"] = ""
+--	L["TOOLTIP_PURCHASE_BANK_BAG_SLOT"] = ""
+--	L["TOOLTIP_PURCHASE_BANK_TAB_REAGENT"] = ""
 	
 	
 -- libdatabroker
@@ -612,6 +639,9 @@ if not L then return end
 --	L["LDB_MOUNTS_TYPE_L"] = ""
 --	L["LDB_MOUNTS_TYPE_U"] = ""
 --	L["LDB_MOUNTS_TYPE_S"] = ""
+--	L["LDB_MOUNTS_TYPE_X"] = ""
+--	L["LDB_MOUNTS_FLYING_USEFORLAND"] = ""
+--	L["LDB_MOUNTS_FLYING_USEFORLAND_TEXT"] = ""
 --	L["LDB_MOUNTS_FLYING_DISMOUNT"] = ""
 --	L["LDB_MOUNTS_FLYING_DISMOUNT_TEXT"] = ""
 --	L["LDB_MOUNTS_FLYING_DISMOUNT_WARNING"] = ""
@@ -626,7 +656,6 @@ if not L then return end
 --	L["LDB_COMPANION_RESTRICTED_ITEM"] = ""
 --	L["LDB_COMPANION_RESTRICTED_EVENT"] = ""
 --	L["LDB_COMPANION_RESTRICTED_UNKNOWN"] = ""
---	L["LDB_COMPANION_NODATA"] = ""
 --	L["LDB_COMPANION_NODATA_TEXT"] = ""
 --	L["LDB_COMPANION_SELECT"] = ""
 --	L["LDB_COMPANION_DESELECT"] = ""

@@ -15,8 +15,8 @@ local castBar_verticalOffset = -6 -- Adjust Cast Bar distance
 local EmptyTexture = "Interface\\Addons\\TidyPlatesHub\\shared\\Empty"
 
 -- Non-Latin Font Bypass
-local NonLatinLocales = { ["ruRU"] = true, ["koKR"] = true, ["zhCN"] = true, ["zhTW"] = true, }
-if NonLatinLocales[GetLocale()] == true then font = NAMEPLATE_FONT end
+local NonLatinLocales = { ["koKR"] = true, ["zhCN"] = true, ["zhTW"] = true, }
+if NonLatinLocales[GetLocale()] == true then font = STANDARD_TEXT_FONT end
 
 local StyleDefault = {}
 
@@ -180,6 +180,12 @@ StyleDefault.raidicon = {
 	x = -35,
 	y = 12+nameplate_verticalOffset,
 	anchor = "TOP",
+		-- Texture Coordinates
+	left = 0,
+	right = 1,
+	top = 0,
+	bottom = 1,
+	--show = false,
 }
 
 StyleDefault.skullicon = {
@@ -203,7 +209,7 @@ StyleDefault.threatcolor = {
 	MEDIUM = {r = .6, g = 1, b = 0, a = 1,},
 	HIGH = {r = 1, g = 0, b = 0, a= 1,},  }
 
-	
+
 -- No-Bar Style		(6.2)
 local StyleTextOnly = CopyTable(StyleDefault)
 StyleTextOnly.threatborder.texture = EmptyTexture
@@ -249,7 +255,7 @@ local DamageThemeName = "Grey/|cFFFF4400Damage"
 local TankThemeName = "Grey/|cFF3782D1Tank"
 
 Theme["Default"] = StyleDefault
-Theme["NameOnly"] = StyleTextOnly			
+Theme["NameOnly"] = StyleTextOnly
 
 SLASH_GREYTANK1 = '/greytank'
 SlashCmdList['GREYTANK'] = ShowTidyPlatesHubTankPanel
@@ -301,7 +307,7 @@ Theme.OnApplyThemeCustomization = ApplyDamageCustomization -- Called By Hub Pane
 do
 	local TankTheme = CopyTable(Theme)
 	TidyPlatesThemeList[TankThemeName] = TankTheme
-	
+
 	local function ApplyTankCustomization()
 		ApplyThemeCustomization(TankTheme)
 	end
@@ -312,7 +318,7 @@ do
 			ApplyTankCustomization()
 		end
 	end
-	
+
 	TankTheme.OnActivateTheme = OnActivateTheme -- called by Tidy Plates Core, Theme Loader
 	TankTheme.OnApplyThemeCustomization = ApplyTankCustomization -- Called By Hub Panel
 	TankTheme.ShowConfigPanel = ShowTidyPlatesHubTankPanel

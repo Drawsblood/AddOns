@@ -86,6 +86,48 @@ L:AddLocale("enUS",
 }
 
 )
+L:AddLocale("itIT", 
+{
+	-- ["Chat window frame parameter options"] = "",
+	-- framealpha_desc = "",
+	-- framealpha_name = "",
+	-- Frames = "",
+	-- mainchatonload_desc = "",
+	-- mainchatonload_name = "",
+	-- maxchatheight_desc = "",
+	-- maxchatheight_name = "",
+	-- maxchatwidth_desc = "",
+	-- maxchatwidth_name = "",
+	-- minchatheight_desc = "",
+	-- minchatheight_name = "",
+	-- minchatwidth_desc = "",
+	-- minchatwidth_name = "",
+	-- removeclamp_desc = "",
+	-- removeclamp_name = "",
+}
+
+)
+L:AddLocale("ptBR", 
+{
+	-- ["Chat window frame parameter options"] = "",
+	-- framealpha_desc = "",
+	-- framealpha_name = "",
+	-- Frames = "",
+	-- mainchatonload_desc = "",
+	-- mainchatonload_name = "",
+	-- maxchatheight_desc = "",
+	-- maxchatheight_name = "",
+	-- maxchatwidth_desc = "",
+	-- maxchatwidth_name = "",
+	-- minchatheight_desc = "",
+	-- minchatheight_name = "",
+	-- minchatwidth_desc = "",
+	-- minchatwidth_name = "",
+	-- removeclamp_desc = "",
+	-- removeclamp_name = "",
+}
+
+)
 L:AddLocale("frFR",  
 {
 	["Chat window frame parameter options"] = "Options de la fenêtre de discussion",
@@ -186,8 +228,8 @@ L:AddLocale("ruRU",
 	minchatheight_name = "Минимальная высоты",
 	minchatwidth_desc = "Устанавливает минимальную ширину для всех окон чата.",
 	minchatwidth_name = "Минимальная ширина",
-	-- removeclamp_desc = "",
-	-- removeclamp_name = "",
+	removeclamp_desc = "Позволить окну чата прижиматься вплотную к краю экрана",
+	removeclamp_name = "Вплотную к краю экрана",
 }
 
 )

@@ -1,0 +1,18 @@
+------------------------------------------------------------------------
+r64 | grdn | 2014-11-26 18:23:49 +0000 (Wed, 26 Nov 2014) | 1 line
+Changed paths:
+   A /tags/6.0.2.2 (from /trunk:63)
+
+See r63
+------------------------------------------------------------------------
+r63 | grdn | 2014-11-26 18:23:29 +0000 (Wed, 26 Nov 2014) | 5 lines
+Changed paths:
+   M /trunk/iGear.lua
+   M /trunk/iGear.toc
+
+The only existing enchanting slots in WoD are:
+Neck
+Back
+Rings
+Weapon
+------------------------------------------------------------------------

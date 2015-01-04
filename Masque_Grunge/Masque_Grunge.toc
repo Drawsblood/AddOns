@@ -1,4 +1,4 @@
-## Interface: 50001
+## Interface: 60000
 ## Title: Masque - Grunge
 ## Version: 1
 ## Notes: Grunge skin for Masque

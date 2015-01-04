@@ -1,5 +1,5 @@
-## Interface: 50100
-## X-Curse-Packaged-Version: 3.03.25
+﻿## Interface: 60000
+## X-Curse-Packaged-Version: 3.04.19
 ## X-Curse-Project-Name: ArkInventory
 ## X-Curse-Project-ID: ark-inventory
 ## X-Curse-Repository-ID: wow/ark-inventory/mainline
@@ -8,32 +8,33 @@
 ## Title-zhCN: [背包]ArkInventory 整合背包银行
 ## Author: Arkayenro - Khaz'goroth
 ## Email: arkayenro at gmail dot com
-## Version: 30325
-## DefaultState: Enabled
-## LoadOnDemand: 0
+## Version: 30419
+## X-ReleaseType: 
 ## SavedVariables: ARKINVDB
 
-## Notes: Allows you to view all items from all your characters on the same realm, when-ever and where-ever you want.
+## Notes: Allows you to view all items from all your characters on the same account, when-ever and where-ever you want.
 
-## OptionalDeps: Blizzard_GuildBankUI, Blizzard_VoidStorageUI, Blizzard_PetJournal, Ace3, AceGUI-3.0-SharedMediaWidgets, LibPeriodicTable-3.1, LibSharedMedia-3.0, LibPetJournal-2.0
+## DefaultState: Enabled
+## LoadOnDemand: 0
 
-## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibPeriodicTable-3.1, LibSharedMedia-3.0, LibPetJournal-2.0
+## LoadManagers: AddonLoader
+## X-LoadOn-Always: delayed
+
+## RequiredDeps: Blizzard_GuildBankUI, Blizzard_VoidStorageUI, Blizzard_PetJournal
+
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibPeriodicTable-3.1, LibSharedMedia-3.0, LibDataBroker-1.1, LibDialog-1.0, Masque
+## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibPeriodicTable-3.1, LibSharedMedia-3.0, LibDataBroker-1.1, LibDialog-1.0
 
 ## X-Category: Inventory
 ## X-Website: http://arkinventory.googlecode.com
 
-## LoadManagers: AddonLoader
-## X-LoadOn-Always:delayed
-
-
-Libs\LibStub\LibStub.lua
-Libs\CallbackHandler\CallbackHandler-1.0.lua
-Libs\LibDataBroker\LibDataBroker-1.1.lua
-Libs\ArkDewdrop\ArkDewdrop-3.0.lua
 
 #@no-lib-strip@
-embeds.xml
+ArkInventoryExternals.xml
 #@end-no-lib-strip@
+
+Libs\ArkDewdrop\ArkDewdrop-3.0.lua
+
 
 Locale\locale.xml
 
@@ -51,6 +52,10 @@ ArkInventoryRules.lua
 ArkInventorySearch.lua
 ArkInventorySync.lua
 
+ArkInventoryPetJournal.lua
+ArkInventoryMountJournal.lua
+ArkInventoryToybox.lua
+
 ArkInventoryTooltip.lua
 ArkInventoryMoney.lua
 ArkInventoryMedia.lua
@@ -61,4 +66,8 @@ ArkInventorySearch.xml
 ArkInventoryConfig.lua
 ArkInventoryLDB.lua
 
+ArkInventoryStaticPopups.lua
+
 ArkInventoryTranslate.lua
+
+ArkInventoryRealms.lua

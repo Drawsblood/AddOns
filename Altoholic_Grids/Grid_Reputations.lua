@@ -2,8 +2,6 @@ local addonName = "Altoholic"
 local addon = _G[addonName]
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
-local BF = LibStub("LibBabble-Faction-3.0"):GetLookupTable()
-local BZ = LibStub("LibBabble-Zone-3.0"):GetLookupTable()
 
 local WHITE		= "|cFFFFFFFF"
 local GREEN		= "|cFF00FF00"
@@ -12,6 +10,8 @@ local YELLOW	= "|cFFFFFF00"
 local DARK_RED = "|cFFF00000"
 
 -- *** Reputations ***
+local CAT_GUILD = 7
+local CAT_ALLINONE = CAT_GUILD + 1
 
 local ICON_NOTREADY = "\124TInterface\\RaidFrame\\ReadyCheck-NotReady:14\124t"
 local ICON_READY = "\124TInterface\\RaidFrame\\ReadyCheck-Ready:14\124t"
@@ -21,183 +21,210 @@ local Factions = {
 	{	-- [1]
 		name = EXPANSION_NAME0,	-- "Classic"
 		{	-- [1]
-			name = FACTION_ALLIANCE,
-			{ name = BZ["Darnassus"], icon = "Achievement_Character_Nightelf_Female"	},
-			{ name = BF["Exodar"], icon = "Achievement_Character_Draenei_Male" },
-			{ name = BZ["Gnomeregan"], icon = "Achievement_Character_Gnome_Female" },
-			{ name = BZ["Ironforge"], icon = "Achievement_Character_Dwarf_Male" },
-			{ name = BF["Stormwind"], icon = "Achievement_Character_Human_Male" },
-			{ name = BF["Gilneas"], icon = "Interface\\Glues\\CharacterCreate\\UI-CHARACTERCREATE-RACES", left = 0.625, right = 0.75, top = 0, bottom = 0.25 },
-			{ name = BF["Tushui Pandaren"], icon = "Interface\\Glues\\CharacterCreate\\UI-CHARACTERCREATE-RACES", left = 0.625, right = 0.75, top = 0, bottom = 0.25 },
-			{ name = BF["Alliance"], icon = "INV_BannerPVP_02" },
+			name = FACTION_ALLIANCE,	-- 469
+			{ name = DataStore:GetFactionName(69), icon = "Achievement_Character_Nightelf_Female" },	-- "Darnassus"
+			{ name = DataStore:GetFactionName(930), icon = "Achievement_Character_Draenei_Male" },	--  name = "Exodar"
+			{ name = DataStore:GetFactionName(54), icon = "Achievement_Character_Gnome_Female" },	-- "Gnomeregan"
+			{ name = DataStore:GetFactionName(47), icon = "Achievement_Character_Dwarf_Male" },		-- "Ironforge"
+			{ name = DataStore:GetFactionName(72), icon = "Achievement_Character_Human_Male" },		-- "Stormwind"
+			{ name = DataStore:GetFactionName(1134), icon = "Interface\\Glues\\CharacterCreate\\UI-CHARACTERCREATE-RACES", left = 0.625, right = 0.75, top = 0, bottom = 0.25 },	-- "Gilneas"
+			{ name = DataStore:GetFactionName(1353), icon = "Interface\\Glues\\CharacterCreate\\UI-CHARACTERCREATE-RACES", left = 0.75, right = 0.875, top = 0, bottom = 0.25 },	-- "Tushui Pandaren"
+			{ name = DataStore:GetFactionName(469), icon = "INV_BannerPVP_02" },	-- "Alliance"
 		},
 		{	-- [2]
 			name = FACTION_HORDE,
-			{ name = BF["Darkspear Trolls"], icon = "Achievement_Character_Troll_Male" },
-			{ name = BZ["Orgrimmar"], icon = "Achievement_Character_Orc_Male" },
-			{ name = BZ["Thunder Bluff"], icon = "Achievement_Character_Tauren_Male" },
-			{ name = BZ["Undercity"], icon = "Achievement_Character_Undead_Female" },
-			{ name = BZ["Silvermoon City"], icon = "Achievement_Character_Bloodelf_Male" },
-			{ name = BF["Bilgewater Cartel"], icon = "Interface\\Glues\\CharacterCreate\\UI-CHARACTERCREATE-RACES", left = 0.625, right = 0.75, top = 0.25, bottom = 0.5 },
-			{ name = BF["Huojin Pandaren"], icon = "Interface\\Glues\\CharacterCreate\\UI-CHARACTERCREATE-RACES", left = 0.625, right = 0.75, top = 0.25, bottom = 0.5 },
-			{ name = BF["Horde"], icon = "INV_BannerPVP_01" },
+			{ name = DataStore:GetFactionName(530), icon = "Achievement_Character_Troll_Male" },		-- "Darkspear Trolls"
+			{ name = DataStore:GetFactionName(76), icon = "Achievement_Character_Orc_Male" },		-- "Orgrimmar"
+			{ name = DataStore:GetFactionName(81), icon = "Achievement_Character_Tauren_Male" },		-- "Thunder Bluff"
+			{ name = DataStore:GetFactionName(68), icon = "Achievement_Character_Undead_Female" },		-- "Undercity"
+			{ name = DataStore:GetFactionName(911), icon = "Achievement_Character_Bloodelf_Male" },		-- "Silvermoon City"
+			{ name = DataStore:GetFactionName(1133), icon = "Interface\\Glues\\CharacterCreate\\UI-CHARACTERCREATE-RACES", left = 0.625, right = 0.75, top = 0.25, bottom = 0.5 },	--  name = "Bilgewater Cartel"
+			{ name = DataStore:GetFactionName(1352), icon = "Interface\\Glues\\CharacterCreate\\UI-CHARACTERCREATE-RACES", left = 0.75, right = 0.875, top = 0.25, bottom = 0.5 },	-- "Huojin Pandaren" 
+			{ name = DataStore:GetFactionName(67), icon = "INV_BannerPVP_01" },	-- "Horde" 
 		},
 		{	-- [3]
-			name = L["Alliance Forces"],
-			{ name = BF["The League of Arathor"], icon = "Achievement_BG_winAB" },
-			{ name = BF["Silverwing Sentinels"], icon = "Achievement_BG_captureflag_WSG" },
-			{ name = BF["Stormpike Guard"], icon = "Achievement_BG_winAV" },
+			name = L["Alliance Forces"],	-- 891
+			{ name = DataStore:GetFactionName(509), icon = "Achievement_BG_winAB" },	--  name = "The League of Arathor" 
+			{ name = DataStore:GetFactionName(890), icon = "Achievement_BG_captureflag_WSG" },	-- "Silverwing Sentinels" 
+			{ name = DataStore:GetFactionName(730), icon = "Achievement_BG_winAV" },		-- "Stormpike Guard"
 		},
 		{	-- [4]
 			name = L["Horde Forces"],
-			{ name = BF["The Defilers"], icon = "Achievement_BG_winAB" },
-			{ name = BF["Warsong Outriders"], icon = "Achievement_BG_captureflag_WSG" },
-			{ name = BF["Frostwolf Clan"], icon = "Achievement_BG_winAV" },
+			{ name = DataStore:GetFactionName(510), icon = "Achievement_BG_winAB" },		-- "The Defilers" 
+			{ name = DataStore:GetFactionName(889), icon = "Achievement_BG_captureflag_WSG" },	-- "Warsong Outriders" 
+			{ name = DataStore:GetFactionName(729), icon = "Achievement_BG_winAV" },		-- "Frostwolf Clan" 
 		},
 		{	-- [5]
 			name = L["Steamwheedle Cartel"],
-			{ name = BZ["Booty Bay"], icon = "Achievement_Zone_Stranglethorn_01" },
-			{ name = BZ["Everlook"], icon = "Achievement_Zone_Winterspring" },
-			{ name = BZ["Gadgetzan"], icon = "Achievement_Zone_Tanaris_01" },
-			{ name = BZ["Ratchet"], icon = "Achievement_Zone_Barrens_01" },
+			{ name = DataStore:GetFactionName(21), icon = "Achievement_Zone_Stranglethorn_01" },		-- "Booty Bay" 
+			{ name = DataStore:GetFactionName(577), icon = "Achievement_Zone_Winterspring" },		-- "Everlook" 
+			{ name = DataStore:GetFactionName(369), icon = "Achievement_Zone_Tanaris_01" },		-- "Gadgetzan" 
+			{ name = DataStore:GetFactionName(470), icon = "Achievement_Zone_Barrens_01" },		-- "Ratchet" 
 		},
 		{	-- [6]
 			name = OTHER,
-			{ name = BF["Argent Dawn"], icon = "INV_Jewelry_Talisman_07" },
-			{ name = BF["Bloodsail Buccaneers"], icon = "INV_Helmet_66" },
-			{ name = BF["Brood of Nozdormu"], icon = "INV_Misc_Head_Dragon_Bronze" },
-			{ name = BF["Cenarion Circle"], icon = "Achievement_Zone_Silithus_01" },
-			{ name = BF["Darkmoon Faire"], icon = "INV_Misc_Ticket_Darkmoon_01" },
-			{ name = BF["Gelkis Clan Centaur"], icon = "INV_Misc_Head_Centaur_01" },
-			{ name = BF["Hydraxian Waterlords"], icon = "Spell_Frost_SummonWaterElemental_2" },
-			{ name = BF["Magram Clan Centaur"], icon = "INV_Misc_Head_Centaur_01" },
-			{ name = BF["Ravenholdt"], icon = "INV_ThrowingKnife_04" },
-			{ name = BF["Shen'dralar"], icon = "Achievement_Zone_Feralas" },
-			{ name = BF["Syndicate"], icon = "INV_Misc_ArmorKit_03" },
-			{ name = BF["Thorium Brotherhood"], icon = "INV_Ingot_Thorium" },
-			{ name = BF["Timbermaw Hold"], icon = "Achievement_Reputation_timbermaw" },
-			{ name = BF["Tranquillien"], icon = "Achievement_Zone_Ghostlands" },
-			{ name = BF["Wintersaber Trainers"], icon = "Ability_Mount_PinkTiger" },
-			{ name = BF["Zandalar Tribe"], icon = "INV_Bijou_Green" },
+			{ name = DataStore:GetFactionName(529), icon = "INV_Jewelry_Talisman_07" },		-- "Argent Dawn" 
+			{ name = DataStore:GetFactionName(87), icon = "INV_Helmet_66" },		-- "Bloodsail Buccaneers" 
+			{ name = DataStore:GetFactionName(910), icon = "INV_Misc_Head_Dragon_Bronze" },		-- "Brood of Nozdormu" 
+			{ name = DataStore:GetFactionName(609), icon = "Achievement_Zone_Silithus_01" },		-- "Cenarion Circle" 
+			{ name = DataStore:GetFactionName(909), icon = "INV_Misc_Ticket_Darkmoon_01" },		-- "Darkmoon Faire" 
+			{ name = DataStore:GetFactionName(92), icon = "INV_Misc_Head_Centaur_01" },			-- "Gelkis Clan Centaur" 
+			{ name = DataStore:GetFactionName(749), icon = "Spell_Frost_SummonWaterElemental_2" },		-- "Hydraxian Waterlords" 
+			{ name = DataStore:GetFactionName(93), icon = "INV_Misc_Head_Centaur_01" },		-- "Magram Clan Centaur" 
+			{ name = DataStore:GetFactionName(349), icon = "INV_ThrowingKnife_04" },		-- "Ravenholdt" 
+			{ name = DataStore:GetFactionName(809), icon = "Achievement_Zone_Feralas" },		-- "Shen'dralar" 
+			{ name = DataStore:GetFactionName(70), icon = "INV_Misc_ArmorKit_03" },		-- "Syndicate" 
+			{ name = DataStore:GetFactionName(59), icon = "INV_Ingot_Thorium" },		-- "Thorium Brotherhood" 
+			{ name = DataStore:GetFactionName(576), icon = "Achievement_Reputation_timbermaw" },		-- "Timbermaw Hold" 
+			{ name = DataStore:GetFactionName(922), icon = "Achievement_Zone_Ghostlands" },		-- "Tranquillien" 
+			{ name = DataStore:GetFactionName(589), icon = "Ability_Mount_PinkTiger" },		-- "Wintersaber Trainers" 
+			{ name = DataStore:GetFactionName(270), icon = "INV_Bijou_Green" },		-- "Zandalar Tribe" 
 		}
 	},
 	{	-- [2]
 		name = EXPANSION_NAME1,	-- "The Burning Crusade"
 		{	-- [1]
 			name = GetRealZoneText(530),	-- Outland
-			{ name = BF["Ashtongue Deathsworn"], icon = "Achievement_Reputation_AshtongueDeathsworn" },
-			{ name = BF["Cenarion Expedition"], icon = "Achievement_Reputation_GuardiansofCenarius" },
-			{ name = BF["The Consortium"], icon = "INV_Enchant_ShardPrismaticLarge" },
-			{ name = BF["Honor Hold"], icon = "Spell_Misc_HellifrePVPHonorHoldFavor" },
-			{ name = BF["Kurenai"], icon = "INV_Misc_Foot_Centaur" },
-			{ name = BF["The Mag'har"], icon = "Achievement_Zone_Nagrand_01" },
-			{ name = BF["Netherwing"], icon = "Ability_Mount_NetherdrakePurple" },
-			{ name = BF["Ogri'la"], icon = "Achievement_Reputation_Ogre" },
-			{ name = BF["Sporeggar"], icon = "INV_Mushroom_11" },
-			{ name = BF["Thrallmar"], icon = "Spell_Misc_HellifrePVPThrallmarFavor" },
+			{ name = DataStore:GetFactionName(1012), icon = "Achievement_Reputation_AshtongueDeathsworn" },	-- "Ashtongue Deathsworn" 
+			{ name = DataStore:GetFactionName(942), icon = "Achievement_Reputation_GuardiansofCenarius" },	-- "Cenarion Expedition" 
+			{ name = DataStore:GetFactionName(933), icon = "INV_Enchant_ShardPrismaticLarge" },		-- "The Consortium" 
+			{ name = DataStore:GetFactionName(946), icon = "Spell_Misc_HellifrePVPHonorHoldFavor" },	-- "Honor Hold" 
+			{ name = DataStore:GetFactionName(978), icon = "INV_Misc_Foot_Centaur" },		-- "Kurenai" 
+			{ name = DataStore:GetFactionName(941), icon = "Achievement_Zone_Nagrand_01" },	-- "The Mag'har" 
+			{ name = DataStore:GetFactionName(1015), icon = "Ability_Mount_NetherdrakePurple" },		-- "Netherwing" 
+			{ name = DataStore:GetFactionName(1038), icon = "Achievement_Reputation_Ogre" },		-- "Ogri'la" 
+			{ name = DataStore:GetFactionName(970), icon = "INV_Mushroom_11" },	-- "Sporeggar" 
+			{ name = DataStore:GetFactionName(947), icon = "Spell_Misc_HellifrePVPThrallmarFavor" },	-- "Thrallmar" 
 		},
 		{	-- [2]
-			name = BZ["Shattrath City"],
-			{ name = BF["Lower City"], icon = "Achievement_Zone_Terrokar" },
-			{ name = BF["Sha'tari Skyguard"], icon = "Ability_Hunter_Pet_NetherRay" },
-			{ name = BF["Shattered Sun Offensive"], icon = "INV_Shield_48" },
-			{ name = BF["The Aldor"], icon = "Achievement_Character_Draenei_Female" },
-			{ name = BF["The Scryers"], icon = "Achievement_Character_Bloodelf_Female" },
-			{ name = BF["The Sha'tar"], icon = "Achievement_Zone_Netherstorm_01" },
+			name = GetMapNameByID(481),	-- "Shattrath City"
+			{ name = DataStore:GetFactionName(1011), icon = "Achievement_Zone_Terrokar" },		-- "Lower City" 
+			{ name = DataStore:GetFactionName(1031), icon = "Ability_Hunter_Pet_NetherRay" },		-- "Sha'tari Skyguard" 
+			{ name = DataStore:GetFactionName(1077), icon = "INV_Shield_48" },		-- "Shattered Sun Offensive" 
+			{ name = DataStore:GetFactionName(932), icon = "Achievement_Character_Draenei_Female" },	-- "The Aldor" 
+			{ name = DataStore:GetFactionName(934), icon = "Achievement_Character_Bloodelf_Female" },		-- "The Scryers" 
+			{ name = DataStore:GetFactionName(935), icon = "Achievement_Zone_Netherstorm_01" },		-- "The Sha'tar" 
 		},
 		{	-- [3]
 			name = OTHER,
-			{ name = BF["Keepers of Time"], icon = "Achievement_Zone_HillsbradFoothills" },
-			{ name = BF["The Scale of the Sands"], icon = "INV_Enchant_DustIllusion" },
-			{ name = BF["The Violet Eye"], icon = "Spell_Holy_MindSooth" },
+			{ name = DataStore:GetFactionName(989), icon = "Achievement_Zone_HillsbradFoothills" },		-- "Keepers of Time" 
+			{ name = DataStore:GetFactionName(990), icon = "INV_Enchant_DustIllusion" },	-- "The Scale of the Sands" 
+			{ name = DataStore:GetFactionName(967), icon = "Spell_Holy_MindSooth" },		-- "The Violet Eye" 
 		}
 	},
 	{	-- [3]
 		name = EXPANSION_NAME2,	-- "Wrath of the Lich King"
 		{	-- [1]
 			name = GetRealZoneText(571),	-- Northrend
-			{ name = BF["Argent Crusade"], icon = "Achievement_Reputation_ArgentCrusader" },
-			{ name = BF["Kirin Tor"], icon = "Achievement_Reputation_KirinTor" },
-			{ name = BF["The Kalu'ak"], icon = "Achievement_Reputation_Tuskarr" },
-			{ name = BF["The Wyrmrest Accord"], icon = "Achievement_Reputation_WyrmrestTemple" },
-			{ name = BF["Knights of the Ebon Blade"], icon = "Achievement_Reputation_KnightsoftheEbonBlade" },
-			{ name = BF["The Sons of Hodir"], icon = "Achievement_Boss_Hodir_01" },
-			{ name = BF["The Ashen Verdict"], icon = "Achievement_Reputation_ArgentCrusader" },
+			{ name = DataStore:GetFactionName(1106), icon = "Achievement_Reputation_ArgentCrusader" },		-- "Argent Crusade"
+			{ name = DataStore:GetFactionName(1090), icon = "Achievement_Reputation_KirinTor" },		-- "Kirin Tor" 
+			{ name = DataStore:GetFactionName(1073), icon = "Achievement_Reputation_Tuskarr" },	-- "The Kalu'ak" 
+			{ name = DataStore:GetFactionName(1091), icon = "Achievement_Reputation_WyrmrestTemple" },		-- "The Wyrmrest Accord" 
+			{ name = DataStore:GetFactionName(1098), icon = "Achievement_Reputation_KnightsoftheEbonBlade" },	-- "Knights of the Ebon Blade" 
+			{ name = DataStore:GetFactionName(1119), icon = "Achievement_Boss_Hodir_01" },		-- "The Sons of Hodir" 
+			{ name = DataStore:GetFactionName(1156), icon = "Achievement_Reputation_ArgentCrusader" },		-- "The Ashen Verdict" 
 		},
 		{	-- [2]
-			name = BF["Alliance Vanguard"],
-			{ name = BF["Alliance Vanguard"], icon = "Spell_Misc_HellifrePVPHonorHoldFavor" },
-			{ name = BF["Explorers' League"], icon = "Achievement_Zone_HowlingFjord_02" },
-			{ name = BF["The Frostborn"], icon = "Achievement_Zone_StormPeaks_01" },
-			{ name = BF["The Silver Covenant"], icon = "Achievement_Zone_CrystalSong_01" },
-			{ name = BF["Valiance Expedition"], icon = "Achievement_Zone_BoreanTundra_01" },
+			name = DataStore:GetFactionName(1037), 	-- "Alliance Vanguard"
+			{ name = DataStore:GetFactionName(1037), icon = "Spell_Misc_HellifrePVPHonorHoldFavor" },	-- "Alliance Vanguard" 
+			{ name = DataStore:GetFactionName(1068), icon = "Achievement_Zone_HowlingFjord_02" },	-- "Explorers' League" 
+			{ name = DataStore:GetFactionName(1126), icon = "Achievement_Zone_StormPeaks_01" },		-- "The Frostborn" 
+			{ name = DataStore:GetFactionName(1094), icon = "Achievement_Zone_CrystalSong_01" },		-- "The Silver Covenant" 
+			{ name = DataStore:GetFactionName(1050), icon = "Achievement_Zone_BoreanTundra_01" },	-- "Valiance Expedition" 	
 		},
 		{	-- [3]
-			name = BF["Horde Expedition"],
-			{ name = BF["Horde Expedition"], icon = "Spell_Misc_HellifrePVPThrallmarFavor" },
-			{ name = BF["The Hand of Vengeance"], icon = "Achievement_Zone_HowlingFjord_02" },
-			{ name = BF["The Sunreavers"], icon = "Achievement_Zone_CrystalSong_01" },
-			{ name = BF["The Taunka"], icon = "Achievement_Zone_BoreanTundra_02" },
-			{ name = BF["Warsong Offensive"], icon = "Achievement_Zone_BoreanTundra_03" },
+			name = DataStore:GetFactionName(1052), 	-- "Horde Expedition"
+			{ name = DataStore:GetFactionName(1052), icon = "Spell_Misc_HellifrePVPThrallmarFavor" },		-- "Horde Expedition" 
+			{ name = DataStore:GetFactionName(1067), icon = "Achievement_Zone_HowlingFjord_02" },		-- "The Hand of Vengeance" 
+			{ name = DataStore:GetFactionName(1124), icon = "Achievement_Zone_CrystalSong_01" },			-- "The Sunreavers" 
+			{ name = DataStore:GetFactionName(1064), icon = "Achievement_Zone_BoreanTundra_02" },		-- "The Taunka" 
+			{ name = DataStore:GetFactionName(1085), icon = "Achievement_Zone_BoreanTundra_03" },		-- "Warsong Offensive" 
 		},
 		{	-- [4]
-			name = BZ["Sholazar Basin"],
-			{ name = BF["Frenzyheart Tribe"], icon = "Ability_Mount_WhiteDireWolf" },
-			{ name = BF["The Oracles"], icon = "Achievement_Reputation_MurlocOracle" },
+			name = GetMapNameByID(493),	-- "Sholazar Basin"
+			{ name = DataStore:GetFactionName(1104), icon = "Ability_Mount_WhiteDireWolf" },		-- "Frenzyheart Tribe" 
+			{ name = DataStore:GetFactionName(1105), icon = "Achievement_Reputation_MurlocOracle" },	-- "The Oracles" 
 		},
 	},
 	{	-- [4]
 		name = EXPANSION_NAME3,	-- "Cataclysm"
 		{	-- [1]
 			name = OTHER,
-			{ name = BF["Guardians of Hyjal"], icon = "Achievement_Zone_mount hyjal" },
-			{ name = BF["The Earthen Ring"], icon = "Spell_Nature_EarthElemental_Totem" },
-			{ name = BF["Therazane"], icon = "inv_misc_tabard_therazane" },
-			{ name = BF["Wildhammer Clan"], icon = "inv_misc_tabard_wildhammerclan" },
-			{ name = BF["Ramkahen"], icon = "inv_misc_tabard_tolvir" },
-			{ name = BF["Baradin's Wardens"], icon = "inv_misc_tabard_baradinwardens" },
-			{ name = BF["Dragonmaw Clan"], icon = "inv_misc_tabard_dragonmawclan" },
-			{ name = BF["Hellscream's Reach"], icon = "inv_misc_tabard_hellscream" },
-			{ name = BF["Avengers of Hyjal"], icon = "inv_neck_hyjaldaily_04" },
+			{ name = DataStore:GetFactionName(1158), icon = "Achievement_Zone_mount hyjal" },		-- "Guardians of Hyjal" 
+			{ name = DataStore:GetFactionName(1135), icon = "Spell_Nature_EarthElemental_Totem" },		-- "The Earthen Ring" 
+			{ name = DataStore:GetFactionName(1171), icon = "inv_misc_tabard_therazane" },		-- "Therazane" 
+			{ name = DataStore:GetFactionName(1174), icon = "inv_misc_tabard_wildhammerclan" },		-- "Wildhammer Clan" 
+			{ name = DataStore:GetFactionName(1173), icon = "inv_misc_tabard_tolvir" },		-- "Ramkahen" 
+			{ name = DataStore:GetFactionName(1177), icon = "inv_misc_tabard_baradinwardens" },		-- "Baradin's Wardens" 
+			{ name = DataStore:GetFactionName(1172), icon = "inv_misc_tabard_dragonmawclan" },		-- "Dragonmaw Clan" 
+			{ name = DataStore:GetFactionName(1178), icon = "inv_misc_tabard_hellscream" },		-- "Hellscream's Reach" 
+			{ name = DataStore:GetFactionName(1204), icon = "inv_neck_hyjaldaily_04" },		-- "Avengers of Hyjal" 
 		}
 	},
 	{	-- [5]
 		name = EXPANSION_NAME4,	-- "Mists of Pandaria"
 		{	-- [1]
-			name = BF["The Anglers"],
-			{ name = BF["Nat Pagle"], icon = "achievement_faction_anglers" },
+			name = DataStore:GetFactionName(1302), 	-- "The Anglers"
+			{ name = DataStore:GetFactionName(1358), icon = "achievement_faction_anglers" },		-- "Nat Pagle" 
 		},
 		{	-- [2]
-			name = BF["The Tillers"],
-			{ name = BF["Chee Chee"], icon = "achievement_faction_tillers" },
-			{ name = BF["Ella"], icon = "achievement_faction_tillers" },
-			{ name = BF["Farmer Fung"], icon = "achievement_faction_tillers" },
-			{ name = BF["Fish Fellreed"], icon = "achievement_faction_tillers" },
-			{ name = BF["Gina Mudclaw"], icon = "achievement_faction_tillers" },
-			{ name = BF["Haohan Mudclaw"], icon = "achievement_faction_tillers" },
-			{ name = BF["Jogu the Drunk"], icon = "achievement_faction_tillers" },
-			{ name = BF["Old Hillpaw"], icon = "achievement_faction_tillers" },
-			{ name = BF["Sho"], icon = "achievement_faction_tillers" },
-			{ name = BF["Tina Mudclaw"], icon = "achievement_faction_tillers" },
+			name = DataStore:GetFactionName(1272), 	-- "The Tillers"
+			{ name = DataStore:GetFactionName(1277), icon = "achievement_faction_tillers" },		-- "Chee Chee" 
+			{ name = DataStore:GetFactionName(1275), icon = "achievement_faction_tillers" },		-- "Ella" 
+			{ name = DataStore:GetFactionName(1283), icon = "achievement_faction_tillers" },		-- "Farmer Fung" 
+			{ name = DataStore:GetFactionName(1282), icon = "achievement_faction_tillers" },		-- "Fish Fellreed" 
+			{ name = DataStore:GetFactionName(1281), icon = "achievement_faction_tillers" },		-- "Gina Mudclaw" 
+			{ name = DataStore:GetFactionName(1279), icon = "achievement_faction_tillers" },		-- "Haohan Mudclaw" 
+			{ name = DataStore:GetFactionName(1273), icon = "achievement_faction_tillers" },		-- "Jogu the Drunk" 
+			{ name = DataStore:GetFactionName(1276), icon = "achievement_faction_tillers" },		-- "Old Hillpaw" 
+			{ name = DataStore:GetFactionName(1278), icon = "achievement_faction_tillers" },		-- "Sho" 
+			{ name = DataStore:GetFactionName(1280), icon = "achievement_faction_tillers" },		-- "Tina Mudclaw" 
 		},
 		{	-- [3]
 			name = OTHER,
-			{ name = BF["Forest Hozen"], icon = "inv_misc_fish_58" },
-			{ name = BF["Golden Lotus"], icon = "achievement_faction_goldenlotus" },
-			{ name = BF["Order of the Cloud Serpent"], icon = "achievement_faction_serpentriders" },
-			{ name = BF["Pearlfin Jinyu"], icon = "inv_misc_fish_58" },
-			{ name = BF["Shado-Pan"], icon = "achievement_faction_shadopan" },
-			{ name = BF["Shang Xi's Academy"], icon = "inv_misc_book_07" },
-			{ name = BF["The Anglers"], icon = "achievement_faction_anglers" },
-			{ name = BF["The August Celestials"], icon = "achievement_faction_celestials" },
-			{ name = BF["The Black Prince"], icon = "inv_misc_head_dragon_black" },
-			{ name = BF["The Brewmasters"], icon = "inv_cask_02" },
-			{ name = BF["The Klaxxi"], icon = "achievement_faction_klaxxi" },
-			{ name = BF["The Lorewalkers"], icon = "achievement_faction_lorewalkers" },
-			{ name = BF["The Tillers"], icon = "achievement_faction_tillers" },
+			{ name = DataStore:GetFactionName(1375), icon = "achievement_general_hordeslayer" },		-- "Dominance Offensive" 
+			{ name = DataStore:GetFactionName(1228), icon = "inv_misc_fish_58" },		-- "Forest Hozen" 
+			{ name = DataStore:GetFactionName(1269), icon = "achievement_faction_goldenlotus" },		-- "Golden Lotus" 
+			{ name = DataStore:GetFactionName(1387), icon = "achievement_reputation_kirintor_offensive" },		-- "Kirin Tor Offensive" 
+			{ name = DataStore:GetFactionName(1376), icon = "achievement_general_allianceslayer" },		-- "Operation: Shieldwall" 
+			{ name = DataStore:GetFactionName(1271), icon = "achievement_faction_serpentriders" },		-- "Order of the Cloud Serpent" 
+			{ name = DataStore:GetFactionName(1242), icon = "inv_misc_fish_58" },		-- "Pearlfin Jinyu" 
+			{ name = DataStore:GetFactionName(1270), icon = "achievement_faction_shadopan" },		-- "Shado-Pan" 
+			{ name = DataStore:GetFactionName(1435), icon = "achievement_faction_shadopan" },		-- "Shado-Pan Assault" 
+			{ name = DataStore:GetFactionName(1216), icon = "inv_misc_book_07" },		-- "Shang Xi's Academy" 
+			{ name = DataStore:GetFactionName(1388), icon = "achievement_faction_sunreaveronslaught" },		-- "Sunreaver Onslaught" 
+			{ name = DataStore:GetFactionName(1302), icon = "achievement_faction_anglers" },		-- "The Anglers" 
+			{ name = DataStore:GetFactionName(1341), icon = "achievement_faction_celestials" },		-- "The August Celestials" 
+			{ name = DataStore:GetFactionName(1359), icon = "inv_misc_head_dragon_black" },		-- "The Black Prince" 
+			{ name = DataStore:GetFactionName(1351), icon = "inv_cask_02" },		-- "The Brewmasters" 
+			{ name = DataStore:GetFactionName(1337), icon = "achievement_faction_klaxxi" },		-- "The Klaxxi" 
+			{ name = DataStore:GetFactionName(1345), icon = "achievement_faction_lorewalkers" },		-- "The Lorewalkers" 
+			{ name = DataStore:GetFactionName(1272), icon = "achievement_faction_tillers" },		-- "The Tillers" 
+			{ name = DataStore:GetFactionName(1492), icon = "ability_monk_quipunch" },		-- "Emperor Shaohao"
 		}
 	},
 	{	-- [6]
+		name = EXPANSION_NAME5,	-- "Warlords of Draenor"
+		{	-- [1]
+			name = FACTION_ALLIANCE,	-- 469
+			{ name = DataStore:GetFactionName(1710), icon = "inv_tabard_a_shataridefense" },		-- Sha'tari Defense
+			{ name = DataStore:GetFactionName(1682), icon = "inv_tabard_a_78wrynnvanguard" },	-- Wrynn's Vanguard
+		},
+		{	-- [2]
+			name = FACTION_HORDE,
+			{ name = DataStore:GetFactionName(1708), icon = "inv_tabard_a_80laughingskull" },	-- Laughing Skull Orcs
+			{ name = DataStore:GetFactionName(1681), icon = "inv_tabard_a_77voljinsspear" },		-- Vol'jin's Spear
+
+		},
+		{	-- [3]
+			name = OTHER,
+			{ name = DataStore:GetFactionName(1515), icon = "inv_tabard_a_76arakkoaoutcast" },		-- Arrakoa Outcasts
+			{ name = DataStore:GetFactionName(1731), icon = "inv_tabard_a_81exarchs" },		-- Council of Exarchs
+			{ name = DataStore:GetFactionName(1445), icon = "inv_tabard_a_01frostwolfclan" },		-- Frostwold Orcs
+			{ name = DataStore:GetFactionName(1711), icon = "achievement_goblinhead" },		-- Steamwheedle Preservation Society
+		},		
+	},	
+	{	-- [7]
 		name = GUILD,
 		{	-- [1]
 			name = GUILD,
@@ -219,8 +246,9 @@ local VertexColors = {
 local view
 local isViewValid
 
-local currentXPack = 1					-- default to wow classic
-local currentFactionGroup = (UnitFactionGroup("player") == "Alliance") and 1 or 2	-- default to alliance or horde
+local OPTION_XPACK = "UI.Tabs.Grids.Reputations.CurrentXPack"
+local OPTION_FACTION = "UI.Tabs.Grids.Reputations.CurrentFactionGroup"
+
 local currentFaction
 local currentDDMText
 
@@ -228,11 +256,13 @@ local function BuildView()
 	view = view or {}
 	wipe(view)
 	
-	if currentXPack and currentFactionGroup then
+	local currentXPack = addon:GetOption(OPTION_XPACK)
+	local currentFactionGroup = addon:GetOption(OPTION_FACTION)
+
+	if (currentXPack ~= CAT_ALLINONE) then
 		for index, faction in ipairs(Factions[currentXPack][currentFactionGroup]) do
 			table.insert(view, faction)	-- insert the table pointer
 		end
-
 	else	-- all in one, add all factions
 		for xPackIndex, xpack in ipairs(Factions) do		-- all xpacks
 			for factionGroupIndex, factionGroup in ipairs(xpack) do 	-- all faction groups
@@ -243,6 +273,14 @@ local function BuildView()
 		end
 		
 		table.sort(view, function(a,b) 	-- sort all factions alphabetically
+			if not a.name then
+				DEFAULT_CHAT_FRAME:AddMessage(a.icon)
+			end
+			if not b.name then
+				DEFAULT_CHAT_FRAME:AddMessage(b.icon)
+			end
+			
+			
 			return a.name < b.name
 		end)
 	end
@@ -250,15 +288,37 @@ local function BuildView()
 	isViewValid = true
 end
 
+local function AddGuildsToFactionsTable(realm, account)
+	-- get the guilds on this realm/account
+	local guilds = {}
+	for guildName, guild in pairs(DataStore:GetGuilds(realm, account)) do
+		if DataStore:GetGuildFaction(guildName, realm, account) == FACTION_ALLIANCE then
+			guilds[guildName] = "inv_misc_tournaments_banner_human"
+		else
+			guilds[guildName] = "inv_misc_tournaments_banner_orc"
+		end
+	end
+	
+	-- clean the Factions table
+	for k, v in ipairs(Factions[CAT_GUILD][1]) do	-- ipairs ! only touch the array part, leave the hash untouched
+		Factions[CAT_GUILD][1][k] = nil
+	end
+	
+	-- add them to the Factions table
+	for k, v in pairs(guilds) do
+		table.insert(Factions[CAT_GUILD][1], { name = k, icon = v } )
+	end
+end
+
 local DDM_AddCloseMenu = addon.Helpers.DDM_AddCloseMenu
 
 local function OnFactionChange(self, xpackIndex, factionGroupIndex)
 	CloseDropDownMenus()
 
-	currentXPack = xpackIndex
-	currentFactionGroup = factionGroupIndex
-	
-	local factionGroup = Factions[currentXPack][currentFactionGroup]
+	addon:SetOption(OPTION_XPACK, xpackIndex)
+	addon:SetOption(OPTION_FACTION, factionGroupIndex)
+		
+	local factionGroup = Factions[xpackIndex][factionGroupIndex]
 	currentDDMText = factionGroup.name
 	addon.Tabs.Grids:SetViewDDMText(currentDDMText)
 	
@@ -271,31 +331,13 @@ local lastRealm, lastAccount
 local function OnGuildSelected(self)
 	CloseDropDownMenus()
 	
-	currentXPack = 5
-	currentFactionGroup = 1
+	addon:SetOption(OPTION_XPACK, CAT_GUILD)
+	addon:SetOption(OPTION_FACTION, 1)
 	
 	local realm, account = addon.Tabs.Grids:GetRealm()
 	
 	if not lastRealm or not lastAccount or lastRealm ~= realm or lastAccount ~= account then	-- realm/account changed ? rebuild view
-		-- get the guilds on this realm/account
-		local guilds = {}
-		for guildName, guild in pairs(DataStore:GetGuilds(realm, account)) do
-			if DataStore:GetGuildFaction(guildName, realm, account) == FACTION_ALLIANCE then
-				guilds[guildName] = "inv_misc_tournaments_banner_human"
-			else
-				guilds[guildName] = "inv_misc_tournaments_banner_orc"
-			end
-		end
-		
-		-- clean the Factions table
-		for k, v in ipairs(Factions[currentXPack][currentFactionGroup]) do	-- ipairs ! only touch the array part, leave the hash untouched
-			Factions[currentXPack][currentFactionGroup][k] = nil
-		end
-		
-		-- add them to the Factions table
-		for k, v in pairs(guilds) do
-			table.insert(Factions[currentXPack][currentFactionGroup], { name = k, icon = v } )
-		end
+		AddGuildsToFactionsTable(realm, account)
 	end
 	
 	lastRealm = realm
@@ -308,12 +350,14 @@ local function OnGuildSelected(self)
 end
 
 local function OnAllInOneSelected(self)
-	currentXPack = nil
-	currentFactionGroup = nil
+	addon:SetOption(OPTION_XPACK, CAT_ALLINONE)
+	addon:SetOption(OPTION_FACTION, 1)
+	
 	currentDDMText = L["All-in-one"]
 	addon.Tabs.Grids:SetViewDDMText(currentDDMText)
 	isViewValid = nil
 	addon.Tabs.Grids:Update()
+	
 end
 
 local function DropDown_Initialize(self, level)
@@ -321,10 +365,14 @@ local function DropDown_Initialize(self, level)
 
 	local info = UIDropDownMenu_CreateInfo()
 	
+	local currentXPack = addon:GetOption(OPTION_XPACK)
+	local currentFactionGroup = addon:GetOption(OPTION_FACTION)
+	
 	if level == 1 then
-		for xpackIndex = 1, 5 do
+		for xpackIndex = 1, (CAT_GUILD - 1) do
 			info.text = Factions[xpackIndex].name
 			info.hasArrow = 1
+			info.checked = (currentXPack == xpackIndex)
 			info.value = xpackIndex
 			UIDropDownMenu_AddButton(info, level)
 		end
@@ -333,11 +381,13 @@ local function DropDown_Initialize(self, level)
 		info.text = GUILD
 		info.hasArrow = nil
 		info.func = OnGuildSelected
+		info.checked = (currentXPack == CAT_GUILD)
 		UIDropDownMenu_AddButton(info, level)
 
 		info.text = L["All-in-one"]
 		info.hasArrow = nil
 		info.func = OnAllInOneSelected
+		info.checked = (currentXPack == CAT_ALLINONE)
 		UIDropDownMenu_AddButton(info, level)
 		
 		DDM_AddCloseMenu()
@@ -346,6 +396,7 @@ local function DropDown_Initialize(self, level)
 		for factionGroupIndex, factionGroup in ipairs(Factions[UIDROPDOWNMENU_MENU_VALUE]) do
 			info.text = factionGroup.name
 			info.func = OnFactionChange
+			info.checked = ((currentXPack == UIDROPDOWNMENU_MENU_VALUE) and (currentFactionGroup == factionGroupIndex))
 			info.arg1 = UIDROPDOWNMENU_MENU_VALUE
 			info.arg2 = factionGroupIndex
 			UIDropDownMenu_AddButton(info, level)
@@ -379,6 +430,17 @@ local callbacks = {
 			if not isViewValid then
 				BuildView()
 			end
+
+			local currentXPack = addon:GetOption(OPTION_XPACK)
+			local currentFactionGroup = addon:GetOption(OPTION_FACTION)
+			
+			if (currentXPack == CAT_GUILD) then
+				addon.Tabs.Grids:SetStatus(GUILD)
+			elseif (currentXPack == CAT_ALLINONE) then
+				addon.Tabs.Grids:SetStatus(L["All-in-one"])
+			else
+				addon.Tabs.Grids:SetStatus(format("%s / %s", Factions[currentXPack].name, Factions[currentXPack][currentFactionGroup].name))
+			end
 		end,
 	GetSize = function() return #view end,
 	RowSetup = function(self, entry, row, dataRowID)
@@ -408,7 +470,7 @@ local callbacks = {
 			itemText:SetFontObject("GameFontNormalSmall")
 			itemText:SetJustifyH("CENTER")
 			itemText:SetPoint("BOTTOMRIGHT", 5, 0)
-			itemTexture:SetDesaturated(0)
+			itemTexture:SetDesaturated(false)
 			
 			local status, _, _, rate = DataStore:GetReputationInfo(character, faction.name)
 			if status and rate then 
@@ -416,7 +478,7 @@ local callbacks = {
 				if status == FACTION_STANDING_LABEL8 then
 					text = ICON_READY
 				else
-					itemTexture:SetDesaturated(1)
+					itemTexture:SetDesaturated(true)
 					itemText:SetFontObject("NumberFontNormalSmall")
 					itemText:SetJustifyH("RIGHT")
 					itemText:SetPoint("BOTTOMRIGHT", 0, 0)
@@ -503,7 +565,19 @@ local callbacks = {
 			frame:Show()
 			title:Show()
 
-			currentDDMText = currentDDMText or ((UnitFactionGroup("player") == "Alliance") and FACTION_ALLIANCE or FACTION_HORDE)
+			local currentXPack = addon:GetOption(OPTION_XPACK)
+			local currentFactionGroup = addon:GetOption(OPTION_FACTION)
+			
+			if (currentXPack ~= CAT_ALLINONE) then
+				currentDDMText = Factions[currentXPack][currentFactionGroup].name
+			else
+				currentDDMText = L["All-in-one"]
+			end
+			
+			if (currentXPack == CAT_GUILD) then
+				local realm, account = addon.Tabs.Grids:GetRealm()
+				AddGuildsToFactionsTable(realm, account)
+			end
 			
 			UIDropDownMenu_SetWidth(frame, 100) 
 			UIDropDownMenu_SetButtonWidth(frame, 20)

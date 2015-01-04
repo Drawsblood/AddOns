@@ -1,4 +1,4 @@
-local _G = getfenv(0)
+local _G = _G
 
 -- addon name and namespace
 local ADDON, NS = ...
@@ -10,7 +10,7 @@ local smatch   = string.match
 local sqrt     = math.sqrt
 local floor    = math.floor
 
-local GetFactionInfo        = _G.GetFactionInfo
+local GetGuildInfo          = _G.GetGuildInfo
 local GetNumFactions        = _G.GetNumFactions
 local GetNumGroupMembers    = _G.GetNumGroupMembers
 local GetNumSubgroupMembers = _G.GetNumSubgroupMembers
@@ -26,284 +26,57 @@ local _
 
 -- setup libs
 local LibStub   = LibStub
-local LDB       = LibStub:GetLibrary("LibDataBroker-1.1")
 
 -- coloring tools
 local Crayon	= LibStub:GetLibrary("LibCrayon-3.0")
 
 -- get translations
-local L         = LibStub:GetLibrary("AceLocale-3.0"):GetLocale( ADDON )
-
--- config libraries
-local AceConfig 		= LibStub:GetLibrary("AceConfig-3.0")
-local AceConfigReg 		= LibStub:GetLibrary("AceConfigRegistry-3.0")
-local AceConfigDialog	= LibStub:GetLibrary("AceConfigDialog-3.0")
+local L         = LibStub:GetLibrary("AceLocale-3.0"):GetLocale(ADDON)
 
 -- constants
 local ICON         = "Interface\\Addons\\"..ADDON.."\\icon.tga"
 local ICON_RESTING = "Interface\\Addons\\"..ADDON.."\\iconrest.tga"
 
 -- addon and locals
-BrokerXPBar = LibStub:GetLibrary("AceAddon-3.0"):NewAddon(ADDON, "AceEvent-3.0", "AceConsole-3.0", "AceHook-3.0", "AceBucket-3.0", "AceTimer-3.0")
+local Addon = LibStub:GetLibrary("AceAddon-3.0"):NewAddon(ADDON, "AceEvent-3.0", "AceConsole-3.0", "AceBucket-3.0", "AceTimer-3.0")
+
+-- internal event handling
+Addon.callbacks = LibStub("CallbackHandler-1.0"):New(Addon)
+
+-- add to namespace
+NS.Addon = Addon
 
 -- addon constants
-BrokerXPBar.MODNAME   = "BrokerXPBar"
-BrokerXPBar.FULLNAME  = "Broker: XP Bar"
+Addon.MODNAME   = "BrokerXPBar"
+Addon.FULLNAME  = "Broker: XP Bar"
 
-BrokerXPBar.MAX_LEVEL = MAX_PLAYER_LEVEL_TABLE[GetExpansionLevel()]
+Addon.MAX_LEVEL = MAX_PLAYER_LEVEL_TABLE[GetExpansionLevel()]
 
 -- player level
-BrokerXPBar.playerLvl       = UnitLevel("player")
+Addon.playerLvl       = UnitLevel("player")
 
 -- faction variables
-BrokerXPBar.faction         = 0
+Addon.faction         = nil
 
-BrokerXPBar.watchedStanding = 0
-BrokerXPBar.atMaxRep        = false
+Addon.watchedStanding = 0
+Addon.watchedFriendID = nil
+Addon.atMaxRep        = false
 
-BrokerXPBar.FONT_NAME_DEFAULT = "Broker: XP Bar - Default"
-BrokerXPBar.FONT_DEFAULT      = "TextStatusBarText"
+Addon.FONT_NAME_DEFAULT = "Friz Quadrata TT"
+Addon.FONT_DEFAULT      = "Fonts\\FRIZQT__.TTF"
 
-local ldbObj  = LDB:NewDataObject(ADDON, {
-	type	= "data source",
-	icon	= ICON,
-	label	= BrokerXPBar.MODNAME,
-	text	= "Updating...",
-	OnClick = function(clickedframe, button) 
-		BrokerXPBar:OnClick(button) 
-	end,
-	OnEnter = function(self)
-		BrokerXPBar:CreateTooltip(self)
-	end,
-	OnLeave = function()
-		-- BrokerXPBar:RemoveTooltip()
-	end,
-})
-
---  minimap button
-do
-	local dragMode = nil
-	
-	local function moveButton(self)
-		if dragMode == "free" then
-			local centerX, centerY = Minimap:GetCenter()
-			local x, y = GetCursorPosition()
-			x, y = x / self:GetEffectiveScale() - centerX, y / self:GetEffectiveScale() - centerY
-			self:ClearAllPoints()
-			self:SetPoint("CENTER", x, y)
-		else
-			local centerX, centerY = Minimap:GetCenter()
-			local x, y = GetCursorPosition()
-			x, y = x / self:GetEffectiveScale() - centerX, y / self:GetEffectiveScale() - centerY
-			centerX, centerY = abs(x), abs(y)
-			centerX, centerY = (centerX / sqrt(centerX^2 + centerY^2)) * 80, (centerY / sqrt(centerX^2 + centerY^2)) * 80
-			centerX = x < 0 and -centerX or centerX
-			centerY = y < 0 and -centerY or centerY
-			self:ClearAllPoints()
-			self:SetPoint("CENTER", centerX, centerY)
-		end
-	end
-
-	local mm_button = CreateFrame("Button", ADDON .. "_MinimapButton", Minimap)
-	mm_button:SetHeight(32)
-	mm_button:SetWidth(32)
-	mm_button:SetFrameStrata("HIGH")
-	mm_button:SetPoint("CENTER", -77.44, -20.06)
-	mm_button:SetMovable(true)
-	mm_button:SetUserPlaced(true)
-	mm_button:EnableMouse(true)
-	mm_button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-	mm_button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
-	
-	local icon = mm_button:CreateTexture(mm_button:GetName() .. "Icon", "HIGH")
-	icon:SetTexture(ICON)
-	icon:SetTexCoord(0, 1, 0, 1)
-	icon:SetWidth(16)
-	icon:SetHeight(16)
-	icon:SetPoint("TOPLEFT", mm_button, "TOPLEFT", 8, -7)
-	
-	local overlay = mm_button:CreateTexture(mm_button:GetName() .. "Overlay", "OVERLAY")
-	overlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-	overlay:SetWidth(53)
-	overlay:SetHeight(53)
-	overlay:SetPoint("TOPLEFT", mm_button, "TOPLEFT")
-	
-	mm_button:SetScript("OnClick", function(self, button)
-		BrokerXPBar:OnClick(button)
-	end)
-	
-	mm_button:SetScript("OnMouseDown", function(self, button)
-		if IsShiftKeyDown() and IsControlKeyDown() then
-			dragMode = "free"
-			self:SetScript("OnUpdate", moveButton)
-		elseif IsShiftKeyDown() then
-			dragMode = nil
-			self:SetScript("OnUpdate", moveButton)
-		end
-	end)
-	
-	mm_button:SetScript("OnMouseUp", function(self)
-		self:SetScript("OnUpdate", nil)
-	end)
-
-	mm_button:SetScript("OnEnter", function(self)
-		BrokerXPBar:CreateTooltip(self)
-	end)
-	
-	mm_button:SetScript("OnLeave", function(self)
-		BrokerXPBar:RemoveTooltip()
-	end)
-
-	mm_button:Hide()
-
-	function BrokerXPBar:ShowMinimapButton(show)
-		if show then
-			mm_button:Show()
-		else
-			mm_button:Hide()
-		end
-	end
-
-	function BrokerXPBar:SetMinimapIcon(active)
-		if active then
-			icon:SetTexture(ICON)
-		else
-			icon:SetTexture(ICON_RESTING)
-		end
-	end
-end
-
--- helper functions
-local function GetArgs(str, pattern)
-   local ret = {}
-   local pos=0
-   
-   while true do
-     local word
-     _, pos, word=string.find(str, pattern, pos+1)
-	 
-     if not word then
-       break
-     end
-	 
-     -- word = string.lower(word)
-     table.insert(ret, word)
-   end
-   
-   return ret
-end
-
-local abbreviations = {
-		[0]  = "", 
-		[1]  = L["k"], 
-		[2]  = L["m"], 
-		[3]  = L["bn"], 
-}
-
-local function FormatNumber(number, sep, abbrev, decimals)
-	if type(number) ~= "number" then
-		return number
-	end
-	
-	local lvl    = 0
-	
-	if abbrev then
-		while number >= 1000 do
-			number = number / 1000
-			lvl = lvl + 1
-			
-			if lvl == #abbreviations - 1 then
-				break
-			end
-		end				
-	end
-	
-	number = string.format("%." .. decimals .. "f", number)
-	
-	local num, decimal = string.match(number,'^(%d*)(.-)$')
-	
-	if sep then
-		num = num:reverse():gsub('(%d%d%d)', "%1"..L[","]):reverse()
-		-- remove leading separator if necessary
-		-- TODO: move into regexp pattern above
-		num = num:gsub('^([^%d])(.*)', "%2")
-	end	
-	
-	-- trim right zeros
-	decimal = decimal:gsub('^(%p%d-)(0*)$', "%1")
-	
-	if decimal == "." then 
-		decimal = ""
-	else
-		-- localize decimal seperator
-		decimal = decimal:gsub('^(%p)(%d*)$', L["."].."%2")
-	end
-	
-	return num .. decimal .. abbreviations[lvl]
-end
-
--- colors
-NS.HexColors = {
-	Red      = "ff0000",
-	White    = "ffffff",
-	Yellow   = "ffff00",
-	Brownish = "eda55f",
-	Orange   = "e54100",
-	Blueish  = "04adcb",
-}
-
-function NS:Colorize(color, text)
-    if not text then
-	    return ""
-	end
-
-	if type(text) ~= "string" then
-		text = tostring(text)
-	end
-	
-	if NS.HexColors[color] then
-		text = text:gsub("(.*)(|r)", "%1%2|cff" .. NS.HexColors[color])
-		text = "|cff" .. NS.HexColors[color] .. tostring(text) .. "|r"
-	end
-	
-	return text
-end
-
-function NS:ColorizeByValue(value, from, to, ...)
-	if value and Crayon then
-		from = from or 0
-		to   = to or 1
-		
-		local hexColor = Crayon:GetThresholdHexColor(value, from, to)
-		
-		local args = {...}
-		local ret = {}
-		
-		for k, v in ipairs(args) do
-			v = "|cff" .. hexColor .. v .. "|r"
-			
-			ret[k] = v
-		end
-		
-		return unpack(ret)
-	else
-		return ...
-	end
-end
+-- modules
+local Options           = nil
+local Tooltip           = nil
+local MinimapButton     = nil
+local DataBroker        = nil
+local Bar               = nil
+local Factions          = nil
+local History           = nil
+local ReputationHistory = nil
 
 -- aux variables
 local countInitial = 0
-
-local blizzRepColors = {
-	[1] = {r=0.80, g=0.13, b=0.13, a=1}, -- hated
-	[2] = {r=1.00, g=0.25, b=0.00, a=1}, -- hostile
-	[3] = {r=0.93, g=0.40, b=0.13, a=1}, -- unfriendly
-	[4] = {r=1.00, g=1.00, b=0.00, a=1}, -- neutral
-	[5] = {r=0.00, g=0.70, b=0.00, a=1}, -- friendly
-	[6] = {r=0.00, g=1.00, b=0.00, a=1}, -- honoured
-	[7] = {r=0.00, g=0.60, b=1.00, a=1}, -- revered
-	[8] = {r=0.00, g=1.00, b=1.00, a=1}, -- exalted
-}
 
 -- combat log processing
 -- using wow constants to avoid localization issues
@@ -380,119 +153,95 @@ do
 	XPGAIN_RAID_PENALTY   = gsub(temp,                               "%%d",    "(%%d+)")
 end
 
-local defaults = {
-	profile = {
-		ShowText         = "XP",
-		ShowXP           = true,
-		ShowRep          = false,
-		Shadow           = true,
-		Thickness        = 2,
-		Spark            = 1,
-		Inverse          = false,
-		ExternalTexture  = false,
-		Texture          = nil,
-		ToGo             = true,
-		ShowValues       = true,
-		ShowPercentage   = true,
-		ShowFactionName  = true,
-		ShowRestedValue  = false,
-		ShowRestedPerc   = false,
-		ColoredText      = true,
-		Separators       = false,
-		Abbreviations    = false,
-		TTAbbreviations  = false,
-		DecimalPlaces    = 2,
-		ShowBlizzBars    = false,
-		HideHint         = false,
-		Location         = "Bottom",
-		xOffset          = 0,
-		yOffset          = 0,
-		Inside           = false,
-		Strata           = "HIGH",
-		Jostle           = false,
-		BlizzRep         = true,
-        Minimap	         = false,
-        MaxHideXPText    = false,
-        MaxHideXPBar     = false,
-        MaxHideRepText   = false,
-        MaxHideRepBar    = false,
-        AutoTrackOnGain  = false,
-        AutoTrackOnLoss  = false,
-		XP               = {r=0.0, g=0.4, b=0.9, a=1},
-		Rest             = {r=1.0, g=0.2, b=1.0, a=1},
-		None             = {r=0.0, g=0.0, b=0.0, a=1},
-		Rep              = {r=1.0, g=0.2, b=1.0, a=1},
-		NoRep            = {r=0.0, g=0.0, b=0.0, a=1},
-		Weight           = 0.8,
-		TimeFrame        = 30,
-		TTHideXPDetails  = false,
-		TTHideRepDetails = false,
-		Ticks            = 0,
-		ShowBarText      = false,
-		MouseOver        = false,
-		Font             = BrokerXPBar.FONT_NAME_DEFAULT,
-		FontSize         = 6,
-		BarToGo            = false,
-		BarShowValues      = true,
-		BarShowPercentage  = false,
-		BarShowFactionName = false,
-		BarShowRestedValue = false,
-		BarShowRestedPerc  = false,
-		BarAbbreviations   = false,
-	}
+local updateHandler = {
+	Spark              = "UpdateBarSetting",
+	Thickness          = "UpdateBarSetting",
+	ShowXP             = "UpdateXPBarSetting",
+	ShowRep            = "UpdateRepBarSetting",
+	Shadow             = "UpdateBarSetting",
+	Inverse            = "UpdateBarSetting",
+	ExternalTexture    = "UpdateTextureSetting",
+	Texture            = "UpdateTextureSetting",
+	Ticks              = "UpdateBarSetting",
+	ShowBarText        = "UpdateBarTextSetting",
+	BarToGo            = "UpdateBarTextSetting",
+	BarShowFactionName = "UpdateBarTextSetting",
+	BarShowValues      = "UpdateBarTextSetting",
+	BarShowPercentage  = "UpdateBarTextSetting",
+	BarShowRestedValue = "UpdateBarTextSetting",
+	BarShowRestedPerc  = "UpdateBarTextSetting",
+	BarAbbreviations   = "UpdateBarTextSetting",
+	MouseOver          = "UpdateBarSetting",
+	Font               = "UpdateBarSetting",
+	FontSize           = "UpdateBarSetting",
+	Frame              = "UpdateBarSetting",
+	Location           = "UpdateBarSetting",
+	xOffset            = "UpdateBarSetting",
+	yOffset            = "UpdateBarSetting",
+	Strata             = "UpdateBarSetting",
+	Inside             = "UpdateBarSetting",
+	Jostle             = "UpdateBarSetting",
+	BlizzRep           = "UpdateRepColorSetting",
+	ShowText           = "UpdateShowTextSetting",
+	ToGo               = "UpdateLabelSetting",
+	ShowFactionName    = "UpdateLabelSetting",
+	ShowValues         = "UpdateLabelSetting",
+	ShowPercentage     = "UpdateLabelSetting",
+	ShowRestedValue    = "UpdateLabelSetting",
+	ShowRestedPerc     = "UpdateLabelSetting",
+	ColoredText        = "UpdateLabelSetting",
+	Separators         = "UpdateLabelSetting",
+	Abbreviations      = "UpdateLabelSetting",
+	DecimalPlaces      = "UpdateLabelSetting",
+	AutoTrackOnGain    = "UpdateAutoTrackSetting",
+	AutoTrackOnLoss    = "UpdateAutoTrackSetting",
+	XP                 = "UpdateColorSetting",
+	Rest               = "UpdateColorSetting",
+	None               = "UpdateColorSetting",
+	Rep                = "UpdateColorSetting",
+	NoRep              = "UpdateColorSetting",
+	TimeFrame          = "UpdateHistorySetting",
+	Weight             = "UpdateHistorySetting",
+	MaxHideXPText      = "UpdateLabelSetting",
+	MaxHideXPBar       = "UpdateXPBarSetting",
+	MaxHideRepText     = "UpdateLabelSetting",
+	MaxHideRepBar      = "UpdateRepBarSetting",
+	ShowBlizzBars      = "UpdateBlizzardBarsSetting",
+	Minimap            = "UpdateMinimapSetting",
 }
 
 -- infrastructure
-function BrokerXPBar:OnInitialize()
+function Addon:OnInitialize()
+	-- set module references
+	Options           = self:GetModule("Options")
+	Tooltip           = self:GetModule("Tooltip")
+	MinimapButton     = self:GetModule("MinimapButton")
+	DataBroker        = self:GetModule("DataBroker")
+	Bar               = self:GetModule("Bar")
+	Factions          = self:GetModule("Factions")
+	History           = self:GetModule("History")
+	ReputationHistory = self:GetModule("ReputationHistory")
+
 	-- debug
 	self.debug = false
 
-	-- options
-	self.options = {}
-
-	self.db = LibStub:GetLibrary("AceDB-3.0"):New(self.MODNAME.."_DB", defaults, "Default")
-	self:SetupOptions()
-	
-	-- profile support
-	self.options.args.profile = LibStub:GetLibrary("AceDBOptions-3.0"):GetOptionsTable(self.db)
-	self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
-	self.db.RegisterCallback(self, "OnProfileCopied",  "OnProfileChanged")
-	self.db.RegisterCallback(self, "OnProfileReset",   "OnProfileChanged")
-	
-	AceConfigReg:RegisterOptionsTable(self.FULLNAME, self.options)
-	AceConfigDialog:AddToBlizOptions(self.FULLNAME)
-
     self:RegisterChatCommand("brokerxpbar", "ChatCommand")
 	self:RegisterChatCommand("bxp",         "ChatCommand")
-	
-	self.Bar:Initialize()
 end
 
-function BrokerXPBar:OnEnable()
+function Addon:OnEnable()
 	-- init session vars
 	self.playerLvl = UnitLevel("player")
 	
 	-- init xp history
-	self.History:Initialize()
-	
-	self.History:SetTimeFrame(self:GetSetting("TimeFrame") * 60)
-	self.History:SetWeight(self:GetSetting("Weight"))
+	History:SetTimeFrame(self:GetSetting("TimeFrame") * 60)
+	History:SetWeight(self:GetSetting("Weight"))
 
-	-- init reputation history
-	self.ReputationHistory:Initialize()
+	-- init reputation history	
+	ReputationHistory:SetTimeFrame(self:GetSetting("TimeFrame") * 60)
+	ReputationHistory:SetWeight(self:GetSetting("Weight"))
 	
-	self.ReputationHistory:SetTimeFrame(self:GetSetting("TimeFrame") * 60)
-	self.ReputationHistory:SetWeight(self:GetSetting("Weight"))
-	
-	self:RegisterBucketEvent("UPDATE_EXHAUSTION", 60, "Update")
-    self:RegisterEvent("PLAYER_UPDATE_RESTING", "UpdateIcon")
-	self:RegisterEvent("UPDATE_FACTION", "UpdateStanding")
-	
-	if self.playerLvl < self.MAX_LEVEL then
-		self:RegisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
-		self:RegisterEvent("PLAYER_XP_UPDATE")
-		self:RegisterEvent("PLAYER_LEVEL_UP")
-	end
+	self:SetupEventHandlers()
 	
 	self:RegisterAutoTrack()
 	self:RegisterTTL()	
@@ -507,61 +256,39 @@ function BrokerXPBar:OnEnable()
 	self:RefreshBarSettings()
 	self:InitialAnchoring()
 	
-	self:ShowMinimapButton(self:GetSetting("Minimap"))
+	MinimapButton:SetShow(Options:GetSetting("Minimap"))
 
 	self:Update()
 end
 
-function BrokerXPBar:OnDisable()
-	self.Bar:Hide()
+function Addon:OnDisable()
+	Bar:Hide()
 
-	self:ShowMinimapButton(false)
+	MinimapButton:SetShow(false)
 	
 	-- if we hid the bars ourselves we restore them else we leave them as they are
 	if not self:GetSetting("ShowBlizzBars") then
 		self:ShowBlizzardBars(true)
 	end
 	
-	self:UnregisterEvent("PLAYER_UPDATE_RESTING")
-	self:UnregisterEvent("UPDATE_FACTION")
-	
-	if self.playerLvl < self.MAX_LEVEL then
-		self:UnregisterEvent("PLAYER_XP_UPDATE")
-		self:UnregisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
-		self:UnregisterEvent("PLAYER_LEVEL_UP")
-	end
+	self:ResetEventHandlers()
 
 	self:RegisterAutoTrack(false)
 	self:RegisterTTL(false)	
-	
-	self:UnregisterAllBuckets()
-	self:UnhookAll()	
 end
 
-function BrokerXPBar:ChatCommand(input)
-    if input then  
-		args = GetArgs(input, "^ *([^%s]+) *")
-		
-		self:TriggerAction(args[1] and string.lower(args[1]) or nil, args)
-	else
-		self:TriggerAction("help")
-	end
-end
-
-function BrokerXPBar:OnProfileChanged(event, database, newProfileKey)
-	self.db.profile = database.profile
-	
-	self:ShowMinimapButton(self:GetSetting("Minimap"))
+function Addon:OnOptionsReloaded()
+	MinimapButton:SetShow(Options:GetSetting("Minimap"))
 	self:ShowBlizzardBars(self:GetSetting("ShowBlizzBars")) 
 
-	self.History:SetTimeFrame(self:GetSetting("TimeFrame") * 60)
-	self.History:SetWeight(self:GetSetting("Weight"))
+	History:SetTimeFrame(self:GetSetting("TimeFrame") * 60)
+	History:SetWeight(self:GetSetting("Weight"))
 	
-	self.ReputationHistory:SetTimeFrame(self:GetSetting("TimeFrame") * 60)
-	self.ReputationHistory:SetWeight(self:GetSetting("Weight"))
+	ReputationHistory:SetTimeFrame(self:GetSetting("TimeFrame") * 60)
+	ReputationHistory:SetWeight(self:GetSetting("Weight"))
 	
-	self.History:Process()
-	self.ReputationHistory:ProcessFaction(self.faction)
+	History:Process()
+	ReputationHistory:ProcessFaction(self.faction)
 	
 	self:RegisterAutoTrack()
 	self:RegisterTTL()		
@@ -571,7 +298,17 @@ function BrokerXPBar:OnProfileChanged(event, database, newProfileKey)
 	self:Update()	
 end
 
-function BrokerXPBar:OnClick(button)
+function Addon:ChatCommand(input)
+    if input then  
+		args = NS:GetArgs(input)
+		
+		self:TriggerAction(args[1] and string.lower(args[1]) or nil, args)
+	else
+		self:TriggerAction("help")
+	end
+end
+
+function Addon:OnClick(button)
 	if ( button == "RightButton" ) then 
 		if IsShiftKeyDown() then
 			-- unused
@@ -598,7 +335,7 @@ function BrokerXPBar:OnClick(button)
 	end
 end
 
-function BrokerXPBar:TriggerAction(action, args)
+function Addon:TriggerAction(action, args)
 	if action == "xp" then
 		-- xp to open edit box
 		self:OutputExperience()
@@ -622,7 +359,7 @@ function BrokerXPBar:TriggerAction(action, args)
 	elseif action == "bar" then
 		self:UserSetBarProgress(args[2], args[3])
 	elseif action == "refresh" then
-		self.Bar:Reanchor()
+		Bar:Reanchor()
 		self:Output("Refresh done.")
 	elseif action == "update" then
 		self:Update()
@@ -642,9 +379,49 @@ function BrokerXPBar:TriggerAction(action, args)
 	end
 end
 
-function BrokerXPBar:RegisterAutoTrack(register)
+function Addon:CreateTooltip(obj)
+	Tooltip:Create(obj)
+end
+
+function Addon:RemoveTooltip()
+	Tooltip:Remove()
+end
+
+function Addon:SetupEventHandlers()
+	Options.RegisterCallback(self, ADDON .. "_SETTING_CHANGED", "UpdateSetting")	
+
+	self:RegisterBucketEvent("UPDATE_EXHAUSTION", 60, "Update")
+	
+    self:RegisterEvent("PLAYER_UPDATE_RESTING", "UpdateIcon")
+	self:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
+	self:RegisterEvent("UPDATE_FACTION")
+	
+	if self.playerLvl < self.MAX_LEVEL then
+		self:RegisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
+		self:RegisterEvent("PLAYER_XP_UPDATE")
+		self:RegisterEvent("PLAYER_LEVEL_UP")
+	end
+end
+
+function Addon:ResetEventHandlers()
+	Options.UnregisterCallback(self, ADDON .. "_SETTING_CHANGED")	
+
+	self:UnregisterAllBuckets()
+	
+	self:UnregisterEvent("PLAYER_UPDATE_RESTING")
+	self:UnregisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
+	self:UnregisterEvent("UPDATE_FACTION")
+	
+	if self.playerLvl < self.MAX_LEVEL then
+		self:UnregisterEvent("PLAYER_XP_UPDATE")
+		self:UnregisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
+		self:UnregisterEvent("PLAYER_LEVEL_UP")
+	end
+end
+
+function Addon:RegisterAutoTrack(register)
 	if register == nil then
-		register = self:GetSetting("AutoTrackOnLoss") or self:GetSetting("AutoTrackOnLoss")
+		register = self:GetSetting("AutoTrackOnGain") or self:GetSetting("AutoTrackOnLoss")
 	end
 	
 	if register then
@@ -654,7 +431,7 @@ function BrokerXPBar:RegisterAutoTrack(register)
 	end
 end
 
-function BrokerXPBar:RegisterTTL(register)
+function Addon:RegisterTTL(register)
 	if register == nil then
 		register = self:GetSetting("ShowText") == "TTL" or self:GetSetting("ShowText") == "TTLRep"
 	end
@@ -671,54 +448,57 @@ function BrokerXPBar:RegisterTTL(register)
 	end
 end
 
-function BrokerXPBar:RefreshBarSettings()
+function Addon:RefreshBarSettings()
 	-- layout settings
-	for option in pairs(self.Bar.settings) do
+	for option in Bar:IterateSettings() do
 		if option == "ShowXP" then
-			self.Bar:SetSetting(option, self:IsBarRequired("XP"), true)
+			Bar:SetSetting(option, self:IsBarRequired("XP"), true)
 		elseif option == "ShowRep" then
-			self.Bar:SetSetting(option, self:IsBarRequired("Rep"), true)
+			Bar:SetSetting(option, self:IsBarRequired("Rep"), true)
 		elseif option == "Texture" then
-			self.Bar:SetSetting(option, self:GetSetting("ExternalTexture") and self:GetSetting("Texture") or nil, true)
+			Bar:SetSetting(option, self:GetSetting("ExternalTexture") and self:GetSetting("Texture") or nil, true)
 		else
-			self.Bar:SetSetting(option, self:GetSetting(option), true)
+			Bar:SetSetting(option, self:GetSetting(option), true)
 		end
 	end
 
 	-- update colors
-	for id in pairs(self.Bar.colors) do
-		local r, g, b, a = self:GetColor(id)
+	for id in Bar:IterateColors() do
+		local r, g, b, a = Options:GetColor(id)
 		
 		if id == "Rep" and self:GetSetting("BlizzRep") then
 			r, g, b, a = self:GetBlizzardReputationColor()
 		end
 		
-		self.Bar:SetColor(id, r, g, b, a)
+		Bar:SetColor(id, r, g, b, a)
 	end
 	
-	self.Bar:Reanchor()
+	Bar:Reanchor()
 end
 
-function BrokerXPBar:InitialAnchoring()
+function Addon:InitialAnchoring()
 	-- try to attach to the anchor frame for 30 secs and then give up
-	if not self.Bar.anchored and countInitial < 30 then
-		self.Bar:Reanchor()
+	if not Bar:IsAnchored() and countInitial < 30 then
+		Bar:Reanchor()
 		countInitial = countInitial + 1
 		self:ScheduleTimer("InitialAnchoring", 1)
 	else
-		self.Bar:SetSetting("Texture", self:GetSetting("ExternalTexture") and self:GetSetting("Texture") or nil)
-		self:UpdateWatchedFactionIndex()
-		self:UpdateStanding()
+		if ReputationHistory:HasNoFactions() then
+			self:ScheduleTimer("InitialAnchoring", 1)
+		else
+			self:UpdateWatchedFactionIndex()
+			self:UpdateStanding()
+		end
 	end
 end
 
 -- update functions
-function BrokerXPBar:Update()
+function Addon:Update()
 	self:UpdateBar()
 	self:UpdateLabel()
 end
 
-function BrokerXPBar:UpdateBar()
+function Addon:UpdateBar()
 	if self:GetSetting("ShowXP") then
 		local currentXP = UnitXP("player")
 		local maxXP     = UnitXPMax("player")
@@ -731,15 +511,13 @@ function BrokerXPBar:UpdateBar()
 		local xp     = currentXP / maxXP
 		local rested = restXP / maxXP
 		
-		local oldValue = self.Bar.progress.XP
+		local oldValue = Bar:GetProgress("XP")
 		
-		self.Bar:SetBarProgress("XP", xp)
-		self:Debug("UpdateBar: Progress for bar XP set to " .. tostring(self.Bar.progress.XP) .. " (from " .. oldValue .. ")")
+		Bar:SetProgress("XP", xp)
 		
-		oldValue = self.Bar.progress.Rested
+		oldValue = Bar:GetProgress("Rested")
 		
-		self.Bar:SetBarProgress("Rested", rested)
-		self:Debug("UpdateBar: Progress for bar Rested set to " .. tostring(self.Bar.progress.Rested) .. " (from " .. oldValue .. ")")
+		Bar:SetProgress("Rested", rested)
 		
 		local text = ""
 		
@@ -747,17 +525,17 @@ function BrokerXPBar:UpdateBar()
 			text = self:GetInfoText("XP", "Bar")
 		end
 		
-		self.Bar:SetText("XP", text)		
+		Bar:SetText("XP", text)		
 	end
 
 	if self:GetSetting("ShowRep") then
 		local reputation = 0
 		local text = ""
 		
-		if self.faction ~= 0 then
+		if self.faction then
 			local name, standing, minRep, maxRep, currentRep = nil, 0, 0, 0, 0
 			
-			name, _, standing, minRep, maxRep, currentRep = GetFactionInfo(self.faction)
+			name, _, standing, minRep, maxRep, currentRep = Factions:GetFactionInfo(self.faction)
 			
 			if maxRep == minRep then
 				return
@@ -770,18 +548,17 @@ function BrokerXPBar:UpdateBar()
 			end
 		end
 
-		local oldValue = self.Bar.progress.Reputation
+		local oldValue = Bar:GetProgress("Reputation")
 		
-		self.Bar:SetBarProgress("Reputation", reputation)
-		self:Debug("UpdateBar: Progress for bar Reputation set to " .. tostring(self.Bar.progress.Reputation) .. " (from " .. oldValue .. ")")		
+		Bar:SetProgress("Reputation", reputation)
 		
-		self.Bar:SetText("Reputation", text)
+		Bar:SetText("Reputation", text)
 	end
 		
-	self.Bar:Update()
+	Bar:Update()
 end
 
-function BrokerXPBar:UpdateLabel()
+function Addon:UpdateLabel()
 	local show = self:GetSetting("ShowText")
 
 	if show == "XPFirst" then
@@ -791,7 +568,7 @@ function BrokerXPBar:UpdateLabel()
 			show = "XP"
 		end
 	elseif show == "RepFirst" then
-		if self.faction == 0 then
+		if not self.faction or self.atMaxRep then
 			show = "XP"
 		else
 			show = "Rep"
@@ -803,99 +580,230 @@ function BrokerXPBar:UpdateLabel()
 	   show == "KTL" then
 		if self.playerLvl == self.MAX_LEVEL then
 			if self:GetSetting("MaxHideXPText") then
-				ldbObj.text = ""
+				DataBroker:SetText("")
 			else
-				ldbObj.text = L["Max Level"]
+				DataBroker:SetText(L["Max Level"])
 			end
 			return
 		end
 	end
 	
 	if show == "Rep" and self.atMaxRep and self:GetSetting("MaxHideRepText") then
-		ldbObj.text = ""
+		DataBroker:SetText("")
 		return
 	end
 
     if show == "Rep" or show == "XP"  then		
-		ldbObj.text = self:GetInfoText(show)
+		DataBroker:SetText(self:GetInfoText(show))
     elseif show == "TTL" then		
-		self.History:Process()
+		History:Process()
 			
-		ldbObj.text = L["TTL"] .. ": " .. self.History:GetTimeToLevel()
+		DataBroker:SetText(L["TTL"] .. ": " .. History:GetTimeToLevel())
     elseif show == "KTL" then
-		self.History:Process()
+		History:Process()
 			
-		ldbObj.text = L["KTL"] .. ": " .. NS:Colorize("Red", self.History:GetKillsToLevel())
+		DataBroker:SetText(L["KTL"] .. ": " .. NS:Colorize("Red", History:GetKillsToLevel()))
     elseif show == "TTLRep" then		
-		self.ReputationHistory:ProcessFaction(self.faction)
+		ReputationHistory:ProcessFaction(self.faction)
 			
-		ldbObj.text = L["TTLRep"] .. ": " .. self.ReputationHistory:GetTimeToLevel(self.faction)
+		DataBroker:SetText(L["TTLRep"] .. ": " .. ReputationHistory:GetTimeToLevel(self.faction))
     else
-        ldbObj.text = self.FULLNAME
+        DataBroker:SetText(self.FULLNAME)
     end
 end
 
-function BrokerXPBar:UpdateIcon()
-	local resting = IsResting() or false
+function Addon:UpdateIcon()
+	local icon = self:GetIcon()
 	
-    if resting then
-		ldbObj.icon = ICON_RESTING
-    else
-		ldbObj.icon = ICON
-    end
-	
-	self:SetMinimapIcon(not resting)
+	DataBroker:SetIcon(icon)
+	MinimapButton:SetIcon(icon)
 end
 
-function BrokerXPBar:UpdateStanding()
+function Addon:UpdateStanding()
 	local standing = 0
+	local friendID = nil
 	
-	-- check for changes in watched faction
-	self:UpdateWatchedFactionIndex()
-	
-	if self.faction ~= 0 then
-		local minRep, maxRep, currentRep = 0, 0, 0
-		_, _, standing, minRep, maxRep, currentRep = GetFactionInfo(self.faction)
+	if self.faction then
+		local atMax = false
+		_, _, standing, _, _, _, _, _, _, _, _, _, _, _, friendID, atMax = Factions:GetFactionInfo(self.faction)
 		
-		if not self.atMaxRep and standing == 8 and currentRep + 1 == maxRep then
+		if atMax then
 			self:MaxReputationReached()
 		end
 	end
+	
+	local recolor = false
+	
+	if friendID ~= self.watchedFriendID then
+		self.watchedFriendID = friendID
 		
+		recolor = true
+	end
+	
 	if standing ~= self.watchedStanding then
 		self.watchedStanding = standing
-		
-		if self:GetSetting("BlizzRep") then
-			local r, g, b, a = self:GetBlizzardReputationColor()
 
-			self.Bar:SetColor("Rep", r, g, b, a)
+		recolor = true		
+	end
+	
+	if recolor then
+		if self:GetSetting("BlizzRep") then
+			local r, g, b, a = self:GetBlizzardReputationColor(standing, friendID)
+
+			Bar:SetColor("Rep", r, g, b, a)
 		end
 	end
 
-	self.ReputationHistory:Update()
+	ReputationHistory:Update()
 	
 	self:Update()
 end
 
-function BrokerXPBar:MaxLevelReached()
+-- settings
+function Addon:UpdateSetting(event, setting, value, old)
+	local handler = updateHandler[setting]
+
+	if handler == "UpdateBarSetting" then
+		Bar:SetSetting(setting, value)
+	elseif handler == "UpdateXPBarSetting" then
+		Bar:SetSetting("ShowXP", self:IsBarRequired("XP"))
+		
+		self:UpdateBar()
+	elseif handler == "UpdateRepBarSetting" then
+		Bar:SetSetting("ShowRep", self:IsBarRequired("Rep"))
+
+		self:UpdateBar()
+	elseif handler == "UpdateTextureSetting" then
+		Bar:SetSetting("Texture", Options:GetSetting("ExternalTexture") and Options:GetSetting("Texture") or nil)
+	elseif handler == "UpdateBarTextSetting" then
+		self:UpdateBar()
+	elseif handler == "UpdateRepColorSetting" then
+		local r, g, b, a = Options:GetColor("Rep")
+
+		if Options:GetSetting("BlizzRep") then
+			r, g, b, a = self:GetBlizzardReputationColor()
+		end
+
+		Bar:SetColor("Rep", r, g, b, a)
+	elseif handler == "UpdateLabelSetting" then
+		self:UpdateLabel()
+	elseif handler == "UpdateShowTextSetting" then
+		self:RegisterTTL()
+		
+		self:UpdateLabel()
+	elseif handler == "UpdateHistorySetting" then
+		if setting == "TimeFrame" then
+			History:SetTimeFrame(value * 60)
+			ReputationHistory:SetTimeFrame(value * 60)
+		elseif setting == "Weight" then
+			History:SetWeight(value)
+			ReputationHistory:SetWeight(value)
+		end
+
+		History:Process()
+		ReputationHistory:Process()
+	elseif handler == "UpdateAutoTrackSetting" then
+		self:RegisterAutoTrack()
+	elseif handler == "UpdateColorSetting" then
+		if setting == "Rep" and self:GetSetting("BlizzRep") then
+			return
+		end
+		
+		Bar:SetColor(setting, value.r, value.g, value.b, value.a)	
+	elseif handler == "UpdateBlizzardBarsSetting" then
+		self:ShowBlizzardBars(value) 
+	elseif handler == "UpdateMinimapSetting" then
+		MinimapButton:SetShow(value)
+	end
+end
+
+function Addon:GetSetting(setting)
+	return Options:GetSetting(setting)
+end
+
+function Addon:GetFaction()
+	return self.faction
+end
+
+function Addon:SetFaction(factionId)
+	if factionId == 0 then
+		factionId = nil
+	end
+	
+	if self.faction == factionId then
+		return
+	end
+
+	self.setFactionInProgress = true
+	
+	local index = Factions:GetFactionIndex(factionId)
+	
+	-- index == 0 is used to unset any watched faction
+	if index < 0 or index > GetNumFactions() then
+		Factions:RestoreUI()
+		
+		return
+	end
+	
+	local watchedName = GetWatchedFactionInfo()
+	local requestedName = Factions:GetFactionName(factionId)
+	
+	if watchedName ~= requestedName then
+		SetWatchedFactionIndex(index)
+		
+		-- after using index we can restore the faction list ui
+		Factions:RestoreUI()
+
+		self.pendingWatchedFaction = requestedName
+	end
+	
+	-- after using index we can restore the faction list ui
+	Factions:RestoreUI()
+	
+	self.faction  = factionId
+	self.atMaxRep = false
+		
+	if not self.faction then
+		self.watchedStanding = 0
+	end
+	
+	self:UpdateStanding()
+	
+	Bar:SetSetting("ShowRep", self:IsBarRequired("Rep"))	
+	
+	Options:Update()
+	
+	self.setFactionInProgress = false
+end
+
+-- utilities
+function Addon:GetIcon()
+	if IsResting() then
+		return ICON_RESTING
+	else
+		return ICON
+	end
+end
+
+function Addon:MaxLevelReached()
 	if self.playerLvl == self.MAX_LEVEL then
 		self:UnregisterEvent("PLAYER_XP_UPDATE")
 		self:UnregisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
 		self:UnregisterEvent("PLAYER_LEVEL_UP")
 		
-		self.Bar:SetSetting("ShowXP", self:IsBarRequired("XP"))
+		Bar:SetSetting("ShowXP", self:IsBarRequired("XP"))
 	end
 end
 
-function BrokerXPBar:MaxReputationReached()
+function Addon:MaxReputationReached()
 	if not self.atMaxRep then
 		self.atMaxRep = true
 		
-		self.Bar:SetSetting("ShowRep", self:IsBarRequired("Rep"))
+		Bar:SetSetting("ShowRep", self:IsBarRequired("Rep"))
 	end
 end
 
-function BrokerXPBar:GetInfoText(source, prefix)
+function Addon:GetInfoText(source, prefix)
 	if source ~= "XP" and source ~= "Rep" then
 		return ""
 	end
@@ -915,11 +823,11 @@ function BrokerXPBar:GetInfoText(source, prefix)
 	if source == "XP" then
 		current, max = UnitXP("player"), UnitXPMax("player")
 	else
-		if self.faction == 0 then
+		if not self.faction  then
 			return L["No watched faction"]
 		end
 		
-		name, _, _, min, max, current = GetFactionInfo(self.faction)
+		name, _, _, min, max, current = Factions:GetFactionInfo(self.faction)
 					
 		current = current - min
 		max     = max - min
@@ -1001,13 +909,13 @@ function BrokerXPBar:GetInfoText(source, prefix)
 end
 
 -- events
-function BrokerXPBar:PLAYER_XP_UPDATE()
-	self.History:UpdateXP()
+function Addon:PLAYER_XP_UPDATE()
+	History:UpdateXP()
 
 	self:Update()
 end
 
-function BrokerXPBar:CHAT_MSG_COMBAT_XP_GAIN(_, xpMsg)
+function Addon:CHAT_MSG_COMBAT_XP_GAIN(_, xpMsg)
 	-- kill, rested, group, penalty, raid penalty
 	local kxp, rxp, gxp, pxp, rpxp
 	local bonusType
@@ -1083,14 +991,14 @@ function BrokerXPBar:CHAT_MSG_COMBAT_XP_GAIN(_, xpMsg)
 		return
 	end
 
-	self.History:AddKill(kxp, gxp, rpxp)
+	History:AddKill(kxp, gxp, rpxp)
 	
 	if self:GetSetting("ShowText") == "KTL" then
 		self:UpdateLabel()
 	end
 end
 
-function BrokerXPBar:PLAYER_LEVEL_UP(_, newLevel)
+function Addon:PLAYER_LEVEL_UP(_, newLevel)
 	self.playerLvl = newLevel
 
 	if self.playerLvl == self.MAX_LEVEL then
@@ -1100,7 +1008,7 @@ function BrokerXPBar:PLAYER_LEVEL_UP(_, newLevel)
 	end
 end
 
-function BrokerXPBar:COMBAT_TEXT_UPDATE(_, msgType, factionName, amount)
+function Addon:COMBAT_TEXT_UPDATE(_, msgType, factionName, amount)
     if msgType ~= "FACTION" then
 		return
 	end
@@ -1108,51 +1016,98 @@ function BrokerXPBar:COMBAT_TEXT_UPDATE(_, msgType, factionName, amount)
 	if (amount < 0 and self:GetSetting("AutoTrackOnLoss")) or 
 	   (amount > 0 and self:GetSetting("AutoTrackOnGain")) then
 		if factionName then
-			self:SetFaction(self:GetFactionByName(factionName))
+			-- NOTE: if rep is gained with guild the factionName passed is the generic 'Guild' instead of the guild name
+			--       this matches with the header entry in the faction list, so we have to get the real guild name instead
+			--       since factionName is localized we need to perform the 'Guild' check against a localized string
+			--       hopefully CHAT_MSG_GUILD is equal to the factionName argument in all languages
+			if factionName == CHAT_MSG_GUILD then
+				local guildName = GetGuildInfo("player")
+				
+				factionName = guildName
+			end
+		
+			self:SetFaction(Factions:GetFactionByName(factionName))
 		end
 	end	
 end
 
--- faction functions
-function BrokerXPBar:UpdateWatchedFactionIndex()
-	-- isWatched in GetFactionInfo(factionIndex) doesnt do the trick before use of SetWatchedFactionIndex(index)
-	local watchedname = GetWatchedFactionInfo()
-	local currentname = GetFactionInfo(self.faction)
-	local index = 0
+function Addon:CHAT_MSG_COMBAT_FACTION_CHANGE()
+	self:UpdateStanding()
+end
 
-	if currentname ~= watchedname then
-		for i = 1, GetNumFactions() do
-			local name, _, _, _, _, _, _, _, isHeader, _, hasRep = GetFactionInfo(i)			
-			if name == watchedname and (not isHeader or hasRep) then
-				index = i
-				break
-			end
+function Addon:UPDATE_FACTION()
+	-- don't check for changes in watched faction until pending faction has been set
+	if self.pendingWatchedFaction then
+		local watchedName = GetWatchedFactionInfo() or ""
+		
+		if watchedName == self.pendingWatchedFaction then
+			self.pendingWatchedFaction = nil
 		end
-
-		self:SetFaction(index)
+	else
+		self:UpdateWatchedFactionIndex()
 	end
+end
+
+-- faction functions
+function Addon:UpdateWatchedFactionIndex()
+	-- NOTE: there are 3 annoying problems with Blizzards API for factions
+	-- * there is no way to iterate over all known factions via id, 
+	--   it has to be done via the visible ui list in the reputation pane where folded reputations are not accessible
+	-- * the watched faction cannot be set via id but only via index in the ui list
+	--   so to set a 'hidden' faction you need to unfold the branch to it (and refold it to clean up afterwards)
+	-- * the event UPDATE_FACTION informing of a change in the watched faction is also used to indicate 
+	--   changes in the faction ui list (e.g. (un)folding of branches)
+
+	-- NOTE: here we take care of the implications of the problem described above
+	if self.isUpdatingWatchedFactionIndex or self.setFactionInProgress or self.pendingWatchedFaction then
+		return
+	end
+	
+	self.isUpdatingWatchedFactionIndex = true
+
+	local watchedName = GetWatchedFactionInfo()
+	local currentName = Factions:GetFactionName(self.faction)
+
+	local watchedId = self.faction
+	
+	if currentName ~= watchedName then
+		local id = Factions:GetFactionByName(watchedName)
+		
+		if id then
+			-- NOTE: isWatched in GetFactionInfo(factionIndex) doesn't do the trick before use of SetWatchedFactionIndex(index)
+			local _, _, _, _, _, _, _, _, isHeader, _, hasRep = Factions:GetFactionInfo(id)
+			
+			if not isHeader or hasRep then
+				watchedId = id
+			end
+		else
+			watchedId = nil
+		end
+	end
+
+	if watchedId ~= self.faction then
+		self:SetFaction(watchedId)		
+	end
+	
+	self.isUpdatingWatchedFactionIndex = false
 
 	return self.faction
 end
 
-function BrokerXPBar:GetFactionName(faction)
-	return GetFactionInfo(faction) or L["None"]
-end
-
 -- auxillary functions
-function BrokerXPBar:Output(msg)
+function Addon:Output(msg)
 	if ( msg ~= nil and DEFAULT_CHAT_FRAME ) then
 		DEFAULT_CHAT_FRAME:AddMessage( self.MODNAME..": "..msg, 0.6, 1.0, 1.0 )
 	end
 end
 
-function BrokerXPBar:Debug(msg)
-	if ( self.debug and msg ~= nil and DEFAULT_CHAT_FRAME ) then
-		DEFAULT_CHAT_FRAME:AddMessage( self.MODNAME .. " (dbg): " .. msg, 1.0, 0.37, 0.37 )
+function Addon:Debug(msg)
+	if self.debug and DEFAULT_CHAT_FRAME then
+		DEFAULT_CHAT_FRAME:AddMessage(self.MODNAME .. " (dbg): " .. tostring(msg), 1.0, 0.37, 0.37)
 	end
 end
 
-function BrokerXPBar:FormatNumber(number, prefix)
+function Addon:FormatNumber(number, prefix)
 	if not prefix then
 		prefix = ""
 	end
@@ -1161,33 +1116,25 @@ function BrokerXPBar:FormatNumber(number, prefix)
 		return number
 	end
 	
-	return FormatNumber(number, self:GetSetting("Separators"), self:GetSetting(prefix .. "Abbreviations"), self:GetSetting("DecimalPlaces"))
+	return NS:FormatNumber(number, self:GetSetting("Separators"), self:GetSetting(prefix .. "Abbreviations"), self:GetSetting("DecimalPlaces"))
 end
 
-function BrokerXPBar:GetBlizzardReputationColor(standing)
-	local r, g, b, a = 0, 0, 0, 0
-	
+function Addon:GetBlizzardReputationColor(standing, friendship)
 	if not standing then
-		standing = self.watchedStanding
+		standing   = self.watchedStanding
+		friendship = self.watchedFriendID 
 	end
 		
-	if standing and blizzRepColors[standing] then
-		r = blizzRepColors[standing].r
-		g = blizzRepColors[standing].g
-		b = blizzRepColors[standing].b
-		a = blizzRepColors[standing].a
-	end
-		
-	return r, g, b, a
+	return Factions:GetBlizzardReputationColor(standing, friendship)
 end
 
-function BrokerXPBar:IsBarRequired(bar)
+function Addon:IsBarRequired(bar)
 	if bar == "XP" then
 		if self:GetSetting("ShowXP") then
 			return self.playerLvl < self.MAX_LEVEL or not self:GetSetting("MaxHideXPBar")
 		end
 	elseif bar == "Rep" then
-		if self:GetSetting("ShowRep") and self.faction ~= 0 then
+		if self:GetSetting("ShowRep") and self.faction then
 			return not self.atMaxRep or not self:GetSetting("MaxHideRepBar")
 		end
 	end
@@ -1195,7 +1142,7 @@ function BrokerXPBar:IsBarRequired(bar)
 	return false
 end
 
-function BrokerXPBar:ShowBlizzardBars(show)
+function Addon:ShowBlizzardBars(show)
 	if show then
 		-- restore the blizzard frames
 		MainMenuExpBar:SetScript("OnEvent", MainMenuExpBar_OnEvent)
@@ -1220,7 +1167,7 @@ function BrokerXPBar:ShowBlizzardBars(show)
 end
 
 -- user functions
-function BrokerXPBar:OutputExperience()
+function Addon:OutputExperience()
 	if self.playerLvl < self.MAX_LEVEL then
 		local totalXP = UnitXPMax("player")
 		local currentXP = UnitXP("player")
@@ -1241,29 +1188,29 @@ function BrokerXPBar:OutputExperience()
 					
 end
 
-function BrokerXPBar:OutputReputation()
-	if self.faction ~= 0 then
-		local name, desc, standing, minRep, maxRep, currentRep = GetFactionInfo(self.faction)
+function Addon:OutputReputation()
+	if self.faction then
+		local name, desc, standing, minRep, maxRep, currentRep, _, _, _, _, _, _, _, _, friendID = Factions:GetFactionInfo(self.faction)
 		DEFAULT_CHAT_FRAME.editBox:SetText(string.format(L["%s: %s/%s (%3.2f%%) Currently %s with %d to go"],
 					name,
 					currentRep - minRep,
 					maxRep - minRep, 
 					(currentRep-minRep)/(maxRep-minRep)*100,
-					getglobal("FACTION_STANDING_LABEL"..standing),
+					Factions:GetStandingLabel(standing, friendID),
 					maxRep - currentRep))
 	else
 		self:Output(L["Currently no faction tracked."])
 	end
 end
 
-function BrokerXPBar:PrintVersionInfo()
+function Addon:PrintVersionInfo()
     self:Output(L["Version"] .. " " .. NS:Colorize("White", GetAddOnMetadata(ADDON, "Version")))
 end
 
-function BrokerXPBar:UserSetBarProgress(bar, progress)
-	if self.Bar.progress[bar] then
-		local current = self.Bar.progress[bar]
+function Addon:UserSetBarProgress(bar, progress)
+	local current = Bar:GetProgress(bar)
 	
+	if current then
 		if not progress then
 			self:Output("Current progress of bar " .. bar .. ": " .. tostring(current))
 			
@@ -1276,10 +1223,10 @@ function BrokerXPBar:UserSetBarProgress(bar, progress)
 			self:Output("No valid value given for bar progress: " .. tostring(progress))
 		end
 	
-		self.Bar:SetBarProgress(bar, fraction)
-		self.Bar:Update()
+		Bar:SetProgress(bar, fraction)
+		Bar:Update()
 		
-		self:Output("Progress of bar " .. bar .. " set to " .. tostring(self.Bar.progress[bar]) .. " (from : " .. tostring(current) .. ")")
+		self:Output("Progress of bar " .. bar .. " set to " .. tostring(Bar:GetProgress(bar)) .. " (from : " .. tostring(current) .. ")")
 	else
 		self:Output("Unknown bar: " .. tostring(bar))
 	end

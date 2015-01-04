@@ -1,5 +1,6 @@
 
 local GetRelativeThreat = TidyPlatesUtility.GetRelativeThreat
+local GetGroupInfo = TidyPlatesUtility.GetGroupInfo
 
 ----------------------
 -- FadeLater() - Registers a callback, which hides the specified frame in X seconds
@@ -246,9 +247,9 @@ local function WatcherFrameHandler(frame, event)
 	if guid then TargetList[guid] = "focus" end
 	
 	-- [[ This code enables full raid target watching
-	if UnitInRaid("player") then
-		local raidsize = TidyPlatesUtility.GetNumRaidMembers() - 1
-		for index = 1, raidsize do
+	local groupType, groupSize = GetGroupInfo()
+	if groupType == "raid" then
+		for index = 1, groupSize do
 			unitid = "raid"..index.."target"
 			guid = UnitGUID(unitid)
 			if guid then TargetList[guid] = unitid end

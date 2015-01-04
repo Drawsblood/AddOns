@@ -100,31 +100,89 @@ L:AddLocale("enUS",
 }
 
 )
+L:AddLocale("itIT", 
+{
+	-- ["Add Nickname"] = "",
+	-- ["Adds an alternate name to show in popups."] = "",
+	-- ["Clear Nickname"] = "",
+	-- ["Clears alternate name to show in popups."] = "",
+	-- framealpha_desc = "",
+	-- framealpha_name = "",
+	-- Popup = "",
+	-- PopupMessage = "",
+	-- ["Remove Nickname"] = "",
+	-- ["Removes an alternate name to show in popups."] = "",
+	-- ["Set Separately"] = "",
+	-- showall_desc = "",
+	-- showall_name = "",
+	-- ["Show All Popups"] = "",
+	-- show_desc = "",
+	-- show_name = "",
+	-- show_perframedesc = "",
+	-- show_perframename = "",
+	-- ["Show Popups"] = "",
+	-- ["Show Popups for all chat windows."] = "",
+	-- ["Show Popups for each window."] = "",
+	-- ["Shows messages in a popup window."] = "",
+	-- ["Shows messages with your name in a popup."] = "",
+	-- ["Toggle setting options separately for each chat window."] = "",
+}
+
+)
+L:AddLocale("ptBR", 
+{
+	-- ["Add Nickname"] = "",
+	-- ["Adds an alternate name to show in popups."] = "",
+	-- ["Clear Nickname"] = "",
+	-- ["Clears alternate name to show in popups."] = "",
+	-- framealpha_desc = "",
+	-- framealpha_name = "",
+	-- Popup = "",
+	-- PopupMessage = "",
+	-- ["Remove Nickname"] = "",
+	-- ["Removes an alternate name to show in popups."] = "",
+	-- ["Set Separately"] = "",
+	-- showall_desc = "",
+	-- showall_name = "",
+	-- ["Show All Popups"] = "",
+	-- show_desc = "",
+	-- show_name = "",
+	-- show_perframedesc = "",
+	-- show_perframename = "",
+	-- ["Show Popups"] = "",
+	-- ["Show Popups for all chat windows."] = "",
+	-- ["Show Popups for each window."] = "",
+	-- ["Shows messages in a popup window."] = "",
+	-- ["Shows messages with your name in a popup."] = "",
+	-- ["Toggle setting options separately for each chat window."] = "",
+}
+
+)
 L:AddLocale("frFR",  
 {
-	["Add Nickname"] = "Ajouter un surnom", -- Needs review
+	["Add Nickname"] = "Ajouter un surnom",
 	-- ["Adds an alternate name to show in popups."] = "",
 	["Clear Nickname"] = "Efface le surnom",
 	-- ["Clears alternate name to show in popups."] = "",
-	framealpha_desc = "Régler la transparence de la popup lorsqu'elle disparait.", -- Needs review
+	framealpha_desc = "Régler la transparence de la popup lorsqu'elle disparait.",
 	framealpha_name = "Transparence des popups",
-	Popup = true, -- Needs review
-	PopupMessage = "Message popup", -- Needs review
+	Popup = true,
+	PopupMessage = "Message popup",
 	["Remove Nickname"] = "Retirer un surnom",
 	-- ["Removes an alternate name to show in popups."] = "",
-	["Set Separately"] = "Afficher séparément", -- Needs review
-	showall_desc = "Afficher les popups pour toutes les fenêtres de discussion.", -- Needs review
-	showall_name = "Afficher toutes les popups", -- Needs review
-	["Show All Popups"] = "Afficher toutes les popups", -- Needs review
-	show_desc = "Afficher les popups pour chaque fenêtre.", -- Needs review
-	show_name = "Afficher les popups", -- Needs review
-	show_perframedesc = "Active ou désactive l'affichage des popups.", -- Needs review
-	show_perframename = "Afficher les popups de la fenêtre de discussion %d", -- Needs review
-	["Show Popups"] = "Afficher les popups", -- Needs review
-	["Show Popups for all chat windows."] = "Afficher les popups pour toutes les fenêtres de discussion.", -- Needs review
-	["Show Popups for each window."] = "Afficher les popups pour chaque fenêtre.", -- Needs review
-	["Shows messages in a popup window."] = "Afficher les messages dans une fenêtre popup.", -- Needs review
-	["Shows messages with your name in a popup."] = "Afficher les messages avec votre nom dans une popup.", -- Needs review
+	["Set Separately"] = "Afficher séparément",
+	showall_desc = "Afficher les popups pour toutes les fenêtres de discussion.",
+	showall_name = "Afficher toutes les popups",
+	["Show All Popups"] = "Afficher toutes les popups",
+	show_desc = "Afficher les popups pour chaque fenêtre.",
+	show_name = "Afficher les popups",
+	show_perframedesc = "Active ou désactive l'affichage des popups.",
+	show_perframename = "Afficher les popups de la fenêtre de discussion %d",
+	["Show Popups"] = "Afficher les popups",
+	["Show Popups for all chat windows."] = "Afficher les popups pour toutes les fenêtres de discussion.",
+	["Show Popups for each window."] = "Afficher les popups pour chaque fenêtre.",
+	["Shows messages in a popup window."] = "Afficher les messages dans une fenêtre popup.",
+	["Shows messages with your name in a popup."] = "Afficher les messages avec votre nom dans une popup.",
 	["Toggle setting options separately for each chat window."] = "Activer des préférences différentes pour chaque fenêtre de discussion.",
 }
 
@@ -479,47 +537,43 @@ end
 -- /dump module.db.profile
 -- /script module.db.profile.sink10OutputSink = nil
 function module:Popup(source, text, r,g,b, ...)   
-    if UIFrameIsFlashing(Prat_PopupFrame) then  
-        UIFrameFlashRemoveFrame(Prat_PopupFrame)
-    end
-    
-	Prat_PopupFrame.fadeOut = 5;
-	Prat_PopupFrame:SetAlpha(module.db.profile.framealpha or 1.0);
+	if Prat_PopupFrame.anim then
+		Prat_PopupFrame.anim:Stop()
+	else
+		Prat_PopupFrame.anim = Prat_PopupFrame:CreateAnimationGroup()
+		Prat_PopupFrame.anim:SetScript("OnFinished", function() Prat_PopupFrameText:Hide() end)
+
+		local fade1 = Prat_PopupFrame.anim:CreateAnimation("Alpha")
+		fade1:SetDuration(1)
+		fade1:SetChange(module.db.profile.framealpha or 1)
+		fade1:SetEndDelay(4)
+		fade1:SetOrder(1)
+
+		local fade2 = Prat_PopupFrame.anim:CreateAnimation("Alpha")
+		fade2:SetDuration(5)
+		fade2:SetChange(-1)
+		fade2:SetOrder(2)
+	end
+
 	Prat_PopupFrameText:SetTextColor(r,g,b)
-	Prat_PopupFrameText:SetText(text);
-	
+	Prat_PopupFrameText:SetText(text)
+
 	local font, _, style = ChatFrame1:GetFont()
 	local _, fontsize = GameFontNormal:GetFont()
-	Prat_PopupFrameText:SetFont( font, fontsize, style )   
-    Prat_PopupFrameText:SetNonSpaceWrap(false)
+	Prat_PopupFrameText:SetFont( font, fontsize, style )
+	Prat_PopupFrameText:SetNonSpaceWrap(false)
 	Prat_PopupFrame:SetWidth(math.min(math.max(64, Prat_PopupFrameText:GetStringWidth()+20), 520))
-    Prat_PopupFrame:SetHeight(64)
-	Prat_PopupFrame:SetBackdropBorderColor(r,g,b) 	
+	Prat_PopupFrame:SetHeight(64)
+	Prat_PopupFrame:SetBackdropBorderColor(r,g,b)
 
-    Prat_PopupFrameText:ClearAllPoints()
-    Prat_PopupFrameText:SetPoint("TOPLEFT", Prat_PopupFrame, "TOPLEFT", 10, 10)
-    Prat_PopupFrameText:SetPoint("BOTTOMRIGHT", Prat_PopupFrame, "BOTTOMRIGHT", -10, -10)
+	Prat_PopupFrameText:ClearAllPoints()
+	Prat_PopupFrameText:SetPoint("TOPLEFT", Prat_PopupFrame, "TOPLEFT", 10, 10)
+	Prat_PopupFrameText:SetPoint("BOTTOMRIGHT", Prat_PopupFrame, "BOTTOMRIGHT", -10, -10)
 	Prat_PopupFrameText:Show()
-	
-	local inTime, outTime, holdTime = 1, Prat_PopupFrame.fadeOut, 4   
-	    
-	local fadeInfo = {}
-	local fadeInfoOut = {}
-	fadeInfo.timeToFade = inTime
-	fadeInfo.mode = "IN"
-	fadeInfo.fadeHoldTime = holdTime
-	fadeInfo.startAlpha = 0
-	fadeInfo.endAlpha = module.db.profile.framealpha or 1.0
 
-	fadeInfo.finishedFunc = UIFrameFade
-	fadeInfo.finishedArg1 = Prat_PopupFrame
-	fadeInfo.finishedArg2 = fadeInfoOut
-	fadeInfoOut.startAlpha = module.db.profile.framealpha or 1.0
-	fadeInfoOut.endAlpha = 0
-	fadeInfoOut.timeToFade = outTime
-	fadeInfoOut.mode = "OUT"
-	fadeInfoOut.finishedFunc = function() Prat_PopupFrameText:Hide() end
-	UIFrameFade(Prat_PopupFrame, fadeInfo)	    	    
+	Prat_PopupFrame:SetAlpha(0)
+	Prat_PopupFrame:Show()
+	Prat_PopupFrame.anim:Play()
 end
 
 local DEBUG 

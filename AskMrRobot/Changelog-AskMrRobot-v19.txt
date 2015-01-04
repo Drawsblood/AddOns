@@ -1,0 +1,8 @@
+2014-12-02  yellowfive  <yellowfive>
+
+[be5dc6c02f77] [v19]
+* AskMrRobot.toc, AskMrRobotUi.lua, amr-constants.lua, config.lua, ui/CombatLogTab.lua:
+
+minor tweaks for combat logging
+
+

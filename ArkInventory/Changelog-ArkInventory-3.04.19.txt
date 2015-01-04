@@ -1,0 +1,72 @@
+------------------------------------------------------------------------
+r475 | arkayenro | 2015-01-04 03:47:49 +0000 (Sun, 04 Jan 2015) | 7 lines
+Changed paths:
+   A /tags/3.04.19 (from /trunk:474)
+
+*3.04.19 (04-JAN-2015)*
+ * changed - minor adjustment to the cleanup/restack code
+ * fixed - item age now defaults to topleft.  if itemlevel is displayed, then itemage it is positioned to center instead
+ * fixed - issue with vault data for characters on different connected realms when in the same guild - you will have to manually erase any existing duplicated vault data
+ * fixed - issue with pet item counts sometimes not updating
+ * fixed - issue with pet scanning code sometimes not re-scanning when it should have
+
+------------------------------------------------------------------------
+r474 | arkayenro | 2015-01-04 03:45:03 +0000 (Sun, 04 Jan 2015) | 7 lines
+Changed paths:
+   M /trunk/ArkInventory.lua
+   M /trunk/ArkInventory.toc
+   M /trunk/ArkInventory.xml
+   M /trunk/ArkInventoryCompanion.lua
+   M /trunk/ArkInventoryMenu.lua
+   M /trunk/ArkInventoryPetJournal.lua
+   M /trunk/ArkInventoryRealms.lua
+   M /trunk/ArkInventoryRestack.lua
+   M /trunk/ArkInventoryStorage.lua
+   M /trunk/ArkInventoryTooltip.lua
+   M /trunk/ArkInventoryTranslate.lua
+   M /trunk/Libs/ArkDewdrop/ArkDewdrop-3.0.lua
+   M /trunk/Libs/ArkDewdrop/ArkDewdrop-3.0.toc
+   M /trunk/Locale/deDE.lua
+   M /trunk/Modules/ArkInventoryRules/ArkInventoryRules.lua
+   M /trunk/VersionHistory.txt
+
+*3.04.19 (04-JAN-2015)*
+ * changed - minor adjustment to the cleanup/restack code
+ * fixed - item age now defaults to topleft.  if itemlevel is displayed, then itemage it is positioned to center instead
+ * fixed - issue with vault data for characters on different connected realms when in the same guild - you will have to manually erase any existing duplicated vault data
+ * fixed - issue with pet item counts sometimes not updating
+ * fixed - issue with pet scanning code sometimes not re-scanning when it should have
+
+------------------------------------------------------------------------
+r472 | arkayenro | 2014-12-21 05:47:43 +0000 (Sun, 21 Dec 2014) | 5 lines
+Changed paths:
+   M /trunk/ArkInventory.lua
+   M /trunk/ArkInventory.toc
+   M /trunk/ArkInventory.xml
+   M /trunk/ArkInventoryMenu.lua
+   M /trunk/ArkInventoryRestack.lua
+   M /trunk/VersionHistory.txt
+
+*3.04.18 (21-DEC-2014)*
+ * fixed - item counts should now display on the tooltips for work order reagents and quest log items
+ * fixed - item age should display if enabled
+ * fixed - LDB actions menu
+
+------------------------------------------------------------------------
+r471 | arkayenro | 2014-11-25 12:27:33 +0000 (Tue, 25 Nov 2014) | 6 lines
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/ArkInventory.lua
+   M /trunk/ArkInventory.toc
+   M /trunk/ArkInventoryExternals.xml
+   M /trunk/ArkInventoryLDB.lua
+   M /trunk/ArkInventoryMenu.lua
+   M /trunk/VersionHistory.txt
+
+*3.04.17 (25-NOV-2014)*
+ * added - libperiodictable libraries: ClassSpell, CurrencyItems, Gear, GearSet, InstanceLoot, InstanceLootHeroid, InstanceLootLFR, TradeskillLevels, TransmogSet
+ * updated - external libraries
+ * added - right click menu to cleanup icon to deposit all reagents
+ * changed - ldb item tracking counts now include items from the bank
+
+------------------------------------------------------------------------

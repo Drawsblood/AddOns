@@ -52,6 +52,7 @@ Stuf.nofunc = function() end
 Stuf.vunit = "player"
 Stuf.numraid = 0
 
+
 -- fast access local variables
 local su, pla, tar, vunit, vf, partyvisible, doaggro = Stuf.units, nil, nil, "player", nil, nil, nil
 local db, dbg, config
@@ -226,7 +227,7 @@ function events.ADDON_LOADED(a1)
 		DisableDefault(FocusFrame)
 		DisableDefault(TargetofFocusFrame)
 				
-		if dbg.disableprframes then
+		if dbg.disableprframes and _G.CompactRaidFrameManager then
 			CompactRaidFrameManager:UnregisterAllEvents() 
 			CompactRaidFrameManager:Hide() 
 			CompactRaidFrameContainer:UnregisterAllEvents() 
@@ -1303,6 +1304,7 @@ local function FastHealthOnUpdate(this)
 	if not this.dofasthp then return end
 	UpdateHealth(this.unit, this.uf)
 end
+
 ---------------------------------------------
 function Stuf:CreateUnitFrame(unit, fromshow)  -- creates entire unit frame and updates its settings 
 ---------------------------------------------
@@ -1347,7 +1349,11 @@ function Stuf:CreateUnitFrame(unit, fromshow)  -- creates entire unit frame and 
 			uf:RegisterForClicks("AnyUp")
 
 			uf.db, uf.dbf = dbuf, dbf
-			SecureUnitButton_OnLoad(uf, unit)
+			--SecureUnitButton_OnLoad(uf, unit)
+			uf:SetAttribute("*type1", "target")
+			uf:SetAttribute("type2", "togglemenu")
+			
+			uf:SetAttribute("unit", unit)
 
 			if notpla then
 				uf:SetScript("OnShow", MainOnShow)
@@ -1371,10 +1377,7 @@ function Stuf:CreateUnitFrame(unit, fromshow)  -- creates entire unit frame and 
 				uf:SetAttribute("toggleForVehicle", true)
 				uf.cache.shards = ""
 			end
-			if dropdown[unit] and _G[ dropdown[unit] ] then  -- thanks to Xinhuan for this hack
-				uf:SetAttribute("_menu", _G[ dropdown[unit] ].menu)
-				uf:SetScript("PostClick", MainPostClick)
-			end
+
 			uf.hidden = true
 			ClickCastFrames[uf] = true
 		elseif not notpla then

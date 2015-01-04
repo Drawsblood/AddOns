@@ -1,0 +1,24 @@
+tag v4.0.8
+79b7ff67cf56ee443ccb3c1fe17f7d75a2f8c488
+Shadowed <shadowed.wow@gmail.com>
+2014-12-14 12:54:09 -0800
+
+Tagging as release v4.0.8
+
+
+--------------------
+
+Shadowed:
+	- Variable scoping is hard
+	- Typo
+	- Should properly fix zone units showing up in the wrong zone
+	- Revert the majority of the range checker changes to get it stable
+	- Fixed error when using a fishing lure
+	- fixed MONOCHROME font crashing SUF
+	- hide the split raid frames when not in a raid
+	- Fixed bugs with zone enabled units not actually being restricted to zones
+	- Fixed range timer start/stop bugs
+	- Disable dismissable totem bars if we only have one "totem"
+	- Fixed bar block combo points error if we had more than expected
+	- Bump frame strata to fix raid manager/work order visual issues
+	- Cleaned up Chi code

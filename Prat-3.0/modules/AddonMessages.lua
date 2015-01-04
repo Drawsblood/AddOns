@@ -63,6 +63,28 @@ L:AddLocale("enUS",
 }
 
 )
+L:AddLocale("itIT", 
+{
+	-- ["Addon message options."] = "",
+	-- AddonMsgs = "",
+	-- show_desc = "",
+	-- show_name = "",
+	-- show_perframedesc = "",
+	-- show_perframename = "",
+}
+
+)
+L:AddLocale("ptBR", 
+{
+	-- ["Addon message options."] = "",
+	-- AddonMsgs = "",
+	-- show_desc = "",
+	-- show_name = "",
+	-- show_perframedesc = "",
+	-- show_perframename = "",
+}
+
+)
 L:AddLocale("frFR",  
 {
 	-- ["Addon message options."] = "",
@@ -114,7 +136,7 @@ L:AddLocale("ruRU",
 	show_desc = "Включить отображение сообщений аддонов в каждой закладке чата.",
 	show_name = "Показывать сообщения аддонов",
 	show_perframedesc = "Вкл/Выкл отображение сообщений аддонов.",
-	show_perframename = "ChatFrame%d AddonMsgsShow", -- Needs review
+	show_perframename = "ChatFrame%d AddonMsgsShow",
 }
 
 )

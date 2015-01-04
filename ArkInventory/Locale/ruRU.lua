@@ -1,4 +1,4 @@
-local L = LibStub( "AceLocale-3.0" ):NewLocale( "ArkInventory", "ruRU" )
+﻿local L = LibStub( "AceLocale-3.0" ):NewLocale( "ArkInventory", "ruRU" )
 if not L then return end
 
 -- post updated translations at http://groups.google.com/group/wow-arkinventory (modify this file and include as an attachment)
@@ -36,7 +36,6 @@ if not L then return end
 	
 --	location names
 --	L["LOCATION_ACCOUNT"] = ""
-	L["LOCATION_BANK"] = "Банк"
 	L["LOCATION_WEARING"] = "Одето"
 	
 	
@@ -52,7 +51,7 @@ if not L then return end
 	
 	
 --	restack
-	L["RESTACK"] = "Сжать и собрать"
+--	L["RESTACK"] = "Сжать и собрать"
 	L["RESTACK_TEXT"] = "собрать предметы в как можно меньшее количество стэков, используя по возможности слоты специальных сумок"
 	L["RESTACK_FAIL_WAIT"] = "Операция пересборки уже выполняется, пожалуйста подождите"
 	L["RESTACK_FAIL_ACCESS"] = "У вас недостаточно прав, чтобы пересобрать закладку %2$s в %1$s" -- 1 = guild bank, 2 = tab number
@@ -98,6 +97,7 @@ if not L then return end
 --	L["STATUS_NAME_TOKEN"] = ""
 --	L["STATUS_NAME_TACKLE"] = ""
 --	L["STATUS_NAME_COOKING"] = ""
+--	L["STATUS_NAME_TOY"] = ""
 	
 	
 --	main menu
@@ -219,32 +219,42 @@ if not L then return end
 --	L["CONFIG_SYSTEM_TOOLTIP_CLASSCOLOUR_TEXT"] = ""
 	L["CONFIG_SYSTEM_TOOLTIP_SELF_ONLY"] = "Только у себя"
 	L["CONFIG_SYSTEM_TOOLTIP_SELF_ONLY_TEXT"] = "Показывать количество предметов только для текущего персонажа"
+--	L["CONFIG_SYSTEM_TOOLTIP_HIGHLIGHT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_HIGHLIGHT_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_FACTION_ONLY"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_FACTION_ONLY_TEXT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_REALM_ONLY"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_REALM_ONLY_TEXT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_CROSSREALM"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_CROSSREALM_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_VAULT_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_SOURCE_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_DESCRIPTION_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_CUSTOM_ENABLE_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_MOUSEOVER_ENABLE_TEXT"] = ""
 	
---	L["CONFIG_SYSTEM_BUGFIX"] = ""
---	L["CONFIG_SYSTEM_BUGFIX_TEXT"] = ""
---	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL"] = ""
---	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_TEXT"] = ""
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_TEXT"] = "изменяет как будут показаны сообщения о багфиксах"
---	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE0"] = ""
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE0_TEXT"] = "отключает сообщения о багфиксах"
---	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE1"] = ""
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE1_TEXT"] = "показывать сокращённую версию сообщений о багфиксах"
---	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE2"] = ""
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE2_TEXT"] = "показывать полную версию сообщений о багфиксах"
---	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG"] = ""
---	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG_TEXT"] = ""
---	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG_ALERT_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_TEXT"] = ""
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_TEXT"] = "изменяет как будут показаны сообщения о багфиксах"
+--	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE0"] = ""
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE0_TEXT"] = "отключает сообщения о багфиксах"
+--	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE1"] = ""
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE1_TEXT"] = "показывать сокращённую версию сообщений о багфиксах"
+--	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE2"] = ""
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE2_TEXT"] = "показывать полную версию сообщений о багфиксах"
+--	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG_ALERT_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD_ENABLED_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD_COUNT_TEXT"] = ""
 --	L["BUGFIX_TAINTED_ALERT_MOUSEOVER_TEXT"] = ""
 --	L["BUGFIX_TAINTED_ALERT_OPEN_TEXT"] = ""
 	
 --	L["CONFIG_SYSTEM_MESSAGES"] = ""
+--	L["CONFIG_SYSTEM_MESSAGES_RESTACK_TEXT"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_INTERIM"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_INTERIM_TEXT"] = ""
@@ -252,6 +262,9 @@ if not L then return end
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_FINAL_TEXT"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT_TEXT"] = ""
+	
+--	L["CONFIG_SYSTEM_TIMERS"] = ""
+--	L["CONFIG_SYSTEM_TIMERS_TEXT"] = ""
 	
 	
 --	configuration options > auto
@@ -264,6 +277,7 @@ if not L then return end
 	L["CONFIG_AUTO_OPEN_MERCHANT"] = "открываете окно продавца"
 	L["CONFIG_AUTO_OPEN_TRADE"] = "открываете окно обмена"
 	L["CONFIG_AUTO_OPEN_AUCTION"] = "открываете аукцион"
+--	L["CONFIG_AUTO_OPEN_VOID"] = ""
 	
 	L["CONFIG_AUTO_CLOSE"] = "Закрывать сумку %1$s, кода вы %3$s"
 	L["CONFIG_AUTO_CLOSE_BANK"] = "закрываете банк"
@@ -272,6 +286,7 @@ if not L then return end
 	L["CONFIG_AUTO_CLOSE_MERCHANT"] = "закрываете окно продавца"
 	L["CONFIG_AUTO_CLOSE_TRADE"] = "закрываете окно обмена"
 	L["CONFIG_AUTO_CLOSE_AUCTION"] = "закрываете аукцион"
+--	L["CONFIG_AUTO_CLOSE_VOID"] = ""
 	L["CONFIG_AUTO_CLOSE_COMBAT"] = "вступаете в бой"
 	
 	
@@ -304,6 +319,7 @@ if not L then return end
 	L["CONFIG_SETTINGS_FRAME_SCALE_TEXT"] = "устанавливает масштаб, делая окно меньше или больше"
 	L["CONFIG_SETTINGS_FRAME_PADDING_TEXT"] = "устанавливает зазор между краем окна и наборами ячеек"
 	L["CONFIG_SETTINGS_FRAME_WIDTH_TEXT"] = "устанавливает количество столбцов для отображения"
+--	L["CONFIG_SETTINGS_FRAME_HEIGHT_TEXT"] = ""
 	L["CONFIG_SETTINGS_FRAME_BACKGROUND_COLOUR_TEXT"] = "Устанавливает фоновый цвет главного окна"
 	L["CONFIG_SETTINGS_FRAME_BORDER_SHOW_TEXT"] = "показать или скрыть кромку главного окна"
 	L["CONFIG_SETTINGS_FRAME_BORDER_STYLE_TEXT"] = "стиль кромки главного окна"
@@ -341,7 +357,6 @@ if not L then return end
 --	L["CONFIG_SETTINGS_BARS_NAME_HEIGHT_TEXT"] = ""
 --	L["CONFIG_SETTINGS_BARS_NAME_ANCHOR_TEXT"] = ""
 	
-	L["CONFIG_SETTINGS_ITEMS"] = "Ячейки"
 	L["CONFIG_SETTINGS_ITEMS_PADDING_TEXT"] = "задает расстояние медлу ячейками"
 	L["CONFIG_SETTINGS_ITEMS_HIDDEN"] = "Показывать скрытые"
 	L["CONFIG_SETTINGS_ITEMS_HIDDEN_TEXT"] = "показывать ли предметы, находящиеся в скрытых категориях"
@@ -385,52 +400,57 @@ if not L then return end
 	L["CONFIG_SETTINGS_EMPTY_COLOUR"] = "Цвета ячеек"
 	L["CONFIG_SETTINGS_EMPTY_COLOUR_TEXT"] = "устанавливает цвет кромки и фона для пустых %1$s ячеек"
 --	L["CONFIG_SETTINGS_EMPTY_STATUS"] = "display format"
+--	L["CONFIG_SETTINGS_EMPTY_FIRST"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = ""
 	
 	
 -- sorting
---	L["CONFIG_SORTMETHOD"] = ""
+--	L["CONFIG_SORTING"] = ""
 	
-	L["CONFIG_SORTMETHOD_SORT"] = "Сортировка"
+	L["CONFIG_SORTING_SORT"] = "Сортировка"
 	
---	L["CONFIG_SORTMETHOD_STYLE_TEXT"] = ""
-	L["CONFIG_SORTMETHOD_STYLE_BAGSLOT"] = "Сумка / Ячейка"
-	L["CONFIG_SORTMETHOD_STYLE_BAGSLOT_TEXT"] = "сортирует инвентарь по номеру сумки и ячейки"
-	L["CONFIG_SORTMETHOD_STYLE_USER"] = "Ручная"
-	L["CONFIG_SORTMETHOD_STYLE_USER_TEXT"] = "сортирует инвентарь тем способом, который выберите Вы"
+--	L["CONFIG_SORTING_METHOD_TEXT"] = ""
+	L["CONFIG_SORTING_METHOD_BAGSLOT"] = "Сумка / Ячейка"
+	L["CONFIG_SORTING_METHOD_BAGSLOT_TEXT"] = "сортирует инвентарь по номеру сумки и ячейки"
+	L["CONFIG_SORTING_METHOD_USER"] = "Ручная"
+	L["CONFIG_SORTING_METHOD_USER_TEXT"] = "сортирует инвентарь тем способом, который выберите Вы"
 	
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME"] = "название предмета"
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_TEXT"] = "использовать ли имя предмета при сортировке"
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_REVERSE"] = "Обратить названия"
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_REVERSE_TEXT"] = "использовать ли обращение названий предметов\n\nнапример вместо Super Mana Potion использовать Potion Mana Super"
-	L["CONFIG_SORTMETHOD_INCLUDE_QUALITY"] = "качество вещи"
-	L["CONFIG_SORTMETHOD_INCLUDE_QUALITY_TEXT"] = "использовать ли качество предмета при сортировке"
-	L["CONFIG_SORTMETHOD_INCLUDE_LOCATION"] = "слот одеваемой вещи"
-	L["CONFIG_SORTMETHOD_INCLUDE_LOCATION_TEXT"] = "использовать ли слот на который одевается вещь при сортировке\n\nвнимание: действует только на вещи, которые можно одеть"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMTYPE"] = "тип и подтип предмета"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMTYPE_TEXT"] = "использовать ли тип и подтип предмета при сортировке"
-	L["CONFIG_SORTMETHOD_INCLUDE_CATEGORY"] = "категория предмета"
-	L["CONFIG_SORTMETHOD_INCLUDE_CATEGORY_TEXT"] = "использовать ли категорию предмета при сортировке"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMUSELEVEL"] = "уровень (исп) предмета"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMUSELEVEL_TEXT"] = "использовать ли уровень (использования) предмета при сортировке"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMSTATLEVEL"] = "уровень (парам) предмета"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMSTATLEVEL_TEXT"] = "использовать ли уровень (по параметрам) предмета при сортировке"
---	L["CONFIG_SORTMETHOD_INCLUDE_ITEMAGE"] = ""
---	L["CONFIG_SORTMETHOD_INCLUDE_ITEMAGE_TEXT"] = ""
-	L["CONFIG_SORTMETHOD_INCLUDE_VENDORPRICE"] = "цена продажи"
-	L["CONFIG_SORTMETHOD_INCLUDE_VENDORPRICE_TEXT"] = "использовать ли цену продажи предмета NPC-торговцу при сортировке"
---	L["CONFIG_SORTMETHOD_INCLUDE_ID"] = ""
---	L["CONFIG_SORTMETHOD_INCLUDE_ID_TEXT"] = ""
+--	L["CONFIG_SORTING_BAG"] = ""
+--	L["CONFIG_SORTING_BAG_TEXT"] = ""
 	
-	L["CONFIG_SORTMETHOD_DIRECTION_TEXT"] = "производить сортировку в порядке увеличения или убывания?"
-	L["CONFIG_SORTMETHOD_ORDER"] = "Порядок сортировки"
-	L["CONFIG_SORTMETHOD_MOVE_UP_TEXT"] = "перемещает %1$s вверх в порядке сортировки"
-	L["CONFIG_SORTMETHOD_MOVE_DOWN_TEXT"] = "перемещает %1$s вниз в порядке сортировки"
-	L["CONFIG_SORTMETHOD_NOT_INCLUDED"] = "* не включено в сортировку *"
+	L["CONFIG_SORTING_INCLUDE_NAME"] = "название предмета"
+	L["CONFIG_SORTING_INCLUDE_NAME_TEXT"] = "использовать ли имя предмета при сортировке"
+	L["CONFIG_SORTING_INCLUDE_NAME_REVERSE"] = "Обратить названия"
+	L["CONFIG_SORTING_INCLUDE_NAME_REVERSE_TEXT"] = "использовать ли обращение названий предметов\n\nнапример вместо Super Mana Potion использовать Potion Mana Super"
+	L["CONFIG_SORTING_INCLUDE_QUALITY"] = "качество вещи"
+	L["CONFIG_SORTING_INCLUDE_QUALITY_TEXT"] = "использовать ли качество предмета при сортировке"
+	L["CONFIG_SORTING_INCLUDE_LOCATION"] = "слот одеваемой вещи"
+	L["CONFIG_SORTING_INCLUDE_LOCATION_TEXT"] = "использовать ли слот на который одевается вещь при сортировке\n\nвнимание: действует только на вещи, которые можно одеть"
+	L["CONFIG_SORTING_INCLUDE_ITEMTYPE"] = "тип и подтип предмета"
+	L["CONFIG_SORTING_INCLUDE_ITEMTYPE_TEXT"] = "использовать ли тип и подтип предмета при сортировке"
+	L["CONFIG_SORTING_INCLUDE_CATEGORY"] = "категория предмета"
+	L["CONFIG_SORTING_INCLUDE_CATEGORY_TEXT"] = "использовать ли категорию предмета при сортировке"
+	L["CONFIG_SORTING_INCLUDE_ITEMUSELEVEL"] = "уровень (исп) предмета"
+	L["CONFIG_SORTING_INCLUDE_ITEMUSELEVEL_TEXT"] = "использовать ли уровень (использования) предмета при сортировке"
+	L["CONFIG_SORTING_INCLUDE_ITEMSTATLEVEL"] = "уровень (парам) предмета"
+	L["CONFIG_SORTING_INCLUDE_ITEMSTATLEVEL_TEXT"] = "использовать ли уровень (по параметрам) предмета при сортировке"
+--	L["CONFIG_SORTING_INCLUDE_ITEMAGE"] = ""
+--	L["CONFIG_SORTING_INCLUDE_ITEMAGE_TEXT"] = ""
+	L["CONFIG_SORTING_INCLUDE_VENDORPRICE"] = "цена продажи"
+	L["CONFIG_SORTING_INCLUDE_VENDORPRICE_TEXT"] = "использовать ли цену продажи предмета NPC-торговцу при сортировке"
+--	L["CONFIG_SORTING_INCLUDE_ID"] = ""
+--	L["CONFIG_SORTING_INCLUDE_ID_TEXT"] = ""
 	
---	L["CONFIG_SORTMETHOD_ADD"] = ""
---	L["CONFIG_SORTMETHOD_ADD_TEXT"] = ""
---	L["CONFIG_SORTMETHOD_RENAME_TEXT"] = ""
---	L["CONFIG_SORTMETHOD_DELETE_TEXT"] = ""
+	L["CONFIG_SORTING_DIRECTION_TEXT"] = "производить сортировку в порядке увеличения или убывания?"
+	L["CONFIG_SORTING_ORDER"] = "Порядок сортировки"
+	L["CONFIG_SORTING_MOVE_UP_TEXT"] = "перемещает %1$s вверх в порядке сортировки"
+	L["CONFIG_SORTING_MOVE_DOWN_TEXT"] = "перемещает %1$s вниз в порядке сортировки"
+	L["CONFIG_SORTING_NOT_INCLUDED"] = "* не включено в сортировку *"
+	
+--	L["CONFIG_SORTING_ADD"] = ""
+--	L["CONFIG_SORTING_ADD_TEXT"] = ""
+--	L["CONFIG_SORTING_RENAME_TEXT"] = ""
+--	L["CONFIG_SORTING_DELETE_TEXT"] = ""
 	
 	
 --	rules
@@ -477,6 +497,7 @@ if not L then return end
 	L["RULE_FAILED_FORMULA_NIL"] = "отсутствует формула"
 --	L["RULE_FAILED_FORMULA_BAD"] = ""
 --	L["RULE_FAILED_ARGUMENT_IS_NIL"] = ""
+--	L["RULE_FAILED_ARGUMENT_IS_NOT"] = ""
 --	L["RULE_FAILED_ARGUMENT_IS_INVALID"] = ""
 --	L["RULE_FAILED_ARGUMENT_NONE_SPECIFIED"] = ""
 	
@@ -526,16 +547,19 @@ if not L then return end
 --	L["BATTLEPET_OPPONENT_KNOWN"] = ""
 --	L["BATTLEPET_OPPONENT_UNKNOWN"] = ""
 --	L["BATTLEPET_OPPONENT_UPGRADE"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_STRONG"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_WEAK"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_ABILITY1"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_ABILITY2"] = ""
 	
 	
 --	item count tooltip
---	L["TOOLTIP_COUNT_ME"] = ""
 --	L["TOOLTIP_VAULT_TABS"] = ""
 --	L["TOOLTIP_GOLD_AMOUNT"] = ""
 	
 	
 --	generic menu text
---	L["AUTOMATIC"] = ""
+	L["AUTOMATIC"] = "непроизвольный"
 	L["BOTTOMLEFT"] = "Снизу слева"
 	L["BOTTOMRIGHT"] = "Снизу справа"
 	L["TOPLEFT"] = "Сверху слева"
@@ -596,6 +620,9 @@ if not L then return end
 --	L["CLICK_TO_IGNORE"] = ""	
 	L["ORDER"] = "Порядок"
 --	L["MOUSEOVER"] = ""
+--	L["NO_DATA_AVAILABLE"] = ""
+--	L["TOOLTIP_PURCHASE_BANK_BAG_SLOT"] = ""
+--	L["TOOLTIP_PURCHASE_BANK_TAB_REAGENT"] = ""
 	
 	
 -- libdatabroker
@@ -612,6 +639,9 @@ if not L then return end
 --	L["LDB_MOUNTS_TYPE_L"] = ""
 --	L["LDB_MOUNTS_TYPE_U"] = ""
 --	L["LDB_MOUNTS_TYPE_S"] = ""
+--	L["LDB_MOUNTS_TYPE_X"] = ""
+--	L["LDB_MOUNTS_FLYING_USEFORLAND"] = ""
+--	L["LDB_MOUNTS_FLYING_USEFORLAND_TEXT"] = ""
 --	L["LDB_MOUNTS_FLYING_DISMOUNT"] = ""
 --	L["LDB_MOUNTS_FLYING_DISMOUNT_TEXT"] = ""
 --	L["LDB_MOUNTS_FLYING_DISMOUNT_WARNING"] = ""
@@ -626,7 +656,6 @@ if not L then return end
 --	L["LDB_COMPANION_RESTRICTED_ITEM"] = ""
 --	L["LDB_COMPANION_RESTRICTED_EVENT"] = ""
 --	L["LDB_COMPANION_RESTRICTED_UNKNOWN"] = ""
---	L["LDB_COMPANION_NODATA"] = ""
 --	L["LDB_COMPANION_NODATA_TEXT"] = ""
 --	L["LDB_COMPANION_SELECT"] = ""
 --	L["LDB_COMPANION_DESELECT"] = ""

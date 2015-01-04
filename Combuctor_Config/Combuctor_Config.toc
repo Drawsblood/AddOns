@@ -1,0 +1,12 @@
+## Interface: 60000
+## Title: Combuctor Config
+## Author: Tuller and Jaliborc (João Cardoso)
+## Notes: An options menu for Combuctor
+## Dependencies: Combuctor
+## LoadOnDemand: 1
+## Version: 6.0.5
+
+panel.lua
+main.lua
+general.lua
+sets.lua

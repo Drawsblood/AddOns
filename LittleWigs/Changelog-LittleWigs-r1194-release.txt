@@ -1,0 +1,373 @@
+------------------------------------------------------------------------
+r1194 | funkydude | 2014-12-13 21:59:21 +0000 (Sat, 13 Dec 2014) | 1 line
+Changed paths:
+   A /tags/r1194-release (from /trunk:1193)
+
+Tagging as r1194-release
+------------------------------------------------------------------------
+r1193 | funkydude | 2014-12-06 15:33:40 +0000 (Sat, 06 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/GrimrailDepot/Rocketspark.lua
+
+Rocketspark: Add slam timer.
+------------------------------------------------------------------------
+r1192 | pettigrow | 2014-12-05 20:34:25 +0000 (Fri, 05 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Locales/frFR.lua
+
+frFR Update
+------------------------------------------------------------------------
+r1190 | funkydude | 2014-12-05 14:11:20 +0000 (Fri, 05 Dec 2014) | 1 line
+Changed paths:
+   A /trunk/WoD/Auchindoun/Locales
+   A /trunk/WoD/Auchindoun/Locales/deDE.lua
+   A /trunk/WoD/Auchindoun/Locales/esES.lua
+   A /trunk/WoD/Auchindoun/Locales/frFR.lua
+   A /trunk/WoD/Auchindoun/Locales/itIT.lua
+   A /trunk/WoD/Auchindoun/Locales/koKR.lua
+   A /trunk/WoD/Auchindoun/Locales/ptBR.lua
+   A /trunk/WoD/Auchindoun/Locales/ruRU.lua
+   A /trunk/WoD/Auchindoun/Locales/zhCN.lua
+   A /trunk/WoD/Auchindoun/Locales/zhTW.lua
+   A /trunk/WoD/Auchindoun/locales.xml
+   M /trunk/WoD/UpperBlackrockSpire/Kyrak.lua
+   A /trunk/WoD/UpperBlackrockSpire/Locales
+   A /trunk/WoD/UpperBlackrockSpire/Locales/deDE.lua
+   A /trunk/WoD/UpperBlackrockSpire/Locales/esES.lua
+   A /trunk/WoD/UpperBlackrockSpire/Locales/frFR.lua
+   A /trunk/WoD/UpperBlackrockSpire/Locales/itIT.lua
+   A /trunk/WoD/UpperBlackrockSpire/Locales/koKR.lua
+   A /trunk/WoD/UpperBlackrockSpire/Locales/ptBR.lua
+   A /trunk/WoD/UpperBlackrockSpire/Locales/ruRU.lua
+   A /trunk/WoD/UpperBlackrockSpire/Locales/zhCN.lua
+   A /trunk/WoD/UpperBlackrockSpire/Locales/zhTW.lua
+   M /trunk/WoD/UpperBlackrockSpire/Ragewing.lua
+   M /trunk/WoD/UpperBlackrockSpire/Zaela.lua
+   A /trunk/WoD/UpperBlackrockSpire/locales.xml
+   M /trunk/modules.xml
+
+add localization for Auchindoun and UBRS.
+------------------------------------------------------------------------
+r1189 | funkydude | 2014-12-05 13:59:55 +0000 (Fri, 05 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Azzakel.lua
+   M /trunk/WoD/Auchindoun/Kaathar.lua
+   M /trunk/WoD/Auchindoun/Nyami.lua
+   M /trunk/WoD/Auchindoun/Terongor.lua
+   M /trunk/modules.xml
+
+Locale cleanups
+------------------------------------------------------------------------
+r1188 | funkydude | 2014-12-05 11:51:30 +0000 (Fri, 05 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Azzakel.lua
+   M /trunk/WoD/Auchindoun/Kaathar.lua
+   M /trunk/WoD/UpperBlackrockSpire/Gorashan.lua
+   M /trunk/WoD/UpperBlackrockSpire/Ragewing.lua
+
+Use :Normal()
+------------------------------------------------------------------------
+r1187 | funkydude | 2014-12-04 15:55:08 +0000 (Thu, 04 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/GrimrailDepot/NitroggThundertower.lua
+   M /trunk/WoD/TheEverbloom/Xeritac.lua
+   M /trunk/WoD/UpperBlackrockSpire/Zaela.lua
+
+NitroggThundertower: Add Slag Blast.
+------------------------------------------------------------------------
+r1186 | funkydude | 2014-12-04 02:37:51 +0000 (Thu, 04 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/IronDocks/Skulloc.lua
+
+Skulloc: Add Gronn Smash timer.
+------------------------------------------------------------------------
+r1184 | funkydude | 2014-12-01 04:16:24 +0000 (Mon, 01 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/GrimrailDepot/NitroggThundertower.lua
+
+NitroggThundertower: Add phase alerts, speed up Suppressive Fire warning.
+------------------------------------------------------------------------
+r1183 | funkydude | 2014-12-01 04:15:09 +0000 (Mon, 01 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Terongor.lua
+   M /trunk/WoD/Skyreach/Araknath.lua
+   M /trunk/WoD/Skyreach/Rukhran.lua
+   M /trunk/WoD/Skyreach/Viryx.lua
+
+Various tweaks
+------------------------------------------------------------------------
+r1181 | funkydude | 2014-11-28 00:46:46 +0000 (Fri, 28 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/BloodmaulSlagMines/Crushto.lua
+   M /trunk/WoD/BloodmaulSlagMines/Gugrokk.lua
+
+Crushto & Gugrokk: Add counter to interrupts.
+------------------------------------------------------------------------
+r1180 | funkydude | 2014-11-28 00:24:28 +0000 (Fri, 28 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/GrimrailDepot/Rocketspark.lua
+   M /trunk/WoD/GrimrailDepot/SkylordTovra.lua
+
+SkylordTovra: Add proximity and bar for hunter's mark.
+------------------------------------------------------------------------
+r1179 | funkydude | 2014-11-27 23:17:52 +0000 (Thu, 27 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Terongor.lua
+
+Terongor: Add enable check.
+------------------------------------------------------------------------
+r1178 | zhTW | 2014-11-27 20:01:23 +0000 (Thu, 27 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/LittleWigs.toc
+
+- Add Notes for zhTW & zhCN in LittleWigs.toc
+------------------------------------------------------------------------
+r1177 | funkydude | 2014-11-27 18:31:13 +0000 (Thu, 27 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/MoP/ScarletMonastery/HighInquisitorWhitemane.lua
+   M /trunk/WoD/GrimrailDepot/Rocketspark.lua
+   M /trunk/WoD/UpperBlackrockSpire/Ragewing.lua
+
+Tweaks
+------------------------------------------------------------------------
+r1176 | funkydude | 2014-11-27 00:03:40 +0000 (Thu, 27 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/MoP/MogushanPalace/Gekkan.lua
+   M /trunk/MoP/MogushanPalace/XinTheWeaponmaster.lua
+   M /trunk/MoP/ScarletHalls/ArmsmasterHarlan.lua
+   M /trunk/MoP/ScarletMonastery/BrotherKorloff.lua
+   M /trunk/MoP/ScarletMonastery/HighInquisitorWhitemane.lua
+   M /trunk/WoD/IronDocks/Enforcers.lua
+   M /trunk/WoD/UpperBlackrockSpire/Tharbek.lua
+
+locale cleanups
+------------------------------------------------------------------------
+r1175 | funkydude | 2014-11-26 00:28:48 +0000 (Wed, 26 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Tharbek.lua
+   M /trunk/WoD/UpperBlackrockSpire/Zaela.lua
+
+Tharbek: error fix
+------------------------------------------------------------------------
+r1174 | funkydude | 2014-11-25 15:17:03 +0000 (Tue, 25 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Gorashan.lua
+
+Gorashan: Add Shrapnel Nova.
+------------------------------------------------------------------------
+r1173 | funkydude | 2014-11-25 14:53:54 +0000 (Tue, 25 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Ragewing.lua
+
+Ragewing: Intermission phase tweaks.
+------------------------------------------------------------------------
+r1172 | funkydude | 2014-11-25 14:10:57 +0000 (Tue, 25 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Kyrak.lua
+
+Kyrak: Add Eruption tank warning & fixation cd.
+------------------------------------------------------------------------
+r1171 | funkydude | 2014-11-25 14:09:30 +0000 (Tue, 25 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Tharbek.lua
+
+Tharbek: Add Iron Reaver & Incinerating Breath
+------------------------------------------------------------------------
+r1170 | funkydude | 2014-11-25 12:07:28 +0000 (Tue, 25 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/IronDocks/Nokgar.lua
+
+IronDocks/Nokgar: add Burning Arrows on you alert.
+------------------------------------------------------------------------
+r1168 | funkydude | 2014-11-25 00:06:35 +0000 (Tue, 25 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Gorashan.lua
+
+Gorashan: Better sounds.
+------------------------------------------------------------------------
+r1167 | funkydude | 2014-11-24 23:49:06 +0000 (Mon, 24 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Terongor.lua
+
+Terongor: Add say for Chaos Wave.
+------------------------------------------------------------------------
+r1166 | funkydude | 2014-11-24 23:14:27 +0000 (Mon, 24 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Ragewing.lua
+
+Ragewing: Replace Magma Spit with Magma Pool.
+------------------------------------------------------------------------
+r1165 | funkydude | 2014-11-24 22:59:16 +0000 (Mon, 24 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/IronDocks/Nokgar.lua
+
+Nokgar: Fix howl spam
+------------------------------------------------------------------------
+r1164 | funkydude | 2014-11-24 21:09:19 +0000 (Mon, 24 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Azzakel.lua
+
+Auchindoun/Azzakel: Fix curtain duration bar.
+------------------------------------------------------------------------
+r1163 | funkydude | 2014-11-24 20:01:53 +0000 (Mon, 24 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Gorashan.lua
+   M /trunk/WoD/UpperBlackrockSpire/Zaela.lua
+
+Gorashan: Tweak conduit messages.
+------------------------------------------------------------------------
+r1161 | funkydude | 2014-11-24 15:59:51 +0000 (Mon, 24 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Azzakel.lua
+   M /trunk/WoD/Auchindoun/Kaathar.lua
+   M /trunk/WoD/Auchindoun/Nyami.lua
+   M /trunk/WoD/Auchindoun/Terongor.lua
+
+Auchindoun: Various fixes from yesterdays changes.
+------------------------------------------------------------------------
+r1159 | funkydude | 2014-11-24 03:37:33 +0000 (Mon, 24 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Zaela.lua
+
+UpperBlackrockSpire/Zaela: Only enable in the correct area.
+------------------------------------------------------------------------
+r1158 | funkydude | 2014-11-24 02:06:47 +0000 (Mon, 24 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Azzakel.lua
+   M /trunk/WoD/Auchindoun/Terongor.lua
+
+Auchindoun/Azzakel: Add Fixate, Drain Life and Rain of Fire warnings, change Seed of Malevolence to only warn when it's on you.
+------------------------------------------------------------------------
+r1157 | funkydude | 2014-11-24 01:35:43 +0000 (Mon, 24 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Azzakel.lua
+
+Auchindoun/Azzakel: Fix Claws of Argus timer and use multi target proximity for Curtain of Flame players.
+------------------------------------------------------------------------
+r1156 | funkydude | 2014-11-24 01:12:38 +0000 (Mon, 24 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Kaathar.lua
+
+Auchindoun/Kaathar: Fix Consecrated Light duration, add Sanctified Strike warning & timer, add Sanctified Ground under you warning.
+------------------------------------------------------------------------
+r1155 | funkydude | 2014-11-24 00:14:52 +0000 (Mon, 24 Nov 2014) | 3 lines
+Changed paths:
+   M /trunk/WoD/TheEverbloom/AncientProtectors.lua
+
+TheEverbloom/AncientProtectors: Add auto-marking to mark the kill order, but mainly to supplement/clarify the potentially large amount of warnings.
+Shortens boss names and shows raid icons.
+Replace "Rapid Tides" cast message with a buff gained message. (You shouldn't interrupt this, interrupt the heal, and dispel this.)
+------------------------------------------------------------------------
+r1154 | funkydude | 2014-11-23 17:22:32 +0000 (Sun, 23 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/GrimrailDepot/SkylordTovra.lua
+
+SkylordTovra: Add Hunter's Mark.
+------------------------------------------------------------------------
+r1153 | funkydude | 2014-11-23 17:08:54 +0000 (Sun, 23 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/GrimrailDepot/Rocketspark.lua
+
+Rocketspark: Add heroic slam spell id.
+------------------------------------------------------------------------
+r1152 | funkydude | 2014-11-23 15:01:03 +0000 (Sun, 23 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Skyreach/Ranjit.lua
+
+Ranjit: Diversify sounds.
+------------------------------------------------------------------------
+r1151 | hormon2343 | 2014-11-23 13:16:42 +0000 (Sun, 23 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Skyreach/Ranjit.lua
+
+Ranjit: Added Windwall and Piercing Rush notification.
+------------------------------------------------------------------------
+r1149 | funkydude | 2014-11-22 02:09:41 +0000 (Sat, 22 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Azzakel.lua
+   M /trunk/WoD/IronDocks/Oshir.lua
+   M /trunk/WoD/ShadowmoonBurialGrounds/Nerzhul.lua
+   M /trunk/WoD/TheEverbloom/Yalnu.lua
+   M /trunk/WoD/UpperBlackrockSpire/Ragewing.lua
+
+Various fixes
+------------------------------------------------------------------------
+r1148 | funkydude | 2014-11-22 01:22:09 +0000 (Sat, 22 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Zaela.lua
+
+Zaela: Warn for Black Iron Cyclone faster.
+------------------------------------------------------------------------
+r1147 | funkydude | 2014-11-21 16:23:33 +0000 (Fri, 21 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Skyreach/Araknath.lua
+
+Araknath: throttle Energize.
+------------------------------------------------------------------------
+r1146 | funkydude | 2014-11-21 16:18:17 +0000 (Fri, 21 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Skyreach/Rukhran.lua
+
+Rukhran: cobbled together fixate alert which will need fixed.
+------------------------------------------------------------------------
+r1145 | funkydude | 2014-11-21 16:03:10 +0000 (Fri, 21 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/TheEverbloom/Witherbark.lua
+
+Witherbark: Don't show energy warnings before engage.
+------------------------------------------------------------------------
+r1144 | funkydude | 2014-11-21 15:58:04 +0000 (Fri, 21 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Skyreach/Viryx.lua
+
+Viryx: Add shielding & add spawned alerts.
+------------------------------------------------------------------------
+r1143 | funkydude | 2014-11-21 14:48:07 +0000 (Fri, 21 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Tharbek.lua
+
+Tharbek: Make Iron Axe a targeted message.
+------------------------------------------------------------------------
+r1142 | hormon2343 | 2014-11-21 12:57:07 +0000 (Fri, 21 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Skyreach/Rukhran.lua
+
+Added Quills warning.
+------------------------------------------------------------------------
+r1141 | funkydude | 2014-11-21 00:41:52 +0000 (Fri, 21 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Kyrak.lua
+
+Kyrak: Tweak sounds
+------------------------------------------------------------------------
+r1140 | funkydude | 2014-11-21 00:01:54 +0000 (Fri, 21 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/TheEverbloom/ArchmageSol.lua
+
+ArchmageSol: Add a throttle for Firebloom.
+------------------------------------------------------------------------
+r1139 | funkydude | 2014-11-20 23:44:04 +0000 (Thu, 20 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Skyreach/Viryx.lua
+
+Viryx: Use GetBossTarget to try improve Cast Down accuracy.
+------------------------------------------------------------------------
+r1138 | funkydude | 2014-11-20 23:32:27 +0000 (Thu, 20 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/ShadowmoonBurialGrounds/Bonemaw.lua
+
+Bonemaw: Fix pre warning for subsequent Inhales after the first.
+------------------------------------------------------------------------
+r1137 | funkydude | 2014-11-18 13:05:24 +0000 (Tue, 18 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/GrimrailDepot/Rocketspark.lua
+   M /trunk/WoD/IronDocks/Enforcers.lua
+
+tweaks
+------------------------------------------------------------------------
+r1135 | funkydude | 2014-11-15 10:08:49 +0000 (Sat, 15 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/IronDocks/Enforcers.lua
+
+Enforcers: Fix disabling early
+------------------------------------------------------------------------

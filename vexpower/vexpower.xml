@@ -1,0 +1,31 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+
+<Script file="vexpower.lua"/>
+
+<Frame name="vexpower_MainFrame" hidden="false" movable="false" enableMouse="false" parent="UIParent" frameStrata="LOW" >
+	<Scripts>
+		<OnLoad>
+			self:RegisterEvent("PLAYER_LOGIN")
+			self:RegisterEvent("PLAYER_REGEN_DISABLED")
+			self:RegisterEvent("PLAYER_REGEN_ENABLED")
+			self:RegisterEvent("UNIT_DISPLAYPOWER")
+			self:RegisterEvent("UPDATE_STEALTH")
+			
+			self:RegisterEvent("PLAYER_TARGET_CHANGED")
+			
+			self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+			self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+			
+			self:RegisterEvent("PET_BATTLE_OPENING_START")
+			self:RegisterEvent("PET_BATTLE_CLOSE")
+			
+			self:RegisterEvent("UNIT_ENTERED_VEHICLE")
+			self:RegisterEvent("UNIT_EXITED_VEHICLE")
+			
+			self:RegisterEvent("LOADING_SCREEN_DISABLED")
+		</OnLoad>
+		<OnEvent function="vexpower_onEvent"/>
+		<OnUpdate function="vexpower_onUpdate"/>
+	</Scripts>
+</Frame>
+</Ui>

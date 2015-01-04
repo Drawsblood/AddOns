@@ -81,6 +81,44 @@ L:AddLocale("enUS",
 }
 
 )
+L:AddLocale("itIT", 
+{
+	-- ["A module to automaticaly enable chat and combat logging."] = "",
+	-- ChatLog = "",
+	-- ["Chat Log: Disabled"] = "",
+	-- ["Chat Log: Enabled"] = "",
+	-- ["Chat log recorded to <WoW Installation>\\Logs\\WoWChatLog.txt only upon logout."] = "",
+	-- ["Combat Log: Disabled"] = "",
+	-- ["Combat Log: Enabled"] = "",
+	-- ["Combat log recorded to <WoW Installation>\\Logs\\WoWCombatLog.txt only upon logout."] = "",
+	-- quiet_desc = "",
+	-- quiet_name = "",
+	-- ["Toggle Chat Log"] = "",
+	-- ["Toggle chat log on and off."] = "",
+	-- ["Toggle Combat Log"] = "",
+	-- ["Toggle combat log on and off."] = "",
+}
+
+)
+L:AddLocale("ptBR", 
+{
+	-- ["A module to automaticaly enable chat and combat logging."] = "",
+	-- ChatLog = "",
+	-- ["Chat Log: Disabled"] = "",
+	-- ["Chat Log: Enabled"] = "",
+	-- ["Chat log recorded to <WoW Installation>\\Logs\\WoWChatLog.txt only upon logout."] = "",
+	-- ["Combat Log: Disabled"] = "",
+	-- ["Combat Log: Enabled"] = "",
+	-- ["Combat log recorded to <WoW Installation>\\Logs\\WoWCombatLog.txt only upon logout."] = "",
+	-- quiet_desc = "",
+	-- quiet_name = "",
+	-- ["Toggle Chat Log"] = "",
+	-- ["Toggle chat log on and off."] = "",
+	-- ["Toggle Combat Log"] = "",
+	-- ["Toggle combat log on and off."] = "",
+}
+
+)
 L:AddLocale("frFR",  
 {
 	["A module to automaticaly enable chat and combat logging."] = "Un module pour activer automatiquement la journalisation du chat et des combats",
@@ -294,9 +332,9 @@ function module:SetChatLog(info, val)
     if self.db.profile.chat then
         self:Print(L["Chat Log: Enabled"])
         self:Print(L["Chat log recorded to <WoW Installation>\\Logs\\WoWChatLog.txt only upon logout."])
-        LoggingChat(1)
+        LoggingChat(true)
     else
-        LoggingChat(0)
+        LoggingChat(false)
         self:Print(L["Chat Log: Disabled"])
     end
 end
@@ -307,9 +345,9 @@ function module:SetCombatLog(info, val)
     if self.db.profile.combat then
         self:Print(L["Combat Log: Enabled"])
         self:Print(L["Combat log recorded to <WoW Installation>\\Logs\\WoWCombatLog.txt only upon logout."])
-        LoggingCombat(1)
+        LoggingCombat(true)
     else
-        LoggingCombat(0)
+        LoggingCombat(false)
         self:Print(L["Combat Log: Disabled"])
     end
 end

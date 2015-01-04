@@ -1,4 +1,4 @@
-local L = LibStub( "AceLocale-3.0" ):NewLocale( "ArkInventory", "deDE" )
+﻿local L = LibStub( "AceLocale-3.0" ):NewLocale( "ArkInventory", "deDE" )
 if not L then return end
 
 -- post updated translations at http://groups.google.com/group/wow-arkinventory (modify this file and include as an attachment)
@@ -36,7 +36,6 @@ if not L then return end
 	
 --	location names
 --	L["LOCATION_ACCOUNT"] = ""
-	L["LOCATION_BANK"] = "Bankfach"
 	L["LOCATION_WEARING"] = "angezogen"
 	
 	
@@ -52,7 +51,7 @@ if not L then return end
 	
 	
 --	restack
-	L["RESTACK"] = "stapeln und umordnen"
+--	L["RESTACK"] = "stapeln und umordnen"
 	L["RESTACK_TEXT"] = "Stapel werden maximal aufgef\195\188llt und Gegenst\195\164nde in ihre Spezialtaschen umgeordnet"
 	L["RESTACK_FAIL_WAIT"] = "Die Gegenst\195\164nde werden bereits gestapelt und umgeordnet, bitte warten"
 	L["RESTACK_FAIL_ACCESS"] = "Du hast keine Rechte um die Gegenst\195\164nde in Fach %2$s der %1$s zu stapeln oder umzuordnen"
@@ -98,6 +97,7 @@ if not L then return end
 	L["STATUS_NAME_TOKEN"] = "Abzeichen"
 --	L["STATUS_NAME_TACKLE"] = ""
 --	L["STATUS_NAME_COOKING"] = ""
+--	L["STATUS_NAME_TOY"] = ""
 	
 	
 --	main menu
@@ -219,32 +219,42 @@ if not L then return end
 --	L["CONFIG_SYSTEM_TOOLTIP_CLASSCOLOUR_TEXT"] = ""
 	L["CONFIG_SYSTEM_TOOLTIP_SELF_ONLY"] = "nur eigene"
 	L["CONFIG_SYSTEM_TOOLTIP_SELF_ONLY_TEXT"] = "Zeigt die Anzahl der Gegenst\195\164nde des aktuellen Charakters."
+--	L["CONFIG_SYSTEM_TOOLTIP_HIGHLIGHT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_HIGHLIGHT_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_FACTION_ONLY"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_FACTION_ONLY_TEXT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_REALM_ONLY"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_REALM_ONLY_TEXT"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_CROSSREALM"] = ""
+--	L["CONFIG_SYSTEM_TOOLTIP_CROSSREALM_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_VAULT_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_SOURCE_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_DESCRIPTION_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_CUSTOM_ENABLE_TEXT"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_BATTLEPET_MOUSEOVER_ENABLE_TEXT"] = ""
 	
-	L["CONFIG_SYSTEM_BUGFIX"] = "Fehlerbehebungen / Workarounds"
-	L["CONFIG_SYSTEM_BUGFIX_TEXT"] = "Schaltet die Fehlerbehebung f\195\188r diese Problem ein."
---	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL"] = ""
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_TEXT"] = "Ein Fehler in der Blizzard CreateFrame-API kann dazu f\195\188hren, dass der Rahmenhintergrund \195\188ber dem Vordergrund liegt, wodurch keine Hinweistexte angezeigt werden und im betroffenen Fenster auch nichts mehr ausgew\195\164hlt werden kann."
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_TEXT"] = "Legt fest, ob und wie ausf\195\188hrlich, Meldungen bei einer Fehlerbehebung angezeigt werden."
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE0"] = "aus"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE0_TEXT"] = "Meldungen bei einer Fehlerbehebung werden nicht angezeigt"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE1"] = "kurz"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE1_TEXT"] = "es werden nur kurze Meldungen bei einer Fehlerbehebung angezeigt"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE2"] = "lang"
-	L["CONFIG_SYSTEM_BUGFIX_FRAMELEVEL_ALERT_STYLE2_TEXT"] = "es werden ausf\195\188hrliche Meldungen bei einer Fehlerbehebung angezeigt"
---	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG"] = ""
---	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG_TEXT"] = ""
---	L["CONFIG_SYSTEM_BUGFIX_ZEROSIZEBAG_ALERT_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND"] = ""
+	L["CONFIG_SYSTEM_WORKAROUND_TEXT"] = "Schaltet die Fehlerbehebung f\195\188r diese Problem ein."
+--	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL"] = ""
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_TEXT"] = "Ein Fehler in der Blizzard CreateFrame-API kann dazu f\195\188hren, dass der Rahmenhintergrund \195\188ber dem Vordergrund liegt, wodurch keine Hinweistexte angezeigt werden und im betroffenen Fenster auch nichts mehr ausgew\195\164hlt werden kann."
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_TEXT"] = "Legt fest, ob und wie ausf\195\188hrlich, Meldungen bei einer Fehlerbehebung angezeigt werden."
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE0"] = "aus"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE0_TEXT"] = "Meldungen bei einer Fehlerbehebung werden nicht angezeigt"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE1"] = "kurz"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE1_TEXT"] = "es werden nur kurze Meldungen bei einer Fehlerbehebung angezeigt"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE2"] = "lang"
+	L["CONFIG_SYSTEM_WORKAROUND_FRAMELEVEL_ALERT_STYLE2_TEXT"] = "es werden ausf\195\188hrliche Meldungen bei einer Fehlerbehebung angezeigt"
+--	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_ZEROSIZEBAG_ALERT_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD_ENABLED_TEXT"] = ""
+--	L["CONFIG_SYSTEM_WORKAROUND_COMBAT_YIELD_COUNT_TEXT"] = ""
 --	L["BUGFIX_TAINTED_ALERT_MOUSEOVER_TEXT"] = ""
 --	L["BUGFIX_TAINTED_ALERT_OPEN_TEXT"] = ""
 	
 --	L["CONFIG_SYSTEM_MESSAGES"] = ""
+--	L["CONFIG_SYSTEM_MESSAGES_RESTACK_TEXT"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_INTERIM"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_INTERIM_TEXT"] = ""
@@ -252,6 +262,9 @@ if not L then return end
 --	L["CONFIG_SYSTEM_MESSAGES_TRANSLATION_FINAL_TEXT"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT"] = ""
 --	L["CONFIG_SYSTEM_MESSAGES_BATTLEPET_OPPONENT_TEXT"] = ""
+	
+--	L["CONFIG_SYSTEM_TIMERS"] = ""
+--	L["CONFIG_SYSTEM_TIMERS_TEXT"] = ""
 	
 	
 --	configuration options > auto
@@ -264,6 +277,7 @@ if not L then return end
 	L["CONFIG_AUTO_OPEN_MERCHANT"] = "H\195\164ndler"
 	L["CONFIG_AUTO_OPEN_TRADE"] = "Handeln"
 	L["CONFIG_AUTO_OPEN_AUCTION"] = "Auktionator"
+--	L["CONFIG_AUTO_OPEN_VOID"] = ""
 	
 	L["CONFIG_AUTO_CLOSE"] = "schlie\195\159e %1$s %2$s beim %3$s"
 	L["CONFIG_AUTO_CLOSE_BANK"] = "Schlie\195\159en des Bankfachs"
@@ -272,6 +286,7 @@ if not L then return end
 	L["CONFIG_AUTO_CLOSE_MERCHANT"] = "Verlassen des H\195\164ndlers"
 	L["CONFIG_AUTO_CLOSE_TRADE"] = "Beenden eines Handels"
 	L["CONFIG_AUTO_CLOSE_AUCTION"] = "Verlassen des Auktionators"
+--	L["CONFIG_AUTO_CLOSE_VOID"] = ""
 	L["CONFIG_AUTO_CLOSE_COMBAT"] = "Beginn eines Kampfes"
 	
 	
@@ -304,6 +319,7 @@ if not L then return end
 	L["CONFIG_SETTINGS_FRAME_SCALE_TEXT"] = "mit der Skalierung kann man Fenster gr\195\182\195\159er oder kleiner machen"
 	L["CONFIG_SETTINGS_FRAME_PADDING_TEXT"] = "legt den Abstand zwischen dem Fensterrand und den Leisten fest"
 	L["CONFIG_SETTINGS_FRAME_WIDTH_TEXT"] = "legt die Anzahl an Spalten fest"
+--	L["CONFIG_SETTINGS_FRAME_HEIGHT_TEXT"] = ""
 	L["CONFIG_SETTINGS_FRAME_BACKGROUND_COLOUR_TEXT"] = "legt die Hintergrundfarbe des Hauptfensters fest"
 	L["CONFIG_SETTINGS_FRAME_BORDER_SHOW_TEXT"] = "bestimmt, ob ein Rahmen um das Hauptfenster angezeigt wird"
 	L["CONFIG_SETTINGS_FRAME_BORDER_STYLE_TEXT"] = "legt die Rahmenart des Hauptfensters fest"
@@ -341,7 +357,6 @@ if not L then return end
 --	L["CONFIG_SETTINGS_BARS_NAME_HEIGHT_TEXT"] = ""
 --	L["CONFIG_SETTINGS_BARS_NAME_ANCHOR_TEXT"] = ""
 	
-	L["CONFIG_SETTINGS_ITEMS"] = "Gegenst\195\164nde"
 	L["CONFIG_SETTINGS_ITEMS_PADDING_TEXT"] = "legt den Abstand zwischen den Pl\195\164tzen der Gegenst\195\164nde fest"
 	L["CONFIG_SETTINGS_ITEMS_HIDDEN"] = "versteckte anzeigen"
 	L["CONFIG_SETTINGS_ITEMS_HIDDEN_TEXT"] = "bestimmt, ob Gegenst\195\164nde aus versteckten Kategorien angezeigt werden sollen"
@@ -358,12 +373,12 @@ if not L then return end
 --	L["CONFIG_SETTINGS_ITEMS_BORDER_RARITY_CUTOFF"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_BORDER_RARITY_CUTOFF_TEXT"] = ""
 	L["CONFIG_SETTINGS_ITEMS_BORDER_TEXTURE_OFFSET_TEXT"] = "Anzahl der Pixel vom Bildrand zum Beginn des Rahmens (wird beim Positionieren des Texturrahmens auf dem Rahmen des Gegenstandes verwendet)"
-	L["CONFIG_SETTINGS_ITEMS_AGE"] = "neue Gegenst\195\164nde"
-	L["CONFIG_SETTINGS_ITEMS_AGE_SHOW_TEXT"] = "bestimmt, ob neue Gegenst\195\164nde im %s Fenster markiert werden sollen"
-	L["CONFIG_SETTINGS_ITEMS_AGE_COLOUR_TEXT"] = "legt die Farbe f\195\188r die Markierung fest"
---	L["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF"] = ""
---	L["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF_TEXT"] = ""
-	L["CONFIG_SETTINGS_ITEMS_AGE_RESET_TEXT"] = "vergisst die als neu zu markierenden Gegenst\195\164nde"
+	L["CONFIG_SETTINGS_ITEMS_AGE"] = "Item-Alter"
+	L["CONFIG_SETTINGS_ITEMS_AGE_SHOW_TEXT"] = "Ein/Aus der Item-Alter-Funktion"
+	L["CONFIG_SETTINGS_ITEMS_AGE_COLOUR_TEXT"] = "verndert die Farbe der Item-Alter-Anzeige"
+	L["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF"] = "Anzeige deaktivieren nach (Minuten)"
+	L["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF_TEXT"] = "Legt die Zeit (in Minuten) fest, in der das Item-Alter dargestellt wird. Mit dem Wert '0' wird das Item-Alter ohne zeitliches Limit dargestellt"
+--	L["CONFIG_SETTINGS_ITEMS_AGE_RESET_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL_TEXT"] = ""
@@ -385,52 +400,57 @@ if not L then return end
 	L["CONFIG_SETTINGS_EMPTY_COLOUR"] = "Farben der Pl\195\164tze"
 	L["CONFIG_SETTINGS_EMPTY_COLOUR_TEXT"] = "Die Farbe, mit der die freien Pl\195\164tze f\195\188r %1$s markiert werden." -- slot name
 --	L["CONFIG_SETTINGS_EMPTY_STATUS"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_FIRST"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = ""
 	
 	
 -- sorting
---	L["CONFIG_SORTMETHOD"] = ""
+--	L["CONFIG_SORTING"] = ""
 	
-	L["CONFIG_SORTMETHOD_SORT"] = "Sortierung"
+	L["CONFIG_SORTING_SORT"] = "Sortierung"
 	
-	L["CONFIG_SORTMETHOD_STYLE_TEXT"] = "Bestimme, wie du deine Gegenst\195\164nde sortieren willst."
-	L["CONFIG_SORTMETHOD_STYLE_BAGSLOT"] = "Tasche / Platz"
-	L["CONFIG_SORTMETHOD_STYLE_BAGSLOT_TEXT"] = "Sortiert das Inventar anhand der Taschen und Platznummern."
-	L["CONFIG_SORTMETHOD_STYLE_USER"] = "Benutzerdefiniert"
-	L["CONFIG_SORTMETHOD_STYLE_USER_TEXT"] = "Du bestimmst, wie deine Taschen sortiert werden sollen."
+	L["CONFIG_SORTING_METHOD_TEXT"] = "Bestimme, wie du deine Gegenst\195\164nde sortieren willst."
+	L["CONFIG_SORTING_METHOD_BAGSLOT"] = "Tasche / Platz"
+	L["CONFIG_SORTING_METHOD_BAGSLOT_TEXT"] = "Sortiert das Inventar anhand der Taschen und Platznummern."
+	L["CONFIG_SORTING_METHOD_USER"] = "Benutzerdefiniert"
+	L["CONFIG_SORTING_METHOD_USER_TEXT"] = "Du bestimmst, wie deine Taschen sortiert werden sollen."
 	
---	L["CONFIG_SORTMETHOD_INCLUDE_NAME"] = ""
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_TEXT"] = "Den Namen des Gegenstandes beim Sortieren des Inventars verwenden."
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_REVERSE"] = "W\195\182rter des Namens umkehren"
-	L["CONFIG_SORTMETHOD_INCLUDE_NAME_REVERSE_TEXT"] = "Bei der Namenssortierung werden die einzelnen W\195\182rter in umgekehrter Reihenfolge verwendet.\n\neg Erstklassiger Manatrank wird zu Manatrank Erstklassiger"
-	L["CONFIG_SORTMETHOD_INCLUDE_QUALITY"] = "Seltenheit"
-	L["CONFIG_SORTMETHOD_INCLUDE_QUALITY_TEXT"] = "Die Gegenst\195\164nde anhand ihrer Seltenheit sortieren."
-	L["CONFIG_SORTMETHOD_INCLUDE_LOCATION"] = "Art des Kleidungsst\195\188cks"
-	L["CONFIG_SORTMETHOD_INCLUDE_LOCATION_TEXT"] = "Die Art des Kleidungsst\195\188cks beim Sortieren des Inventars verwenden.\n\nAnmerkung: Betrifft nur Kleidung, die angezogen werden kann."
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMTYPE"] = "Typ und Subtyp"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMTYPE_TEXT"] = "Typ und Subtyp beim Sortieren des Inventars verwenden."
-	L["CONFIG_SORTMETHOD_INCLUDE_CATEGORY"] = "Kategorie"
-	L["CONFIG_SORTMETHOD_INCLUDE_CATEGORY_TEXT"] = "Die Kategorie eines Gegenstandes beim Sortieren des Inventars verwenden."
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMUSELEVEL"] = "Verwendbarkeitsstufe"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMUSELEVEL_TEXT"] = "Die Stufe, ab der ein Gegenstand verwendet werden kann, bestimmt die Sortierreihenfolge."
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMSTATLEVEL"] = "Gegenstandsstufe"
-	L["CONFIG_SORTMETHOD_INCLUDE_ITEMSTATLEVEL_TEXT"] = "Die Stufe eines Gegenstandes beim Sortieren des Inventars verwenden."
---	L["CONFIG_SORTMETHOD_INCLUDE_ITEMAGE"] = ""
---	L["CONFIG_SORTMETHOD_INCLUDE_ITEMAGE_TEXT"] = ""
-	L["CONFIG_SORTMETHOD_INCLUDE_VENDORPRICE"] = "Preis beim H\195\164ndler"
-	L["CONFIG_SORTMETHOD_INCLUDE_VENDORPRICE_TEXT"] = "Der Verkaufspreis (gestapelte Gegenst\195\164nde werden aufsummiert) bestimmt die Sortierreihenfolge."
---	L["CONFIG_SORTMETHOD_INCLUDE_ID"] = ""
---	L["CONFIG_SORTMETHOD_INCLUDE_ID_TEXT"] = ""
+--	L["CONFIG_SORTING_BAG"] = ""
+--	L["CONFIG_SORTING_BAG_TEXT"] = ""
 	
-	L["CONFIG_SORTMETHOD_DIRECTION_TEXT"] = "Gegenst\195\164nde in aufsteigender oder absteigender Reihenfolge sortieren."
-	L["CONFIG_SORTMETHOD_ORDER"] = "Sortierreihenfolge"
-	L["CONFIG_SORTMETHOD_MOVE_UP_TEXT"] = "verschiebt %1$s in der Sortierreihenfolge nach oben"
-	L["CONFIG_SORTMETHOD_MOVE_DOWN_TEXT"] = "verschiebt %1$s in der Sortierreihenfolge nach unten"
-	L["CONFIG_SORTMETHOD_NOT_INCLUDED"] = "* wird zurzeit beim Sortieren nicht beachtet *"
+--	L["CONFIG_SORTING_INCLUDE_NAME"] = ""
+	L["CONFIG_SORTING_INCLUDE_NAME_TEXT"] = "Den Namen des Gegenstandes beim Sortieren des Inventars verwenden."
+	L["CONFIG_SORTING_INCLUDE_NAME_REVERSE"] = "W\195\182rter des Namens umkehren"
+	L["CONFIG_SORTING_INCLUDE_NAME_REVERSE_TEXT"] = "Bei der Namenssortierung werden die einzelnen W\195\182rter in umgekehrter Reihenfolge verwendet.\n\neg Erstklassiger Manatrank wird zu Manatrank Erstklassiger"
+	L["CONFIG_SORTING_INCLUDE_QUALITY"] = "Seltenheit"
+	L["CONFIG_SORTING_INCLUDE_QUALITY_TEXT"] = "Die Gegenst\195\164nde anhand ihrer Seltenheit sortieren."
+	L["CONFIG_SORTING_INCLUDE_LOCATION"] = "Art des Kleidungsst\195\188cks"
+	L["CONFIG_SORTING_INCLUDE_LOCATION_TEXT"] = "Die Art des Kleidungsst\195\188cks beim Sortieren des Inventars verwenden.\n\nAnmerkung: Betrifft nur Kleidung, die angezogen werden kann."
+	L["CONFIG_SORTING_INCLUDE_ITEMTYPE"] = "Typ und Subtyp"
+	L["CONFIG_SORTING_INCLUDE_ITEMTYPE_TEXT"] = "Typ und Subtyp beim Sortieren des Inventars verwenden."
+	L["CONFIG_SORTING_INCLUDE_CATEGORY"] = "Kategorie"
+	L["CONFIG_SORTING_INCLUDE_CATEGORY_TEXT"] = "Die Kategorie eines Gegenstandes beim Sortieren des Inventars verwenden."
+	L["CONFIG_SORTING_INCLUDE_ITEMUSELEVEL"] = "Verwendbarkeitsstufe"
+	L["CONFIG_SORTING_INCLUDE_ITEMUSELEVEL_TEXT"] = "Die Stufe, ab der ein Gegenstand verwendet werden kann, bestimmt die Sortierreihenfolge."
+	L["CONFIG_SORTING_INCLUDE_ITEMSTATLEVEL"] = "Gegenstandsstufe"
+	L["CONFIG_SORTING_INCLUDE_ITEMSTATLEVEL_TEXT"] = "Die Stufe eines Gegenstandes beim Sortieren des Inventars verwenden."
+--	L["CONFIG_SORTING_INCLUDE_ITEMAGE"] = ""
+--	L["CONFIG_SORTING_INCLUDE_ITEMAGE_TEXT"] = ""
+	L["CONFIG_SORTING_INCLUDE_VENDORPRICE"] = "Preis beim H\195\164ndler"
+	L["CONFIG_SORTING_INCLUDE_VENDORPRICE_TEXT"] = "Der Verkaufspreis (gestapelte Gegenst\195\164nde werden aufsummiert) bestimmt die Sortierreihenfolge."
+--	L["CONFIG_SORTING_INCLUDE_ID"] = ""
+--	L["CONFIG_SORTING_INCLUDE_ID_TEXT"] = ""
 	
---	L["CONFIG_SORTMETHOD_ADD"] = ""
---	L["CONFIG_SORTMETHOD_ADD_TEXT"] = ""
---	L["CONFIG_SORTMETHOD_RENAME_TEXT"] = ""
---	L["CONFIG_SORTMETHOD_DELETE_TEXT"] = ""
+	L["CONFIG_SORTING_DIRECTION_TEXT"] = "Gegenst\195\164nde in aufsteigender oder absteigender Reihenfolge sortieren."
+	L["CONFIG_SORTING_ORDER"] = "Sortierreihenfolge"
+	L["CONFIG_SORTING_MOVE_UP_TEXT"] = "verschiebt %1$s in der Sortierreihenfolge nach oben"
+	L["CONFIG_SORTING_MOVE_DOWN_TEXT"] = "verschiebt %1$s in der Sortierreihenfolge nach unten"
+	L["CONFIG_SORTING_NOT_INCLUDED"] = "* wird zurzeit beim Sortieren nicht beachtet *"
+	
+--	L["CONFIG_SORTING_ADD"] = ""
+--	L["CONFIG_SORTING_ADD_TEXT"] = ""
+--	L["CONFIG_SORTING_RENAME_TEXT"] = ""
+--	L["CONFIG_SORTING_DELETE_TEXT"] = ""
 	
 	
 -- rules
@@ -477,6 +497,7 @@ if not L then return end
 	L["RULE_FAILED_FORMULA_NIL"] = "fehlender Ausdruck"
 --	L["RULE_FAILED_FORMULA_BAD"] = ""
 --	L["RULE_FAILED_ARGUMENT_IS_NIL"] = ""
+--	L["RULE_FAILED_ARGUMENT_IS_NOT"] = ""
 --	L["RULE_FAILED_ARGUMENT_IS_INVALID"] = ""
 --	L["RULE_FAILED_ARGUMENT_NONE_SPECIFIED"] = ""
 	
@@ -526,12 +547,16 @@ if not L then return end
 --	L["BATTLEPET_OPPONENT_KNOWN"] = ""
 --	L["BATTLEPET_OPPONENT_UNKNOWN"] = ""
 --	L["BATTLEPET_OPPONENT_UPGRADE"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_STRONG"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_WEAK"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_ABILITY1"] = ""
+--	L["BATTLEPET_OPPONENT_FORMAT_ABILITY2"] = ""
 	
 	
 --	item count tooltip
---	L["TOOLTIP_COUNT_ME"] = ""
 --	L["TOOLTIP_VAULT_TABS"] = ""
 --	L["TOOLTIP_GOLD_AMOUNT"] = ""
+	
 	
 --	generic text
 --	L["AUTOMATIC"] = ""
@@ -595,6 +620,9 @@ if not L then return end
 --	L["CLICK_TO_IGNORE"] = ""	
 	L["ORDER"] = "Reihenfolge"
 --	L["MOUSEOVER"] = ""
+--	L["NO_DATA_AVAILABLE"] = ""
+--	L["TOOLTIP_PURCHASE_BANK_BAG_SLOT"] = ""
+--	L["TOOLTIP_PURCHASE_BANK_TAB_REAGENT"] = ""
 	
 	
 -- libdatabroker
@@ -611,6 +639,9 @@ if not L then return end
 --	L["LDB_MOUNTS_TYPE_L"] = ""
 --	L["LDB_MOUNTS_TYPE_U"] = ""
 --	L["LDB_MOUNTS_TYPE_S"] = ""
+--	L["LDB_MOUNTS_TYPE_X"] = ""
+--	L["LDB_MOUNTS_FLYING_USEFORLAND"] = ""
+--	L["LDB_MOUNTS_FLYING_USEFORLAND_TEXT"] = ""
 --	L["LDB_MOUNTS_FLYING_DISMOUNT"] = ""
 --	L["LDB_MOUNTS_FLYING_DISMOUNT_TEXT"] = ""
 --	L["LDB_MOUNTS_FLYING_DISMOUNT_WARNING"] = ""
@@ -625,7 +656,6 @@ if not L then return end
 --	L["LDB_COMPANION_RESTRICTED_ITEM"] = ""
 --	L["LDB_COMPANION_RESTRICTED_EVENT"] = ""
 --	L["LDB_COMPANION_RESTRICTED_UNKNOWN"] = ""
---	L["LDB_COMPANION_NODATA"] = ""
 --	L["LDB_COMPANION_NODATA_TEXT"] = ""
 --	L["LDB_COMPANION_SELECT"] = ""
 --	L["LDB_COMPANION_DESELECT"] = ""

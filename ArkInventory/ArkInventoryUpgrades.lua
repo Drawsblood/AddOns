@@ -1,4 +1,4 @@
-local _G = _G
+﻿local _G = _G
 local select = _G.select
 local pairs = _G.pairs
 local ipairs = _G.ipairs
@@ -19,14 +19,113 @@ function ArkInventory.CategoryRenumber( cat_old, cat_new )
 	
 end
 
-function ArkInventory.ConvertOldOptions( )
-	
-	--ArkInventory.Output( LIGHTYELLOW_FONT_COLOR_CODE, "ConvertOldOptions" )
-	
-	local upgrade_version = 0
 
-	if not ArkInventory.db.profile.option["version"] then
-		ArkInventory.db.profile.option["version"] = upgrade_version
+function ArkInventory.DatabaseUpgradePreLoad( )
+	
+	ARKINVDB = ARKINVDB or { }
+	
+	if ArkInventory.Const.Program.Version >= 3.0227 then
+		-- erase old factionrealm data
+		if ARKINVDB.factionrealm then
+			ARKINVDB.factionrealm = nil
+		end
+	end
+	
+	
+	if ArkInventory.Const.Program.Version >= 30334 then
+		
+		ARKINVDB.global = ARKINVDB.global or { }
+		ARKINVDB.global.player = ARKINVDB.global.player or { }
+		ARKINVDB.global.player.data = ARKINVDB.global.player.data or { }
+		
+		if ARKINVDB.global.option and ARKINVDB.global.option.sort and ARKINVDB.global.option.sort.data then
+			ARKINVDB.global.option.sort.method = { }
+			ARKINVDB.global.option.sort.method.data = ARKINVDB.global.option.sort.data
+			ARKINVDB.global.option.sort.data = nil
+		end
+		
+		if ARKINVDB.realm then
+			-- move realm into global
+			
+			for r, v1 in pairs( ARKINVDB.realm ) do
+				
+				if v1.player and v1.player.data then
+					
+					for n, v2 in pairs( v1.player.data ) do
+						
+						if string.sub( n, 1, 1 ) ~= "!" then
+							
+							local k = string.format( "%s%s%s", n, ArkInventory.Const.PlayerIDTag, r )
+							ARKINVDB.global.player.data[k] = v2
+							ARKINVDB.global.player.data[k].location = nil
+							ARKINVDB.global.player.data[k].version = v1.player.version or ArkInventory.Const.Program.Version
+							
+							ARKINVDB.global.player.data[k].info = { }
+							
+							local i = ARKINVDB.global.player.data[k].info
+							i.player_id = k
+							i.guild_id = nil
+							if i.guild then
+								i.guild_id = string.format( "%s%s%s%s", ArkInventory.Const.GuildTag, i.guild, ArkInventory.Const.PlayerIDTag, r )
+							end
+							i.guild = nil
+							
+						end
+						
+					end
+					
+				end
+				
+			end
+		
+			ARKINVDB.realm = nil
+		
+		end
+		
+		if ARKINVDB.char then
+			-- move char into global
+			
+			for k, v in pairs( ARKINVDB.char ) do
+				
+				ARKINVDB.global.player.data[k] = ARKINVDB.global.player.data[k] or { }
+				
+				if v.option and v.option.ldb then
+					ARKINVDB.global.player.data[k].ldb = v.option.ldb
+					ARKINVDB.global.player.data[k].ldb.version = v.option.version
+				end
+				
+				ARKINVDB.global.player.data[k].ldb = ARKINVDB.global.player.data[k].ldb or { }
+				ARKINVDB.global.player.data[k].ldb.version = ARKINVDB.global.player.data[k].ldb.version or ArkInventory.Const.Program.Version
+				
+			end
+			
+			ARKINVDB.char = nil
+			
+		end
+		
+	end
+	
+end
+
+
+
+function ArkInventory.DatabaseUpgradePostLoad( )
+	
+	--ArkInventory.Output( LIGHTYELLOW_FONT_COLOR_CODE, "DatabaseUpgradePostLoad" )
+	
+	local upgrade_version
+	
+	
+	if not ArkInventory.db.global.option.version or ArkInventory.db.global.option.version == 0 then
+		ArkInventory.db.global.option.version = ArkInventory.Const.Program.Version
+	end
+	
+	if not ArkInventory.db.global.player.version or ArkInventory.db.global.player.version == 0 then
+		ArkInventory.db.global.player.version = ArkInventory.Const.Program.Version
+	end
+	
+	if not ArkInventory.db.profile.option.version or ArkInventory.db.profile.option.version == 0 then
+		ArkInventory.db.profile.option.version = ArkInventory.Const.Program.Version
 	end
 	
 	
@@ -34,7 +133,7 @@ function ArkInventory.ConvertOldOptions( )
 	if ArkInventory.db.profile.option.version < upgrade_version then
 	
 		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_PROFILE"], ArkInventory.db:GetCurrentProfile( ), upgrade_version ) )
-	
+		
 		ArkInventory.db.global.cache = nil
 		
 		for k, v in pairs( ArkInventory.db.profile.option.category ) do
@@ -149,32 +248,6 @@ function ArkInventory.ConvertOldOptions( )
 	end
 	
 	
-	upgrade_version = 3.0211
-	if ArkInventory.db.realm.player.version < upgrade_version then
-		
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_GLOBAL"], "player", upgrade_version ) )
-		
-		ArkInventory.db.global.player = nil
-		
-		for n in pairs( ArkInventory.db.realm.player.data ) do
-			if string.match( n, "!" ) then
-				ArkInventory.db.realm.player.data[n] = nil
-			end
-		end
-		
-		ArkInventory.db.realm.player.version = upgrade_version
-		
-	end
-	
-	
-	upgrade_version = 3.0219
-	if ArkInventory.db.realm.player.version < upgrade_version then
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_GLOBAL"], "player", upgrade_version ) )
-		ArkInventory.EraseSavedData( )
-		ArkInventory.db.realm.player.version = upgrade_version
-	end
-	
-	
 	upgrade_version = 3.0223
 	if ArkInventory.db.global.option.version < upgrade_version then
 		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_GLOBAL"], "player", upgrade_version ) )
@@ -190,7 +263,7 @@ function ArkInventory.ConvertOldOptions( )
 		
 		local cat, cat_old
 		
-		cat = ArkInventory.db.global.option.sort.data
+		cat = ArkInventory.db.global.option.sort.method.data
 		for k in pairs( cat ) do
 			cat[k].used = true
 		end
@@ -416,10 +489,11 @@ function ArkInventory.ConvertOldOptions( )
 		
 	end
 	
-	if ArkInventory.db.char.option.version < upgrade_version then
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_CHAR"], UnitName( "player" ), upgrade_version ) )
-		ArkInventory.db.char.option.ldb.mounts.track = nil
-		ArkInventory.db.char.option.version = upgrade_version
+	for k, v in pairs( ArkInventory.db.global.player.data ) do
+		if v.ldb.version and v.ldb.version < upgrade_version then
+			v.ldb.mounts.track = nil
+			v.ldb.version = upgrade_version
+		end
 	end
 	
 	
@@ -503,81 +577,51 @@ function ArkInventory.ConvertOldOptions( )
 	end
 	
 	
-	
-	
 	upgrade_version = 3.0248
-	if ArkInventory.db.realm.player.version < upgrade_version then
-		
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_GLOBAL"], "player", upgrade_version ) )
-		ArkInventory.EraseSavedData( )
-		
-		ArkInventory.db.realm.player.version = upgrade_version
-		
-	end
-	
-	if ArkInventory.db.char.option.version < upgrade_version then
-		
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_CHAR"], UnitName( "player" ), upgrade_version ) )
-		
-		if ArkInventory.db.char.option.ldb then
-		
-			if ArkInventory.db.char.option.ldb.currency and ArkInventory.db.char.option.ldb.currency.tracked then
-				for k, v in pairs( ArkInventory.db.char.option.ldb.currency.tracked ) do
-					if v then
-						ArkInventory.db.char.option.ldb.tracking.currency.tracked[k] = v
+	for k, v in pairs( ArkInventory.db.global.player.data ) do
+		if v.ldb.version and v.ldb.version < upgrade_version then
+			
+			if v.ldb.currency and v.ldb.currency.tracked then
+				for k2, v2 in pairs( v.ldb.currency.tracked ) do
+					if v2 then
+						v.ldb.tracking.currency.tracked[k2] = v2
 					end
 				end
 			end
 			
-			ArkInventory.db.char.option.ldb.currency = nil
-		
-			ArkInventory.db.char.option.ldb.ammo = nil
+			v.ldb.currency = nil
+			
+			v.ldb.ammo = nil
+			
+			v.ldb.version = upgrade_version
 			
 		end
-		
-		
-		ArkInventory.db.char.option.version = upgrade_version
-		
 	end
-	
-	
-	
-	upgrade_version = 3.0249
-	if ArkInventory.db.realm.player.version < upgrade_version then
-		
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_GLOBAL"], "player", upgrade_version ) )
-		ArkInventory.EraseSavedData( nil, ArkInventory.Const.Location.Token )
-		
-		ArkInventory.db.realm.player.version = upgrade_version
-		
-	end
-	
 	
 	
 	upgrade_version = 3.0250
-	if ArkInventory.db.char.option.version < upgrade_version then
-		
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_CHAR"], UnitName( "player" ), upgrade_version ) )
-		
-		if ArkInventory.db.char.option.ldb and ArkInventory.db.char.option.ldb.mounts then
+	for k, v in pairs( ArkInventory.db.global.player.data ) do
+		if v.ldb.version and v.ldb.version < upgrade_version then
 			
-			if ArkInventory.db.char.option.ldb.mounts.ground and ArkInventory.db.char.option.ldb.mounts.ground.track then
-				ArkInventory.db.char.option.ldb.mounts.ground.track = nil
-			end
-		
-			if ArkInventory.db.char.option.ldb.mounts.flying and ArkInventory.db.char.option.ldb.mounts.flying.track then
-				ArkInventory.db.char.option.ldb.mounts.flying.track = nil
+			if v.ldb.mounts then
+				
+				if v.ldb.mounts.ground and v.ldb.mounts.ground.track then
+					v.ldb.mounts.ground.track = nil
+				end
+			
+				if v.ldb.mounts.flying and v.ldb.mounts.flying.track then
+					v.ldb.mounts.flying.track = nil
+				end
+				
+				if v.ldb.mounts.water and v.ldb.mounts.water.track then
+					v.ldb.mounts.water.track = nil
+				end
+				
 			end
 			
-			if ArkInventory.db.char.option.ldb.mounts.water and ArkInventory.db.char.option.ldb.mounts.water.track then
-				ArkInventory.db.char.option.ldb.mounts.water.track = nil
-			end
+			v.ldb.version = upgrade_version
 			
 		end
-		
-		
-		ArkInventory.db.char.option.version = upgrade_version
-		
 	end
 
 	if ArkInventory.db.profile.option.version < upgrade_version then
@@ -596,17 +640,7 @@ function ArkInventory.ConvertOldOptions( )
 	end
 	
 	
-	
 	upgrade_version = 3.0257
-	if ArkInventory.db.realm.player.version < upgrade_version then
-		
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_GLOBAL"], "player", upgrade_version ) )
-		ArkInventory.EraseSavedData( )
-		
-		ArkInventory.db.realm.player.version = upgrade_version
-		
-	end
-	
 	if ArkInventory.db.profile.option.version < upgrade_version then
 		
 		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_PROFILE"], ArkInventory.db:GetCurrentProfile( ), upgrade_version ) )
@@ -625,7 +659,6 @@ function ArkInventory.ConvertOldOptions( )
 		ArkInventory.db.profile.option.version = upgrade_version
 		
 	end
-	
 	
 	
 	upgrade_version = 3.0260
@@ -651,30 +684,7 @@ function ArkInventory.ConvertOldOptions( )
 	end
 	
 	
-	
-	
-	upgrade_version = 3.0268
-	if ArkInventory.db.realm.player.version < upgrade_version then
-		
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_GLOBAL"], "player", upgrade_version ) )
-		ArkInventory.EraseSavedData( nil, ArkInventory.Const.Location.Auction )
-		
-		ArkInventory.db.realm.player.version = upgrade_version
-		
-	end
-	
-	
 	upgrade_version = 3.0271
-	if ArkInventory.db.realm.player.version < upgrade_version then
-		
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_GLOBAL"], "player", upgrade_version ) )
-		ArkInventory.EraseSavedData( nil, ArkInventory.Const.Location.Spellbook )
-		ArkInventory.EraseSavedData( nil, ArkInventory.Const.Location.Tradeskill )
-		
-		ArkInventory.db.realm.player.version = upgrade_version
-		
-	end
-	
 	if ArkInventory.db.profile.option.version < upgrade_version then
 		
 		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_PROFILE"], ArkInventory.db:GetCurrentProfile( ), upgrade_version ) )
@@ -688,18 +698,7 @@ function ArkInventory.ConvertOldOptions( )
 	end
 	
 	
-	
-	
 	upgrade_version = 3.0279
-	if ArkInventory.db.realm.player.version < upgrade_version then
-		
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_GLOBAL"], "player", upgrade_version ) )
-		ArkInventory.EraseSavedData( )
-		
-		ArkInventory.db.realm.player.version = upgrade_version
-		
-	end
-	
 	if ArkInventory.db.profile.option.version < upgrade_version then
 		
 		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_PROFILE"], ArkInventory.db:GetCurrentProfile( ), upgrade_version ) )
@@ -714,81 +713,143 @@ function ArkInventory.ConvertOldOptions( )
 	end
 	
 	
-	upgrade_version = 30309
-	if ArkInventory.db.global.option.version < upgrade_version then
-		
-		
-		
-		ArkInventory.db.global.option.version = upgrade_version
-		
-	end
-	
-	
 	upgrade_version = 30311
-	if ArkInventory.db.char.option.version < upgrade_version then
-		
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_CHAR"], UnitName( "player" ), upgrade_version ) )
-		
-		-- erase any previously selected pets
-		for k in pairs( ArkInventory.db.char.option.ldb.pets.selected ) do
-			ArkInventory.db.char.option.ldb.pets.selected[k] = nil
+	for k, v in pairs( ArkInventory.db.global.player.data ) do
+		if v.ldb.version and v.ldb.version < upgrade_version then
+			
+			-- erase any previously selected pets
+			for x in pairs( v.ldb.pets.selected ) do
+				v.ldb.pets.selected[x] = nil
+			end
+			
+			for x in pairs( v.ldb.tracking.currency.tracked ) do
+				v.ldb.tracking.currency.tracked[x] = false
+			end
+			
+			v.ldb.version = upgrade_version
+			
 		end
-		
-		for k in pairs( ArkInventory.db.char.option.ldb.tracking.currency.tracked ) do
-			ArkInventory.db.char.option.ldb.tracking.currency.tracked[k] = false
-		end
-		
-		ArkInventory.db.char.option.version = upgrade_version
 		
 	end
 	
-	upgrade_version = 30313
-	if ArkInventory.db.realm.player.version < upgrade_version then
-		
-		ArkInventory.EraseSavedData( )
-		
-		ArkInventory.db.realm.player.version = upgrade_version
-		
-	end
 	
 	upgrade_version = 30316
-	if ArkInventory.db.realm.player.version < upgrade_version then
-		
-		ArkInventory.EraseSavedData( nil, ArkInventory.Const.Location.Pet, true )
-		ArkInventory.EraseSavedData( nil, ArkInventory.Const.Location.Mount, true )
-		
-		ArkInventory.db.realm.player.version = upgrade_version
-		
-	end
-	
-	if ArkInventory.db.char.option.version < upgrade_version then
-		
-		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_CHAR"], UnitName( "player" ), upgrade_version ) )
-		
-		if ArkInventory.db.char and ArkInventory.db.char.option and ArkInventory.db.char.option.ldb and ArkInventory.db.char.option.ldb.mounts then
+	for k, v in pairs( ArkInventory.db.global.player.data ) do
+		if v.ldb.version and v.ldb.version < upgrade_version then
 			
-			if ArkInventory.db.char.option.ldb.mounts.ground then
-				ArkInventory.db.char.option.ldb.mounts.l = ArkInventory.db.char.option.ldb.mounts.ground
-				ArkInventory.db.char.option.ldb.mounts.ground = nil
+			if v.ldb.mounts then
+				
+				if v.ldb.mounts.ground then
+					v.ldb.mounts.l = v.ldb.mounts.ground
+					v.ldb.mounts.ground = nil
+				end
+				
+				if v.ldb.mounts.flying then
+					v.ldb.mounts.a = v.ldb.mounts.flying
+					v.ldb.mounts.flying = nil
+				end
+				
+				if v.ldb.mounts.water then
+					v.ldb.mounts.u = v.ldb.mounts.water
+					v.ldb.mounts.water = nil
+				end
+				
 			end
 			
-			if ArkInventory.db.char.option.ldb.mounts.flying then
-				ArkInventory.db.char.option.ldb.mounts.a = ArkInventory.db.char.option.ldb.mounts.flying
-				ArkInventory.db.char.option.ldb.mounts.flying = nil
-			end
-			
-			if ArkInventory.db.char.option.ldb.mounts.water then
-				ArkInventory.db.char.option.ldb.mounts.u = ArkInventory.db.char.option.ldb.mounts.water
-				ArkInventory.db.char.option.ldb.mounts.water = nil
-			end
+			v.ldb.version = upgrade_version
 			
 		end
+	end
+	
+	
+	upgrade_version = 30334
+	if ArkInventory.db.global.player.version < upgrade_version then
+		for k, v in pairs( ArkInventory.db.global.player.data ) do
+			if v.version then
+				v.version = nil
+			end
+			if v.ldb.version then
+				v.ldb.version = nil
+			end
+		end
+		ArkInventory.db.global.player.version = upgrade_version
+	end
+	
+	
+	upgrade_version = 30400
+	if ArkInventory.db.global.player.version < upgrade_version then
 		
-		ArkInventory.db.char.option.version = upgrade_version
+		ArkInventory.EraseSavedData( nil, nil, true )
+		
+		for k, v1 in pairs( ArkInventory.db.global.player.data ) do
+			if v1.display then
+				for loc_id, v2 in pairs( v1.display ) do
+					if v2.bag then
+						for bag_id, v3 in pairs( v2.bag ) do
+							v1.bagoptions[loc_id][bag_id].display = not not v3
+						end
+					end
+				end
+				v1.display = nil
+			end
+		end
+		
+		ArkInventory.db.global.player.version = upgrade_version
 		
 	end
 	
 	
+	upgrade_version = 30404
+	if ArkInventory.db.profile.option.version < upgrade_version then
+		
+		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_PROFILE"], ArkInventory.db:GetCurrentProfile( ), upgrade_version ) )
+		
+		for k, v in pairs( ArkInventory.db.profile.option.location ) do
+			v.sort.method = v.sort.default or v.sort.method or 9999
+			v.sort.default = nil
+		end
+		
+		ArkInventory.db.profile.option.version = upgrade_version
+		
+	end
+	
+	
+	upgrade_version = 30407
+	if ArkInventory.db.global.player.version < upgrade_version then
+		ArkInventory.EraseSavedData( nil, ArkInventory.Const.Location.Pet, true )
+	end
+	
+	
+	upgrade_version = 30409
+	if ArkInventory.db.profile.option.version < upgrade_version then
+		
+		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_PROFILE"], ArkInventory.db:GetCurrentProfile( ), upgrade_version ) )
+		
+		for k, v in pairs( ArkInventory.db.profile.option.location ) do
+			if type( v.slot.empty.first ) == "boolean" then
+				if v.slot.empty.first then
+					v.slot.empty.first = 1
+				else
+					v.slot.empty.first = 0
+				end
+			end
+		end
+		
+		ArkInventory.db.profile.option.version = upgrade_version
+		
+	end
+	
+	
+	upgrade_version = 30415
+	if ArkInventory.db.global.player.version < upgrade_version then
+		
+		for _, v in pairs( ArkInventory.db.global.player.data ) do
+			table.wipe( v.ldb.pets.selected )
+		end
+		
+		ArkInventory.db.global.player.version = upgrade_version
+		
+	end
 	
 	
 	
@@ -802,12 +863,64 @@ function ArkInventory.ConvertOldOptions( )
 	end
 	
 	-- check sort keys
-	ArkInventory.SortKeyCheck( )
+	ArkInventory.SortingMethodCheck( )
 	
 	-- set versions to current mod version
 	ArkInventory.db.global.option.version = ArkInventory.Const.Program.Version
-	ArkInventory.db.realm.player.version = ArkInventory.Const.Program.Version
+	ArkInventory.db.global.player.version = ArkInventory.Const.Program.Version
 	ArkInventory.db.profile.option.version = ArkInventory.Const.Program.Version
-	ArkInventory.db.char.option.version = ArkInventory.Const.Program.Version
+	
+end
+
+
+
+
+local function SV_WOD_Fixup_Recurse( t )
+	
+	if type( t ) ~= "table" then return end
+	
+	local s
+	local fix = { }
+	
+	for k, v in pairs( t ) do
+		
+		if type( v ) == "table" then
+			SV_WOD_Fixup_Recurse( v )
+		elseif type( v ) == "number" then
+			s = string.format( "%.8f", v )
+			if v ~= tonumber( s ) and string.match( s, "^%d+[.]0+$" ) then
+				t[k] = math.floor( v )
+			end
+		end
+		
+		if type( k ) == "number" then
+			s = string.format( "%.8f", k )
+			if k ~= tonumber( s ) and string.match( s, "^%d+[.]0+$" ) then
+				fix[k] = v
+			end
+		end
+		
+	end
+	
+	for k, v in pairs( fix ) do
+		t[k] = nil
+		t[math.floor(k)] = v
+	end
+	
+	table.wipe( fix )
+	
+end
+
+function ArkInventory.SV_WOD_Fixup( )
+	
+	if true then return end
+	
+	-- shouldnt be needed anymore
+	
+	ARKINVDB = ARKINVDB or { }
+	
+	for k, v in pairs( ARKINVDB ) do
+		SV_WOD_Fixup_Recurse( v )
+	end
 	
 end

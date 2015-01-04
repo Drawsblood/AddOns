@@ -2,6 +2,7 @@ local addonName = "Altoholic"
 local addon = _G[addonName]
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
+local LCI = LibStub("LibCraftInfo-1.0")
 
 local THIS_ACCOUNT = "Default"
 local WHITE		= "|cFFFFFFFF"
@@ -32,7 +33,7 @@ local VIEW_GLYPHS = 4
 local VIEW_AUCTIONS = 5
 local VIEW_BIDS = 6
 local VIEW_MAILS = 7
-local VIEW_MOUNTS = 8
+-- local VIEW_MOUNTS = 8
 local VIEW_COMPANIONS = 9
 local VIEW_SPELLS = 10
 local VIEW_KNOWN_GLYPHS = 11
@@ -61,6 +62,7 @@ local BAG_ICONS = {
 	"Interface\\Icons\\INV_Misc_Bag_25_Mooncloth",
 	"Interface\\Icons\\INV_Misc_Bag_26_Spellfire",
 	"Interface\\Icons\\INV_Misc_Bag_33",
+	"Interface\\Icons\\inv_misc_basket_05",
 }
 
 local ICON_BAGS_HALLOWSEND = "Interface\\Icons\\INV_Misc_Bag_28_Halloween"
@@ -109,7 +111,7 @@ end
 
 local function EnableIcon(name)
 	_G[name]:Enable()
-	_G[name.."IconTexture"]:SetDesaturated(0)
+	_G[name.."IconTexture"]:SetDesaturated(false)
 end
 
 local DDM_Add = addon.Helpers.DDM_Add
@@ -260,9 +262,7 @@ function ns:ShowCharInfo(view)
 		
 	elseif view == VIEW_SPELLS then
 		addon.Spellbook:Update()
-	elseif view == VIEW_MOUNTS then
-		addon.Pets:SetSinglePetView("MOUNT")
-		addon.Pets:UpdatePets()
+
 	elseif view == VIEW_COMPANIONS then
 		addon.Pets:SetSinglePetView("CRITTER")
 		addon.Pets:UpdatePets()
@@ -370,6 +370,8 @@ local function OnContainerChange(self)
 	elseif self.value == 3 then
 		addon:ToggleOption(nil, "UI.Tabs.Characters.ViewVoidStorage")
 	elseif self.value == 4 then
+		addon:ToggleOption(nil, "UI.Tabs.Characters.ViewReagentBank")
+	elseif self.value == 5 then
 		addon:ToggleOption(nil, "UI.Tabs.Characters.ViewBagsAllInOne")
 	end
 	
@@ -479,7 +481,7 @@ end
 local function OnClearMailboxEntries(self)
 	local character = ns:GetAltKey()
 	DataStore:ClearMailboxEntries(character)
-	addon.Mails:Update()
+	addon.Mail:Update()
 end
 
 
@@ -536,7 +538,8 @@ local function BagsIcon_Initialize(self, level)
 	DDM_Add(L["Bags"], 1, OnContainerChange, nil, (addon:GetOption("UI.Tabs.Characters.ViewBags") == 1))
 	DDM_Add(L["Bank"], 2, OnContainerChange, nil, (addon:GetOption("UI.Tabs.Characters.ViewBank") == 1))
 	DDM_Add(VOID_STORAGE, 3, OnContainerChange, nil, (addon:GetOption("UI.Tabs.Characters.ViewVoidStorage") == 1))
-	DDM_Add(L["All-in-one"], 4, OnContainerChange, nil, (addon:GetOption("UI.Tabs.Characters.ViewBagsAllInOne") == 1))
+	DDM_Add(REAGENT_BANK , 4, OnContainerChange, nil, (addon:GetOption("UI.Tabs.Characters.ViewReagentBank") == 1))
+	DDM_Add(L["All-in-one"], 5, OnContainerChange, nil, (addon:GetOption("UI.Tabs.Characters.ViewBagsAllInOne") == 1))
 		
 	DDM_AddTitle(" ")
 	DDM_AddTitle("|r" ..RARITY)
@@ -575,7 +578,7 @@ local function TalentsIcon_Initialize(self, level)
 	DDM_Add(TALENT_SPEC_PRIMARY, 1, OnTalentChange, nil, nil)
 	DDM_Add(TALENT_SPEC_SECONDARY, 2, OnTalentChange, nil, nil)
 	DDM_AddTitle(" ")
-	DDM_Add(GLYPHS, nil, OnGlyphChange)
+	DDM_Add(GLYPHS, nil, OnGlyphChange, nil, (currentView == VIEW_GLYPHS))
 	
 	DDM_AddCloseMenu()
 end
@@ -653,13 +656,9 @@ local function SpellbookIcon_Initialize(self, level)
 	if DataStore_Pets and last then
 		local pets = DataStore:GetPets(currentCharacterKey, "CRITTER")
 		local numPets = DataStore:GetNumPets(pets) or 0
-		pets = DataStore:GetPets(currentCharacterKey, "MOUNT")
-		local numMounts = DataStore:GetNumPets(pets) or 0
-	
-		DDM_Add(format(MOUNTS .. " %s(%d)", GREEN, numMounts), VIEW_MOUNTS, OnViewChange, nil, (currentView == VIEW_MOUNTS))
+
 		DDM_Add(format(COMPANIONS .. " %s(%d)", GREEN, numPets), VIEW_COMPANIONS, OnViewChange, nil, (currentView == VIEW_COMPANIONS))
 	else
-		DDM_Add(format(MOUNTS .. " %s(%d)", GREY, numMounts), nil, nil)
 		DDM_Add(format(COMPANIONS .. " %s(%d)", GREY, numPets), nil, nil)
 	end
 	DDM_AddTitle(" ")
@@ -784,7 +783,7 @@ local function ProfessionsIcon_Initialize(self, level)
 				local isHeader, _, spellID = DataStore:GetCraftLineInfo(profession, index)
 				
 				if not isHeader then		-- NON header !!
-					local itemID = DataStore:GetCraftInfo(spellID)
+					local itemID = LCI:GetCraftResultItem(spellID)
 					
 					if itemID then
 						local _, _, _, _, _, itemType, _, _, itemEquipLoc = GetItemInfo(itemID)
@@ -851,7 +850,7 @@ function ns:OnLoad()
 	local bagIcon = ICON_VIEW_BAGS
 
 	-- bag icon gets better with more chars at lv max
-	local LVMax = 85
+	local LVMax = 90
 	local numLvMax = 0
 	for _, character in pairs(DataStore:GetCharacters()) do
 		if DataStore:GetCharacterLevel(character) >= LVMax then

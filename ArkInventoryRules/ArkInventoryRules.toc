@@ -1,5 +1,5 @@
-﻿## Interface: 50100
-## X-Curse-Packaged-Version: 3.03.25
+﻿## Interface: 60000
+## X-Curse-Packaged-Version: 3.04.19
 ## X-Curse-Project-Name: ArkInventory
 ## X-Curse-Project-ID: ark-inventory
 ## X-Curse-Repository-ID: wow/ark-inventory/mainline
@@ -8,17 +8,16 @@
 ## Notes: Rules for ArkInventory
 ## Author: Arkayenro
 ## Email: arkayenro at gmail dot com
+## Version: 10000
+
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
-
 ## RequiredDeps: ArkInventory
-## OptionalDeps: Outfitter, ItemRack, ClosetGnome, SellJunk, Scrap, Scrap_Merchant, ReagentRestocker
-
-## X-Category: Inventory
-## X-Website: http://arkinventory.googlecode.com
 
 ## LoadManagers: AddonLoader
-## X-LoadOn-Always:delayed
+## X-LoadOn-Always: delayed
+
+## OptionalDeps: Outfitter, ItemRack, ClosetGnome, SellJunk, Scrap, Scrap_Merchant, ReagentRestocker
 
 
 ArkInventoryRules.lua

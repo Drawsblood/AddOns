@@ -1,0 +1,20 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+
+<Script file="core.lua"/>
+<Frame name="vexrunes_bar_main" hidden="false" movable="false" enableMouse="false" parent="UIParent" frameStrata="LOW" >
+	<Scripts>
+		<OnLoad>
+			self:RegisterEvent("PLAYER_LOGIN")
+			self:RegisterEvent("PLAYER_REGEN_DISABLED")
+			self:RegisterEvent("PLAYER_REGEN_ENABLED")
+			self:RegisterEvent("RUNE_TYPE_UPDATE")
+			self:RegisterEvent("UNIT_ENTERED_VEHICLE")
+			self:RegisterEvent("UNIT_EXITED_VEHICLE")
+			self:RegisterEvent("PET_BATTLE_OPENING_START")
+			self:RegisterEvent("PET_BATTLE_CLOSE")
+		</OnLoad>
+		<OnEvent function="vexrunes_onEvent"/>
+		<OnUpdate function="vexrunes_onUpdate"/>
+	</Scripts>
+</Frame>
+</Ui>

@@ -198,6 +198,23 @@ end
 -- ****************************************************************************
 -- Called when the text in the input frame editbox changes to allow validation.
 -- ****************************************************************************
+local function ValidateInputCallback(message)
+ local frame = popupFrames.inputFrame
+ 
+ -- Clear validation message and enable okay button.
+ frame.validateFontString:SetText("")
+ frame.okayButton:Enable()
+
+  -- Disable the save button and display the validation message if validation failed.
+  if (message) then
+   frame.validateFontString:SetText(message)
+   frame.okayButton:Disable()
+  end
+end
+
+-- ****************************************************************************
+-- Called when the text in the input frame editbox changes to allow validation.
+-- ****************************************************************************
 local function ValidateInput(this)
  local frame = popupFrames.inputFrame
 
@@ -208,7 +225,7 @@ local function ValidateInput(this)
  if (frame.validateHandler) then
   local firstText = frame.inputEditbox:GetText()
   local secondText = frame.secondInputEditbox:GetText()
-  local message = frame.validateHandler(firstText, frame.showSecondEditbox and secondText)
+  local message = frame.validateHandler(firstText, frame.showSecondEditbox and secondText, ValidateInputCallback)
 
   -- Disable the save button and display the validation message if validation failed.
   if (message) then
@@ -460,6 +477,8 @@ local function UpdateFontPreviews()
   fontSize = frame.normalFontSizeSlider:GetValue()
   outline = OUTLINE_MAP[frame.normalOutlineDropdown:GetSelectedID()]
   frame.normalPreviewFontString:SetFont(fontPath, fontSize, outline)
+  frame.normalPreviewFontString:SetText("")
+  frame.normalPreviewFontString:SetText(L.MSG_NORMAL_PREVIEW_TEXT)
   frame.normalPreviewFontString:SetAlpha(frame.normalFontOpacitySlider:GetValue() / 100)
  end
  
@@ -467,7 +486,11 @@ local function UpdateFontPreviews()
   fontPath = fonts[frame.critFontDropdown:GetSelectedID()]
   fontSize = frame.critFontSizeSlider:GetValue()
   outline = OUTLINE_MAP[frame.critOutlineDropdown:GetSelectedID()]
-  if (fontPath and outline) then frame.critPreviewFontString:SetFont(fontPath, fontSize, outline) end
+  if (fontPath and outline) then
+   frame.critPreviewFontString:SetFont(fontPath, fontSize, outline)
+   frame.critPreviewFontString:SetText("")
+   frame.critPreviewFontString:SetText(L.MSG_CRIT)
+  end
   frame.critPreviewFontString:SetAlpha(frame.critFontOpacitySlider:GetValue() / 100)
  end
 end
@@ -504,7 +527,7 @@ local function CreateFontPopup()
 
  -- Normal font dropdown.
  local dropdown =  MSBTControls.CreateDropdown(normalControlsFrame)
- objLocale = L.DROPDOWNS["normalFont"]
+ local objLocale = L.DROPDOWNS["normalFont"]
  dropdown:Configure(150, objLocale.label, objLocale.tooltip)
  dropdown:SetListboxHeight(200)
  dropdown:SetPoint("TOPLEFT")
@@ -1583,7 +1606,7 @@ local function CreateScrollAreaConfig()
  
  -- Scroll area dropdown.
  local dropdown =  MSBTControls.CreateDropdown(frame)
- objLocale = L.DROPDOWNS["scrollArea"]
+ local objLocale = L.DROPDOWNS["scrollArea"]
  dropdown:Configure(200, objLocale.label, objLocale.tooltip)
  dropdown:SetPoint("TOP", frame, "TOP", 0, -20)
  dropdown:SetChangeHandler(
@@ -1766,7 +1789,7 @@ local function CreateScrollAreaConfig()
  frame.animationSpeedSlider = slider
  
  -- Inherit animation speed checkbox.
- checkbox = MSBTControls.CreateCheckbox(frame)
+ local checkbox = MSBTControls.CreateCheckbox(frame)
  objLocale = L.CHECKBOXES["inheritField"] 
  checkbox:Configure(20, objLocale.label, objLocale.tooltip)
  checkbox:SetPoint("BOTTOMLEFT", frame.animationSpeedSlider, "BOTTOMRIGHT", 10, 5)
@@ -1848,7 +1871,7 @@ local function CreateScrollAreaConfig()
 
 
  -- Preview button.
- button = MSBTControls.CreateOptionButton(frame)
+ local button = MSBTControls.CreateOptionButton(frame)
  objLocale = L.BUTTONS["scrollAreasPreview"]
  button:Configure(20, objLocale.label, objLocale.tooltip)
  button:SetPoint("BOTTOM", frame, "BOTTOM", 0, 50)
@@ -1951,7 +1974,7 @@ local function CreateScrollAreaSelection()
  
  -- Scroll area dropdown.
  local dropdown =  MSBTControls.CreateDropdown(frame)
- objLocale = L.DROPDOWNS["outputScrollArea"]
+ local objLocale = L.DROPDOWNS["outputScrollArea"]
  dropdown:Configure(150, objLocale.label, objLocale.tooltip)
  dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 20, -45)
  frame.scrollAreaDropdown = dropdown
@@ -2091,7 +2114,7 @@ local function CreateEvent()
 
  -- Scroll area dropdown.
  local dropdown =  MSBTControls.CreateDropdown(frame)
- objLocale = L.DROPDOWNS["outputScrollArea"]
+ local objLocale = L.DROPDOWNS["outputScrollArea"]
  dropdown:Configure(150, objLocale.label, objLocale.tooltip)
  dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 20, -60)
  controls.scrollAreaDropdown = dropdown
@@ -2279,7 +2302,7 @@ local function CreateClasses()
  
  -- All classes checkbox.
  local checkbox = MSBTControls.CreateCheckbox(frame)
- objLocale = L.CHECKBOXES["allClasses"] 
+ local objLocale = L.CHECKBOXES["allClasses"] 
  checkbox:Configure(24, objLocale.label, objLocale.tooltip)
  checkbox:SetPoint("TOPLEFT", frame, "TOPLEFT", 20, -40)
  checkbox:SetClickHandler(
@@ -2396,6 +2419,7 @@ local function ConditionDropdownOnChange(this, id)
    control:Show()
    control:SetMinMaxValues(conditionData.minValue, conditionData.maxValue)
    control:SetValueStep(conditionData.step)
+   control:SetObeyStepOnDrag(true)
    control:SetValue(conditionData.default or conditionData.minValue)
   elseif (conditionData.controlType == "dropdown") then
    control = frame.parameterDropdown
@@ -2725,13 +2749,13 @@ local function CreateMainEvent()
 
 
  -- Trigger conditions label.
- fontString = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+ local fontString = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
  fontString:SetPoint("TOPLEFT", frame.mainEventDropdown, "BOTTOMLEFT", 0, -30)
  fontString:SetText(L.MSG_EVENT_CONDITIONS .. ":")
  frame.triggerConditionsLabel = fontString
  
  -- Add event condition button.
- button = MSBTControls.CreateOptionButton(frame)
+ local button = MSBTControls.CreateOptionButton(frame)
  objLocale = L.BUTTONS["addEventCondition"]
  button:Configure(20, objLocale.label, objLocale.tooltip)
  button:SetPoint("LEFT", frame.triggerConditionsLabel, "RIGHT", 10, 0)
@@ -2764,7 +2788,7 @@ local function CreateMainEvent()
  controls[#controls+1] = button
 
  -- Main event conditions listbox.
- listbox = MSBTControls.CreateListbox(frame)
+ local listbox = MSBTControls.CreateListbox(frame)
  listbox:Configure(400, 100, 25)
  listbox:SetPoint("TOPLEFT", frame.triggerConditionsLabel, "BOTTOMLEFT", 10, -10)
  listbox:SetCreateLineHandler(CreateMainEventConditionsLine)
@@ -3415,7 +3439,6 @@ local function CreateTriggerPopup()
  local warriorStances = {
   [1] = GetSkillName(2457),
   [2] = GetSkillName(71),
-  [3] = GetSkillName(2458),
  }
 
  -- Localized zone types.
@@ -3718,7 +3741,7 @@ local function CreateItemListLine(this)
 
  -- Delete item button.
  local button = MSBTControls.CreateIconButton(frame, "Delete")
- objLocale = L.BUTTONS["deleteItem"]
+ local objLocale = L.BUTTONS["deleteItem"]
  button:SetTooltip(objLocale.tooltip)
  button:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
  button:SetClickHandler(DeleteItemButtonOnClick)
@@ -3770,7 +3793,7 @@ local function CreateItemList()
  
  -- Add item button.
  local button = MSBTControls.CreateOptionButton(frame)
- objLocale = L.BUTTONS["addItem"]
+ local objLocale = L.BUTTONS["addItem"]
  button:Configure(20, objLocale.label, objLocale.tooltip)
  button:SetPoint("LEFT", frame.itemsFontString, "RIGHT", 10, 0)
  button:SetClickHandler(
@@ -3940,7 +3963,7 @@ local function CreateSkillListLine(this)
 
  -- Delete skill button.
  local button = MSBTControls.CreateIconButton(frame, "Delete")
- objLocale = L.BUTTONS["deleteSkill"]
+ local objLocale = L.BUTTONS["deleteSkill"]
  button:SetTooltip(objLocale.tooltip)
  button:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
  button:SetClickHandler(DeleteSkillButtonOnClick)
@@ -4015,7 +4038,7 @@ local function CreateSkillList()
  
  -- Add skill button.
  local button = MSBTControls.CreateOptionButton(frame)
- objLocale = L.BUTTONS["addSkill"]
+ local objLocale = L.BUTTONS["addSkill"]
  button:Configure(20, objLocale.label, objLocale.tooltip)
  button:SetPoint("LEFT", frame.skillsFontString, "RIGHT", 10, 0)
  button:SetClickHandler(

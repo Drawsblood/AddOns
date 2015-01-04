@@ -1,4 +1,4 @@
-local _G = _G
+﻿local _G = _G
 local select = _G.select
 local pairs = _G.pairs
 local ipairs = _G.ipairs
@@ -17,6 +17,7 @@ end
 	
 function ArkInventory.Frame_Search_Show( )
 	ARKINV_Search:Show( )
+	ArkInventory.Frame_Main_Level( ARKINV_Search )
 end
 
 function ArkInventory.Frame_Search_Toggle( )
@@ -62,10 +63,10 @@ function ArkInventory.Frame_Search_Paint( )
 			style = ArkInventory.db.profile.option.ui.search.background.style or ArkInventory.Const.Texture.BackgroundDefault
 			if style == ArkInventory.Const.Texture.BackgroundDefault then
 				colour = ArkInventory.db.profile.option.ui.search.background.colour
-				obj:SetTexture( colour.r, colour.g, colour.b, colour.a )
+				ArkInventory.SetTexture( obj, true, colour.r, colour.g, colour.b, colour.a )
 			else
 				file = ArkInventory.Lib.SharedMedia:Fetch( ArkInventory.Lib.SharedMedia.MediaType.BACKGROUND, style )
-				obj:SetTexture( file )
+				ArkInventory.SetTexture( obj, file )
 			end
 		end
 		
@@ -212,7 +213,7 @@ function ArkInventory.Frame_Search_Table_Refresh( frame )
 
 	local cp = ArkInventory.Global.Me
 	
-	for p, pd in ArkInventory.spairs( ArkInventory.db.realm.player.data ) do
+	for p, pd in ArkInventory.spairs( ArkInventory.db.global.player.data ) do
 		
 		for l, ld in pairs( pd.location ) do
 			
@@ -308,7 +309,7 @@ function ArkInventory.Frame_Search_Table_Scroll( frame )
 			
 			_G[string.format( "%s%s", linename, "Id" )]:SetText( r.h )
 
-			_G[string.format( "%s%s", linename, "T1" )]:SetTexture( r.t )
+			ArkInventory.SetTexture( _G[string.format( "%s%s", linename, "T1" )], r.t )
 			
 			local cc = select( 5, ArkInventory.GetItemQualityColor( r.q ) )
 			_G[string.format( "%s%s", linename, "C1" )]:SetText( string.format( "%s%s", cc, r.name ) )

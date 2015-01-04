@@ -1,4 +1,4 @@
-<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
 	
 	<!-- TOOLTIP -->
 
@@ -190,7 +190,7 @@
 		</Layers>
 		
 	</Frame>
-
+	
 	<Button virtual="true" name="ARKINV_TemplateButton" inherits="OptionsButtonTemplate">
 		<Size x="18" y="18" />
 		<Scripts>
@@ -251,24 +251,19 @@
 			</Anchors>
 		</PushedTexture>
 		
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentArkNewText" inherits="ARKINV_NewItemFont" hidden="true" parentKey="ArkNewText">
+					<Anchors>
+						<Anchor point="TOPLEFT" />
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		
 		<Frames>
 			
-			<Frame name="$parentArkBorder" inherits="ARKINV_Border" />
-			
-			<Frame name="$parentArkNew">
-			
-				<Anchors>
-					<Anchor point="TOPLEFT" x="0" y="-2" />
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT" x="0" y="-12" />
-				</Anchors>
-				
-				<Layers>
-					<Layer level="BORDER">
-						<FontString name="$parentText" inherits="ARKINV_NewItemFont" justifyH="CENTER" hidden="true" />
-					</Layer>
-				</Layers>
-				
-			</Frame>
+			<Frame name="$parentArkBorder" inherits="ARKINV_Border" parentKey="ArkBorder" />
 			
 		</Frames>
 		
@@ -324,16 +319,30 @@
 			
 			<Frame parentKey="active" inherits="ARKINV_BorderPulse" setAllPoints="true" />
 			
+			<Frame parentKey="favorite" hidden="true">
+				<Size x="26" y="26" />
+				<Anchors>
+					<Anchor point="TOPLEFT" x="-8" y="8" />
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture file="Interface\PetBattles\PetJournal">
+							<TexCoords left="0.11328125" right="0.16210938" top="0.02246094" bottom="0.04687500" />	
+						</Texture>
+					</Layer>
+				</Layers>
+			</Frame>
+			
 		</Frames>
 		
 		<Scripts>
 			
 			<OnClick>
-				ArkInventory.Frame_Item_Mount_OnClick( self, button, down )
+				ArkInventory.Frame_Item_OnClick_MountJournal( self, button, down )
 			</OnClick>
 			
 			<OnDragStart>
-				ArkInventory.Frame_Item_Mount_OnDragStart( self )
+				ArkInventory.Frame_Item_OnDragStart_MountJournal( self )
 			</OnDragStart>
 			
 			<OnReceiveDrag>
@@ -378,7 +387,6 @@
 				</Layers>
 			</Frame>
 			
-			
 			<Frame parentKey="locked" hidden="true">
 				<Size x="26" y="26" />
 				<Anchors>
@@ -396,11 +404,49 @@
 		<Scripts>
 			
 			<OnClick>
-				ArkInventory.Frame_Item_Battlepet_OnClick( self, button, down )
+				ArkInventory.Frame_Item_OnClick_PetJournal( self, button, down )
 			</OnClick>
 			
 			<OnDragStart>
-				ArkInventory.Frame_Item_Battlepet_OnDragStart( self )
+				ArkInventory.Frame_Item_OnDragStart_PetJournal( self )
+			</OnDragStart>
+			
+			<OnReceiveDrag>
+				-- do nothing
+			</OnReceiveDrag>
+			
+		</Scripts>
+		
+	</Button>
+	
+	<Button virtual="true" name="ARKINV_TemplateButtonToyboxItem" inherits="ARKINV_TemplateButtonItem" hidden="true">
+		
+		<Frames>
+			
+			<Frame parentKey="favorite" hidden="true">
+				<Size x="26" y="26" />
+				<Anchors>
+					<Anchor point="TOPLEFT" x="-8" y="8" />
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture file="Interface\PetBattles\PetJournal">
+							<TexCoords left="0.11328125" right="0.16210938" top="0.02246094" bottom="0.04687500" />	
+						</Texture>
+					</Layer>
+				</Layers>
+			</Frame>
+			
+		</Frames>
+		
+		<Scripts>
+			
+			<OnClick>
+				ArkInventory.Frame_Item_OnClick_Toybox( self, button )
+			</OnClick>
+			
+			<OnDragStart>
+				ArkInventory.Frame_Item_OnDragStart_Toybox( self )
 			</OnDragStart>
 			
 			<OnReceiveDrag>
@@ -468,11 +514,11 @@
 		<Scripts>
 			
 			<OnLoad>
-				ArkInventory.Frame_Item_Tainted_OnLoad( self )
+				ArkInventory.Frame_Item_OnLoad_Tainted( self )
 			</OnLoad>
 			
 			<OnEnter>
-				ArkInventory.Frame_Tainted_OnEnter( self )
+				ArkInventory.Frame_Item_OnEnter_Tainted( self )
 			</OnEnter>
 			
 			<OnClick>
@@ -613,7 +659,7 @@
 		<Scripts>
 			
 			<OnLoad>
-				ArkInventory.Frame_Changer_Primary_OnLoad( self )
+				ArkInventory.Frame_Changer_Slot_OnLoad( self )
 			</OnLoad>
 			
 			<OnEvent>
@@ -629,49 +675,49 @@
 			</OnHide>
 
 			<OnClick>
-				ArkInventory.Frame_Changer_Primary_OnClick( self, button, down )
+				ArkInventory.Frame_Changer_Slot_OnClick( self, button, down )
 			</OnClick>
 			
-            <OnDragStart>
+			<OnDragStart>
 				<!-- over-ride template -->
-            </OnDragStart>
-
+			</OnDragStart>
+			
 			<OnReceiveDrag>
-				ArkInventory.Frame_Changer_Primary_OnClick( self )
+				ArkInventory.Frame_Changer_Slot_OnClick( self )
 			</OnReceiveDrag>
 			
 			<OnEnter>
-				ArkInventory.Frame_Changer_Primary_OnEnter( self )
+				ArkInventory.Frame_Changer_Slot_OnEnter( self )
 			</OnEnter>
 			
 			<OnLeave>
 				ArkInventory.Frame_Changer_Generic_OnLeave( self )
 			</OnLeave>
-
+			
 		</Scripts>
 
 	</Button>
 	
 	<Button virtual="true" name="ArkInventory_ChangerBankMainTemplate" inherits="ArkInventory_ChangerPlayerMainTemplate">
-
+		
 		<Scripts>
-
+			
 			<OnLoad>
-				ArkInventory.Frame_Changer_Primary_OnLoad( self )
+				ArkInventory.Frame_Changer_Slot_OnLoad( self )
 			</OnLoad>
 			
 			<OnClick>
-				ArkInventory.Frame_Changer_Primary_OnClick( self, button, down )
+				ArkInventory.Frame_Changer_Slot_OnClick( self, button, down )
 			</OnClick>
-
-	        <OnReceiveDrag>
-	            ArkInventory.Frame_Changer_Primary_OnClick( self )
-	        </OnReceiveDrag>
+			
+			<OnReceiveDrag>
+				ArkInventory.Frame_Changer_Slot_OnClick( self )
+			</OnReceiveDrag>
 			
 			<OnEnter>
-				ArkInventory.Frame_Changer_Primary_OnEnter( self )
+				ArkInventory.Frame_Changer_Slot_OnEnter( self )
 			</OnEnter>
-
+			
 		</Scripts>
 		
 	</Button>
@@ -735,11 +781,11 @@
 		<Scripts>
 			
 			<OnLoad>
-				ArkInventory.Frame_Changer_Secondary_OnLoad( self )
+				ArkInventory.Frame_Changer_Slot_OnLoad( self )
 			</OnLoad>
 			
 			<OnClick>
-				ArkInventory.Frame_Changer_Secondary_OnClick( self, button, down )
+				ArkInventory.Frame_Changer_Slot_OnClick( self, button, down )
 			</OnClick>
 			
 			<OnDragStart>
@@ -751,44 +797,12 @@
 			</OnReceiveDrag>
 			
 			<OnEnter>
-				ArkInventory.Frame_Changer_Secondary_OnEnter( self )
+				ArkInventory.Frame_Changer_Slot_OnEnter( self )
 			</OnEnter>
 			
 		</Scripts>
 		
 	</Button>
-	
-	<Button virtual="true" name="ArkInventory_ChangerBattlepetTemplate" inherits="ARKINV_TemplateButtonBattlepetItem" hidden="false">
-		<Scripts>
-			
-			<OnLoad>
-				ArkInventory.Frame_Changer_Battlepet_OnLoad( self )
-			</OnLoad>
-			
-			<OnClick>
-				ArkInventory.Frame_Changer_Battlepet_OnClick( self )
-			</OnClick>
-			
-			<OnDragStart>
-				ArkInventory.Frame_Changer_Battlepet_OnDragStart( self )
-			</OnDragStart>
-			
-			<OnReceiveDrag>
-				ArkInventory.Frame_Changer_Battlepet_OnClick( self )
-			</OnReceiveDrag>
-			
-			<OnEnter>
-				ArkInventory.Frame_Changer_Battlepet_OnEnter( self )
-			</OnEnter>
-			
-			<OnLeave>
-				ArkInventory.Frame_Changer_Battlepet_OnLeave( self )
-			</OnLeave>
-			
-		</Scripts>
-		
-	</Button>
-	
 	
 	
 	
@@ -819,13 +833,9 @@
 
 	</Frame>
 	
-	<Frame virtual="true" name="ARKINV_TemplateFrameBag">
-
+	<Frame virtual="true" name="ARKINV_TemplateFrameBag" mouseEnabled="false" hidden="false" >
+		
 		<Size x="1" y="1" />
-
-		<Anchors>
-			<Anchor point="TOPLEFT" />
-		</Anchors>
 		
 		<Scripts>
 			<OnLoad>
@@ -996,27 +1006,62 @@
 		
 	</Frame>
 	
-	<Frame virtual="true" name="ARKINV_TemplateFrameMainContainer" inherits="ARKINV_TemplateFrameStandard">
-
-		<Size x="400" y="40" />
-
+	<ScrollFrame virtual="true" name="ARKINV_TemplateFrameMainContainer" inherits="ARKINV_TemplateFrameStandard,HybridScrollFrameTemplate">
+		
+		<Size x="400" y="400" />
+		
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="$parentSearch" relativePoint="BOTTOMLEFT" x="0" y="4" />
 			<Anchor point="RIGHT" />
 		</Anchors>
-
+		
+		<ScrollChild>
+			
+			<Frame name="$parentContainer" inherits="ARKINV_TemplateFrameBasic">
+				
+				<Size x="40" y="10" />
+				
+				<Anchors>
+					<Anchor point="TOPLEFT" />
+					<Anchor point="BOTTOMRIGHT" />
+				</Anchors>
+		
+				<Frames>
+				</Frames>
+				
+				<Scripts>
+					<OnLoad>
+						ArkInventory.Frame_Container_OnLoad( self )
+					</OnLoad>
+				</Scripts>
+				
+			</Frame>
+			
+		</ScrollChild>
+		
 		<Frames>
-			<Frame name="$parentBar" />
-			<Frame name="$parentBag" />
+			<Slider name="$parentVerticalScroll" inherits="MinimalHybridScrollBarTemplate" parentKey="scrollBar">
+				<Anchors>
+					<Anchor point="TOP" y="-30" />
+					<Anchor point="LEFT" relativePoint="RIGHT" />
+					<Anchor point="BOTTOM" y="30" />
+				</Anchors>
+				<Scripts>
+					<OnValueChanged>
+						self:GetParent( ):SetVerticalScroll( value )
+					</OnValueChanged>
+				</Scripts>
+			</Slider>
 		</Frames>
-
+		
 		<Scripts>
 			<OnLoad>
-				ArkInventory.Frame_Container_OnLoad( self )
+				-- override. stops mouse enabling which breaks the main window dragging
 			</OnLoad>
 		</Scripts>
-
-	</Frame>
+		
+	</ScrollFrame>
+	
 	
 	<Frame virtual="true" name="ARKINV_TemplateFrameMainChanger" inherits="ARKINV_TemplateFrameStandard" hidden="false">
 
@@ -1120,11 +1165,11 @@
 		
 	</Frame>
 
-	<Frame virtual="true" name="ARKINV_TemplateFrameMainLog" inherits="ARKINV_TemplateFrameStandard" hidden="true">
+	<Frame virtual="true" name="ARKINV_TemplateFrameVaultLog" inherits="ARKINV_TemplateFrameStandard" hidden="true">
 
 		<Anchors>
-			<Anchor point="TOPLEFT" relativeTo="$parentContainer" />
-			<Anchor point="BOTTOMRIGHT" relativeTo="$parentContainer" />
+			<Anchor point="TOPLEFT" relativeTo="$parentScroll" />
+			<Anchor point="BOTTOMRIGHT" relativeTo="$parentScroll" />
 		</Anchors>
 	
 		<Layers>
@@ -1136,7 +1181,7 @@
 		</Layers>
 
 		<Frames>
-		
+			
 			<ScrollingMessageFrame name="$parentList" fade="false" enableMouse="true">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="10" y="-10" />
@@ -1153,48 +1198,15 @@
 				</Scripts>
 			</ScrollingMessageFrame>
 
-			<Button name="$parentScrollUp" inherits="ARKINV_TemplateButtonAction">
-				<Size x="30" y="30" />
-				<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" />
-				<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Down" />
-				<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled" />
-				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD" />
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentList" relativePoint="TOPRIGHT" x="5" y="0" />
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						ArkInventory.ScrollingMessageFrame_Scroll( self:GetParent( ), "List", "up" )
-					</OnClick>
-				</Scripts>
-			</Button>
-
-
-			<Button name="$parentScrollDown" inherits="ARKINV_TemplateButtonAction">
-				<Size x="30" y="30" />
-				<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" />
-				<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down" />
-				<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled" />
-				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD" />
-				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentList" relativePoint="BOTTOMRIGHT" x="5" y="0" />
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						ArkInventory.ScrollingMessageFrame_Scroll( self:GetParent( ), "List", "down" )
-					</OnClick>
-				</Scripts>
-			</Button>
-
 		</Frames>
 	
 	</Frame>
 
-	<Frame virtual="true" name="ARKINV_TemplateFrameMainInfo" inherits="ARKINV_TemplateFrameStandard" hidden="true">
+	<Frame virtual="true" name="ARKINV_TemplateFrameVaultInfo" inherits="ARKINV_TemplateFrameStandard" hidden="true">
 		
 		<Anchors>
-			<Anchor point="TOPLEFT" relativeTo="$parentContainer" />
-			<Anchor point="BOTTOMRIGHT" relativeTo="$parentContainer" />
+			<Anchor point="TOPLEFT" relativeTo="$parentScroll" />
+			<Anchor point="BOTTOMRIGHT" relativeTo="$parentScroll" />
 		</Anchors>
 	
 		<Frames>
@@ -1300,7 +1312,7 @@
 	
 	</Frame>
 
-	<Frame virtual="true" name="ARKINV_TemplateFrameMainScanOnly" parent="UIParent" toplevel="true" movable="true" enableMouse="true" hidden="true" frameStrata="MEDIUM">
+	<Frame virtual="true" name="ARKINV_TemplateFrameMainScanOnly" parent="UIParent" toplevel="true" movable="true" enableMouse="true" hidden="true">
 		<Scripts>
 			<OnLoad>
 				ArkInventory.Frame_Main_OnLoad( self )
@@ -1308,7 +1320,7 @@
 		</Scripts>
 	</Frame>
 
-	<Frame virtual="true" name="ARKINV_TemplateFrameMain" parent="UIParent" toplevel="true" movable="true" enableMouse="true" hidden="true" frameStrata="MEDIUM">
+	<Frame virtual="true" name="ARKINV_TemplateFrameMain" parent="UIParent" toplevel="true" movable="true" enableMouse="true" hidden="true">
 		
 		<Size x="400" y="180" />
 		
@@ -1319,7 +1331,7 @@
 		<Frames>
 			<Frame name="$parentTitle" inherits="ARKINV_TemplateFrameMainTitle" />
 			<Frame name="$parentSearch" inherits="ARKINV_TemplateFrameMainSearch" />
-			<Frame name="$parentContainer" inherits="ARKINV_TemplateFrameMainContainer" />
+			<ScrollFrame name="$parentScroll" inherits="ARKINV_TemplateFrameMainContainer" />
 			<Frame name="$parentChanger" inherits="ARKINV_TemplateFrameMainChanger" hidden="false" />
 			<Frame name="$parentStatus" inherits="ARKINV_TemplateFrameMainStatus" hidden="false" />
 		</Frames>
@@ -1333,6 +1345,7 @@
 			</OnDragStart>
 			<OnDragStop>
 				ArkInventory.FrameDragStop( self )
+				ArkInventory.Frame_Main_Level( self )
 			</OnDragStop>
 			<OnShow>
 				ArkInventory.Frame_Main_OnShow( self )
@@ -1340,6 +1353,9 @@
 			<OnHide>
 				ArkInventory.Frame_Main_OnHide( self )
 			</OnHide>
+			<OnMouseUp>
+				ArkInventory.Frame_Main_Level( self )
+			</OnMouseUp>
 		</Scripts>
 		
 	</Frame>
@@ -1693,8 +1709,6 @@
 	</Frame>
 	
 	
-
-	
 	<Frame name="ARKINV_Frame3" inherits="ARKINV_TemplateFrameMain" id="3" /> <!-- bank -->
 	
 	<Frame parent="ARKINV_Frame3Changer" name="$parentWindow" hidden="false">
@@ -1758,57 +1772,11 @@
 				</Anchors>
 			</Button>
 
-			<Frame name="$parentPurchaseInfo">
-			
-				<Size x="130" y="38" />
-				
+			<Button name="$parentBag9" inherits="ArkInventory_ChangerGenericExtraTemplate">
 				<Anchors>
-					<Anchor point="RIGHT" />
+					<Anchor point="LEFT" relativeTo="$parentBag8" relativePoint="RIGHT" x="5" y="0" />
 				</Anchors>
-				
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parentSlotCost" inherits="ARKINV_GameFontNormal" text="COSTS_LABEL">
-							<Size x="0" y="12" />
-							<Anchors>
-								<Anchor point="TOPLEFT" />
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-
-				<Frames>
-
-					<Button name="$parentPurchaseButton" inherits="UIPanelButtonTemplate" text="BANKSLOTPURCHASE">
-						<Size x="124" y="21" />
-						<Anchors>
-							<Anchor point="BOTTOMLEFT" />
-						</Anchors>
-						<Scripts>
-							<OnClick>
-								PlaySound( "igMainMenuOption" )
-								StaticPopup_Show( "CONFIRM_BUY_BANK_SLOT" )
-							</OnClick>
-						</Scripts>
-					</Button>
-
-					<Frame name="$parentDetailMoneyFrame" inherits="ArkInventory_SmallMoneyFrameTemplate">
-					
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentSlotCost" relativePoint="RIGHT" x="10" y="0" />
-						</Anchors>
-						
-						<Scripts>
-							<OnLoad>
-								ArkInventory.SmallMoneyFrame_OnLoad( self, "STATIC" )
-							</OnLoad>
-						</Scripts>
-						
-					</Frame>
-					
-				</Frames>
-
-			</Frame>
+			</Button>
 
 		</Frames>
 		
@@ -1819,8 +1787,8 @@
 	
 		<Frames>
 			
-			<Frame name="$parentLog" inherits="ARKINV_TemplateFrameMainLog" />
-			<Frame name="$parentInfo" inherits="ARKINV_TemplateFrameMainInfo" />
+			<Frame name="$parentLog" inherits="ARKINV_TemplateFrameVaultLog" />
+			<Frame name="$parentInfo" inherits="ARKINV_TemplateFrameVaultInfo" />
 
 		</Frames>
 	
@@ -2025,7 +1993,7 @@
 		</Frames>
 		
 	</Frame>
-
+	
 	
 	<Frame name="ARKINV_Frame5" inherits="ARKINV_TemplateFrameMain" id="5" /> <!-- mailbox -->
 
@@ -2033,39 +2001,6 @@
 
 	<Frame name="ARKINV_Frame7" inherits="ARKINV_TemplateFrameMain" id="7" /> <!-- pets -->
 	
-	<Frame parent="ARKINV_Frame7Changer" name="$parentWindow" hidden="false">
-		
-		<Size x="1" y="1" />
-		
-		<Anchors>
-			<Anchor point="TOPLEFT" />
-			<Anchor point="BOTTOMRIGHT" />
-		</Anchors>
-		
-		<Frames>
-			
-			<Button name="$parentBag1" inherits="ArkInventory_ChangerBattlepetTemplate" id="1">
-				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMLEFT" x="50" y="10" />
-				</Anchors>
-			</Button>
-			
-			<Button name="$parentBag2" inherits="ArkInventory_ChangerBattlepetTemplate" id="2">
-				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parentBag1" x="50" y="0" />
-				</Anchors>
-			</Button>
-			
-			<Button name="$parentBag3" inherits="ArkInventory_ChangerBattlepetTemplate" id="3">
-				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parentBag2" x="50" y="0" />
-				</Anchors>
-			</Button>
-			
-		</Frames>
-		
-	</Frame>
-
 	<Frame name="ARKINV_Frame8" inherits="ARKINV_TemplateFrameMain" id="8" /> <!-- tokens -->
 	
 	<Frame name="ARKINV_Frame9" inherits="ARKINV_TemplateFrameMain" id="9" /> <!-- mounts -->
@@ -2078,6 +2013,8 @@
 	
 	<Frame name="ARKINV_Frame13" inherits="ARKINV_TemplateFrameMain" id="13" /> <!-- void storage -->
 	
+	<Frame name="ARKINV_Frame14" inherits="ARKINV_TemplateFrameMain" id="14" /> <!-- toybox -->
+	
 <!-- END OF ADD ON FRAME -->
 	
 	<GameTooltip name="ARKINV_ScanTooltip" inherits="ArkScanTooltipTemplate" />
@@ -2085,14 +2022,17 @@
 	<Frame name="ARKINV_CombatYieldTimer" hidden="true">
 		<Scripts>
 			<Onload>
-				self:RegisterEvent( "PLAYER_REGEN_DISABLED" )
-				self:RegisterEvent( "PLAYER_REGEN_ENABLED" )
+				self.timer = 0
+				if ArkInventory.Global.Thread.WhileInCombat then
+					self:RegisterEvent( "PLAYER_REGEN_DISABLED" )
+					self:RegisterEvent( "PLAYER_REGEN_ENABLED" )
+				end
 			</Onload>
 			<OnUpdate>
-				self.timer = ( self.timer or 0 ) + elapsed
-				if self.timer > 0.02 then
+				self.timer = self.timer + elapsed
+				if self.timer > 0.05 then
+					self.timer = 0
 					ArkInventory.Frame_Main_DrawThreadResume( )
-					self.timer = nil
 				end
 			</OnUpdate>
 			<OnEvent>
@@ -2102,9 +2042,10 @@
 					self:Hide( )
 					table.wipe( ArkInventory.Global.Thread.Window )
 					table.wipe( ArkInventory.Global.Thread.WindowState )
+					--ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
 				end
 			</OnEvent>
 		</Scripts>
 	</Frame>
-
+	
 </Ui>

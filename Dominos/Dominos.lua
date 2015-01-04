@@ -3,9 +3,13 @@
 		Driver for Dominos Frames
 --]]
 
-Dominos = LibStub('AceAddon-3.0'):NewAddon('Dominos', 'AceEvent-3.0', 'AceConsole-3.0')
-local L = LibStub('AceLocale-3.0'):GetLocale('Dominos')
-local CURRENT_VERSION = GetAddOnMetadata('Dominos', 'Version')
+local AddonName, Addon = ...
+
+Dominos = LibStub('AceAddon-3.0'):NewAddon(AddonName, 'AceEvent-3.0', 'AceConsole-3.0')
+local L = LibStub('AceLocale-3.0'):GetLocale(AddonName)
+
+local CURRENT_VERSION = GetAddOnMetadata(AddonName, 'Version')
+local CONFIG_ADDON_NAME = AddonName .. '_Config'
 
 
 --[[ Startup ]]--
@@ -50,10 +54,12 @@ function Dominos:OnEnable()
 	self:HideBlizzard()
 	self:CreateDataBrokerPlugin()
 	self:Load()
+
+	self.MultiActionBarGridFixer:SetShowGrid(self:ShowGrid())
 end
 
 function Dominos:CreateDataBrokerPlugin()
-	local dataObject = LibStub:GetLibrary('LibDataBroker-1.1'):NewDataObject('Dominos', {
+	local dataObject = LibStub:GetLibrary('LibDataBroker-1.1'):NewDataObject(AddonName, {
 		type = 'launcher',
 
 		icon = [[Interface\Addons\Dominos\Dominos]],
@@ -72,7 +78,7 @@ function Dominos:CreateDataBrokerPlugin()
 
 		OnTooltipShow = function(tooltip)
 			if not tooltip or not tooltip.AddLine then return end
-			tooltip:AddLine('Dominos')
+			tooltip:AddLine(AddonName)
 
 			if Dominos:Locked() then
 				tooltip:AddLine(L.ConfigEnterTip)
@@ -89,14 +95,13 @@ function Dominos:CreateDataBrokerPlugin()
 				end
 			end
 
-			local enabled = select(4, GetAddOnInfo('Dominos_Config'))
-			if enabled then
+			if self:IsConfigAddonEnabled() then
 				tooltip:AddLine(L.ShowOptionsTip)
 			end
 		end,
 	})
-	
-	LibStub('LibDBIcon-1.0'):Register('Dominos', dataObject, self.db.profile.minimap)
+
+	LibStub('LibDBIcon-1.0'):Register(AddonName, dataObject, self.db.profile.minimap)
 end
 
 --[[ Version Updating ]]--
@@ -113,7 +118,7 @@ function Dominos:GetDefaults()
 			showTooltips = true,
 			showTooltipsCombat = true,
 			useVehicleUI = true,
-			
+
 			minimap = {
 				hide = false,
 			},
@@ -129,89 +134,9 @@ function Dominos:GetDefaults()
 end
 
 function Dominos:UpdateSettings(major, minor, bugfix)
-	--perform state translation to handle updates from older versions
-	if major < '4' then
-		for profile,sets in pairs(self.db.sv.profiles) do
-			if sets.frames then
-				for frameId, frameSets in pairs(sets.frames) do
-					if frameSets.pages then
-						for class, oldStates in pairs(frameSets.pages) do
-							local newStates = {}
-							
-							--convert class states
-							if class == 'WARRIOR' then
-								newStates['battle'] = oldStates['[bonusbar:1]']
-								newStates['defensive'] = oldStates['[bonusbar:2]']
-								newStates['berserker'] = oldStates['[bonusbar:3]']
-							elseif class == 'DRUID' then
-								newStates['moonkin'] = oldStates['[bonusbar:4]']
-								newStates['bear'] = oldStates['[bonusbar:3]']
-								newStates['tree'] = oldStates['[form:5]']
-								newStates['prowl'] = oldStates['[bonusbar:1,stealth]']
-								newStates['cat'] = oldStates['[bonusbar:1]']
-							elseif class == 'PRIEST' then
-								newStates['shadow'] = oldStates['[bonusbar:1]']
-							elseif class == 'ROGUE' then
-								newStates['vanish'] = oldStates['[bonusbar:1,form:3]']
-								newStates['shadowdance'] = oldStates['[bonusbar:2]']
-								newStates['stealth'] = oldStates['[bonusbar:1]']
-							elseif class == 'WARLOCK' then
-								newStates['meta'] = oldStates['[form:2]']
-							end
-						
-							--modifier states
-							for i, state in Dominos.BarStates:getAll('modifier') do
-								newStates[state.id] = oldStates[state.value]
-							end
-							
-							--possess states
-							for i, state in Dominos.BarStates:getAll('possess') do
-								newStates[state.id] = oldStates[state.value]
-							end
-							
-							--page states
-							for i, state in Dominos.BarStates:getAll('page') do
-								newStates[state.id] = oldStates[state.value]
-							end
-							
-							--targeting states
-							for i, state in Dominos.BarStates:getAll('target') do
-								newStates[state.id] = oldStates[state.value]
-							end
-							
-							frameSets.pages[class] = newStates
-						end
-					end
-				end
-			end
-		end
-	end
-	
-	--fix missing druid bear form paging
-	for profile, sets in pairs(self.db.sv.profiles) do
-		if sets.frames then
-			for frameId, frameSets in pairs(sets.frames) do
-				if frameSets.pages then
-					for class, states in pairs(frameSets.pages) do
-						--convert class states
-						if class == 'DRUID' then
-							if tonumber(frameId) == 1 and not states['bear'] then
-								states['bear'] = 8
-							else
-								if tonumber(frameId) ~= 1 and states['bear'] == 8 then
-									states['bear'] = nil
-								end
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-	
 	--inject new roll bar defaults
 	if major == '5' and minor == '0' and bugfix < '14' then
-		for profile,sets in pairs(self.db.sv.profiles) do
+		for profile, sets in pairs(self.db.sv.profiles) do
 			if sets.frames then
 				local rollBarFrameSets = sets.frames['roll']
 				if rollBarFrameSets then
@@ -225,56 +150,30 @@ end
 
 function Dominos:UpdateVersion()
 	DominosVersion = CURRENT_VERSION
-	self:Print(format(L.Updated, DominosVersion))
+
+	self:Print(string.format(L.Updated, DominosVersion))
 end
 
 
 --Load is called  when the addon is first enabled, and also whenever a profile is loaded
-local function HasClassBar()
-	local _,class = UnitClass('player')
-	return not(class == 'MAGE' or class == 'SHAMAN')
-end
-
 function Dominos:Load()
-	for i = 1, self:NumBars() do
-		self.ActionBar:New(i)
-	end
-	
-	if HasClassBar() then
-		self.ClassBar:New()
-	end
-	
-	self.PetBar:New()
-	self.BagBar:New()
-	self.MenuBar:New()
-	self.ExtraBar:New()
-	self.VehicleBar:New()
-
-	--load in extra functionality
-	for _,module in self:IterateModules() do
-		module:Load()
+	for i, module in self:IterateModules() do
+		if module.Load then
+			module:Load()
+		end
 	end
 
-	--anchor everything
 	self.Frame:ForAll('Reanchor')
-
-	--minimap button
 	self:UpdateMinimapButton()
 end
 
 --unload is called when we're switching profiles
 function Dominos:Unload()
-	self.ActionBar:ForAll('Free')
-	self.Frame:ForFrame('pet', 'Free')
-	self.Frame:ForFrame('class', 'Free')
-	self.Frame:ForFrame('menu', 'Free')
-	self.Frame:ForFrame('bags', 'Free')
-	self.Frame:ForFrame('extra', 'Free')
-	self.Frame:ForFrame('vehicle', 'Free')
-
 	--unload any module stuff
-	for _,module in self:IterateModules() do
-		module:Unload()
+	for i, module in self:IterateModules() do
+		if module.Unload then
+			module:Unload()
+		end
 	end
 end
 
@@ -283,52 +182,52 @@ end
 
 --shamelessly pulled from Bartender4
 function Dominos:HideBlizzard()
-	if MultiActionBar_UpdateGrid then
-		MultiActionBar_UpdateGrid = Multibar_EmptyFunc
+	local uiHider = CreateFrame('Frame', nil, _G['UIParent'], 'SecureFrameTemplate'); uiHider:Hide()
+	self.uiHider = uiHider
+
+	local disableFrame = function(frameName, unregisterEvents)
+		local frame = _G[frameName]
+		if not frame then
+			self:Print('Unknown Frame', frameName)
+		end
+
+		frame:SetParent(uiHider)
+		frame.ignoreFramePositionManager = true
+
+		if unregisterEvents then
+			frame:UnregisterAllEvents()
+		end
 	end
-	
-	-- Hidden parent frame
-	local UIHider = CreateFrame('Frame', nil, UIParent, 'SecureFrameTemplate'); UIHider:Hide()
-	self.UIHider = UIHider
-	
-	_G['MultiBarBottomLeft']:SetParent(UIHider)
-	_G['MultiBarBottomRight']:SetParent(UIHider)
-	_G['MultiBarLeft']:SetParent(UIHider)
-	_G['MultiBarRight']:SetParent(UIHider)
-	
-	UIPARENT_MANAGED_FRAME_POSITIONS["MainMenuBar"] = nil
-	UIPARENT_MANAGED_FRAME_POSITIONS["StanceBarFrame"] = nil
-	UIPARENT_MANAGED_FRAME_POSITIONS["PossessBarFrame"] = nil
-	UIPARENT_MANAGED_FRAME_POSITIONS["PETACTIONBAR_YPOS"] = nil
 
-	MainMenuBar:EnableMouse(false)
+	--[[ disable, but don't hide the menu bar ]]--
 
-	local animations = {MainMenuBar.slideOut:GetAnimations()}
-	animations[1]:SetOffset(0,0)
+	_G['MainMenuBar']:EnableMouse(false)
+	_G['MainMenuBar'].ignoreFramePositionManager = true
 
-	animations = {OverrideActionBar.slideOut:GetAnimations()}
-	animations[1]:SetOffset(0,0)
+	disableFrame('MultiBarBottomLeft')
+	disableFrame('MultiBarBottomRight')
+	disableFrame('MultiBarLeft')
+	disableFrame('MultiBarRight')
+	disableFrame('MainMenuBarArtFrame')
+	disableFrame('MainMenuExpBar')
+	disableFrame('MainMenuBarMaxLevelBar')
+	disableFrame('ReputationWatchBar')
+	disableFrame('StanceBarFrame')
+	disableFrame('PossessBarFrame')
+	disableFrame('PetActionBarFrame')
+	disableFrame('MultiCastActionBarFrame')
 
-	MainMenuBarArtFrame:Hide()
-	MainMenuBarArtFrame:SetParent(UIHider)
 
-	MainMenuExpBar:SetParent(UIHider)
+	--[[ disable override bar transition animations ]]--
 
-	MainMenuBarMaxLevelBar:Hide()
-	MainMenuBarMaxLevelBar:SetParent(UIHider)
+	do
+		local animations = {_G['MainMenuBar'].slideOut:GetAnimations()}
+		animations[1]:SetOffset(0, 0)
 
-	ReputationWatchBar:SetParent(UIHider)
+		animations = {_G['OverrideActionBar'].slideOut:GetAnimations()}
+		animations[1]:SetOffset(0, 0)
+	end
 
-	_G['StanceBarFrame']:UnregisterAllEvents()
-	_G['StanceBarFrame']:Hide()
-	_G['StanceBarFrame']:SetParent(UIHider)
-	
-	_G['PossessBarFrame']:Hide()
-	_G['PossessBarFrame']:SetParent(UIHider)
-	
-	_G['PetActionBarFrame']:Hide()
-	_G['PetActionBarFrame']:SetParent(UIHider)
-	
 	self:UpdateUseOverrideUI()
 end
 
@@ -338,14 +237,14 @@ function Dominos:SetUseOverrideUI(enable)
 end
 
 function Dominos:UsingOverrideUI()
-	return self.db.profile.useOverrideUI 
+	return self.db.profile.useOverrideUI
 end
 
 function Dominos:UpdateUseOverrideUI()
 	local usingOverrideUI = self:UsingOverrideUI()
-	
+
 	self.OverrideController:SetAttribute('state-useoverrideui', usingOverrideUI)
-	
+
 	local oab = _G['OverrideActionBar']
 	oab:ClearAllPoints()
 	if usingOverrideUI then
@@ -496,7 +395,12 @@ end
 --[[ Options Menu Display ]]--
 
 function Dominos:ShowOptions()
+	if InCombatLockdown() then
+		return
+	end
+
 	if LoadAddOn('Dominos_Config') then
+		InterfaceOptionsFrame_Show()
 		InterfaceOptionsFrame_OpenToCategory(self.Options)
 		return true
 	end
@@ -507,6 +411,7 @@ function Dominos:NewMenu(id)
 	if not self.Menu then
 		LoadAddOn('Dominos_Config')
 	end
+
 	return self.Menu and self.Menu:New(id)
 end
 
@@ -570,6 +475,9 @@ function Dominos:OnCmd(args)
 		self:PrintHelp()
 	elseif cmd == 'statedump' then
 		self.OverrideController:DumpStates()
+	elseif cmd == 'configstatus' then
+		local status = self:IsConfigAddonEnabled() and 'ENABLED' or 'DISABLED'
+		print(('Config Mode Status: %s'):format(status))
 	--options stuff
 	else
 		if not self:ShowOptions() then
@@ -578,34 +486,41 @@ function Dominos:OnCmd(args)
 	end
 end
 
-function Dominos:PrintHelp(cmd)
+do
 	local function PrintCmd(cmd, desc)
 		print(format(' - |cFF33FF99%s|r: %s', cmd, desc))
 	end
 
-	self:Print('Commands (/dom, /dominos)')
-	PrintCmd('config', L.ConfigDesc)
-	PrintCmd('scale <frameList> <scale>', L.SetScaleDesc)
-	PrintCmd('setalpha <frameList> <opacity>', L.SetAlphaDesc)
-	PrintCmd('fade <frameList> <opacity>', L.SetFadeDesc)
-	PrintCmd('setcols <frameList> <columns>', L.SetColsDesc)
-	PrintCmd('pad <frameList> <padding>', L.SetPadDesc)
-	PrintCmd('space <frameList> <spacing>', L.SetSpacingDesc)
-	PrintCmd('show <frameList>', L.ShowFramesDesc)
-	PrintCmd('hide <frameList>', L.HideFramesDesc)
-	PrintCmd('toggle <frameList>', L.ToggleFramesDesc)
-	PrintCmd('save <profile>', L.SaveDesc)
-	PrintCmd('set <profile>', L.SetDesc)
-	PrintCmd('copy <profile>', L.CopyDesc)
-	PrintCmd('delete <profile>', L.DeleteDesc)
-	PrintCmd('reset', L.ResetDesc)
-	PrintCmd('list', L.ListDesc)
-	PrintCmd('version', L.PrintVersionDesc)
+	function Dominos:PrintHelp(cmd)
+		self:Print('Commands (/dom, /dominos)')
+
+		PrintCmd('config', L.ConfigDesc)
+		PrintCmd('scale <frameList> <scale>', L.SetScaleDesc)
+		PrintCmd('setalpha <frameList> <opacity>', L.SetAlphaDesc)
+		PrintCmd('fade <frameList> <opacity>', L.SetFadeDesc)
+		PrintCmd('setcols <frameList> <columns>', L.SetColsDesc)
+		PrintCmd('pad <frameList> <padding>', L.SetPadDesc)
+		PrintCmd('space <frameList> <spacing>', L.SetSpacingDesc)
+		PrintCmd('show <frameList>', L.ShowFramesDesc)
+		PrintCmd('hide <frameList>', L.HideFramesDesc)
+		PrintCmd('toggle <frameList>', L.ToggleFramesDesc)
+		PrintCmd('save <profile>', L.SaveDesc)
+		PrintCmd('set <profile>', L.SetDesc)
+		PrintCmd('copy <profile>', L.CopyDesc)
+		PrintCmd('delete <profile>', L.DeleteDesc)
+		PrintCmd('reset', L.ResetDesc)
+		PrintCmd('list', L.ListDesc)
+		PrintCmd('version', L.PrintVersionDesc)
+	end
 end
 
 --version info
 function Dominos:PrintVersion()
 	self:Print(DominosVersion)
+end
+
+function Dominos:IsConfigAddonEnabled()
+	return GetAddOnEnableState(UnitName('player'), AddonName .. '_Config') >= 1
 end
 
 
@@ -614,78 +529,18 @@ end
 --moving
 Dominos.locked = true
 
-local function CreateConfigHelperDialog()
-	local f = CreateFrame('Frame', 'DominosConfigHelperDialog', UIParent)
-	f:SetFrameStrata('DIALOG')
-	f:SetToplevel(true)
-	f:EnableMouse(true)
-	f:SetClampedToScreen(true)
-	f:SetWidth(360)
-	f:SetHeight(120)
-	f:SetBackdrop{
-		bgFile='Interface\\DialogFrame\\UI-DialogBox-Background' ,
-		edgeFile='Interface\\DialogFrame\\UI-DialogBox-Border',
-		tile = true,
-		insets = {left = 11, right = 12, top = 12, bottom = 11},
-		tileSize = 32,
-		edgeSize = 32,
-	}
-	f:SetPoint('TOP', 0, -24)
-	f:Hide()
-	f:SetScript('OnShow', function() PlaySound('igMainMenuOption') end)
-	f:SetScript('OnHide', function() PlaySound('gsTitleOptionExit') end)
-
-	local tr = f:CreateTitleRegion()
-	tr:SetAllPoints(f)
-
-	local header = f:CreateTexture(nil, 'ARTWORK')
-	header:SetTexture('Interface\\DialogFrame\\UI-DialogBox-Header')
-	header:SetWidth(326); header:SetHeight(64)
-	header:SetPoint('TOP', 0, 12)
-
-	local title = f:CreateFontString('ARTWORK')
-	title:SetFontObject('GameFontNormal')
-	title:SetPoint('TOP', header, 'TOP', 0, -14)
-	title:SetText(L.ConfigMode)
-
-	local desc = f:CreateFontString('ARTWORK')
-	desc:SetFontObject('GameFontHighlight')
-	desc:SetJustifyV('TOP')
-	desc:SetJustifyH('LEFT')
-	desc:SetPoint('TOPLEFT', 18, -32)
-	desc:SetPoint('BOTTOMRIGHT', -18, 48)
-	desc:SetText(L.ConfigModeHelp)
-
-	local exitConfig = CreateFrame('CheckButton', f:GetName() .. 'ExitConfig', f, 'OptionsButtonTemplate')
-	_G[exitConfig:GetName() .. 'Text']:SetText(EXIT)
-	exitConfig:SetScript('OnClick', function() Dominos:SetLock(true) end)
-	exitConfig:SetPoint('BOTTOMRIGHT', -14, 14)
-
-	return f
-end
-
-function Dominos:ShowConfigHelper()
-	if not self.configHelper then
-		self.configHelper = CreateConfigHelperDialog()
-	end
-	self.configHelper:Show()
-end
-
-function Dominos:HideConfigHelper()
-	if self.configHelper then
-		self.configHelper:Hide()
-	end
-end
-
 function Dominos:SetLock(enable)
+	if InCombatLockdown() and (not enable) then
+		return
+	end
+
 	self.locked = enable or false
+
 	if self:Locked() then
-		self.Frame:ForAll('Lock')
-		self:HideConfigHelper()
+		self:GetModule('ConfigOverlay'):Hide()
 	else
-		self.Frame:ForAll('Unlock')
 		LibStub('LibKeyBound-1.0'):Deactivate()
-		self:ShowConfigHelper()
+		self:GetModule('ConfigOverlay'):Show()
 	end
 end
 
@@ -811,6 +666,7 @@ end
 function Dominos:SetShowGrid(enable)
 	self.db.profile.showgrid = enable or false
 	self.ActionBar:ForAll('UpdateGrid')
+	self.MultiActionBarGridFixer:SetShowGrid(enable)
 end
 
 function Dominos:ShowGrid()
@@ -901,24 +757,20 @@ function Dominos:NumBars()
 	return self.db.profile.ab.count
 end
 
---tooltips
-function Dominos:ShouldShowTooltips()
-	if self:ShowTooltips() then
-		return (not InCombatLockdown()) or self:ShowCombatTooltips()
-	end
-	return false;	
-end
 
+--tooltips
 function Dominos:ShowTooltips()
 	return self.db.profile.showTooltips
 end
 
 function Dominos:SetShowTooltips(enable)
 	self.db.profile.showTooltips = enable or false
+	self:GetModule('Tooltips'):SetShowTooltips(enable)
 end
 
 function Dominos:SetShowCombatTooltips(enable)
 	self.db.profile.showTooltipsCombat = enable or false
+	self:GetModule('Tooltips'):SetShowTooltipsInCombat(enable)
 end
 
 function Dominos:ShowCombatTooltips()

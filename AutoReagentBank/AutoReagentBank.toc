@@ -1,0 +1,17 @@
+## Interface: 60000
+## Title: AutoReagentBank
+## Notes: Simple addon that automatically stocks reagents into the reagent bank.
+## Author: CobraA1
+## Version: 2
+## Dependencies: 
+## SavedVariablesPerCharacter: ReagentRestockerDB
+## X-Interface: 60000
+## X-Compatible-With: 60000
+## X-License: The MIT License
+## X-Category: Bags & Inventory
+## X-Curse-Packaged-Version: v2
+## X-Curse-Project-Name: AutoReagentBank
+## X-Curse-Project-ID: autoreagentbank
+## X-Curse-Repository-ID: wow/autoreagentbank/mainline
+
+AutoReagentBank.lua

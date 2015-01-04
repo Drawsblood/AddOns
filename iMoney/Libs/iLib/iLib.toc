@@ -1,10 +1,10 @@
-﻿## Interface: 50100
-## Version: 0.9
+﻿## Interface: 60000
+## Version: 1.0
 ## Title: Lib: iLib
-## Notes: A library which provides shared functionality for grdn's broker series.
+## Notes: A library which provides shared functionality for grdn's addons.
 ## Author: grdn
-## OptionalDeps: Ace3, LibCompress, LibQTip-1.0
-## X-Curse-Packaged-Version: r42
+## OptionalDeps: Ace3, LibQTip-1.0
+## X-Curse-Packaged-Version: r59
 ## X-Curse-Project-Name: iLib
 ## X-Curse-Project-ID: ilib
 ## X-Curse-Repository-ID: wow/ilib/mainline

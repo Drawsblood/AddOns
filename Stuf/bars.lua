@@ -966,7 +966,7 @@ if CLS == "DRUID" then  -- Druid Bar -------------------------------------------
 				end
 			end
 			Stuf:AddEvent("UNIT_POWER", uf.refreshfuncs[name])
-			Stuf:RegisterElementRefresh(uf, name, "powercolorelements", true)
+			Stuf:RegisterElementRefresh(uf, name, "metroelements", true)
 		end
 		if db.fade and not f.barfade then
 			f.barfade = f:CreateTexture(nil, "BORDER")

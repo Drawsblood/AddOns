@@ -1,4 +1,4 @@
-local _G = _G
+﻿local _G = _G
 local select = _G.select
 local pairs = _G.pairs
 local ipairs = _G.ipairs
@@ -13,9 +13,9 @@ function ArkInventory.MenuMainOpen( frame )
 	assert( frame, "code error: frame argument is missing" )
 
 	if ArkInventory.Lib.Dewdrop:IsOpen( frame ) then
-	
+		
 		ArkInventory.Lib.Dewdrop:Close( )
-	
+		
 	else
 
 		local loc_id = frame:GetParent( ):GetParent( ).ARK_Data.loc_id
@@ -67,12 +67,72 @@ function ArkInventory.MenuMainOpen( frame )
 						end
 					)
 					
-					ArkInventory.Lib.Dewdrop:AddLine( )
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"icon", ArkInventory.Const.Actions[24].Texture,
+						"text", ArkInventory.Localise["MENU_ACTION_REFRESH"],
+						"closeWhenClicked", true,
+						"func", function( )
+							ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Resort )
+						end
+					)
+					
 					
 					ArkInventory.Lib.Dewdrop:AddLine(
-						"text", ArkInventory.Localise["MENU_ACTION"],
-						"hasArrow", true,
-						"value", "ACTIONS"
+						"text", ArkInventory.Localise["RELOAD"],
+						"tooltipTitle", ArkInventory.Localise["RELOAD"],
+						"tooltipText", ArkInventory.Localise["MENU_ACTION_RELOAD_TEXT"],
+						"closeWhenClicked", true,
+						"func", function( )
+							ArkInventory.ItemCacheClear( )
+							ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
+						end
+					)
+
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"icon", ArkInventory.Const.Actions[22].Texture,
+						"text", ArkInventory.Localise["RESTACK"],
+						"closeWhenClicked", true,
+						"func", function( )
+							ArkInventory.Restack( )
+						end
+					)
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"icon", ArkInventory.Const.Actions[13].Texture,
+						"text", ArkInventory.Localise["SEARCH"],
+						"closeWhenClicked", true,
+						"func", function( )
+							ArkInventory.Frame_Search_Toggle( )
+						end
+					)
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"icon", ArkInventory.Const.Actions[12].Texture,
+						"text", ArkInventory.Localise["CONFIG_RULES"],
+						"closeWhenClicked", true,
+						"func", function( )
+							ArkInventory.Frame_Rules_Toggle( )
+						end
+					)
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"text", ArkInventory.Localise["MENU_ACTION_EDITMODE"],
+						"closeWhenClicked", true,
+						"checked", ArkInventory.Global.Mode.Edit,
+						"func", function( )
+							ArkInventory.ToggleEditMode( )
+						end
+					)
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"text", ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_HIDDEN"],
+						"tooltipTitle", ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_HIDDEN"],
+						"tooltipText", ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_HIDDEN_TEXT"],
+						"checked", ArkInventory.LocationOptionGetReal( loc_id, "slot", "ignorehidden" ),
+						"func", function( )
+							ArkInventory.LocationOptionSetReal( loc_id, "slot", "ignorehidden", not ArkInventory.LocationOptionGetReal( loc_id, "slot", "ignorehidden" ) )
+							ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Recalculate )
+						end
 					)
 					
 					if ( loc_id == ArkInventory.Const.Location.Mount ) or ( loc_id == ArkInventory.Const.Location.Pet ) then
@@ -92,29 +152,6 @@ function ArkInventory.MenuMainOpen( frame )
 				
 				if level == 2 and value then
 				
-					if value == "ACTIONS" then
-						
-						ArkInventory.Lib.Dewdrop:AddLine(
-							"text", ArkInventory.Localise["MENU_ACTION"],
-							"isTitle", true,
-							"textHeight", 12
-						)
-						
-						ArkInventory.Lib.Dewdrop:AddLine( )
-						
-						ArkInventory.Lib.Dewdrop:AddLine(
-							"text", ArkInventory.Localise["RELOAD"],
-							"tooltipTitle", ArkInventory.Localise["RELOAD"],
-							"tooltipText", ArkInventory.Localise["MENU_ACTION_RELOAD_TEXT"],
-							--"icon", ArkInventory.Const.Texture.Action.Refresh,
-							"closeWhenClicked", true,
-							"func", function( )
-								ArkInventory.ItemCacheClear( )
-								ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
-							end
-						)
-						
-					end
 			
 				end
 				
@@ -158,10 +195,10 @@ function ArkInventory.MenuBarOpen( frame )
 		local bar_name = ArkInventory.LocationOptionGet( loc_id, "bar", "data", bar_id, "label" ) or ""
 		local cp = ArkInventory.LocationPlayerInfoGet( loc_id )
 		
-		local sid_def = ArkInventory.LocationOptionGet( loc_id, "sort", "default" ) or 9999
+		local sid_def = ArkInventory.LocationOptionGet( loc_id, "sort", "method" ) or 9999
 		local sid = ArkInventory.LocationOptionGet( loc_id, "bar", "data", bar_id, "sortorder" ) or sid_def
 		
-		if not ArkInventory.db.global.option.sort.data[sid].used then
+		if not ArkInventory.db.global.option.sort.method.data[sid].used then
 			--ArkInventory.OutputWarning( "bar ", bar_id, " in location ", loc_id, " is using an invalid sort method.  resetting it to default" )
 			ArkInventory.LocationOptionSet( loc_id, "bar", "data", bar_id, "sortorder", nil )
 			sid = sid_def
@@ -220,7 +257,7 @@ function ArkInventory.MenuBarOpen( frame )
 					if sid ~= sid_def then
 						
 						ArkInventory.Lib.Dewdrop:AddLine(
-							"text", string.format( "%s: %s%s%s", ArkInventory.Localise["CURRENT"], GREEN_FONT_COLOR_CODE, ArkInventory.db.global.option.sort.data[sid].name, FONT_COLOR_CODE_CLOSE ),
+							"text", string.format( "%s: %s%s%s", ArkInventory.Localise["CURRENT"], GREEN_FONT_COLOR_CODE, ArkInventory.db.global.option.sort.method.data[sid].name, FONT_COLOR_CODE_CLOSE ),
 							"hasArrow", true,
 							"value", "SORT_METHOD"
 						)
@@ -228,7 +265,7 @@ function ArkInventory.MenuBarOpen( frame )
 						--ArkInventory.Lib.Dewdrop:AddLine( )
 						
 						ArkInventory.Lib.Dewdrop:AddLine(
-							"text", string.format( "%s: %s%s%s", ArkInventory.Localise["DEFAULT"], LIGHTYELLOW_FONT_COLOR_CODE, ArkInventory.db.global.option.sort.data[sid_def].name, FONT_COLOR_CODE_CLOSE ),
+							"text", string.format( "%s: %s%s%s", ArkInventory.Localise["DEFAULT"], LIGHTYELLOW_FONT_COLOR_CODE, ArkInventory.db.global.option.sort.method.data[sid_def].name, FONT_COLOR_CODE_CLOSE ),
 							"tooltipTitle", ArkInventory.Localise["MENU_ITEM_DEFAULT_RESET"],
 							"tooltipText", ArkInventory.Localise["MENU_BAR_SORTKEY_DEFAULT_RESET_TEXT"],
 							"closeWhenClicked", true,
@@ -241,7 +278,7 @@ function ArkInventory.MenuBarOpen( frame )
 					else
 						
 						ArkInventory.Lib.Dewdrop:AddLine(
-							"text", string.format( "%s: %s%s%s", ArkInventory.Localise["DEFAULT"], LIGHTYELLOW_FONT_COLOR_CODE, ArkInventory.db.global.option.sort.data[sid_def].name, FONT_COLOR_CODE_CLOSE ),
+							"text", string.format( "%s: %s%s%s", ArkInventory.Localise["DEFAULT"], LIGHTYELLOW_FONT_COLOR_CODE, ArkInventory.db.global.option.sort.method.data[sid_def].name, FONT_COLOR_CODE_CLOSE ),
 							"hasArrow", true,
 							"value", "SORT_METHOD"
 						)
@@ -267,6 +304,17 @@ function ArkInventory.MenuBarOpen( frame )
 						end
 					end
 					
+					for bag_id in pairs( ArkInventory.Global.Location[loc_id].Bags ) do
+						if ArkInventory.db.profile.option.location[loc_id].bag[bag_id].bar == bar_id then
+							has_entries = true
+							ArkInventory.Lib.Dewdrop:AddLine(
+								"text", ArkInventory.Localise["LOCATION_BAG"],
+								"hasArrow", true,
+								"value", "BAG_CURRENT"
+							)
+						end
+					end
+					
 					if not has_entries then
 						ArkInventory.Lib.Dewdrop:AddLine(
 							"text", ArkInventory.Localise["NONE"],
@@ -286,6 +334,11 @@ function ArkInventory.MenuBarOpen( frame )
 							"value", string.format( "CATEGORY_ASSIGN_%s", v )
 						)
 					end
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"text", ArkInventory.Localise["LOCATION_BAG"],
+						"hasArrow", true,
+						"value", "BAG_ASSIGN"
+					)
 					
 					if ArkInventory.Global.Options.CategoryMoveLocation == loc_id and ArkInventory.Global.Options.CategoryMoveSource ~= bar_id then
 						
@@ -395,7 +448,7 @@ function ArkInventory.MenuBarOpen( frame )
 						
 						ArkInventory.Lib.Dewdrop:AddLine( )
 						
-						local x = ArkInventory.db.global.option.sort.data
+						local x = ArkInventory.db.global.option.sort.method.data
 						for k, v in ArkInventory.spairs( x, function(a,b) return x[a].name < x[b].name end ) do
 							
 							if v.used then
@@ -552,6 +605,76 @@ function ArkInventory.MenuBarOpen( frame )
 					end
 
 					
+					if value == "BAG_CURRENT" then
+						
+						ArkInventory.Lib.Dewdrop:AddLine(
+							"text", ArkInventory.Localise["LOCATION_BAG"],
+							"isTitle", true,
+							"textHeight", 12
+						)
+						
+						ArkInventory.Lib.Dewdrop:AddLine( )
+						
+						for bag_id in pairs( ArkInventory.Global.Location[loc_id].Bags ) do
+							
+							local cat_bar = ArkInventory.db.profile.option.location[loc_id].bag[bag_id].bar
+							
+							if bar_id == cat_bar then
+								
+								local n = string.format( "%s%s%s", GREEN_FONT_COLOR_CODE, bag_id, FONT_COLOR_CODE_CLOSE )
+								
+								ArkInventory.Lib.Dewdrop:AddLine(
+									"text", n,
+									"tooltipTitle", string.format( "%s > %s", ArkInventory.Localise["LOCATION_BAG"], bag_id ),
+									"hasArrow", true,
+									"value", string.format( "BAG_CURRENT_OPTION_%s", bag_id )
+								)
+								
+							end
+							
+						end
+						
+					end
+					
+					
+					if value == "BAG_ASSIGN" then
+						
+						ArkInventory.Lib.Dewdrop:AddLine(
+							"text", ArkInventory.Localise["LOCATION_BAG"],
+							"isTitle", true,
+							"textHeight", 12
+						)
+						
+						ArkInventory.Lib.Dewdrop:AddLine( )
+						
+						for bag_id in pairs( ArkInventory.Global.Location[loc_id].Bags ) do
+							
+							local cat_bar = ArkInventory.db.profile.option.location[loc_id].bag[bag_id].bar
+							
+							if bar_id ~= cat_bar then
+								
+								local n = string.format( "%s", bag_id )
+								
+								if cat_bar then
+									n = string.format( "%s%s%s [%s]%s", LIGHTYELLOW_FONT_COLOR_CODE, n, GREEN_FONT_COLOR_CODE, cat_bar, FONT_COLOR_CODE_CLOSE )
+								end
+								
+								ArkInventory.Lib.Dewdrop:AddLine(
+									"text", n,
+									"tooltipTitle", ArkInventory.Localise["LOCATION_BAG"],
+									"tooltipText", string.format( ArkInventory.Localise["MENU_BAR_BAG_ASSIGN_TEXT"], bag_id ),
+									"func", function( )
+										ArkInventory.db.profile.option.location[loc_id].bag[bag_id].bar = bar_id
+										ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
+									end
+								)
+								
+							end
+							
+						end
+						
+					end
+					
 				end
 
 				
@@ -619,11 +742,42 @@ function ArkInventory.MenuBarOpen( frame )
 						
 					end
 
+					if strsub( value, 1, 19 ) == "BAG_CURRENT_OPTION_" then
+					
+						local bag_id = tonumber( string.match( value, "^BAG_CURRENT_OPTION_(.+)" ) )
+						
+						if bag_id ~= nil then
+							
+							ArkInventory.Lib.Dewdrop:AddLine(
+								"text", string.format( "%s > %s", ArkInventory.Localise["LOCATION_BAG"], bag_id ),
+								"isTitle", true,
+								"textHeight", 12
+							)
+							
+							ArkInventory.Lib.Dewdrop:AddLine( )
+							
+							local cv = ArkInventory.db.profile.option.location[loc_id].bag[bag_id].bar
+							
+							ArkInventory.Lib.Dewdrop:AddLine(
+								"text", ArkInventory.Localise["REMOVE"],
+								"tooltipTitle", ArkInventory.Localise["REMOVE"],
+--								"tooltipText", string.format( ArkInventory.Localise["MENU_BAR_CATEGORY_REMOVE_TEXT"], cat.fullname, bar_id ),
+								"func", function( )
+									ArkInventory.db.profile.option.location[loc_id].bag[bag_id].bar = nil
+									ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
+								end
+							)
+							
+						end
+						
+					end
+					
 				end
 				
 			end
+			
 		)
-
+		
 	end
 	
 end
@@ -878,20 +1032,22 @@ function ArkInventory.MenuItemOpen( frame )
 							
 							elseif ( class == "battlepet" ) then
 								
-								irar = irar + 1
-								
-								ArkInventory.Lib.Dewdrop:AddLine( "text", string.format( "%s: %s%s (%s)", QUALITY, LIGHTYELLOW_FONT_COLOR_CODE, irar, _G[string.format( "ITEM_QUALITY%s_DESC", irar )] ) )
+								ArkInventory.Lib.Dewdrop:AddLine( "text", string.format( "%s: %s%s (%s)", QUALITY, LIGHTYELLOW_FONT_COLOR_CODE, i.q, _G[string.format( "ITEM_QUALITY%s_DESC", i.q )] ) )
 								
 								ArkInventory.Lib.Dewdrop:AddLine( "text", string.format( "%s: %s%s", ArkInventory.Localise["MENU_ITEM_DEBUG_LVL_ITEM"], LIGHTYELLOW_FONT_COLOR_CODE, ilvl ) )
 								
-								ArkInventory.Lib.Dewdrop:AddLine( "text", string.format( "%s: %s%s", ArkInventory.Localise["MENU_ITEM_DEBUG_TYPE"], LIGHTYELLOW_FONT_COLOR_CODE, ityp ) )
+								ArkInventory.Lib.Dewdrop:AddLine( "text", string.format( "%s: %s%s (%s)", ArkInventory.Localise["MENU_ITEM_DEBUG_TYPE"], LIGHTYELLOW_FONT_COLOR_CODE, ityp, ArkInventory.PetJournal.PetTypeName( ityp ) or ArkInventory.Localise["UNKNOWN"] ) )
 								
-								if i.pid then
+								if i.guid then
 									
-									ArkInventory.Lib.Dewdrop:AddLine( "text", string.format( "%s: %s%s", ArkInventory.Localise["MENU_ITEM_DEBUG_PET_ID"], LIGHTYELLOW_FONT_COLOR_CODE, i.pid ) )
+									ArkInventory.Lib.Dewdrop:AddLine( "text", string.format( "%s: %s%s", ArkInventory.Localise["MENU_ITEM_DEBUG_PET_ID"], LIGHTYELLOW_FONT_COLOR_CODE, i.guid ) )
 									
-									local speciesID = C_PetJournal.GetPetInfoByPetID( i.pid )
-									ArkInventory.Lib.Dewdrop:AddLine( "text", string.format( "%s: %s%s", ArkInventory.Localise["MENU_ITEM_DEBUG_PET_SPECIES"], LIGHTYELLOW_FONT_COLOR_CODE, speciesID ) )
+									local pd = ArkInventory.PetJournal.GetPet( i.guid )
+									if pd then
+										ArkInventory.Lib.Dewdrop:AddLine( "text", string.format( "%s: %s%s", ArkInventory.Localise["MENU_ITEM_DEBUG_PET_SPECIES"], LIGHTYELLOW_FONT_COLOR_CODE, pd.sd.speciesID ) )
+										ArkInventory.Lib.Dewdrop:AddLine( "text", string.format( "%s: %s%s", "IsRevoked", LIGHTYELLOW_FONT_COLOR_CODE, pd.IsRevoked and "true" or "false" ) )
+										ArkInventory.Lib.Dewdrop:AddLine( "text", string.format( "%s: %s%s", "isLockedForConvert", LIGHTYELLOW_FONT_COLOR_CODE, pd.isLockedForConvert and "true" or "false" ) )
+									end
 									
 								end
 								
@@ -1064,6 +1220,7 @@ function ArkInventory.MenuBagOpen( frame )
 
 		local loc_id = frame.ARK_Data.loc_id
 		local bag_id = frame.ARK_Data.bag_id
+		local blizzard_id = ArkInventory.BagID_Blizzard( loc_id, bag_id )
 		local cp = ArkInventory.LocationPlayerInfoGet( loc_id )
 		local player_id = cp.info.player_id
 		
@@ -1092,12 +1249,11 @@ function ArkInventory.MenuBagOpen( frame )
 			"children", function( level, value )
 			
 				if level == 1 then
-
+					
 					ArkInventory.Lib.Dewdrop:AddLine(
-						--"text", string.upper( string.format( ArkInventory.Localise["MENU_BAG_TITLE"], bag_id ) ),
-						"text", ArkInventory.Localise["MENU_BAG_TITLE"],
+						"text", ArkInventory.Localise["OPTIONS"],
 						"isTitle", true,
-						"icon", bag.texture,
+						"icon", ArkInventory.Const.Actions[11].Texture,
 						"textHeight", 12
 					)
 					ArkInventory.Lib.Dewdrop:AddLine( )
@@ -1106,10 +1262,10 @@ function ArkInventory.MenuBagOpen( frame )
 						"text", ArkInventory.Localise["MENU_BAG_SHOW"],
 						"tooltipTitle", ArkInventory.Localise["MENU_BAG_SHOW"],
 						"tooltipText", ArkInventory.Localise["MENU_BAG_SHOW_TEXT"],
-						"checked", ArkInventory.db.realm.player.data[player_id].display[loc_id].bag[bag_id],
+						"checked", ArkInventory.db.global.player.data[player_id].bagoptions[loc_id][bag_id].display,
 						"closeWhenClicked", true,
 						"func", function( )
-							ArkInventory.db.realm.player.data[player_id].display[loc_id].bag[bag_id] = not ArkInventory.db.realm.player.data[player_id].display[loc_id].bag[bag_id]
+							ArkInventory.db.global.player.data[player_id].bagoptions[loc_id][bag_id].display = not ArkInventory.db.global.player.data[player_id].bagoptions[loc_id][bag_id].display
 							ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Recalculate )
 						end
 					)
@@ -1124,9 +1280,9 @@ function ArkInventory.MenuBagOpen( frame )
 						"func", function( )
 							for x in pairs( ArkInventory.Global.Location[loc_id].Bags ) do
 								if x == bag_id then
-									ArkInventory.db.realm.player.data[player_id].display[loc_id].bag[x] = true
+									ArkInventory.db.global.player.data[player_id].bagoptions[loc_id][x].display = true
 								else
-									ArkInventory.db.realm.player.data[player_id].display[loc_id].bag[x] = false
+									ArkInventory.db.global.player.data[player_id].bagoptions[loc_id][x].display = false
 								end
 							end
 							ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Recalculate )
@@ -1140,20 +1296,20 @@ function ArkInventory.MenuBagOpen( frame )
 						"closeWhenClicked", true,
 						"func", function( )
 							for x in pairs( ArkInventory.Global.Location[loc_id].Bags ) do
-								ArkInventory.db.realm.player.data[player_id].display[loc_id].bag[x] = true
+								ArkInventory.db.global.player.data[player_id].bagoptions[loc_id][x].display = true
 							end
 							ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Recalculate )
 						end
 					)
 					
-					if not isEmpty then -- fix this when ready
+					if not isEmpty then
 						
 						ArkInventory.Lib.Dewdrop:AddLine( )
 						
 						ArkInventory.Lib.Dewdrop:AddLine(
 							"text", ArkInventory.Localise["MENU_BAG_EMPTY"],
-							"tooltipTitle", ArkInventory.Localise["MENU_BAG_SHOW"],
-							"tooltipText", ArkInventory.Localise["MENU_BAG_SHOW_TEXT"],
+							"tooltipTitle", ArkInventory.Localise["MENU_BAG_EMPTY"],
+							"tooltipText", ArkInventory.Localise["MENU_BAG_EMPTY_TEXT"],
 							"closeWhenClicked", true,
 							"func", function( )
 								ArkInventory.EmptyBag( loc_id, bag_id )
@@ -1161,7 +1317,59 @@ function ArkInventory.MenuBagOpen( frame )
 						)
 						
 					end
+					
+					
+					if not ArkInventory.Global.Mode.Edit and loc_id == ArkInventory.Const.Location.Bank and bag.status == ArkInventory.Const.Bag.Status.Purchase then
 						
+						if bag_id == ArkInventory.Global.Location[loc_id].tabReagent then
+							
+							local cost = GetReagentBankCost( )
+							
+							ArkInventory.Lib.Dewdrop:AddLine( )
+							ArkInventory.Lib.Dewdrop:AddLine(
+								"text", BANKSLOTPURCHASE,
+								"tooltipTitle", ArkInventory.Localise["REAGENTBANK"],
+								"tooltipText", string.format( "%s\n\n%s %s", REAGENTBANK_PURCHASE_TEXT, COSTS_LABEL, ArkInventory.MoneyText( cost, true ) ),
+								"closeWhenClicked", true,
+								"func", function( )
+									PlaySound( "igMainMenuOption" )
+									StaticPopup_Show( "CONFIRM_BUY_REAGENTBANK_TAB" )
+								end
+							)
+							
+						else
+							
+							local numSlots = GetNumBankSlots( )
+							local cost = GetBankSlotCost( numSlots )
+							
+							ArkInventory.Lib.Dewdrop:AddLine( )
+							ArkInventory.Lib.Dewdrop:AddLine(
+								"text", BANKSLOTPURCHASE,
+								"tooltipTitle", BANK_BAG,
+								"tooltipText", string.format( "%s\n\n%s %s", BANKSLOTPURCHASE_LABEL, COSTS_LABEL, ArkInventory.MoneyText( cost, true ) ),
+								"closeWhenClicked", true,
+								"func", function( )
+									PlaySound( "igMainMenuOption" )
+									StaticPopup_Show( "CONFIRM_BUY_BANK_SLOT" )
+								end
+							)
+							
+						end
+						
+					elseif not ArkInventory.Global.Mode.Edit and loc_id == ArkInventory.Const.Location.Bank and bag_id == ArkInventory.Global.Location[loc_id].tabReagent then
+						
+						ArkInventory.Lib.Dewdrop:AddLine( )
+						ArkInventory.Lib.Dewdrop:AddLine(
+							"text", REAGENTBANK_DEPOSIT,
+							"tooltipTitle", REAGENTBANK_DEPOSIT,
+							"closeWhenClicked", true,
+							"func", function( )
+								PlaySound( "igMainMenuOption" )
+								DepositReagentBank( )
+							end
+						)
+						
+					end
 					
 					if ArkInventory.Global.Mode.Edit and not isEmpty then
 					
@@ -1175,8 +1383,179 @@ function ArkInventory.MenuBagOpen( frame )
 						
 					end
 					
-				end
 					
+					if loc_id == ArkInventory.Const.Location.Bag or loc_id == ArkInventory.Const.Location.Bank then
+						
+						if blizzard_id > 0 then
+							
+							ArkInventory.Lib.Dewdrop:AddLine( )
+							
+							ArkInventory.Lib.Dewdrop:AddLine(
+								"text", BAG_FILTER_ASSIGN_TO,
+								"isTitle", true,
+								"textHeight", 12
+							)
+							
+							for i = LE_BAG_FILTER_FLAG_EQUIPMENT, NUM_LE_BAG_FILTER_FLAGS do
+								
+								if ( i ~= LE_BAG_FILTER_FLAG_JUNK ) then
+									
+									local checked = false
+									
+									if loc_id == ArkInventory.Const.Location.Bag then
+										
+										checked = GetBagSlotFlag( blizzard_id, i )
+										
+									elseif loc_id == ArkInventory.Const.Location.Bank then
+										
+										if bag_id == 1 then
+											checked = GetBankBagSlotFlag( blizzard_id - NUM_BAG_SLOTS, i )
+										else
+											checked = GetBagSlotFlag( blizzard_id, i )
+										end
+										
+									end
+									
+									
+									ArkInventory.Lib.Dewdrop:AddLine(
+										"text", BAG_FILTER_LABELS[i],
+										"tooltipTitle", BAG_FILTER_ASSIGN_TO,
+										"tooltipText", BAG_FILTER_LABELS[i],
+										"checked", checked,
+										"closeWhenClicked", true,
+										"func", function( )
+											
+											if loc_id == ArkInventory.Const.Location.Bag then
+												
+												SetBagSlotFlag( blizzard_id, i, not checked )
+												
+											elseif loc_id == ArkInventory.Const.Location.Bank then
+												
+												if bag_id == 1 then
+													SetBankBagSlotFlag( blizzard_id - NUM_BAG_SLOTS, i, not checked )
+												else
+													SetBagSlotFlag( blizzard_id, i, not checked )
+												end
+												
+											end
+											
+										end
+									)
+							
+								end
+								
+							end
+						
+						end
+						
+						
+						ArkInventory.Lib.Dewdrop:AddLine( )
+						
+						ArkInventory.Lib.Dewdrop:AddLine(
+							"text", ArkInventory.Localise["RESTACK"],
+							"isTitle", true,
+							"icon", ArkInventory.Const.Actions[22].Texture,
+							"textHeight", 12
+						)
+						
+						
+						local checked = false
+						
+						if loc_id == ArkInventory.Const.Location.Bag then
+							
+							if bag_id == 1 then
+								checked = GetBackpackAutosortDisabled( )
+							else
+								checked = GetBagSlotFlag( blizzard_id, LE_BAG_FILTER_FLAG_IGNORE_CLEANUP )
+							end
+							
+						elseif loc_id == ArkInventory.Const.Location.Bank then
+							
+							if bag_id == 1 then
+								checked = GetBankAutosortDisabled( )
+							elseif bag_id == ArkInventory.Global.Location[loc_id].tabReagent then
+								checked = ArkInventory.Global.Me.bagoptions[loc_id][bag_id].cleanup.ignore
+							else
+								checked = GetBankBagSlotFlag( blizzard_id - NUM_BAG_SLOTS, LE_BAG_FILTER_FLAG_IGNORE_CLEANUP )
+							end
+							
+						end
+						
+						
+						ArkInventory.Lib.Dewdrop:AddLine(
+							"text", BAG_FILTER_IGNORE,
+							"tooltipTitle", ArkInventory.Localise["RESTACK"],
+							"tooltipText", BAG_FILTER_IGNORE,
+							"checked", checked,
+							"closeWhenClicked", true,
+							"func", function( )
+								
+								if loc_id == ArkInventory.Const.Location.Bag then
+									
+									if bag_id == 1 then
+										SetBackpackAutosortDisabled( not checked )
+									else
+										SetBagSlotFlag( blizzard_id, LE_BAG_FILTER_FLAG_IGNORE_CLEANUP, not checked )
+									end
+									
+								elseif loc_id == ArkInventory.Const.Location.Bank then
+									
+									if bag_id == 1 then
+										SetBankAutosortDisabled( not checked )
+									elseif bag_id == ArkInventory.Global.Location[loc_id].tabReagent then
+										ArkInventory.Global.Me.bagoptions[loc_id][bag_id].cleanup.ignore = not checked
+									else
+										SetBankBagSlotFlag( blizzard_id - NUM_BAG_SLOTS, LE_BAG_FILTER_FLAG_IGNORE_CLEANUP, not checked )
+									end
+									
+								end
+								
+							end
+						)
+						
+						if loc_id == ArkInventory.Const.Location.Bank and bag_id == ArkInventory.Global.Location[loc_id].tabReagent then
+							
+							ArkInventory.Lib.Dewdrop:AddLine(
+								"text", REAGENTBANK_DEPOSIT,
+								"checked", ArkInventory.Global.Me.bagoptions[loc_id][bag_id].cleanup.deposit,
+								"closeWhenClicked", true,
+								"func", function( )
+									ArkInventory.Global.Me.bagoptions[loc_id][bag_id].cleanup.deposit = not ArkInventory.Global.Me.bagoptions[loc_id][bag_id].cleanup.deposit
+								end
+							)
+						
+						end
+						
+						if loc_id == ArkInventory.Const.Location.Bag then
+							
+							ArkInventory.Lib.Dewdrop:AddLine(
+								"text", REVERSE_CLEAN_UP_BAGS_TEXT,
+								"tooltipTitle", REVERSE_CLEAN_UP_BAGS_TEXT,
+								"tooltipText", OPTION_TOOLTIP_REVERSE_CLEAN_UP_BAGS,
+								"checked", GetSortBagsRightToLeft( ),
+								"closeWhenClicked", true,
+								"func", function( )
+									SetSortBagsRightToLeft( not GetSortBagsRightToLeft( ) )
+								end
+							)
+							
+							ArkInventory.Lib.Dewdrop:AddLine(
+								"text", REVERSE_NEW_LOOT_TEXT,
+								"tooltipTitle", REVERSE_NEW_LOOT_TEXT,
+								"tooltipText", OPTION_TOOLTIP_REVERSE_NEW_LOOT,
+								"checked", GetInsertItemsLeftToRight( ),
+								"closeWhenClicked", true,
+								"func", function( value )
+									SetInsertItemsLeftToRight( not GetInsertItemsLeftToRight( ) )
+								end
+							)
+							
+						end
+						
+					end
+					
+				end
+				
 				if level == 2 and value then
 					
 					if value == "DEBUG_INFO" then
@@ -1270,7 +1649,7 @@ function ArkInventory.MenuChangerVaultTabOpen( frame )
 				if level == 1 then
 				
 					ArkInventory.Lib.Dewdrop:AddLine(
-						"text", string.format( "%s: %s", GUILD_BANK, string.format( GUILDBANK_TAB_NUMBER, bag_id ) ),
+						"text", string.format( "%s: %s", ArkInventory.Localise["GUILDBANK"], string.format( GUILDBANK_TAB_NUMBER, bag_id ) ),
 						"isTitle", true,
 						"icon", bag.texture,
 						"textHeight", 12
@@ -1301,7 +1680,7 @@ function ArkInventory.MenuChangerVaultTabOpen( frame )
 					end
 					
 					ArkInventory.Lib.Dewdrop:AddLine(
-						"text", string.format( "mode: %s", GUILD_BANK ),
+						"text", string.format( "mode: %s", ArkInventory.Localise["GUILDBANK"] ),
 						"closeWhenClicked", true,
 						"disabled", GuildBankFrame.mode == "bank",
 						"func", function( )
@@ -1384,13 +1763,13 @@ end
 function ArkInventory.MenuChangerVaultActionOpen( frame )
 	
 	assert( frame, "code error: frame argument is missing" )
-
-	if ArkInventory.Lib.Dewdrop:IsOpen( frame ) then
 	
+	if ArkInventory.Lib.Dewdrop:IsOpen( frame ) then
+		
 		ArkInventory.Lib.Dewdrop:Close( )
 		
 	else
-
+		
 		local loc_id = ArkInventory.Const.Location.Vault
 		local cp = ArkInventory.LocationPlayerInfoGet( loc_id )
 		local bag_id = GetCurrentGuildBankTab( )
@@ -1418,7 +1797,7 @@ function ArkInventory.MenuChangerVaultActionOpen( frame )
 				if level == 1 then
 				
 					ArkInventory.Lib.Dewdrop:AddLine(
-						"text", GUILD_BANK,
+						"text", ArkInventory.Localise["GUILDBANK"],
 						"icon", ArkInventory.Global.Location[loc_id].Texture,
 						"isTitle", true,
 						"textHeight", 12
@@ -1465,7 +1844,7 @@ function ArkInventory.MenuChangerVaultActionOpen( frame )
 					end
 					
 					if amount > 0 then
-						tt = string.format( "%s %s", GUILDBANK_AVAILABLE_MONEY, ArkInventory.MoneyText( amount ) )
+						tt = string.format( "%s %s", GUILDBANK_AVAILABLE_MONEY, ArkInventory.MoneyText( amount, true ) )
 					end
 					
 					if ok and ( not CanWithdrawGuildBankMoney( ) ) then
@@ -1502,6 +1881,7 @@ function ArkInventory.MenuChangerVaultActionOpen( frame )
 						if not amount or numSlots >= 6 then
 							
 							amount = 0
+							ok = false
 							
 						else
 							
@@ -1513,10 +1893,10 @@ function ArkInventory.MenuChangerVaultActionOpen( frame )
 							
 						end
 						
-					end
-					
-					if amount > 0 then
-						tt = string.format( "%s%s", COSTS_LABEL, ArkInventory.MoneyText( amount ) )
+						if amount > 0 then
+							tt = string.format( "%s %s", COSTS_LABEL, ArkInventory.MoneyText( amount, true ) )
+						end
+						
 					end
 					
 					if ok ~= nil then
@@ -1543,7 +1923,7 @@ function ArkInventory.MenuChangerVaultActionOpen( frame )
 					
 					
 					ArkInventory.Lib.Dewdrop:AddLine(
-						"text", string.format( "%s: %s", string.format( GUILDBANK_TAB_NUMBER, bag_id ), bag.name ),
+						"text", string.format( "%s: %s", string.format( GUILDBANK_TAB_NUMBER, bag_id ), bag.name or "" ),
 						"isTitle", true,
 						"icon", bag.texture,
 						"textHeight", 12
@@ -1552,7 +1932,7 @@ function ArkInventory.MenuChangerVaultActionOpen( frame )
 					ArkInventory.Lib.Dewdrop:AddLine( )
 					
 					ArkInventory.Lib.Dewdrop:AddLine(
-						"text", string.format( "%s: %s", DISPLAY, GUILD_BANK ),
+						"text", string.format( "%s: %s", DISPLAY, ArkInventory.Localise["GUILDBANK"] ),
 						"closeWhenClicked", true,
 						"disabled", GuildBankFrame.mode == "bank",
 						"func", function( )
@@ -1723,18 +2103,107 @@ function ArkInventory.MenuSwitchCharacter( frame, level, value, offset )
 	local cp = ArkInventory.LocationPlayerInfoGet( loc_id )
 	
 	if level == offset + 1 then
-	
+		
+		local count = 0
+		local realms = { }
+		
 		ArkInventory.Lib.Dewdrop:AddLine(
 			"text", ArkInventory.Localise["MENU_CHARACTER_SWITCH"],
 			"isTitle", true,
 			"textHeight", 12
 		)
 		
-		local fc = 0
+		ArkInventory.Lib.Dewdrop:AddLine( )
+		
+		ArkInventory.Lib.Dewdrop:AddLine(
+			"text", cp.info.realm,
+			"notClickable", true
+		)
+		
+		local show
+		
+		for n, tp in ArkInventory.spairs( ArkInventory.db.global.player.data, function( a, b ) return ( a < b ) end ) do
+			
+			show = true
+			
+			if ( loc_id == ArkInventory.Const.Location.Vault ) and ( tp.info.class ~= "GUILD" ) then
+				show = false
+			elseif ( loc_id == ArkInventory.Const.Location.Pet ) and ( tp.info.class ~= "ACCOUNT" ) then
+				show = false
+			elseif ( loc_id == ArkInventory.Const.Location.Mount ) and ( tp.info.class ~= "ACCOUNT" ) then
+				show = false
+			elseif tp.location[loc_id].slot_count == 0 then
+				show = false
+			elseif tp.info.realm ~= cp.info.realm then
+				show = false
+				realms[tp.info.realm] = true
+			end
+			
+			if show then
+				
+				count = count + 1
+				ArkInventory.Lib.Dewdrop:AddLine(
+					"text", ArkInventory.DisplayName4( tp.info, cp.info.faction ),
+					--"tooltipTitle", "",
+					--"tooltipText", "",
+					"hasArrow", true,
+					"isRadio", true,
+					"checked", cp.info.player_id == tp.info.player_id,
+					"closeWhenClicked", true,
+					"func", function( )
+						ArkInventory.Frame_Main_Show( loc_id, tp.info.player_id )
+					end,
+					"value", string.format( "SWITCH_CHARACTER_ERASE_%s", tp.info.player_id )
+				)
+				
+			end
+			
+		end
+		
+		if count == 0 then
+			
+			ArkInventory.Lib.Dewdrop:AddLine(
+				"text", "no data availale",
+				"disabled", true
+			)
+			
+		end
+
+		if not ArkInventory.Table.IsEmpty( realms ) then
+			
+			table.sort( realms )
+			
+			ArkInventory.Lib.Dewdrop:AddLine( )
+			
+			for k in ArkInventory.spairs( realms, function( a, b ) return ( a < b ) end ) do
+			
+				ArkInventory.Lib.Dewdrop:AddLine(
+					"text", k,
+					--"tooltipTitle", "",
+					--"tooltipText", "",
+					"hasArrow", true,
+					--"isRadio", true,
+					--"checked", cp.info.player_id == tp.info.player_id,
+					--"notClickable", cp.info.player_id == tp.info.player_id,
+					--"closeWhenClicked", true,
+					"value", string.format( "SWITCH_CHARACTER_REALM_%s", k )
+				)
+				
+			end
+			
+		end
+		
+	end
+	
+	
+	if level > offset + 1 and value then
+		
+		local realm = string.match( value, "^SWITCH_CHARACTER_REALM_(.+)" )
+		if realm then
 			
 			local count = 0
 			
-			for n, tp in ArkInventory.spairs( ArkInventory.db.realm.player.data, function( a, b ) return a < b end ) do
+			for n, tp in ArkInventory.spairs( ArkInventory.db.global.player.data, function( a, b ) return a < b end ) do
 				
 				local show = true
 				
@@ -1750,7 +2219,7 @@ function ArkInventory.MenuSwitchCharacter( frame, level, value, offset )
 					show = false
 				end
 				
-				if not tp or tp.location[loc_id].slot_count == 0 then
+				if tp.location[loc_id].slot_count == 0 or tp.info.realm ~= realm then
 					show = false
 				end
 				
@@ -1759,7 +2228,7 @@ function ArkInventory.MenuSwitchCharacter( frame, level, value, offset )
 					count = count + 1
 					
 					ArkInventory.Lib.Dewdrop:AddLine(
-						"text", ArkInventory.DisplayName4( tp.info ),
+						"text", ArkInventory.DisplayName4( tp.info, cp.info.faction ),
 						--"tooltipTitle", "",
 						--"tooltipText", "",
 						"hasArrow", true,
@@ -1770,7 +2239,7 @@ function ArkInventory.MenuSwitchCharacter( frame, level, value, offset )
 						"func", function( )
 							ArkInventory.Frame_Main_Show( loc_id, tp.info.player_id )
 						end,
-						"value", string.format( "SWITCH_CHARACTER_SWITCH_%s", tp.info.player_id )
+						"value", string.format( "SWITCH_CHARACTER_ERASE_%s", tp.info.player_id )
 					)
 					
 				end
@@ -1788,45 +2257,46 @@ function ArkInventory.MenuSwitchCharacter( frame, level, value, offset )
 			end
 			
 		end
-	
-	if level == offset + 2 and value then
-
-		local player_id = string.match( value, "^SWITCH_CHARACTER_SWITCH_(.+)" )
 		
-		local tp = ArkInventory.PlayerInfoGet( player_id )
-		
-		ArkInventory.Lib.Dewdrop:AddLine(
-			"text", ArkInventory.DisplayName4( tp.info ),
-			"isTitle", true,
-			"textHeight", 12
-		)
-		
-		ArkInventory.Lib.Dewdrop:AddLine( )
-		
-		if loc_id ~= ArkInventory.Const.Location.Vault then
+		local player_id = string.match( value, "^SWITCH_CHARACTER_ERASE_(.+)" )
+		if player_id then
+			
+			local tp = ArkInventory.PlayerInfoGet( player_id )
+			
 			ArkInventory.Lib.Dewdrop:AddLine(
-				"text", string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE"], ArkInventory.Global.Location[loc_id].Name ),
-				"tooltipTitle", string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE"], ArkInventory.Global.Location[loc_id].Name ),
-				"tooltipText", string.format( "%s%s", RED_FONT_COLOR_CODE, string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE_TEXT"], ArkInventory.Global.Location[loc_id].Name, ArkInventory.DisplayName1( tp.info ) ) ),
+				"text", ArkInventory.DisplayName4( tp.info, cp.info.faction ),
+				"isTitle", true,
+				"textHeight", 12
+			)
+			
+			ArkInventory.Lib.Dewdrop:AddLine( )
+			
+			if loc_id ~= ArkInventory.Const.Location.Vault then
+				ArkInventory.Lib.Dewdrop:AddLine(
+					"text", string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE"], ArkInventory.Global.Location[loc_id].Name ),
+					"tooltipTitle", string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE"], ArkInventory.Global.Location[loc_id].Name ),
+					"tooltipText", string.format( "%s%s", RED_FONT_COLOR_CODE, string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE_TEXT"], ArkInventory.Global.Location[loc_id].Name, ArkInventory.DisplayName1( tp.info ) ) ),
+					"closeWhenClicked", true,
+					"func", function( )
+						ArkInventory.Frame_Main_Hide( loc_id )
+						ArkInventory.EraseSavedData( tp.info.player_id, loc_id )
+					end
+				)
+			end
+			
+			ArkInventory.Lib.Dewdrop:AddLine(
+				"text", string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE"], ArkInventory.Localise["ALL"] ),
+				"tooltipTitle", string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE"], ArkInventory.Localise["ALL"] ),
+				"tooltipText", string.format( "%s%s", RED_FONT_COLOR_CODE, string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE_TEXT"], ArkInventory.Localise["ALL"], ArkInventory.DisplayName1( tp.info ) ) ),
 				"closeWhenClicked", true,
 				"func", function( )
-					ArkInventory.Frame_Main_Hide( loc_id )
-					ArkInventory.EraseSavedData( tp.info.player_id, loc_id )
+					ArkInventory.Frame_Main_Hide( )
+					ArkInventory.EraseSavedData( tp.info.player_id )
 				end
 			)
+		
 		end
 		
-		ArkInventory.Lib.Dewdrop:AddLine(
-			"text", string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE"], ArkInventory.Localise["ALL"] ),
-			"tooltipTitle", string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE"], ArkInventory.Localise["ALL"] ),
-			"tooltipText", string.format( "%s%s", RED_FONT_COLOR_CODE, string.format( ArkInventory.Localise["MENU_CHARACTER_SWITCH_ERASE_TEXT"], ArkInventory.Localise["ALL"], ArkInventory.DisplayName1( tp.info ) ) ),
-			"closeWhenClicked", true,
-			"func", function( )
-				ArkInventory.Frame_Main_Hide( )
-				ArkInventory.EraseSavedData( tp.info.player_id )
-			end
-		)
-	
 	end
 
 end
@@ -1878,7 +2348,7 @@ function ArkInventory.MenuSwitchCharacterOpen( frame )
 end
 
 function ArkInventory.MenuLDBBagsOpen( frame )
-
+	
 	assert( frame, "code error: frame argument is missing" )
 
 	if ArkInventory.Lib.Dewdrop:IsOpen( frame ) then
@@ -2003,7 +2473,9 @@ function ArkInventory.MenuLDBBagsOpen( frame )
 									"text", v.Name,
 									"closeWhenClicked", true,
 									"icon", v.Texture,
-									"func", v.Scripts.OnClick
+									"func", function( )
+										v.Scripts.OnClick( nil, nil )
+									end
 								)
 							end
 						end
@@ -2024,9 +2496,9 @@ function ArkInventory.MenuLDBBagsOpen( frame )
 							"text", ArkInventory.Localise["LDB_BAGS_COLOUR_USE"],
 							"tooltipTitle", ArkInventory.Localise["LDB_BAGS_COLOUR_USE"],
 							"tooltipText", ArkInventory.Localise["LDB_BAGS_COLOUR_USE_TEXT"],
-							"checked", ArkInventory.db.char.option.ldb.bags.colour,
+							"checked", ArkInventory.Global.Me.ldb.bags.colour,
 							"func", function( )
-								ArkInventory.db.char.option.ldb.bags.colour = not ArkInventory.db.char.option.ldb.bags.colour
+								ArkInventory.Global.Me.ldb.bags.colour = not ArkInventory.Global.Me.ldb.bags.colour
 								ArkInventory.LDB.Bags:Update( )
 							end
 						)
@@ -2035,9 +2507,9 @@ function ArkInventory.MenuLDBBagsOpen( frame )
 							"text", ArkInventory.Localise["LDB_BAGS_STYLE"],
 							"tooltipTitle", ArkInventory.Localise["LDB_BAGS_STYLE"],
 							"tooltipText", ArkInventory.Localise["LDB_BAGS_STYLE_TEXT"],
-							"checked", ArkInventory.db.char.option.ldb.bags.full,
+							"checked", ArkInventory.Global.Me.ldb.bags.full,
 							"func", function( )
-								ArkInventory.db.char.option.ldb.bags.full = not ArkInventory.db.char.option.ldb.bags.full
+								ArkInventory.Global.Me.ldb.bags.full = not ArkInventory.Global.Me.ldb.bags.full
 								ArkInventory.LDB.Bags:Update( )
 							end
 						)
@@ -2046,9 +2518,9 @@ function ArkInventory.MenuLDBBagsOpen( frame )
 							"text", ArkInventory.Localise["LDB_BAGS_INCLUDE_TYPE"],
 							"tooltipTitle", ArkInventory.Localise["LDB_BAGS_INCLUDE_TYPE"],
 							"tooltipText", ArkInventory.Localise["LDB_BAGS_INCLUDE_TYPE_TEXT"],
-							"checked", ArkInventory.db.char.option.ldb.bags.includetype,
+							"checked", ArkInventory.Global.Me.ldb.bags.includetype,
 							"func", function( )
-								ArkInventory.db.char.option.ldb.bags.includetype = not ArkInventory.db.char.option.ldb.bags.includetype
+								ArkInventory.Global.Me.ldb.bags.includetype = not ArkInventory.Global.Me.ldb.bags.includetype
 								ArkInventory.LDB.Bags:Update( )
 							end
 						)
@@ -2135,7 +2607,7 @@ function ArkInventory.MenuLDBTrackingCurrencyOpen( frame )
 								local h = GetCurrencyListLink( j )
 								local class, id = ArkInventory.ObjectStringDecode( h )
 								
-								local checked = ArkInventory.db.char.option.ldb.tracking.currency.tracked[id]
+								local checked = ArkInventory.Global.Me.ldb.tracking.currency.tracked[id]
 								
 								local t1 = name
 								local t2 = ArkInventory.Localise["CLICK_TO_SELECT"]
@@ -2151,7 +2623,7 @@ function ArkInventory.MenuLDBTrackingCurrencyOpen( frame )
 									"tooltipText", t2,
 									"checked", checked,
 									"func", function( )
-										ArkInventory.db.char.option.ldb.tracking.currency.tracked[id] = not ArkInventory.db.char.option.ldb.tracking.currency.tracked[id]
+										ArkInventory.Global.Me.ldb.tracking.currency.tracked[id] = not ArkInventory.Global.Me.ldb.tracking.currency.tracked[id]
 										ArkInventory.LDB.Tracking_Currency:Update( )
 									end
 								)
@@ -2228,12 +2700,14 @@ function ArkInventory.MenuLDBTrackingItemOpen( frame )
 						local count = GetItemCount( k )
 						local name, _, _, _, _, _, _, _, _, icon = GetItemInfo( k )
 						
+--[[
 						if k == 6265 then
 							-- soul shards
 							count = UnitPower( "player", 7 ) or 0
 						end
+]]--
 						
-						local checked = ArkInventory.db.char.option.ldb.tracking.item.tracked[k]
+						local checked = ArkInventory.Global.Me.ldb.tracking.item.tracked[k]
 						local t1 = name
 						local t2 = ArkInventory.Localise["CLICK_TO_SELECT"]
 						
@@ -2250,7 +2724,7 @@ function ArkInventory.MenuLDBTrackingItemOpen( frame )
 							"checked", checked,
 							"hasArrow", true,
 							"func", function( )
-								ArkInventory.db.char.option.ldb.tracking.item.tracked[k] = not ArkInventory.db.char.option.ldb.tracking.item.tracked[k]
+								ArkInventory.Global.Me.ldb.tracking.item.tracked[k] = not ArkInventory.Global.Me.ldb.tracking.item.tracked[k]
 								ArkInventory.LDB.Tracking_Item:Update( )
 							end,
 							"value", k
@@ -2285,7 +2759,7 @@ function ArkInventory.MenuLDBTrackingItemOpen( frame )
 						--"tooltipText", "",
 						"func", function( )
 							ArkInventory.db.global.option.tracking.items[value] = nil
-							ArkInventory.db.char.option.ldb.tracking.item.tracked[value] = false
+							ArkInventory.Global.Me.ldb.tracking.item.tracked[value] = false
 							ArkInventory.LDB.Tracking_Item:Update( )
 						end
 					)
@@ -2304,8 +2778,9 @@ function ArkInventory.MenuMounts( frame, level, value, offset )
 
 	assert( frame, "code error: frame argument is missing" )
 	
+	local icon = ""
 	
-	if ( level == offset + 1 ) and ( ( offset == 0 ) or ( value and ( value == "INSERT_LOCATION_MENU" ) ) ) then
+	if ( level == 1 + offset ) and ( ( offset == 0 ) or ( value and ( value == "INSERT_LOCATION_MENU" ) ) ) then
 		
 --		ArkInventory.Lib.Dewdrop:AddLine(
 --			"text", ArkInventory.Global.Location[ArkInventory.Const.Location.Mount].Name,
@@ -2314,61 +2789,29 @@ function ArkInventory.MenuMounts( frame, level, value, offset )
 --		)
 		
 		local tooltiptext = ""
-		local skill = ArkInventory.LDB.Mounts.RidingSkill( )
+		local skill = ArkInventory.MountJournal.SkillLevel( )
 		
 		if skill == 0 then
 			tooltiptext = string.format( "%s%s", RED_FONT_COLOR_CODE, SPELL_FAILED_LOW_CASTLEVEL )
 		else
 			tooltiptext = ""
 		end
-		ArkInventory.Lib.Dewdrop:AddLine(
-			"text", ArkInventory.Localise["LDB_MOUNTS_TYPE_L"],
-			"tooltipTitle", ArkInventory.Localise["LDB_MOUNTS_TYPE_L"],
-			"tooltipText", tooltiptext,
-			"hasArrow", true,
-			"disabled", skill == 0,
-			"value", "l"
-		)
 		
-		if skill < 225 then
-			tooltiptext = string.format( "%s%s", RED_FONT_COLOR_CODE, SPELL_FAILED_LOW_CASTLEVEL )
-		else
-			tooltiptext = ""
+		for mountType in pairs( ArkInventory.Const.MountTypes ) do
+			if mountType ~= "x" then
+			
+				local mode = ArkInventory.Localise[string.upper( string.format( "LDB_MOUNTS_TYPE_%s", mountType ) )]
+				ArkInventory.Lib.Dewdrop:AddLine(
+					"text", mode,
+					"tooltipTitle", mode,
+					"hasArrow", true,
+					"disabled", skill == 0,
+					"value", mountType
+				)
+				
+			end
 		end
-		ArkInventory.Lib.Dewdrop:AddLine(
-			"text", ArkInventory.Localise["LDB_MOUNTS_TYPE_A"],
-			"tooltipTitle", ArkInventory.Localise["LDB_MOUNTS_TYPE_A"],
-			"tooltipText", tooltiptext,
-			"hasArrow", true,
-			"disabled", skill < 225,
-			"value", "a"
-		)
 		
-		if skill == 0 then
-			tooltiptext = string.format( "%s%s", RED_FONT_COLOR_CODE, SPELL_FAILED_LOW_CASTLEVEL )
-		else
-			tooltiptext = ""
-		end
-		ArkInventory.Lib.Dewdrop:AddLine(
-			"text", ArkInventory.Localise["LDB_MOUNTS_TYPE_U"],
-			"tooltipTitle", ArkInventory.Localise["LDB_MOUNTS_TYPE_U"],
-			"tooltipText", tooltiptext,
-			"hasArrow", true,
-			"disabled", skill == 0,
-			"value", "u"
-		)
-		
---[[
-		ArkInventory.Lib.Dewdrop:AddLine( )
-		
-		ArkInventory.Lib.Dewdrop:AddLine(
-			"text", "cancel auras",
-			"TooltipTitle", "cancel auras",
-			"tooltipText", "attempt to cancel specific auras before mounting",
-			"hasArrow", true,
-			"value", "aura"
-		)
-]]--
 		
 		ArkInventory.Lib.Dewdrop:AddLine( )
 		
@@ -2385,184 +2828,121 @@ function ArkInventory.MenuMounts( frame, level, value, offset )
 	
 	if ( level == 2 + offset ) and value then
 		
-		if value == "aura" then
+		local mountType = value
+		local header = ArkInventory.Localise[string.upper( string.format( "LDB_MOUNTS_TYPE_%s", mountType ) )]
+		local selected = ArkInventory.Global.Me.ldb.mounts[mountType].selected
 		
-			ArkInventory.Lib.Dewdrop:AddLine(
-				"text", "cancel aura",
-				"isTitle", true,
-				"textHeight", 14
-			)
+		ArkInventory.Lib.Dewdrop:AddLine(
+			"text", header,
+			"isTitle", true,
+			"textHeight", 14
+		)
+		
+		ArkInventory.Lib.Dewdrop:AddLine( )
+		
+		local companionCount = 0
+		
+		for _, md in ArkInventory.MountJournal.Iterate( ) do
 			
-			ArkInventory.Lib.Dewdrop:AddLine( )
-			
-			local count = 0
-			
-			for spellId in pairs( ArkInventory.db.global.option.ldb.mounts.aura ) do
+			if md.owned and md.mt == ArkInventory.Const.MountTypes[mountType] then
 				
-				count = count + 1
+				companionCount = companionCount + 1
 				
-				local text = GetSpellInfo( spellId )
-				local checked = ArkInventory.db.char.option.ldb.mounts.aura[spellId]
-				local icon = ""
+				icon = ""
+				local text = md.name
 				
-				if checked then
-					icon = ArkInventory.Const.Texture.Yes 
-					text = string.format( "%s%s [%s]%s", GREEN_FONT_COLOR_CODE, text, spellId, FONT_COLOR_CODE_CLOSE )
+				if selected[md.spell] == true then
+					icon = ArkInventory.Const.Texture.Yes
+--					text = string.format( "%s%s%s", GREEN_FONT_COLOR_CODE, md.name, FONT_COLOR_CODE_CLOSE )
+				elseif selected[md.spell] == false then
+					icon = ArkInventory.Const.Texture.No
+--					text = string.format( "%s%s%s", RED_FONT_COLOR_CODE, md.name, FONT_COLOR_CODE_CLOSE )
 				end
 				
 				ArkInventory.Lib.Dewdrop:AddLine(
-					"icon",  icon,
+					"icon", icon,
 					"text", text,
-					"func", function( )
-						ArkInventory.db.char.option.ldb.mounts.aura[spellId] = not ArkInventory.db.char.option.ldb.mounts.aura[spellId]
-					end
+					"tooltipTitle", md.name,
+					"tooltipText", md.desc,
+					"hasArrow", true,
+					"value", string.format( "%s:%s", mountType, md.index )
 				)
+				
 			end
 			
-			if count > 0 then
-				ArkInventory.Lib.Dewdrop:AddLine( )
-			end
-			
-			ArkInventory.Lib.Dewdrop:AddLine(
-				"text", "add aura",
-				"tooltipTitle", "add aura",
-				"tooltipText", "enter the spell id for the aura you want cancelled before mounting.\n\nimportant: shapeshift forms can only be cancelled by the user",
-				"hasArrow", true,
-				"hasEditBox", true,
-				"editBoxText", "",
-				"editBoxFunc", function( v )
-					local spellId = tonumber( v )
-					ArkInventory.db.global.option.ldb.mounts.aura[spellId] = true
-					ArkInventory.db.char.option.ldb.mounts.aura[spellId] = true
-				end
-			)
-			
-		else
-		
-			local companionType = "MOUNT"
-			local mountType = value
-			local header = ArkInventory.Localise[string.upper( string.format( "LDB_MOUNTS_TYPE_%s", mountType ) )]
-			local selected = ArkInventory.db.char.option.ldb.mounts[mountType].selected
-			
-			ArkInventory.Lib.Dewdrop:AddLine(
-				"text", header,
-				"isTitle", true,
-				"textHeight", 14
-			)
-			
-			local n = GetNumCompanions( companionType )
+		end
+	
+		if companionCount > 0 then
 			
 			ArkInventory.Lib.Dewdrop:AddLine( )
 			
-			local companionCount = 0
+			local companionName = ArkInventory.Localise["RANDOM"]
+			local tooltipText = ArkInventory.Localise["CLICK_TO_SELECT"]
+			local selected = ArkInventory.Global.Me.ldb.mounts[mountType].selected
 			
-			for companionIndex = 1, n do
-				
-				local companionID, companionName, companionSpellID, texture, active = GetCompanionInfo( companionType, companionIndex )
-				local companionData = ArkInventory.Global.Companion.MOUNT[companionSpellID]
-				
-				if companionData.mt == mountType then
-					
-					companionCount = companionCount + 1
-					
-					local text = companionName
-					local tooltipText = ""
-					local icon = ""
-					
-					if selected[companionSpellID] == true then
-						icon = ArkInventory.Const.Texture.Yes
-						text = string.format( "%s%s%s", GREEN_FONT_COLOR_CODE, companionName, FONT_COLOR_CODE_CLOSE )
-					elseif selected[companionSpellID] == false then
-						icon = ArkInventory.Const.Texture.No
-						text = string.format( "%s%s%s", RED_FONT_COLOR_CODE, companionName, FONT_COLOR_CODE_CLOSE )
-					end
-					
-					if ( companionData and companionData.r ) then
-						
-						if companionData.r.zone then
-							tooltipText = ArkInventory.Localise["LDB_COMPANION_RESTRICTED_ZONE"]
-						elseif companionData.r.item then
-							tooltipText = ArkInventory.Localise["LDB_COMPANION_RESTRICTED_ITEM"]
-						elseif companionData.r.event then
-							tooltipText = ArkInventory.Localise["LDB_COMPANION_RESTRICTED_EVENT"]
-						else
-							tooltipText = ArkInventory.Localise["LDB_COMPANION_RESTRICTED_UNKNOWN"]
-						end
-						
-						tooltipText = string.format( ArkInventory.Localise["LDB_COMPANION_RESTRICTED"], ORANGE_FONT_COLOR_CODE, tooltipText )
-						
-					end
-					
-					ArkInventory.Lib.Dewdrop:AddLine(
-						"icon", icon,
-						"text", text,
-						"disabled", not companionData.usable[mountType],
-						"tooltipTitle", companionName,
-						"tooltipText", tooltipText,
-						"hasArrow", true,
-						"value", string.format( "%s:%s:%s", companionType, mountType, companionIndex )
-					)
-					
+			local allrandom = true
+			for k, v in pairs( selected ) do
+				if v == true then
+					allrandom = false
+					break
 				end
-				
 			end
+			
+			if allrandom then
+				companionName = string.format( "%s%s%s", GREEN_FONT_COLOR_CODE, companionName, FONT_COLOR_CODE_CLOSE )
+				tooltipText = nil
+			end
+			
+			ArkInventory.Lib.Dewdrop:AddLine(
+				"text", companionName,
+				"tooltipTitle", companionName,
+				"tooltipText", tooltipText,
+				"checked", allrandom,
+				"notClickable", allrandom,
+				"func", function( )
+					for k, v in pairs( selected ) do
+						if v == true then
+							selected[k] = nil
+						end
+					end
+					ArkInventory.LDB.Mounts:Update( )
+				end
+			)
+			
+		end
 		
-			if companionCount > 0 then
-				
-				ArkInventory.Lib.Dewdrop:AddLine( )
-				
-				local companionName = ArkInventory.Localise["RANDOM"]
-				local tooltipText = ArkInventory.Localise["CLICK_TO_SELECT"]
-				local selected = ArkInventory.db.char.option.ldb.mounts[mountType].selected
-				
-				local allrandom = ( ArkInventory.LDB.Companion.GetSelectedCount( selected ) == 0 )
-				if allrandom then
-					companionName = string.format( "%s%s%s", GREEN_FONT_COLOR_CODE, companionName, FONT_COLOR_CODE_CLOSE )
-					tooltipText = nil
-				end
-				
-				ArkInventory.Lib.Dewdrop:AddLine(
-					"text", companionName,
-					"tooltipTitle", companionName,
-					"tooltipText", tooltipText,
-					"checked", allrandom,
-					"notClickable", allrandom,
-					"func", function( )
-						for k, v in pairs( selected ) do
-							if v == true then
-								selected[k] = nil
-							end
-						end
-						ArkInventory.LDB.Mounts:Update( )
-					end
-				)
-				
-				if mountType == "a" then
-					
-					ArkInventory.Lib.Dewdrop:AddLine( )
-					
-					ArkInventory.Lib.Dewdrop:AddLine(
-						"text", ArkInventory.Localise["LDB_MOUNTS_FLYING_DISMOUNT"],
-						"tooltipTitle", ArkInventory.Localise["LDB_MOUNTS_FLYING_DISMOUNT"],
-						"tooltipText", ArkInventory.Localise["LDB_MOUNTS_FLYING_DISMOUNT_TEXT"],
-						"checked", ArkInventory.db.char.option.ldb.mounts.a.dismount,
-						"func", function( )
-							ArkInventory.db.char.option.ldb.mounts.a.dismount = not ArkInventory.db.char.option.ldb.mounts.a.dismount
-						end
-					)
-					
-				end
-				
-			end
+		if companionCount == 0 then
 			
-			if companionCount == 0 then
-				
-				ArkInventory.Lib.Dewdrop:AddLine(
-					"text", ArkInventory.Localise["LDB_COMPANION_NONE"],
-					"disabled", true
-				)
-				
-			end
+			ArkInventory.Lib.Dewdrop:AddLine(
+				"text", ArkInventory.Localise["LDB_COMPANION_NONE"],
+				"disabled", true
+			)
+			
+		end
+		
+		if mountType == "a" then
+			
+			ArkInventory.Lib.Dewdrop:AddLine( )
+			ArkInventory.Lib.Dewdrop:AddLine(
+				"text", ArkInventory.Localise["LDB_MOUNTS_FLYING_USEFORLAND"],
+				"tooltipTitle", ArkInventory.Localise["LDB_MOUNTS_FLYING_USEFORLAND"],
+				"tooltipText", ArkInventory.Localise["LDB_MOUNTS_FLYING_USEFORLAND_TEXT"],
+				"checked", ArkInventory.Global.Me.ldb.mounts.l.useflying,
+				"func", function( )
+					ArkInventory.Global.Me.ldb.mounts.l.useflying = not ArkInventory.Global.Me.ldb.mounts.l.useflying
+				end
+			)
+			
+			ArkInventory.Lib.Dewdrop:AddLine( )
+			ArkInventory.Lib.Dewdrop:AddLine(
+				"text", ArkInventory.Localise["LDB_MOUNTS_FLYING_DISMOUNT"],
+				"tooltipTitle", ArkInventory.Localise["LDB_MOUNTS_FLYING_DISMOUNT"],
+				"tooltipText", ArkInventory.Localise["LDB_MOUNTS_FLYING_DISMOUNT_TEXT"],
+				"checked", ArkInventory.Global.Me.ldb.mounts.a.dismount,
+				"func", function( )
+					ArkInventory.Global.Me.ldb.mounts.a.dismount = not ArkInventory.Global.Me.ldb.mounts.a.dismount
+				end
+			)
 			
 		end
 		
@@ -2570,81 +2950,77 @@ function ArkInventory.MenuMounts( frame, level, value, offset )
 	
 	if ( level == 3 + offset ) and value then
 		
-		if value == "aura" then
-			
-		else
-			
-			local companionType, mountType, companionIndex = string.match( value, "^(.-):(.-):(.-)$" )
-			companionIndex = tonumber( companionIndex )
-			
-			local companionID, companionName, companionSpellID, texture, active = GetCompanionInfo( companionType, companionIndex )
-			
-			local selected = ArkInventory.db.char.option.ldb.mounts[mountType].selected
-			
-			ArkInventory.Lib.Dewdrop:AddLine(
-				"text", companionName,
-				"isTitle", true,
-				"textHeight", 14
-			)
-			
-			ArkInventory.Lib.Dewdrop:AddLine( )
-			
-			ArkInventory.Lib.Dewdrop:AddLine(
-				"text", string.format( "%s%s%s", GREEN_FONT_COLOR_CODE, ArkInventory.Localise["CLICK_TO_SELECT"], FONT_COLOR_CODE_CLOSE ),
-				"tooltipTitle", companionName,
-				"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_SELECT"], companionName ),
-				"checked", selected[companionSpellID] == true,
-				"disabled", selected[companionSpellID] == true,
-				"isRadio", true,
-				"func", function( )
-					selected[companionSpellID] = true
-					ArkInventory.LDB.Mounts:Update( )
-				end
-			)
-	
-			ArkInventory.Lib.Dewdrop:AddLine(
-				"text", string.format( "%s%s%s", RED_FONT_COLOR_CODE, ArkInventory.Localise["CLICK_TO_IGNORE"], FONT_COLOR_CODE_CLOSE ),
-				"tooltipTitle", companionName,
-				"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_IGNORE"], companionName ),
-				"checked", selected[companionSpellID] == false,
-				"disabled", selected[companionSpellID] == false,
-				"isRadio", true,
-				"func", function( )
-					selected[companionSpellID] = false
-					ArkInventory.LDB.Mounts:Update( )
-				end
-			)
-	
-			if selected[companionSpellID] ~= nil then
-				ArkInventory.Lib.Dewdrop:AddLine(
-					"text", string.format( "%s%s%s", HIGHLIGHT_FONT_COLOR_CODE, ArkInventory.Localise["CLICK_TO_DESELECT"], FONT_COLOR_CODE_CLOSE ),
-					"tooltipTitle", companionName,
-					"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_DESELECT"], companionName ),
-					"checked", selected[companionSpellID] == nil,
-					"disabled", selected[companionSpellID] == nil,
-					"isRadio", true,
-					"func", function( )
-						selected[companionSpellID] = nil
-						ArkInventory.LDB.Mounts:Update( )
-					end
-				)
+		local mountType, index = string.match( value, "^(.-):(.-)$" )
+		index = tonumber( index )
+		
+		local md = ArkInventory.MountJournal.GetMount( index )
+		local usable = ArkInventory.MountJournal.IsUsable( md.index )
+		local selected = ArkInventory.Global.Me.ldb.mounts[mountType].selected
+		
+		ArkInventory.Lib.Dewdrop:AddLine(
+			"icon", md.icon,
+			"text", md.name,
+			"isTitle", true,
+			"textHeight", 14
+		)
+		
+		ArkInventory.Lib.Dewdrop:AddLine( )
+		
+		ArkInventory.Lib.Dewdrop:AddLine(
+			"text", string.format( "%s%s%s", GREEN_FONT_COLOR_CODE, ArkInventory.Localise["CLICK_TO_SELECT"], FONT_COLOR_CODE_CLOSE ),
+			"tooltipTitle", md.name,
+			"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_SELECT"], md.name ),
+			"checked", selected[md.spell] == true,
+			"disabled", selected[md.spell] == true,
+			"isRadio", true,
+			"func", function( )
+				selected[md.spell] = true
+				ArkInventory.LDB.Mounts:Update( )
 			end
-			
-			ArkInventory.Lib.Dewdrop:AddLine( )
-			
+		)
+
+		ArkInventory.Lib.Dewdrop:AddLine(
+			"text", string.format( "%s%s%s", RED_FONT_COLOR_CODE, ArkInventory.Localise["CLICK_TO_IGNORE"], FONT_COLOR_CODE_CLOSE ),
+			"tooltipTitle", md.name,
+			"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_IGNORE"], md.name ),
+			"checked", selected[md.spell] == false,
+			"disabled", selected[md.spell] == false,
+			"isRadio", true,
+			"func", function( )
+				selected[md.spell] = false
+				ArkInventory.LDB.Mounts:Update( )
+			end
+		)
+
+		if selected[md.spell] ~= nil then
 			ArkInventory.Lib.Dewdrop:AddLine(
-				"text", ArkInventory.Localise["LDB_MOUNTS_SUMMON"],
-				"tooltipTitle", companionName,
-				"tooltipText", ArkInventory.Localise["LDB_MOUNTS_SUMMON"],
+				"text", string.format( "%s%s%s", HIGHLIGHT_FONT_COLOR_CODE, ArkInventory.Localise["CLICK_TO_DESELECT"], FONT_COLOR_CODE_CLOSE ),
+				"tooltipTitle", md.name,
+				"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_DESELECT"], md.name ),
+				"checked", selected[md.spell] == nil,
+				"disabled", selected[md.spell] == nil,
+				"isRadio", true,
 				"func", function( )
-					CallCompanion( companionType, companionIndex )
+					selected[md.spell] = nil
+					ArkInventory.LDB.Mounts:Update( )
 				end
 			)
-			
 		end
 		
+		ArkInventory.Lib.Dewdrop:AddLine( )
+		
+		ArkInventory.Lib.Dewdrop:AddLine(
+			"text", ArkInventory.Localise["LDB_MOUNTS_SUMMON"],
+			"tooltipTitle", md.name,
+			"tooltipText", ArkInventory.Localise["LDB_MOUNTS_SUMMON"],
+			"disabled", not usable,
+			"func", function( )
+				ArkInventory.MountJournal.Summon( index )
+			end
+		)
+		
 	end
-
+	
 end
 
 function ArkInventory.MenuLDBMountsOpen( frame )
@@ -2713,19 +3089,19 @@ function ArkInventory.MenuPets( frame, level, value, offset )
 	
 	assert( frame, "code error: frame argument is missing" )
 	
-	local selected = ArkInventory.db.char.option.ldb.pets.selected
+	local selected = ArkInventory.Global.Me.ldb.pets.selected
 	
 	--ArkInventory.Output( level, " / ", offset, " / ", value )
 	
 	if ( level == offset + 1 ) and ( ( offset == 0 ) or ( value and ( value == "INSERT_LOCATION_MENU" ) ) ) then
 		
-		local n = ArkInventory.Lib.Pet:NumPets( )
+		local n = ArkInventory.PetJournal.GetCount( )
 		
 		if n > 0 then
-		
+			
 			for i = 1, C_PetJournal.GetNumPetTypes( ) do
 				ArkInventory.Lib.Dewdrop:AddLine(
-					"text", _G["BATTLE_PET_NAME_" .. i],
+					"text", ArkInventory.PetJournal.PetTypeName( i ),
 					"hasArrow", true,
 					"value", string.format( "PETTYPE_%s", i )
 				)
@@ -2736,18 +3112,25 @@ function ArkInventory.MenuPets( frame, level, value, offset )
 			local companionName = ArkInventory.Localise["RANDOM"]
 			local tooltipText = ArkInventory.Localise["CLICK_TO_SELECT"]
 			
-			local checked = ( ArkInventory.LDB.Companion.GetSelectedCount( selected ) == 0 )
-			if checked then
+			local allrandom = true
+			for k, v in pairs( selected ) do
+				if v == true then
+					allrandom = false
+					break
+				end
+			end
+			
+			if allrandom then
 				companionName = string.format( "%s%s", GREEN_FONT_COLOR_CODE, companionName )
 				tooltipText = nil
 			end
-				
+			
 			ArkInventory.Lib.Dewdrop:AddLine(
 				"text", companionName,
 				"tooltipTitle", companionName,
 				"tooltipText", tooltipText,
-				"checked", checked,
-				"notClickable", checked,
+				"checked", allrandom,
+				"notClickable", allrandom,
 				"func", function( )
 					for k, v in pairs( selected ) do
 						if v == true then
@@ -2778,40 +3161,18 @@ function ArkInventory.MenuPets( frame, level, value, offset )
 		if petType0 then
 			
 			petType0 = tonumber( petType0 )
+			local species = -1
 			
-			for _, petID in ArkInventory.Lib.Pet:IteratePetIDs( ) do
+			for _, pd in ArkInventory.PetJournal.Iterate( ) do
 				
-				local speciesID, customName, level, xp, maxXp, displayID, isFavorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique = C_PetJournal.GetPetInfoByPetID( petID )
-				
-				if petType == petType0 then
+				if ( pd.sd.petType == petType0 ) and ( species ~= pd.sd.speciesID ) then
 					
-					if customName and customName ~= "" then
-						name = string.format( "%s (%s)", name, customName )
-					end
-					
-					--companionCount = companionCount + 1
-					
-					local text = name
-					local tooltipText = ""
-					local icon = ""
-					
-					if selected[petID] == true then
-						icon = ArkInventory.Const.Texture.Yes
-						text = string.format( "%s%s|r", GREEN_FONT_COLOR_CODE, name )
-					elseif selected[petID] == false then
-						icon = ArkInventory.Const.Texture.No
-						text = string.format( "%s%s|r", RED_FONT_COLOR_CODE, name )
-					else
-						-- nil
-					end
+					species = pd.sd.speciesID
 					
 					ArkInventory.Lib.Dewdrop:AddLine(
-						"icon", icon,
-						"text", text,
-						"tooltipTitle", name,
-						"tooltipText", tooltipText,
+						"text", pd.sd.name,
 						"hasArrow", true,
-						"value", string.format( "PETID_%s", petID )
+						"value", string.format( "PETSPECIES_%s", pd.sd.speciesID )
 					)
 				
 				end
@@ -2824,19 +3185,75 @@ function ArkInventory.MenuPets( frame, level, value, offset )
 		
 	if ( level == offset + 3 ) and value then
 		
+		local speciesID = string.match( value, "^PETSPECIES_(.+)$" )
+		
+		if speciesID then
+			
+			speciesID = tonumber( speciesID )
+			local sd = ArkInventory.PetJournal.GetSpeciesInfo( speciesID )
+			
+			if sd then
+				
+				ArkInventory.Lib.Dewdrop:AddLine(
+					"icon", sd.icon,
+					"text", sd.name,
+					"isTitle", true,
+					"textHeight", 14
+				)
+				
+				ArkInventory.Lib.Dewdrop:AddLine( )
+				
+				for _, pd in ArkInventory.PetJournal.Iterate( ) do
+					
+					if ( pd.sd.speciesID == sd.speciesID ) then
+						
+						local c = select( 5, ArkInventory.GetItemQualityColor( pd.rarity ) )
+						local name = string.format( "%s%s|r", c, sd.name )
+						
+						if pd.cn and pd.cn ~= "" then
+							name = string.format( "%s (%s)", name, pd.cn )
+						end
+						
+						name = string.format( "%s [%s]", name, pd.level )
+						
+						local icon = ""
+						
+						if selected[pd.guid] == true then
+							icon = ArkInventory.Const.Texture.Yes
+						elseif selected[pd.guid] == false then
+							icon = ArkInventory.Const.Texture.No
+						end
+						
+						ArkInventory.Lib.Dewdrop:AddLine(
+							"icon", icon,
+							"text", name,
+							"tooltipTitle", name,
+							"hasArrow", true,
+							"value", string.format( "PETID_%s", pd.guid )
+						)
+					
+					end
+					
+				end
+				
+			end
+		
+		end
+		
+	end
+		
+	if ( level == offset + 4 ) and value then
+		
 		local petID = string.match( value, "^PETID_(.+)$" )
 		
 		if petID then
 			
-			local _, customName, _, _, _, _, _, name = C_PetJournal.GetPetInfoByPetID( petID )
-			if customName and customName ~= "" then
-				name = string.format( "%s (%s)", name, customName )
-			end
+			local pd = ArkInventory.PetJournal.GetPet( petID )
 			
-			local selected = ArkInventory.db.char.option.ldb.pets.selected
+			local selected = ArkInventory.Global.Me.ldb.pets.selected
 			
 			ArkInventory.Lib.Dewdrop:AddLine(
-				"text", name,
+				"text", pd.fullName,
 				"isTitle", true,
 				"textHeight", 14
 			)
@@ -2845,38 +3262,38 @@ function ArkInventory.MenuPets( frame, level, value, offset )
 			
 			ArkInventory.Lib.Dewdrop:AddLine(
 				"text", string.format( "%s%s%s", GREEN_FONT_COLOR_CODE, ArkInventory.Localise["CLICK_TO_SELECT"], FONT_COLOR_CODE_CLOSE ),
-				"tooltipTitle", name,
-				"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_SELECT"], name ),
-				"checked", selected[petID] == true,
-				"disabled", selected[petID] == true,
+				"tooltipTitle", pd.fullName,
+				"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_SELECT"], pd.fullName ),
+				"checked", selected[pd.guid] == true,
+				"disabled", selected[pd.guid] == true,
 				"isRadio", true,
 				"func", function( )
-					selected[petID] = true
+					selected[pd.guid] = true
 					ArkInventory.LDB.Pets:Update( )
 				end
 			)
 	
 			ArkInventory.Lib.Dewdrop:AddLine(
 				"text", string.format( "%s%s%s", RED_FONT_COLOR_CODE, ArkInventory.Localise["CLICK_TO_IGNORE"], FONT_COLOR_CODE_CLOSE ),
-				"tooltipTitle", name,
-				"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_IGNORE"], name ),
-				"checked", selected[petID] == false,
-				"disabled", selected[petID] == false,
+				"tooltipTitle", pd.fullName,
+				"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_IGNORE"], pd.fullName ),
+				"checked", selected[pd.guid] == false,
+				"disabled", selected[pd.guid] == false,
 				"isRadio", true,
 				"func", function( )
-					selected[petID] = false
+					selected[pd.guid] = false
 					ArkInventory.LDB.Pets:Update( )
 				end
 			)
 			
-			if selected[petID] ~= nil then
+			if selected[pd.guid] ~= nil then
 				ArkInventory.Lib.Dewdrop:AddLine(
 					"text", string.format( "%s%s%s", HIGHLIGHT_FONT_COLOR_CODE, ArkInventory.Localise["CLICK_TO_DESELECT"], FONT_COLOR_CODE_CLOSE ),
-					"tooltipTitle", name,
-					"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_DESELECT"], name ),
+					"tooltipTitle", pd.fullName,
+					"tooltipText", string.format( ArkInventory.Localise["LDB_COMPANION_DESELECT"], pd.fullName ),
 					"isRadio", true,
 					"func", function( )
-						selected[petID] = nil
+						selected[pd.guid] = nil
 						ArkInventory.LDB.Pets:Update( )
 					end
 				)
@@ -2885,18 +3302,18 @@ function ArkInventory.MenuPets( frame, level, value, offset )
 			ArkInventory.Lib.Dewdrop:AddLine( )
 			
 			local txt = BATTLE_PET_SUMMON
-			local activeID = C_PetJournal.GetSummonedPetGUID( )
-			if activeID and activeID == petID then
+			local active = ArkInventory.PetJournal.GetCurrent( )
+			if active and active == pd.guid then
 				txt = PET_ACTION_DISMISS
 			end
 			
 			ArkInventory.Lib.Dewdrop:AddLine(
 				"text", txt,
-				"tooltipTitle", name,
+				"tooltipTitle", pd.fullName,
 				"tooltipText", BATTLE_PETS_SUMMON_TOOLTIP,
-				"disabled", not C_PetJournal.PetIsSummonable( petID ),
+				"disabled", not ArkInventory.PetJournal.CanSummon( pd.guid ),
 				"func", function( )
-					C_PetJournal.SummonPetByGUID( petID )
+					ArkInventory.PetJournal.Summon( pd.guid )
 				end
 			)
 			
@@ -2968,9 +3385,10 @@ function ArkInventory.MenuLDBPetsOpen( frame )
 	
 end
 
-function ArkInventory.MenuBattlePet( frame, petID )
+function ArkInventory.MenuItemPetJournal( frame, index )
 	
 	assert( frame, "code error: frame argument is missing" )
+	assert( index, "code error: index argument is missing" )
 
 	if ArkInventory.Lib.Dewdrop:IsOpen( frame ) then
 	
@@ -2993,59 +3411,57 @@ function ArkInventory.MenuBattlePet( frame, petID )
 			"relativePoint", rp,
 			"children", function( level, value )
 				
+				local pd = ArkInventory.PetJournal.GetPet( index )
+				
+				if pd then
+					
+					--ArkInventory.Output( pd.fullName, " / ", pd.rarity, " / ", pd.link )
+
 				if ( level == 1 ) then
 					
-					local speciesID, customName, level, xp, maxXp, displayID, isFavorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique = C_PetJournal.GetPetInfoByPetID( petID )
-					local health, maxHealth, attack, speed, rarity = C_PetJournal.GetPetStats( petID )
-					
-					rarity = ( rarity and ( rarity - 1 ) ) or 1
-					
-					--name = string.format( "%s%s|r", select( 5, ArkInventory.GetItemQualityColor( rarity ) ), name )
-					if customName then
-						name = string.format( "%s (%s)", name, customName )
-					end
+					--name = string.format( "%s%s|r", select( 5, ArkInventory.GetItemQualityColor( pd.rarity ) ), pd.fullName )
 					
 					ArkInventory.Lib.Dewdrop:AddLine(
-						"text", name,
+						"text", pd.fullName,
 						"isTitle", true,
+						"icon", pd.sd.icon,
 						"textHeight", 14
 					)
 					
 					ArkInventory.Lib.Dewdrop:AddLine( )
 					
-					local isRevoked = C_PetJournal.PetIsRevoked( petID )
-					local isLockedForConvert = C_PetJournal.PetIsLockedForConvert( petID )
+					local isRevoked = ArkInventory.PetJournal.IsRevoked( pd.guid )
+					local isLockedForConvert = ArkInventory.PetJournal.IsLockedForConvert( pd.guid )
 					
 					if ( not isRevoked ) and ( not isLockedForConvert ) then
 						
 						local txt = BATTLE_PET_SUMMON
-						if ( C_PetJournal.GetSummonedPetGUID( ) == petID ) then
+						if ( ArkInventory.PetJournal.GetCurrent( ) == pd.guid ) then
 							txt = PET_DISMISS
 						end
 						
 						-- summon / dismiss
 						ArkInventory.Lib.Dewdrop:AddLine(
 							"text", txt,
-							"disabled", not C_PetJournal.PetIsSummonable( petID ),
+							"disabled", not ArkInventory.PetJournal.CanSummon( pd.guid ),
 							"closeWhenClicked", true,
 							"func", function( info )
-								C_PetJournal.SummonPetByGUID( petID )
+								ArkInventory.PetJournal.Summon( pd.guid )
 							end
 						)
 						
 						-- rename
 						ArkInventory.Lib.Dewdrop:AddLine(
 							"text", BATTLE_PET_RENAME,
-							"disabled", not C_PetJournal.IsJournalUnlocked( ),
+							"disabled", not ArkInventory.PetJournal.JournalIsReady( ),
 							"closeWhenClicked", true,
 							"func", function( info )
-								StaticPopup_Show( "BATTLE_PET_RENAME", nil, nil, petID )
+								ArkInventory.Lib.StaticDialog:Spawn( "BATTLE_PET_RENAME", pd.guid )
 							end
 						)
 						
 						-- enable / disable favourite
-						local isFavorite = C_PetJournal.PetIsFavorite( petID )
-						if isFavorite then
+						if pd.fav then
 							txt = BATTLE_PET_UNFAVORITE
 						else
 							txt = BATTLE_PET_FAVORITE
@@ -3053,24 +3469,24 @@ function ArkInventory.MenuBattlePet( frame, petID )
 						
 						ArkInventory.Lib.Dewdrop:AddLine(
 							"text", txt,
-							"disabled", not C_PetJournal.IsJournalUnlocked( ),
+							"disabled", not ArkInventory.PetJournal.JournalIsReady( ),
 							"closeWhenClicked", true,
 							"func", function( info )
-								if isFavorite then
-									C_PetJournal.SetFavorite( petID, 0 )
+								if pd.fav then
+									ArkInventory.PetJournal.SetFavorite( pd.guid, 0 )
 								else
-									C_PetJournal.SetFavorite( petID, 1 )
+									ArkInventory.PetJournal.SetFavorite( pd.guid, 1 )
 								end
 							end
 						)
 						
 						-- release
-						if C_PetJournal.PetCanBeReleased( petID ) then
+						if ArkInventory.PetJournal.CanRelease( pd.guid ) then
 							
 							txt = nil
-							if C_PetBattles.IsInBattle( ) then
+							if ArkInventory.PetJournal.InBattle( ) then
 								txt2 = "in battle"
-							elseif C_PetJournal.PetIsSlotted( petID ) then
+							elseif ArkInventory.PetJournal.IsSlotted( pd.guid ) then
 								txt = "slotted"
 							end
 							
@@ -3078,45 +3494,31 @@ function ArkInventory.MenuBattlePet( frame, petID )
 								"text", BATTLE_PET_RELEASE,
 								"tooltipTitle", BATTLE_PET_RELEASE,
 								"tooltipText", txt,
-								"disabled", C_PetBattles.IsInBattle( ) or C_PetJournal.PetIsSlotted( petID ),
+								"disabled", ArkInventory.PetJournal.InBattle( ) or ArkInventory.PetJournal.IsSlotted( pd.guid ),
 								"closeWhenClicked", true,
 								"func", function( info )
-									
-									local speciesID, customName, level, xp, maxXp, displayID, isFavorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique = C_PetJournal.GetPetInfoByPetID( petID )
-									local health, maxHealth, attack, speed, rarity = C_PetJournal.GetPetStats( petID )
-									local qd = ""
-									
-									if isWild and canBattle then
-										qd = _G["BATTLE_PET_BREED_QUALITY" .. rarity]
-										rarity = ( rarity and ( rarity - 1 ) ) or 1
-										qd = string.format( ", %s%s|r", select( 5, ArkInventory.GetItemQualityColor( rarity ) ), qd )
-									end
-									
-									local release = string.format( "%s|r, %s %d%s", name, LEVEL, level, qd )
-									
-									StaticPopup_Show( "BATTLE_PET_RELEASE", release, nil, petID )
-									
+									ArkInventory.Lib.StaticDialog:Spawn( "BATTLE_PET_RELEASE", pd.guid )
 								end
 							)
 						end
 						
 						-- cage
-						if C_PetJournal.PetIsTradable( petID ) then
+						if ArkInventory.PetJournal.CanTrade( pd.guid ) then
 							
 							txt = BATTLE_PET_PUT_IN_CAGE
 							
-							if C_PetJournal.PetIsSlotted( petID ) then
+							if ArkInventory.PetJournal.IsSlotted( pd.guid ) then
 								txt = BATTLE_PET_PUT_IN_CAGE_SLOTTED
-							elseif C_PetJournal.PetIsHurt( petID ) then
+							elseif ArkInventory.PetJournal.IsHurt( pd.guid ) then
 								txt = BATTLE_PET_PUT_IN_CAGE_HEALTH
 							end
 							
 							ArkInventory.Lib.Dewdrop:AddLine(
 								"text", txt,
-								"disabled", C_PetJournal.PetIsSlotted( petID ) or C_PetJournal.PetIsHurt( petID ),
+								"disabled", ArkInventory.PetJournal.IsSlotted( pd.guid ) or ArkInventory.PetJournal.IsHurt( pd.guid ),
 								"closeWhenClicked", true,
 								"func", function( info )
-									StaticPopup_Show( "BATTLE_PET_PUT_IN_CAGE", nil, nil, petID )
+									ArkInventory.Lib.StaticDialog:Spawn( "BATTLE_PET_PUT_IN_CAGE", pd.guid )
 								end
 							)
 						end
@@ -3125,13 +3527,23 @@ function ArkInventory.MenuBattlePet( frame, petID )
 					
 				end
 				
+				else
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"text", "pet data not found",
+						"tooltipTitle", "error",
+						"tooltipText", "pet data not found",
+						"disabled", true
+					)
+
+				end
 				
-				if level == 1 then
+				if ( level == 1 ) then
 					
 					ArkInventory.Lib.Dewdrop:AddLine( )
 					
 					ArkInventory.Lib.Dewdrop:AddLine(
-						"text", CANCEL,
+						"text", ArkInventory.Localise["CLOSE_MENU"],
 						"closeWhenClicked", true
 					)
 					
@@ -3144,3 +3556,173 @@ function ArkInventory.MenuBattlePet( frame, petID )
 	
 end
 
+function ArkInventory.MenuItemMountJournal( frame, index )
+	
+	assert( frame, "code error: frame argument is missing" )
+	assert( index, "code error: index argument is missing" )
+
+	if ArkInventory.Lib.Dewdrop:IsOpen( frame ) then
+	
+		ArkInventory.Lib.Dewdrop:Close( )
+	
+	else
+
+		local x, p, rp
+		x = frame:GetLeft( ) + ( frame:GetRight( ) - frame:GetLeft( ) ) / 2
+		if ( x >= ( GetScreenWidth( ) / 2 ) ) then
+			p = "TOPRIGHT"
+			rp = "BOTTOMLEFT"
+		else
+			p = "TOPLEFT"
+			rp = "BOTTOMRIGHT"
+		end
+		
+		ArkInventory.Lib.Dewdrop:Open( frame,
+			"point", p,
+			"relativePoint", rp,
+			"children", function( level, value )
+				
+				local md = ArkInventory.MountJournal.GetMount( index )
+				
+				if md then
+					
+					if ( level == 1 ) then
+						
+						--name = string.format( "%s%s|r", select( 5, ArkInventory.GetItemQualityColor( pd.rarity ) ), pd.fullName )
+						
+						ArkInventory.Lib.Dewdrop:AddLine(
+							"text", md.name,
+							"isTitle", true,
+							"icon", md.icon,
+							"textHeight", 14
+						)
+						
+						ArkInventory.Lib.Dewdrop:AddLine( )
+						
+						-- enable / disable favourite
+						if md.fav then
+							txt = BATTLE_PET_UNFAVORITE
+						else
+							txt = BATTLE_PET_FAVORITE
+						end
+						
+						ArkInventory.Lib.Dewdrop:AddLine(
+							"text", txt,
+							"disabled", not ArkInventory.PetJournal.JournalIsReady( ),
+							"closeWhenClicked", true,
+							"func", function( info )
+								if md.fav then
+									ArkInventory.MountJournal.SetFavorite( index, false )
+								else
+									ArkInventory.MountJournal.SetFavorite( index, true )
+								end
+							end
+						)
+						
+					end
+					
+				else
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"text", "mount data not found",
+						"tooltipTitle", "error",
+						"tooltipText", "mount data not found",
+						"disabled", true
+					)
+
+				end
+				
+				if ( level == 1 ) then
+					
+					ArkInventory.Lib.Dewdrop:AddLine( )
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"text", ArkInventory.Localise["CLOSE_MENU"],
+						"closeWhenClicked", true
+					)
+					
+				end
+				
+			end
+		)
+
+	end
+	
+end
+
+function ArkInventory.MenuRestackOpen( frame )
+	
+	assert( frame, "code error: frame argument is missing" )
+
+	if ArkInventory.Lib.Dewdrop:IsOpen( frame ) then
+		
+		ArkInventory.Lib.Dewdrop:Close( )
+		
+	else
+		
+		local x, p, rp
+		x = frame:GetBottom( ) + ( frame:GetTop( ) - frame:GetBottom( ) ) / 2
+		if ( x >= ( GetScreenHeight( ) / 2 ) ) then
+			p = "TOPLEFT"
+			rp = "BOTTOMLEFT"
+		else
+			p = "BOTTOMLEFT"
+			rp = "TOPLEFT"
+		end
+	
+		ArkInventory.Lib.Dewdrop:Open( frame,
+			"point", p,
+			"relativePoint", rp,
+			"children", function( level, value )
+				
+				if level == 1 then
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"icon", ArkInventory.Const.Actions[22].Texture,
+						"text", ArkInventory.Localise["RESTACK"],
+						"isTitle", true,
+						"textHeight", 14
+					)
+					
+					ArkInventory.Lib.Dewdrop:AddLine( )
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"text", REAGENTBANK_DEPOSIT,
+						"tooltipTitle", REAGENTBANK_DEPOSIT,
+						"closeWhenClicked", true,
+						"disabled", ArkInventory.Global.Mode.Edit or not ArkInventory.Global.Mode.Bank,
+						"func", function( )
+							PlaySound( "igMainMenuOption" )
+							DepositReagentBank( )
+						end
+					)
+					
+					ArkInventory.Lib.Dewdrop:AddLine( )
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"text", REVERSE_CLEAN_UP_BAGS_TEXT,
+						"tooltipTitle", REVERSE_CLEAN_UP_BAGS_TEXT,
+						"tooltipText", OPTION_TOOLTIP_REVERSE_CLEAN_UP_BAGS,
+						"checked", GetSortBagsRightToLeft( ),
+						"closeWhenClicked", true,
+						"func", function( )
+							SetSortBagsRightToLeft( not GetSortBagsRightToLeft( ) )
+						end
+					)
+					
+					ArkInventory.Lib.Dewdrop:AddLine( )
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"text", ArkInventory.Localise["CLOSE_MENU"],
+						"closeWhenClicked", true
+					)
+					
+				end
+				
+			end
+			
+		)
+	
+	end
+	
+end

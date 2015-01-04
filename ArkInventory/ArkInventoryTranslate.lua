@@ -1,4 +1,4 @@
-local _G = _G
+﻿local _G = _G
 local select = _G.select
 local pairs = _G.pairs
 local ipairs = _G.ipairs
@@ -353,10 +353,10 @@ frame:SetScript( "OnUpdate",
 				
 				ArkInventory.TranslationsLoaded = true
 				
-				ArkInventory.ItemCacheClear( )
-				ArkInventory.ScanLocation( )
-				ArkInventory.MountDataUpdate( )
 				ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
+				ArkInventory.ItemCacheClear( )
+				--ArkInventory.ScanLocation( )
+				ArkInventory.PlayerInfoSet( )
 				
 			end
 			

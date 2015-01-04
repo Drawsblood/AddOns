@@ -275,7 +275,7 @@ end
 local function safestr(s) return s or "" end
 
 function SplitChatMessage(frame, event, ...)
-  local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15 = ...
+  local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16 = ...
 
   ClearChatSections(SplitMessageOrg)
   ClearChatSections(SplitMessage)
@@ -283,6 +283,11 @@ function SplitChatMessage(frame, event, ...)
   if (strsub((event or ""), 1, 8) == "CHAT_MSG") then
     local type = strsub(event, 10)
     local info = _G.ChatTypeInfo[type]
+
+    if (arg16) then
+      -- hiding sender in letterbox: do NOT even show in chat window (only shows in cinematic frame)
+      return true;
+    end
 
     local s = SplitMessageOrg
 
@@ -299,7 +304,7 @@ function SplitChatMessage(frame, event, ...)
     }
 
     if CHAT_PLAYER_GUIDS then
-      if s.GUID and s.GUID:len() > 0 then
+      if s.GUID and s.GUID:len() > 0 and s.GUID ~= "0000000000000000" then
         s.GUIDINFO = {
           _G.GetPlayerInfoByGUID(s.GUID)
         }
@@ -308,14 +313,14 @@ function SplitChatMessage(frame, event, ...)
     --@end-debug@]===]
 
     --        if NEW_CHATFILTERS then
-    local kill, newarg1, newarg2, newarg3, newarg4, newarg5, newarg6, newarg7, newarg8, newarg9, newarg10, newarg11, newarg12, newarg13, newarg14, newarg15 =
-    RunMessageEventFilters(frame, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
+    local kill, newarg1, newarg2, newarg3, newarg4, newarg5, newarg6, newarg7, newarg8, newarg9, newarg10, newarg11, newarg12, newarg13, newarg14, newarg15, newarg16 =
+    RunMessageEventFilters(frame, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16)
     if kill then
       return true
     end
     if newarg1 ~= nil then
-      arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15 =
-      newarg1, newarg2, newarg3, newarg4, newarg5, newarg6, newarg7, newarg8, newarg9, newarg10, newarg11, newarg12, newarg13, newarg14, newarg15
+      arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,arg16 =
+      newarg1, newarg2, newarg3, newarg4, newarg5, newarg6, newarg7, newarg8, newarg9, newarg10, newarg11, newarg12, newarg13, newarg14, newarg15, newarg16
     end
     --        else
     --            local kill, newarg1 = RunOldMessageEventFilters(event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)
@@ -401,13 +406,20 @@ function SplitChatMessage(frame, event, ...)
 
 
     local arg2 = safestr(arg2)
-    if strlen(arg2) > 0 then
+    if strlen(arg2) > 0 then 
 
       if (strsub(type, 1, 7) == "MONSTER" or type == "RAID_BOSS_EMOTE" or
               type == "CHANNEL_NOTICE" or type == "CHANNEL_NOTICE_USER") then
       -- no link
         s.NONPLAYER = arg2
       else
+          --ambiguate guild chat names
+          if (type == "GUILD") then
+              arg2 = _G.Ambiguate(arg2, "guild")
+          else
+              arg2 = _G.Ambiguate(arg2, "none")
+          end
+
         local plr, svr = arg2:match("([^%-]+)%-?(.*)")
 
         s.pP = "["
@@ -586,9 +598,23 @@ function SplitChatMessage(frame, event, ...)
         --
         --				else
         --					s.MESSAGE = string.gsub(s.MESSAGE, tag, "");
+        elseif ( _G.GROUP_TAG_LIST[term] ) then
+            local groupIndex = _G.GROUP_TAG_LIST[term];
+            local groupList = "[";
+            for i=1, _G.GetNumGroupMembers() do
+                local name, rank, subgroup, level, class, classFileName = _G.GetRaidRosterInfo(i);
+                if ( name and subgroup == groupIndex ) then
+                    local r,g,b = GetClassGetColor(classFileName);
+                    name = string.format("\124cff%.2x%.2x%.2x%s\124r", r*255, g*255, b*255, name);
+                    groupList = groupList..(groupList == "[" and "" or _G.PLAYER_LIST_DELIMITER)..name;
+                end
+            end
+            groupList = groupList.."]";
+            s.MESSAGE = string.gsub(s.MESSAGE, tag, groupList);
         end
       end
     end
+
 
     if type == "SYSTEM" or strsub(type, 1, 11) == "ACHIEVEMENT" or strsub(type, 1, 11) == "TARGETICONS" or strsub(type, 1, 18) == "GUILD_ACHIEVEMENT" then
       if strsub(type, 1, 11) == "ACHIEVEMENT" or strsub(type, 1, 18) == "GUILD_ACHIEVEMENT" then
@@ -618,7 +644,7 @@ function SplitChatMessage(frame, event, ...)
     end
 
     s.ACCESSID = _G.ChatHistory_GetAccessID(chatGroup, chatTarget);
-    s.TYPEID = _G.ChatHistory_GetAccessID(type, chatTarget);
+    s.TYPEID = _G.ChatHistory_GetAccessID(type, chatTarget, arg12 or arg13);
 
     s.ORG = SplitMessageOrg
 

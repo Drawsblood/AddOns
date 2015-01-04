@@ -1,0 +1,16 @@
+## Interface: 60000
+## X-Curse-Packaged-Version: v10
+## X-Curse-Project-Name: OpenAll
+## X-Curse-Project-ID: openall
+## X-Curse-Repository-ID: wow/openall/mainline
+
+## Title: OpenAll
+## Notes: Open all your mail
+## Author: Kemayo
+## Version: 1
+## X-Category: Mail
+## LoadManagers: SupplyAndDemand, AddonLoader
+## X-S&D-AtMail: true
+## X-LoadOn-Mailbox: true
+
+OpenAll.lua

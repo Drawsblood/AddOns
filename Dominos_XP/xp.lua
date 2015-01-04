@@ -1,5 +1,5 @@
 --[[
-        xp.lua
+		xp.lua
 		The dominos xp bar
 --]]
 
@@ -11,13 +11,13 @@
 	modification, are permitted provided that the following conditions are met:
 
 		* Redistributions of source code must retain the above copyright notice,
-		  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 		* Redistributions in binary form must reproduce the above copyright
-		  notice, this list of conditions and the following disclaimer in the
-		  documentation and/or other materials provided with the distribution.
+		notice, this list of conditions and the following disclaimer in the
+		documentation and/or other materials provided with the distribution.
 		* Neither the name of the author nor the names of its contributors may
-		  be used to endorse or promote products derived from this software
-		  without specific prior written permission.
+		be used to endorse or promote products derived from this software
+		without specific prior written permission.
 
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 	AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -33,6 +33,7 @@
 --]]
 
 local REP_FORMAT = '%s:  %s / %s (%s)'
+local FRIEND_ID_FACTION_COLOR_INDEX = 5 --color index to use for friend factions
 local L = LibStub('AceLocale-3.0'):GetLocale('Dominos-XP')
 
 --taken from http://lua-users.org/wiki/FormattingNumbers
@@ -59,15 +60,15 @@ local textEnv = {
 
 --[[ Module Stuff ]]--
 
-local DXP = Dominos:NewModule('xp')
+local XpBarController = Dominos:NewModule('XpBar')
 local XP
 
-function DXP:Load()
+function XpBarController:Load()
 	self.frame = XP:New()
 	self.frame:SetFrameStrata('BACKGROUND')
 end
 
-function DXP:Unload()
+function XpBarController:Unload()
 	self.frame:Free()
 end
 
@@ -103,26 +104,30 @@ function XP:GetDefaults()
 end
 
 function XP:Load()
-	local bg = self:CreateTexture(nil, 'BACKGROUND')
-	bg:SetAllPoints(self)
+	-- make sure textures are created on the header frame
+	-- since that controls show states, etc
+	local parent = self.header
+
+	local bg = parent:CreateTexture(nil, 'BACKGROUND')
+	bg:SetAllPoints(parent)
 	if bg.SetHorizTile then
 		bg:SetHorizTile(false)
 	end
 	self.bg = bg
 
-	local rest = CreateFrame('StatusBar', nil, self)
+	local rest = CreateFrame('StatusBar', nil, parent)
 	rest:EnableMouse(false)
-	rest:SetAllPoints(self)
+	rest:SetAllPoints(parent)
 	self.rest = rest
 
 	local value = CreateFrame('StatusBar', nil, rest)
 	value:EnableMouse(false)
-	value:SetAllPoints(self)
+	value:SetAllPoints(parent)
 	self.value = value
 
 	local blank = CreateFrame('StatusBar', nil, value)
 	blank:EnableMouse(false)
-	blank:SetAllPoints(self)
+	blank:SetAllPoints(parent)
 	self.blank = blank
 
 	local text = blank:CreateFontString(nil, 'OVERLAY', 'GameFontHighlight')
@@ -134,7 +139,7 @@ function XP:Load()
 	click:SetScript('OnEnter', function(_, ...) self:OnEnter(...) end)
 	click:SetScript('OnLeave', function(_, ...) self:OnLeave(...) end)
 	click:RegisterForClicks('anyUp')
-	click:SetAllPoints(self)
+	click:SetAllPoints(parent)
 end
 
 function XP:OnClick(button)
@@ -287,7 +292,19 @@ function XP:OnRepEvent(event)
 end
 
 function XP:UpdateReputation()
-	local name, reaction, min, max, value = GetWatchedFactionInfo()
+	local name, reaction, min, max, value, factionID = GetWatchedFactionInfo()
+	local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID)
+
+	if friendID then
+		if nextFriendThreshold then
+			min, max, value = friendThreshold, nextFriendThreshold, friendRep
+		else
+			-- max rank, make it look like a full bar
+			min, max, value = 0, 1, 1;
+		end
+		reaction = FRIEND_ID_FACTION_COLOR_INDEX
+	end
+
 	max = max - min
 	value = value - min
 
@@ -297,14 +314,19 @@ function XP:UpdateReputation()
 
 	self.value:SetMinMaxValues(0, max)
 	self.value:SetValue(value)
-	
+
 	--update statusbar text
 	textEnv.faction = name
 	textEnv.rep = value
 	textEnv.repMax = max
 	textEnv.tnl = max - value
 	textEnv.pct = round(value / max * 100)
-	textEnv.repLevel = _G['FACTION_STANDING_LABEL' .. reaction]
+
+	if friendID then
+		textEnv.repLevel = friendTextLevel
+	else
+		textEnv.repLevel = _G['FACTION_STANDING_LABEL' .. reaction]
+	end
 
 	local getRepText = assert(loadstring(self:GetRepFormat(), "getRepText"))
 	setfenv(getRepText, textEnv)
@@ -320,7 +342,7 @@ end
 
 function XP:GetRepFormat()
 	return self.sets.repFormat or [[
-		return format('%s: %s / %s (%s)', faction, comma(rep), comma(repMax), repLevel) 
+		return format('%s: %s / %s (%s)', faction, comma(rep), comma(repMax), repLevel)
 	]]
 end
 
@@ -341,15 +363,15 @@ function XP:UpdateTexture()
 	local LSM = LibStub('LibSharedMedia-3.0', true)
 
 	local texture = (LSM and LSM:Fetch('statusbar', self.sets.texture)) or DEFAULT_STATUSBAR_TEXTURE
+
 	self.value:SetStatusBarTexture(texture)
-	if self.value:GetStatusBarTexture().SetHorizTile then
-		self.value:GetStatusBarTexture():SetHorizTile(false)
-	end
+	self.value:GetStatusBarTexture():SetHorizTile(true)
+
 	self.rest:SetStatusBarTexture(texture)
-	if self.rest:GetStatusBarTexture().SetHorizTile then
-		self.rest:GetStatusBarTexture():SetHorizTile(false)
-	end
+	self.rest:GetStatusBarTexture():SetHorizTile(true)
+
 	self.bg:SetTexture(texture)
+	self.bg:SetHorizTile(true)
 end
 
 function XP:SetAlwaysShowXP(enable)
@@ -419,6 +441,9 @@ end
 local function AddLayoutPanel(menu)
 	local p = menu:NewPanel(LibStub('AceLocale-3.0'):GetLocale('Dominos-Config').Layout)
 
+	p:NewShowInOverrideUICheckbox()
+	p:NewShowInPetBattleUICheckbox()
+
 	p:NewOpacitySlider()
 	p:NewFadeSlider()
 	p:NewScaleSlider()
@@ -444,7 +469,7 @@ local NUM_ITEMS = 9
 local width, height, offset = 140, 20, 2
 
 local function TextureButton_OnClick(self)
-	DXP.frame:SetTexture(self:GetText())
+	XpBarController.frame:SetTexture(self:GetText())
 	self:GetParent():UpdateList()
 end
 
@@ -476,7 +501,7 @@ end
 local function Panel_UpdateList(self)
 	local SML = LibStub('LibSharedMedia-3.0')
 	local textures = LibStub('LibSharedMedia-3.0'):List('statusbar')
-	local currentTexture = DXP.frame.sets.texture
+	local currentTexture = XpBarController.frame.sets.texture
 
 	local scroll = self.scroll
 	FauxScrollFrame_Update(scroll, #textures, #self.buttons, height + offset)

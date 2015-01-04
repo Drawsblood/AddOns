@@ -15,7 +15,7 @@ Dependencies: AceLibrary
 License: LGPL v2.1
 ]]
 
-local Dewdrop = LibStub:NewLibrary( "ArkDewdrop-3.0", 2 )
+local Dewdrop = LibStub:NewLibrary( "ArkDewdrop-3.0", 3 )
 
 if not Dewdrop then
 	return -- already loaded and no upgrade necessary
@@ -90,6 +90,27 @@ local function InCombat( )
 	end
 	
 end
+
+local function setTexture( o, t, r, g, b, a )
+	
+	if ( not o ) then
+		return
+	end
+	
+	if t == true then
+		o:SetTexture( r, g, b, a )
+	elseif( tonumber( t ) ) then
+		o:SetToFileData( t )
+	else
+		o:SetTexture( t )
+	end
+	
+	if r and g and b then
+		o:SetVertexColor( r, g, b )
+	end
+	
+end
+
 
 
 local CLOSE = "Close"
@@ -292,7 +313,7 @@ end
 -- Underline on mouseover - use a single global underline that we move around, no point in creating lots of copies
 local underlineFrame = CreateFrame( "Frame" )
 underlineFrame.tx = underlineFrame:CreateTexture( )
-underlineFrame.tx:SetTexture( 1, 1, 0.5, 0.75 )
+setTexture(underlineFrame.tx, true, 1, 1, 0.5, 0.75)
 underlineFrame:SetScript( "OnHide",
 	function( self )
 		self:Hide( )
@@ -483,7 +504,7 @@ local function ReleaseButton(level, index)
 --	button.arrow:SetHeight(16)
 --	button.arrow:SetWidth(16)
 	table.remove(level.buttons, index)
-	table.insert(buttons, button)
+	buttons[#buttons + 1] = button
 	for k in pairs(button) do
 		if k ~= 0 and k ~= "text" and k ~= "check" and k ~= "arrow" and k ~= "colorSwatch" and k ~= "highlight" and k ~= "radioHighlight" then
 			button[k] = nil
@@ -585,20 +606,20 @@ local function AcquireButton( level )
 		button:SetFrameStrata("FULLSCREEN_DIALOG")
 		button:SetHeight(16)
 		local highlight = button:CreateTexture(nil, "BACKGROUND")
-		highlight:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+		setTexture(highlight, "Interface\\QuestFrame\\UI-QuestTitleHighlight" )
 		button.highlight = highlight
 		highlight:SetBlendMode("ADD")
 		highlight:SetAllPoints(button)
 		highlight:Hide()
 		local check = button:CreateTexture(nil, "ARTWORK")
 		button.check = check
-		check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+		setTexture(check,"Interface\\Buttons\\UI-CheckBox-Check")
 		check:SetPoint("CENTER", button, "LEFT", 12, 0)
 		check:SetWidth(24)
 		check:SetHeight(24)
 		local radioHighlight = button:CreateTexture(nil, "ARTWORK")
 		button.radioHighlight = radioHighlight
-		radioHighlight:SetTexture("Interface\\Buttons\\UI-RadioButton")
+		setTexture(radioHighlight,"Interface\\Buttons\\UI-RadioButton")
 		radioHighlight:SetAllPoints(check)
 		radioHighlight:SetBlendMode("ADD")
 		radioHighlight:SetTexCoord(0.5, 0.75, 0, 1)
@@ -769,15 +790,15 @@ local function AcquireButton( level )
 		arrow:SetPoint("LEFT", button, "RIGHT", -16, 0)
 		arrow:SetWidth(16)
 		arrow:SetHeight(16)
-		arrow:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
+		setTexture(arrow,"Interface\\ChatFrame\\ChatFrameExpandArrow")
 		local colorSwatch = button:CreateTexture(nil, "ARTWORK")
 		button.colorSwatch = colorSwatch
 		colorSwatch:SetWidth(20)
 		colorSwatch:SetHeight(20)
-		colorSwatch:SetTexture("Interface\\ChatFrame\\ChatFrameColorSwatch")
+		setTexture(colorSwatch,"Interface\\ChatFrame\\ChatFrameColorSwatch")
 		local texture = button:CreateTexture(nil, "OVERLAY")
 		colorSwatch.texture = texture
-		texture:SetTexture("Interface\\Buttons\\WHITE8X8")
+		setTexture(texture,"Interface\\Buttons\\WHITE8X8")
 		texture:SetWidth(11.5)
 		texture:SetHeight(11.5)
 		texture:Show()
@@ -800,7 +821,7 @@ local function AcquireButton( level )
 	button.text:SetPoint("LEFT", button, "LEFT", 24, 0)
 	button:Show()
 	button.level = level
-	table.insert(level.buttons, button)
+	level.buttons[#level.buttons + 1] = button
 	if not level.parented then
 		level.parented = true
 		level:ClearAllPoints()
@@ -1314,7 +1335,7 @@ function Dewdrop:FeedAceOptionsTable(options, difference)
 		if current.num == difference + 1 then
 			break
 		end
-		table.insert(values, current.value)
+		values[#values + 1] = current.value
 		current = levels[current.num - 1]
 	end
 
@@ -1361,7 +1382,7 @@ function Dewdrop:FeedAceOptionsTable(options, difference)
 			return
 		end
 		for k in pairs(options.args) do
-			table.insert(values, k)
+			values[#values + 1] = k
 		end
 		if options.pass then
 			if options.get and options.set then
@@ -1708,7 +1729,7 @@ function Dewdrop:FeedAceOptionsTable(options, difference)
 			if type(k) ~= "number" then
 				indexed = false
 			end
-			table.insert(values, k)
+			values[#values + 1] = k
 		end
 		if not indexed then
 			if not othersort then
@@ -1799,7 +1820,7 @@ function Dewdrop:FeedTable(s, difference)
 		if current.num == difference + 1 then
 			break
 		end
-		table.insert(values, current.value)
+		values[#values + 1] = current.value
 		current = levels[current.num - 1]
 	end
 
@@ -1813,14 +1834,14 @@ function Dewdrop:FeedTable(s, difference)
 
 	if t.subMenu or current.num == 1 then
 		for k in pairs(t.subMenu) do
-			table.insert(values, k)
+			values[#values + 1] = k
 		end
 		table.sort(values)
 		for _,k in ipairs(values) do
 			local argTable = {"value", k}
 			for key, val in pairs(t.subMenu[k]) do
-				table.insert(argTable, key)
-				table.insert(argTable, val)
+				argTable[#argTable + 1] = key
+				argTable[#argTable + 1] = val
 			end
 			self:AddLine(unpack(argTable))
 		end
@@ -1978,13 +1999,13 @@ function OpenSlider(parent)
 
 		local width = editBox:GetWidth()/2 + 10
 		local left = editBox:CreateTexture(nil, "BACKGROUND")
-		left:SetTexture("Interface\\ChatFrame\\UI-ChatInputBorder-Left")
+		setTexture(left,"Interface\\ChatFrame\\UI-ChatInputBorder-Left")
 		left:SetTexCoord(0, width / 256, 0, 1)
 		left:SetWidth(width)
 		left:SetHeight(32)
 		left:SetPoint("LEFT", editBox, "LEFT", -10, 0)
 		local right = editBox:CreateTexture(nil, "BACKGROUND")
-		right:SetTexture("Interface\\ChatFrame\\UI-ChatInputBorder-Right")
+		setTexture(right,"Interface\\ChatFrame\\UI-ChatInputBorder-Right")
 		right:SetTexCoord(1 - width / 256, 1, 0, 1)
 		right:SetWidth(width)
 		right:SetHeight(32)
@@ -2364,13 +2385,13 @@ function OpenEditBox(parent)
 		editBox:SetPoint("CENTER", editBoxFrame, "CENTER", 0, 0)
 
 		local left = editBox:CreateTexture(nil, "BACKGROUND")
-		left:SetTexture("Interface\\ChatFrame\\UI-ChatInputBorder-Left")
+		setTexture(left,"Interface\\ChatFrame\\UI-ChatInputBorder-Left")
 		left:SetTexCoord(0, 100 / 256, 0, 1)
 		left:SetWidth(100)
 		left:SetHeight(32)
 		left:SetPoint("LEFT", editBox, "LEFT", -10, 0)
 		local right = editBox:CreateTexture(nil, "BACKGROUND")
-		right:SetTexture("Interface\\ChatFrame\\UI-ChatInputBorder-Right")
+		setTexture(right,"Interface\\ChatFrame\\UI-ChatInputBorder-Right")
 		right:SetTexCoord(156/256, 1, 0, 1)
 		right:SetWidth(100)
 		right:SetHeight(32)
@@ -3083,7 +3104,7 @@ function Dewdrop:AddLine(...)
 	button.isRadio = not info.notCheckable and info.isRadio
 	if info.isRadio then
 		button.check:Show()
-		button.check:SetTexture(info.checkIcon or "Interface\\Buttons\\UI-RadioButton")
+		setTexture(button.check,info.checkIcon or "Interface\\Buttons\\UI-RadioButton")
 		if button.checked then
 			button.check:SetTexCoord(0.25, 0.5, 0, 1)
 			button.check:SetVertexColor(1, 1, 1, 1)
@@ -3091,12 +3112,12 @@ function Dewdrop:AddLine(...)
 			button.check:SetTexCoord(0, 0.25, 0, 1)
 			button.check:SetVertexColor(1, 1, 1, 0.5)
 		end
-		button.radioHighlight:SetTexture(info.checkIcon or "Interface\\Buttons\\UI-RadioButton")
+		setTexture(button.radioHighlight,info.checkIcon or "Interface\\Buttons\\UI-RadioButton")
 		button.check:SetWidth(16)
 		button.check:SetHeight(16)
 	elseif info.icon then
 		button.check:Show()
-		button.check:SetTexture(info.icon)
+		setTexture(button.check,info.icon)
 		if info.iconWidth and info.iconHeight then
 			button.check:SetWidth(info.iconWidth)
 			button.check:SetHeight(info.iconHeight)
@@ -3117,7 +3138,7 @@ function Dewdrop:AddLine(...)
 			if info.checkIcon then
 				button.check:SetWidth(16)
 				button.check:SetHeight(16)
-				button.check:SetTexture(info.checkIcon)
+				setTexture(button.check,info.checkIcon)
 				if info.checkIcon:find("^Interface\\Icons\\") then
 					button.check:SetTexCoord(0.05, 0.95, 0.05, 0.95)
 				else
@@ -3126,7 +3147,7 @@ function Dewdrop:AddLine(...)
 			else
 				button.check:SetWidth(24)
 				button.check:SetHeight(24)
-				button.check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+				setTexture(button.check,"Interface\\Buttons\\UI-CheckBox-Check")
 				button.check:SetTexCoord(0, 1, 0, 1)
 			end
 			button.check:SetVertexColor(1, 1, 1, 1)
@@ -3528,7 +3549,7 @@ function Dewdrop:error(message, ...)
 			arg[i] = tostring(arg[i])
 		end
 		for i = 1, 10 do
-			table.insert(arg, "nil")
+			arg[#arg + 1] = "nil"
 		end
 		message = message:format(unpack(arg))
 	end

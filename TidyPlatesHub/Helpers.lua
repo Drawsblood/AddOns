@@ -2,22 +2,6 @@
 ----------------------------------
 -- Helpers
 ----------------------------------
-local PrefixList = {
-   ["ALL"] = 1,
-   ["MY"] = 2,
-   ["NO"] = 3,
-   ["CC"] = 4,
-   ["OTHER"] = 5,
-   ["All"] = 1,
-   ["My"] = 2,
-   ["No"] = 3,
-   ["Other"] = 5,
-   ["all"] = 1,
-   ["my"] = 2,
-   ["no"] = 3,
-   ["cc"] = 4,
-   ["other"] = 5,
-}
 
 local function CallForStyleUpdate()
 	for name, theme in pairs(TidyPlatesThemeList) do
@@ -85,20 +69,22 @@ local function ConvertDebuffListTable(source, target, order)
 		local str = temp[index]
 		local item
 		local prefix, suffix
-		prefix, suffix = select(3, string.find( str, "(%w+)[%s%p]*(.*)"))
-		--print(prefix, index, suffix)
-		if prefix then
-			if PrefixList[prefix] then
-				item = suffix
-				-- CONVERT
-				target[item] = PrefixList[prefix]
-			else -- If no prefix is listed, assume 1
-				if suffix and suffix ~= "" then item = prefix.." "..suffix
-				else item = prefix end
-				-- CONVERT
-				target[item] = 1
+		
+		if str then 
+			prefix, suffix = select(3, string.find( str, "(%w+)[%s%p]*(.*)"))
+			if prefix then
+				if TidyPlatesHubPrefixList[prefix] then
+					item = suffix
+					-- CONVERT
+					target[item] = TidyPlatesHubPrefixList[prefix]
+				else -- If no prefix is listed, assume 1
+					if suffix and suffix ~= "" then item = prefix.." "..suffix
+					else item = prefix end
+					-- CONVERT
+					target[item] = 1
+				end
+				if order then order[item] = index end
 			end
-			if order then order[item] = index end
 		end
 	end	
 	

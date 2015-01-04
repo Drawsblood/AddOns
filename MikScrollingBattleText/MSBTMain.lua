@@ -105,7 +105,7 @@ local SPELLID_AUTOSHOT = 75
 -- Spell names.
 local SPELL_BLINK					= GetSkillName(1953)
 local SPELL_BLIZZARD				= GetSkillName(10)
-local SPELL_BLOOD_STRIKE			= GetSkillName(45902)
+local SPELL_BLOOD_STRIKE			= GetSkillName(60945)
 local SPELL_BLOOD_STRIKE_OFF_HAND	= GetSkillName(66215)
 local SPELL_HELLFIRE				= GetSkillName(1949)
 local SPELL_HURRICANE				= GetSkillName(16914)
@@ -858,7 +858,7 @@ local function AuraHandler(parserEvent, currentProfile)
   
   -- Append stack or fade prefix if needed.
   if (not parserEvent.isFade) then
-   if (parserEvent.amount > 1) then eventTypeString = eventTypeString .. "_STACK" end
+   if (parserEvent.isDose) then eventTypeString = eventTypeString .. "_STACK" end
   else
    eventTypeString = eventTypeString .. "_FADE"
   end

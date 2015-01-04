@@ -74,13 +74,14 @@ L["CATEGORY_SYSTEM_EQUIPMENT_ACCOUNTBOUND"] = ( TUTORIAL_TITLE24 and ITEM_ACCOUN
 
 -- ldb
 L["LDB_MOUNTS_TYPE_A"] = BATTLE_PET_NAME_3 or true -- calculated keyword
-L["LDB_MOUNTS_TYPE_X"] = VIDEO_QUALITY_LABEL6 or true -- calculated keyword
 
 
 -- generic words
 L["ACCEPT"] = ACCEPT or true
 L["ADD"] = ADD or true
 L["ALL"] = ALL or true
+L["BAG"] = INVTYPE_BAG or true
+L["BANK"] = BANK or true
 L["AQUATIC"] = BATTLE_PET_NAME_9 or true
 L["BACKGROUND"] = EMBLEM_BACKGROUND or true
 L["BATTLEPET"] = TOOLTIP_BATTLE_PET or true
@@ -99,22 +100,30 @@ L["DELETE"] = DELETE or true
 L["DESCRIPTION"] = QUEST_DESCRIPTION or true
 L["DISABLED"] = ADDON_DISABLED or true
 L["GENERAL"] = GENERAL or true
+L["GUILDBANK"] = GUILD_BANK or true
+L["IGNORE"] = IGNORE or true
 L["ITEMS"] = ITEMS or true
 L["LOCK"] = LOCK or true
+L["MAIL"] = MAIL_LABEL or true
 L["MOUNT"] = MOUNT or true
 L["NAME"] = NAME or true
 L["NEW"] = NEW or true
 L["NO"] = NO or true
 L["NONE"] = NONE or true
+L["OPTIONS"] = GAMEOPTIONS_MENU or true
 L["PET"] = PET or true
 L["REMOVE"] = REMOVE or true
 L["RENAME"] = PET_RENAME or true
+L["REAGENTBANK"] = REAGENT_BANK or true
 L["REPUTATION"] = REPUTATION or true
+L["RESTACK"] = BAG_FILTER_CLEANUP or true
 L["SEARCH"] = SEARCH or true
 L["SPECIAL"] = SPECIAL or true
 L["START"] = START or true
 L["STATUS"] = STATUS or true
 L["TOTAL"] = TOTAL or true
+L["TOY"] = TOY or true
+L["TOYBOX"] = TOY_BOX or true
 L["TRACKING"] = TRACKING or true
 L["UNKNOWN"] = UNKNOWNOBJECT or true
 L["YES"] = YES or true
@@ -139,6 +148,8 @@ L["WOW_TOOLTIP_CLASS"] = string.format( "^%s", string.gsub( ITEM_CLASSES_ALLOWED
 L["PET_BATTLE_BOUND"] = string.format( "%s (%s)", TOOLTIP_BATTLE_PET, ITEM_ACCOUNTBOUND )
 L["PET_COMPANION_BOUND"] = string.format( "%s (%s)", PET, ITEM_ACCOUNTBOUND )
 L["PET_CANNOT_BATTLE"] = string.gsub( BATTLE_PET_CANNOT_BATTLE, "\n", " " )
+L["WOW_TOOLTIP_ITEMUPGRADELEVEL"] = ConvertToCapture( ITEM_UPGRADE_TOOLTIP_FORMAT )
+
 
 
 -- generated from auction house categories

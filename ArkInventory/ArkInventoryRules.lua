@@ -1,4 +1,4 @@
-function ArkInventory.Frame_Rules_Hide( )
+﻿function ArkInventory.Frame_Rules_Hide( )
 	if ARKINV_Rules then
 		ARKINV_Rules:Hide( )
 	end
@@ -7,6 +7,7 @@ end
 function ArkInventory.Frame_Rules_Show( )
 	if ARKINV_Rules then
 		ARKINV_Rules:Show( )
+		ArkInventory.Frame_Main_Level( ARKINV_Rules )
 	end
 end
 

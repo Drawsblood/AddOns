@@ -1,4 +1,4 @@
-## Interface: 50001
+## Interface: 60000
 ## Title: Broker uClock
 ## Notes: Lightweight time/date display with optional hourly chime.
 ## Notes-zhCN: 简洁的显示日期与时间的 Broker 插件模块
@@ -8,8 +8,8 @@
 ## SavedVariables: uClockDB
 ## X-Icon: Interface\Icons\Spell_Holy_BorrowedTime
 ## OptionalDeps: Blizzard_TimeManager, Ace3, LibDataBroker-1.1, GroupCalendar, GroupCalendar5
-## X-Curse-Packaged-Version: v3.3.6
-## X-Curse-Project-Name: Broker uClock
+## X-Curse-Packaged-Version: v3.3.7
+## X-Curse-Project-Name: Broker_uClock
 ## X-Curse-Project-ID: broker-uclock
 ## X-Curse-Repository-ID: wow/broker-uclock/mainline
 

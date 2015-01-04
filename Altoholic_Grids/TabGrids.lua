@@ -11,6 +11,7 @@ local THIS_ACCOUNT = "Default"
 local ICON_NOT_STARTED = "Interface\\RaidFrame\\ReadyCheck-NotReady" 
 local ICON_PARTIAL = "Interface\\RaidFrame\\ReadyCheck-Waiting"
 local ICON_COMPLETED = "Interface\\RaidFrame\\ReadyCheck-Ready" 
+local CHARS_PER_FRAME = 11
 
 local parent = "AltoholicTabGrids"
 local classMenu = parent .. "ClassIconMenu"	-- name of mouse over menu frames (add a number at the end to get it)
@@ -42,6 +43,10 @@ local ICON_VIEW_COMPANIONS = "Interface\\Icons\\INV_Box_Birdcage_01"
 local ICON_VIEW_MOUNTS = "Interface\\Icons\\Ability_Mount_RidingHorse"
 local ICON_VIEW_TRADESKILLS = "Interface\\Icons\\Ability_Repair"
 local ICON_VIEW_ARCHEOLOGY = "Interface\\Icons\\trade_archaeology"
+local ICON_VIEW_QUESTS = "Interface\\LFGFrame\\LFGIcon-Quest"
+local ICON_VIEW_DUNGEONS = "Interface\\Icons\\inv_helmet_189"
+local ICON_VIEW_GARRISON_ARCHITECT = "Interface\\Icons\\inv_garrison_blueprints3"
+local ICON_VIEW_GARRISON_FOLLOWERS = "Interface\\Icons\\achievement_garrisonfollower_epic"
 
 addon.Tabs.Grids = {}
 
@@ -65,12 +70,12 @@ end
 
 local function EnableIcon(name)
 	_G[name]:Enable()
-	_G[name.."IconTexture"]:SetDesaturated(0)
+	_G[name.."IconTexture"]:SetDesaturated(false)
 end
 
 local function DisableIcon(name)
 	_G[name]:Disable()
-	_G[name.."IconTexture"]:SetDesaturated(1)
+	_G[name.."IconTexture"]:SetDesaturated(true)
 end
 
 local function UpdateMenuIcons()
@@ -95,16 +100,35 @@ local function UpdateMenuIcons()
 	
 	if DataStore_Pets then
 		EnableIcon(parent .. "_Pets")
-		EnableIcon(parent .. "_Mounts")
 	else
 		DisableIcon(parent .. "_Pets")
-		DisableIcon(parent .. "_Mounts")
 	end
+	DisableIcon(parent .. "_Mounts")
 	
 	if DataStore_Achievements then
 		EnableIcon(parent .. "_Tabards")
 	else
 		DisableIcon(parent .. "_Tabards")
+	end
+
+	if DataStore_Quests then
+		EnableIcon(parent .. "_Dailies")
+	else
+		DisableIcon(parent .. "_Dailies")
+	end
+	
+	if DataStore_Agenda then
+		EnableIcon(parent .. "_Dungeons")
+	else
+		DisableIcon(parent .. "_Dungeons")
+	end
+	
+	if DataStore_Garrisons then
+		EnableIcon(parent .. "_GarrisonArchitect")
+		EnableIcon(parent .. "_GarrisonFollowers")
+	else
+		DisableIcon(parent .. "_GarrisonArchitect")
+		DisableIcon(parent .. "_GarrisonFollowers")
 	end
 end
 
@@ -114,19 +138,19 @@ local function UpdateClassIcons()
 	
 		local index = 1
 
-		-- add the first 10 keys found on this realm
+		-- add the first 11 keys found on this realm
 		for characterName, characterKey in pairs(DataStore:GetCharacters(currentRealm, currentAccount)) do	
 			-- ex: : ["Tabs.Grids.Default.MyRealm.Column4"] = "Account.realm.alt7"
 
 			addon:SetOption(format("Tabs.Grids.%s.%s.Column%d", currentAccount, currentRealm, index), characterKey)
 			
 			index = index + 1
-			if index > 10 then
+			if index > CHARS_PER_FRAME then
 				break
 			end
 		end
 		
-		while index <= 10 do
+		while index <= CHARS_PER_FRAME do
 			addon:SetOption(format("Tabs.Grids.%s.%s.Column%d", currentAccount, currentRealm, index), nil)
 			index = index + 1
 		end
@@ -135,7 +159,7 @@ local function UpdateClassIcons()
 	local itemName, itemButton, itemTexture
 	local class, _
 	
-	for i = 1, 10 do
+	for i = 1, CHARS_PER_FRAME do
 		itemName = parent .. "_ClassIcon" .. i
 		itemButton = _G[itemName]
 		
@@ -166,11 +190,13 @@ local function UpdateClassIcons()
 			itemButton.border:SetVertexColor(0, 1, 0, 0.5)
 		end
 		
-		itemTexture:SetWidth(36)
-		itemTexture:SetHeight(36)
+		itemTexture:SetWidth(33)
+		itemTexture:SetHeight(33)
 		itemTexture:SetAllPoints(itemButton)
 		
 		itemButton.border:Show()
+		itemButton:SetWidth(34)
+		itemButton:SetHeight(34)
 		itemButton:Show()
 	end
 end
@@ -187,7 +213,7 @@ function ns:OnShow()
 		currentCategory = 1
 		
 		-- Button Borders
-		for column = 1, 10 do
+		for column = 1, CHARS_PER_FRAME do
 			for row = 1, 8 do
 				addon:CreateButtonBorder(_G["AltoholicFrameGridsEntry".. row .. "Item" .. column])
 			end
@@ -215,7 +241,7 @@ end
 function ns:Update()
 	UpdateClassIcons()
 
-	-- update de la frame en cours
+	-- update current frame
 	local numVisibleLines = 8
 	local frame = "AltoholicFrameGrids"
 	_G[frame]:Show()
@@ -239,7 +265,7 @@ function ns:Update()
 
 			obj:RowSetup(entry, row, dataRowID)
 			
-			for column = 1, 10 do
+			for column = 1, CHARS_PER_FRAME do
 				itemButton = _G[entry.. row .. "Item" .. column]
 				itemButton.border:Hide()
 				
@@ -271,7 +297,7 @@ function ns:GetRealm()
 end
 
 function ns:SetStatus(text)
-	_G[parent .. "Status"]:SetText(text)
+	_G[parent .. "Status"]:SetText(text or "")
 end
 
 function ns:SetViewDDMText(text)
@@ -442,8 +468,18 @@ function ns:OnLoad()
 	addon:SetItemButtonTexture(parent .. "_Archeology", ICON_VIEW_ARCHEOLOGY, size, size)
 	_G[parent .. "_Archeology"].text = GetSpellInfo(78670)
 	
+	addon:SetItemButtonTexture(parent .. "_Dailies", ICON_VIEW_QUESTS, size, size)
+	_G[parent .. "_Dailies"].text = "Daily Quests"
+	addon:SetItemButtonTexture(parent .. "_Dungeons", ICON_VIEW_DUNGEONS, size, size)
+	_G[parent .. "_Dungeons"].text = LOOKING_FOR_DUNGEON
+	addon:SetItemButtonTexture(parent .. "_GarrisonArchitect", ICON_VIEW_GARRISON_ARCHITECT, size, size)
+	_G[parent .. "_GarrisonArchitect"].text = GARRISON_ARCHITECT
+	addon:SetItemButtonTexture(parent .. "_GarrisonFollowers", ICON_VIEW_GARRISON_FOLLOWERS, size, size)
+	_G[parent .. "_GarrisonFollowers"].text = GARRISON_FOLLOWERS_TITLE
+
+		
 	-- Class Icons
-	for column = 1, 10 do
+	for column = 1, CHARS_PER_FRAME do
 		addon:DDM_Initialize(_G[classMenu..column], ClassIcon_Initialize)
 	end
 end

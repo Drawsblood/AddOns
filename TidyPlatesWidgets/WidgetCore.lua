@@ -60,6 +60,7 @@ do
 			-- If expired...
 			if expiration < curTime then 
 				if frame.Expire then frame:Expire() end
+				
 				frame:Hide()
 				Framelist[frame] = nil
 				--TidyPlates:RequestDelegateUpdate()		-- Request an Update on Delegate functions, so we can catch when auras fall off
@@ -115,5 +116,16 @@ do
 	TidyPlatesWidgets.ResetWidgets = ResetWidgets
 end
 		
+---------------------
+-- Reset/Nil Tidy Plates Widget Frames
+---------------------	
+local function GetCombatEventResults(...)
+	local timestamp, combatevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlag, spellid, spellname  = ...
+	local auraType, stackCount = select(15, ...)
+	return timestamp, combatevent, sourceGUID, destGUID, destName, destFlags, destRaidFlag, auraType, spellid, spellname, stackCount
+end
+
+--if (tonumber((select(2, GetBuildInfo()))) >= 14299) then else end
+TidyPlatesUtility.GetCombatEventResults = GetCombatEventResults
 
 

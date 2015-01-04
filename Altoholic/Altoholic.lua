@@ -7,6 +7,7 @@ local addon = _G[addonName]
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 local BI = LibStub("LibBabble-Inventory-3.0"):GetLookupTable()
+local LCI = LibStub("LibCraftInfo-1.0")
 local DS
 
 local WHITE		= "|cFFFFFFFF"
@@ -160,7 +161,6 @@ local Orig_AuctionFrameBrowse_Update
 
 function AuctionFrameBrowse_UpdateHook()
 	-- Courtesy of Tirdal on WoWInterface
-
 	local AuctioneerCompactUI = false;
 
 	Orig_AuctionFrameBrowse_Update()		-- Let default stuff happen first ..
@@ -222,6 +222,38 @@ function AuctionFrameBrowse_UpdateHook()
 	AltoTooltip:Hide()
 end
 
+local function IsBOPRecipeKnown(itemID)
+	-- Check if a given recipe is BOP and known by the current player
+	local _, link = GetItemInfo(itemID)
+	if not link then return end
+
+	-- ITEM_BIND_ON_EQUIP = "Binds when equipped";
+	-- ITEM_BIND_ON_PICKUP = "Binds when picked up";
+	-- ITEM_BIND_ON_USE = "Binds when used";
+	-- ITEM_SPELL_KNOWN = "Already known";
+	
+	AltoTooltip:SetOwner(AltoholicFrame, "ANCHOR_LEFT")
+	AltoTooltip:SetHyperlink(link)
+	
+	local tooltipLine
+	local isBOP
+	local isKnown	-- by the current character only
+	
+	for i = 1, AltoTooltip:NumLines() do
+		tooltipLine = _G[ "AltoTooltipTextLeft" .. i]:GetText()
+		if tooltipLine then
+			if tooltipLine == ITEM_BIND_ON_PICKUP and i <= 4 then	
+				-- some items will have "Binds when picked up" twice.. only care about the occurence in the first 4 lines
+				isBOP = true
+			elseif tooltipLine == ITEM_SPELL_KNOWN then
+				isKnown = true
+			end
+		end
+	end
+
+	return (isBOP and isKnown) -- only return true if both are true
+end
+
 local Orig_MerchantFrame_UpdateMerchantInfo
 
 local function MerchantFrame_UpdateMerchantInfoHook()
@@ -248,7 +280,9 @@ local function MerchantFrame_UpdateMerchantInfoHook()
 					if button then
 						local r, g, b
 						
-						if #couldLearn == 0 and #willLearn == 0 then		-- nobody could learn the recipe, neither now nor later : red
+						if IsBOPRecipeKnown(itemID) then		-- recipe is bop and already known, useless to alts : red.
+							r, g, b = 1, 0, 0
+						elseif #couldLearn == 0 and #willLearn == 0 then		-- nobody could learn the recipe, neither now nor later : red
 							r, g, b = 1, 0, 0
 						elseif #couldLearn > 0 then							-- at least 1 could learn it : green (priority over "will learn")
 							r, g, b = 0, 1, 0
@@ -499,7 +533,7 @@ end
 function addon:GetSpellIDFromRecipeLink(link)
 	-- returns nil if recipe id is not in the DB, returns the spellID otherwise
 	local recipeID = addon:GetIDFromLink(link)
-	return addon.RecipeDB[recipeID]
+	return LCI:GetRecipeLearnedSpell(recipeID)
 end
 
 function addon:GetMoneyString(copper, color, noTexture)
@@ -581,8 +615,6 @@ function Altoholic:FormatDelay(timeStamp)
 	return RecentTimeDate(year, month, day, hour)
 end
 
-
-
 function addon:GetSuggestion(index, level)
 	if addon.Suggestions[index] then 
 		for _, v in pairs( addon.Suggestions[index] ) do
@@ -594,20 +626,27 @@ function addon:GetSuggestion(index, level)
 end
 
 function addon:GetRecipeLevel(link, tooltip)
-	if not tooltip then	-- if no tooltip is provided for scanning, let's make one
-		tooltip = AltoTooltip
+	-- if not tooltip then	-- if no tooltip is provided for scanning, let's make one
+		-- tooltip = AltoTooltip
 		
-		tooltip:ClearLines();	
-		tooltip:SetOwner(AltoholicFrame, "ANCHOR_LEFT");
-		tooltip:SetHyperlink(link)
-	end
+		-- tooltip:ClearLines();	
+		-- tooltip:SetOwner(AltoholicFrame, "ANCHOR_LEFT");
+		-- tooltip:SetHyperlink(link)
+	-- end
 
+	local tooltip = AltoScanningTooltip
+	
+	tooltip:ClearLines()
+	tooltip:SetHyperlink(link)
+	
 	local tooltipName = tooltip:GetName()
-	for i = 2, tooltip:NumLines() do			-- parse all tooltip lines, one by one
+	
+	for i = tooltip:NumLines(), 2, -1 do			-- parse all tooltip lines, from last to second
 		local tooltipText = _G[tooltipName .. "TextLeft" .. i]:GetText()
 		if tooltipText then
-			if string.find(tooltipText, "%d+") then	-- try to find a numeric value .. 
-				return tonumber(string.sub(tooltipText, string.find(tooltipText, "%d+")))	-- required level found
+			local _, _, rLevel = string.find(tooltipText, "%((%d+)%)") -- find number encloded in brackets
+			if rLevel then
+				return tonumber(rLevel)
 			end
 		end
 	end
