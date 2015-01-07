@@ -1,0 +1,15 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Include file="aura\SVAura.xml"/>
+    <Script file="map\SVMap.lua"/>
+    <Include file="plate\SVPlate.xml"/>
+    <Script file="tip\SVTip.lua"/>
+    <Include file="bar\SVBar.xml"/>
+    <Include file="unit\SVUnit.xml"/>
+    <Script file="chat\SVChat.lua"/>
+    <Include file="bag\SVBag.xml"/>
+    <Include file="override\SVOverride.xml"/>
+    <Script file="gear\SVGear.lua"/>
+    <Script file="henchmen\SVHenchmen.lua"/>
+    <Include file="tool\SVTools.xml"/>
+    <Include file="quest\SVQuest.xml"/>
+</Ui>

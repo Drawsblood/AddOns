@@ -1,0 +1,9 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Script file="screen.lua"/>
+	<Script file="media.lua"/>
+    <Script file="utilities.lua"/>
+    <Script file="visibility.lua"/>
+    <Script file="slash.lua"/>
+    <Script file="alerts.lua"/>
+    <Script file="credits.lua"/>
+</Ui>

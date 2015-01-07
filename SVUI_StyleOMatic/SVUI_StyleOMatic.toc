@@ -1,0 +1,14 @@
+## Interface: 60000
+## Author: Munglunch, Azilroka, Sortokk
+## Version: 5.4.15
+## Title: |cffFF9900SVUI |r|cffFFEF00Style-O-Matic|r
+## Notes: Supervillain UI [|cff9911FFAddon Skins|r].
+## SavedVariables: StyleOMatic_Global
+## SavedVariablesPerCharacter: StyleOMatic_Profile, StyleOMatic_Cache
+## RequiredDeps: SVUI
+## OptionalDeps: Blizzard_DebugTools, Blizzard_PetJournal, SharedMedia
+## X-Email: munglunch@gmail.com
+## X-SVUIName: Style-O-Matic
+## X-SVUISchema: StyleOMatic
+
+SVUI_StyleOMatic.xml

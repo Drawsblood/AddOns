@@ -1,0 +1,21 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">	
+	<Script file='SVTools.lua'/>
+	
+	<Script file="stats\bags.lua"/>
+	<Script file="stats\cta.lua"/>
+	<Script file="stats\durability.lua"/>
+	<Script file="stats\experience.lua"/>
+	<Script file="stats\friends.lua"/>
+	<Script file="stats\gold.lua"/>
+	<Script file="stats\tokens.lua"/>
+	<Script file="stats\guild.lua"/>
+	<Script file="stats\reputation.lua"/>
+	<Script file="stats\system.lua"/>
+	<Script file="stats\time.lua"/>
+	<Script file="stats\dps.lua"/>
+	<Script file="stats\hps.lua"/>
+
+	<Script file="buttons\profession.lua"/>
+	<Script file="buttons\garrison.lua"/>
+	<Script file="buttons\raidleader.lua"/>
+</Ui>

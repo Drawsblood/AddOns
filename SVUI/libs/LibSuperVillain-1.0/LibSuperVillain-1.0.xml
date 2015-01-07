@@ -1,0 +1,10 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="LibSuperVillain-1.0.lua"/>
+	<Script file="modules\Linguist.lua"/>
+	<Script file="modules\Registry.lua"/>
+	<Script file="modules\Events.lua"/>
+	<Script file="modules\Timers.lua"/>
+	<Script file="modules\Animate.lua"/>
+	<Script file="modules\Sounds.lua"/>
+	<Script file="modules\SpecialFX.lua"/>
+</Ui>

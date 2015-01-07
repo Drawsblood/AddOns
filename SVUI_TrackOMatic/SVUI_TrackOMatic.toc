@@ -1,0 +1,15 @@
+## Interface: 60000
+## Author: Munglunch
+## Version: 5.4.15
+## Title: |cffFF9900SVUI |r|cffFFEF00Track-O-Matic|r
+## Notes: Supervillain UI [|cff9911FFRaid & Party Member Tracking|r].
+## SavedVariables: TrackOMatic_Global
+## SavedVariablesPerCharacter: TrackOMatic_Profile
+## RequiredDeps: SVUI
+## LoadOnDemand: 1
+## X-Email: munglunch@gmail.com
+## X-oUF: oUF_Villain
+## X-SVUIName: Track-O-Matic
+## X-SVUISchema: TrackOMatic
+
+SVUI_TrackOMatic.xml

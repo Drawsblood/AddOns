@@ -1,0 +1,16 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file='fonts.lua'/>
+	<Script file='map.lua'/>
+	<Script file='bar.lua'/>
+	<Script file='aura.lua'/>
+	<Script file='bag.lua'/>
+	<Script file='dock.lua'/>
+	<Script file='chat.lua'/>
+	<Script file='henchmen.lua'/>
+	<Include file='filters\_load.xml'/>
+	<Script file='plate.lua'/>
+	<Script file='tip.lua'/>
+	<Include file='units\_load.xml'/>
+	<!-- <Script file='layouts.lua'/> -->
+	<Script file='profiles.lua'/>
+</Ui>

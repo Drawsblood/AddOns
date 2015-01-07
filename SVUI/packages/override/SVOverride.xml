@@ -1,0 +1,7 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">	
+	<Script file='SVOverride.lua'/>
+	<Script file="components\alert.lua"/>
+	<Script file="components\mirror.lua"/>
+	<Script file="components\loot.lua"/>
+	<Script file="components\errors.lua"/>
+</Ui>

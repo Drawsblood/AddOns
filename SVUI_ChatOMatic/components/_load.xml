@@ -1,0 +1,4 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">	
+	<Script file="answering_service.lua"/>
+	<Script file="chat_history.lua"/>
+</Ui>

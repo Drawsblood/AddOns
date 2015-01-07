@@ -1,0 +1,14 @@
+## Interface: 60000
+## Author: Munglunch
+## Version: 5.4.15
+## Title: |cffFF9900SVUI |r|cffFFEF00Log-O-Matic|r
+## Notes: Supervillain UI [|cff9911FFData Logging|r].
+## SavedVariables: LogOMatic_Data
+## SavedVariablesPerCharacter: LogOMatic_Profile
+## RequiredDeps: SVUI
+## LoadOnDemand: 1
+## X-Email: munglunch@gmail.com
+## X-SVUIName: Log-O-Matic
+## X-SVUISchema: LogOMatic
+
+SVUI_LogOMatic.xml

@@ -1,0 +1,14 @@
+## Interface: 60000
+## Author: Munglunch
+## Version: 5.4.15
+## Title: |cffFF9900SVUI |r|cffFFEF00Chat-O-Matic|r
+## Notes: Supervillain UI [|cff9911FFVarious Chat Gadgets|r]
+## SavedVariables: ChatOMatic_Data
+## SavedVariablesPerCharacter: ChatOMatic_Profile, ChatOMatic_Cache
+## RequiredDeps: SVUI
+## LoadOnDemand: 1
+## X-Email: munglunch@gmail.com
+## X-SVUIName: Chat-O-Matic
+## X-SVUISchema: ChatOMatic
+
+SVUI_ChatOMatic.xml

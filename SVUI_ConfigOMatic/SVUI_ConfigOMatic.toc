@@ -1,0 +1,12 @@
+## Interface: 60000
+## Author: Munglunch
+## Version: 5.4.15
+## Title: |cffFF9900SVUI |r|cffFFEF00Config-O-Matic|r
+## Notes: Supervillain UI [|cff9911FFConfig Options|r]
+## RequiredDeps: SVUI
+## LoadOnDemand: 1
+## X-Notes: Special thanks to Elv and Tukz for their incredible work.
+## X-Email: munglunch@gmail.com
+## X-SVUIName: Config-O-Matic
+
+SVUI_ConfigOMatic.xml

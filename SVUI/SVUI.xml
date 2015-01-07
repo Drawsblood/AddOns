@@ -1,0 +1,11 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Include file="libs\_load.xml"/>
+    <Include file="language\_load.xml"/>
+    <Script file="system\core.lua"/>
+    <Include file="data\_load.xml"/>
+    <Include file="system\_load.xml"/>
+    <Include file="framework\_load.xml"/>
+    <Include file="setup\_load.xml"/>
+    <Include file="packages\_load.xml"/>
+    <Include file="scripts\_load.xml"/>
+</Ui>

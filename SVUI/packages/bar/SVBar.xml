@@ -1,0 +1,6 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">	
+	<Script file="SVBar.lua"/>
+	<Script file="components\keybind.lua"/>
+	<Script file="components\micro.lua"/>
+	<Script file="components\extra.lua"/>
+</Ui>
