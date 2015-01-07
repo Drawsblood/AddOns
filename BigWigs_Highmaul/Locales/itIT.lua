@@ -57,3 +57,10 @@ L["branded_say"] = "%s (%d) %dy"
 
 end
 
+L = BigWigs:NewBossLocale("Highmaul Trash", "itIT")
+if L then
+L["oro"] = "Oro" -- Needs review
+L["ritualist"] = "Ritualista Spezzatore" -- Needs review
+
+end
+

@@ -137,8 +137,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_REMOVED", "GazeOfTheAbyssRemoved", 165595)
 	self:Log("SPELL_AURA_APPLIED", "GazeClosestApplied", 176537)
 	self:Log("SPELL_AURA_REMOVED", "GazeClosestRemoved", 176537)
-	self:Log("SPELL_AURA_APPLIED", "GrowingDarkness", 176533)
-	self:Log("SPELL_PERIODIC_DAMAGE", "GrowingDarkness", 176533)
+	self:Log("SPELL_AURA_APPLIED", "GrowingDarknessDamage", 176525)
 
 	self:Death("ReaverDeath", 78549) -- Gorian Reaver
 end
@@ -373,12 +372,12 @@ end
 
 do
 	local prev = 0
-	function mod:GrowingDarkness(args)
+	function mod:GrowingDarknessDamage(args)
 		local t = GetTime()
-		if self:Me(args.destGUID) and t-prev > 2 then
+		if self:Me(args.destGUID) and t-prev > 1 then
+			prev = t
 			self:Message(args.spellId, "Personal", "Info", CL.underyou:format(args.spellName)) -- you ded, so ded.
 			self:Flash(args.spellId)
-			prev = t
 		end
 	end
 end
@@ -413,13 +412,13 @@ function mod:Phases(unit, spellName, _, _, spellId)
 		if spellId == 164336 then -- no intermission for Displacement
 			self:Message("stages", "Neutral", "Long", CL.phase:format(phase), false)
 			self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, unit)
-			 -- first power just pauses the cds for ~10s
+			 -- first power just pauses the cds for a few seconds
 			local t = GetTime()
-			self:CDBar(156238, p1times[156238]+10-t) -- Arcane Wrath
-			self:CDBar(156467, p1times[156467]+10-t) -- Destructive Resonance
-			self:CDBar(156471, p1times[156471]+10-t, CL.count:format(self:SpellName(-9945), aberrationCount), 156471) -- Arcane Aberration
-			self:CDBar(158605, p1times[158605]+10-t) -- Mark of Chaos
-			self:CDBar(157349, p1times[157349]+10-t) -- Force Nova
+			self:CDBar(156238, p1times[156238]+3.6-t) -- Arcane Wrath
+			self:CDBar(156467, p1times[156467]+3.6-t) -- Destructive Resonance
+			self:CDBar(156471, p1times[156471]+3.6-t, CL.count:format(self:SpellName(-9945), aberrationCount), 156471) -- Arcane Aberration
+			self:CDBar(158605, p1times[158605]+3.6-t) -- Mark of Chaos
+			self:CDBar(157349, p1times[157349]+3.6-t) -- Force Nova
 			wipe(p1times)
 		else
 			self:StopBar(156238) -- Arcane Wrath

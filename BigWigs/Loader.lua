@@ -23,7 +23,7 @@ do
 	--@end-alpha@]===]
 
 	-- This will (in ZIPs), be replaced by the highest revision number in the source tree.
-	myRevision = tonumber("12488")
+	myRevision = tonumber("12507")
 
 	-- If myRevision ends up NOT being a number, it means we're running a SVN copy.
 	if type(myRevision) ~= "number" then
@@ -486,18 +486,33 @@ do
 	local DBMdotRevision = "12226" -- The changing version of the local client, changes with every alpha revision using an SVN keyword.
 	local DBMdotReleaseRevision = "12226" -- This is manually changed by them every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 	local DBMdotDisplayVersion = "6.0.10" -- Same as above but is changed between alpha and release cycles e.g. "N.N.N" for a release and "N.N.N alpha" for the alpha duration
+
+	local timer = nil
+	local prevUpgradedUser = nil
+	local function sendMsg()
+		if IsInGroup() then
+			SendAddonMessage("D4", "V\t"..DBMdotRevision.."\t"..DBMdotReleaseRevision.."\t"..DBMdotDisplayVersion.."\t"..GetLocale().."\t".."true", IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- LE_PARTY_CATEGORY_INSTANCE = 2
+		end
+		timer = nil
+	end
 	function mod:DBM_VersionCheck(prefix, sender, revision, releaseRevision, displayVersion)
 		if prefix == "H" and (BigWigs and BigWigs.db.profile.fakeDBMVersion or self.isFakingDBM) then
-			SendAddonMessage("D4", "V\t"..DBMdotRevision.."\t"..DBMdotReleaseRevision.."\t"..DBMdotDisplayVersion.."\t"..GetLocale().."\t".."true", IsInGroup(2) and "INSTANCE_CHAT" or "RAID")
+			if timer then timer:Cancel() end
+			prevUpgradedUser = nil
+			timer = CTimerNewTicker(3.2, sendMsg, 1)
 		elseif prefix == "V" then
 			usersDBM[sender] = displayVersion
 			-- If there are people with newer versions than us, suddenly we've upgraded!
 			local rev, dotRev = tonumber(revision), tonumber(DBMdotRevision)
-			if rev and displayVersion and rev ~= 99999 and rev > dotRev then -- Failsafes
-				DBMdotRevision = revision -- Update our local rev with the highest possible rev found including alphas.
-				DBMdotReleaseRevision = releaseRevision -- Update our release rev with the highest found, this should be the same for alpha users and latest release users.
-				DBMdotDisplayVersion = displayVersion -- Update to the latest display version, including alphas.
-				self:DBM_VersionCheck("H") -- Re-send addon message.
+			if rev and displayVersion and rev ~= 99999 and rev > dotRev and not displayVersion:find("alpha", nil, true) then -- Failsafes
+				if not prevUpgradedUser then
+					prevUpgradedUser = sender
+				elseif prevUpgradedUser ~= sender then
+					DBMdotRevision = revision -- Update our local rev with the highest possible rev found.
+					DBMdotReleaseRevision = releaseRevision -- Update our release rev with the highest found, this should be the same for alpha users and latest release users.
+					DBMdotDisplayVersion = displayVersion -- Update to the latest display version.
+					self:DBM_VersionCheck("H") -- Re-send addon message.
+				end
 			end
 		end
 	end
@@ -640,7 +655,7 @@ end
 
 -- Misc
 function mod:CHAT_MSG_ADDON(prefix, msg, channel, sender)
-	if channel == "WHISPER" or channel == "GUILD" or channel == "CHANNEL" then
+	if channel ~= "RAID" and channel ~= "PARTY" and channel ~= "INSTANCE_CHAT" then
 		return
 	elseif prefix == "BigWigs" then
 		local bwPrefix, bwMsg = msg:match("^(%u-):(.+)")
@@ -708,7 +723,7 @@ do
 			end
 			message = tonumber(message)
 			-- XXX The > 13k check is a hack for now until I find out what addon is sending a stupidly large version (20032). This is probably being done to farm BW versions, when a version of 0 should be used.
-			if not message or message == 0 or message > 13500 then return end -- Allow addons to query Big Wigs versions by using a version of 0, but don't add them to the user list.
+			if not message or message == 0 or message > 13700 then return end -- Allow addons to query Big Wigs versions by using a version of 0, but don't add them to the user list.
 			usersRelease[sender] = message
 			usersAlpha[sender] = nil
 			if message > highestReleaseRevision then highestReleaseRevision = message end
@@ -722,7 +737,7 @@ do
 			end
 			message = tonumber(message)
 			-- XXX The > 13k check is a hack for now until I find out what addon is sending a stupidly large version (20032). This is probably being done to farm BW versions, when a version of 0 should be used.
-			if not message or message == 0 or message > 13500 then return end -- Allow addons to query Big Wigs versions by using a version of 0, but don't add them to the user list.
+			if not message or message == 0 or message > 13700 then return end -- Allow addons to query Big Wigs versions by using a version of 0, but don't add them to the user list.
 			usersAlpha[sender] = message
 			usersRelease[sender] = nil
 			if message > highestAlphaRevision then highestAlphaRevision = message end

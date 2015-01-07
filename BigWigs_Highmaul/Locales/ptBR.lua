@@ -34,3 +34,10 @@ if L then
 
 end
 
+L = BigWigs:NewBossLocale("Highmaul Trash", "ptBR")
+if L then
+L["oro"] = "Oro" -- Needs review
+L["ritualist"] = "Ritualista Rachador" -- Needs review
+
+end
+

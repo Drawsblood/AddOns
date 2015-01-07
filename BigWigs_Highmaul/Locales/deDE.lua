@@ -67,3 +67,10 @@ L["slow_fixate"] = "Verlangsamen + Fixieren"
 
 end
 
+L = BigWigs:NewBossLocale("Highmaul Trash", "deDE")
+if L then
+L["oro"] = "Oro"
+L["ritualist"] = "Brecherritualist"
+
+end
+

@@ -67,7 +67,6 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_REMOVED", "CrystallineBarrageRemoved", 162346)
 	self:Log("SPELL_PERIODIC_DAMAGE", "CrystallineBarrageDamage", 162370)
 	self:Log("SPELL_PERIODIC_MISSED", "CrystallineBarrageDamage", 162370)
-	self:Log("SPELL_ABSORBED", "CrystallineBarrageDamage", 162370)
 	self:Log("SPELL_CAST_START", "TectonicUpheaval", 162475)
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "Split", "boss1", "boss2", "boss3")
 	-- Earthwarper
@@ -149,9 +148,9 @@ do
 	local prev = 0
 	function mod:CrystallineBarrageDamage(args)
 		local t = GetTime()
-		if self:Me(args.destGUID) and t-prev > 2 then
-			self:Message(162346, "Personal", "Alarm", CL.underyou:format(args.spellName))
+		if self:Me(args.destGUID) and t-prev > 1 then
 			prev = t
+			self:Message(162346, "Personal", "Alarm", CL.underyou:format(args.spellName))
 		end
 	end
 end
@@ -172,9 +171,9 @@ end
 
 function mod:Split(unit, spellName, _, _, spellId)
 	if spellId == 140562 then -- Break Player Targetting (cast when Tectus/Shards die)
-		self:StopBar(-10061) -- Earthwarper
-		self:StopBar(-10062) -- Berserker
 		if not self:Mythic() then
+			self:StopBar(-10061) -- Earthwarper
+			self:StopBar(-10062) -- Berserker
 			self:UnregisterEvent("CHAT_MSG_MONSTER_YELL")
 		end
 		--self:CDBar(162346, 8) -- Crystalline Barrage 7-12s, then every ~20s, 2-5s staggered
@@ -214,9 +213,9 @@ do
 	local prev = 0
 	function mod:EarthenFlechettesDamage(args)
 		local t = GetTime()
-		if self:Me(args.destGUID) and not self:Tank() and t-prev > 2 then
-			self:Message(args.spellId, "Personal", "Alarm", CL.underyou:format(args.spellName))
+		if self:Me(args.destGUID) and not self:Tank() and t-prev > 1 then
 			prev = t
+			self:Message(args.spellId, "Personal", "Alarm", CL.underyou:format(args.spellName))
 		end
 	end
 end

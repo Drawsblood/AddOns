@@ -1,9 +1,133 @@
 ------------------------------------------------------------------------
-r12489 | funkydude | 2015-01-04 14:24:29 +0000 (Sun, 04 Jan 2015) | 1 line
+r12508 | funkydude | 2015-01-06 10:59:13 +0000 (Tue, 06 Jan 2015) | 1 line
 Changed paths:
-   A /tags/r12489-release (from /trunk:12488)
+   A /tags/r12508-release (from /trunk:12507)
 
-Tagging as r12489-release
+Tagging as r12508-release
+------------------------------------------------------------------------
+r12507 | funkydude | 2015-01-06 10:50:28 +0000 (Tue, 06 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Loader.lua
+
+Revert not sending BW version when faking DBM. By order of popularity: People that turn it on for the sake of it > People using both addons > People actually needing to use it.
+------------------------------------------------------------------------
+r12506 | nebula169 | 2015-01-06 02:37:53 +0000 (Tue, 06 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/Margok.lua
+
+Margok: better p2 initial times
+------------------------------------------------------------------------
+r12505 | elvador | 2015-01-05 17:45:21 +0000 (Mon, 05 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Plugins/Bars.lua
+
+Bars: Allow restarting bars on emphasize with one anchor
+------------------------------------------------------------------------
+r12504 | funkydude | 2015-01-05 16:01:32 +0000 (Mon, 05 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/Locales/deDE.lua
+   M /trunk/Highmaul/Locales/esES.lua
+   M /trunk/Highmaul/Locales/frFR.lua
+   M /trunk/Highmaul/Locales/itIT.lua
+   M /trunk/Highmaul/Locales/koKR.lua
+   M /trunk/Highmaul/Locales/ptBR.lua
+   M /trunk/Highmaul/Locales/ruRU.lua
+   M /trunk/Highmaul/Locales/zhCN.lua
+   M /trunk/Highmaul/Locales/zhTW.lua
+
+Add trash mob translations.
+------------------------------------------------------------------------
+r12503 | nebula169 | 2015-01-05 09:56:53 +0000 (Mon, 05 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/KargathBladefist.lua
+   M /trunk/Highmaul/Tectus.lua
+
+tweaks
+------------------------------------------------------------------------
+r12502 | nebula169 | 2015-01-05 09:52:07 +0000 (Mon, 05 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/Koragh.lua
+
+Koragh: pause bars during the intermission
+------------------------------------------------------------------------
+r12501 | nebula169 | 2015-01-05 08:47:44 +0000 (Mon, 05 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Core/BossPrototype.lua
+
+BossPrototype: tweak PauseBar/ResumeBar to take the bar's option key to restart the emphasis countdown
+------------------------------------------------------------------------
+r12500 | funkydude | 2015-01-05 03:28:19 +0000 (Mon, 05 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Loader.lua
+
+Don't send a BW version if faking a DBM version.
+------------------------------------------------------------------------
+r12499 | funkydude | 2015-01-05 03:10:36 +0000 (Mon, 05 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/BigWigs.toc
+   M /trunk/Loader.lua
+
+More improvements to the DBM faker.
+------------------------------------------------------------------------
+r12498 | nebula169 | 2015-01-05 00:15:48 +0000 (Mon, 05 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/KargathBladefist.lua
+
+KargathBladefist: use APPLIED and drop direct damage events for Mauling Brew
+------------------------------------------------------------------------
+r12497 | funkydude | 2015-01-05 00:10:12 +0000 (Mon, 05 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/Trash.lua
+
+Trash: Add ritualist enable mob and throttle Wild Flames.
+------------------------------------------------------------------------
+r12496 | nebula169 | 2015-01-05 00:08:40 +0000 (Mon, 05 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/Margok.lua
+
+Margok: fix id and just use the APPLIED event for Growing Darkness
+------------------------------------------------------------------------
+r12495 | funkydude | 2015-01-04 23:59:22 +0000 (Sun, 04 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/KargathBladefist.lua
+   M /trunk/Highmaul/Margok.lua
+   M /trunk/Highmaul/Tectus.lua
+   M /trunk/Highmaul/TheButcher.lua
+
+Reduce the throttle for some things.
+------------------------------------------------------------------------
+r12494 | funkydude | 2015-01-04 23:52:02 +0000 (Sun, 04 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/TwinOgron.lua
+
+TwinOgron: Don't throttle Blaze.
+------------------------------------------------------------------------
+r12493 | nebula169 | 2015-01-04 22:54:35 +0000 (Sun, 04 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/Koragh.lua
+
+Koragh: back to SPELL_MISSED
+------------------------------------------------------------------------
+r12492 | nebula169 | 2015-01-04 22:51:09 +0000 (Sun, 04 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/KargathBladefist.lua
+   M /trunk/Highmaul/Tectus.lua
+
+KargathBladefist: add another spell id for Mauling Brew damage
+------------------------------------------------------------------------
+r12491 | funkydude | 2015-01-04 22:06:15 +0000 (Sun, 04 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Highmaul/Trash.lua
+
+Trash: add wild flames warning
+------------------------------------------------------------------------
+r12490 | funkydude | 2015-01-04 21:07:13 +0000 (Sun, 04 Jan 2015) | 1 line
+Changed paths:
+   A /trunk/Highmaul/Trash.lua
+   M /trunk/Highmaul/modules.xml
+   M /trunk/Sounds/12345_countdown_license.txt
+
+Start on the Highmaul trash module.
 ------------------------------------------------------------------------
 r12488 | funkydude | 2015-01-04 14:20:36 +0000 (Sun, 04 Jan 2015) | 1 line
 Changed paths:
@@ -1365,126 +1489,4 @@ Changed paths:
    M /trunk/Highmaul/TwinOgron.lua
 
 TwinOgron: Add enrage.
-------------------------------------------------------------------------
-r12274 | nebula169 | 2014-12-05 13:30:19 +0000 (Fri, 05 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Highmaul/Tectus.lua
-
-Tectus: limit Accretion to your target
-------------------------------------------------------------------------
-r12273 | funkydude | 2014-12-05 13:28:35 +0000 (Fri, 05 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/BigWigs.toc
-   M /trunk/Highmaul/Koragh.lua
-   M /trunk/Highmaul/TwinOgron.lua
-
-TwinOgron: cleanup options.
-------------------------------------------------------------------------
-r12272 | nebula169 | 2014-12-05 11:54:43 +0000 (Fri, 05 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Highmaul/TwinOgron.lua
-
-TwinOgron: fix Phemos times for mythic (assumed)
-------------------------------------------------------------------------
-r12271 | nebula169 | 2014-12-05 11:51:48 +0000 (Fri, 05 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Highmaul/Margok.lua
-
-Margok: use Branded instead of Arcane Wrath when on you and add a say
-------------------------------------------------------------------------
-r12270 | funkydude | 2014-12-05 11:48:58 +0000 (Fri, 05 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Core/BossPrototype.lua
-
-BossPrototype: Add :Normal()
-------------------------------------------------------------------------
-r12269 | nebula169 | 2014-12-05 11:31:29 +0000 (Fri, 05 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Highmaul/TwinOgron.lua
-
-TwinOgron: fix Phemos times for normal
-------------------------------------------------------------------------
-r12268 | ananhaid | 2014-12-05 11:26:23 +0000 (Fri, 05 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Draenor/Drov.lua
-
-Drov id fix.
-------------------------------------------------------------------------
-r12267 | funkydude | 2014-12-05 10:26:48 +0000 (Fri, 05 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/BlackrockFoundry/BigWigs_BlackrockFoundry.toc
-   M /trunk/Draenor/BigWigs_Draenor.toc
-   M /trunk/EndlessSpring/BigWigs_EndlessSpring.toc
-   M /trunk/HeartOfFear/BigWigs_HeartOfFear.toc
-   M /trunk/Highmaul/BigWigs_Highmaul.toc
-   M /trunk/Mogushan/BigWigs_Mogushan.toc
-   M /trunk/Pandaria/BigWigs_Pandaria.toc
-   M /trunk/SiegeOfOrgrimmar/BigWigs_SiegeOfOrgrimmar.toc
-   M /trunk/ThroneOfThunder/BigWigs_ThroneOfThunder.toc
-   M /trunk/modules.xml
-
-Load module locale files after the modules.
-------------------------------------------------------------------------
-r12266 | nebula169 | 2014-12-05 04:52:10 +0000 (Fri, 05 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Draenor/Tarlna.lua
-
-Tarlna: Genesis is now channeled for 15s
-------------------------------------------------------------------------
-r12264 | funkydude | 2014-12-04 15:39:50 +0000 (Thu, 04 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/BigWigs.toc
-   M /trunk/Highmaul/Tectus.lua
-
-Tectus: Probably still the same berserk on Mythic going by the hotfix wording.
-------------------------------------------------------------------------
-r12263 | nebula169 | 2014-12-04 12:24:50 +0000 (Thu, 04 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Highmaul/Brackenspore.lua
-   M /trunk/Highmaul/KargathBladefist.lua
-
-KargathBladefist: tweak Impale time
-------------------------------------------------------------------------
-r12262 | nebula169 | 2014-12-04 12:17:15 +0000 (Thu, 04 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Highmaul/Margok.lua
-
-Margok: icon for Arcane Wrath and include the stack number in the message
-------------------------------------------------------------------------
-r12261 | pettigrow | 2014-12-04 10:46:53 +0000 (Thu, 04 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Highmaul/Locales/frFR.lua
-
-frFR Update
-------------------------------------------------------------------------
-r12260 | dynaletik | 2014-12-04 09:37:40 +0000 (Thu, 04 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/BlackrockFoundry/Locales/deDE.lua
-   M /trunk/Highmaul/Locales/deDE.lua
-
-- deDE update for WoD raids
-------------------------------------------------------------------------
-r12259 | nebula169 | 2014-12-04 09:29:57 +0000 (Thu, 04 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Highmaul/TwinOgron.lua
-
-TwinOgron: fix Phemos timers
-------------------------------------------------------------------------
-r12258 | jongt23 | 2014-12-04 01:11:48 +0000 (Thu, 04 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Highmaul/Locales/esES.lua
-
-esES update
-------------------------------------------------------------------------
-r12257 | funkydude | 2014-12-04 00:17:15 +0000 (Thu, 04 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Highmaul/Brackenspore.lua
-
-Brackenspore: Fix big add description.
-------------------------------------------------------------------------
-r12256 | funkydude | 2014-12-03 23:55:21 +0000 (Wed, 03 Dec 2014) | 1 line
-Changed paths:
-   M /trunk/Highmaul/TwinOgron.lua
-
-TwinOgron: Fix whirlwind.
 ------------------------------------------------------------------------

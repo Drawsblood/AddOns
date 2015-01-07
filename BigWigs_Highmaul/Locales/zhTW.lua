@@ -67,3 +67,8 @@ L["slow_fixate"] = "緩速+凝視"
 
 end
 
+L = BigWigs:NewBossLocale("Highmaul Trash", "zhTW")
+if L then
+
+end
+

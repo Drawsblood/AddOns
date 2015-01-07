@@ -1139,7 +1139,7 @@ function api.UpdateGroupEstimates(missions, useInactive)
 	local ft, fc, f = {}, 0, C_Garrison.GetFollowers()
 	for i=1,#f do
 		local fi = f[i]
-		if fi.isCollected and (useInactive or fi.status ~= GARRISON_FOLLOWER_INACTIVE) then
+		if fi.isCollected and (useInactive or fi.status ~= GARRISON_FOLLOWER_INACTIVE) and not T.config.ignore[fi.followerID] then
 			local cn, tn, fid = 1, 1, fi.followerID
 			fi.counters, fi.traits, fi.traitMap, fc = {}, {}, {}, fc + 1
 			for i=1,3 do
@@ -1153,7 +1153,7 @@ function api.UpdateGroupEstimates(missions, useInactive)
 					fi.traits[tn], fi.traitMap[a], tn = a, i, tn + 1
 				end
 			end
-			ft[fc], fi.active, fi.scavanger, fi.mount = fi, fi.status ~= GARRISON_FOLLOWER_INACTIVE and 1 or 0, fi.traitMap[79] and 1 or 0, fi.traitMap[221] and 1 or 0
+			ft[fc], fi.active, fi.scavanger, fi.mount, fi.working = fi, fi.status ~= GARRISON_FOLLOWER_INACTIVE and 1 or 0, fi.traitMap[79] and 1 or 0, fi.traitMap[221] and 1 or 0, fi.status == GARRISON_FOLLOWER_WORKING and 1 or 0
 		end
 	end
 	f = ft
@@ -1174,7 +1174,7 @@ function api.UpdateGroupEstimates(missions, useInactive)
 			local v = co[i]
 			counters[v] = (counters[v] or 0) + 1
 		end
-		local ns, na, nm = f[a].scavanger, f[a].active, f[a].mount
+		local ns, na, nm, nw = f[a].scavanger, f[a].active, f[a].mount, f[a].working
 					
 		for b=a+1,fc do
 			local co = f[b].counters
@@ -1182,7 +1182,7 @@ function api.UpdateGroupEstimates(missions, useInactive)
 				local v = co[i]
 				counters[v] = (counters[v] or 0) + 1
 			end
-			local ns, na, nm = ns + f[b].scavanger, na + f[b].active, nm + f[b].mount
+			local ns, na, nm, nw = ns + f[b].scavanger, na + f[b].active, nm + f[b].mount, nw + f[b].working
 			
 			for i=1, n2 do
 				local mi, nc, l = m2[i], 0
@@ -1195,7 +1195,7 @@ function api.UpdateGroupEstimates(missions, useInactive)
 					local mlvl, la, lb = mi[2], f[a].iLevel + f[b].level*3, f[b].iLevel + f[b].level*3
 					mlvl = mlvl > 100 and (mlvl + 300) or (600 + mlvl * 3)
 					local gap = (mlvl > la and (mlvl - la) or 0) + (mlvl > lb and (mlvl - lb) or 0)
-					sc = sc + s2 * ((mi[5] > 0 and ns * 16 or 0) + na) + (32768-gap)*16 + nm
+					sc = sc + s2 * ((mi[5] > 0 and ns * 16 or 0) + na) + (32768-gap)*16 + nm*4 + (3-nw)
 					if best[1] < sc then
 						best[1], best[2], best[3] = sc, a, b
 					end
@@ -1208,7 +1208,7 @@ function api.UpdateGroupEstimates(missions, useInactive)
 					local v = co[i]
 					counters[v] = (counters[v] or 0) + 1
 				end
-				local ns, na, nm = ns + f[c].scavanger, na + f[c].active, nm + f[c].mount
+				local ns, na, nm, nw = ns + f[c].scavanger, na + f[c].active, nm + f[c].mount, nw + f[c].working
 				
 				for i=1, n3 do
 					local mi, nc, l = m3[i], 0
@@ -1221,7 +1221,7 @@ function api.UpdateGroupEstimates(missions, useInactive)
 						local mlvl, la, lb, lc = mi[2], f[a].iLevel + f[b].level*3, f[b].iLevel + f[b].level*3, f[c].iLevel + f[c].level*3
 						mlvl = mlvl > 100 and (mlvl + 300) or (600 + mlvl * 3)
 						local gap = (mlvl > la and (mlvl - la) or 0) + (mlvl > lb and (mlvl - lb) or 0) + (mlvl > lc and (mlvl - lc) or 0)
-						sc = sc + s2 * ((mi[5] > 0 and ns * 16 or 0) + na) + (32768-gap)*16 + nm
+						sc = sc + s2 * ((mi[5] > 0 and ns * 16 or 0) + na) + (32768-gap)*16 + nm*4 + (3-nw)
 						if best[1] < sc then
 							best[1], best[2], best[3], best[4] = sc, a, b, c
 						end

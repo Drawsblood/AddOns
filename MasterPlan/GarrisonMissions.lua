@@ -5,18 +5,6 @@ local EV, G, L = T.Evie, T.Garrison, T.L
 local roamingParty, easyDrop = T.MissionsUI.roamingParty, T.MissionsUI.easyDrop
 local MISSION_PAGE_FRAME = GarrisonMissionFrame.MissionTab.MissionPage
 
-local Hide do
-	local dungeon = CreateFrame("Frame")
-	dungeon:Hide()
-	function Hide(f, ...)
-		if f then
-			f:SetParent(dungeon)
-			return Hide(...)
-		end
-	end
-end
-Hide(GarrisonMissionFrameMissionsTab1, GarrisonMissionFrameMissionsTab2)
-
 do -- GarrisonFollowerList_SortFollowers
 	local toggle = CreateFrame("CheckButton", nil, GarrisonMissionFrameFollowers, "InterfaceOptionsCheckButtonTemplate")
 	toggle:SetSize(24, 24) toggle:SetHitRectInsets(0,0,0,0)

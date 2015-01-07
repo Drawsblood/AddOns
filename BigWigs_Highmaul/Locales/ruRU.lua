@@ -66,3 +66,10 @@ L["slow_fixate"] = "Замедление+Фиксация" -- Needs review
 
 end
 
+L = BigWigs:NewBossLocale("Highmaul Trash", "ruRU")
+if L then
+L["oro"] = "Оро" -- Needs review
+L["ritualist"] = "Ритуалист-сокрушитель" -- Needs review
+
+end
+

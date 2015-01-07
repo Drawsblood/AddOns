@@ -64,3 +64,10 @@ L["slow_fixate"] = "Lento+Fijado"
 
 end
 
+L = BigWigs:NewBossLocale("Highmaul Trash", "esES") or BigWigs:NewBossLocale("Highmaul Trash", "esMX")
+if L then
+L["oro"] = "Oro" -- Needs review
+L["ritualist"] = "Ritualista rompedor" -- Needs review
+
+end
+

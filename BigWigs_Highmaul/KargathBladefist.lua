@@ -68,9 +68,9 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_START", "ChainHurl", 159947)
 	self:Log("SPELL_AURA_APPLIED", "ChainHurlApplied", 159947)
 	self:Log("SPELL_PERIODIC_DAMAGE", "FlameJetDamage", 159311)
-	self:Log("SPELL_ABSORBED", "FlameJetDamage", 159311)
+	self:Log("SPELL_PERIODIC_MISSED", "FlameJetDamage", 159311)
 	self:Log("SPELL_PERIODIC_DAMAGE", "MaulingBrewDamage", 159413)
-	self:Log("SPELL_ABSORBED", "MaulingBrewDamage", 159413)
+	self:Log("SPELL_PERIODIC_MISSED", "MaulingBrewDamage", 159413)
 	self:Log("SPELL_CAST_START", "VileBreath", 160521)
 	-- Mythic
 	self:Log("SPELL_AURA_APPLIED", "OnTheHunt", 162497)
@@ -200,9 +200,9 @@ do
 	local prev = 0
 	function mod:MaulingBrewDamage(args)
 		local t = GetTime()
-		if self:Me(args.destGUID) and t-prev > 2 then
-			self:Message(args.spellId, "Personal", "Info", CL.underyou:format(args.spellName))
+		if self:Me(args.destGUID) and t-prev > 1 then
 			prev = t
+			self:Message(args.spellId, "Personal", "Info", CL.underyou:format(args.spellName))
 		end
 	end
 end
@@ -211,9 +211,9 @@ do
 	local prev = 0
 	function mod:FlameJetDamage(args)
 		local t = GetTime()
-		if self:Me(args.destGUID) and t-prev > 2 then
-			self:Message(args.spellId, "Personal", "Info", CL.underyou:format(args.spellName))
+		if self:Me(args.destGUID) and t-prev > 1 then
 			prev = t
+			self:Message(args.spellId, "Personal", "Info", CL.underyou:format(args.spellName))
 		end
 	end
 end
