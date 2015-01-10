@@ -12,9 +12,9 @@ mod.engageId = 1723
 -- Locals
 --
 
-local allowSuppression = false
+local allowSuppression = nil
+local intermission = nil
 local ballCount = 1
-local nextBall, nextMC, nextFrost, nextArcane = 0, 0, 0, 0
 
 --------------------------------------------------------------------------------
 -- Localization
@@ -65,11 +65,13 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
-	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "Intermission", "boss1")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "Vulnerability", "boss1")
+	self:Log("SPELL_AURA_REMOVED", "BarrierRemoved", 156803)
+	self:Log("SPELL_AURA_APPLIED", "BarrierApplied", 156803)
 	self:Log("SPELL_AURA_APPLIED", "CausticEnergy", 161242)
 	self:Log("SPELL_CAST_SUCCESS", "OverwhelmingEnergy", 161612)
 	self:Log("SPELL_DAMAGE", "OverwhelmingEnergy", 161576)
-	self:Log("SPELL_ABSORBED", "OverwhelmingEnergy", 161576)
+	self:Log("SPELL_MISSED", "OverwhelmingEnergy", 161576)
 	self:Log("SPELL_CAST_START", "ExpelMagicShadow", 162184)
 	self:Log("SPELL_CAST_SUCCESS", "ExpelMagicFire", 162185)
 	self:Log("SPELL_CAST_START", "ExpelMagicArcaneStart", 162186)
@@ -86,18 +88,16 @@ function mod:OnBossEnable()
 end
 
 function mod:OnEngage()
-	allowSuppression = false
+	allowSuppression = nil
+	intermission = nil
 	ballCount = 1
-	local t = GetTime()
-	nextArcane = t + 30
+	self:Bar(162185, 6)  -- Expel Magic: Fire
 	self:Bar(162186, 30) -- Expel Magic: Arcane
-	nextFrost = t + 40
-	self:Bar(172747, 40) -- Expel Magic: Frost -- guess, first charge phase is usually happening when it would come off cd
-	nextBall = t + 36
 	self:Bar(161612, 36, L.overwhelming_energy_bar:format(ballCount)) -- Overwhelming Energy
+	self:Bar(172747, 40) -- Expel Magic: Frost
+	self:Bar(162184, 55) -- Expel Magic: Shadow
 	if self:Mythic() then
 		self:CDBar(172895, 8) -- Expel Magic: Fel
-		nextMC = t + 90
 	end
 	self:RegisterUnitEvent("UNIT_POWER_FREQUENT", nil, "boss1")
 end
@@ -128,52 +128,65 @@ do
 		end
 	end
 
-	function mod:Intermission(unit, spellName, _, _, spellId)
+	function mod:Vulnerability(unit, spellName, _, _, spellId)
 		if spellId == 160734 then -- Vulnerability
 			self:Message(spellId, "Positive", "Long", CL.removed:format(self:SpellName(156803))) -- Nullification Barrier removed!
-			self:Bar(spellId, 20) -- Vulnerability
-			self:StopBar(161328) -- Suppression Field
-			self:StopBar(162186) -- Expel Magic: Arcane
-			self:StopBar(172747) -- Expel Magic: Frost
-			self:StopBar(172895) -- Expel Magic: Fel
-
+			self:Bar(spellId, 20)
 			count = 0
 			self:ScheduleTimer(nextAdd, 1, self)
-
-			-- this is all guess-work! cds seem to pause for the duration of Vulnerability
-			-- plus the time he takes to run to the middle of the room?
-			local t = GetTime()
-			nextArcane = nextArcane + 24
-			self:CDBar(162186, nextArcane-t) -- Expel Magic: Arcane
-
-			nextFrost = nextFrost + 24
-			self:CDBar(172747, nextFrost-t) -- Expel Magic: Frost
-
-			-- once the balls start dropping (at around 5s), they don't stop (mostly? >.>)
-			if self:Mythic() and nextMC-t > 4 then
-				nextMC = nextMC + 24
-			end
-			if nextBall-t > 4 then
-				nextBall = nextBall + 24
-				if self:Mythic() and abs(nextBall-nextMC) < 5 then -- XXX still worried about these getting out of sync
-					nextMC = nextBall
-					self:CDBar(163472, nextBall-t, L.dominating_power_bar:format(ballCount)) -- Dominating Power
-				else
-					self:CDBar(161612, nextBall-t, L.overwhelming_energy_bar:format(ballCount)) -- Overwhelming Enery
-				end
-			end
-		elseif spellId == 156803 then -- Nullification Barrier
-			self:Message(160734, "Positive", nil, spellName)
-			self:RegisterUnitEvent("UNIT_POWER_FREQUENT", nil, unit)
-			if self:Mythic() then
-				self:CDBar(172895, 6) -- Expel Magic: Fel
-			end
 		end
 	end
 end
 
+function mod:BarrierRemoved(args)
+	intermission = true
+	-- cds pause for the duration of the shield charging phase
+	self:PauseBar(161328) -- Suppression Field
+	self:PauseBar(162184) -- Expel Magic: Shadow
+	self:PauseBar(162185) -- Expel Magic: Fire
+	self:PauseBar(162186) -- Expel Magic: Arcane
+	self:PauseBar(172747) -- Expel Magic: Frost
+	self:PauseBar(172895) -- Expel Magic: Fel
+	-- once the balls start dropping, they don't stop
+	if self:Mythic() and self:BarTimeLeft(L.dominating_power_bar:format(ballCount)) > 6 then
+		self:PauseBar(163472, L.dominating_power_bar:format(ballCount))
+		self:CancelDelayedMessage(CL.soon:format(self:SpellName(163472)))
+	elseif self:BarTimeLeft(L.overwhelming_energy_bar:format(ballCount)) > 6 then
+		self:PauseBar(161612, L.overwhelming_energy_bar:format(ballCount))
+		self:CancelDelayedMessage(CL.soon:format(self:SpellName(161612)))
+	end
+end
+
+function mod:BarrierApplied(args)
+	if not self.isEngaged then return end -- Prevent this running when he gains the shield on engage, but before encounter engage events fire. 
+	intermission = nil
+	self:Message(160734, "Positive", nil, args.spellName)
+	self:ResumeBar(161328) -- Suppression Field
+	self:ResumeBar(162184) -- Expel Magic: Shadow
+	self:ResumeBar(162185) -- Expel Magic: Fire
+	self:ResumeBar(162186) -- Expel Magic: Arcane
+	self:ResumeBar(172747) -- Expel Magic: Frost
+	self:ResumeBar(172895) -- Expel Magic: Fel
+	if self:Mythic() then
+		self:ResumeBar(163472, L.dominating_power_bar:format(ballCount))
+		local cd = self:BarTimeLeft(L.dominating_power_bar:format(ballCount))
+		if cd > 0 then
+			self:DelayedMessage(163472, cd-6, "Urgent", CL.soon:format(self:SpellName(163472)), 163472) -- Dominating Power soon!
+		end
+	end
+	self:ResumeBar(161612, L.overwhelming_energy_bar:format(ballCount))
+	if UnitPower("player", 10) > 0 then -- has alternate power (soaking)
+		local cd = self:BarTimeLeft(L.overwhelming_energy_bar:format(ballCount))
+		if cd > 0 then
+			self:DelayedMessage(161612, cd-6, "Positive", CL.soon:format(self:SpellName(161612)), 161612, "Warning") -- Overwhelming Energy soon!
+		end
+	end
+	self:RegisterUnitEvent("UNIT_POWER_FREQUENT", nil, "boss1")
+end
+
 function mod:ExpelMagicShadow(args)
 	self:Message(args.spellId, "Attention", "Alert")
+	self:CDBar(args.spellId, 63) -- 63-65
 end
 
 do
@@ -187,7 +200,6 @@ do
 	function mod:ExpelMagicArcaneStart(args)
 		--self:TargetMessage(158605, self:UnitName("boss1target"), "Urgent", "Warning", CL.casting:format(args.spellName))
 		self:GetBossTarget(printTarget, 0.1, args.sourceGUID)
-		nextArcane = GetTime() + 26.7
 		self:CDBar(args.spellId, 26.7)
 	end
 end
@@ -216,6 +228,7 @@ end
 
 function mod:ExpelMagicFire(args)
 	self:Message(args.spellId, "Important", "Alarm")
+	self:CDBar(args.spellId, 63) -- 63-65
 	self:Bar(args.spellId, 10, L.fire_bar)
 	self:OpenProximity(args.spellId, 5)
 	self:ScheduleTimer("CloseProximity", 10.5, args.spellId)
@@ -223,19 +236,19 @@ end
 
 do
 	local function printTarget(self, name, guid)
-		local inRange = self:Range(name) < 30
 		if self:Me(guid) then
 			self:Flash(172747)
 			self:Say(172747)
-		elseif inRange then
+			self:PlaySound(172747, "Alarm")
+		elseif self:Range(name) < 30 then
 			self:Flash(172747)
+			self:PlaySound(172747, "Alarm")
 		end
-		self:TargetMessage(172747, name, "Neutral", "Alarm", nil, nil, inRange)
+		self:TargetMessage(172747, name, "Neutral")
 	end
 	function mod:ExpelMagicFrost(args)
 		self:GetBossTarget(printTarget, 0.5, args.sourceGUID)
 		self:Bar(args.spellId, 21.5, ("<%s>"):format(self:SpellName(84721)), 84721) -- Frozen Orb
-		nextFrost = GetTime() + 60
 		self:Bar(args.spellId, 60)
 	end
 end
@@ -247,7 +260,7 @@ do
 	end
 	function mod:SuppressionFieldYell(_, _, _, _, _, suppressionTarget)
 		if allowSuppression then
-			allowSuppression = false
+			allowSuppression = nil
 			if UnitIsUnit("player", suppressionTarget) then
 				self:Flash(161328)
 				self:Say(161328)
@@ -280,21 +293,18 @@ do
 	function mod:OverwhelmingEnergy(args)
 		local t = GetTime()
 		if t-prev > 10 then
-			self:StopBar(L.overwhelming_energy_bar:format(ballCount))
-			self:StopBar(L.dominating_power_bar:format(ballCount))
-			ballCount = ballCount + 1
-			if UnitPower("player", 10) > 0 then -- has alternate power (soaking)
-				self:Message(161612, "Positive", "Warning", CL.count:format(args.spellName, ballCount)) -- green to keep it different looking
-			end
-			nextBall = t + 30
-			if self:Mythic() and nextMC-t < 35 then -- XXX still worried about these getting out of sync
-				nextMC = nextBall
-				self:CDBar(163472, 30, L.dominating_power_bar:format(ballCount)) -- Dominating Power
-				self:Message(163472, "Urgent", nil, CL.custom_sec:format(self:SpellName(163472), 30)) -- Dominating Power in 30 sec!
-			else
-				self:CDBar(161612, 30, L.overwhelming_energy_bar:format(ballCount)) -- Overwhelming Enery
-			end
 			prev = t
+			ballCount = ballCount + 1
+			local cd = intermission and 60 or 30 -- doesn't actually start the cd until the next time they would have hit if falling during the intermission
+			if self:Mythic() and ballCount % 2 == 0 then
+				self:CDBar(163472, cd, L.dominating_power_bar:format(ballCount)) -- Dominating Power
+				self:DelayedMessage(163472, cd-6, "Urgent", CL.soon:format(self:SpellName(163472))) -- Dominating Power soon!
+			else
+				self:CDBar(161612, cd, L.overwhelming_energy_bar:format(ballCount)) -- Overwhelming Energy
+				if UnitPower("player", 10) > 0 then -- has alternate power (soaking)
+					self:DelayedMessage(161612, cd-6, "Positive", CL.soon:format(args.spellName), 161612, "Warning") -- Overwhelming Energy soon!
+				end
+			end
 		end
 	end
 end
@@ -344,7 +354,6 @@ do
 	function mod:DominatingPower(args)
 		list[#list+1] = args.destName
 		if not scheduled then
-			nextMC = GetTime() + 60
 			scheduled = self:ScheduleTimer(warn, 0.2, self, args.spellId)
 		end
 	end

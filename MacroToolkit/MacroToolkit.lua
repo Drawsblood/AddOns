@@ -206,12 +206,18 @@ function MT:eventHandler(this, event, arg1, ...)
 		end
 		--if #MT.db.global.extended > 0 then
 		if countTables(MT.db.global.extended) > 0 then
-			for i, e in pairs(MT.db.global.extended) do _G[format("MTSB%d", i)]:SetAttribute("macrotext", e.body) end
+			for i, e in pairs(MT.db.global.extended) do 
+				_G[format("MTSB%d", i)]:SetAttribute("macrotext", e.body)
+				_G[format("MTSB%d", i)]:SetAttribute("dynamic", MT:IsDynamic(i))
+				MT:UpdateIcon(_G[format("MTSB%d", i)])
+			end
 		end
 		--if #MT.db.char.extended > 0 then
 		if countTables(MT.db.char.extended) > 0 then
 			for i, e in pairs(MT.db.char.extended) do 
 				_G[format("MTSB%d", i)]:SetAttribute("macrotext", e.body)
+				_G[format("MTSB%d", i)]:SetAttribute("dynamic", MT:IsDynamic(i))
+				MT:UpdateIcon(_G[format("MTSB%d", i)])
 				--check for orphaned macro
 				local found = false
 				for om = _G.MAX_ACCOUNT_MACROS + 1, _G.MAX_CHARACTER_MACROS + _G.MAX_ACCOUNT_MACROS do
@@ -271,6 +277,7 @@ function MT:ClearAllMacros()
 			DeleteMacro(m)
 			MT:MacroFrame      ()
 			_G[format("MTSB%d", m)]:SetAttribute("macrotext", "")
+			_G[format("MTSB%d", m)]:SetAttribute("dynamic", false)
 		end
 		local var = (tab == 1) and "global" or "char"
 		MT.db[var].extended = {}
@@ -526,6 +533,7 @@ function MT:ExtendMacro(save, macrobody, idx, exists)
 	if not exists then 
 		MT:UpdateExtended(idx or MTF.selectedMacro, body, index)
 		securebutton:SetAttribute("macrotext", body)
+		securebutton:SetAttribute("dynamic", MT:IsDynamic(idx or MTF.selectedMacro))
 	end
 	--modified 15/12/13 - need to ensure button info is passed to the secure frame
 	--local newbody = format("%s%s%s %s", showtooltip, show, MT.click, securebutton:GetName())
@@ -542,6 +550,7 @@ function MT:ExtendMacro(save, macrobody, idx, exists)
 		MacroToolkitText:GetScript("OnTextChanged")(MacroToolkitText)
 		MT:UpdateCharLimit()
 	end
+	return n
 end
 
 --function to modify any extended macro created prior to the fix that passes
@@ -586,6 +595,7 @@ local function unextend(body)
 	local securebutton = _G[format("MTSB%d", mindex)]
 	MT:DeleteExtended(mindex)
 	securebutton:SetAttribute("macrotext", "")
+	securebutton:SetAttribute("dynamic", false)
 	MacroToolkitText.extended = nil
 	_G[format("MacroToolkitButton%d", (MTF.selectedMacro - MTF.macroBase))].extended = nil
 	MacroToolkitExtend:SetText(L["Extend"])
@@ -988,6 +998,13 @@ function MT:ShowDetails()
 	MacroToolkitExtend:Enable()
 end
 
+function MT:IsDynamic(index)
+	if not index then return false end
+	local body = select(2, GetMacroInfo(index))
+	if not body or body == "" then return false end
+	return strlower(body) == "interface\\icons\\inv_misc_questionmark"
+end
+
 function MT:SaveMacro()
 	if InCombatLockdown() then
 		MT:CombatMessage()
@@ -1001,7 +1018,9 @@ function MT:SaveMacro()
 			MT.db.global.extra[tostring(MTF.selectedMacro)].body = MacroToolkitText:GetText()
 			_G[format("MTSB%d", MTF.selectedMacro)]:SetAttribute("macrotext", MacroToolkitText:GetText())
 		else
-			if MacroToolkitText.extended then MT:ExtendMacro(true)
+			if MacroToolkitText.extended then
+				local n = MT:ExtendMacro(true)
+				MT:UpdateIcon(_G[n])
 			else EditMacro(MTF.selectedMacro, nil, nil, MacroToolkitText:GetText()) end
 		end
 		MTF.textChanged = nil

@@ -68,3 +68,11 @@ L["slow_fixate"] = "减速+锁定"
 
 end
 
+L = BigWigs:NewBossLocale("Highmaul Trash", "zhCN")
+if L then
+L["oro"] = "奥罗"
+L["ritualist"] = "毁灭者祭师"
+L["runemaster"] = "高里亚符文大师"
+
+end
+

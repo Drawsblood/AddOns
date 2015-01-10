@@ -812,6 +812,11 @@ do -- tabs
 			PlaySound("UI_Garrison_Toast_MissionComplete")
 		end
 	end)
+	local hidden = CreateFrame("Frame")
+	hidden:Hide()
+	GarrisonMissionFrameMissionsTab1:SetParent(hidden)
+	GarrisonMissionFrameMissionsTab2:SetParent(hidden)
+	GarrisonMissionFrameMissionsListScrollFrame:SetParent(hidden)
 end
 
 local GetActiveMissions, StartCompleteAll, CompleteMission, ClearCompletionState do
@@ -1419,12 +1424,14 @@ do -- activeMissionsHandle
 		
 		local nr, nf, r = 1, 1
 		if type(d.followers) == "table" then
-			local fi, w
+			local fin, fi, w = G.GetFollowerInfo()
 			for i=1,#d.followers do
-				fi, w, nf = C_Garrison.GetFollowerInfo(d.followers[i]), self.followers[nf], nf + 1
-				w.followerID = fi.followerID
-				w.portrait:SetToFileData(fi.portraitIconID)
-				w:Show()
+				fi, w = fin[d.followers[i]], self.followers[nf]
+				if fi and w then
+					w.followerID, nf = fi.followerID, nf + 1
+					w.portrait:SetToFileData(fi.portraitIconID)
+					w:Show()
+				end
 			end
 		end
 		if type(d.rewards) == "table" then
@@ -2152,6 +2159,7 @@ do -- interestMissionsHandle
 		self.level:SetText("")
 		self.fc:SetText("")
 		self.title:SetText("")
+		self.seen:SetText("")
 		self.mtype:SetTexture(0,0,0,0)
 		unusedFollowers:SetParent(self)
 		unusedFollowers:SetPoint("BOTTOM")
@@ -2275,7 +2283,7 @@ do -- interestMissionsHandle
 				missions[#missions] = nil
 			end
 			missionRewards[-0][1] = GetHighmaulReward()
-			local c2, c3, ni = IsQuestComplete(35998), IsQuestComplete(36013), 1
+			local c2, c3, ni = IsQuestFlaggedCompleted(35998), IsQuestFlaggedCompleted(36013), 1
 			if c2 or c3 then
 				for i=1,#missions do
 					local rt = missions[i][5]
@@ -2419,7 +2427,6 @@ function api:SetMissionsUI(tab)
 	availUI:SetShown(tab == 1)
 	activeUI:SetShown(tab == 3)
 	interestUI:SetShown(tab == 4)
-	GarrisonMissionFrameMissionsListScrollFrame:Hide()
 	if not activeUI:IsShown() then
 		if activeUI.completionState == "RUNNING" then
 			G.AbortCompleteMissions()

@@ -53,8 +53,8 @@ end
 L = BigWigs:NewBossLocale("Imperator Mar'gok", "deDE")
 if L then
 L["add_death_soon"] = "Add stirbt bald!"
-L["adds"] = "Nachtsiechender Getreuer" -- Needs review
-L["adds_desc"] = "Zeigt an, wann Nachtsiechende Getreue dem Kampf beitreten." -- Needs review
+L["adds"] = "Nachtsiechender Gläubiger"
+L["adds_desc"] = "Zeigt an, wann Nachtsiechende Gläubige dem Kampf beitreten."
 L["branded_say"] = "%s (%d) %dm"
 L["custom_off_branded_marker"] = "Gebrandmarkt markieren"
 L["custom_off_branded_marker_desc"] = [=[Markiert die Ziele von Gebrandmarkt mit {rt3}{rt4}, benötigt Leiter oder Assistent.
@@ -63,7 +63,16 @@ L["custom_off_fixate_marker"] = "Fixieren markieren"
 L["custom_off_fixate_marker_desc"] = [=[Markiert die Ziele von Fixieren mit {rt1}{rt2}, benötigt Leiter oder Assistent.
 |cFFFF0000Um Konflikte beim Markieren zu vermeiden, sollte lediglich 1 Person im Raid diese Option aktivieren.|r]=]
 L["gaze_target_message"] = "Vorgeschmack zielt auf DICH!"
+L["phase4_trigger"] = "Ihr wisst überhaupt nicht, worauf Ihr Euch einlasst"
 L["slow_fixate"] = "Verlangsamen + Fixieren"
+
+end
+
+L = BigWigs:NewBossLocale("Highmaul Trash", "deDE")
+if L then
+L["oro"] = "Oro"
+L["ritualist"] = "Brecherritualist"
+L["runemaster"] = "Gorianischer Runenmeister"
 
 end
 

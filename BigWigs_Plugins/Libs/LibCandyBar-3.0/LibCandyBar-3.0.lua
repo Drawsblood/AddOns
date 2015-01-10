@@ -20,7 +20,7 @@ local CreateFrame, error, setmetatable, UIParent = CreateFrame, error, setmetata
 if not LibStub then error("LibCandyBar-3.0 requires LibStub.") end
 local cbh = LibStub:GetLibrary("CallbackHandler-1.0")
 if not cbh then error("LibCandyBar-3.0 requires CallbackHandler-1.0") end
-local lib, old = LibStub:NewLibrary("LibCandyBar-3.0", 82) -- Bump minor on changes
+local lib, old = LibStub:NewLibrary("LibCandyBar-3.0", 83) -- Bump minor on changes
 if not lib then return end
 lib.callbacks = lib.callbacks or cbh:New(lib)
 local cb = lib.callbacks
@@ -54,6 +54,7 @@ local function stopBar(bar)
 	bar.running = nil
 	bar.paused = nil
 	bar:Hide()
+	bar:SetParent(UIParent)
 end
 
 local tformat1 = "%d:%02d:%02d"

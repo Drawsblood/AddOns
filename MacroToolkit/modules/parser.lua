@@ -243,7 +243,8 @@ local function parseSequence(parameters)
 	local reset, cs = "", ""
 	local c = format("|c%s", MT.db.profile.stringcolour)
 	local s, e, rw, res = string.find(parameters, "(reset%s*=%s*)(.*)")
-	local err, err2, rwhole
+	local err, err2, rwhole, parok
+	local rpars = {"target", "combat", "ctrl", "shift", "alt"}
 	if s then
 		local s1, e1 = string.find(res, " ")
 		if s1 then
@@ -259,16 +260,21 @@ local function parseSequence(parameters)
 			local rp = {strsplit("/", reset)}
 			for _, p in ipairs(rp) do
 				if not isNumeric({p}) then
-					if p ~= "target" and p ~= "combat" then
+					--ticket 85
+					for _, rp in ipairs(rpars) do
+						if p == rp then
+							parok = true
+							break
+						end
+					end
+					if not parok then
 						err = format("%s: reset=|c%s%s|r", L["Unknown parameter"], MT.db.profile.stringcolour, p)
 						break
-					end
+					else parok = false end
 				end
 			end
 		end
-	else
-		cs = parameters
-	end
+	else cs = parameters end
 	
 	--0 is no longer accepted as a valid slot as of 6.0.2
 	s, e, rw = string.find(cs, "0%s*,")

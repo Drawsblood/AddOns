@@ -27,7 +27,7 @@ if L then
 L["creeping_moss_add_heal"] = "Мох под БОЛЬШИМ АДДОМ (исцеляется)"
 L["creeping_moss_boss_heal"] = "Мох под БОССОМ (исцеление)"
 L["mythic_ability"] = "Особая способность"
-L["mythic_ability_desc"] = "Показать таймер следующего Зова прилива или Взрывных поганок" -- Needs review
+L["mythic_ability_desc"] = "Показать таймер следующего Зова прилива или Взрывных поганок"
 
 end
 
@@ -45,24 +45,32 @@ L["custom_off_fel_marker"] = "Метка - Исторжение магии: Ск
 L["custom_off_fel_marker_desc"] = [=[Пометить метками {rt1}{rt2}{rt3} цели с Исторженим магии: Скверна. Требует лидера или повышения.
 |cFFFF0000Только 1 человек должен иметь данную опцию включенной, чтобы избежать конфликтов.|r]=]
 L["fire_bar"] = "Все взорвутся!"
-L["overwhelming_energy_bar"] = "Шаров упало" -- Needs review
+L["overwhelming_energy_bar"] = "Шаров упало"
 
 end
 
 L = BigWigs:NewBossLocale("Imperator Mar'gok", "ruRU")
 if L then
 L["add_death_soon"] = "Прислужник скоро умрет!"
-L["adds"] = "Поддавшийся ночи верный служитель" -- Needs review
-L["adds_desc"] = "Отсчёт времени до выхода поддавшегося ночи верного служителя" -- Needs review
-L["branded_say"] = "%s (%d) %d" -- Needs review
-L["custom_off_branded_marker"] = "Метки заклинания Клеймо." -- Needs review
-L["custom_off_branded_marker_desc"] = "Помечать значками {rt3}{rt4} цели Клейма, требует быть лидером или иметь повышение." -- Needs review
+L["adds"] = "Поддавшийся ночи верный служитель"
+L["adds_desc"] = "Отсчёт времени до выхода поддавшегося ночи верного служителя"
+L["branded_say"] = "%s (%d) %d"
+L["custom_off_branded_marker"] = "Метки заклинания Клеймо."
+L["custom_off_branded_marker_desc"] = "Помечать значками {rt3}{rt4} цели Клейма, требует быть лидером или иметь повышение."
 L["custom_off_fixate_marker"] = "Маркировка Сосредоточение внимания"
 L["custom_off_fixate_marker_desc"] = [=[Отмечать цели Горианских боевых магов метками {rt1}{rt2}, требуется быть помощником или лидером.
 |cFFFF0000Только 1 человек в рейде должен включить эту опцию, чтобы предотвратить конфликты.|r]=]
-L["gaze_target_message"] = "Вспышка безумия на ВАС!" -- Needs review
-L["phase4_trigger"] = "Ты понятия не имеешь о силе камней" -- Needs review
-L["slow_fixate"] = "Замедление+Фиксация" -- Needs review
+L["gaze_target_message"] = "Вспышка безумия на ВАС!"
+L["phase4_trigger"] = "Ты понятия не имеешь о силе камней"
+L["slow_fixate"] = "Замедление+Фиксация"
+
+end
+
+L = BigWigs:NewBossLocale("Highmaul Trash", "ruRU")
+if L then
+L["oro"] = "Оро"
+L["ritualist"] = "Ритуалист-сокрушитель"
+L["runemaster"] = "Горианский мастер рун"
 
 end
 

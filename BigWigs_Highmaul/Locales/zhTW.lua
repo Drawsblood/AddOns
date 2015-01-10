@@ -54,7 +54,7 @@ L = BigWigs:NewBossLocale("Imperator Mar'gok", "zhTW")
 if L then
 L["add_death_soon"] = "小怪即將死亡！"
 L["adds"] = "夜狂信徒"
-L["adds_desc"] = "為夜狂信徒進入戰鬥顯示計時器."
+L["adds_desc"] = "為夜狂信徒進入戰鬥顯示計時器。" -- Needs review
 L["branded_say"] = "%s (%d) %d碼"
 L["custom_off_branded_marker"] = "標記烙印"
 L["custom_off_branded_marker_desc"] = "標記烙印的目標為 {rt3}{rt4}，需要團隊權限或隊長。"
@@ -62,8 +62,16 @@ L["custom_off_fixate_marker"] = "標記凝視"
 L["custom_off_fixate_marker_desc"] = [=[標記戈利安戰爭法師凝視的目標為 {rt1}{rt2}，需要團隊權限或隊長。
 |cFFFF0000團隊中該只有一人啟用這選項以避免衝突。|r]=]
 L["gaze_target_message"] = "瘋狂之眼凝視 >你<！"
-L["phase4_trigger"] = "你根本不知道你面對的是什麼力量，瑪爾戈克"
+L["phase4_trigger"] = "你根本不知道你面對的是什麼力量，瑪爾戈克。(我們知道，它在呼喚我們！它的力量是我們的！)"
 L["slow_fixate"] = "緩速+凝視"
+
+end
+
+L = BigWigs:NewBossLocale("Highmaul Trash", "zhTW")
+if L then
+L["oro"] = "歐洛" -- Needs review
+L["ritualist"] = "破源者祭儀師" -- Needs review
+L["runemaster"] = "戈利安符文師" -- Needs review
 
 end
 

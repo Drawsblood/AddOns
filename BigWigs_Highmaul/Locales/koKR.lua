@@ -53,6 +53,8 @@ end
 L = BigWigs:NewBossLocale("Imperator Mar'gok", "koKR")
 if L then
 L["add_death_soon"] = "쫄이 곧 죽습니다!"
+L["adds"] = "뒤틀린 밤의 신봉자"
+L["adds_desc"] = "뒤틀린 밤의 신봉자가 전투에 난입하는 때를 알려주는 타이머"
 L["branded_say"] = "%s (%d) %d미터"
 L["custom_off_branded_marker"] = "낙인 징표 설정"
 L["custom_off_branded_marker_desc"] = [=[낙인의 대상을 {rt3}{rt4}의 징표로 설정합니다.
@@ -60,8 +62,17 @@ L["custom_off_branded_marker_desc"] = [=[낙인의 대상을 {rt3}{rt4}의 징�
 L["custom_off_fixate_marker"] = "시선집중 징표 설정"
 L["custom_off_fixate_marker_desc"] = [=[고리안 전투마법사의 시선 집중의 대상을 {rt1}{rt2}의 징표로 설정합니다.
 |cFFFF0000징표 설정에서 문제가 발생하는 것을 막기 위해 공격대에서 오직 1명만 이 옵션을 활성화해야 합니다.|r]=]
+L["gaze_target_message"] = "당신은 심연의 시선의 대상자입니다!"
 L["phase4_trigger"] = "마르고크, 넌 그 힘에 대해 아무것도 모른다."
 L["slow_fixate"] = "감속+시선 집중"
+
+end
+
+L = BigWigs:NewBossLocale("Highmaul Trash", "koKR")
+if L then
+L["oro"] = "오로"
+L["ritualist"] = "파괴자 의식술사"
+L["runemaster"] = "고리안 룬마법사" -- Needs review
 
 end
 

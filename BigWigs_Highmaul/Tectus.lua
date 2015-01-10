@@ -61,13 +61,13 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
+	--self:Log("SPELL_CAST_SUCCESS", "AddsSpawn", 181113) -- XXX 6.1
 	-- Tectus
 	self:Log("SPELL_AURA_APPLIED_DOSE", "Accretion", 162288)
 	self:Log("SPELL_AURA_APPLIED", "CrystallineBarrage", 162346)
 	self:Log("SPELL_AURA_REMOVED", "CrystallineBarrageRemoved", 162346)
 	self:Log("SPELL_PERIODIC_DAMAGE", "CrystallineBarrageDamage", 162370)
 	self:Log("SPELL_PERIODIC_MISSED", "CrystallineBarrageDamage", 162370)
-	self:Log("SPELL_ABSORBED", "CrystallineBarrageDamage", 162370)
 	self:Log("SPELL_CAST_START", "TectonicUpheaval", 162475)
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "Split", "boss1", "boss2", "boss3")
 	-- Earthwarper
@@ -149,9 +149,9 @@ do
 	local prev = 0
 	function mod:CrystallineBarrageDamage(args)
 		local t = GetTime()
-		if self:Me(args.destGUID) and t-prev > 2 then
-			self:Message(162346, "Personal", "Alarm", CL.underyou:format(args.spellName))
+		if self:Me(args.destGUID) and t-prev > 1 then
 			prev = t
+			self:Message(162346, "Personal", "Alarm", CL.underyou:format(args.spellName))
 		end
 	end
 end
@@ -172,9 +172,9 @@ end
 
 function mod:Split(unit, spellName, _, _, spellId)
 	if spellId == 140562 then -- Break Player Targetting (cast when Tectus/Shards die)
-		self:StopBar(-10061) -- Earthwarper
-		self:StopBar(-10062) -- Berserker
 		if not self:Mythic() then
+			self:StopBar(-10061) -- Earthwarper
+			self:StopBar(-10062) -- Berserker
 			self:UnregisterEvent("CHAT_MSG_MONSTER_YELL")
 		end
 		--self:CDBar(162346, 8) -- Crystalline Barrage 7-12s, then every ~20s, 2-5s staggered
@@ -196,6 +196,21 @@ function mod:NewAdd(event, msg, unit)
 	end
 end
 
+-- XXX for patch 6.1
+-- The CDs *might* need adapted due to the event being slightly earlier than the yell
+--function mod:AddsSpawn(args)
+--	if self:MobId(args.sourceGUID) == 80599 then -- Night-Twisted Earthwarper
+--		self:Message("adds", "Attention", "Info", -10061, false)
+--		self:CDBar("adds", 41, -10061, "spell_shadow_raisedead")
+--		self:CDBar(162894, 10) -- Gift of Earth
+--		self:CDBar(162968, 15) -- Earthen Flechettes
+--	elseif self:MobId(args.sourceGUID) == 80822 then -- Night-Twisted Berserker
+--		self:Message("adds", "Attention", "Info", -10062, false)
+--		self:CDBar("adds", 41, -10062, "ability_warrior_endlessrage")
+--		self:CDBar(163312, 13) -- Raving Assault (~10s + 3s cast)
+--	end
+--end
+
 function mod:GiftOfEarth(args)
 	self:Message(args.spellId, "Urgent", "Alert")
 	self:CDBar(args.spellId, 11)
@@ -214,9 +229,9 @@ do
 	local prev = 0
 	function mod:EarthenFlechettesDamage(args)
 		local t = GetTime()
-		if self:Me(args.destGUID) and not self:Tank() and t-prev > 2 then
-			self:Message(args.spellId, "Personal", "Alarm", CL.underyou:format(args.spellName))
+		if self:Me(args.destGUID) and not self:Tank() and t-prev > 1 then
 			prev = t
+			self:Message(args.spellId, "Personal", "Alarm", CL.underyou:format(args.spellName))
 		end
 	end
 end

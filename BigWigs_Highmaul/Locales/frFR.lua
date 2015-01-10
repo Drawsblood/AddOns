@@ -67,3 +67,11 @@ L["slow_fixate"] = "Lenteur+Fixer"
 
 end
 
+L = BigWigs:NewBossLocale("Highmaul Trash", "frFR")
+if L then
+L["oro"] = "Oro" -- Needs review
+L["ritualist"] = "Briseur ritualiste" -- Needs review
+L["runemaster"] = "Maître des runes gorien" -- Needs review
+
+end
+

@@ -54,6 +54,15 @@ L = BigWigs:NewBossLocale("Imperator Mar'gok", "itIT")
 if L then
 L["add_death_soon"] = "L'add sta per morire tra poco!"
 L["branded_say"] = "%s (%d) %dy"
+L["phase4_trigger"] = "Non conosci il potere con cui hai a che fare, Mar'gok."
+
+end
+
+L = BigWigs:NewBossLocale("Highmaul Trash", "itIT")
+if L then
+L["oro"] = "Oro"
+L["ritualist"] = "Ritualista Spezzatore" -- Needs review
+L["runemaster"] = "Maestro Runico Gorian" -- Needs review
 
 end
 
