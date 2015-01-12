@@ -70,6 +70,7 @@ end
 
 L = BigWigs:NewBossLocale("Highmaul Trash", "zhCN")
 if L then
+L["arcanist"] = "高里亚奥术师"
 L["oro"] = "奥罗"
 L["ritualist"] = "毁灭者祭师"
 L["runemaster"] = "高里亚符文大师"

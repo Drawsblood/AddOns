@@ -102,7 +102,7 @@ MT.conditions={
 
 MT.optargs={
 	[6]={"1","2","3","4","5","LeftButton","MiddleButton","RightButton","Button4","Button5"},
-	[5]={"alt","shift","ctrl","AUTOLOOTTOGGLE","STICKCAMERA","SPLITSTACK","PICKUPACTION","COMPAREITEMS","OPENALLBAGS","QUESTWATCHTOGGLE","SELFCAST"},
+	[5]={"alt","shift","ctrl","ctrlalt","ctrlshift","altshift","ctrlshiftalt","AUTOLOOTTOGGLE","STICKCAMERA","SPLITSTACK","PICKUPACTION","COMPAREITEMS","OPENALLBAGS","QUESTWATCHTOGGLE","SELFCAST"},
 	[4]={"party","raid"},
 }
 

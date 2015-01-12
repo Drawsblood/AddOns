@@ -103,6 +103,7 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
+	--self:Log("SPELL_CAST_SUCCESS", "PhaseEnd", 181089) -- XXX 6.1
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "PhaseEnd", "boss1")
 	self:Log("SPELL_AURA_APPLIED", "PhaseStart", 158012, 157964) -- Power of Fortification, Replication
 	self:Log("SPELL_AURA_APPLIED_DOSE", "AcceleratedAssault", 159515)
@@ -136,8 +137,8 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_APPLIED", "GazeOfTheAbyssApplied", 165595)
 	self:Log("SPELL_AURA_APPLIED_DOSE", "GazeOfTheAbyssApplied", 165595)
 	self:Log("SPELL_AURA_REMOVED", "GazeOfTheAbyssRemoved", 165595)
-	self:Log("SPELL_AURA_APPLIED", "GazeClosestApplied", 176537)
-	self:Log("SPELL_AURA_REMOVED", "GazeClosestRemoved", 176537)
+	self:Log("SPELL_AURA_APPLIED", "GazeClosestApplied", 176537) -- XXX 6.1 renamed to Eyes of the Abyss
+	self:Log("SPELL_AURA_REMOVED", "GazeClosestRemoved", 176537) -- XXX 6.1 renamed to Eyes of the Abyss
 	self:Log("SPELL_AURA_APPLIED", "GrowingDarknessDamage", 176525)
 	--self:Log("SPELL_CAST_SUCCESS", "ChogallSpawn", 181113) -- XXX 6.1
 
@@ -165,6 +166,21 @@ function mod:OnEngage()
 	self:Bar(158605, 34) -- Mark of Chaos
 	self:Bar(157349, 45) -- Force Nova
 	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+end
+
+function mod:OnBossDisable()
+	if self.db.profile.custom_off_branded_marker then
+		for _, player in next, brandedMarks do
+			SetRaidTarget(player, 0)
+		end
+		wipe(brandedMarks)
+	end
+	if self.db.profile.custom_off_fixate_marker then
+		for player in next, fixateMarks do
+			SetRaidTarget(player, 0)
+		end
+		wipe(fixateMarks)
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -308,6 +324,8 @@ do -- GazeOfTheAbyss
 	-- only show the proximity for people that aren't targeted by an add (debuff will fall off)
 
 	-- debuff scanning because the two add debuffs have the same name :\
+
+	-- XXX fixed for 6.1, renamed to "Eyes of the Abyss" FIXME
 	local function checkDebuff(unit, id)
 		if select(11, UnitDebuff(unit, (GetSpellInfo(id)))) == id then return true end -- only one?
 		for i = 1, 10 do
@@ -448,6 +466,11 @@ function mod:PhaseEnd(unit, spellName, _, _, spellId)
 		end
 	end
 end
+
+-- XXX for patch 6.1
+--function mod:PhaseEnd(args)
+--	
+--end
 
 function mod:PhaseStart(args)
 	if not self.isEngaged then return end -- In Mythic mode he gains this when he's floating around the room before engage.

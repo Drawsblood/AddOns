@@ -70,6 +70,7 @@ end
 
 L = BigWigs:NewBossLocale("Highmaul Trash", "deDE")
 if L then
+L["arcanist"] = "Gorianischer Arkanist"
 L["oro"] = "Oro"
 L["ritualist"] = "Brecherritualist"
 L["runemaster"] = "Gorianischer Runenmeister"

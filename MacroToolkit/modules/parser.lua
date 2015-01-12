@@ -536,6 +536,20 @@ function MT:ShortenMacro(macrotext)
 				l = string.gsub(l, format("%s Sound_EnableSFX 1", scon), format("%smtso", MT.slash))
 				l = string.gsub(l, format("%s VehicleExit%%(%%)", srun), format("%smtev", MT.slash))
 			end
+			--*** ticket 89 
+			l = string.gsub(l, "mod:ctrl,mod:shift,mod:alt", "mod:ctrlshiftalt")
+			l = string.gsub(l, "mod:ctrl,mod:alt,mod:shift", "mod:ctrlshiftalt")
+			l = string.gsub(l, "mod:shift,mod:ctrl,mod:alt", "mod:ctrlshiftalt")
+			l = string.gsub(l, "mod:shift,mod:alt,mod:ctrl", "mod:ctrlshiftalt")
+			l = string.gsub(l, "mod:alt,mod:shift,mod:ctrl", "mod:ctrlshiftalt")
+			l = string.gsub(l, "mod:alt,mod:ctrl,mod:shift", "mod:ctrlshiftalt")
+			l = string.gsub(l, "mod:ctrl,mod:alt", "mod:ctrlalt")
+			l = string.gsub(l, "mod:alt,mod:ctrl", "mod:ctrlalt")
+			l = string.gsub(l, "mod:ctrl,mod:shift", "mod:ctrlshift")
+			l = string.gsub(l, "mod:shift,mod:ctrl", "mod:ctrlshift")
+			l = string.gsub(l, "mod:alt,mod:shift", "mod:altshift")
+			l = string.gsub(l, "mod:shift,mod:alt", "mod:altshift")
+			--***
 			table.insert(mout, l)
 		end
 	end

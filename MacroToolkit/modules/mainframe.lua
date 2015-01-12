@@ -911,9 +911,11 @@ function MT:UpdateIcon(this, justicon)
 			if MT:IsCast(cmd) or MT:IsCastSequence(cmd) then
 				local spell, target = SecureCmdOptionParse(mline)
 				if MT:IsCastSequence(cmd) then
-					local idx, it, sp = QueryCastSequence(spell)
-					spell = sp or it
-					if string.sub(spell, 1, 1) == "!" then spell = string.sub(spell, 2) end
+					if spell then
+						local idx, it, sp = QueryCastSequence(spell)
+						spell = sp or it
+						if spell then if string.sub(spell, 1, 1) == "!" then spell = string.sub(spell, 2) end end
+					end
 				end
 				if spell then
 					icon = select(3, GetSpellInfo(spell))

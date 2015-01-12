@@ -1,0 +1,7 @@
+## Interface: 60000
+## Title: Een
+## Author: Een
+## Notes: Een's Chat Window backup
+## SavedVariables: Een_ChannelColours, Een_ChatFrame, Een_AutoLoad, Een_Msg 
+## SavedVariablesPerCharacter: Een_ToonChatFrame
+Een.lua

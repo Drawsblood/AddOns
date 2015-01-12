@@ -118,6 +118,15 @@ function mod:OnEngage()
 	end
 end
 
+function mod:OnBossDisable()
+	if self.db.profile.custom_off_volatility_marker then
+		for _, player in next, volatilityTargets do
+			SetRaidTarget(player, 0)
+		end
+		wipe(volatilityTargets)
+	end
+end
+
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
@@ -230,7 +239,7 @@ function mod:DoubleSlash(args)
 end
 
 function mod:ArcaneWound(args)
-	self:TargetMessage(args.spellId, args.destName, args.amount, "Neutral")
+	self:TargetMessage(args.spellId, args.destName, "Neutral")
 end
 
 function mod:Whirlwind(args)

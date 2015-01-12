@@ -72,7 +72,7 @@ L = BigWigs:NewBossLocale("Highmaul Trash", "koKR")
 if L then
 L["oro"] = "오로"
 L["ritualist"] = "파괴자 의식술사"
-L["runemaster"] = "고리안 룬마법사" -- Needs review
+L["runemaster"] = "고리안 룬술사"
 
 end
 
