@@ -4,7 +4,6 @@
 	<Include file="Externals\curse\svn\CallbackHandler-1.0\CallbackHandler-1.0.xml" />
 	
 	<Include file="Externals\curse\hg\LibDialog-1.0\lib.xml" />
-	<Script file="Externals\curse\git\LibDataBroker-1.1\LibDataBroker-1.1.lua" />
 	
 	<Include file="Externals\curse\svn\Ace3-AceAddon\AceAddon-3.0.xml" />
 	<Include file="Externals\curse\svn\Ace3-AceConsole\AceConsole-3.0.xml" />

@@ -1,0 +1,7 @@
+## Interface: 60000
+## Title: SetButtonFonts
+## Dependencies: Prat-3.0
+## Author: Christopher Giroir <kelsin@valefor.com>
+## Version: 0.0.1
+SetButtonFonts.lua
+

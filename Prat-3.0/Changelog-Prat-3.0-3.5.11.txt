@@ -1,0 +1,8 @@
+2015-01-12  sylvanaar  <sylvanaar@mindspring.com>
+
+[f93239cf7d74] [3.5.11]
+* modules/PlayerNames.lua:
+
+Fix level information for guild members, so level's appear in guild chat again.
+
+

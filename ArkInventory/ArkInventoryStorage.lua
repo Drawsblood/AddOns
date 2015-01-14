@@ -967,7 +967,7 @@ function ArkInventory.HookMailSend( ... )
 	
 	smd.id = id
 	smd.sender = ArkInventory.Global.Me.info.id
-	smd.age = ArkInventory.ItemAgeUpdate( )
+	smd.age = ArkInventory.TimeAsMinutes( )
 	
 	local name, texture, count
 	for x = 1, ATTACHMENTS_MAX_SEND do
@@ -1013,7 +1013,7 @@ function ArkInventory.HookMailReturn( index )
 	
 	smd.id = id
 	smd.sender = ArkInventory.Global.Me.info.id
-	smd.age = ArkInventory.ItemAgeUpdate( )
+	smd.age = ArkInventory.TimeAsMinutes( )
 	
 	local name, texture, count
 	for x = 1, ATTACHMENTS_MAX_RECEIVE do
@@ -1781,7 +1781,11 @@ function ArkInventory.ScanBag( blizzard_id )
 		
 		if changed_item then
 			
-			i.age = ArkInventory.ItemAgeUpdate( )
+			if i.h then
+				i.age = ArkInventory.TimeAsMinutes( )
+			else
+				i.age = nil
+			end
 			
 			ArkInventory.ItemCategoryGet( i )
 			
@@ -1906,7 +1910,11 @@ function ArkInventory.ScanVault( )
 		
 		if changed_item then
 			
-			i.age = ArkInventory.ItemAgeUpdate( )
+			if i.h then
+				i.age = ArkInventory.TimeAsMinutes( )
+			else
+				i.age = nil
+			end
 			
 			i.h = h
 			i.count = count
@@ -2090,8 +2098,12 @@ function ArkInventory.ScanWearing( )
 
 		if changed_item or i.loc_id == nil then
 		
-			i.age = ArkInventory.ItemAgeUpdate( )
-
+			if i.h then
+				i.age = ArkInventory.TimeAsMinutes( )
+			else
+				i.age = nil
+			end
+			
 			i.loc_id = loc_id
 			i.bag_id = bag_id
 			i.slot_id = slot_id
@@ -2211,7 +2223,12 @@ function ArkInventory.ScanMailInbox( )
 					
 					if changed_item then
 						
-						i.age = ArkInventory.ItemAgeUpdate( )
+						if i.h then
+							i.age = ArkInventory.TimeAsMinutes( )
+						else
+							i.age = nil
+						end
+						
 						i.count = count
 						i.q = ArkInventory.ObjectInfoQuality( h )
 						
@@ -2660,7 +2677,12 @@ function ArkInventory.ScanCurrency( )
 			
 			if changed_item or i.loc_id == nil then
 				
-				i.age = ArkInventory.ItemAgeUpdate( )
+				if i.h then
+					i.age = ArkInventory.TimeAsMinutes( )
+				else
+					i.age = nil
+				end
+				
 				i.q = ArkInventory.ObjectInfoQuality( h )
 				
 				ArkInventory.Frame_Main_DrawStatus( loc_id, ArkInventory.Const.Window.Draw.Refresh )
@@ -2757,7 +2779,11 @@ function ArkInventory.ScanVoidStorage( blizzard_id )
 
 		if changed_item or i.loc_id == nil then
 			
-			i.age = ArkInventory.ItemAgeUpdate( )
+			if i.h then
+				i.age = ArkInventory.TimeAsMinutes( )
+			else
+				i.age = nil
+			end
 			
 			i.loc_id = loc_id
 			i.bag_id = bag_id
@@ -2996,13 +3022,17 @@ function ArkInventory.ScanAuction( massive )
 		
 		if changed_item then
 			
-			i.age = ArkInventory.ItemAgeUpdate( )
-			
 			i.h = h
 			i.count = count
 			i.sb = sb
 			i.q = ArkInventory.ObjectInfoQuality( h )
 			
+			if i.h then
+				i.age = ArkInventory.TimeAsMinutes( )
+			else
+				i.age = nil
+			end
+
 			if duration == 1 then
 				-- Short (less than 30 minutes)
 				i.expires = i.age + 30
@@ -3016,6 +3046,7 @@ function ArkInventory.ScanAuction( massive )
 				-- Very Long (more than 12 hours)
 				i.expires = i.age + 48 * 60
 			end
+			
 			
 			ArkInventory.Frame_Main_DrawStatus( loc_id, ArkInventory.Const.Window.Draw.Refresh )
 			
@@ -3033,7 +3064,7 @@ function ArkInventory.ScanAuctionExpire( )
 	
 	local loc_id, bag_id = ArkInventory.BagID_Internal( blizzard_id )
 	
-	local current_time = ArkInventory.ItemAgeUpdate( )
+	local current_time = ArkInventory.TimeAsMinutes( )
 	
 	local cp = ArkInventory.Global.Me
 	
@@ -3917,7 +3948,7 @@ function ArkInventory.ObjectCountGet( search_id, player_id, just_me, ignore_vaul
 end
 
 function ArkInventory.BattlepetBaseHyperlink( ... )
-	local v = { ... } -- species, level, rarity, maxHealth, power, speed, name (not used)
-	--ArkInventory.Output( "[ ", v[1], " / ", v[2], " / ", v[3], " / ", v[4], " / ", v[5], " / ", v[6], " / ", v[7], " ]" )
-	return string.format( "battlepet:%s:%s:%s:%s:%s:%s:0", v[1] or 0, v[2] or 0, v[3] or 0, v[4] or 0, v[5] or 0, v[6] or 0 )
+	local v = { ... } -- species, level, rarity, maxHealth, power, speed, name (not used), petid
+	--ArkInventory.Output( "[ ", v, " ]" )
+	return string.format( "battlepet:%s:%s:%s:%s:%s:%s:%s:%s", v[1] or 0, v[2] or 0, v[3] or 0, v[4] or 0, v[5] or 0, v[6] or 0, v[7] or "", v[8] or "" )
 end

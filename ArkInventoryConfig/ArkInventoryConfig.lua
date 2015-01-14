@@ -466,9 +466,8 @@ function ArkInventory.ConfigInternal( )
 												return ArkInventory.db.global.option.tooltip.battlepet.enable
 											end,
 											set = function( info, v )
-												
 												ArkInventory.db.global.option.tooltip.battlepet.enable = v
-												ArkInventory.BlizzardAPIHookBattlepetTooltip( v )
+												ArkInventory.BlizzardAPIHookBattlepetTooltip( not v )
 											end,
 										},
 										source = {
@@ -3440,7 +3439,7 @@ function ArkInventory.ConfigInternalSettings( path )
 					},
 				},
 				age = {
-					order = 900,
+					order = 800,
 					name = ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_AGE"],
 					type = "group",
 					--inline = true,
@@ -3452,11 +3451,11 @@ function ArkInventory.ConfigInternalSettings( path )
 							type = "toggle",
 							get = function( info )
 								local loc_id = ConfigGetNodeArg( info, #info - 3 )
-								return ArkInventory.LocationOptionGetReal( loc_id, "slot", "new", "show" )
+								return ArkInventory.LocationOptionGetReal( loc_id, "slot", "age", "show" )
 							end,
 							set = function( info, v )
 								local loc_id = ConfigGetNodeArg( info, #info - 3 )
-								ArkInventory.LocationOptionSetReal( loc_id, "slot", "new", "show", v )
+								ArkInventory.LocationOptionSetReal( loc_id, "slot", "age", "show", v )
 								ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Refresh )
 							end,
 						},
@@ -3467,32 +3466,78 @@ function ArkInventory.ConfigInternalSettings( path )
 							type = "color",
 							hidden = function( info )
 								local loc_id = ConfigGetNodeArg( info, #info - 3 )
-								return not ArkInventory.LocationOptionGetReal( loc_id, "slot", "new", "show" )
+								return not ArkInventory.LocationOptionGetReal( loc_id, "slot", "age", "show" )
 							end,
 							hasAlpha = false,
 							get = function( info )
 								local loc_id = ConfigGetNodeArg( info, #info - 3 )
-								local r = ArkInventory.LocationOptionGetReal( loc_id, "slot", "new", "colour", "r" )
-								local g = ArkInventory.LocationOptionGetReal( loc_id, "slot", "new", "colour", "g" )
-								local b = ArkInventory.LocationOptionGetReal( loc_id, "slot", "new", "colour", "b" )
+								local r = ArkInventory.LocationOptionGetReal( loc_id, "slot", "age", "colour", "r" )
+								local g = ArkInventory.LocationOptionGetReal( loc_id, "slot", "age", "colour", "g" )
+								local b = ArkInventory.LocationOptionGetReal( loc_id, "slot", "age", "colour", "b" )
 								return r, g, b
 							end,
 							set = function( info, r, g, b )
 								local loc_id = ConfigGetNodeArg( info, #info - 3 )
-								ArkInventory.LocationOptionSetReal( loc_id, "slot", "new", "colour", "r", r )
-								ArkInventory.LocationOptionSetReal( loc_id, "slot", "new", "colour", "g", g )
-								ArkInventory.LocationOptionSetReal( loc_id, "slot", "new", "colour", "b", b )
+								ArkInventory.LocationOptionSetReal( loc_id, "slot", "age", "colour", "r", r )
+								ArkInventory.LocationOptionSetReal( loc_id, "slot", "age", "colour", "g", g )
+								ArkInventory.LocationOptionSetReal( loc_id, "slot", "age", "colour", "b", b )
 								ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Refresh )
 							end,
 						},
 						cutoff = {
 							order = 300,
-							name = ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF"],
+							name = string.format( "%s (%s)", ArkInventory.Localise["DURATION"], ArkInventory.Localise["MINUTES"] ),
 							desc = ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF_TEXT"],
 							type = "input",
 							hidden = function( info )
 								local loc_id = ConfigGetNodeArg( info, #info - 3 )
-								return not ArkInventory.LocationOptionGetReal( loc_id, "slot", "new", "show" )
+								return not ArkInventory.LocationOptionGetReal( loc_id, "slot", "age", "show" )
+							end,
+							get = function( info )
+								local loc_id = ConfigGetNodeArg( info, #info - 3 )
+								return string.format( "%i", ArkInventory.LocationOptionGetReal( loc_id, "slot", "age", "cutoff" ) )
+							end,
+							set = function( info, v )
+								local v = math.floor( tonumber( v ) or 0 )
+								if v < 0 then v = 0 end
+								local loc_id = ConfigGetNodeArg( info, #info - 3 )
+								if ArkInventory.LocationOptionGetReal( loc_id, "slot", "age", "cutoff" ) ~= v then
+									ArkInventory.LocationOptionSetReal( loc_id, "slot", "age", "cutoff", v )
+									ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Refresh )
+								end
+							end,
+						},
+					},
+				},
+				new = {
+					order = 900,
+					name = ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_NEW"],
+					type = "group",
+					--inline = true,
+					args = {
+						show = {
+							order = 100,
+							name = ArkInventory.Localise["ENABLED"],
+							desc = ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_NEW_ENABLED_TEXT"],
+							type = "toggle",
+							get = function( info )
+								local loc_id = ConfigGetNodeArg( info, #info - 3 )
+								return ArkInventory.LocationOptionGetReal( loc_id, "slot", "new", "enable" )
+							end,
+							set = function( info, v )
+								local loc_id = ConfigGetNodeArg( info, #info - 3 )
+								ArkInventory.LocationOptionSetReal( loc_id, "slot", "new", "enable", v )
+								ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
+							end,
+						},
+						cutoff = {
+							order = 300,
+							name = string.format( "%s (%s)", ArkInventory.Localise["DURATION"], ArkInventory.Localise["MINUTES"] ),
+							desc = ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_NEW_CUTOFF_TEXT"],
+							type = "input",
+							hidden = function( info )
+								local loc_id = ConfigGetNodeArg( info, #info - 3 )
+								return not ArkInventory.LocationOptionGetReal( loc_id, "slot", "new", "enable" )
 							end,
 							get = function( info )
 								local loc_id = ConfigGetNodeArg( info, #info - 3 )
@@ -3500,29 +3545,12 @@ function ArkInventory.ConfigInternalSettings( path )
 							end,
 							set = function( info, v )
 								local v = math.floor( tonumber( v ) or 0 )
-								if v < 0 then v = 0 end
+								if v < 0 then v = 1 end
 								local loc_id = ConfigGetNodeArg( info, #info - 3 )
 								if ArkInventory.LocationOptionGetReal( loc_id, "slot", "new", "cutoff" ) ~= v then
 									ArkInventory.LocationOptionSetReal( loc_id, "slot", "new", "cutoff", v )
-									ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Refresh )
+									ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
 								end
-							end,
-						},
-						reset = {
-							order = 400,
-							name = ArkInventory.Localise["CLEAR"],
-							desc = ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_AGE_RESET_TEXT"],
-							type = "execute",
-							disabled = function( )
-								return true
-							end,
-							hidden = function( info )
-								local loc_id = ConfigGetNodeArg( info, #info - 3 )
-								return not ArkInventory.LocationOptionGetReal( loc_id, "slot", "new", "show" )
-							end,
-							func = function( )
-								-- reset item ages
-								ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Refresh )
 							end,
 						},
 					},

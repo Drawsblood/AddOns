@@ -370,6 +370,13 @@ if not L then return end
 	L["CONFIG_SETTINGS_ITEMS_TINT_USABLE_TEXT"] = "tint unusable items red"
 	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW"] = "Item Level"
 	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW_TEXT"] = "show item level for equippable items"
+	
+	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = "Display cooldowns for items in the %1$s window"
+	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = "Update on GCD"
+	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL_TEXT"] = "Refresh the %1$s window to show cooldowns when a Global Cooldown event is triggered"
+	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT"] = "Refresh in combat"
+	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT_TEXT"] = "Refresh the %1$s window to show cooldowns while in combat, or wait until combat has ended"
+	
 	L["CONFIG_SETTINGS_ITEMS_BORDER_SHOW_TEXT"] = "show borders around items or not"
 	L["CONFIG_SETTINGS_ITEMS_BORDER_STYLE_TEXT"] = "set the border style for items"
 	L["CONFIG_SETTINGS_ITEMS_BORDER_RARITY"] = "Rarity coloured border"
@@ -377,17 +384,16 @@ if not L then return end
 	L["CONFIG_SETTINGS_ITEMS_BORDER_RARITY_CUTOFF"] = "Rarity Cutoff"
 	L["CONFIG_SETTINGS_ITEMS_BORDER_RARITY_CUTOFF_TEXT"] = "only colour the item border if the item rarity is equal to or above %s"
 	L["CONFIG_SETTINGS_ITEMS_BORDER_TEXTURE_OFFSET_TEXT"] = "the number pixels from the outside of the image to the inside edge of the border itself (used to realign the border to the item texture)"
+	
+	L["CONFIG_SETTINGS_ITEMS_NEW"] = "New Items"
+	L["CONFIG_SETTINGS_ITEMS_NEW_ENABLED_TEXT"] = "temporarily moves new items into their own category"
+	L["CONFIG_SETTINGS_ITEMS_NEW_CUTOFF_TEXT"] = "only move items to the new items category if they are less than this value."
+	L["CONFIG_SETTINGS_ITEMS_NEW_RESET_TEXT"] = "reset the new item age timer"
+	
 	L["CONFIG_SETTINGS_ITEMS_AGE"] = "Item Age"
 	L["CONFIG_SETTINGS_ITEMS_AGE_SHOW_TEXT"] = "toggles the display of the item age text"
 	L["CONFIG_SETTINGS_ITEMS_AGE_COLOUR_TEXT"] = "sets the colour of the item age text"
-	L["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF"] = "Cutoff (minutes)"
 	L["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF_TEXT"] = "display the items age if they are less than this value.  use 0 to always display the age"
-	L["CONFIG_SETTINGS_ITEMS_AGE_RESET_TEXT"] = "clears the new item status for all items in this location"
-	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = "Display cooldowns for items in the %1$s window"
-	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = "Update on GCD"
-	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL_TEXT"] = "Refresh the %1$s window to show cooldowns when a Global Cooldown event is triggered"
-	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT"] = "Refresh in combat"
-	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT_TEXT"] = "Refresh the %1$s window to show cooldowns while in combat, or wait until combat has ended"
 	
 	L["CONFIG_SETTINGS_SORTING_OPEN"] = "On window open"
 	L["CONFIG_SETTINGS_SORTING_OPEN_TEXT"] = "toggles whether a resort is done when you open the window."
@@ -551,8 +557,6 @@ if not L then return end
 	
 	L["BATTLEPET_OPPONENT_IMMUNE"] = "Cannot be Captured"
 	L["BATTLEPET_OPPONENT_KNOWN_MAX"] = "Limit Reached"
-	L["BATTLEPET_OPPONENT_KNOWN"] = "Owned"
-	L["BATTLEPET_OPPONENT_UNKNOWN"] = "Not Owned"
 	L["BATTLEPET_OPPONENT_UPGRADE"] = "Upgrade?"
 	L["BATTLEPET_OPPONENT_FORMAT_STRONG"] = "%1$s (%2$s) Strengths" -- 1 = pet type, 2 = pet level
 	L["BATTLEPET_OPPONENT_FORMAT_WEAK"] = "%1$s (%2$s) Weaknesses" -- 1 = pet type, 2 = pet level

@@ -203,7 +203,7 @@ end
 
 
 local tooltipTable = {
-	{ "WOW_SKILL_HERBALISM", 22795 }, -- 63122, 85663
+	{ "WOW_SKILL_HERBALISM", 85663 },
 	{ "WOW_SKILL_MINING", 2901 },
 }
 

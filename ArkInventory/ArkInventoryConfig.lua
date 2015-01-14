@@ -289,18 +289,6 @@ function ArkInventory.ConfigBlizzard( )
 			end,
 		},
 		
-		petinfo = {
-			guiHidden = true,
-			cmdHidden = true,
-			order = 12000,
-			name = "petinfo",
-			desc = "gets information about the targeted battle pet",
-			type = "execute",
-			func = function( )
-				ArkInventory.PetJournal.BattlePetInfoTarget( )
-			end,
-		},
-		
 	}
 	
 end

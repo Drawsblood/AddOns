@@ -92,6 +92,7 @@ L["CATEGORY"] = CATEGORY or true
 L["CHARACTER"] = CHARACTER or true
 L["CLOSE"] = CLOSE or true
 L["COLOUR"] = COLOR or true
+L["COLLECTED"] = COLLECTED or true
 L["COMPLETE"] = COMPLETE or true
 L["CURRENCY"] = CURRENCY or true
 L["CUSTOM"] = CUSTOM or true
@@ -99,6 +100,7 @@ L["DEFAULT"] = DEFAULT or true
 L["DELETE"] = DELETE or true
 L["DESCRIPTION"] = QUEST_DESCRIPTION or true
 L["DISABLED"] = ADDON_DISABLED or true
+L["DURATION"] = AUCTION_DURATION or true
 L["GENERAL"] = GENERAL or true
 L["GUILDBANK"] = GUILD_BANK or true
 L["IGNORE"] = IGNORE or true
@@ -110,12 +112,14 @@ L["NAME"] = NAME or true
 L["NEW"] = NEW or true
 L["NO"] = NO or true
 L["NONE"] = NONE or true
+L["NOT_COLLECTED"] = NOT_COLLECTED or true
 L["OPTIONS"] = GAMEOPTIONS_MENU or true
 L["PET"] = PET or true
+L["REAGENTBANK"] = REAGENT_BANK or true
 L["REMOVE"] = REMOVE or true
 L["RENAME"] = PET_RENAME or true
-L["REAGENTBANK"] = REAGENT_BANK or true
 L["REPUTATION"] = REPUTATION or true
+L["RESET"] = RESET or true
 L["RESTACK"] = BAG_FILTER_CLEANUP or true
 L["SEARCH"] = SEARCH or true
 L["SPECIAL"] = SPECIAL or true
@@ -149,6 +153,8 @@ L["PET_BATTLE_BOUND"] = string.format( "%s (%s)", TOOLTIP_BATTLE_PET, ITEM_ACCOU
 L["PET_COMPANION_BOUND"] = string.format( "%s (%s)", PET, ITEM_ACCOUNTBOUND )
 L["PET_CANNOT_BATTLE"] = string.gsub( BATTLE_PET_CANNOT_BATTLE, "\n", " " )
 L["WOW_TOOLTIP_ITEMUPGRADELEVEL"] = ConvertToCapture( ITEM_UPGRADE_TOOLTIP_FORMAT )
+
+L["MINUTES"] = string.match( D_MINUTES, ":(.-);$" ) or true
 
 
 

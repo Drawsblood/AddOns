@@ -366,6 +366,13 @@ if not L then return end
 	L["CONFIG_SETTINGS_ITEMS_TINT_USABLE_TEXT"] = "Teinter les objets inutilisables en rouge"
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW_TEXT"] = ""
+	
+--	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT_TEXT"] = ""
+	
 	L["CONFIG_SETTINGS_ITEMS_BORDER_SHOW_TEXT"] = "Montrer une bordure autour des objets"
 	L["CONFIG_SETTINGS_ITEMS_BORDER_STYLE_TEXT"] = "Définir le style de bordure des objets"
 	L["CONFIG_SETTINGS_ITEMS_BORDER_RARITY"] = "Couleur de rareté"
@@ -373,17 +380,16 @@ if not L then return end
 --	L["CONFIG_SETTINGS_ITEMS_BORDER_RARITY_CUTOFF"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_BORDER_RARITY_CUTOFF_TEXT"] = ""
 	L["CONFIG_SETTINGS_ITEMS_BORDER_TEXTURE_OFFSET_TEXT"] = "Définir le nombre de pixels entre le bord extérieur des images et l'intérieur de la bordure (Utiliser pour réaligner la bordure sur la texture des objets)"
+	
+--	L["CONFIG_SETTINGS_ITEMS_NEW"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_NEW_ENABLED_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_NEW_CUTOFF_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_NEW_RESET_TEXT"] = ""
+
 	L["CONFIG_SETTINGS_ITEMS_AGE"] = "Nouveaux objets"
 	L["CONFIG_SETTINGS_ITEMS_AGE_SHOW_TEXT"] = "Basculer l'afficher de l'indicateur de nouvel objet pour la fenêtre de %s"
 	L["CONFIG_SETTINGS_ITEMS_AGE_COLOUR_TEXT"] = "Définir la couleur de texte de l'indicateur de nouveaux objets"
---	L["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF_TEXT"] = ""
-	L["CONFIG_SETTINGS_ITEMS_AGE_RESET_TEXT"] = "Effacer le status nouvel objet pour tous les objets de cette emplacement"
---	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = ""
---	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = ""
---	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL_TEXT"] = ""
---	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT"] = ""
---	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT_TEXT"] = ""
 	
 	L["CONFIG_SETTINGS_SORTING_OPEN"] = "Ouverture de la fenêtre"
 	L["CONFIG_SETTINGS_SORTING_OPEN_TEXT"] = "Activer pour faire un tri à l'ouverture de la fenêtre"
@@ -544,8 +550,6 @@ if not L then return end
 	
 --	L["BATTLEPET_OPPONENT_IMMUNE"] = ""
 --	L["BATTLEPET_OPPONENT_KNOWN_MAX"] = ""
---	L["BATTLEPET_OPPONENT_KNOWN"] = ""
---	L["BATTLEPET_OPPONENT_UNKNOWN"] = ""
 --	L["BATTLEPET_OPPONENT_UPGRADE"] = ""
 --	L["BATTLEPET_OPPONENT_FORMAT_STRONG"] = ""
 --	L["BATTLEPET_OPPONENT_FORMAT_WEAK"] = ""

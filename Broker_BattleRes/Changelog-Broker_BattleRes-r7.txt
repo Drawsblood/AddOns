@@ -1,0 +1,13 @@
+------------------------------------------------------------------------
+r7 | nebula169 | 2014-12-06 10:26:01 +0000 (Sat, 06 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/Broker_BattleRes.lua
+
+add tooltip in while in a raid showing recharge rate (or a guess based on GetInstanceInfo) and recent reses
+------------------------------------------------------------------------
+r6 | nebula169 | 2014-10-29 11:01:25 +0000 (Wed, 29 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/Broker_BattleRes.lua
+
+use SPELL_UPDATE_CHARGES to start the timer
+------------------------------------------------------------------------

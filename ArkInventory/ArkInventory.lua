@@ -1,6 +1,6 @@
 ﻿-- (c) 2006-2014, all rights reserved.
--- $Revision: 1289 $
--- $Date: 2015-01-04 11:09:03 +1100 (Sun, 04 Jan 2015) $
+-- $Revision: 1294 $
+-- $Date: 2015-01-07 14:57:02 +1100 (Wed, 07 Jan 2015) $
 
 
 local _G = _G
@@ -350,6 +350,10 @@ ArkInventory.Const = { -- constants
 				[445] = {
 					["id"] = "SYSTEM_TOY",
 					["text"] = ArkInventory.Localise["TOY"],
+				},
+				[446] = {
+					["id"] = "SYSTEM_NEW",
+					["text"] = ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_NEW"],
 				},
 			},
 			Consumable = {
@@ -822,8 +826,12 @@ ArkInventory.Const = { -- constants
 			Name = ArkInventory.Localise["MENU_ACTION_REFRESH"],
 			Scripts = {
 				OnClick = function( self, button )
-					ArkInventory.Frame_Main_Level( self:GetParent( ):GetParent( ) )
-					ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Resort )
+					if button == "RightButton" then
+						ArkInventory.MenuRefreshOpen( self )
+					else
+						ArkInventory.Frame_Main_Level( self:GetParent( ):GetParent( ) )
+						ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Resort )
+					end
 				end,
 				OnEnter = function( self )
 					ArkInventory.GameTooltipSetText( self, ArkInventory.Localise["MENU_ACTION_REFRESH"] )
@@ -1497,6 +1505,8 @@ ArkInventory.Global = { -- globals
 		items = nil,
 	},
 	
+	NewItemResetTime = nil,
+	
 }
 
 ArkInventory.Config = {
@@ -1966,7 +1976,7 @@ ArkInventory.Const.DatabaseDefaults.profile = {
 					},
 					["ignorehidden"] = false,
 					["anchor"] = ArkInventory.Const.Anchor.BottomRight,
-					["new"] = {
+					["age"] = {
 						["show"] = false,
 						["colour"] = {
 							["r"] = 1,
@@ -1974,6 +1984,10 @@ ArkInventory.Const.DatabaseDefaults.profile = {
 							["b"] = 1,
 						},
 						["cutoff"] = 0,
+					},
+					["new"] = {
+						["enable"] = false,
+						["cutoff"] = 2,
 					},
 					["offline"] = {
 						["fade"] = true,
@@ -2108,6 +2122,7 @@ function ArkInventory.OnLoad( )
 	-- called via hidden frame in xml
 	
 	--ArkInventory.Output( "OnLoad: ", debugprofilestop( ) )
+	
 	
 	ArkInventory.Const.Program.Version = 0 + GetAddOnMetadata( ArkInventory.Const.Program.Name, "Version" )
 	
@@ -2632,12 +2647,21 @@ function ArkInventory.Output( ... )
 	table.wipe( ArkInventory_TempOutputTable )
 	
 	local n = select( '#', ... )
-	for i = 1, n do
-		local v = select( i, ... )
-		ArkInventory_TempOutputTable[i] = ArkInventory.OutputSerialize( v )
-	end
 	
-	ArkInventory:Print( table.concat( ArkInventory_TempOutputTable ) )
+	if n == 0 then
+		
+		ArkInventory:Print( "nil" )
+		
+	else
+		
+		for i = 1, n do
+			local v = select( i, ... )
+			ArkInventory_TempOutputTable[i] = ArkInventory.OutputSerialize( v )
+		end
+		
+		ArkInventory:Print( table.concat( ArkInventory_TempOutputTable ) )
+		
+	end
 	
 end
 
@@ -5368,10 +5392,17 @@ function ArkInventory.Frame_Container_CalculateBars( frame, Layout )
 	local ignore = false
 	local hidden = false
 	local show_all = false
+	
 	if ArkInventory.Global.Mode.Edit or ArkInventory.LocationOptionGet( loc_id, "slot", "ignorehidden" ) then
 		-- show everything if in edit mode or the user wants us to ignore the hidden flag
 		show_all = true
 	end
+	
+	local new_shift = ArkInventory.LocationOptionGet( loc_id, "slot", "new", "enable" )
+	local new_cutoff = ArkInventory.TimeAsMinutes( ) - ArkInventory.LocationOptionGet( loc_id, "slot", "new", "cutoff" )
+	local new_reset = ArkInventory.Global.NewItemResetTime or new_cutoff
+	
+	-- /run ArkInventory.Global.NewItemResetTime = ArkInventory.TimeAsMinutes( )
 	
 	-- the basics, just stick the items into their appropriate bars (cpu intensive, so yield when in combat)
 	local yieldcount = 1
@@ -5392,7 +5423,11 @@ function ArkInventory.Frame_Container_CalculateBars( frame, Layout )
 			if not ignore then
 				
 				cat_id = ArkInventory.ItemCategoryGet( i )
-				--bar_id = filter.slot[bag_id][slot_id] or filter.slot[bag_id][0] or ArkInventory.CategoryLocationGet( loc_id, cat_id )
+				
+				if i.h and new_shift and i.age > new_reset and i.age > new_cutoff then
+					cat_id = ArkInventory.CategoryGetSystemID( "SYSTEM_NEW" )
+				end
+				
 				bar_id = ArkInventory.db.profile.option.location[loc_id].bag[bag_id].bar or ArkInventory.CategoryLocationGet( loc_id, cat_id )
 				
 				--ArkInventory.Output( "loc=[", loc_id, "], bag=[", bag_id, "], slot=[", slot_id, "], cat=[", cat_id, "], bar_id=[", bar_id, "]" )
@@ -7044,9 +7079,9 @@ function ArkInventory.Frame_Item_Update_New( frame )
 		
 		if obj then
 			
-			if ArkInventory.LocationOptionGet( loc_id, "slot", "new", "show" ) then
+			if ArkInventory.LocationOptionGet( loc_id, "slot", "age", "show" ) then
 				
-				local cutoff = ArkInventory.LocationOptionGet( loc_id, "slot", "new", "cutoff" )
+				local cutoff = ArkInventory.LocationOptionGet( loc_id, "slot", "age", "cutoff" )
 				local age, age_text = ArkInventory.ItemAgeGet( i.age )
 				
 				if age and ( cutoff == 0 or age <= cutoff ) then
@@ -7058,7 +7093,7 @@ function ArkInventory.Frame_Item_Update_New( frame )
 						obj:SetPoint( "TOPLEFT" )
 					end
 					
-					local colour = ArkInventory.LocationOptionGet( loc_id, "slot", "new", "colour" )
+					local colour = ArkInventory.LocationOptionGet( loc_id, "slot", "age", "colour" )
 					
 					obj:SetText( age_text )
 					obj:SetTextColor( colour.r, colour.g, colour.b )
@@ -7926,7 +7961,9 @@ function ArkInventory.Frame_Status_Update_Empty( loc_id, cp, ldb )
 					n = ""
 				end
 				
-				if ArkInventory.LocationOptionGet( loc_id, "status", "emptytext", "full" ) then
+				if cp.info.player_id == ArkInventory.PlayerIDAccount( ) then
+					y[#y + 1] = string.format( "%s%i%s%s", c, e.count, n, FONT_COLOR_CODE_CLOSE )
+				elseif ArkInventory.LocationOptionGet( loc_id, "status", "emptytext", "full" ) then
 					y[#y + 1] = string.format( "%s%i/%i%s%s", c, e.count - e.empty, e.count, n, FONT_COLOR_CODE_CLOSE )
 				else
 					y[#y + 1] = string.format( "%s%i%s%s", c, e.empty, n, FONT_COLOR_CODE_CLOSE )
@@ -9019,7 +9056,11 @@ function ArkInventory.HookFloatingBattlePet_Show( ... )
 		ItemRefTooltip:SetOwner( UIParent, "ANCHOR_PRESERVE" )
 	end
 	
-	ArkInventory.TooltipSetBattlepet( ItemRefTooltip, h )
+	if ItemRefTooltip:IsShown( ) and ItemRefTooltip.ARK_Data[1] == h then
+		ItemRefTooltip:Hide( )
+	else
+		ArkInventory.TooltipSetBattlepet( ItemRefTooltip, h )
+	end
 	
 end
 
@@ -9800,7 +9841,7 @@ function ArkInventory.MemoryUsed( c )
 
 end
 
-function ArkInventory.ItemAgeUpdate( )
+function ArkInventory.TimeAsMinutes( )
 	return math.floor( time( date( '*t' ) ) / 60 ) -- minutes
 end
 
@@ -9810,7 +9851,7 @@ function ArkInventory.ItemAgeGet( age )
 		
 		local s = ArkInventory.Localise["DHMS"]
 		
-		local x = ArkInventory.ItemAgeUpdate( ) - age
+		local x = ArkInventory.TimeAsMinutes( ) - age
 		local m = x + 1 -- push seconds up so that items with less than a minute get displayed
 		
 		local d = math.floor( m / 1440 )
@@ -9851,7 +9892,6 @@ function ArkInventory.ItemAgeGet( age )
 end
 
 function ArkInventory.StartupChecks( )
-	
 	
 end
 

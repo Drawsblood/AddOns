@@ -3679,7 +3679,7 @@ function ArkInventory.MenuRestackOpen( frame )
 					
 					ArkInventory.Lib.Dewdrop:AddLine(
 						"icon", ArkInventory.Const.Actions[22].Texture,
-						"text", ArkInventory.Localise["RESTACK"],
+						"text", ArkInventory.Const.Actions[22].Name,
 						"isTitle", true,
 						"textHeight", 14
 					)
@@ -3707,6 +3707,69 @@ function ArkInventory.MenuRestackOpen( frame )
 						"closeWhenClicked", true,
 						"func", function( )
 							SetSortBagsRightToLeft( not GetSortBagsRightToLeft( ) )
+						end
+					)
+					
+					ArkInventory.Lib.Dewdrop:AddLine( )
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"text", ArkInventory.Localise["CLOSE_MENU"],
+						"closeWhenClicked", true
+					)
+					
+				end
+				
+			end
+			
+		)
+	
+	end
+	
+end
+
+function ArkInventory.MenuRefreshOpen( frame )
+	
+	assert( frame, "code error: frame argument is missing" )
+
+	if ArkInventory.Lib.Dewdrop:IsOpen( frame ) then
+		
+		ArkInventory.Lib.Dewdrop:Close( )
+		
+	else
+		
+		local x, p, rp
+		x = frame:GetBottom( ) + ( frame:GetTop( ) - frame:GetBottom( ) ) / 2
+		if ( x >= ( GetScreenHeight( ) / 2 ) ) then
+			p = "TOPLEFT"
+			rp = "BOTTOMLEFT"
+		else
+			p = "BOTTOMLEFT"
+			rp = "TOPLEFT"
+		end
+	
+		ArkInventory.Lib.Dewdrop:Open( frame,
+			"point", p,
+			"relativePoint", rp,
+			"children", function( level, value )
+				
+				if level == 1 then
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"icon", ArkInventory.Const.Actions[24].Texture,
+						"text", ArkInventory.Const.Actions[24].Name,
+						"isTitle", true,
+						"textHeight", 14
+					)
+					
+					ArkInventory.Lib.Dewdrop:AddLine( )
+					
+					ArkInventory.Lib.Dewdrop:AddLine(
+						"text", string.format( "%s: %s", ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_NEW"], ArkInventory.Localise["RESET"] ),
+						"tooltipTitle", ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_NEW_RESET_TEXT"],
+						"closeWhenClicked", true,
+						"func", function( )
+							ArkInventory.Global.NewItemResetTime = ArkInventory.TimeAsMinutes( )
+							ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
 						end
 					)
 					

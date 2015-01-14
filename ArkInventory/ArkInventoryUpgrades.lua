@@ -852,6 +852,37 @@ function ArkInventory.DatabaseUpgradePostLoad( )
 	end
 	
 	
+	upgrade_version = 30420
+	if ArkInventory.db.profile.option.version < upgrade_version then
+		
+		ArkInventory.Output( string.format( ArkInventory.Localise["UPGRADE_PROFILE"], ArkInventory.db:GetCurrentProfile( ), upgrade_version ) )
+		
+		for k, v in pairs( ArkInventory.db.profile.option.location ) do
+			
+			if v.slot.new.show then
+				
+				v.slot.age.show = v.slot.new.show
+				v.slot.new.show = nil
+				
+				v.slot.age.cutoff = v.slot.new.cutoff
+				v.slot.new.cutoff = 2
+				
+				if v.slot.new.colour then
+					v.slot.age.colour.r = v.slot.new.colour.r
+					v.slot.age.colour.g = v.slot.new.colour.g
+					v.slot.age.colour.b = v.slot.new.colour.b
+					v.slot.new.colour = nil
+				end
+			
+			end
+			
+		end
+		
+		ArkInventory.db.profile.option.version = upgrade_version
+		
+	end
+	
+
 	
 	
 	

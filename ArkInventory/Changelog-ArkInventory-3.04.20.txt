@@ -1,0 +1,118 @@
+------------------------------------------------------------------------
+r477 | arkayenro | 2015-01-14 01:23:31 +0000 (Wed, 14 Jan 2015) | 10 lines
+Changed paths:
+   A /tags/3.04.20 (from /trunk:476)
+
+*3.04.20 (14-JAN-2015)*
+ * added - new items category
+ * added - config > settings > location > items > new items
+ * added - right click menu off refresh icon for new item reset
+ * added - pet breed information is now displayed on the custom tooltips when the Battle Pet BreedID addon is installed
+ * updated - pet tooltips and code
+ * changed - cosmetic issue with pet and mount totals in the status bar, they will now always show the total count (the option to swap between used/empty is ignored)
+ * changed - translations (mostly around pet text)
+ * fixed - issue with LibDataBroker not having a TOC file so cant be loaded as standalone.  moved it back to being an included library
+
+------------------------------------------------------------------------
+r476 | arkayenro | 2015-01-14 01:13:56 +0000 (Wed, 14 Jan 2015) | 10 lines
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/ArkInventory.lua
+   M /trunk/ArkInventory.toc
+   M /trunk/ArkInventoryConfig.lua
+   M /trunk/ArkInventoryExternals.xml
+   M /trunk/ArkInventoryMenu.lua
+   M /trunk/ArkInventoryPetJournal.lua
+   M /trunk/ArkInventoryStorage.lua
+   M /trunk/ArkInventoryTooltip.lua
+   M /trunk/ArkInventoryTranslate.lua
+   M /trunk/ArkInventoryUpgrades.lua
+   A /trunk/Libs/LibDataBroker-1.1
+   A /trunk/Libs/LibDataBroker-1.1/Changelog-libdatabroker-1-1-v1.1.4.txt
+   A /trunk/Libs/LibDataBroker-1.1/LibDataBroker-1.1.lua
+   A /trunk/Libs/LibDataBroker-1.1/README.textile
+   M /trunk/Locale/deDE.lua
+   M /trunk/Locale/enUS.lua
+   M /trunk/Locale/esES.lua
+   M /trunk/Locale/esMX.lua
+   M /trunk/Locale/frFR.lua
+   M /trunk/Locale/game.lua
+   M /trunk/Locale/itIT.lua
+   M /trunk/Locale/koKR.lua
+   M /trunk/Locale/ptBR.lua
+   M /trunk/Locale/ruRU.lua
+   M /trunk/Locale/zhCN.lua
+   M /trunk/Locale/zhTW.lua
+   M /trunk/Modules/ArkInventoryConfig/ArkInventoryConfig.lua
+   M /trunk/VersionHistory.txt
+
+*3.04.20 (14-JAN-2015)*
+ * added - new items category
+ * added - config > settings > location > items > new items
+ * added - right click menu off refresh icon for new item reset
+ * added - pet breed information is now displayed on the custom tooltips when the Battle Pet BreedID addon is installed
+ * updated - pet tooltips and code
+ * changed - cosmetic issue with pet and mount totals in the status bar, they will now always show the total count (the option to swap between used/empty is ignored)
+ * changed - translations (mostly around pet text)
+ * fixed - issue with LibDataBroker not having a TOC file so cant be loaded as standalone.  moved it back to being an included library
+
+------------------------------------------------------------------------
+r474 | arkayenro | 2015-01-04 03:45:03 +0000 (Sun, 04 Jan 2015) | 7 lines
+Changed paths:
+   M /trunk/ArkInventory.lua
+   M /trunk/ArkInventory.toc
+   M /trunk/ArkInventory.xml
+   M /trunk/ArkInventoryCompanion.lua
+   M /trunk/ArkInventoryMenu.lua
+   M /trunk/ArkInventoryPetJournal.lua
+   M /trunk/ArkInventoryRealms.lua
+   M /trunk/ArkInventoryRestack.lua
+   M /trunk/ArkInventoryStorage.lua
+   M /trunk/ArkInventoryTooltip.lua
+   M /trunk/ArkInventoryTranslate.lua
+   M /trunk/Libs/ArkDewdrop/ArkDewdrop-3.0.lua
+   M /trunk/Libs/ArkDewdrop/ArkDewdrop-3.0.toc
+   M /trunk/Locale/deDE.lua
+   M /trunk/Modules/ArkInventoryRules/ArkInventoryRules.lua
+   M /trunk/VersionHistory.txt
+
+*3.04.19 (04-JAN-2015)*
+ * changed - minor adjustment to the cleanup/restack code
+ * fixed - item age now defaults to topleft.  if itemlevel is displayed, then itemage it is positioned to center instead
+ * fixed - issue with vault data for characters on different connected realms when in the same guild - you will have to manually erase any existing duplicated vault data
+ * fixed - issue with pet item counts sometimes not updating
+ * fixed - issue with pet scanning code sometimes not re-scanning when it should have
+
+------------------------------------------------------------------------
+r472 | arkayenro | 2014-12-21 05:47:43 +0000 (Sun, 21 Dec 2014) | 5 lines
+Changed paths:
+   M /trunk/ArkInventory.lua
+   M /trunk/ArkInventory.toc
+   M /trunk/ArkInventory.xml
+   M /trunk/ArkInventoryMenu.lua
+   M /trunk/ArkInventoryRestack.lua
+   M /trunk/VersionHistory.txt
+
+*3.04.18 (21-DEC-2014)*
+ * fixed - item counts should now display on the tooltips for work order reagents and quest log items
+ * fixed - item age should display if enabled
+ * fixed - LDB actions menu
+
+------------------------------------------------------------------------
+r471 | arkayenro | 2014-11-25 12:27:33 +0000 (Tue, 25 Nov 2014) | 6 lines
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/ArkInventory.lua
+   M /trunk/ArkInventory.toc
+   M /trunk/ArkInventoryExternals.xml
+   M /trunk/ArkInventoryLDB.lua
+   M /trunk/ArkInventoryMenu.lua
+   M /trunk/VersionHistory.txt
+
+*3.04.17 (25-NOV-2014)*
+ * added - libperiodictable libraries: ClassSpell, CurrencyItems, Gear, GearSet, InstanceLoot, InstanceLootHeroid, InstanceLootLFR, TradeskillLevels, TransmogSet
+ * updated - external libraries
+ * added - right click menu to cleanup icon to deposit all reagents
+ * changed - ldb item tracking counts now include items from the bank
+
+------------------------------------------------------------------------

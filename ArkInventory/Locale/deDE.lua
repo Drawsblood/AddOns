@@ -366,6 +366,13 @@ if not L then return end
 	L["CONFIG_SETTINGS_ITEMS_TINT_USABLE_TEXT"] = "Benutzbare Gegenst\195\164nde rot einf\195\164rben"
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW_TEXT"] = ""
+	
+--	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT_TEXT"] = ""
+	
 	L["CONFIG_SETTINGS_ITEMS_BORDER_SHOW_TEXT"] = "bestimmt, ob ein Rahmen um die Gegenst\195\164nde angezeigt wird"
 	L["CONFIG_SETTINGS_ITEMS_BORDER_STYLE_TEXT"] = "bestimmt die Rahmenart f\195\188r Gegenst\195\164nde"
 	L["CONFIG_SETTINGS_ITEMS_BORDER_RARITY"] = "Seltenheit bestimmt Rahmenfarbe"
@@ -373,17 +380,15 @@ if not L then return end
 --	L["CONFIG_SETTINGS_ITEMS_BORDER_RARITY_CUTOFF"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_BORDER_RARITY_CUTOFF_TEXT"] = ""
 	L["CONFIG_SETTINGS_ITEMS_BORDER_TEXTURE_OFFSET_TEXT"] = "Anzahl der Pixel vom Bildrand zum Beginn des Rahmens (wird beim Positionieren des Texturrahmens auf dem Rahmen des Gegenstandes verwendet)"
+	
+--	L["CONFIG_SETTINGS_ITEMS_NEW"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_NEW_ENABLED_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_NEW_CUTOFF_TEXT"] = ""
+	
 	L["CONFIG_SETTINGS_ITEMS_AGE"] = "Item-Alter"
 	L["CONFIG_SETTINGS_ITEMS_AGE_SHOW_TEXT"] = "Ein/Aus der Item-Alter-Funktion"
 	L["CONFIG_SETTINGS_ITEMS_AGE_COLOUR_TEXT"] = "verndert die Farbe der Item-Alter-Anzeige"
-	L["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF"] = "Anzeige deaktivieren nach (Minuten)"
 	L["CONFIG_SETTINGS_ITEMS_AGE_CUTOFF_TEXT"] = "Legt die Zeit (in Minuten) fest, in der das Item-Alter dargestellt wird. Mit dem Wert '0' wird das Item-Alter ohne zeitliches Limit dargestellt"
---	L["CONFIG_SETTINGS_ITEMS_AGE_RESET_TEXT"] = ""
---	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = ""
---	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = ""
---	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL_TEXT"] = ""
---	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT"] = ""
---	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_COMBAT_TEXT"] = ""
 	
 	L["CONFIG_SETTINGS_SORTING_OPEN"] = "beim \195\150ffnenn des Fensters"
 	L["CONFIG_SETTINGS_SORTING_OPEN_TEXT"] = "Die Gegenst\195\164nde werden erst beim \195\150ffnenn des Fensters sortiert."
@@ -544,8 +549,6 @@ if not L then return end
 	
 --	L["BATTLEPET_OPPONENT_IMMUNE"] = ""
 --	L["BATTLEPET_OPPONENT_KNOWN_MAX"] = ""
---	L["BATTLEPET_OPPONENT_KNOWN"] = ""
---	L["BATTLEPET_OPPONENT_UNKNOWN"] = ""
 --	L["BATTLEPET_OPPONENT_UPGRADE"] = ""
 --	L["BATTLEPET_OPPONENT_FORMAT_STRONG"] = ""
 --	L["BATTLEPET_OPPONENT_FORMAT_WEAK"] = ""
