@@ -2,11 +2,35 @@
 
 if not L then return end
 
+L["FILTER_REALMS"] = "Realms filter"
+L["FILTER_FACTIONS"] = "Faction filter"
+L["FILTER_LEVELS"] = "Level filter"
+L["FILTER_PROFESSIONS"] = "Profession filter"
+L["FILTER_CLASSES"] = "Class filter"
+
+-- Colors
+L["COLOR_RED"] = "Red"
+L["COLOR_GREY"] = "Grey"
+L["COLOR_GREEN"] = "Green"
+L["COLOR_YELLOW"] = "Yellow"
+L["COLOR_ORANGE"] = "Orange"
+
+L["ITEM_TYPE_RECIPE"] = "Recipe"
+L["ITEM_SUBTYPE_BOOK"] = "Book"
+
+
+
 -- Note: since 2.4.004 and the support of LibBabble, certain lines are commented, but remain there for clarity (especially those concerning the menu)
 -- A lot of translations, especially those concerning the loot table, come from atlas loot, credit goes to their team for gathering this info, I (Thaoky) simply took what I needed.
 
 L["TIME_TO_NEXT_WARNING_TEXT"] = "Time until next warning"
 L["TIME_TO_NEXT_WARNING_TOOLTIP"] = "Minimum time before you get the next mail expiry warning."
+
+L["Garrison resources"] = true
+L["Uncollected resources"] = true
+L["Last collected"] = true
+L["Max. uncollected resources in"] = true
+
 
 L["Death Knight"] = true
 
@@ -28,7 +52,6 @@ L["Resistance"] = true
 
 --skills
 L["Class Skills"] = true
-L["Professions"] = true
 L["Secondary Skills"] = true
 L["Fishing"] = true
 L["Riding"] = true
@@ -769,11 +792,8 @@ L["Include guild members' professions"] = true
 
 -- ** Frame 3 : Mail **
 L["Warn when mail expires in less days than this value"] = true
-L["Mail Expiry Warning"] = true
-L["Scan mail body (marks it as read)"] = true
 L["New mail notification"] = true
 L["Be informed when a guildmate sends a mail to one of my alts.\n\nMail content is directly visible without having to reconnect the character"] = true
-
 L["Use color-coding for recipes at the AH"] = true
 L["Use color-coding for recipes at vendors"] = true
 
@@ -787,6 +807,7 @@ L["Show Minimap Icon"] = true
 -- ** Frame 5 : Tooltip **
 L["Show item source"] = true
 L["Show item count per character"] = true
+L["Show item count without details"] = true
 L["Show total item count"] = true
 L["Show guild bank count"] = true
 L["Show already known/learnable by"] = true

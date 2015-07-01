@@ -3,19 +3,22 @@
 
 	<Frame parentKey="AuctionsOptions" parent="DataStoreFrames" hidden="true">
 		<Size x="615" y="306" />
+		<KeyValues>
+			<KeyValue key="module" value="DataStore_Auctions" />
+		</KeyValues>
 		<Frames>
-			<CheckButton parentKey="AutoClearExpiredItems" inherits="InterfaceOptionsCheckButtonTemplate">
-				<Size x="20" y="20" />
+			<CheckButton parentKey="AutoClearExpiredItems" inherits="DataStoreToggleableOptionTemplate">
 				<Anchors> 
 					<Anchor point="TOPLEFT" x="40" y="-40" />
-				</Anchors>      
-				<Scripts>
-					<OnClick>
-						DataStore:ToggleOption(self, "DataStore_Auctions", "AutoClearExpiredItems")
-					</OnClick>
-				</Scripts>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="option" value="AutoClearExpiredItems" />
+					<KeyValue key="locLabel" value="CLEAR_EXPIRED_ITEMS_LABEL" />
+					<KeyValue key="locTitle" value="CLEAR_EXPIRED_ITEMS_TITLE" />
+					<KeyValue key="locEnabled" value="CLEAR_EXPIRED_ITEMS_ENABLED" />
+					<KeyValue key="locDisabled" value="CLEAR_EXPIRED_ITEMS_DISABLED" />
+				</KeyValues>
 			</CheckButton>
 		</Frames>
 	</Frame>
-	
 </Ui>

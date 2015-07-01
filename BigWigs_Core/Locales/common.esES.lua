@@ -40,6 +40,7 @@ L["removed"] = "%s eliminado"
 L["say"] = "¡%s en MI!"
 L["small_adds"] = "Esbirros pequeños"
 L["soon"] = "¡%s pronto!"
+L["spawned"] = "%s Apareció" -- Needs review
 L["spawning"] = "¡%s aparece!"
 L["stack"] = "%dx %s en %s"
 L["stackyou"] = "%dx %s en TI"

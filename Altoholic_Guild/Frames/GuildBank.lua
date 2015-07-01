@@ -1,11 +1,9 @@
 local addonName = "Altoholic"
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
-local WHITE		= "|cFFFFFFFF"
-local GREEN		= "|cFF00FF00"
-local YELLOW	= "|cFFFFFF00"
 local THIS_ACCOUNT = "Default"
 
 local ICON_GUILD = "Interface\\Icons\\Achievement_GuildPerk_Everyones a Hero_rank2"
@@ -81,7 +79,7 @@ local function OnGuildChange(self)
 	currentGuildBankTab = nil
 	
 	local _, _, guildName = strsplit(".", currentGuildKey)
-	parent.Status:SetText(format("%s %s/", GREEN..guildName, WHITE))
+	parent.Status:SetText(format("%s %s/", colors.green..guildName, colors.white))
 
 	local currentGuild = GetGuildInfo("player")
 	
@@ -120,7 +118,7 @@ local function OnGuildDelete(self)
 	
 	local _, realm, guildName = strsplit(".", guildKey)
 
-	AltoMsgBox_Text:SetText(format("%s\n%s%s %s(%s)", L["Delete Guild Bank?"], GREEN, guildName, WHITE, realm ))
+	AltoMsgBox_Text:SetText(format("%s\n%s%s %s(%s)", L["Delete Guild Bank?"], colors.green, guildName, colors.white, realm ))
 	AltoMsgBox:Show()
 	
 	CloseDropDownMenus()
@@ -166,16 +164,16 @@ function ns:Update()
 	if not tab.name then return end		-- tab not yet scanned ? exit
 	
 	local _, _, guildName = strsplit(".", currentGuildKey)
-	parent.Status:SetText(format("%s %s/ %s", GREEN..guildName, WHITE, tab.name))
+	parent.Status:SetText(format("%s %s/ %s", colors.green..guildName, colors.white, tab.name))
 
-	frame.Info1:SetText(format(L["Last visit: %s by %s"], GREEN..tab.ClientDate..WHITE, GREEN..tab.visitedBy))
+	frame.Info1:SetText(format(L["Last visit: %s by %s"], colors.green..tab.ClientDate..colors.white, colors.green..tab.visitedBy))
 	local localTime, realmTime
-	localTime = format("%s%02d%s:%s%02d", GREEN, tab.ClientHour, WHITE, GREEN, tab.ClientMinute )
-	realmTime = format("%s%02d%s:%s%02d", GREEN, tab.ServerHour, WHITE, GREEN, tab.ServerMinute )
-	frame.Info2:SetText(format(L["Local Time: %s   %sRealm Time: %s"], localTime, WHITE, realmTime))
+	localTime = format("%s%02d%s:%s%02d", colors.green, tab.ClientHour, colors.white, colors.green, tab.ClientMinute )
+	realmTime = format("%s%02d%s:%s%02d", colors.green, tab.ServerHour, colors.white, colors.green, tab.ServerMinute )
+	frame.Info2:SetText(format(L["Local Time: %s   %sRealm Time: %s"], localTime, colors.white, realmTime))
 	
 	local money = DataStore:GetGuildBankMoney(currentGuildKey)
-	frame.Info3:SetText(MONEY .. ": " .. addon:GetMoneyString(money or 0, WHITE))
+	frame.Info3:SetText(MONEY .. ": " .. addon:GetMoneyString(money or 0, colors.white))
 	
 	local rarity = addon:GetOption("UI.Tabs.Guild.BankItemsRarity")
 	
@@ -259,10 +257,10 @@ local function GuildIcon_Initialize(self, level)
 					-- this test is not necessary, if a guild key is in the db, there's essentially data.
 					-- local money = DataStore:GetGuildBankMoney(guild)
 					-- if money then
-						local text = format("%s / %s", WHITE..realm, GREEN..guildName)
+						local text = format("%s / %s", colors.white..realm, colors.green..guildName)
 
 						if account ~= "Default" then
-							text = format("%s %s(%s)", text, YELLOW, account)
+							text = format("%s %s(%s)", text, colors.yellow, account)
 						end
 					
 						info.text = text
@@ -280,13 +278,13 @@ local function GuildIcon_Initialize(self, level)
 		local account, realm, name = strsplit(".", UIDROPDOWNMENU_MENU_VALUE)
 		local guild = addon:GetGuild(name, realm, account)
 	
-		info.text = WHITE ..  L["Hide this guild in the tooltip"]
+		info.text = colors.white ..  L["Hide this guild in the tooltip"]
 		info.value = UIDROPDOWNMENU_MENU_VALUE
 		info.checked = guild.hideInTooltip
 		info.func = OnHideInTooltip
 		UIDropDownMenu_AddButton(info, level)
 		
-		info.text = WHITE .. DELETE
+		info.text = colors.white .. DELETE
 		info.value = UIDROPDOWNMENU_MENU_VALUE
 		info.checked = nil
 		info.func = OnGuildDelete
@@ -335,27 +333,27 @@ local function UpdateIcon_Initialize(self, level)
 	
 	if #newer > 0 then
 		DDM_AddTitle(" ")
-		DDM_AddTitle(YELLOW..L["Newer data"])
+		DDM_AddTitle(colors.yellow..L["Newer data"])
 		
 		table.sort(newer, function(a,b) return a.timeStamp > b.timeStamp end)
 		
 		for _, member in ipairs(newer) do
 			local clientTime, serverHour, serverMinute = DataStore:GetGuildMemberBankTabInfo(member.name, tabName)
 		
-			DDM_Add(format("%s %s", WHITE..member.name, GREEN..date("%m/%d/%Y %H:%M", clientTime)), member.name, OnBankTabRemoteUpdate)
+			DDM_Add(format("%s %s", colors.white..member.name, colors.green..date("%m/%d/%Y %H:%M", clientTime)), member.name, OnBankTabRemoteUpdate)
 		end
 	end
 
 	if #older > 0 then
 		DDM_AddTitle(" ")
-		DDM_AddTitle(YELLOW..L["Older data"])
+		DDM_AddTitle(colors.yellow..L["Older data"])
 		
 		table.sort(older, function(a,b) return a.timeStamp > b.timeStamp end)
 		
 		for _, member in ipairs(older) do
 			local clientTime, serverHour, serverMinute = DataStore:GetGuildMemberBankTabInfo(member.name, tabName)
 		
-			DDM_Add(format("%s %s", WHITE..member.name, GREEN..date("%m/%d/%Y %H:%M", clientTime)), member.name, OnBankTabRemoteUpdate)
+			DDM_Add(format("%s %s", colors.white..member.name, colors.green..date("%m/%d/%Y %H:%M", clientTime)), member.name, OnBankTabRemoteUpdate)
 		end
 	end
 
@@ -424,8 +422,8 @@ function ns:OnLoad()
 	-- if the player is not in a guild, set the drop down to the first available guild on this realm, if any.
 	if not currentGuild then
 		-- if the guild that will be displayed is not the one the current player is in, then disable the button
-		parent.Bank.UpdateIcon:Disable()
-		parent.Bank.UpdateIcon.Icon:SetDesaturated(true)
+		menuIcons.UpdateIcon:Disable()
+		menuIcons.UpdateIcon.Icon:SetDesaturated(true)
 	
 		for guildName, guild in pairs(DataStore:GetGuilds(currentRealm, THIS_ACCOUNT)) do
 			local money = DataStore:GetGuildBankMoney(guild)

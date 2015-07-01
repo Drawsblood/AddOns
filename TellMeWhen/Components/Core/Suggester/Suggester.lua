@@ -54,7 +54,7 @@ local SUGpreTable = {}
 local ClassSpellLookup = ClassSpellCache:GetSpellLookup()
 
 ---------- Initialization/Spell Caching ----------
-TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon)
+TMW:RegisterCallback("TMW_CONFIG_ICON_TYPE_CHANGED", function(event, icon)
 	if icon == TMW.CI.icon then
 		SUG.redoIfSame = 1
 		SUG.SuggestionList:Hide()
@@ -105,6 +105,7 @@ function SUG:DoSuggest()
 	end
 
 	suggestedForModule = SUG.CurrentModule
+	SUG.tabIndex = 1
 	SUG:SuggestingComplete(1)
 end
 
@@ -116,16 +117,55 @@ local function progressCallback(countdown)
 	SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"] .. " " .. countdown)
 end
 
-function SUG:SuggestingComplete(doSort)
-	local numFramesNeeded = TMW.SUG:GetNumFramesNeeded()
+local buckets_meta = {__index = function(t, k)
+	t[k] = {}
+	return t[k]
+end}
+local buckets = setmetatable({}, buckets_meta)
 
+function SUG:SuggestingComplete(doSort)
 	SUG.SuggestionList.blocker:Hide()
 	SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
 	if doSort and not SUG.CurrentModule.dontSort then
-		SUG.SuggestionList.blocker:Show()
-		SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"])
-		TMW.shellsortDeferred(SUGpreTable, SUG.CurrentModule:Table_GetSorter(), nil, SUG.SuggestingComplete, SUG, progressCallback)
-		return
+		local sorter, sorterBucket = SUG.CurrentModule:Table_GetSorter()
+
+		if sorterBucket then
+
+			-- Don't GC the buckets while we're using them
+			-- (idk if this would ever happen, but better safe than sorry)
+			buckets_meta.__mode = nil
+
+			-- Fill the bukkits.
+			sorterBucket(SUGpreTable, buckets)
+
+			-- All this data is in the buckets now, so wipe SUGpreTable
+			-- so we can fill it after we sort the buckets.
+			wipe(SUGpreTable)
+
+			for k, bucket in TMW:OrderedPairs(buckets) do
+				-- Sort the bucket.
+				sort(bucket, sorter)
+
+				-- Add the sorted bucket's contents to the main table.
+				for i = 1, #bucket do
+					SUGpreTable[#SUGpreTable + 1] = bucket[i]
+				end
+
+				-- We're done with this bucket. Prepare it for next use.
+				-- It might get reused, or it might get GC'd.
+				wipe(bucket)
+			end
+
+			-- Resume GC on the buckets.
+			buckets_meta.__mode = 'kv'
+
+		else
+			SUG.SuggestionList.blocker:Show()
+			SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"])
+
+			TMW.shellsortDeferred(SUGpreTable, sorter, nil, SUG.SuggestingComplete, SUG, progressCallback)
+			return
+		end
 	end
 
 	if suggestedForModule ~= SUG.CurrentModule then
@@ -143,12 +183,13 @@ function SUG:SuggestingComplete(doSort)
 	end
 
 	-- SUG:GetFrame() creates a frame if it doesn't exist.
+	local numFramesNeeded = TMW.SUG:GetNumFramesNeeded()
 	for id = 1, numFramesNeeded do
 		SUG:GetFrame(id)
 	end
 	
 	for frameID = 1, #SUG do
-		local id
+		local id, key
 		while true do
 		
 			-- Here is how this horrifying line of code works:
@@ -156,7 +197,7 @@ function SUG:SuggestingComplete(doSort)
 			-- The plus 1 is so that there will be one blank frame at the end to show the user that they're at the end.
 			SUG.offset = min(SUG.offset, max(0, #SUGpreTable-numFramesNeeded+1))
 			
-			local key = frameID + SUG.offset
+			key = frameID + SUG.offset
 			id = SUGpreTable[key]
 			
 			if not id then
@@ -187,6 +228,7 @@ function SUG:SuggestingComplete(doSort)
 		f.overrideInsertName = nil
 		f.Background:SetVertexColor(0, 0, 0, 0)
 		f.Icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+		f:UnlockHighlight()
 
 		if SUG.CurrentModule.noTexture then
 			f.Icon:SetWidth(0.00001)
@@ -219,15 +261,35 @@ function SUG:SuggestingComplete(doSort)
 				Entry_Colorize(SUG.CurrentModule, f, id)
 			end
 
+			if frameID == SUG.tabIndex then
+				f:LockHighlight()
+			end
+
 			f:Show()
 		else
 			f:Hide()
 		end
 	end
 
+	if self.inline then
+		print(#SUGpreTable, numFramesNeeded)
+		if #SUGpreTable >= numFramesNeeded then
+			SUG.SuggestionList:SetHeight(SUG:GetHeightForFrames(numFramesNeeded))
+		else
+			SUG.SuggestionList:SetHeight(SUG:GetHeightForFrames(#SUGpreTable))
+		end
+	end
+
 	-- If there is a frame that we are mousing over, update its tooltip
 	if SUG.mousedOver then
 		TMW:TT_Update(SUG.mousedOver)
+	else
+		-- Otherwise, show the tooltip of the current tab index
+		local f = SUG[SUG.tabIndex]
+		if f and f:IsVisible() then
+			f:GetScript("OnEnter")(f)
+			TMW.SUG.mousedOver = nil -- this gets set on the OnEnter, but it isn't correct.
+		end
 	end
 end
 
@@ -311,6 +373,8 @@ function SUG:NameOnCursor(isClick)
 
 		SUG.offset = 0
 		SUG:DoSuggest()
+	else
+		SUG:SuggestingComplete()
 	end
 
 	-- Create a new table so that old one, which is now nearly 2MB in size, can be GC'd.
@@ -330,6 +394,63 @@ function SUG.strfindsug(str)
 end
 local strfindsug = SUG.strfindsug
 
+
+do	-- KeyManger
+	local KeyManager = CreateFrame("Frame", nil, UIParent)
+	KeyManager:SetFrameStrata("FULLSCREEN")
+	KeyManager:EnableKeyboard(true)
+	KeyManager:Show()
+	function KeyManager:HandlePress(key)
+		if key == "UP" then
+			if SUG.tabIndex > 1 then
+				SUG.tabIndex = SUG.tabIndex - 1
+			elseif SUG.offset > 0 then
+				SUG.offset = SUG.offset - 1
+			end
+
+		elseif key == "DOWN" then
+			if TMW.SUG[SUG.tabIndex + 1] and TMW.SUG[SUG.tabIndex + 1]:IsVisible() then
+				SUG.tabIndex = SUG.tabIndex + 1
+			else
+				SUG.offset = SUG.offset + 1
+			end
+		
+		else
+			return
+		end
+
+		SUG:SuggestingComplete()
+	end
+
+	KeyManager:SetScript("OnKeyDown", function(self, key)
+		if SUG.SuggestionList:IsVisible() and (key == "UP" or key == "DOWN") then
+			KeyManager:SetPropagateKeyboardInput(false)
+			self.down = {key = key, start = TMW.time}
+
+			self:HandlePress(key)
+		else
+			KeyManager:SetPropagateKeyboardInput(true)
+		end
+	end)
+	KeyManager:SetScript("OnKeyUp", function(self, key)
+		KeyManager:SetPropagateKeyboardInput(true)
+
+		self.down = nil
+	end)
+	KeyManager:SetScript("OnUpdate", function(self, key)
+		if not self.down then
+			return
+		end
+		local data = self.down
+
+		local repeatRate = 0.05
+		if (not data.last and data.start + 0.5 < TMW.time) or (data.last and data.last + repeatRate < TMW.time) then
+			self:HandlePress(data.key)
+			data.last = (data.last or TMW.time) + repeatRate
+		end
+	end)
+end
+  
 
 ---------- EditBox Hooking ----------
 local EditBoxHooks = {
@@ -355,6 +476,7 @@ local EditBoxHooks = {
 			SUG.Box = self
 			SUG.CurrentModule = newModule
 			SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
+			SUG:SetStyle(self.SUG_inline)
 			SUG:NameOnCursor()
 		end
 	end,
@@ -374,16 +496,24 @@ local EditBoxHooks = {
 			SUG:NameOnCursor(1)
 		end
 	end,
+
 	OnTabPressed = function(self)
-		if self.SUG_Enabled and SUG[1] and SUG[1].insert and SUG[1]:IsVisible() and not SUG.CurrentModule.noTab and not SUG.SuggestionList.blocker:IsShown() then
-			SUG[1]:Click("LeftButton")
+		local i = SUG.tabIndex
+
+		if self.SUG_Enabled and SUG[i] and SUG[i].insert and SUG[i]:IsVisible()
+			and not SUG.CurrentModule.noTab and not SUG.SuggestionList.blocker:IsShown() then
+			SUG[i]:Click("LeftButton")
 			TMW.HELP:Hide("SUG_FIRSTHELP")
 		end
 	end,
 }
 
 --- Enable the suggestion list on an editbox.
-function SUG:EnableEditBox(editbox, inputType, onlyOneEntry)
+-- @param editbox [EditBox] The editbox to enable the suggestion list on.
+-- @param inputType [string] The name of the suggestion list module to use.
+-- @param onlyOneEntry [boolean|nil] True to have the suggestion list hide after inserting an entry.
+-- @param inline [boolean|nil] True to cause the suggestion list to display underneath the editbox. Otherwise, will be attached to the IconEditor.
+function SUG:EnableEditBox(editbox, inputType, onlyOneEntry, inline)
 	editbox.SUG_Enabled = 1
 
 	inputType = TMW.get(inputType)
@@ -392,6 +522,7 @@ function SUG:EnableEditBox(editbox, inputType, onlyOneEntry)
 		return SUG:DisableEditBox(editbox)
 	end
 	editbox.SUG_type = inputType
+	editbox.SUG_inline = inline
 	editbox.SUG_onlyOneEntry = onlyOneEntry
 
 	if not editbox.SUG_hooked then
@@ -438,23 +569,70 @@ function SUG:ColorHelp(frame)
 	GameTooltip:Show()
 end
 
+local INLINE_MAX_FRAMES = 10
 function SUG:GetNumFramesNeeded()
-	return floor((TMW.SUG.SuggestionList:GetHeight() + 5)/TMW.SUG[1]:GetHeight()) - 2
+	if self.inline then
+		return INLINE_MAX_FRAMES
+	end
+
+	return floor((TMW.SUG.SuggestionList:GetHeight() + 5)/TMW.SUG[1]:GetHeight()) - (self.inline and 1 or 2)
+end
+
+function SUG:GetHeightForFrames(numFrames)
+	return (numFrames * TMW.SUG[1]:GetHeight()) + 6
+end
+
+function SUG:SetStyle(inline)
+	local firstItem = TMW.SUG:GetFrame(1)
+	self.inline = inline
+
+	local List = SUG.SuggestionList
+
+	if inline then
+
+		firstItem:SetPoint("TOP", 0, -3)
+		List.Header:Hide()
+		List.Help:Hide()
+
+		List:SetFrameLevel(100)
+		List:SetScale(0.85)
+		List:ClearAllPoints()
+		List:SetPoint("TOPLEFT", SUG.Box, "BOTTOMLEFT", 0, -2)
+		--List:SetPoint("TOPRIGHT", SUG.Box, "BOTTOMRIGHT", 0, -2)
+		--List:SetParent(SUG.Box)
+		List:SetHeight(SUG:GetHeightForFrames(INLINE_MAX_FRAMES))
+		List.Background:SetTexture(0.02, 0.02, 0.02, 0.970)
+	else
+		firstItem:SetPoint("TOP", 0, -6 - TMW.SUG[1]:GetHeight())
+
+		List:SetFrameLevel(TMW.IE:GetFrameLevel() + 1)
+		List:SetScale(1)
+		List:ClearAllPoints()
+		List:SetPoint("TOPLEFT", TMW.IE, "TOPRIGHT", 1, 0)
+		List:SetPoint("BOTTOMLEFT", TMW.IE, "BOTTOMRIGHT", 1, 0)
+		--List:SetParent(TMW.IE)
+
+		List.Header:Show()
+		List.Help:Show()
+		List.Background:SetTexture(0.05, 0.05, 0.05, 0.970)
+	end
 end
 
 function SUG:GetFrame(id)
 	local Suggest = TMW.SUG.SuggestionList
-	if TMW.SUG[id] then
-		return TMW.SUG[id]
+	local f = TMW.SUG[id]
+	
+	if not f then
+		f = CreateFrame("Button", Suggest:GetName().."Item"..id, Suggest, "TellMeWhen_SpellSuggestTemplate", id)
+		TMW.SUG[id] = f
+		
+		if TMW.SUG[id-1] then
+			f:SetPoint("TOPRIGHT", TMW.SUG[id-1], "BOTTOMRIGHT", 0, 0)
+			f:SetPoint("TOPLEFT", TMW.SUG[id-1], "BOTTOMLEFT", 0, 0)
+		end
 	end
 	
-	local f = CreateFrame("Button", Suggest:GetName().."Item"..id, Suggest, "TellMeWhen_SpellSuggestTemplate", id)
-	TMW.SUG[id] = f
-	
-	if TMW.SUG[id-1] then
-		f:SetPoint("TOPRIGHT", TMW.SUG[id-1], "BOTTOMRIGHT", 0, 0)
-		f:SetPoint("TOPLEFT", TMW.SUG[id-1], "BOTTOMLEFT", 0, 0)
-	end
+	f:SetFrameLevel(f:GetParent():GetFrameLevel() + 5)
 	
 	return f
 end
@@ -697,39 +875,43 @@ end
 function Module:Table_Get()
 	return SpellCache_Cache
 end
-function Module.Sorter_Spells(a, b)
 
-	local haveA, haveB = EquivFirstIDLookup[a], EquivFirstIDLookup[b]
-	if haveA or haveB then
-		if haveA and haveB then
-			return a < b
+function Module.Sorter_Bucket(suggestions, buckets)
+	for i = 1, #suggestions do
+		local id = suggestions[i]
+
+		if id == "GCD" then
+			 -- Used by the spell suggestions for the spell CD condition.
+			 -- We put it here so that we can still use bucket sort.
+			tinsert(buckets[0.5], id)
+		elseif EquivFirstIDLookup[id] then
+			tinsert(buckets[1], id)
+		elseif PlayerSpells[id] then
+			tinsert(buckets[2], id)
+		elseif ClassSpellLookup[id] then
+			tinsert(buckets[3], id)
 		else
-			return haveA
+			local auraSoruce = AuraCache_Cache[id]
+			if auraSoruce == 2 then
+				tinsert(buckets[4], id)
+			elseif auraSoruce == 1 then
+				tinsert(buckets[5], id)
+			else
+				if SUGIsNumberInput then
+					tinsert(buckets[6 + floor(id/5000)], id)
+				else
+					local name = SpellCache_Cache[id]
+					local offset = name and strbyte(name) or 0
+					tinsert(buckets[6 + offset], id)
+				end
+			end
 		end
 	end
+end
 
-	--player's spells (pclass)
-	local haveA, haveB = PlayerSpells[a], PlayerSpells[b]
-	if (haveA and not haveB) or (haveB and not haveA) then
-		return haveA
-	end
-
-	--all player spells (any class)
-	local haveA, haveB = ClassSpellLookup[a], ClassSpellLookup[b]
-	if (haveA and not haveB) or (haveB and not haveA) then
-		return haveA
-	elseif not (haveA or haveB) then
-
-		local haveA, haveB = AuraCache_Cache[a], AuraCache_Cache[b] -- Auras
-		if haveA and haveB and haveA ~= haveB then -- if both are auras (kind doesnt matter) AND if they are different aura types, then compare the types
-			return haveA > haveB -- greater than is intended.. player auras are 2 while npc auras are 1, player auras should go first
-		elseif (haveA and not haveB) or (haveB and not haveA) then --otherwise, if only one of them is an aura, then prioritize the one that is an aura
-			return haveA
-		end
-		--if they both were auras, and they were auras of the same type (player, NPC) then procede on to the rest of the code to sort them by name/id
-	end
-
-	if SUGIsNumberInput then
+function Module.Sorter_Spells(a, b)
+	-- Due to bucket sort, if EquivFirstIDLookup[a], then it is true for b as well.
+	if SUGIsNumberInput or EquivFirstIDLookup[a] then
 		--sort by id
 		return a < b
 	else
@@ -748,7 +930,7 @@ function Module.Sorter_Spells(a, b)
 	end
 end
 function Module:Table_GetSorter()
-	return self.Sorter_Spells
+	return self.Sorter_Spells, self.Sorter_Bucket
 end
 function Module:Entry_AddToList_1(f, id)
 	if tonumber(id) then --sanity check

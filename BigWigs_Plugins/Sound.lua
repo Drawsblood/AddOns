@@ -12,7 +12,7 @@ if not plugin then return end
 local media = LibStub("LibSharedMedia-3.0")
 local mType = media.MediaType and media.MediaType.SOUND or "sound"
 local soundList = nil
-local db, bwDb
+local db
 
 local sounds = {
 	Long = "BigWigs: Long",
@@ -20,7 +20,6 @@ local sounds = {
 	Alert = "BigWigs: Alert",
 	Alarm = "BigWigs: Alarm",
 	Warning = "BigWigs: Raid Warning",
-	Victory = "BigWigs: Victory",
 }
 local L = LibStub("AceLocale-3.0"):GetLocale("Big Wigs: Plugins")
 
@@ -29,14 +28,13 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Big Wigs: Plugins")
 --
 
 plugin.defaultDB = {
-	defaultonly = false,
+	sound = true,
 	media = {
 		Long = "BigWigs: Long",
 		Info = "BigWigs: Info",
 		Alert = "BigWigs: Alert",
 		Alarm = "BigWigs: Alarm",
 		Warning = "BigWigs: Raid Warning",
-		Victory = "BigWigs: Victory",
 	},
 }
 
@@ -56,12 +54,12 @@ plugin.pluginOptions = {
 		plugin.db.profile.media[sound] = soundList[value]
 	end,
 	args = {
-		default = {
+		sound = {
 			type = "toggle",
-			name = "|cfffed000".. L.defaultOnly .."|r",
-			desc = L.soundDefaultDescription,
-			get = function(info) return plugin.db.profile.defaultonly end,
-			set = function(info, v) plugin.db.profile.defaultonly = v end,
+			name = L.sound,
+			desc = L.soundDesc,
+			get = function() return plugin.db.profile.sound end,
+			set = function(info, v) plugin.db.profile.sound = v end,
 			order = 1,
 			width = "full",
 			descStyle = "inline",
@@ -90,6 +88,7 @@ local soundOptions = {
 		},
 	},
 }
+plugin.soundOptions = soundOptions
 
 local function addKey(t, key)
 	if t.type and t.type == "select" then
@@ -102,13 +101,16 @@ local function addKey(t, key)
 	return t
 end
 
+local C = BigWigs.C
 local keyTable = {}
 function plugin:SetSoundOptions(name, key, flags)
 	wipe(keyTable)
 	keyTable[1] = name
 	keyTable[2] = key
-	if type(key) == "number" and key > 0 then key = GetSpellInfo(key) end -- XXX temp 6.1 store as id
 	local t = addKey(soundOptions, keyTable)
+	if t.args.countdown then
+		t.args.countdown.disabled = not flags or bit.band(flags, C.COUNTDOWN) == 0
+	end
 	return t
 end
 
@@ -118,28 +120,20 @@ end
 
 local function updateProfile()
 	db = plugin.db.profile
-	bwDb = BigWigs.db.profile
+	db.media.Victory = nil -- XXX temp cleanup
+	db.defaultonly = nil -- XXX temp cleanup
 end
 
-local function shouldDisable() return plugin.db.profile.defaultonly end
+local function shouldDisable() return not plugin.db.profile.sound end
 
 function plugin:OnRegister()
 	self:RegisterMessage("BigWigs_ProfileUpdate", updateProfile)
-	db = self.db.profile
-	bwDb = BigWigs.db.profile
+	updateProfile()
 
 	media:Register(mType, "BigWigs: Long", "Interface\\AddOns\\BigWigs\\Sounds\\Long.ogg")
 	media:Register(mType, "BigWigs: Info", "Interface\\AddOns\\BigWigs\\Sounds\\Info.ogg")
 	media:Register(mType, "BigWigs: Alert", "Interface\\AddOns\\BigWigs\\Sounds\\Alert.ogg")
 	media:Register(mType, "BigWigs: Alarm", "Interface\\AddOns\\BigWigs\\Sounds\\Alarm.ogg")
-	media:Register(mType, "BigWigs: Victory", "Interface\\AddOns\\BigWigs\\Sounds\\Victory.ogg")
-	media:Register(mType, "BigWigs: Victory Long", "Interface\\AddOns\\BigWigs\\Sounds\\VictoryLong.ogg")
-	media:Register(mType, "BigWigs: Victory Classic", "Interface\\AddOns\\BigWigs\\Sounds\\VictoryClassic.ogg")
-	media:Register(mType, "BigWigs: 5", "Interface\\AddOns\\BigWigs\\Sounds\\5.ogg")
-	media:Register(mType, "BigWigs: 4", "Interface\\AddOns\\BigWigs\\Sounds\\4.ogg")
-	media:Register(mType, "BigWigs: 3", "Interface\\AddOns\\BigWigs\\Sounds\\3.ogg")
-	media:Register(mType, "BigWigs: 2", "Interface\\AddOns\\BigWigs\\Sounds\\2.ogg")
-	media:Register(mType, "BigWigs: 1", "Interface\\AddOns\\BigWigs\\Sounds\\1.ogg")
 
 	-- Ingame sounds that DBM uses for DBM converts
 	media:Register(mType, "BigWigs: [DBM] ".. L.FlagTaken, "Sound\\Spells\\PVPFlagTaken.ogg")
@@ -164,33 +158,32 @@ function plugin:OnRegister()
 			width = "full",
 			itemControl = "DDI-Sound",
 		}
-		if k ~= "Victory" then
-			soundOptions.args[k] = {
-				name = n,
-				get = function(info)
-					local name, key = unpack(info.arg)
-					for i, v in next, soundList do
-						-- If no custom sound exists for this option, fall back to global sound option
-						if v == (plugin.db.profile[info[#info]] and plugin.db.profile[info[#info]][name] and plugin.db.profile[info[#info]][name][key] or plugin.db.profile.media[info[#info]]) then
-							return i
-						end
+		soundOptions.args[k] = {
+			name = n,
+			get = function(info)
+				local name, key = unpack(info.arg)
+				local optionName = info[#info]
+				for i, v in next, soundList do
+					-- If no custom sound exists for this option, fall back to global sound option
+					if v == (plugin.db.profile[optionName] and plugin.db.profile[optionName][name] and plugin.db.profile[optionName][name][key] or plugin.db.profile.media[optionName]) then
+						return i
 					end
-				end,
-				set = function(info, value)
-					local name, key = unpack(info.arg)
-					local optionName = info[#info]
-					if not plugin.db.profile[optionName] then plugin.db.profile[optionName] = {} end
-					if not plugin.db.profile[optionName][name] then plugin.db.profile[optionName][name] = {} end
-					plugin.db.profile[optionName][name][key] = soundList[value]
-					-- We don't cleanup/reset the DB as someone may have a custom global sound but wish to use the default sound on a specific option
-				end,
-				type = "select",
-				values = soundList,
-				order = 2,
-				width = "full",
-				itemControl = "DDI-Sound",
-			}
-		end
+				end
+			end,
+			set = function(info, value)
+				local name, key = unpack(info.arg)
+				local optionName = info[#info]
+				if not plugin.db.profile[optionName] then plugin.db.profile[optionName] = {} end
+				if not plugin.db.profile[optionName][name] then plugin.db.profile[optionName][name] = {} end
+				plugin.db.profile[optionName][name][key] = soundList[value]
+				-- We don't cleanup/reset the DB as someone may have a custom global sound but wish to use the default sound on a specific option
+			end,
+			type = "select",
+			values = soundList,
+			order = 2,
+			width = "full",
+			itemControl = "DDI-Sound",
+		}
 	end
 end
 
@@ -203,29 +196,20 @@ end
 --
 
 do
-	local GetSpellInfo, PlaySoundFile, PlaySound, type = GetSpellInfo, PlaySoundFile, PlaySound, type
-	function plugin:BigWigs_Sound(event, module, key, sound, overwrite)
-		if bwDb.sound then
+	local PlaySoundFile = PlaySoundFile
+	function plugin:BigWigs_Sound(event, module, key, sound)
+		if db.sound then
 			local sDb = db[sound]
 			if not module or not key or not sDb or not sDb[module.name] or not sDb[module.name][key] then
-				if db.defaultonly and not overwrite then
-					PlaySound("RaidWarning", "Master")
-				else
-					local path = db.media[sound] and media:Fetch(mType, db.media[sound]) or media:Fetch(mType, sound)
-					if path then
-						PlaySoundFile(path, "Master")
-					end
+				local path = db.media[sound] and media:Fetch(mType, db.media[sound]) or media:Fetch(mType, sound)
+				if path then
+					PlaySoundFile(path, "Master")
 				end
 			else
-				if type(key) == "number" and key > 0 then key = GetSpellInfo(key) end -- XXX temp 6.1 store as id
 				local newSound = sDb[module.name][key]
-				if db.defaultonly and not overwrite then
-					PlaySound("RaidWarning", "Master")
-				else
-					local path = db.media[newSound] and media:Fetch(mType, db.media[newSound]) or media:Fetch(mType, newSound)
-					if path then
-						PlaySoundFile(path, "Master")
-					end
+				local path = db.media[newSound] and media:Fetch(mType, db.media[newSound]) or media:Fetch(mType, newSound)
+				if path then
+					PlaySoundFile(path, "Master")
 				end
 			end
 		end

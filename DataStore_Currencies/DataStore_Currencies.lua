@@ -100,7 +100,8 @@ end
 
 local function ScanTotals()
 	ScanCurrencyTotals(CURRENCY_ID_CONQUEST, nil, 100)
-	ScanCurrencyTotals(CURRENCY_ID_HONOR, nil, 100)
+	-- ScanCurrencyTotals(CURRENCY_ID_HONOR, nil, 100)
+	ScanCurrencyTotals(CURRENCY_ID_HONOR)
 	ScanCurrencyTotals(CURRENCY_ID_JUSTICE, nil, 100)
 	ScanCurrencyTotals(CURRENCY_ID_VALOR, 100)
 	ScanCurrencyTotals(CURRENCY_ID_APEXIS)

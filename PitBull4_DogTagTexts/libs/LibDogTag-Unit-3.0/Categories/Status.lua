@@ -1,5 +1,5 @@
 local MAJOR_VERSION = "LibDogTag-Unit-3.0"
-local MINOR_VERSION = 90000 + tonumber(("$Revision: 270 $"):match("%d+")) or 0
+local MINOR_VERSION = 90000 + tonumber(("$Revision: 273 $"):match("%d+")) or 0
 
 if MINOR_VERSION > _G.DogTag_Unit_MINOR_VERSION then
 	_G.DogTag_Unit_MINOR_VERSION = MINOR_VERSION
@@ -382,6 +382,43 @@ DogTag:AddTag("Unit", "PvPIcon", {
 	events = "UNIT_FACTION#$unit",
 	doc = L["Display the appropriate PvP icon if the unit is PvP flagged"],
 	example = '[PvPIcon] => "|TInterface\\TargetingFrame\\UI-PVP-Horde:24:24:0:0:64:64:3:38:1:36|t"; [PvPIcon] => ""',
+	category = L["Status"]
+})
+
+DogTag:AddTag("Unit", "CombatIcon", {
+	code = function(size, unit)
+		if UnitAffectingCombat(unit) then
+			return ("|TInterface\\CharacterFrame\\UI-StateIcon:%d:%d:0:0:64:64:32:64:0:32|t"):format(size, size)
+		else
+			return nil
+		end
+	end,
+	arg = {
+		'size', 'number', 32,
+		'unit', 'string;undef', 'player'
+	},
+	ret = "string;nil",
+	events = "Update",
+	doc = L["Display the combat icon if the unit is in combat"],
+	example = '[CombatIcon] => "|TInterface\\CharacterFrame\\UI-StateIcon:32:32:0:0:64:64:32:64:0:32|t"; [CombatIcon] => ""',
+	category = L["Status"]
+})
+
+DogTag:AddTag("Unit", "RestingIcon", {
+	code = function(size)
+		if IsResting() then
+			return ("|TInterface\\CharacterFrame\\UI-StateIcon:%d:%d:0:0:64:64:0:32:0:32|t"):format(size, size)
+		else
+			return nil
+		end
+	end,
+	arg = {
+		'size', 'number', 32,
+	},
+	ret = "string;nil",
+	events = "PLAYER_UPDATE_RESTING",
+	doc = L["Display the resting icon if the player is resting"],
+	example = '[RestingIcon] => "|TInterface\\CharacterFrame\\UI-StateIcon:32:32:0:0:64:64:0:32:0:32|t"; [RestingIcon] => ""',
 	category = L["Status"]
 })
 

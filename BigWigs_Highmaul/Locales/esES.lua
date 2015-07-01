@@ -17,6 +17,8 @@ if L then
 L["adds_desc"] = "Temporizadores para cuando los nuevos adds entren al combate."
 L["custom_off_barrage_marker"] = "Marcador de Tromba cristalina"
 L["custom_off_barrage_marker_desc"] = "Marca los jugadores afectados por Tromba cristalina con {rt1}{rt2}{rt3}{rt4}{rt5}, requiere ayudante o líder."
+L["custom_on_shard_marker"] = "Marcador de Esquirla de Tectus"
+L["custom_on_shard_marker_desc"] = "Marca las 2 'Esquirla de Tectus' que aparecen con {rt8}{rt7}, requiere ayudante o líder."
 L["motes"] = "Motas"
 L["shard"] = "Esquirla"
 
@@ -26,8 +28,13 @@ L = BigWigs:NewBossLocale("Brackenspore", "esES") or BigWigs:NewBossLocale("Brac
 if L then
 L["creeping_moss_add_heal"] = "Musgo debajo del ADD GRANDE (sanando)"
 L["creeping_moss_boss_heal"] = "Musgo debajo del jefe (sanando)"
+L["custom_off_spore_shooter_marker"] = "Marcador de Disparador de esporas"
+L["custom_off_spore_shooter_marker_desc"] = [=[Marca los Disparadores de esporas con {rt1}{rt2}{rt3}{rt4}, requiere ayudante o líder.
+|cFFFF0000Sólo 1 persona en la raid debería tener activada esta opción para prevenir conflictos con las marcas.|r
+|cFFADFF2FCONSEJO: Si eres el encargado de activar esta opción, mueve rápidamente el ratón por encima de los mobs de la manera más rápida posible para marcarlos.|r]=]
 L["mythic_ability"] = "Habilidad especial"
 L["mythic_ability_desc"] = "Mostrar una barra con el tiempo para la siguiente Llamada de las mareas u Hongo explosivo."
+L["mythic_ability_wave"] = "Oleada aproximandose!"
 
 end
 
@@ -53,6 +60,8 @@ end
 L = BigWigs:NewBossLocale("Imperator Mar'gok", "esES") or BigWigs:NewBossLocale("Imperator Mar'gok", "esMX")
 if L then
 L["add_death_soon"] = "Add a punto de morir!"
+L["adds"] = "Fiel alterado por las sombras"
+L["adds_desc"] = "Temporizadores para cuando los Fiel alterado por las sombras entren en el combate."
 L["branded_say"] = "%s (%d) %dm"
 L["custom_off_branded_marker"] = "Marcador de Marcado"
 L["custom_off_branded_marker_desc"] = [=[Marca los jugadores que tienen Marcado con {rt3}{rt4}, requiere ayudante o líder.
@@ -66,10 +75,10 @@ end
 
 L = BigWigs:NewBossLocale("Highmaul Trash", "esES") or BigWigs:NewBossLocale("Highmaul Trash", "esMX")
 if L then
-L["arcanist"] = "Arcanista goriano" -- Needs review
-L["oro"] = "Oro" -- Needs review
-L["ritualist"] = "Ritualista rompedor" -- Needs review
-L["runemaster"] = "Maestro de runas goriano" -- Needs review
+L["arcanist"] = "Arcanista goriano"
+L["oro"] = "Oro"
+L["ritualist"] = "Ritualista rompedor"
+L["runemaster"] = "Maestro de runas goriano"
 
 end
 

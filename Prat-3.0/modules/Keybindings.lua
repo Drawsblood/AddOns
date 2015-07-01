@@ -133,7 +133,7 @@ Prat:AddModuleToLoad(function()
 	["Channel %d"] = "채널 %d",
 	["Copy Selected Chat Frame"] = "선택한 대화창 복사",
 	["Guild Channel"] = "길드",
-	["Instance Channel"] = "전장", -- Needs review
+	["Instance Channel"] = "전장",
 	["Next Chat Tab"] = "다음 채팅 탭",
 	["Officer Channel"] = "관리자",
 	["Party Channel"] = "파티",
@@ -221,7 +221,7 @@ Prat:AddModuleToLoad(function()
 	["Channel %d"] = "Canal %d",
 	["Copy Selected Chat Frame"] = "Copiar el Marco de Chat Seleccionado",
 	["Guild Channel"] = "Canal de Hermandad",
-	["Instance Channel"] = "Canal Campo de Batalla", -- Needs review
+	["Instance Channel"] = "Canal Campo de Batalla",
 	["Next Chat Tab"] = "Siguiente Pestaña de Chat",
 	["Officer Channel"] = "Canal Oficial",
 	["Party Channel"] = "Canal del Grupo",
@@ -243,7 +243,7 @@ Prat:AddModuleToLoad(function()
 	["Channel %d"] = "頻道 %d",
 	["Copy Selected Chat Frame"] = "複製選取的聊天視窗",
 	["Guild Channel"] = "公會頻道",
-	["Instance Channel"] = "戰場頻道", -- Needs review
+	["Instance Channel"] = "戰場頻道",
 	["Next Chat Tab"] = "次個聊天標籤",
 	["Officer Channel"] = "幹部頻道",
 	["Party Channel"] = "小隊頻道",

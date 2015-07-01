@@ -1,5 +1,5 @@
 local major = "DRData-1.0"
-local minor = 1039
+local minor = 1042
 assert(LibStub, string.format("%s requires LibStub.", major))
 
 local Data = LibStub:NewLibrary(major, minor)
@@ -111,8 +111,7 @@ end
 
 -- How long before DR resets ?
 Data.resetTimes = {
-	-- The official delay is 15 seconds, but the server only checks this every 5 seconds, so it
-	-- actually ranges from 15 to 20 seconds, 18 is a good average.
+	-- As of 6.1, this is always 18 seconds, and no longer has a range between 15 and 20 seconds.
 	default   = 18,
 	-- Knockbacks are a special case
 	knockback = 10,
@@ -188,7 +187,6 @@ local spellsAndProvidersByCategory = {
 		[ 61721] = true, -- Polymorph (rabbit)
 		[ 61780] = true, -- Polymorph (turkey)
 		[ 82691] = true, -- Ring of Frost
-		[ 31661] = true, -- Dragon's Breath
 		-- Monk
 		[115078] = true, -- Paralysis
 		[123393] = true, -- Breath of Fire (Glyphed)
@@ -240,6 +238,8 @@ local spellsAndProvidersByCategory = {
 	disorient = {
 		-- Druid
 		[ 33786] = true, -- Cyclone
+		-- Mage
+		[ 31661] = true, -- Dragon's Breath
 		-- Paladin
 		[105421] = true, -- Blinding Light -- FIXME: is this the right category? Its missing from blizzard's list
 		[ 10326] = true, -- Turn Evil

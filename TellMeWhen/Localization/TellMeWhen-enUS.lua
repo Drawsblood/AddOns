@@ -347,6 +347,13 @@ L["ICONMENU_ICD_DESC"] = [=[Tracks the cooldown of a proc or a similar effect.
 L["ICONMENU_CAST"] = "Spell Cast"
 L["ICONMENU_CAST_DESC"] = [=[Tracks spell casts and channels.]=]
 
+L["ICONMENU_UNITCNDTIC"] = "Unit Condition Icon"
+L["ICONMENU_UNITCNDTIC_DESC"] = [=[Tracks the state of conditions on a number of units.
+
+The settings configured for this icon apply to each unit being checked.]=]
+L["ICONMENU_UNITFAIL"] = "Unit's Conditions Fail"
+L["ICONMENU_UNITSUCCEED"] = "Unit's Conditions Succeed"
+
 L["ICONMENU_CNDTIC"] = "Condition Icon"
 L["ICONMENU_CNDTIC_DESC"] = [=[Tracks the state of conditions.]=]
 L["ICONMENU_CNDTIC_ICONMENUTOOLTIP"] = "(%d |4Condition:Conditions;)"
@@ -458,10 +465,10 @@ Entering "none" or "blank" will cause the icon to show no texture.
 You can view a list of dynamic textures by typing "$" (dollar sign; ALT-036) in this box.
 
 |cff00d1ffCustom|r
-You can use your own textures too as long as they are placed in WoW's directory, are .tga or .blp format, and have dimensions that are powers of 2 (32, 64, etc). Set this field to the path to the texture relative to WoW's root folder.]]
+You can use your own textures too as long as they are placed in a subfolder of WoW's directory, are .tga or .blp format, and have dimensions that are powers of 2 (32, 64, etc). Set this field to the path to the texture relative to WoW's root folder.]]
 
 L["ICONMENU_CUSTOMTEX_MOPAPPEND_DESC"] = [[|cff00d1ffTroubleshooting|r
-|TNULL:0|t If this icon's texture is showing as solid green, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root and update the setting here accordingly to allow it to work correctly. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist.]]
+|TNULL:0|t If this icon's texture is showing as solid green, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root, restart WoW, and update this setting to the new location. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist.]]
 
 
 L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
@@ -534,7 +541,9 @@ L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only chec
 L["ICONMENU_SHOWTIMER"] = "Show timer"
 L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldown sweep animation on the icon."
 L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
-L["ICONMENU_SHOWTIMERTEXT_DESC"] = "Check this option to display a textual display of the remaining cooldown/duration on the icon."
+L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual display of the remaining cooldown/duration on the icon.
+
+For this to work, you either need an addon like OmniCC installed, or you need to enable Blizzard's timer texts in the interface options, under the ActionBars category.]]
 L["ICONMENU_INVERTTIMER"] = "Invert shading"
 L["ICONMENU_INVERTTIMER_DESC"] = "Check this option to invert the shading effect of the timer."
 L["ICONMENU_SHOWTIMERTEXT_NOOCC"] = "Show ElvUI timer text"
@@ -563,6 +572,9 @@ Set to 0 to disable this setting.]]
 L["ICONMENU_BAROFFS"] = [[This amount will be added to the bar in order to offset it.
 
 Useful for custom indicators of when you should begin casting a spell to prevent a buff from falling off, or to indicate the power required to cast a spell and still have some left over for an interrupt.]]
+
+L["ICONMENU_BAR_COLOR_BACKDROP"] = "Backdrop Color/Opacity"
+L["ICONMENU_BAR_COLOR_BACKDROP_DESC"] = "Configure the color and opacity of the backdrop beind the bar."
 
 L["ICONMENU_BAR_COLOR_START"] = "Start Color"
 L["ICONMENU_BAR_COLOR_START_DESC"] = "Color of the bar when the cooldown/duration has just begun."
@@ -747,7 +759,7 @@ L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = [[Forces the icon to be hidden all the tim
 
 |cff7fffff-|r The icon can still be checked by conditions of other icons.
 |cff7fffff-|r Meta icons can display this icon.
-|cff7fffff-|r This icon's events will still be processed.]]
+|cff7fffff-|r This icon's notifications will still be processed.]]
 L["ICONMENU_WPNENCHANTTYPE"] = "Weapon slot to monitor"
 L["ICONMENU_HIDEUNEQUIPPED"] = "Hide when slot lacks weapon"
 L["ICONMENU_HIDEUNEQUIPPED_DESC"] = "Check this to force the icon to be hidden if the weapon spot being checked does not have a weapon in it, or if that slot has a shield or an off-hand frill."
@@ -763,8 +775,17 @@ L["ICONMENU_HIDENOUNITS"] = "Hide if no units"
 L["ICONMENU_HIDENOUNITS_DESC"] = "Check this to cause the icon to hide if all the units that this icon is checking have been invalidated because of unit conditions and/or units not existing."
 L["ICONMENU_ONLYBAGS"] = "Only if in bags"
 L["ICONMENU_ONLYBAGS_DESC"] = "Check this to make the icon show only if the item is in your bags (or equipped). If 'Only if equipped' is enabled, this is also forcibly enabled."
-L["ICONMENU_ONLYSEEN"] = "Only if seen"
-L["ICONMENU_ONLYSEEN_DESC"] = "Check this to make the icon only show a cooldown if the unit has cast it at least once. You should check this if you are checking spells from different Classes in one icon."
+
+L["ICONMENU_ONLYSEEN_HEADER"] = "Spell Filtering"
+L["ICONMENU_ONLYSEEN_ALL"] = "Allow All Spells"
+L["ICONMENU_ONLYSEEN_ALL_DESC"] = "Check this to allow all abilities to be shown for all units checked."
+L["ICONMENU_ONLYSEEN"] = "Only Observed Spells"
+L["ICONMENU_ONLYSEEN_DESC"] = "Check this to only let the icon show an ability if the unit has cast it at least once."
+L["ICONMENU_ONLYSEEN_CLASS"] = "Only Unit's Class Spells"
+L["ICONMENU_ONLYSEEN_CLASS_DESC"] = [[Check this to only let the icon show an ability if the unit's class is known to have the ability.
+
+Known class spells are highlighted with blue or pink in the suggestion list.]]
+
 L["ICONMENU_SHOWWHENNONE"] = "Show if no result"
 L["ICONMENU_SHOWWHENNONE_DESC"] = "Check this to allow the icon to show as Undiminished when no diminishing returns could be detected on any unit."
 L["ICONMENU_CHECKREFRESH"] = "Listen for refreshes"
@@ -824,6 +845,7 @@ Set this setting to 0 if you want to hide the entire group will still allowing i
 
 L["UIPANEL_ONLYINCOMBAT"] = "Only show in combat"
 L["UIPANEL_SPEC"] = "Dual Spec"
+L["UIPANEL_SPEC_DESC"] = "Checks whether you are in your primary or secondary specialization."
 L["UIPANEL_TREE"] = "Talent Tree"
 L["UIPANEL_SPECIALIZATION"] = "Talent Specialization"
 L["UIPANEL_SPECIALIZATIONROLE"] = "Specialization Role"
@@ -1209,6 +1231,10 @@ L["TEXTLAYOUTS_POINT_DESC"] = "The point on the text display that will be anchor
 L["TEXTLAYOUTS_RELATIVEPOINT_DESC"] = "The point on the object that will be anchored to"
 L["TEXTLAYOUTS_RELATIVETO_DESC"] = "The object that the text will be anchored to"
 
+
+L["TEXTLAYOUTS_ERR_ANCHOR_BADINDEX"] = "Layout error: Text display #%d is trying to anchor to text display #%d, but #%d doesn't exist, so text display #%d won't work."
+L["TEXTLAYOUTS_ERR_ANCHOR_BADANCHOR"] = "This text layout doesn't work with this group's display method. Choose a different text layout. (Missing anchor: %s)"
+
 L["UIPANEL_ANCHORNUM"] = "Anchor %d"
 
 -- -------------
@@ -1235,7 +1261,7 @@ L["CONDITIONPANEL_ABSOLUTE"] = "Absolute"
 L["CONDITIONPANEL_MAX"] = "Max"
 L["CONDITIONPANEL_COMBO"] = "Combo Points"
 L["CONDITIONPANEL_ALTPOWER"] = "Alt. Power"
-L["CONDITIONPANEL_ALTPOWER_DESC"] = [[This is the encounter specific power used in several encounters in Cataclysm, including Cho'gall and Atramedes]]
+L["CONDITIONPANEL_ALTPOWER_DESC"] = [[This is the encounter-specific power used for many quests and boss fights.]]
 L["CONDITIONPANEL_EXISTS"] = "Unit Exists"
 L["CONDITIONPANEL_ALIVE"] = "Unit is Alive"
 L["CONDITIONPANEL_ALIVE_DESC"] = "The condition will pass if the unit specified is alive."
@@ -1267,24 +1293,49 @@ If you don't want to display the icon being checked, check %q in the icon editor
 
 The group of the icon being checked must be shown in order to check the icon.]=]
 
-L["CONDITIONPANEL_RUNES_DESC"] = [=[Use this condition type to only show the icon when the selected runes are available.
 
-Each rune is a check button. A check mark will require that the rune be usable, an 'X' will require that the rune be unusable, no mark will ignore the rune.
 
-The runes in the second row are the death rune version of each rune above.]=]
-L["CONDITIONPANEL_RUNES_CHECK"] = "Force top-row runes to only match non-death runes."
-L["CONDITIONPANEL_RUNES_CHECK_DESC"] = [=[Normally, configuring the runes in the top row for this condition will let them match either a normal rune or a death rune in that slot.
 
-Enable this option to force the runes in the top row to only match non-death runes.]=]
+L["CONDITIONPANEL_RUNES"] = "Rune Count"
+L["CONDITIONPANEL_RUNES_DESC3"] = [=[Use this condition type to only show the icon when the desired number of runes are available.]=]
+L["CONDITIONPANEL_RUNES_CHECK_DESC"] = [=[Check this rune to count this rune type into the total count for the condition.]=]
+
+L["CONDITIONPANEL_RUNES_DESC_GENERIC"] = [=[Each rune is a check button. Check each rune to have it be counted into the conditions.
+
+The runes in the first row will not match death runes. The runes in the second row are the death rune version of each rune above.]=]
+
+
+L["CONDITIONPANEL_RUNESRECH"] = "Recharging Rune Count"
+L["CONDITIONPANEL_RUNESRECH_DESC"] = [=[Use this condition type to only show the icon when the desired number of runes are recharging.]=]
+
+
+
+L["CONDITIONPANEL_RUNESLOCK"] = "Locked Rune Count"
+L["CONDITIONPANEL_RUNESLOCK_DESC"] = [=[Use this condition type to only show the icon when the desired number of runes are locked (awaiting recharge).]=]
+
+
+
+
 L["CONDITIONPANEL_PVPFLAG"] = "Unit is PvP Flagged"
 L["CONDITIONPANEL_LEVEL"] = "Unit Level"
 L["CONDITIONPANEL_CLASS"] = "Unit Class"
 L["CONDITIONPANEL_UNITSPEC"] = "Unit Specialization"
 L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"] = "Choose Specs..."
-L["CONDITIONPANEL_UNITSPEC_DESC"] = "This condition ONLY works for BATTLEGROUND and ARENA ENEMIES, as well as yourself."
+L["CONDITIONPANEL_UNITSPEC_DESC"] = [[This condition ONLY works for:
+|cff7fffff-|r Yourself
+|cff7fffff-|r Battleground enemies
+|cff7fffff-|r Arena enemies
+
+It does NOT work for: |TInterface\AddOns\TellMeWhen\Textures\Alert:0:2|t
+|cff7fffff-|r Group members
+|cff7fffff-|r Any other players]]
 L["CONDITIONPANEL_CLASSIFICATION"] = "Unit Classification"
+L["CONDITIONPANEL_CLASSIFICATION_DESC"] = "Checks the rare/elite/world boss status of a unit."
 L["CONDITIONPANEL_ROLE"] = "Unit Group Role"
+L["CONDITIONPANEL_ROLE_DESC"] = "Checks the assigned role of the player in your group/raid"
 L["CONDITIONPANEL_RAIDICON"] = "Unit Raid Icon"
+L["CONDITIONPANEL_RAIDICON_DESC"] = "Checks the raid marker icon assigned to a unit."
+L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_RAIDICON"] = "Choose Icons..."
 L["CONDITIONPANEL_UNITISUNIT"] = "Unit is Unit"
 L["CONDITIONPANEL_UNITISUNIT_DESC"] = "This condition will pass if the unit in the first editbox and the second editbox are the same entity."
 L["CONDITIONPANEL_UNITISUNIT_EBDESC"] = "Enter a unit in this editbox to be compared with the first unit."
@@ -1318,11 +1369,14 @@ Players and other units without an NPC ID will be treated as having an ID of 0 i
 L["CONDITIONPANEL_NPCIDTOMATCH"] = "ID to Match"
 L["CONDITIONPANEL_NPCIDTOOLTIP"] = "You can enter multiple NPC IDs to be matched by separating each one with a semicolon (;). The condition will pass if any IDs are matched."
 L["CONDITIONPANEL_ZONEPVP"] = "Zone PvP Type"
+L["CONDITIONPANEL_ZONEPVP_DESC"] = "Checks the PvP mode of the zone (e.g. Contested, Sanctuary, Combat Zone, etc.)"
 L["CONDITIONPANEL_ZONEPVP_FFA"] = "Free-For-All PvP"
 L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"
+L["CONDITIONPANEL_INSTANCETYPE_DESC"] = "Checks the type of instance that you are in, including the difficulty setting of any dungeon or raid."
 L["CONDITIONPANEL_INSTANCETYPE_NONE"] = "Outside"
 L["CONDITIONPANEL_INSTANCETYPE_LEGACY"] = "%s (Legacy)"
 L["CONDITIONPANEL_GROUPTYPE"] = "Group Type"
+L["CONDITIONPANEL_GROUPTYPE_DESC"] = "Checks the type of group that you are in (solo, party, or raid)."
 L["CONDITIONPANEL_GROUPSIZE"] = "Instance Size"
 L["CONDITIONPANEL_GROUPSIZE_DESC"] = [[Checks against the number of players that the current instance is tuned for.
 
@@ -1330,6 +1384,8 @@ This includes the current flex raid tuning.]]
 L["CONDITIONPANEL_SWIMMING"] = "Swimming"
 L["CONDITIONPANEL_RESTING"] = "Resting"
 L["CONDITIONPANEL_INPETBATTLE"] = "In pet battle"
+L["CONDITIONPANEL_OVERRBAR"] = "Action bar overridden"
+L["CONDITIONPANEL_OVERRBAR_DESC"] = "Checks if you have some effect that override your primary action bar. This does not include pet battles."
 L["CONDITIONPANEL_MANAUSABLE"] = "Spell Usable (Mana/Energy/etc.)"
 L["CONDITIONPANEL_MANAUSABLE_DESC"] = [[Checks if a spell is usable base on how much primary resource (mana/energy/rage/focus/runic power/etc.) you have.
 
@@ -1337,10 +1393,15 @@ Does not check usability based on secondary resources (runes/holy power/chi/etc.
 L["CONDITIONPANEL_SPELLRANGE"] = "Spell in range of unit"
 L["CONDITIONPANEL_ITEMRANGE"] = "Item in range of unit"
 L["CONDITIONPANEL_AUTOCAST"] = "Pet spell autocasting"
+L["CONDITIONPANEL_AUTOCAST_DESC"] = "Checks if the specified pet spell is autocasting."
 L["CONDITIONPANEL_PETMODE"] = "Pet attack mode"
+L["CONDITIONPANEL_PETMODE_DESC"] = "Checks the attack mode of your current pet."
+L["CONDITIONPANEL_PETMODE_NONE"] = "No Pet"
 L["CONDITIONPANEL_PETTREE"] = "Pet talent tree"
 L["CONDITIONPANEL_PETSPEC"] = "Pet specialization"
+L["CONDITIONPANEL_PETSPEC_DESC"] = "Checks the specialization of your current pet."
 L["CONDITIONPANEL_TRACKING"] = "Tracking active"
+L["CONDITIONPANEL_TRACKING_DESC"] = "Checks what types of minimap tracking you have active."
 L["CONDITIONPANEL_BLIZZEQUIPSET"] = "Equipment set equipped"
 L["CONDITIONPANEL_BLIZZEQUIPSET_DESC"] = "Checks whether or not you have a specific Blizzard equipment manager set equipped."
 L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT"] = "Equipment set name"
@@ -1459,6 +1520,7 @@ L["PRESENCE"] = "Presence"
 L["SPEED"] = "Unit Speed"
 L["SPEED_DESC"] = [[This refers to the current movement speed of the unit. If the unit is not moving, it is zero.  If you wish to track the maximum run speed of the unit, use the 'Unit Run Speed' condition instead.]]
 L["RUNSPEED"] = "Unit Run Speed"
+L["RUNSPEED_DESC"] = "This refers to the maximum run speed of the unit, regardless of whether the unit is presently moving."
 L["SPELLTOCHECK"] = "Spell to Check"
 L["GLYPHTOCHECK"] = "Glyph to Check"
 L["SPELLTOCOMP1"] = "First Spell to Compare"
@@ -1855,13 +1917,13 @@ L["SUG_INSERT_LEFT"] = "|cff7fffffLeft-click|r"
 L["SUG_INSERT_RIGHT"] = "|cff7fffffRight-click|r"
 L["SUG_INSERT_TAB"] = " or |cff7fffffTab|r"
 
-L["SUG_INSERTNAME"] = "%s to insert as a name"
-L["SUG_INSERTID"] = "%s to insert as an ID"
-L["SUG_INSERTITEMSLOT"] = "%s to insert as an item slot ID"
+L["SUG_INSERTNAME"] = "%s to insert name"
+L["SUG_INSERTID"] = "%s to insert ID"
+L["SUG_INSERTITEMSLOT"] = "%s to insert item slot ID"
 L["SUG_INSERTEQUIV"] = "%s to insert equivalency"
 L["SUG_INSERTTEXTSUB"] = "%s to insert tag"
 L["SUG_INSERTTUNITID"] = "%s to insert unitID"
-L["SUG_INSERTNAME"] = "%s to insert error message"
+L["SUG_INSERTERROR"] = "%s to insert error message"
 
 L["SUG_INSERTNAME_INTERFERE"] = [[%s to insert as a name
 
@@ -1877,13 +1939,15 @@ L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Sharpened %(%+%d+ Damage%)"
 L["SUG_ATBEGINING"] = "Suggester: Match beginning"
 L["SUG_ATBEGINING_DESC"] = "If checked, the suggestion list will only display spells that start with the same name as the spell that is being typed in. Otherwise, it will match any part of a spell."
 
-L["SUG_FIRSTHELP_DESC"] = [[This is the suggestion list. You can insert entries from it to speed up configuration.
+L["SUG_FIRSTHELP_DESC"] = [[The suggestion list speeds up configuration.
 
-If you are inserting by name, you do not need to chose the entry with the correct ID - all that matters is that you pick the correct name.
+|cff7fffffClick|r, or use the |cff7fffffUp/Down|r arrow keys and |cff7fffffTab|r, to insert entries.
 
-In almost all cases, it is best to track things by name. You only need to track things by ID if there are multiple things with the same name but with different effects that could overlap.
+If you want a name, you don't need to choose the correct ID - just pick the correct name.
 
-Press tab at any time to insert the first entry shown. Right-click to insert an ID if you are typing a name, and vice-versa.]]
+Usually, it's best to track things by name. You only need to use IDs if there are different things with the same name that could overlap.
+
+|cff7fffffRight-click|r to insert an ID if you are typing a name, and vice-versa.]]
 
 
 
@@ -1899,6 +1963,13 @@ L["LOSECONTROL_TYPE_SCHOOLLOCK"] = "Spell School Locked"
 L["LOSECONTROL_TYPE_MAGICAL_IMMUNITY"] = "Magical Immunity"
 L["LOSECONTROL_TYPE_DESC_USEUNKNOWN"] = "NOTE: It is not known if this loss of control type is used or not."
 
+
+L["EVENT_CATEGORY_CONDITION"] = "Conditions"
+L["EVENT_CATEGORY_MISC"] = "Miscellaneous"
+L["EVENT_CATEGORY_VISIBILITY"] = "Visibility"
+L["EVENT_CATEGORY_TIMER"] = "Timer"
+L["EVENT_CATEGORY_CHANGED"] = "Data Changed"
+L["EVENT_CATEGORY_CLICK"] = "Interaction"
 
 L["SOUND_EVENT_ONSHOW"] = "On Show"
 L["SOUND_EVENT_ONSHOW_DESC"] = "This event triggers when the icon becomes shown (even if %q is checked)."

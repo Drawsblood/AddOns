@@ -1,6 +1,6 @@
 --[[
 Name: LibBabble-Faction-3.0
-Revision: $Rev: 195 $
+Revision: $Rev: 197 $
 Maintainers: ckknight, nevcairiel, Ackis
 Website: http://www.wowace.com/projects/libbabble-faction-3-0/
 Dependencies: None
@@ -8,7 +8,7 @@ License: MIT
 ]]
 
 local MAJOR_VERSION = "LibBabble-Faction-3.0"
-local MINOR_VERSION = 90000 + tonumber(("$Rev: 195 $"):match("%d+"))
+local MINOR_VERSION = 90000 + tonumber(("$Rev: 197 $"):match("%d+"))
 
 if not LibStub then error(MAJOR_VERSION .. " requires LibStub.") end
 local lib = LibStub("LibBabble-3.0"):New(MAJOR_VERSION, MINOR_VERSION)
@@ -340,13 +340,13 @@ elseif GAME_LOCALE == "deDE" then
 	Undercity = "Unterstadt",
 	["Valiance Expedition"] = "Expedition Valianz",
 	-- Vivianne = "",
-	-- ["Vol'jin's Spear"] = "",
+	["Vol'jin's Spear"] = "Vol'jins Speer", -- Needs review
 	["Warsong Offensive"] = "Kriegshymnenoffensive",
 	["Warsong Outriders"] = "Vorhut des Kriegshymnenklan",
 	["Wildhammer Clan"] = "Wildhammerklan",
 	["Winterfin Retreat"] = "Zuflucht der Winterflossen",
 	["Wintersaber Trainers"] = "Wintersäblerausbilder",
-	-- ["Wrynn's Vanguard"] = "",
+	["Wrynn's Vanguard"] = "Wrynns Vorhut", -- Needs review
 	["Zandalar Tribe"] = "Stamm der Zandalari",
 }
 elseif GAME_LOCALE == "frFR" then

@@ -3,8 +3,6 @@ local addon = _G[addonName]
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
-local WHITE		= "|cFFFFFFFF"
-local GREEN		= "|cFF00FF00"
 local SPELLS_PER_PAGE = 12
 
 addon.Spellbook = {}

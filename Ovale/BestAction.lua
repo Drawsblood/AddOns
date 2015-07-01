@@ -9,6 +9,7 @@ local OvaleBestAction = Ovale:NewModule("OvaleBestAction", "AceEvent-3.0")
 Ovale.OvaleBestAction = OvaleBestAction
 
 --<private-static-properties>
+local OvaleDebug = Ovale.OvaleDebug
 local OvalePool = Ovale.OvalePool
 local OvaleProfiler = Ovale.OvaleProfiler
 local OvaleTimeSpan = Ovale.OvaleTimeSpan
@@ -21,27 +22,32 @@ local OvaleCondition = nil
 local OvaleCooldown = nil
 local OvaleData = nil
 local OvaleEquipment = nil
+local OvaleGUID = nil
 local OvaleFuture = nil
 local OvalePower = nil
 local OvaleSpellBook = nil
 local OvaleStance = nil
 
 local abs = math.abs
+local assert = assert
 local floor = math.floor
 local ipairs = ipairs
 local loadstring = loadstring
 local pairs = pairs
 local tonumber = tonumber
-local tostring = tostring
 local type = type
 local wipe = wipe
 local Complement = OvaleTimeSpan.Complement
-local CopyTimeSpan = OvaleTimeSpan.CopyTo
+local CopyTimeSpan = OvaleTimeSpan.Copy
 local HasTime = OvaleTimeSpan.HasTime
 local Intersect = OvaleTimeSpan.Intersect
 local IntersectInterval = OvaleTimeSpan.IntersectInterval
+local IsUniverse = OvaleTimeSpan.IsUniverse
 local Measure = OvaleTimeSpan.Measure
+local ReleaseTimeSpan = OvaleTimeSpan.Release
 local Union = OvaleTimeSpan.Union
+local EMPTY_SET = OvaleTimeSpan.EMPTY_SET
+local UNIVERSE = OvaleTimeSpan.UNIVERSE
 local INFINITY = math.huge
 
 local API_GetTime = GetTime
@@ -57,10 +63,10 @@ local API_IsItemInRange = IsItemInRange
 local API_IsUsableAction = IsUsableAction
 local API_IsUsableItem = IsUsableItem
 
+-- Register for debugging messages.
+OvaleDebug:RegisterDebugging(OvaleBestAction)
 -- Register for profiling.
 OvaleProfiler:RegisterProfiling(OvaleBestAction)
-
-local OVALE_DEFAULT_PRIORITY = 3
 
 -- Table of node types to visitor methods.
 local COMPUTE_VISITOR = {
@@ -76,14 +82,11 @@ local COMPUTE_VISITOR = {
 	["state"] = "ComputeState",
 	["unless"] = "ComputeIf",
 	["value"] = "ComputeValue",
-	["wait"] = "ComputeWait",
 }
 
 -- Age of the current computation.
 local self_serial = 0
 
--- Pool of time-span tables.
-local self_timeSpanPool = OvalePool("OvaleBestAction_timeSpanPool")
 -- timeSpan[node] = computed time span for that node.
 local self_timeSpan = {}
 
@@ -91,10 +94,6 @@ local self_timeSpan = {}
 local self_valuePool = OvalePool("OvaleBestAction_valuePool")
 -- value[node] = result node of that node.
 local self_value = {}
-
--- Static time-span variables.
-local self_computedTimeSpan = OvaleTimeSpan()
-local self_tempTimeSpan = OvaleTimeSpan()
 --</private-static-properties>
 
 --<private-static-methods>
@@ -113,13 +112,28 @@ local function SetValue(node, value, origin, rate)
 	return result
 end
 
-local function GetTimeSpan(node)
+-- Typecast elements into values.
+local function AsValue(atTime, timeSpan, node)
+	local value, origin, rate
+	if node and node.type == "value" then
+		value, origin, rate = node.value, node.origin, node.rate
+	elseif timeSpan and HasTime(timeSpan, atTime) then
+		value, origin, rate, timeSpan = 1, 0, 0, UNIVERSE
+	else
+		value, origin, rate, timeSpan = 0, 0, 0, UNIVERSE
+	end
+	return value, origin, rate, timeSpan
+end
+
+local function GetTimeSpan(node, defaultTimeSpan)
 	local timeSpan = self_timeSpan[node]
 	if timeSpan then
-		timeSpan:Reset()
+		if defaultTimeSpan then
+			CopyTimeSpan(timeSpan, defaultTimeSpan)
+		end
 	else
-		timeSpan = OvaleTimeSpan(self_timeSpanPool:Get())
-		self_timeSpan[node] = timeSpan
+		self_timeSpan[node] = OvaleTimeSpan:New(defaultTimeSpan)
+		timeSpan = self_timeSpan[node]
 	end
 	return timeSpan
 end
@@ -130,20 +144,20 @@ local function GetActionItemInfo(element, state, atTime, target)
 	local actionTexture, actionInRange, actionCooldownStart, actionCooldownDuration,
 		actionUsable, actionShortcut, actionIsCurrent, actionEnable, actionType, actionId
 
-	local itemId = element.params[1]
+	local itemId = element.positionalParams[1]
 	if type(itemId) ~= "number" then
 		itemId = OvaleEquipment:GetEquippedItem(itemId)
 	end
 	if not itemId then
-		state:Log("Unknown item '%s'.", element.params[1])
+		state:Log("Unknown item '%s'.", element.positionalParams[1])
 	else
 		state:Log("Item ID '%s'", itemId)
 		local action = OvaleActionBar:GetForItem(itemId)
 		local spellName = API_GetItemSpell(itemId)
 
 		-- Use texture specified in the action if given.
-		if element.params.texture then
-			actionTexture = "Interface\\Icons\\" .. element.params.texture
+		if element.namedParams.texture then
+			actionTexture = "Interface\\Icons\\" .. element.namedParams.texture
 		end
 		actionTexture = actionTexture or API_GetItemIcon(itemId)
 		actionInRange = API_IsItemInRange(itemId, target)
@@ -168,14 +182,14 @@ local function GetActionMacroInfo(element, state, atTime, target)
 	local actionTexture, actionInRange, actionCooldownStart, actionCooldownDuration,
 		actionUsable, actionShortcut, actionIsCurrent, actionEnable, actionType, actionId
 
-	local macro = element.params[1]
+	local macro = element.positionalParams[1]
 	local action = OvaleActionBar:GetForMacro(macro)
 	if not action then
 		state:Log("Unknown macro '%s'.", macro)
 	else
 		-- Use texture specified in the action if given.
-		if element.params.texture then
-			actionTexture = "Interface\\Icons\\" .. element.params.texture
+		if element.namedParams.texture then
+			actionTexture = "Interface\\Icons\\" .. element.namedParams.texture
 		end
 		actionTexture = actionTexture or API_GetActionTexture(action)
 		actionInRange = API_IsActionInRange(action, target)
@@ -197,15 +211,17 @@ local function GetActionSpellInfo(element, state, atTime, target)
 
 	local actionTexture, actionInRange, actionCooldownStart, actionCooldownDuration,
 		actionUsable, actionShortcut, actionIsCurrent, actionEnable, actionType, actionId
+	local targetGUID = OvaleGUID:UnitGUID(target)
 
-	local spellId = element.params[1]
+	local spellId = element.positionalParams[1]
 	local si = OvaleData.spellInfo[spellId]
 	local replacedSpellId = nil
 	if si and si.replace then
-		local replacement = state:GetSpellInfoProperty(spellId, atTime, "replace", target)
+		local replacement = state:GetSpellInfoProperty(spellId, atTime, "replace", targetGUID)
 		if replacement then
 			replacedSpellId = spellId
 			spellId = replacement
+			si = OvaleData.spellInfo[spellId]
 			state:Log("Spell ID '%s' is replaced by spell ID '%s'.", replacedSpellId, spellId)
 		end
 	end
@@ -224,11 +240,11 @@ local function GetActionSpellInfo(element, state, atTime, target)
 	if not isKnownSpell and not action then
 		state:Log("Unknown spell ID '%s'.", spellId)
 	else
-		local isUsable, noMana = state:IsUsableSpell(spellId, atTime, target)
+		local isUsable, noMana = state:IsUsableSpell(spellId, atTime, targetGUID)
 		if isUsable or noMana then
 			-- Use texture specified in the action if given.
-			if element.params.texture then
-				actionTexture = "Interface\\Icons\\" .. element.params.texture
+			if element.namedParams.texture then
+				actionTexture = "Interface\\Icons\\" .. element.namedParams.texture
 			end
 			actionTexture = actionTexture or API_GetSpellTexture(spellId)
 			actionInRange = OvaleSpellBook:IsSpellInRange(spellId, target)
@@ -248,7 +264,7 @@ local function GetActionSpellInfo(element, state, atTime, target)
 				end
 				-- Extend the cooldown duration if the spell needs additional time to pool resources.
 				if actionCooldownStart and actionCooldownDuration then
-					local seconds = state:GetTimeToSpell(spellId, atTime, target)
+					local seconds = state:GetTimeToSpell(spellId, atTime, targetGUID)
 					if seconds > 0 then
 						local t = atTime + seconds
 						if t > actionCooldownStart + actionCooldownDuration then
@@ -277,7 +293,7 @@ local function GetActionTextureInfo(element, state, atTime, target)
 
 	local actionTexture
 	do
-		local texture = element.params[1]
+		local texture = element.positionalParams[1]
 		local spellId = tonumber(texture)
 		if spellId then
 			actionTexture = API_GetSpellTexture(spellId)
@@ -310,6 +326,7 @@ function OvaleBestAction:OnInitialize()
 	OvaleCondition = Ovale.OvaleCondition
 	OvaleCooldown = Ovale.OvaleCooldown
 	OvaleData = Ovale.OvaleData
+	OvaleGUID = Ovale.OvaleGUID
 	OvaleEquipment = Ovale.OvaleEquipment
 	OvaleFuture = Ovale.OvaleFuture
 	OvalePower = Ovale.OvalePower
@@ -328,7 +345,7 @@ end
 function OvaleBestAction:Ovale_ScriptChanged()
 	-- Clean-up tables that are referenced using obsolete nodes as keys.
 	for node, timeSpan in pairs(self_timeSpan) do
-		self_timeSpanPool:Release(timeSpan)
+		ReleaseTimeSpan(timeSpan)
 		self_timeSpan[node] = nil
 	end
 	for node, value in pairs(self_value) do
@@ -360,7 +377,7 @@ function OvaleBestAction:GetActionInfo(element, state, atTime)
 				element.actionId,
 				element.actionTarget
 		else
-			local target = element.params.target or state.defaultTarget
+			local target = element.namedParams.target or state.defaultTarget
 			if element.lowername == "item" then
 				return GetActionItemInfo(element, state, atTime, target)
 			elseif element.lowername == "macro" then
@@ -378,35 +395,20 @@ end
 function OvaleBestAction:GetAction(node, state, atTime)
 	self:StartProfiling("OvaleBestAction_GetAction")
 	local groupNode = node.child[1]
-	local timeSpan, priority, element = self:Compute(groupNode, state, atTime)
-	self_computedTimeSpan:Reset(timeSpan)
+	local timeSpan, element = self:Compute(groupNode, state, atTime)
 	if element and element.type == "state" then
-		-- Loop-count check to guard against infinite loops.
-		local loopCount = 0
-		while element and element.type == "state" do
-			loopCount = loopCount + 1
-			if loopCount >= 10 then
-				self:Error("Found too many SetState() actions -- probably an infinite loop in script.")
-				break
-			end
-			-- Set the state in the simulator.
-			local variable, value = element.params[1], element.params[2]
-			local isFuture = not HasTime(self_computedTimeSpan, atTime)
-			state:PutState(variable, value, isFuture)
-			-- Get the cumulative intersection of time spans for these re-computations.
-			self_tempTimeSpan:Reset(self_computedTimeSpan)
-			self:StartNewAction(state)
-			timeSpan, priority, element = self:Compute(groupNode, state, atTime)
-			Intersect(self_tempTimeSpan, timeSpan, self_computedTimeSpan)
-		end
+		-- Set the state in the simulator.
+		local variable, value = element.positionalParams[1], element.positionalParams[2]
+		local isFuture = not HasTime(timeSpan, atTime)
+		state:PutState(variable, value, isFuture)
 	end
 	self:StopProfiling("OvaleBestAction_GetAction")
-	return self_computedTimeSpan, priority, element
+	return timeSpan, element
 end
 
 function OvaleBestAction:PostOrderCompute(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_Compute")
-	local timeSpan, priority, result
+	local timeSpan, result
 
 	-- Check for recently cached computation results if this is a node with a postOrder list.
 	local postOrder = element.postOrder
@@ -417,7 +419,7 @@ function OvaleBestAction:PostOrderCompute(element, state, atTime)
 			local childNode, parentNode = postOrder[index], postOrder[index + 1]
 			index = index + 2
 
-			timeSpan, priority, result = self:PostOrderCompute(childNode, state, atTime)
+			timeSpan, result = self:PostOrderCompute(childNode, state, atTime)
 			--[[
 				Check for cases where short-circuit evaluation applies:
 
@@ -428,18 +430,20 @@ function OvaleBestAction:PostOrderCompute(element, state, atTime)
 			--]]
 			if parentNode then
 				local shortCircuit = false
-				if parentNode.type == "if" and Measure(timeSpan) == 0 then
-					state:Log("[%d]    '%s' will trigger short-circuit evaluation of parent node [%d] with zero-measure time span.", element.nodeId, childNode.type, parentNode.nodeId)
-					shortCircuit = true
-				elseif parentNode.type == "unless" and timeSpan and timeSpan[1] == 0 and timeSpan[2] == INFINITY then
-					state:Log("[%d]    '%s' will trigger short-circuit evaluation of parent node [%d] with universe as time span.", element.nodeId, childNode.type, parentNode.nodeId)
-					shortCircuit = true
-				elseif parentNode.type == "logical" and parentNode.operator == "and" and Measure(timeSpan) == 0 then
-					state:Log("[%d]    '%s' will trigger short-circuit evaluation of parent node [%d] with zero measure.", element.nodeId, childNode.type, parentNode.nodeId)
-					shortCircuit = true
-				elseif parentNode.type == "logical" and parentNode.operator == "or" and timeSpan and timeSpan[1] == 0 and timeSpan[2] == INFINITY then
-					state:Log("[%d]    '%s' will trigger short-circuit evaluation of parent node [%d] with universe as time span.", element.nodeId, childNode.type, parentNode.nodeId)
-					shortCircuit = true
+				if parentNode.child and parentNode.child[1] == childNode then
+					if parentNode.type == "if" and Measure(timeSpan) == 0 then
+						state:Log("[%d]    '%s' will trigger short-circuit evaluation of parent node [%d] with zero-measure time span.", element.nodeId, childNode.type, parentNode.nodeId)
+						shortCircuit = true
+					elseif parentNode.type == "unless" and IsUniverse(timeSpan) then
+						state:Log("[%d]    '%s' will trigger short-circuit evaluation of parent node [%d] with universe as time span.", element.nodeId, childNode.type, parentNode.nodeId)
+						shortCircuit = true
+					elseif parentNode.type == "logical" and parentNode.operator == "and" and Measure(timeSpan) == 0 then
+						state:Log("[%d]    '%s' will trigger short-circuit evaluation of parent node [%d] with zero measure.", element.nodeId, childNode.type, parentNode.nodeId)
+						shortCircuit = true
+					elseif parentNode.type == "logical" and parentNode.operator == "or" and IsUniverse(timeSpan) then
+						state:Log("[%d]    '%s' will trigger short-circuit evaluation of parent node [%d] with universe as time span.", element.nodeId, childNode.type, parentNode.nodeId)
+						shortCircuit = true
+					end
 				end
 				if shortCircuit then
 					-- Traverse the postOrder array looking for the parent node.
@@ -454,57 +458,53 @@ function OvaleBestAction:PostOrderCompute(element, state, atTime)
 		end
 	end
 	-- Compute the result for this node.
-	timeSpan, priority, result = self:RecursiveCompute(element, state, atTime)
+	timeSpan, result = self:RecursiveCompute(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_Compute")
-	return timeSpan, priority, result
+	return timeSpan, result
 end
 
 function OvaleBestAction:RecursiveCompute(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_Compute")
-	local timeSpan, priority, result
+	local timeSpan, result
 	if element then
-		if element.asString then
-			state:Log("[%d] >>> Computing '%s' at time=%f: %s", element.nodeId, element.type, atTime, element.asString)
-		else
-			state:Log("[%d] >>> Computing '%s' at time=%f", element.nodeId, element.type, atTime)
-		end
 		-- Check for recently cached computation results.
 		if element.serial and element.serial >= self_serial then
 			timeSpan = element.timeSpan
-			priority = element.priority
 			result = element.result
-			state:Log("[%d]    using cached result (age = %d)", element.nodeId, element.serial)
 		else
+			if element.asString then
+				state:Log("[%d] >>> Computing '%s' at time=%f: %s", element.nodeId, element.type, atTime, element.asString)
+			else
+				state:Log("[%d] >>> Computing '%s' at time=%f", element.nodeId, element.type, atTime)
+			end
 			local visitor = COMPUTE_VISITOR[element.type]
 			if visitor and self[visitor] then
-				timeSpan, priority, result = self[visitor](self, element, state, atTime)
+				timeSpan, result = self[visitor](self, element, state, atTime)
 				element.serial = self_serial
 				element.timeSpan = timeSpan
-				element.priority = priority
 				element.result = result
 			else
 				state:Log("[%d] Runtime error: unable to compute node of type '%s'.", element.nodeId, element.type)
 			end
-		end
-		if result and result.type == "value" then
-			local value, origin, rate = result.value, result.origin, result.rate
-			state:Log("[%d] <<< '%s' returns %s with value = %f, %f, %f", element.nodeId, element.type, tostring(timeSpan), value, origin, rate)
-		elseif result and result.nodeId then
-			state:Log("[%d] <<< '%s' returns [%d] %s", element.nodeId, element.type, result.nodeId, tostring(timeSpan))
-		else
-			state:Log("[%d] <<< '%s' returns %s", element.nodeId, element.type, tostring(timeSpan))
+			if result and result.type == "value" then
+				state:Log("[%d] <<< '%s' returns %s with value = %s, %s, %s", element.nodeId, element.type, timeSpan, result.value, result.origin, result.rate)
+			elseif result and result.nodeId then
+				state:Log("[%d] <<< '%s' returns [%d] %s", element.nodeId, element.type, result.nodeId, timeSpan)
+			else
+				state:Log("[%d] <<< '%s' returns %s", element.nodeId, element.type, timeSpan)
+			end
 		end
 	end
 	self:StopProfiling("OvaleBestAction_Compute")
-	return timeSpan, priority, result
+	return timeSpan, result
 end
 
 function OvaleBestAction:ComputeBool(element, state, atTime)
-	local timeSpan, _, newElement = self:Compute(element, state, atTime)
+	local timeSpan, newElement = self:Compute(element, state, atTime)
 	-- Match SimulationCraft: 0 is false, non-zero is true.
 	--	(https://code.google.com/p/simulationcraft/wiki/ActionLists#Logical_operators)
 	if newElement and newElement.type == "value" and newElement.value == 0 and newElement.rate == 0 then
-		return nil
+		return EMPTY_SET
 	else
 		return timeSpan
 	end
@@ -514,9 +514,10 @@ function OvaleBestAction:ComputeAction(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_ComputeAction")
 	local nodeId = element.nodeId
 	local timeSpan = GetTimeSpan(element)
-	local priority, result
+	local result
 
 	state:Log("[%d]    evaluating action: %s(%s)", nodeId, element.name, element.paramsAsString)
+
 	local actionTexture, actionInRange, actionCooldownStart, actionCooldownDuration,
 		actionUsable, actionShortcut, actionIsCurrent, actionEnable, actionType, actionId, actionTarget = self:GetActionInfo(element, state, atTime)
 
@@ -533,13 +534,16 @@ function OvaleBestAction:ComputeAction(element, state, atTime)
 	element.actionId = actionId
 	element.actionTarget = actionTarget
 
-	local action = element.params[1]
+	local action = element.positionalParams[1]
 	if not actionTexture then
 		state:Log("[%d]    Action %s not found.", nodeId, action)
+		wipe(timeSpan)
 	elseif not (actionEnable and actionEnable > 0) then
 		state:Log("[%d]    Action %s not enabled.", nodeId, action)
-	elseif element.params.usable == 1 and not actionUsable then
+		wipe(timeSpan)
+	elseif element.namedParams.usable == 1 and not actionUsable then
 		state:Log("[%d]    Action %s not usable.", nodeId, action)
+		wipe(timeSpan)
 	else
 		-- Set the cast time of the action.
 		local spellInfo
@@ -563,17 +567,17 @@ function OvaleBestAction:ComputeAction(element, state, atTime)
 				state:Log("[%d]    Action %s is on cooldown (start=%f, duration=%f).", nodeId, action, actionCooldownStart, actionCooldownDuration)
 				start = actionCooldownStart + actionCooldownDuration
 			else
-				state:Log("[%d]    Action %s is waiting on the GCD (start=%f).", nodeId, action, actionCooldownStart)
+				state:Log("[%d]    Action %s is waiting on the GCD or resources (start=%f).", nodeId, action, actionCooldownStart)
 				start = actionCooldownStart
 			end
 		else
 			state:Log("[%d]    Action %s is off cooldown.", nodeId, action)
 			start = state.currentTime
 		end
-		state:Log("[%d]    start=%f atTime=%s", nodeId, start, atTime)
+		state:Log("[%d]    start=%f atTime=%f", nodeId, start, atTime)
 
 		-- Set the "offgcd" flag in the element if it is a spell.
-		local offgcd = element.params.offgcd or (spellInfo and spellInfo.offgcd) or 0
+		local offgcd = element.namedParams.offgcd or (spellInfo and spellInfo.offgcd) or 0
 		element.offgcd = (offgcd == 1) and true or nil
 
 		-- If the action is available before the end of the current spellcast, then wait until we can first cast the action.
@@ -614,59 +618,36 @@ function OvaleBestAction:ComputeAction(element, state, atTime)
 			end
 		end
 		state:Log("[%d]    Action %s can start at %f.", nodeId, action, start)
-		timeSpan[1], timeSpan[2] = start, INFINITY
-
-		--[[
-			Allow for the return value of an to be "typecast" to a constant value by specifying
-			asValue=1 as a parameter.
-
-			Return 1 if the action is off of cooldown, or 0 if it is on cooldown.
-		--]]
-		local value
-		if element.params.asValue == 1 then
-			local value = HasTime(timeSpan, atTime) and 1 or 0
-			result = SetValue(element, value)
-			timeSpan[1], timeSpan[2] = 0, INFINITY
-			state:Log("[%d]    Action %s typecast to value %f.", nodeId, action, value)
-		else
-			result = element
-		end
-		priority = element.params.priority or OVALE_DEFAULT_PRIORITY
+		CopyTimeSpan(timeSpan, start, INFINITY)
+		result = element
 	end
 
 	self:StopProfiling("OvaleBestAction_ComputeAction")
-	return timeSpan, priority, result
+	return timeSpan, result
 end
 
 function OvaleBestAction:ComputeArithmetic(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_Compute")
-	local timeSpanA, _, elementA = self:Compute(element.child[1], state, atTime)
-	local timeSpanB, _, elementB = self:Compute(element.child[2], state, atTime)
 	local timeSpan = GetTimeSpan(element)
 	local result
+
+	--[[
+		Typecast LHS and RHS to values for arithmetic computations.
+		A(t) = a + (t - b)*c
+		B(t) = x + (t - y)*z
+	--]]
+	local a, b, c, timeSpanA = AsValue(atTime, self:Compute(element.child[1], state, atTime))
+	local x, y, z, timeSpanB = AsValue(atTime, self:Compute(element.child[2], state, atTime))
 
 	-- Take intersection of A and B.
 	Intersect(timeSpanA, timeSpanB, timeSpan)
 	if Measure(timeSpan) == 0 then
-		state:Log("[%d]    arithmetic '%s' returns %s with zero measure", element.nodeId, element.operator, tostring(timeSpan))
+		state:Log("[%d]    arithmetic '%s' returns %s with zero measure", element.nodeId, element.operator, timeSpan)
 		result = SetValue(element, 0)
 	else
-		--[[
-			A(t) = a + (t - b)*c
-			B(t) = x + (t - y)*z
-
-			Silently "typecast" non-values to a constant value of 0.
-		--]]
-		local a = elementA and elementA.value or 0
-		local b = elementA and elementA.origin or 0
-		local c = elementA and elementA.rate or 0
-		local x = elementB and elementB.value or 0
-		local y = elementB and elementB.origin or 0
-		local z = elementB and elementB.rate or 0
 		local operator = element.operator
 		local t = atTime
-
-		state:Log("[%d]    %f+(t-%f)*%f %s %f+(t-%f)*%f", element.nodeId, a, b, c, operator, x, y, z)
+		state:Log("[%d]    %s+(t-%s)*%s %s %s+(t-%s)*%s", element.nodeId, a, b, c, operator, x, y, z)
 
 		-- result(t) = l + (t - m)*n
 		local l, m, n
@@ -723,11 +704,9 @@ function OvaleBestAction:ComputeArithmetic(element, state, atTime)
 			else
 				bound = abs(B/z)
 			end
-			local scratch = OvaleTimeSpan(self_timeSpanPool:Get())
-			scratch:Reset(timeSpan)
-			timeSpan:Reset()
-			IntersectInterval(scratch, t - bound, t + bound, timeSpan)
-			self_timeSpanPool:Release(scratch)
+			local scratch = IntersectInterval(timeSpan, t - bound, t + bound)
+			CopyTimeSpan(timeSpan, scratch)
+			ReleaseTimeSpan(scratch)
 		elseif operator == "%" then
 			if c == 0 and z == 0 then
 				l = A % B
@@ -740,39 +719,32 @@ function OvaleBestAction:ComputeArithmetic(element, state, atTime)
 				n = 0
 			end
 		end
-		state:Log("[%d]    arithmetic '%s' returns %f+(t-%f)*%f", element.nodeId, operator, l, m, n)
+		state:Log("[%d]    arithmetic '%s' returns %s+(t-%s)*%s", element.nodeId, operator, l, m, n)
 		result = SetValue(element, l, m, n)
 	end
 	self:StopProfiling("OvaleBestAction_Compute")
-	return timeSpan, OVALE_DEFAULT_PRIORITY, result
+	return timeSpan, result
 end
 
 function OvaleBestAction:ComputeCompare(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_Compute")
-	local timeSpanA, _, elementA = self:Compute(element.child[1], state, atTime)
-	local timeSpanB, _, elementB = self:Compute(element.child[2], state, atTime)
 	local timeSpan = GetTimeSpan(element)
+
+	--[[
+		Typecast LHS and RHS to values for arithmetic computations.
+		A(t) = a + (t - b)*c
+		B(t) = x + (t - y)*z
+	--]]
+	local a, b, c, timeSpanA = AsValue(atTime, self:Compute(element.child[1], state, atTime))
+	local x, y, z, timeSpanB = AsValue(atTime, self:Compute(element.child[2], state, atTime))
 
 	-- Take intersection of A and B.
 	Intersect(timeSpanA, timeSpanB, timeSpan)
 	if Measure(timeSpan) == 0 then
-		state:Log("[%d]    compare '%s' returns %s with zero measure", element.nodeId, element.operator, tostring(timeSpan))
+		state:Log("[%d]    compare '%s' returns %s with zero measure", element.nodeId, element.operator, timeSpan)
 	else
-		--[[
-			A(t) = a + (t - b)*c
-			B(t) = x + (t - y)*z
-
-			Silently "typecast" non-values to a constant value of 0.
-		--]]
-		local a = elementA and elementA.value or 0
-		local b = elementA and elementA.origin or 0
-		local c = elementA and elementA.rate or 0
-		local x = elementB and elementB.value or 0
-		local y = elementB and elementB.origin or 0
-		local z = elementB and elementB.rate or 0
 		local operator = element.operator
-
-		state:Log("[%d]    %f+(t-%f)*%f %s %f+(t-%f)*%f", element.nodeId, a, b, c, operator, x, y, z)
+		state:Log("[%d]    %s+(t-%s)*%s %s %s+(t-%s)*%s", element.nodeId, a, b, c, operator, x, y, z)
 
 		--[[
 					 A(t) = B(t)
@@ -790,29 +762,32 @@ function OvaleBestAction:ComputeCompare(element, state, atTime)
 					or (operator == "<=" and A <= B)
 					or (operator == ">" and A > B)
 					or (operator == ">=" and A >= B)) then
-				timeSpan:Reset()
+				wipe(timeSpan)
 			end
 		else
-			local scratch = OvaleTimeSpan(self_timeSpanPool:Get())
-			scratch:Reset(timeSpan)
-			timeSpan:Reset()
 			local t = (B - A)/(c - z)
 			t = (t > 0) and t or 0
-			state:Log("[%d]    intersection at t = %f", element.nodeId, t)
+			state:Log("[%d]    intersection at t = %s", element.nodeId, t)
+			local scratch
 			if (c > z and operator == "<")
 					or (c > z and operator == "<=")
 					or (c < z and operator == ">")
 					or (c < z and operator == ">=") then
-				IntersectInterval(scratch, 0, t, timeSpan)
+				scratch = IntersectInterval(timeSpan, 0, t)
 			elseif (c < z and operator == "<")
 					or (c < z and operator == "<=")
 					or (c > z and operator == ">")
 					or (c > z and operator == ">=") then
-				IntersectInterval(scratch, t, INFINITY, timeSpan)
+				scratch = IntersectInterval(timeSpan, t, INFINITY)
 			end
-			self_timeSpanPool:Release(scratch)
+			if scratch then
+				CopyTimeSpan(timeSpan, scratch)
+				ReleaseTimeSpan(scratch)
+			else
+				wipe(timeSpan)
+			end
 		end
-		state:Log("[%d]    compare '%s' returns %s", element.nodeId, operator, tostring(timeSpan))
+		state:Log("[%d]    compare '%s' returns %s", element.nodeId, operator, timeSpan)
 	end
 	self:StopProfiling("OvaleBestAction_Compute")
 	return timeSpan
@@ -821,109 +796,56 @@ end
 function OvaleBestAction:ComputeCustomFunction(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_Compute")
 	local timeSpan = GetTimeSpan(element)
-	local priority, result
+	local result
 
 	local node = OvaleCompile:GetFunctionNode(element.name)
 	if node then
-		state:Log("[%d]    evaluating function: %s(%s)", element.nodeId, node.name, node.paramsAsString)
-		local timeSpanA, priorityA, elementA = self:Compute(node.child[1], state, atTime)
-		if element.params.asValue == 1 or node.params.asValue == 1 then
-			--[[
-				Allow for the return value of a custom function to be "typecast" to a constant value.
-
-				If the return value is a time span (a "boolean" value), then if the current time of
-				the simulation is within the time span, then return 1, or 0 otherwise.
-
-				If the return value is a linear function, then if the current time of the simulation
-				is within the function's domain, then the function is simply evaluated at the current
-				time, or 0 otherwise.
-
-				If the return value is an action, then return 1 if the action is off of cooldown, or
-				0 if it is on cooldown.
-			--]]
-			local value = 0
-			if HasTime(timeSpanA, atTime) then
-				if not elementA then	-- boolean
-					value = 1
-				elseif elementA.type == "value" then
-					value = elementA.value + (atTime - elementA.origin) * elementA.rate
-				elseif elementA.type == "action" then
-					value = 1
-				end
-			end
-			state:Log("[%d]    function '%s' typecast to value %f", element.nodeId, element.name, value)
-			timeSpan[1], timeSpan[2] = 0, INFINITY
-			result = SetValue(element, value)
-		else
-			CopyTimeSpan(timeSpanA, timeSpan)
-			result = elementA
-		end
+		-- state:Log("[%d]    evaluating function: %s(%s)", element.nodeId, node.name, node.paramsAsString)
+		local timeSpanA, elementA = self:Compute(node.child[1], state, atTime)
+		CopyTimeSpan(timeSpan, timeSpanA)
+		result = elementA
+	else
+		wipe(timeSpan)
 	end
 
 	self:StopProfiling("OvaleBestAction_Compute")
-	return timeSpan, priority, result
+	return timeSpan, result
 end
 
 function OvaleBestAction:ComputeFunction(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_ComputeFunction")
 	local timeSpan = GetTimeSpan(element)
-	local priority, result
+	local result
 
-	state:Log("[%d]    evaluating condition: %s(%s)", element.nodeId, element.name, element.paramsAsString)
-	local start, ending, value, origin, rate = OvaleCondition:EvaluateCondition(element.func, element.params, state, atTime)
+	-- state:Log("[%d]    evaluating condition: %s(%s)", element.nodeId, element.name, element.paramsAsString)
+	local start, ending, value, origin, rate = OvaleCondition:EvaluateCondition(element.func, element.positionalParams, element.namedParams, state, atTime)
 	if start and ending then
-		timeSpan[1], timeSpan[2] = start, ending
+		CopyTimeSpan(timeSpan, start, ending)
+	else
+		wipe(timeSpan)
+	end
+	if value then
+		result = SetValue(element, value, origin, rate)
 	end
 	state:Log("[%d]    condition '%s' returns %s, %s, %s, %s, %s", element.nodeId, element.name, start, ending, value, origin, rate)
 
-	--[[
-		Allow for the return value of a script condition to be "typecast" to a constant value
-		by specifying asValue=1 as a script parameter.
-
-		If the return value is a time span (a "boolean" value), then if the current time of
-		the simulation is within the time span, then return 1, or 0 otherwise.
-
-		If the return value is a linear function, then if the current time of the simulation
-		is within the function's domain, then the function is simply evaluated at the current
-		time, or 0 otherwise.
-	--]]
-	if element.params.asValue == 1 then
-		if HasTime(timeSpan, atTime) then
-			if value then
-				value = value + (atTime - origin) * rate
-			else
-				value = 1
-			end
-		else
-			value = 0
-		end
-		result = SetValue(element, value)
-		timeSpan[1], timeSpan[2] = 0, INFINITY
-		priority = OVALE_DEFAULT_PRIORITY
-		state:Log("[%d]    condition '%s' typecast to value %f", element.nodeId, element.name, value)
-	elseif value then
-		result = SetValue(element, value, origin, rate)
-	end
-
 	self:StopProfiling("OvaleBestAction_ComputeFunction")
-	return timeSpan, priority, result
+	return timeSpan, result
 end
 
 function OvaleBestAction:ComputeGroup(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_Compute")
-	local bestTimeSpan, bestPriority, bestElement, bestCastTime
-	local timeSpan = GetTimeSpan(element)
+	local bestTimeSpan, bestElement, bestCastTime
 
-	local best = OvaleTimeSpan(self_timeSpanPool:Get())
-	local current = OvaleTimeSpan(self_timeSpanPool:Get())
-
+	local best = OvaleTimeSpan:New()
+	local current = OvaleTimeSpan:New()
 	for _, node in ipairs(element.child) do
-		local currentTimeSpan, currentPriority, currentElement = self:Compute(node, state, atTime)
+		local currentTimeSpan, currentElement = self:Compute(node, state, atTime)
 		-- We only care about actions that are available at time t > atTime.
-		current:Reset()
 		IntersectInterval(currentTimeSpan, atTime, INFINITY, current)
 		if Measure(current) > 0 then
-			state:Log("[%d]    group checking %s", element.nodeId, tostring(current))
+			local nodeString = (currentElement and currentElement.nodeId) and " [" .. currentElement.nodeId .. "]" or ""
+			state:Log("[%d]    group checking [%d]: %s%s", element.nodeId, node.nodeId, current, nodeString)
 			local currentCastTime
 			if currentElement then
 				currentCastTime = currentElement.castTime
@@ -935,108 +857,83 @@ function OvaleBestAction:ComputeGroup(element, state, atTime)
 
 			local currentIsBetter = false
 			if Measure(best) == 0 then
-				state:Log("[%d]    group first best is %s", element.nodeId, tostring(current))
+				state:Log("[%d]    group first best is [%d]: %s%s", element.nodeId, node.nodeId, current, nodeString)
 				currentIsBetter = true
-			elseif not currentPriority or not bestPriority or currentPriority == bestPriority then
-				-- If the spells have the same priority, then pick the one with an earlier cast time.
-				local threshold = (bestElement and bestElement.params) and bestElement.params.wait or 0
+			else
+				-- Pick the action with the earlier cast time.
+				local threshold = (bestElement and bestElement.namedParams) and bestElement.namedParams.wait or 0
 				if best[1] - current[1] > threshold then
-					state:Log("[%d]    group new best is %s", element.nodeId, tostring(current))
-					currentIsBetter = true
-				end
-			elseif currentPriority > bestPriority then
-				-- If the current spell has a higher priority than the best one found, then choose the
-				-- higher priority spell if its cast is pushed back too far by the lower priority one.
-				local threshold = (currentElement and currentElement.params) and currentElement.params.wait or (bestCastTime * 0.75)
-				if current[1] - best[1] < threshold then
-					state:Log("[%d]    group new best (lower prio) is %s", element.nodeId, tostring(current))
-					currentIsBetter = true
-				end
-			elseif currentPriority < bestPriority then
-				-- If the current spell has a lower priority than the best one found, then choose the
-				-- lower priority spell only if it doesn't push back the cast of the higher priority
-				-- one by too much.
-				local threshold = (bestElement and bestElement.params) and bestElement.params.wait or (currentCastTime * 0.75)
-				if best[1] - current[1] > threshold then
-					state:Log("[%d]    group new best (higher prio) is %s", element.nodeId, tostring(current))
+					state:Log("[%d]    group new best is [%d]: %s%s", element.nodeId, node.nodeId, current, nodeString)
 					currentIsBetter = true
 				end
 			end
 			if currentIsBetter then
-				best:Reset(current)
+				CopyTimeSpan(best, current)
 				bestTimeSpan = currentTimeSpan
-				bestPriority = currentPriority
 				bestElement = currentElement
 				bestCastTime = currentCastTime
 			end
-			-- If the node is a "wait" node, then skip the remaining nodes.
-			if currentElement and currentElement.wait then break end
 		end
 	end
+	OvaleTimeSpan:Release(best, current)
 
-	self_timeSpanPool:Release(best)
-	self_timeSpanPool:Release(current)
-
-	CopyTimeSpan(bestTimeSpan, timeSpan)
+	local timeSpan = GetTimeSpan(element, bestTimeSpan)
+	if not bestTimeSpan then
+		wipe(timeSpan)
+	end
 	if bestElement then
 		local id = bestElement.value
-		if bestElement.params then
-			id = bestElement.params[1]
+		if bestElement.positionalParams then
+			id = bestElement.positionalParams[1]
 		end
-		state:Log("[%d]    group best action %s remains %s", element.nodeId, id, tostring(timeSpan))
+		state:Log("[%d]    group best action %s remains %s", element.nodeId, id, timeSpan)
 	else
-		state:Log("[%d]    group no best action returns %s", element.nodeId, tostring(timeSpan))
+		state:Log("[%d]    group no best action returns %s", element.nodeId, timeSpan)
 	end
 
 	self:StopProfiling("OvaleBestAction_Compute")
-	return timeSpan, bestPriority, bestElement
+	return timeSpan, bestElement
 end
 
 function OvaleBestAction:ComputeIf(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_Compute")
-	local timeSpanA = self:ComputeBool(element.child[1], state, atTime)
 	local timeSpan = GetTimeSpan(element)
-	local priority, result
-	local conditionTimeSpan = OvaleTimeSpan(self_timeSpanPool:Get())
-	if element.type == "if" then
-		conditionTimeSpan:Reset(timeSpanA)
-	elseif element.type == "unless" then
+	local result
+
+	local timeSpanA = self:ComputeBool(element.child[1], state, atTime)
+	local conditionTimeSpan = timeSpanA
+	if element.type == "unless" then
 		-- "unless A B" is equivalent to "if (not A) B", so take the complement of A.
-		Complement(timeSpanA, conditionTimeSpan)
+		conditionTimeSpan = Complement(timeSpanA)
 	end
 	-- Short-circuit evaluation of left argument to IF.
 	if Measure(conditionTimeSpan) == 0 then
-		timeSpan:Reset(conditionTimeSpan)
-		state:Log("[%d]    '%s' returns %s with zero measure", element.nodeId, element.type, tostring(timeSpan))
-		priority = OVALE_DEFAULT_PRIORITY
-		result = SetValue(element, 0)
+		CopyTimeSpan(timeSpan, conditionTimeSpan)
+		state:Log("[%d]    '%s' returns %s with zero measure", element.nodeId, element.type, timeSpan)
 	else
-		local timeSpanB, priorityB, elementB = self:Compute(element.child[2], state, atTime)
-		-- If the "then" clause is a "wait" node, then only wait if the conditions are true.
-		if elementB and elementB.wait and not HasTime(conditionTimeSpan, atTime) then
-			elementB.wait = nil
-		end
+		local timeSpanB, elementB = self:Compute(element.child[2], state, atTime)
 		-- Take intersection of the condition and B.
 		Intersect(conditionTimeSpan, timeSpanB, timeSpan)
-		state:Log("[%d]    '%s' returns %s", element.nodeId, element.type, tostring(timeSpan))
-		priority = priorityB
+		state:Log("[%d]    '%s' returns %s (intersection of %s and %s)", element.nodeId, element.type, timeSpan, conditionTimeSpan, timeSpanB)
 		result = elementB
 	end
-	self_timeSpanPool:Release(conditionTimeSpan)
+	if element.type == "unless" then
+		ReleaseTimeSpan(conditionTimeSpan)
+	end
 
 	self:StopProfiling("OvaleBestAction_Compute")
-	return timeSpan, priority, result
+	return timeSpan, result
 end
 
 function OvaleBestAction:ComputeLogical(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_Compute")
-	local timeSpanA = self:ComputeBool(element.child[1], state, atTime)
 	local timeSpan = GetTimeSpan(element)
 
+	local timeSpanA = self:ComputeBool(element.child[1], state, atTime)
 	if element.operator == "and" then
 		-- Short-circuit evaluation of left argument to AND.
 		if Measure(timeSpanA) == 0 then
-			timeSpan:Reset(timeSpanA)
+			CopyTimeSpan(timeSpan, timeSpanA)
 			state:Log("[%d]    logical '%s' short-circuits with zero measure left argument", element.nodeId, element.operator)
 		else
 			local timeSpanB = self:ComputeBool(element.child[2], state, atTime)
@@ -1047,8 +944,8 @@ function OvaleBestAction:ComputeLogical(element, state, atTime)
 		Complement(timeSpanA, timeSpan)
 	elseif element.operator == "or" then
 		-- Short-circuit evaluation of left argument to OR.
-		if timeSpanA and timeSpanA[1] == 0 and timeSpanA[2] == INFINITY then
-			timeSpan:Reset(timeSpanA)
+		if IsUniverse(timeSpanA) then
+			CopyTimeSpan(timeSpan, timeSpanA)
 			state:Log("[%d]    logical '%s' short-circuits with universe as left argument", element.nodeId, element.operator)
 		else
 			local timeSpanB = self:ComputeBool(element.child[2], state, atTime)
@@ -1056,22 +953,18 @@ function OvaleBestAction:ComputeLogical(element, state, atTime)
 			Union(timeSpanA, timeSpanB, timeSpan)
 		end
 	elseif element.operator == "xor" then
-		-- A xor B = (A and not B) or (not A and B)
+		-- A xor B = (A or B) and not (A and B)
 		local timeSpanB = self:ComputeBool(element.child[2], state, atTime)
-		local left = OvaleTimeSpan(self_timeSpanPool:Get())
-		local right = OvaleTimeSpan(self_timeSpanPool:Get())
-		local scratch = OvaleTimeSpan(self_timeSpanPool:Get())
-		Complement(timeSpanB, scratch)
-		Intersect(timeSpanA, scratch, left)
-		Complement(timeSpanA, scratch)
-		Intersect(scratch, timeSpanB, right)
-		Union(left, right, timeSpan)
-		self_timeSpanPool:Release(left)
-		self_timeSpanPool:Release(right)
-		self_timeSpanPool:Release(scratch)
+		local left = Union(timeSpanA, timeSpanB)
+		local scratch = Intersect(timeSpanA, timeSpanB)
+		local right = Complement(scratch)
+		Intersect(left, right, timeSpan)
+		OvaleTimeSpan:Release(left, scratch, right)
+	else
+		wipe(timeSpan)
 	end
 
-	state:Log("[%d]    logical '%s' returns %s", element.nodeId, element.operator, tostring(timeSpan))
+	state:Log("[%d]    logical '%s' returns %s", element.nodeId, element.operator, timeSpan)
 	self:StopProfiling("OvaleBestAction_Compute")
 	return timeSpan
 end
@@ -1080,58 +973,34 @@ function OvaleBestAction:ComputeLua(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_ComputeLua")
 	local value = loadstring(element.lua)()
 	state:Log("[%d]    lua returns %s", element.nodeId, value)
-
-	local timeSpan = GetTimeSpan(element)
-	local priority, result
+	local result
 	if value then
-		timeSpan[1], timeSpan[2] = 0, INFINITY
 		result = SetValue(element, value)
-		priority = OVALE_DEFAULT_PRIORITY
 	end
+	-- A Lua value element's timespan is always (0, INFINITY).
+	local timeSpan = GetTimeSpan(element, UNIVERSE)
 	self:StopProfiling("OvaleBestAction_ComputeLua")
-	return timeSpan, priority, result
+	return timeSpan, result
 end
 
 function OvaleBestAction:ComputeState(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_Compute")
-	local timeSpan = GetTimeSpan(element)
-	local result
-
-	if element.func == "setstate" then
-		state:Log("[%d]    %s: %s = %s", element.nodeId, element.name, element.params[1], element.params[2])
-		timeSpan[1], timeSpan[2] = 0, INFINITY
-		result = element
-	end
+	local result = element
+	assert(element.func == "setstate")
+	state:Log("[%d]    %s: %s = %s", element.nodeId, element.name, element.positionalParams[1], element.positionalParams[2])
+	-- A state element's timespan is always (0, INFINITY).
+	local timeSpan = GetTimeSpan(element, UNIVERSE)
 	self:StopProfiling("OvaleBestAction_Compute")
-	return timeSpan, OVALE_DEFAULT_PRIORITY, result
+	return timeSpan, result
 end
 
 function OvaleBestAction:ComputeValue(element, state, atTime)
 	self:StartProfiling("OvaleBestAction_Compute")
 	state:Log("[%d]    value is %s", element.nodeId, element.value)
-	local timeSpan = GetTimeSpan(element)
-	timeSpan[1], timeSpan[2] = 0, INFINITY
+	-- A value element's timespan is always (0, INFINITY).
+	local timeSpan = GetTimeSpan(element, UNIVERSE)
 	self:StopProfiling("OvaleBestAction_Compute")
-	return timeSpan, OVALE_DEFAULT_PRIORITY, element
-end
-
-function OvaleBestAction:ComputeWait(element, state, atTime)
-	self:StartProfiling("OvaleBestAction_Compute")
-	local timeSpanA, priorityA, elementA = self:Compute(element.child[1], state, atTime)
-	local timeSpan = GetTimeSpan(element)
-
-	if elementA then
-		elementA.wait = true
-		CopyTimeSpan(timeSpanA, timeSpan)
-		state:Log("[%d]    '%s' returns %s", element.nodeId, element.type, tostring(timeSpan))
-	end
-	self:StopProfiling("OvaleBestAction_Compute")
-	return timeSpan, priorityA, elementA
-end
-
-function OvaleBestAction:Debug()
-	self_timeSpanPool:Debug()
-	self_valuePool:Debug()
+	return timeSpan, element
 end
 --</public-static-methods>
 

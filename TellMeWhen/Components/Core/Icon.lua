@@ -272,6 +272,11 @@ function Icon.GetGUID(icon, generate)
 		else
 			return icon.TempGUID
 		end
+	else
+		-- Nil this out for icons that are imported that have a GUID.
+		-- There will be a tempGUID already for the icon, but it won't match
+		-- the imported GUID.
+		icon.TempGUID = nil
 	end
 
 	return GUID
@@ -428,8 +433,9 @@ function Icon.ProcessQueuedEvents(icon)
 						conditionResult = conditionChecker(icon, EventSettings)
 						
 						if EventSettings.CndtJustPassed then
-							if conditionResult ~= EventSettingsWasPassingConditionMap[EventSettings] then
-								EventSettingsWasPassingConditionMap[EventSettings] = conditionResult
+							local uniqueKey = tostring(icon) .. tostring(EventSettings)
+							if conditionResult ~= EventSettingsWasPassingConditionMap[uniqueKey] then
+								EventSettingsWasPassingConditionMap[uniqueKey] = conditionResult
 							else
 								conditionResult = false
 							end
@@ -500,10 +506,6 @@ Icon.Update_Method = "auto"
 -- @param method [string] A string the indicates the update method that will be used for the icon. Must be either "auto" or "manual".
 -- @usage icon:SetUpdateMethod("manual")
 function Icon.SetUpdateMethod(icon, method)
-	if TMW.db.profile.DEBUG_ForceAutoUpdate then
-		method = "auto"
-	end
-
 	icon.Update_Method = method
 
 	if method == "auto" then
@@ -776,6 +778,7 @@ function Icon.DisableIcon(icon, soft)
 
 	icon:DisableAllModules()
 	
+
 	if icon.typeData then
 		icon.typeData:UnimplementFromIcon(icon)
 	end
@@ -784,6 +787,7 @@ function Icon.DisableIcon(icon, soft)
 		icon.viewData:UnimplementFromIcon(icon)
 	end
 end
+
 
 --- Completely sets up an icon.
 -- 
@@ -799,8 +803,21 @@ function Icon.Setup(icon)
 	local ics = icon:GetSettings()
 	local typeData = TMW.Types[ics.Type]
 	local viewData = group.viewData
-	local iconGUID = icon:GetGUID()
+	local iconGUID = icon:GetGUID()	
 
+	if not typeData then
+		error("TellMeWhen: Critical error: Couldn't find type data or fallback type data for " ..
+			ics.Type .. " (Where is the default icon type? Things broke badly!)")
+	end
+
+	-- Check if the group should update its icons in case
+	-- an update was called specifically for this icon.
+	if not group:ShouldUpdateIcons() then
+		return
+	end
+	
+
+	-- Determine if this icon is a group controller, and setup the entire group if it is.
 	if icon.ID == 1 then
 		local newController
 
@@ -811,6 +828,8 @@ function Icon.Setup(icon)
 			newController = nil
 		end
 
+		-- Only perform a group setup if the group's controller has changed.
+		-- If we didn't check for this, we would stack overflow by repeatedly doing this.
 		if newController ~= group.Controller then
 			group.Controller = newController
 			group:Setup() -- Don't tail call here, because if something goes wrong then we WANT to stack overflow.
@@ -818,26 +837,31 @@ function Icon.Setup(icon)
 		end
 	end
 
-	
-	if not group:ShouldUpdateIcons() then return end
-	
+
+	-- Set this so that we can prevent update table registration checks from happening
+	-- until the end of this method (its a slightly intensive process that adds up if done a ton of times)
+	-- This is also used externally (in some IconModules, for eg) to prevent other thigns from happening
+	-- during setup. Listen for TMW_ICON_SETUP_POST to find when this gets set to nil.
 	icon.IsSettingUp = true
 	
-	local typeData_old = icon.typeData
-	
+
+	-- Perform a soft reset on the icon.
 	icon:DisableIcon(true)
 
-	if iconGUID then
-		TMW:DeclareDataOwner(iconGUID, icon)
-	end
-	
-	icon.viewData = viewData
-	icon.typeData = typeData	
 
-	if not typeData then
-		error("TellMeWhen: Critical error: Couldn't find type data or fallback type data for " .. ics.Type .. " (Where is the default icon type? Things broke badly!)")
-	end
+	-- Associate the icon's GUID with the icon in a global context
+	-- so that it can be referred to by GUID.
+	TMW:DeclareDataOwner(iconGUID, icon)
 	
+
+	-- Store these on the icon for convenience
+	icon.typeData = typeData
+	icon.viewData = viewData
+	
+
+	-- Store all of the icon's relevant settings on the icon,
+	-- and nil out any settings that aren't relevant.
+	-- TODO: (really big TODO) get rid of this behavior.
 	for k in pairs(TMW.Icon_Defaults) do
 		if typeData.RelevantSettings[k] then
 			icon[k] = ics[k]
@@ -846,7 +870,9 @@ function Icon.Setup(icon)
 		end
 	end
 
-	-- process alpha settings
+
+	-- Set icon.Alpha and icon.UnAlpha based on the icon.ShowWhen setting.
+	-- TODO: Overhaul the alpha system so this isn't hardcoded in.
 	if icon.ShowWhen then
 		if bitband(icon.ShowWhen, 0x1) == 0 then
 			icon.UnAlpha = 0
@@ -855,64 +881,77 @@ function Icon.Setup(icon)
 		end
 	end
 	
+
+	-- Non-controlled icons should always show if they're used.
+	-- Controlled icons are shown/hidden based on whether or not they're used
+	-- (this is handled by the icon controller system, so don't manually show controller icons here)
 	if not icon:IsControlled() then
 		icon:Show()
 	end
+
+
+	-- Lame framelevel fix: Sometimes, icons end up with dramatically different frame levels than their group.
 	icon:SetFrameLevel(group:GetFrameLevel() + 1)
 
+
+	-- Notify that we've begun setting up this icon (we're past all the basic stuff now,
+	-- and at the point where other parties might be interested in doing anything before we go further)
 	TMW:Fire("TMW_ICON_SETUP_PRE", icon)
 
-	-- force an update
-	icon.LastUpdate = 0
 	
-	-- actually run the icon's update function
 	if icon.Enabled or not TMW.Locked then
-	
-		------------ Icon Type ------------
-		typeData:ImplementIntoIcon(icon)
-		
-		if icon.typeData ~= typeData_old then
-			TMW:Fire("TMW_ICON_TYPE_CHANGED", icon, typeData, typeData_old)
-		end		
-		
+
 		------------ Icon View ------------
 		viewData:Icon_Setup(icon)
 		viewData:ImplementIntoIcon(icon)
 		viewData:Icon_Setup_Post(icon)
+	
+
+		------------ Icon Type ------------
+		typeData:ImplementIntoIcon(icon)
+			
+		-- Only perform a setup for icons that aren't controlled.
+		-- Controlled icons shouldn't be setup because they aren't autonomous.
+		if not icon:IsControlled() then 
+			icon.LastUpdate = 0
+			icon.NextUpdateTime = 0
+			TMW.safecall(typeData.Setup, typeData, icon)
+		end
 
 
 		------------ Conditions ------------
+		-- Don't setup conditions to untyped icons.
 		if icon.typeData.type ~= "" then
+			-- Create our condition object for the icon.
 			local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
 			icon.ConditionObject = ConditionObjectConstructor:Construct()
 			
 			if icon.ConditionObject then
+				-- If this icon has valid conditions, listen for updates to them.
 				icon.ConditionObject:DeclareExternalUpdater(icon, true)
 				TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
 				icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
 			end
 		end
-			
-		if not icon:IsControlled() then -- true for controllers and non-controlled groups
-			icon.LastUpdate = 0
-			icon.NextUpdateTime = 0
-			TMW.safecall(typeData.Setup, typeData, icon)
-		end
 	else
+		-- Disable icons that aren't enabled when we're locked.
 		icon:DisableIcon()
 	end
 
 
+	-- Queue another immediate update.
 	icon.NextUpdateTime = 0
 
 
-	if TMW.Locked then	
+	if TMW.Locked then
+		-- Clear out configuration mode properties from the icon.
 		icon:SetInfo("alphaOverride", nil)
 		if icon.attributes.texture == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
 			icon:SetInfo("texture", "")
 		end
 		icon:EnableMouse(false)
 	else
+		-- Put the icon in a configurable state.
 		icon:Show()
 		ClearScripts(icon)
 		icon:SetUpdateFunction(nil)
@@ -934,8 +973,13 @@ function Icon.Setup(icon)
 
 	if icon:IsControlled() then
 		if TMW.Locked then
+			-- Inherit the controller's attributes icon the controlled icon
+			-- in order to copy things like timer sweep reverse 
+			-- (which is set statically in the IconType's Setup method, and IconType:Setup() isn't performed for controller icons)
 			icon:InheritDataFromIcon(icon.group.Controller)
 		else
+			-- In config mode, give controller icons the special texture,
+			-- and make them slightly transparent for the hell of it.
 			icon:SetInfo("texture; alphaOverride",
 				"Interface\\AddOns\\TellMeWhen\\Textures\\Controlled",
 				icon.Enabled and 0.95 or 0.5
@@ -943,12 +987,13 @@ function Icon.Setup(icon)
 		end
 	end
 	
-
+	-- Now that we're done setting up, we can call this manually
+	-- (icon.IsSettingUp == true prevents it from being called to save on CPU usage)
 	icon:CheckUpdateTableRegistration()
-
-	TMW:Fire("TMW_ICON_SETUP_POST", icon)
-	
 	icon.IsSettingUp = nil
+
+	-- Let everyone know that we're done setting up this icon.
+	TMW:Fire("TMW_ICON_SETUP_POST", icon)
 end
 
 
@@ -1310,7 +1355,7 @@ end})
 --    end
 --    
 --    if attributes.dogTagUnit ~= dogTagUnit then
---      doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdate
+--      doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdated
 --    end
 --    --]]
 --  end)

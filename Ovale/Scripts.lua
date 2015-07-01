@@ -15,12 +15,28 @@ local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local OvaleOptions = Ovale.OvaleOptions
 local L = Ovale.L
 
+-- Forward declarations for module dependencies.
+local OvaleEquipment = nil
+local OvalePaperDoll = nil
+local OvaleSpellBook = nil
+local OvaleStance = nil
+
+local format = string.format
 local gsub = string.gsub
 local pairs = pairs
-local API_UnitClass = UnitClass
+local strlower = string.lower
 
--- Player's class.
-local _, self_class = API_UnitClass("player")
+-- Name and description of default script.
+local DEFAULT_NAME = "Ovale"
+local DEFAULT_DESCRIPTION = L["Script défaut"]
+
+-- Name and description of "custom" script.
+local CUSTOM_NAME = "custom"
+local CUSTOM_DESCRIPTION = L["Script personnalisé"]
+
+-- Name and description of "disabled" script.
+local DISABLED_NAME = "Disabled"
+local DISABLED_DESCRIPTION = L["Disabled"]
 
 do
 	local defaultDB = {
@@ -58,30 +74,57 @@ OvaleScripts.script = {}
 
 --<public-static-methods>
 function OvaleScripts:OnInitialize()
+	-- Resolve module dependencies.
+	OvaleEquipment = Ovale.OvaleEquipment
+	OvalePaperDoll = Ovale.OvalePaperDoll
+	OvaleSpellBook = Ovale.OvaleSpellBook
+	OvaleStance = Ovale.OvaleStance
+
 	self:CreateOptions()
+	-- Register the default script that triggers the automatic script selection; the body code is ignored.
+	self:RegisterScript(nil, nil, DEFAULT_NAME, DEFAULT_DESCRIPTION, nil, "script")
 	-- Register the custom script.
-	self:RegisterScript(self_class, "custom", L["Script personnalisé"], Ovale.db.profile.code)
+	self:RegisterScript(Ovale.playerClass, nil, CUSTOM_NAME, CUSTOM_DESCRIPTION, Ovale.db.profile.code, "script")
 	-- Register an empty script called "Disabled" that can be used to show no icons.
-	self:RegisterScript(nil, "Disabled", "Disabled", "", "script")
+	self:RegisterScript(nil, nil, DISABLED_NAME, DISABLED_DESCRIPTION, nil, "script")
+end
+
+function OvaleScripts:OnEnable()
+	self:RegisterMessage("Ovale_StanceChanged")
+end
+
+function OvaleScripts:OnDisable()
+	self:UnregisterMessage("Ovale_StanceChanged")
+end
+
+function OvaleScripts:Ovale_StanceChanged(event, newStance, oldStance)
+	if newStance == "warrior_gladiator_stance" or oldStance == "warrior_gladiator_stance" then
+		self:SendMessage("Ovale_ScriptChanged")
+	end
 end
 
 -- Return a table of script descriptions indexed by name.
 function OvaleScripts:GetDescriptions(scriptType)
 	local descriptionsTable = {}
 	for name, script in pairs(self.script) do
-		if not scriptType or script.type == scriptType then
-			descriptionsTable[name] = script.desc
+		if (not scriptType or script.type == scriptType) and (not script.specialization or OvalePaperDoll:IsSpecialization(script.specialization)) then
+			if name == DEFAULT_NAME then
+				descriptionsTable[name] = script.desc .. " (" .. self:GetScriptName(name) .. ")"
+			else
+				descriptionsTable[name] = script.desc
+			end
 		end
 	end
 	return descriptionsTable
 end
 
-function OvaleScripts:RegisterScript(class, name, description, code, scriptType)
-	if not class or class == self_class then
+function OvaleScripts:RegisterScript(class, specialization, name, description, code, scriptType)
+	if not class or class == Ovale.playerClass then
 		self.script[name] = self.script[name] or {}
 		local script = self.script[name]
 		script.type = scriptType or "script"
 		script.desc = description or name
+		script.specialization = specialization
 		script.code = code or ""
 	end
 end
@@ -95,6 +138,104 @@ function OvaleScripts:SetScript(name)
 	if oldSource ~= name then
 		Ovale.db.profile.source = name
 		self:SendMessage("Ovale_ScriptChanged")
+	end
+end
+
+function OvaleScripts:GetDefaultScriptName(class, specialization)
+	local name
+	if class == "DEATHKNIGHT" then
+		if specialization == "blood" then
+			-- TODO: Use the Tier17M script until a new one has been created for patch 6.2.
+			name = format("simulationcraft_death_knight_%s_t17m", specialization)
+		elseif specialization == "frost" then
+			local weaponType = OvaleEquipment:HasOffHandWeapon() and "1h" or "2h"
+			name = format("simulationcraft_death_knight_frost_%s_t18m", weaponType)
+		elseif specialization then
+			name = format("simulationcraft_death_knight_%s_t18m", specialization)
+		end
+	elseif class == "DRUID" then
+		if specialization == "balance" then
+			-- TODO: Add support for balance Eclipse energy to allow scripts to work.
+			name = DISABLED_NAME
+		elseif specialization == "restoration" then
+			name = "nerien_druid_restoration"
+		end
+	elseif class == "HUNTER" then
+		if specialization == "beast_mastery" then
+			specialization = "bm"
+		elseif specialization == "marksmanship" then
+			specialization = "mm"
+		else -- if specialization == "survival" then
+			specialization = "sv"
+		end
+		name = format("simulationcraft_hunter_%s_t18m", specialization)
+	elseif class == "MONK" then
+		local weaponType = OvaleEquipment:HasOffHandWeapon() and "1h" or "2h"
+		if specialization == "brewmaster" then
+			-- TODO: Use the Tier17M script until a new one has been created for patch 6.2.
+			local talentChoice = "serenity"					-- Serenity (default)
+			if OvaleSpellBook:GetTalentPoints(20) > 0 then	-- Chi Explosion
+				talentChoice = "ce"
+			end
+			name = format("simulationcraft_monk_brewmaster_%s_%s_t17m", weaponType, talentChoice)
+		elseif specialization == "windwalker" then
+			name = format("simulationcraft_monk_windwalker_%s_t18m", weaponType)
+		end
+	elseif class == "PALADIN" then
+		if specialization == "holy" then
+			-- TODO: Create a holy paladin script (see summonstone.com).
+			name = DISABLED_NAME
+		elseif class == "protection" then
+			-- TODO: Use the Tier17M script until a new one has been created for patch 6.2.
+			name = format("simulationcraft_paladin_%s_t17m", specialization)
+		end
+	elseif class == "PRIEST" then
+		if specialization == "discipline" or specialization == "holy" then
+			-- TODO: Create discipline and holy priest scripts.
+			name = DISABLED_NAME
+		else -- if specialization == "shadow" then
+			local talentChoice = "cop"							-- Clarity of Power (default)
+			if OvaleSpellBook:GetTalentPoints(20) > 0 then		-- Void Entropy
+				talentChoice = "ve"
+			elseif OvaleSpellBook:GetTalentPoints(21) > 0 then	-- Auspicious Spirits
+				talentChoice = "as"
+			end
+			name = format("simulationcraft_priest_shadow_t18m_%s", talentChoice)
+		end
+	elseif class == "SHAMAN" and specialization == "restoration" then
+		name = "nerien_shaman_restoration"
+	elseif class == "WARRIOR" then
+		if specialization == "fury" then
+			local weaponType = OvaleEquipment:HasMainHandWeapon(1) and "1h" or "2h"
+			name = format("simulationcraft_warrior_fury_%s_t18m", weaponType)
+		elseif specialization == "protection" then
+			-- Check if the warrior is in Gladiator Stance for DPS.
+			if OvaleStance:IsStance("warrior_gladiator_stance") then
+				specialization = "gladiator"
+				name = format("simulationcraft_warrior_%s_t18m", specialization)
+			else
+				-- TODO: Use the Tier17M script until a new one has been created for patch 6.2.
+				name = format("simulationcraft_warrior_%s_t17m", specialization)
+			end
+		end
+	end
+	if not name and specialization then
+		name = format("simulationcraft_%s_%s_t18m", strlower(class), specialization)
+	end
+	if not (name and self.script[name]) then
+		name = DISABLED_NAME
+	end
+	return name
+end
+
+function OvaleScripts:GetScriptName(name)
+	return (name == DEFAULT_NAME) and self:GetDefaultScriptName(Ovale.playerClass, OvalePaperDoll:GetSpecialization()) or name
+end
+
+function OvaleScripts:GetScript(name)
+	name = self:GetScriptName(name)
+	if name and self.script[name] then
+		return self.script[name].code
 	end
 end
 
@@ -126,19 +267,16 @@ function OvaleScripts:CreateOptions()
 				name = L["Script"],
 				width = "full",
 				disabled = function()
-					return Ovale.db.profile.source ~= "custom"
+					return Ovale.db.profile.source ~= CUSTOM_NAME
 				end,
 				get = function(info)
-					local source = Ovale.db.profile.source
-					local code = ""
-					if source and OvaleScripts.script[source] then
-						code = OvaleScripts.script[source].code
-					end
+					local code = OvaleScripts:GetScript(Ovale.db.profile.source)
+					code = code or ""
 					-- Substitute spaces for tabs.
 					return gsub(code, "\t", "    ")
 				end,
 				set = function(info, v)
-					OvaleScripts:RegisterScript(self_class, "custom", L["Script personnalisé"], v, "script")
+					OvaleScripts:RegisterScript(Ovale.playerClass, nil, CUSTOM_NAME, CUSTOM_DESCRIPTION, v, "script")
 					Ovale.db.profile.code = v
 					self:SendMessage("Ovale_ScriptChanged")
 				end,
@@ -148,20 +286,16 @@ function OvaleScripts:CreateOptions()
 				type = "execute",
 				name = L["Copier sur Script personnalisé"],
 				disabled = function()
-					return Ovale.db.profile.source == "custom"
+					return Ovale.db.profile.source == CUSTOM_NAME
 				end,
 				confirm = function()
 					return L["Ecraser le Script personnalisé préexistant?"]
 				end,
 				func = function()
-					local source = Ovale.db.profile.source
-					local code = ""
-					if source and OvaleScripts.script[source] then
-						code = OvaleScripts.script[source].code
-					end
-					OvaleScripts.script["custom"].code = code
-					Ovale.db.profile.source = "custom"
-					Ovale.db.profile.code = code
+					local code = OvaleScripts:GetScript(Ovale.db.profile.source)
+					OvaleScripts:RegisterScript(Ovale.playerClass, nil, CUSTOM_NAME, CUSTOM_DESCRIPTION, code, "script")
+					Ovale.db.profile.source = CUSTOM_NAME
+					Ovale.db.profile.code = OvaleScripts:GetScript(CUSTOM_NAME)
 					self:SendMessage("Ovale_ScriptChanged")
 				end,
 			},

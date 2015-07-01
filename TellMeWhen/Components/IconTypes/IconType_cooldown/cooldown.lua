@@ -174,7 +174,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 		
 		local start, duration, stack
 		
-		local charges, maxCharges, start_charge, duration_charge = GetSpellCharges(NameStringArray[i])
+		local charges, maxCharges, start_charge, duration_charge = GetSpellCharges(iName)
 		if charges then
 			if charges < maxCharges then
 				-- If the ability has charges and isn't at max charges, 
@@ -262,6 +262,9 @@ local function SpellCooldown_OnUpdate(icon, time)
 		dataToUse = usableData
 	elseif unusableFound then
 		dataToUse = unusableData
+	elseif usableFound then
+		usableData.Alpha = 0
+		dataToUse = usableData
 	end
 	
 	if dataToUse then

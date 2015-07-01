@@ -207,7 +207,7 @@ end
 
 function ArkInventory.PetJournal.Iterate( )
 	local t = ArkInventory.PetJournal.data.collection
-	return ArkInventory.spairs( t, function( a, b ) return ( t[a].fullName or "" ) < ( t[b].fullName or "" ) end )
+	return ArkInventory.spairs( t, function( a, b ) return ( t[a].fullname or "" ) < ( t[b].fullname or "" ) end )
 end
 
 function ArkInventory.PetJournal.CanSummon( arg1 )
@@ -506,9 +506,9 @@ function ArkInventory.PetJournal.ScanPet( index, guid, update )
 	pet = pd[guid]
 	
 	if customName and customName ~= "" then
-		pet.fullName = string.format( "%s (%s)", sd.name, customName )
+		pet.fullname = string.format( "%s (%s)", sd.name, customName )
 	else
-		pet.fullName = sd.name
+		pet.fullname = sd.name
 	end
 	
 	return pet, update
@@ -1064,7 +1064,11 @@ function ArkInventory:LISTEN_PET_BATTLE_OPENING_DONE( event, ... )
 									--info = string.format( "- " )
 								end
 								
-								info = string.format( "%s%s %s", info, pd.link, pd.breed )
+								info = string.format( "%s%s", info, pd.link )
+								
+								if pd.breed then
+									info = string.format( "%s  %s", info, pd.breed )
+								end
 								
 							end
 						end
@@ -1148,7 +1152,7 @@ end
 
 -- runtime
 PetJournal:HookScript( "OnHide", ArkInventory.PetJournal.OnHide )
-PetJournalParent:HookScript( "OnHide", ArkInventory.PetJournal.OnHide )
+--CollectionsJournal:HookScript( "OnHide", ArkInventory.PetJournal.OnHide )
 
 --PetJournalParent:Show( )
 --PetJournalParent:Hide( )

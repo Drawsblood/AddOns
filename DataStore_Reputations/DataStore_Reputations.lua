@@ -51,9 +51,11 @@ These UIDs have 2 purposes:
 - minimize the amount of data sent across the network when sharing accounts (since both sides have the same reference table)
 
 Note: Let the system manage the ids, DO NOT delete entries from this table, if a faction is removed from the game, mark it as OLD_ or whatever.
+
+Since WoD, GetFactionInfoByID does not return a value when an alliance player asks for an horde function.
+Default to an english text.
 --]]
 
--- Since WoD, GetFactionInfoByID does not return a value when an alliance player asks for an horde function, so at least default to an english text
 
 
 local factions = {

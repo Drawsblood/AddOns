@@ -3,8 +3,6 @@ local addon = _G[addonName]
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
-local GREEN		= "|cFF00FF00"
-
 local parentName = "AltoholicTabAgenda"
 local parent
 
@@ -48,20 +46,6 @@ end
 
 function ns:SetMode(mode)
 	currentMode = mode
-	
-	-- AltoholicTabSummaryStatus:SetText("")
-	-- AltoholicTabSummaryToggleView:Show()
-	-- AltoholicTabSummary_SelectLocation:Show()
-	-- AltoholicTabSummary_RequestSharing:Show()
-	-- AltoholicTabSummary_Options:Show()
-	-- AltoholicTabSummary_OptionsDataStore:Show()
-
-	-- if currentMode == 1 then
-	-- elseif currentMode == 2 then
-	-- elseif currentMode == 3 then
-	-- elseif currentMode == 4 then
-	-- elseif currentMode == 5 then
-	-- end
 end
 
 function ns:Refresh()

@@ -2,32 +2,6 @@
 
 
 
-	<Button name="TellMeWhen_BarDisplay_ColorButton" virtual="true">
-		<Size x="20" y="20"/>
-
-		<KeyValues>
-			<KeyValue key="tmwClass" type="string" value="Config_ColorButton"/>
-		</KeyValues>
-
-		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture parentKey="background">
-					<Size x="17.5" y="17.5"/>
-					<Anchors>
-						<Anchor point="CENTER"/>
-					</Anchors>
-					<Color r="1.0" g="1.0" b="1.0"/>
-				</Texture>
-				<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
-	</Button>
-
 	<Frame name="TellMeWhen_BarDisplayBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="85"/>
 		<Frames>
@@ -121,7 +95,7 @@
 				</Scripts>
 			</EditBox>
 
-			<Button name="$parentColorStart" parentKey="ColorStart" inherits="TellMeWhen_BarDisplay_ColorButton">
+			<Button name="$parentColorStart" parentKey="ColorStart" inherits="TellMeWhen_ColorButtonTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentFakeMax" relativePoint="BOTTOM" y="-10" />
 				</Anchors>
@@ -131,6 +105,7 @@
 							setting = "BarDisplay_StartColor",
 							title = TMW.L["ICONMENU_BAR_COLOR_START"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_START_DESC"],
+							hasOpacity = true,
 							disabled = function(self)
 								return not TMW.CI.ics.BarDisplay_EnableColors
 							end,
@@ -139,7 +114,7 @@
 				</Scripts>
 			</Button>
 
-			<Button name="$parentColorMiddle" parentKey="ColorMiddle" inherits="TellMeWhen_BarDisplay_ColorButton">
+			<Button name="$parentColorMiddle" parentKey="ColorMiddle" inherits="TellMeWhen_ColorButtonTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentColorStart" />
 				</Anchors>
@@ -149,6 +124,7 @@
 							setting = "BarDisplay_MiddleColor",
 							title = TMW.L["ICONMENU_BAR_COLOR_MIDDLE"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_MIDDLE_DESC"],
+							hasOpacity = true,
 							disabled = function(self)
 								return not TMW.CI.ics.BarDisplay_EnableColors
 							end,
@@ -157,7 +133,7 @@
 				</Scripts>
 			</Button>
 
-			<Button name="$parentColorComplete" parentKey="ColorComplete" inherits="TellMeWhen_BarDisplay_ColorButton">
+			<Button name="$parentColorComplete" parentKey="ColorComplete" inherits="TellMeWhen_ColorButtonTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentColorStart" />
 				</Anchors>
@@ -167,6 +143,7 @@
 							setting = "BarDisplay_CompleteColor",
 							title = TMW.L["ICONMENU_BAR_COLOR_COMPLETE"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_COMPLETE_DESC"],
+							hasOpacity = true,
 							disabled = function(self)
 								return not TMW.CI.ics.BarDisplay_EnableColors
 							end,

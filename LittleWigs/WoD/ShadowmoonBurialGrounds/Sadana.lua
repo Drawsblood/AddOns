@@ -6,6 +6,7 @@
 local mod, CL = BigWigs:NewBoss("Sadana Bloodfury", 969, 1139)
 if not mod then return end
 mod:RegisterEnableMob(75509)
+--BOSS_KILL#1677#Sadana Bloodfury
 
 --------------------------------------------------------------------------------
 -- Localization
@@ -29,16 +30,11 @@ function mod:GetOptions()
 		153240, -- Daggerfall
 		153153, -- Dark Communion
 		"custom_on_markadd", -- Add marker option
-		"bosskill",
 	}
 end
 
 function mod:OnBossEnable()
 	self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", "CheckBossStatus")
-
-	-- XXX Currently doesn't fire IEEU, rely on the old fashioned engage
-	self:RegisterEvent("PLAYER_REGEN_DISABLED", "CheckForEngage")
-	self:RegisterEvent("PLAYER_REGEN_ENABLED", "CheckForWipe")
 
 	self:Log("SPELL_CAST_SUCCESS", "DarkEclipse", 164974)
 	self:Log("SPELL_CAST_SUCCESS", "Daggerfall", 153240)
@@ -62,26 +58,23 @@ function mod:DarkEclipse(args)
 end
 
 do
-	local function printTarget(self) -- XXX no boss unit available to use... yet
-		local bossId = self:GetUnitIdByGUID(75509)
-		if not bossId then return end
-		local bossTarget = bossId.."target"
-		if UnitExists(bossTarget) then
-			if UnitIsUnit(bossTarget, "player") then
-				self:Flash(153240)
-				self:Say(153240)
-			end
-			self:TargetMessage(153240, self:UnitName(bossTarget), "Attention", "Alert")
+	local function printTarget(self, player, guid)
+		if self:Me(guid) then
+			self:Flash(153240)
+			self:Say(153240)
 		end
+		self:TargetMessage(153240, player, "Attention", "Alert")
 	end
 	function mod:Daggerfall(args)
-		self:ScheduleTimer(printTarget, 0.1, self)
+		self:GetBossTarget(printTarget, 0.2, args.sourceGUID)
 	end
 end
 
 do
 	local counter, ref = 0, nil
 	local function findAdd(self)
+		-- Designer of this encounter just doesn't want this add to be on the boss frames unfortunately :(
+		-- Doomed to polling the group instead of the boss units.
 		local addId = self:GetUnitIdByGUID(75966) -- Defiled Spirit
 		if addId then
 			SetRaidTarget(addId, 8)

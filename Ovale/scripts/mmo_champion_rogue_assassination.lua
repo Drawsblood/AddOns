@@ -2,137 +2,306 @@ local OVALE, Ovale = ...
 local OvaleScripts = Ovale.OvaleScripts
 
 do
-	local name = "mmo_champion_rogue_assassination_t17m"
-	local desc = "[6.0] MMO-Champion: Rogue_Assassination_T17M"
+	local name = "mmo_champion_rogue_assassination_20"
+	local desc = "[6.2] MMO-Champion: Rogue_Assassination_2.0"
 	local code = [[
-# Based on SimulationCraft profile "Rogue_Assassination_T17M".
+# Based on SimulationCraft profile "Rogue_Assassination_2.0".
 #	class=rogue
 #	spec=assassination
-#	talents=http://us.battle.net/wow/en/tool/talent-calculator#ca!2....21
+#	talents=3000032
 #	glyphs=vendetta/energy/disappearance
 
 Include(ovale_common)
+Include(ovale_trinkets_mop)
+Include(ovale_trinkets_wod)
 Include(ovale_rogue_spells)
 
-AddCheckBox(opt_interrupt L(interrupt) default)
-AddCheckBox(opt_melee_range L(not_in_melee_range))
-AddCheckBox(opt_potion_agility ItemName(draenic_agility_potion) default)
+AddCheckBox(opt_melee_range L(not_in_melee_range) specialization=assassination)
+AddCheckBox(opt_potion_agility ItemName(draenic_agility_potion) default specialization=assassination)
+AddCheckBox(opt_vanish SpellName(vanish) default specialization=assassination)
 
-AddFunction UsePotionAgility
+AddFunction AssassinationUsePotionAgility
 {
 	if CheckBoxOn(opt_potion_agility) and target.Classification(worldboss) Item(draenic_agility_potion usable=1)
 }
 
-AddFunction UseItemActions
+AddFunction AssassinationUseItemActions
 {
 	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
 
-AddFunction GetInMeleeRange
-{
-	if CheckBoxOn(opt_melee_range) and not target.InRange(kick)
-	{
-		Spell(shadowstep)
-		Texture(misc_arrowlup help=L(not_in_melee_range))
-	}
-}
-
-AddFunction InterruptActions
-{
-	if CheckBoxOn(opt_interrupt) and not target.IsFriend() and target.IsInterruptible()
-	{
-		if target.InRange(kick) Spell(kick)
-		if not target.Classification(worldboss)
-		{
-			if target.InRange(cheap_shot) Spell(cheap_shot)
-			if target.InRange(deadly_throw) and ComboPoints() == 5 Spell(deadly_throw)
-			if target.InRange(kidney_shot) Spell(kidney_shot)
-			Spell(arcane_torrent_energy)
-			if target.InRange(quaking_palm) Spell(quaking_palm)
-		}
-	}
-}
-
 ### actions.default
 
 AddFunction AssassinationDefaultMainActions
 {
-	#rupture,if=combo_points=5&ticks_remain<3
-	if ComboPoints() == 5 and target.TicksRemaining(rupture_debuff) < 3 Spell(rupture)
-	#rupture,cycle_targets=1,if=active_enemies>1&!ticking&combo_points=5
-	if Enemies() > 1 and not target.DebuffPresent(rupture_debuff) and ComboPoints() == 5 Spell(rupture)
-	#mutilate,if=buff.stealth.up
-	if BuffPresent(stealthed_buff any=1) Spell(mutilate)
-	#slice_and_dice,if=buff.slice_and_dice.remains<5
-	if BuffRemaining(slice_and_dice_buff) < 5 Spell(slice_and_dice)
-	#crimson_tempest,if=combo_points>4&active_enemies>=4&remains<8
-	if ComboPoints() > 4 and Enemies() >= 4 and target.DebuffRemaining(crimson_tempest_debuff) < 8 Spell(crimson_tempest)
-	#fan_of_knives,if=combo_points<5&active_enemies>=4
-	if ComboPoints() < 5 and Enemies() >= 4 Spell(fan_of_knives)
-	#rupture,if=(remains<2|(combo_points=5&remains<=(duration*0.3)))&active_enemies=1
-	if { target.DebuffRemaining(rupture_debuff) < 2 or ComboPoints() == 5 and target.DebuffRemaining(rupture_debuff) <= BaseDuration(rupture_debuff) * 0.3 } and Enemies() == 1 Spell(rupture)
-	#envenom,cycle_targets=1,if=(combo_points>4&(cooldown.death_from_above.remains>2|!talent.death_from_above.enabled))&active_enemies<4&!dot.deadly_poison_dot.ticking
-	if ComboPoints() > 4 and { SpellCooldown(death_from_above) > 2 or not Talent(death_from_above_talent) } and Enemies() < 4 and not target.DebuffPresent(deadly_poison_dot_debuff) Spell(envenom)
-	#envenom,if=(combo_points>4&(cooldown.death_from_above.remains>2|!talent.death_from_above.enabled))&active_enemies<4&(buff.envenom.remains<2|energy>55)
-	if ComboPoints() > 4 and { SpellCooldown(death_from_above) > 2 or not Talent(death_from_above_talent) } and Enemies() < 4 and { BuffRemaining(envenom_buff) < 2 or Energy() > 55 } Spell(envenom)
-	#fan_of_knives,cycle_targets=1,if=active_enemies>2&!dot.deadly_poison_dot.ticking&debuff.vendetta.down
-	if Enemies() > 2 and not target.DebuffPresent(deadly_poison_dot_debuff) and target.DebuffExpires(vendetta_debuff) Spell(fan_of_knives)
-	#mutilate,cycle_targets=1,if=target.health.pct>35&(combo_points<4|(talent.anticipation.enabled&anticipation_charges<3))&active_enemies=2&!dot.deadly_poison_dot.ticking&debuff.vendetta.down
-	if target.HealthPercent() > 35 and { ComboPoints() < 4 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 3 } and Enemies() == 2 and not target.DebuffPresent(deadly_poison_dot_debuff) and target.DebuffExpires(vendetta_debuff) Spell(mutilate)
-	#mutilate,if=target.health.pct>35&(combo_points<5|(talent.anticipation.enabled&anticipation_charges<4))&active_enemies<5
-	if target.HealthPercent() > 35 and { ComboPoints() < 5 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 4 } and Enemies() < 5 Spell(mutilate)
-	#dispatch,cycle_targets=1,if=(combo_points<5|(talent.anticipation.enabled&anticipation_charges<4))&active_enemies=2&!dot.deadly_poison_dot.ticking&debuff.vendetta.down
-	if { ComboPoints() < 5 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 4 } and Enemies() == 2 and not target.DebuffPresent(deadly_poison_dot_debuff) and target.DebuffExpires(vendetta_debuff) Spell(dispatch)
-	#dispatch,if=(combo_points<5|(talent.anticipation.enabled&anticipation_charges<4))&active_enemies<4
-	if { ComboPoints() < 5 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 4 } and Enemies() < 4 Spell(dispatch)
-	#mutilate,cycle_targets=1,if=active_enemies=2&!dot.deadly_poison_dot.ticking&debuff.vendetta.down
-	if Enemies() == 2 and not target.DebuffPresent(deadly_poison_dot_debuff) and target.DebuffExpires(vendetta_debuff) Spell(mutilate)
-	#mutilate,if=active_enemies<5
-	if Enemies() < 5 Spell(mutilate)
+	#run_action_list,name=opener_ant,if=(time<5.5&combo_points<5)&talent.anticipation.enabled
+	if TimeInCombat() < 5.5 and ComboPoints() < 5 and Talent(anticipation_talent) AssassinationOpenerAntMainActions()
+	#run_action_list,name=reflection_rotation_ant_ref,if=buff.shadow_reflection.up&talent.anticipation.enabled&talent.shadow_reflection.enabled
+	if BuffPresent(shadow_reflection_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) AssassinationReflectionRotationAntRefMainActions()
+	#run_action_list,name=vanish_rotation_ant_ref,if=buff.vanish.up&talent.anticipation.enabled&talent.shadow_reflection.enabled
+	if BuffPresent(vanish_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) AssassinationVanishRotationAntRefMainActions()
+	#call_action_list,name=cd_controller_ant,if=talent.anticipation.enabled
+	if Talent(anticipation_talent) AssassinationCdControllerAntMainActions()
+	#run_action_list,name=generators_ant_env,if=talent.anticipation.enabled&buff.envenom.up
+	if Talent(anticipation_talent) and BuffPresent(envenom_buff) AssassinationGeneratorsAntEnvMainActions()
+	#run_action_list,name=generators_ant,if=talent.anticipation.enabled
+	if Talent(anticipation_talent) AssassinationGeneratorsAntMainActions()
 }
 
 AddFunction AssassinationDefaultShortCdActions
 {
-	#vanish,if=time>10&!buff.stealth.up
-	if TimeInCombat() > 10 and not BuffPresent(stealthed_buff any=1) Spell(vanish)
-	#auto_attack
-	GetInMeleeRange()
-
-	unless ComboPoints() == 5 and target.TicksRemaining(rupture_debuff) < 3 and Spell(rupture) or Enemies() > 1 and not target.DebuffPresent(rupture_debuff) and ComboPoints() == 5 and Spell(rupture) or BuffPresent(stealthed_buff any=1) and Spell(mutilate) or BuffRemaining(slice_and_dice_buff) < 5 and Spell(slice_and_dice)
+	unless TimeInCombat() < 5.5 and ComboPoints() < 5 and Talent(anticipation_talent) and AssassinationOpenerAntShortCdPostConditions()
 	{
-		#marked_for_death,if=combo_points=0
-		if ComboPoints() == 0 Spell(marked_for_death)
+		unless BuffPresent(shadow_reflection_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) and AssassinationReflectionRotationAntRefShortCdPostConditions()
+		{
+			unless BuffPresent(vanish_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) and AssassinationVanishRotationAntRefShortCdPostConditions()
+			{
+				#call_action_list,name=cd_controller_ant,if=talent.anticipation.enabled
+				if Talent(anticipation_talent) AssassinationCdControllerAntShortCdActions()
+			}
+		}
 	}
 }
 
 AddFunction AssassinationDefaultCdActions
 {
-	#potion,name=draenic_agility,if=buff.bloodlust.react|target.time_to_die<40|debuff.vendetta.up
-	if BuffPresent(burst_haste_buff any=1) or target.TimeToDie() < 40 or target.DebuffPresent(vendetta_debuff) UsePotionAgility()
-	#kick
-	InterruptActions()
-	#preparation,if=!buff.vanish.up&cooldown.vanish.remains>60
-	if not BuffPresent(vanish_buff any=1) and SpellCooldown(vanish) > 60 Spell(preparation)
-	#use_item,slot=trinket2,if=active_enemies>1
-	if Enemies() > 1 UseItemActions()
-	#blood_fury
-	Spell(blood_fury_ap)
-	#berserking
-	Spell(berserking)
-	#arcane_torrent,if=energy<60
-	if Energy() < 60 Spell(arcane_torrent_energy)
-
-	unless ComboPoints() == 5 and target.TicksRemaining(rupture_debuff) < 3 and Spell(rupture) or Enemies() > 1 and not target.DebuffPresent(rupture_debuff) and ComboPoints() == 5 and Spell(rupture) or BuffPresent(stealthed_buff any=1) and Spell(mutilate) or BuffRemaining(slice_and_dice_buff) < 5 and Spell(slice_and_dice) or ComboPoints() > 4 and Enemies() >= 4 and target.DebuffRemaining(crimson_tempest_debuff) < 8 and Spell(crimson_tempest) or ComboPoints() < 5 and Enemies() >= 4 and Spell(fan_of_knives) or { target.DebuffRemaining(rupture_debuff) < 2 or ComboPoints() == 5 and target.DebuffRemaining(rupture_debuff) <= BaseDuration(rupture_debuff) * 0.3 } and Enemies() == 1 and Spell(rupture)
+	unless TimeInCombat() < 5.5 and ComboPoints() < 5 and Talent(anticipation_talent) and AssassinationOpenerAntCdPostConditions()
 	{
-		#shadow_reflection,if=cooldown.vendetta.remains=0
-		if not SpellCooldown(vendetta) > 0 Spell(shadow_reflection)
-		#vendetta,if=buff.shadow_reflection.up|!talent.shadow_reflection.enabled
-		if BuffPresent(shadow_reflection_buff) or not Talent(shadow_reflection_talent) Spell(vendetta)
-		#use_item,slot=trinket2,if=debuff.vendetta.up&active_enemies=1
-		if target.DebuffPresent(vendetta_debuff) and Enemies() == 1 UseItemActions()
+		#run_action_list,name=reflection_rotation_ant_ref,if=buff.shadow_reflection.up&talent.anticipation.enabled&talent.shadow_reflection.enabled
+		if BuffPresent(shadow_reflection_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) AssassinationReflectionRotationAntRefCdActions()
+
+		unless BuffPresent(shadow_reflection_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) and AssassinationReflectionRotationAntRefCdPostConditions()
+		{
+			unless BuffPresent(vanish_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) and AssassinationVanishRotationAntRefCdPostConditions()
+			{
+				#call_action_list,name=cd_controller_ant,if=talent.anticipation.enabled
+				if Talent(anticipation_talent) AssassinationCdControllerAntCdActions()
+
+				unless Talent(anticipation_talent) and AssassinationCdControllerAntCdPostConditions()
+				{
+					#run_action_list,name=generators_ant_env,if=talent.anticipation.enabled&buff.envenom.up
+					if Talent(anticipation_talent) and BuffPresent(envenom_buff) AssassinationGeneratorsAntEnvCdActions()
+
+					unless Talent(anticipation_talent) and BuffPresent(envenom_buff) and AssassinationGeneratorsAntEnvCdPostConditions()
+					{
+						#run_action_list,name=generators_ant,if=talent.anticipation.enabled
+						if Talent(anticipation_talent) AssassinationGeneratorsAntCdActions()
+					}
+				}
+			}
+		}
 	}
+}
+
+### actions.cd_controller_ant
+
+AddFunction AssassinationCdControllerAntMainActions
+{
+	#call_action_list,name=pool_ant,if=energy+energy.regen*cooldown.vendetta.remains<=105
+	if Energy() + EnergyRegenRate() * SpellCooldown(vendetta) <= 105 AssassinationPoolAntMainActions()
+}
+
+AddFunction AssassinationCdControllerAntShortCdActions
+{
+	#vanish,if=energy>13&!buff.stealth.up&combo_points+anticipation_charges<8&buff.blindside.down
+	if Energy() > 13 and not BuffPresent(stealthed_buff any=1) and ComboPoints() + BuffStacks(anticipation_buff) < 8 and BuffExpires(blindside_buff) and { CheckBoxOn(opt_vanish) or not SpellCooldown(preparation) > 0 } Spell(vanish)
+}
+
+AddFunction AssassinationCdControllerAntCdActions
+{
+	#shadow_reflection,if=energy>35
+	if Energy() > 35 Spell(shadow_reflection)
+	#preparation,if=cooldown.vanish.remains>25
+	if SpellCooldown(vanish) > 25 Spell(preparation)
+	#call_action_list,name=pool_ant,if=energy+energy.regen*cooldown.vendetta.remains<=105
+	if Energy() + EnergyRegenRate() * SpellCooldown(vendetta) <= 105 AssassinationPoolAntCdActions()
+}
+
+AddFunction AssassinationCdControllerAntCdPostConditions
+{
+	Energy() + EnergyRegenRate() * SpellCooldown(vendetta) <= 105 and AssassinationPoolAntCdPostConditions()
+}
+
+### actions.energy_neutral_finishers
+
+AddFunction AssassinationEnergyNeutralFinishersMainActions
+{
+	#rupture,cycle_targets=1,if=ticks_remain<3
+	if target.TicksRemaining(rupture_debuff) < 3 Spell(rupture)
+}
+
+AddFunction AssassinationEnergyNeutralFinishersShortCdPostConditions
+{
+	target.TicksRemaining(rupture_debuff) < 3 and Spell(rupture)
+}
+
+AddFunction AssassinationEnergyNeutralFinishersCdPostConditions
+{
+	target.TicksRemaining(rupture_debuff) < 3 and Spell(rupture)
+}
+
+### actions.finishers
+
+AddFunction AssassinationFinishersMainActions
+{
+	#rupture,cycle_targets=1,if=ticks_remain<3
+	if target.TicksRemaining(rupture_debuff) < 3 Spell(rupture)
+	#pool_resource,for_next=1,extra_amount=50
+	#death_from_above
+	Spell(death_from_above)
+	unless SpellUsable(death_from_above) and SpellCooldown(death_from_above) < TimeToEnergy(50)
+	{
+		#envenom,cycle_targets=1,if=target.health.pct<=35&(energy+energy.regen*cooldown.vendetta.remains>=105&(buff.envenom.remains<=1.8|energy>45))|buff.bloodlust.up|debuff.vendetta.up
+		if target.HealthPercent() <= 35 and Energy() + EnergyRegenRate() * SpellCooldown(vendetta) >= 105 and { BuffRemaining(envenom_buff) <= 1.8 or Energy() > 45 } or BuffPresent(burst_haste_buff any=1) or target.DebuffPresent(vendetta_debuff) Spell(envenom)
+		#envenom,cycle_targets=1,if=target.health.pct>35&(energy+energy.regen*cooldown.vendetta.remains>=105&(buff.envenom.remains<=1.8|energy>55))|buff.bloodlust.up|debuff.vendetta.up
+		if target.HealthPercent() > 35 and Energy() + EnergyRegenRate() * SpellCooldown(vendetta) >= 105 and { BuffRemaining(envenom_buff) <= 1.8 or Energy() > 55 } or BuffPresent(burst_haste_buff any=1) or target.DebuffPresent(vendetta_debuff) Spell(envenom)
+	}
+}
+
+AddFunction AssassinationFinishersShortCdPostConditions
+{
+	target.TicksRemaining(rupture_debuff) < 3 and Spell(rupture) or not { SpellUsable(death_from_above) and SpellCooldown(death_from_above) < TimeToEnergy(50) } and { { target.HealthPercent() <= 35 and Energy() + EnergyRegenRate() * SpellCooldown(vendetta) >= 105 and { BuffRemaining(envenom_buff) <= 1.8 or Energy() > 45 } or BuffPresent(burst_haste_buff any=1) or target.DebuffPresent(vendetta_debuff) } and Spell(envenom) or { target.HealthPercent() > 35 and Energy() + EnergyRegenRate() * SpellCooldown(vendetta) >= 105 and { BuffRemaining(envenom_buff) <= 1.8 or Energy() > 55 } or BuffPresent(burst_haste_buff any=1) or target.DebuffPresent(vendetta_debuff) } and Spell(envenom) }
+}
+
+AddFunction AssassinationFinishersCdActions
+{
+	unless target.TicksRemaining(rupture_debuff) < 3 and Spell(rupture)
+	{
+		#pool_resource,for_next=1,extra_amount=50
+		#death_from_above
+		unless SpellUsable(death_from_above) and SpellCooldown(death_from_above) < TimeToEnergy(50)
+		{
+			unless { target.HealthPercent() <= 35 and Energy() + EnergyRegenRate() * SpellCooldown(vendetta) >= 105 and { BuffRemaining(envenom_buff) <= 1.8 or Energy() > 45 } or BuffPresent(burst_haste_buff any=1) or target.DebuffPresent(vendetta_debuff) } and Spell(envenom) or { target.HealthPercent() > 35 and Energy() + EnergyRegenRate() * SpellCooldown(vendetta) >= 105 and { BuffRemaining(envenom_buff) <= 1.8 or Energy() > 55 } or BuffPresent(burst_haste_buff any=1) or target.DebuffPresent(vendetta_debuff) } and Spell(envenom)
+			{
+				#call_action_list,name=pool_ant_env
+				AssassinationPoolAntEnvCdActions()
+			}
+		}
+	}
+}
+
+AddFunction AssassinationFinishersCdPostConditions
+{
+	target.TicksRemaining(rupture_debuff) < 3 and Spell(rupture) or not { SpellUsable(death_from_above) and SpellCooldown(death_from_above) < TimeToEnergy(50) } and { { target.HealthPercent() <= 35 and Energy() + EnergyRegenRate() * SpellCooldown(vendetta) >= 105 and { BuffRemaining(envenom_buff) <= 1.8 or Energy() > 45 } or BuffPresent(burst_haste_buff any=1) or target.DebuffPresent(vendetta_debuff) } and Spell(envenom) or { target.HealthPercent() > 35 and Energy() + EnergyRegenRate() * SpellCooldown(vendetta) >= 105 and { BuffRemaining(envenom_buff) <= 1.8 or Energy() > 55 } or BuffPresent(burst_haste_buff any=1) or target.DebuffPresent(vendetta_debuff) } and Spell(envenom) }
+}
+
+### actions.generators_ant
+
+AddFunction AssassinationGeneratorsAntMainActions
+{
+	#call_action_list,name=finishers,if=combo_points=5
+	if ComboPoints() == 5 AssassinationFinishersMainActions()
+	#call_action_list,name=energy_neutral_finishers,if=combo_points=5
+	if ComboPoints() == 5 AssassinationEnergyNeutralFinishersMainActions()
+	#dispatch
+	Spell(dispatch)
+	#mutilate
+	Spell(mutilate)
+}
+
+AddFunction AssassinationGeneratorsAntShortCdPostConditions
+{
+	ComboPoints() == 5 and AssassinationFinishersShortCdPostConditions() or ComboPoints() == 5 and AssassinationEnergyNeutralFinishersShortCdPostConditions() or Spell(dispatch) or Spell(mutilate)
+}
+
+AddFunction AssassinationGeneratorsAntCdActions
+{
+	#call_action_list,name=finishers,if=combo_points=5
+	if ComboPoints() == 5 AssassinationFinishersCdActions()
+}
+
+AddFunction AssassinationGeneratorsAntCdPostConditions
+{
+	ComboPoints() == 5 and AssassinationFinishersCdPostConditions() or ComboPoints() == 5 and AssassinationEnergyNeutralFinishersCdPostConditions() or Spell(dispatch) or Spell(mutilate)
+}
+
+### actions.generators_ant_env
+
+AddFunction AssassinationGeneratorsAntEnvMainActions
+{
+	#call_action_list,name=finishers,if=combo_points=5&combo_points+anticipation_charges>=7
+	if ComboPoints() == 5 and ComboPoints() + BuffStacks(anticipation_buff) >= 7 AssassinationFinishersMainActions()
+	#call_action_list,name=energy_neutral_finishers,if=combo_points=5
+	if ComboPoints() == 5 AssassinationEnergyNeutralFinishersMainActions()
+	#dispatch
+	Spell(dispatch)
+	#mutilate
+	Spell(mutilate)
+}
+
+AddFunction AssassinationGeneratorsAntEnvShortCdPostConditions
+{
+	ComboPoints() == 5 and ComboPoints() + BuffStacks(anticipation_buff) >= 7 and AssassinationFinishersShortCdPostConditions() or ComboPoints() == 5 and AssassinationEnergyNeutralFinishersShortCdPostConditions() or Spell(dispatch) or Spell(mutilate)
+}
+
+AddFunction AssassinationGeneratorsAntEnvCdActions
+{
+	#call_action_list,name=finishers,if=combo_points=5&combo_points+anticipation_charges>=7
+	if ComboPoints() == 5 and ComboPoints() + BuffStacks(anticipation_buff) >= 7 AssassinationFinishersCdActions()
+}
+
+AddFunction AssassinationGeneratorsAntEnvCdPostConditions
+{
+	ComboPoints() == 5 and ComboPoints() + BuffStacks(anticipation_buff) >= 7 and AssassinationFinishersCdPostConditions() or ComboPoints() == 5 and AssassinationEnergyNeutralFinishersCdPostConditions() or Spell(dispatch) or Spell(mutilate)
+}
+
+### actions.opener_ant
+
+AddFunction AssassinationOpenerAntMainActions
+{
+	#mutilate,if=time<1
+	if TimeInCombat() < 1 Spell(mutilate)
+	#rupture,if=time<2
+	if TimeInCombat() < 2 Spell(rupture)
+	#dispatch
+	Spell(dispatch)
+	#mutilate
+	Spell(mutilate)
+}
+
+AddFunction AssassinationOpenerAntShortCdPostConditions
+{
+	TimeInCombat() < 1 and Spell(mutilate) or TimeInCombat() < 2 and Spell(rupture) or Spell(dispatch) or Spell(mutilate)
+}
+
+AddFunction AssassinationOpenerAntCdPostConditions
+{
+	TimeInCombat() < 1 and Spell(mutilate) or TimeInCombat() < 2 and Spell(rupture) or Spell(dispatch) or Spell(mutilate)
+}
+
+### actions.pool_ant
+
+AddFunction AssassinationPoolAntMainActions
+{
+	#call_action_list,name=finishers,if=combo_points+anticipation_charges>=8&combo_points=5
+	if ComboPoints() + BuffStacks(anticipation_buff) >= 8 and ComboPoints() == 5 AssassinationFinishersMainActions()
+}
+
+AddFunction AssassinationPoolAntCdActions
+{
+	#call_action_list,name=finishers,if=combo_points+anticipation_charges>=8&combo_points=5
+	if ComboPoints() + BuffStacks(anticipation_buff) >= 8 and ComboPoints() == 5 AssassinationFinishersCdActions()
+
+	unless ComboPoints() + BuffStacks(anticipation_buff) >= 8 and ComboPoints() == 5 and AssassinationFinishersCdPostConditions()
+	{
+		#preparation,if=cooldown.vanish.remains>25|target.time_to_die<17&cooldown.vendetta.remains>1
+		if SpellCooldown(vanish) > 25 or target.TimeToDie() < 17 and SpellCooldown(vendetta) > 1 Spell(preparation)
+	}
+}
+
+AddFunction AssassinationPoolAntCdPostConditions
+{
+	ComboPoints() + BuffStacks(anticipation_buff) >= 8 and ComboPoints() == 5 and AssassinationFinishersCdPostConditions()
+}
+
+### actions.pool_ant_env
+
+AddFunction AssassinationPoolAntEnvCdActions
+{
+	#preparation,if=cooldown.vanish.remains>25|target.time_to_die<17&cooldown.vendetta.remains>1
+	if SpellCooldown(vanish) > 25 or target.TimeToDie() < 17 and SpellCooldown(vendetta) > 1 Spell(preparation)
 }
 
 ### actions.precombat
@@ -140,22 +309,25 @@ AddFunction AssassinationDefaultCdActions
 AddFunction AssassinationPrecombatMainActions
 {
 	#flask,type=greater_draenic_agility_flask
-	#food,type=sleeper_surprise
-	#apply_poison,lethal=deadly,nonlethal=crippling
+	#food,type=sleeper_sushi
+	#apply_poison,lethal=deadly
 	if BuffRemaining(lethal_poison_buff) < 1200 Spell(deadly_poison)
 	#stealth
-	if BuffExpires(stealthed_buff any=1) Spell(stealth)
-	#slice_and_dice,if=talent.marked_for_death.enabled
-	if Talent(marked_for_death_talent) Spell(slice_and_dice)
+	Spell(stealth)
 }
 
 AddFunction AssassinationPrecombatShortCdActions
 {
-	unless BuffRemaining(lethal_poison_buff) < 1200 and Spell(deadly_poison) or BuffExpires(stealthed_buff any=1) and Spell(stealth)
+	unless BuffRemaining(lethal_poison_buff) < 1200 and Spell(deadly_poison) or Spell(stealth)
 	{
 		#marked_for_death
 		Spell(marked_for_death)
 	}
+}
+
+AddFunction AssassinationPrecombatShortCdPostConditions
+{
+	BuffRemaining(lethal_poison_buff) < 1200 and Spell(deadly_poison) or Spell(stealth)
 }
 
 AddFunction AssassinationPrecombatCdActions
@@ -164,87 +336,162 @@ AddFunction AssassinationPrecombatCdActions
 	{
 		#snapshot_stats
 		#potion,name=draenic_agility
-		UsePotionAgility()
+		AssassinationUsePotionAgility()
 	}
 }
 
+AddFunction AssassinationPrecombatCdPostConditions
+{
+	BuffRemaining(lethal_poison_buff) < 1200 and Spell(deadly_poison) or Spell(stealth)
+}
+
+### actions.reflection_rotation_ant_ref
+
+AddFunction AssassinationReflectionRotationAntRefMainActions
+{
+	#run_action_list,name=generators_ant_env,if=talent.anticipation.enabled&buff.envenom.up
+	if Talent(anticipation_talent) and BuffPresent(envenom_buff) AssassinationGeneratorsAntEnvMainActions()
+	#run_action_list,name=generators_ant,if=talent.anticipation.enabled
+	if Talent(anticipation_talent) AssassinationGeneratorsAntMainActions()
+}
+
+AddFunction AssassinationReflectionRotationAntRefShortCdPostConditions
+{
+	Talent(anticipation_talent) and BuffPresent(envenom_buff) and AssassinationGeneratorsAntEnvShortCdPostConditions() or Talent(anticipation_talent) and AssassinationGeneratorsAntShortCdPostConditions()
+}
+
+AddFunction AssassinationReflectionRotationAntRefCdActions
+{
+	#potion,name=draenic_agility,if=buff.bloodlust.react|target.time_to_die<40|(buff.shadow_reflection.up|(!talent.shadow_reflection.enabled&buff.vendetta.up))&(trinket.stat.agi.up|trinket.stat.multistrike.up|trinket.stat.crit.up|buff.archmages_greater_incandescence_agi.up)|((buff.shadow_reflection.up|(!talent.shadow_reflection.enabled&buff.vendetta.up))&target.time_to_die<136)
+	if BuffPresent(burst_haste_buff any=1) or target.TimeToDie() < 40 or { BuffPresent(shadow_reflection_buff) or not Talent(shadow_reflection_talent) and BuffPresent(vendetta_buff) } and { BuffPresent(trinket_stat_agi_buff) or BuffPresent(trinket_stat_multistrike_buff) or BuffPresent(trinket_stat_crit_buff) or BuffPresent(archmages_greater_incandescence_agi_buff) } or { BuffPresent(shadow_reflection_buff) or not Talent(shadow_reflection_talent) and BuffPresent(vendetta_buff) } and target.TimeToDie() < 136 AssassinationUsePotionAgility()
+	#vendetta
+	Spell(vendetta)
+	#use_item,slot=trinket2
+	AssassinationUseItemActions()
+	#use_item,slot=finger1
+	AssassinationUseItemActions()
+	#Arcane_Torrent,if=energy<90
+	if Energy() < 90 Spell(arcane_torrent_energy)
+	#blood_fury
+	Spell(blood_fury_ap)
+	#berserking
+	Spell(berserking)
+	#run_action_list,name=generators_ant_env,if=talent.anticipation.enabled&buff.envenom.up
+	if Talent(anticipation_talent) and BuffPresent(envenom_buff) AssassinationGeneratorsAntEnvCdActions()
+
+	unless Talent(anticipation_talent) and BuffPresent(envenom_buff) and AssassinationGeneratorsAntEnvCdPostConditions()
+	{
+		#run_action_list,name=generators_ant,if=talent.anticipation.enabled
+		if Talent(anticipation_talent) AssassinationGeneratorsAntCdActions()
+	}
+}
+
+AddFunction AssassinationReflectionRotationAntRefCdPostConditions
+{
+	Talent(anticipation_talent) and BuffPresent(envenom_buff) and AssassinationGeneratorsAntEnvCdPostConditions() or Talent(anticipation_talent) and AssassinationGeneratorsAntCdPostConditions()
+}
+
+### actions.vanish_rotation_ant_ref
+
+AddFunction AssassinationVanishRotationAntRefMainActions
+{
+	#mutilate
+	Spell(mutilate)
+}
+
+AddFunction AssassinationVanishRotationAntRefShortCdPostConditions
+{
+	Spell(mutilate)
+}
+
+AddFunction AssassinationVanishRotationAntRefCdPostConditions
+{
+	Spell(mutilate)
+}
+
 ### Assassination icons.
-AddCheckBox(opt_rogue_assassination_aoe L(AOE) specialization=assassination default)
 
-AddIcon specialization=assassination help=shortcd enemies=1 checkbox=!opt_rogue_assassination_aoe
+AddCheckBox(opt_rogue_assassination_aoe L(AOE) default specialization=assassination)
+
+AddIcon checkbox=!opt_rogue_assassination_aoe enemies=1 help=shortcd specialization=assassination
 {
 	if not InCombat() AssassinationPrecombatShortCdActions()
-	AssassinationDefaultShortCdActions()
+	unless not InCombat() and AssassinationPrecombatShortCdPostConditions()
+	{
+		AssassinationDefaultShortCdActions()
+	}
 }
 
-AddIcon specialization=assassination help=shortcd checkbox=opt_rogue_assassination_aoe
+AddIcon checkbox=opt_rogue_assassination_aoe help=shortcd specialization=assassination
 {
 	if not InCombat() AssassinationPrecombatShortCdActions()
-	AssassinationDefaultShortCdActions()
+	unless not InCombat() and AssassinationPrecombatShortCdPostConditions()
+	{
+		AssassinationDefaultShortCdActions()
+	}
 }
 
-AddIcon specialization=assassination help=main enemies=1
+AddIcon enemies=1 help=main specialization=assassination
 {
 	if not InCombat() AssassinationPrecombatMainActions()
 	AssassinationDefaultMainActions()
 }
 
-AddIcon specialization=assassination help=aoe checkbox=opt_rogue_assassination_aoe
+AddIcon checkbox=opt_rogue_assassination_aoe help=aoe specialization=assassination
 {
 	if not InCombat() AssassinationPrecombatMainActions()
 	AssassinationDefaultMainActions()
 }
 
-AddIcon specialization=assassination help=cd enemies=1 checkbox=!opt_rogue_assassination_aoe
+AddIcon checkbox=!opt_rogue_assassination_aoe enemies=1 help=cd specialization=assassination
 {
 	if not InCombat() AssassinationPrecombatCdActions()
-	AssassinationDefaultCdActions()
+	unless not InCombat() and AssassinationPrecombatCdPostConditions()
+	{
+		AssassinationDefaultCdActions()
+	}
 }
 
-AddIcon specialization=assassination help=cd checkbox=opt_rogue_assassination_aoe
+AddIcon checkbox=opt_rogue_assassination_aoe help=cd specialization=assassination
 {
 	if not InCombat() AssassinationPrecombatCdActions()
-	AssassinationDefaultCdActions()
+	unless not InCombat() and AssassinationPrecombatCdPostConditions()
+	{
+		AssassinationDefaultCdActions()
+	}
 }
 
 ### Required symbols
 # anticipation_buff
 # anticipation_talent
 # arcane_torrent_energy
+# archmages_greater_incandescence_agi_buff
 # berserking
+# blindside_buff
 # blood_fury_ap
-# cheap_shot
-# crimson_tempest
-# crimson_tempest_debuff
 # deadly_poison
-# deadly_poison_dot_debuff
-# deadly_throw
 # death_from_above
-# death_from_above_talent
 # dispatch
 # draenic_agility_potion
 # envenom
 # envenom_buff
-# fan_of_knives
 # kick
-# kidney_shot
+# lethal_poison_buff
 # marked_for_death
-# marked_for_death_talent
 # mutilate
 # preparation
-# quaking_palm
 # rupture
 # rupture_debuff
 # shadow_reflection
 # shadow_reflection_buff
 # shadow_reflection_talent
 # shadowstep
-# slice_and_dice
-# slice_and_dice_buff
 # stealth
 # vanish
+# vanish_buff
 # vendetta
+# vendetta_buff
 # vendetta_debuff
 ]]
-	OvaleScripts:RegisterScript("ROGUE", name, desc, code, "script")
+	OvaleScripts:RegisterScript("ROGUE", "assassination", name, desc, code, "script")
 end

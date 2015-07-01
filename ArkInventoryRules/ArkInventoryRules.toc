@@ -1,5 +1,5 @@
-﻿## Interface: 60000
-## X-Curse-Packaged-Version: 3.04.20
+﻿## Interface: 60200
+## X-Curse-Packaged-Version: 3.05.04
 ## X-Curse-Project-Name: ArkInventory
 ## X-Curse-Project-ID: ark-inventory
 ## X-Curse-Repository-ID: wow/ark-inventory/mainline
@@ -8,7 +8,7 @@
 ## Notes: Rules for ArkInventory
 ## Author: Arkayenro
 ## Email: arkayenro at gmail dot com
-## Version: 10000
+## Version: 10001
 
 ## DefaultState: Enabled
 ## LoadOnDemand: 0

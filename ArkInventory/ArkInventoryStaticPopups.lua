@@ -92,7 +92,7 @@ ArkInventory.Lib.StaticDialog:Register( "BATTLE_PET_RELEASE", {
 			qd = string.format( ", %s%s|r", select( 5, ArkInventory.GetItemQualityColor( pd.rarity ) ), qd )
 		end
 		
-		local text = string.format( "%s|r, %s %d%s", pd.fullName, LEVEL, pd.level, qd )
+		local text = string.format( "%s|r, %s %d%s", pd.fullname, LEVEL, pd.level, qd )
 		
 		self.text:SetText( string.format( PET_RELEASE_LABEL, text ) )
 		

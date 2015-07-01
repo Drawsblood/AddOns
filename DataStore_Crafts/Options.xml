@@ -4,17 +4,20 @@
 	<Frame parentKey="CraftsOptions" parent="DataStoreFrames" hidden="true">
 		<Size x="615" y="306" />
 		<Frames>
-			<CheckButton parentKey="BroadcastProfs" inherits="InterfaceOptionsCheckButtonTemplate">
-				<Size x="20" y="20" />
+			<!--
+			<CheckButton parentKey="   " inherits="DataStoreToggleableOptionTemplate">
 				<Anchors> 
 					<Anchor point="TOPLEFT" x="40" y="-40" />
-				</Anchors>      
-				<Scripts>
-					<OnClick>
-						DataStore:ToggleOption(self, "DataStore_Crafts", "BroadcastProfs")
-					</OnClick>
-				</Scripts>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="option" value="   " />
+					<KeyValue key="locLabel" value="opt_LABEL" />
+					<KeyValue key="locTitle" value="opt_TITLE" />
+					<KeyValue key="locEnabled" value="opt_ENABLED" />
+					<KeyValue key="locDisabled" value="opt_DISABLED" />
+				</KeyValues>
 			</CheckButton>
+			-->
 		</Frames>
 	</Frame>
 	

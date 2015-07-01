@@ -1,0 +1,10 @@
+## Interface: 60000
+## Title: Wardrobe-AL 3.42
+## Author: AnduinLothar, Miravlix, Cragganmore, Nemes, Swizstera
+## Notes: Define and switch among outfits/gearsets.
+## Version: 3.42
+## RequiredDeps: 
+## OptionalDeps: MobileMinimapButtons, Tablet-2.0, Ace3, Baggins
+## X-Embeds: Ace3
+## SavedVariables: Wardrobe_Config,Wardrobe_Config_FuBar,Wardrobe_Config_db
+Wardrobe.xml

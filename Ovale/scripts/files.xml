@@ -1,5 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 	<Script file="ovale_common.lua" />
+	<Script file="ovale_trinkets_mop.lua" />
+	<Script file="ovale_trinkets_wod.lua" />
 
 	<Script file="ovale_deathknight.lua" />
 	<Script file="ovale_deathknight_spells.lua" />
@@ -24,10 +26,6 @@
 	<Script file="ovale_warrior.lua" />
 	<Script file="ovale_warrior_spells.lua" />
 
-	<Script file="leafkiller_druid.lua" />
-	<Script file="lunaeclipse_druid.lua" />
-	<Script file="wiljo_mage.lua" />
-
 	<Script file="mmo_champion_rogue_assassination.lua" />
 	<Script file="mmo_champion_rogue_combat.lua" />
 	<Script file="mmo_champion_rogue_subtlety.lua" />
@@ -51,13 +49,8 @@
 	<Script file="simulationcraft_monk_brewmaster_2h_serenity.lua" />
 	<Script file="simulationcraft_monk_windwalker_1h.lua" />
 	<Script file="simulationcraft_monk_windwalker_2h.lua" />
-	<Script file="simulationcraft_paladin_holy.lua" />
 	<Script file="simulationcraft_paladin_protection.lua" />
 	<Script file="simulationcraft_paladin_retribution.lua" />
-	<Script file="simulationcraft_priest_discipline_dmg.lua" />
-	<Script file="simulationcraft_priest_discipline_heal.lua" />
-	<Script file="simulationcraft_priest_holy_dmg.lua" />
-	<Script file="simulationcraft_priest_holy_heal.lua" />
 	<Script file="simulationcraft_priest_shadow_as.lua" />
 	<Script file="simulationcraft_priest_shadow_cop.lua" />
 	<Script file="simulationcraft_priest_shadow_ve.lua" />

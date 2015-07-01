@@ -51,7 +51,7 @@ if not L then return end
 	
 	
 --	restack
---	L["RESTACK"] = "壓縮並重新堆疊"
+	L["RESTACK"] = "壓縮並重新堆疊"
 	L["RESTACK_TEXT"] = "重新堆疊物品以減少物品佔用的欄位，特殊背包的欄位將會優先被使用"
 	L["RESTACK_FAIL_WAIT"] = "正在重新堆疊，請等候完成"
 	L["RESTACK_FAIL_ACCESS"] = "你沒有權限重新堆疊|cffffffff%1$s|r的第|cffffffff%2$s|r個分頁"
@@ -82,11 +82,13 @@ if not L then return end
 	
 --	bag names - used to name the empty slots in the status frame
 	L["STATUS_NAME_BAG"] = "背包"
+--	L["STATUS_NAME_COOKING"] = ""
 	L["STATUS_NAME_CRITTER"] = "小動物"
 	L["STATUS_NAME_ENCHANTING"] = "附魔"
 	L["STATUS_NAME_ENGINEERING"] = "工程"
 	L["STATUS_NAME_GEAR"] = "裝備"
 	L["STATUS_NAME_GEM"] = "珠寶"
+--	L["STATUS_NAME_HEIRLOOM"] = ""
 	L["STATUS_NAME_HERB"] = "草藥"
 	L["STATUS_NAME_INSCRIPTION"] = "銘文"
 	L["STATUS_NAME_KEY"] = "鑰匙"
@@ -94,12 +96,12 @@ if not L then return end
 	L["STATUS_NAME_MAIL"] = "郵件"
 	L["STATUS_NAME_MINING"] = "礦石"
 	L["STATUS_NAME_MOUNT"] = "坐騎"
---	L["STATUS_NAME_TOKEN"] = ""
+--	L["STATUS_NAME_REAGENTBANK"] = ""
 --	L["STATUS_NAME_TACKLE"] = ""
---	L["STATUS_NAME_COOKING"] = ""
+--	L["STATUS_NAME_TOKEN"] = ""
 --	L["STATUS_NAME_TOY"] = ""
-
-
+	
+	
 --	main menu
 	L["MENU"] = "選單"
 	
@@ -168,6 +170,7 @@ if not L then return end
 	L["MENU_BAR_CATEGORY_HIDDEN_TEXT"] = "設定此分組是否為隱藏模式\n\n在隱藏分組內的物品，一般情況下將不會顯示"
 --	L["MENU_BAR_CATEGORY_MOVE_START_TEXT"] = ""
 --	L["MENU_BAR_CATEGORY_MOVE_COMPLETE_TEXT"] = ""
+--	L["MENU_BAR_BAG_ASSIGN_TEXT"] = ""
 	L["MENU_BAR_OPTIONS"] = "分組選項"
 	L["MENU_BAR_CLEAR_TEXT"] = "移除所有除了預設分類以外指定到此的類別"
 	L["MENU_BAR_INSERT_TEXT"] = "插入空白分組，將其他分組往後移"
@@ -205,6 +208,8 @@ if not L then return end
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_LOW"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_MEDIUM"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_HIGH"] = ""
+	
+--	L["CONFIG_SYSTEM_RESTACK_TEXT"] = ""
 	
 	L["CONFIG_SYSTEM_TOOLTIP"] = "工具提示"
 	L["CONFIG_SYSTEM_TOOLTIP_ENABLE_TEXT"] = "設定是否顯示工具提示"
@@ -366,6 +371,8 @@ if not L then return end
 	L["CONFIG_SETTINGS_ITEMS_TINT_USABLE_TEXT"] = "將可使用物品標示為紅色"
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS_TEXT"] = ""
 	
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = ""
@@ -408,6 +415,8 @@ if not L then return end
 --	L["CONFIG_SETTINGS_EMPTY_STATUS"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION_TEXT"] = ""
 	
 	
 -- sorting
@@ -415,6 +424,8 @@ if not L then return end
 	
 	L["CONFIG_SORTING_SORT"] = "排序"
 	
+--	L["CONFIG_SORTING_METHOD"] = ""
+--	L["CONFIG_SORTING_METHODS"] = ""
 --	L["CONFIG_SORTING_METHOD_TEXT"] = ""
 	L["CONFIG_SORTING_METHOD_BAGSLOT"] = "依背包/欄位"
 	L["CONFIG_SORTING_METHOD_BAGSLOT_TEXT"] = "依背包/欄位編號排序物品"
@@ -422,6 +433,7 @@ if not L then return end
 	L["CONFIG_SORTING_METHOD_USER_TEXT"] = "設定排序規則為使用者定義"
 	
 --	L["CONFIG_SORTING_BAG"] = ""
+--	L["CONFIG_SORTING_BAGS"] = ""
 --	L["CONFIG_SORTING_BAG_TEXT"] = ""
 	
 	L["CONFIG_SORTING_INCLUDE_NAME"] = "物品名稱"
@@ -627,6 +639,8 @@ if not L then return end
 	L["NO_DATA_AVAILABLE"] = "無數據"
 --	L["TOOLTIP_PURCHASE_BANK_BAG_SLOT"] = ""
 --	L["TOOLTIP_PURCHASE_BANK_TAB_REAGENT"] = ""
+--	L["LABEL"] = ""
+--	L["ABORTED"] = ""
 	
 	
 -- libdatabroker

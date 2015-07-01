@@ -1,0 +1,21 @@
+tag v4.0.0-beta56
+a2c2fcffe9feb06a9b9dd8461fd4afe4e77cc5ac
+Benjamin Staneck <staneck@gmail.com>
+2015-06-25 23:46:11 +0200
+
+
+
+--------------------
+
+Benjamin Staneck:
+	- remove Aspect of the Fox and Amplify Magic from aura filters. They are gone. RIP.
+	- Update TOC for Patch 6.2
+Kyle Buller:
+	- remove cooldown alpha hooks, was fixed in 6.1
+Benjamin Staneck:
+	- more indentation fixes
+Kyle Buller:
+	- add WordWrap() for LuaText to enable multi-line texts
+Benjamin Staneck:
+	- fix indenting
+	- add Hand of Gul'dan back to Warlock debuffs

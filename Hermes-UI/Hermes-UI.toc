@@ -6,7 +6,7 @@
 ## SavedVariables: 
 ## OptionalDeps: 
 ## RequiredDeps: Hermes
-## X-Curse-Packaged-Version: v2.6.4
+## X-Curse-Packaged-Version: v2.6.8
 ## X-Curse-Project-Name: Hermes
 ## X-Curse-Project-ID: hermes
 ## X-Curse-Repository-ID: wow/hermes/mainline

@@ -61,7 +61,12 @@ local checkPanel = {
 					if value then
 						MT.showmacroframe = ShowMacroFrame
 						ShowMacroFrame = function() MacroToolkitFrame:Show() end
-					elseif MT.showmacroframe then ShowMacroFrame = MT.showmacroframe end
+						MT.origMTText = MacroFrameText 
+						MacroFrameText = MacroToolkitFrameText
+					elseif MT.showmacroframe then 
+						ShowMacroFrame = MT.showmacroframe
+						MacroFrameText = MT.origMTText
+					end
 				end,
 			},
 		usecolour = {

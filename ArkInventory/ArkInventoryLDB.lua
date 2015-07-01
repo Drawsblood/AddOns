@@ -95,7 +95,8 @@ function ArkInventory.LDB.Tracking_Currency:Update( )
 		
 		if not isHeader then
 			local h = GetCurrencyListLink( j )
-			local class, id = ArkInventory.ObjectStringDecode( h )
+			local osd = ArkInventory.ObjectStringDecode( h )
+			local id = osd[2]
 			if ArkInventory.Global.Me.ldb.tracking.currency.tracked[id] then
 				self.text = string.format( "%s  |T%s:0|t %d", self.text, icon or ArkInventory.Const.Texture.Missing, count or 0 )
 				hasText = true
@@ -146,7 +147,8 @@ function ArkInventory.LDB.Tracking_Currency:OnTooltipShow( )
 		else
 			
 			local h = GetCurrencyListLink( j )
-			local class, id = ArkInventory.ObjectStringDecode( h )
+			local osd = ArkInventory.ObjectStringDecode( h )
+			local id = osd[2]
 			
 			if ArkInventory.Global.Me.ldb.tracking.currency.tracked[id] then
 				self:AddDoubleLine( name, count, 0, 1, 0, 0, 1, 0 )
@@ -455,10 +457,10 @@ function ArkInventory.LDB.Mounts:OnTooltipShow( ... )
 		return
 	end
 	
-	if ArkInventory.MountJournal.SkillLevel( ) == 0 then
-		self:AddLine( SPELL_FAILED_LOW_CASTLEVEL, 1, 0, 0 )
-		return
-	end
+--	if ArkInventory.MountJournal.SkillLevel( ) == 0 then
+--		self:AddLine( SPELL_FAILED_LOW_CASTLEVEL, 1, 0, 0 )
+--		return
+--	end
 	
 	self:AddDoubleLine( MODE, ArkInventory.Localise["LDB_MOUNTS_TOOLTIP_SELECTION"] )
 	

@@ -2,11 +2,8 @@
 	MenuBar, by Goranaws
 --]]
 
-local MenuBar = Dominos:CreateClass('Frame', Dominos.Frame)
+local MenuBar = Dominos:CreateClass('Frame', Dominos.ButtonBar)
 Dominos.MenuBar = MenuBar
-
-local WIDTH_OFFSET = 2
-local HEIGHT_OFFSET = 20
 
 local MICRO_BUTTONS = {
 	"CharacterMicroButton",
@@ -15,16 +12,13 @@ local MICRO_BUTTONS = {
 	"AchievementMicroButton",
 	"QuestLogMicroButton",
 	"GuildMicroButton",
-	-- "PVPMicroButton",
 	"LFDMicroButton",
-	"CompanionsMicroButton",
 	"EJMicroButton",
+	"CollectionsMicroButton",
 	"StoreMicroButton",
 	"HelpMicroButton",
-	"MainMenuMicroButton",
+	"MainMenuMicroButton"
 }
-
-local overrideButtons = {}
 
 local MICRO_BUTTON_NAMES = {
 	['CharacterMicroButton'] = _G['CHARACTER_BUTTON'],
@@ -33,32 +27,25 @@ local MICRO_BUTTON_NAMES = {
 	['AchievementMicroButton'] = _G['ACHIEVEMENT_BUTTON'],
 	['QuestLogMicroButton'] = _G['QUESTLOG_BUTTON'],
 	['GuildMicroButton'] = _G['LOOKINGFORGUILD'],
-	-- ['PVPMicroButton'] = _G['PLAYER_V_PLAYER'],
 	['LFDMicroButton'] = _G['DUNGEONS_BUTTON'],
 	['EJMicroButton'] = _G['ENCOUNTER_JOURNAL'],
-	['CompanionsMicroButton'] = _G['MOUNTS_AND_PETS'],
 	['MainMenuMicroButton'] = _G['MAINMENU_BUTTON'],
 	['HelpMicroButton'] = _G['HELP_BUTTON'],
-	['StoreMicroButton'] = _G['BLIZZARD_STORE']
+	['StoreMicroButton'] = _G['BLIZZARD_STORE'],
+	['CollectionsMicroButton'] = _G['COLLECTIONS']
 }
-
 
 --[[ Menu Bar ]]--
 
 function MenuBar:New()
-	local bar = MenuBar.super.New(self, 'menu')
-
-	bar:LoadButtons()
-	bar:Layout()
-
-	return bar
+	return MenuBar.proto.New(self, 'menu')
 end
 
-function MenuBar:Create(frameId)
-	local bar = MenuBar.super.Create(self, frameId)
+function MenuBar:Create(...)
+	local bar = MenuBar.proto.Create(self, ...)
 
-	bar.buttons = {}
 	bar.activeButtons = {}
+	bar.overrideButtons = {}
 
 	local getOrHook = function(frame, script, action)
 		if frame:GetScript(script) then
@@ -70,15 +57,15 @@ function MenuBar:Create(frameId)
 
 	local requestLayoutUpdate
 	do
-		local f = CreateFrame('Frame'); f:Hide()
+		local frame = CreateFrame('Frame'); frame:Hide()
 		local delay = 0.01
 
-		f:SetScript('OnUpdate', function(self, elapsed)
+		frame:SetScript('OnUpdate', function(self, elapsed)
 			self:Hide()
 			bar:Layout()
 		end)
 
-		requestLayoutUpdate = function() f:Show() end
+		requestLayoutUpdate = function() frame:Show() end
 	end
 
 	hooksecurefunc('UpdateMicroButtons', requestLayoutUpdate)
@@ -111,43 +98,6 @@ function MenuBar:Create(frameId)
 	return bar
 end
 
-function MenuBar:LoadButtons()
-	for i, buttonName in ipairs(MICRO_BUTTONS) do
-		self:AddButton(i)
-	end
-
-	self:UpdateClickThrough()
-end
-
-function MenuBar:AddButton(i)
-	local buttonName = MICRO_BUTTONS[i]
-	local button = _G[buttonName]
-
-	if button then
-		button:SetParent(self.header)
-		button:Show()
-
-		self.buttons[i] = button
-	end
-end
-
-function MenuBar:RemoveButton(i)
-	local button = self.buttons[i]
-
-	if button then
-		button:SetParent(nil)
-		button:Hide()
-
-		self.buttons[i] = nil
-	end
-end
-
-function MenuBar:LoadSettings(...)
-	MenuBar.super.LoadSettings(self, ...)
-
-	self.activeButtons = {}
-end
-
 function MenuBar:GetDefaults()
 	return {
 		point = 'BOTTOMRIGHT',
@@ -156,8 +106,58 @@ function MenuBar:GetDefaults()
 	}
 end
 
+function MenuBar:GetButton(index)
+	return self.activeButtons[index]
+end
+
 function MenuBar:NumButtons()
 	return #self.activeButtons
+end
+
+function MenuBar:GetButtonInsets()
+	local l, r, t, b = MenuBar.proto.GetButtonInsets(self)
+
+	return l, r + 1, t + 3, b
+end
+
+function MenuBar:UpdateActiveButtons()
+	table.wipe(self.activeButtons)
+
+	for _, name in ipairs(MICRO_BUTTONS) do
+		local button = _G[name]
+
+		if not self:IsMenuButtonDisabled(button) then
+			table.insert(self.activeButtons, button)
+		end
+	end
+end
+
+function MenuBar:UpdateOverrideBarButtons()
+	table.wipe(self.overrideButtons)
+
+	local isStoreEnabled = C_StorePublic.IsEnabled()
+
+	for _, buttonName in ipairs(MICRO_BUTTONS) do
+		local shouldAddButton
+
+		if buttonName == 'HelpMicroButton' then
+			shouldAddButton = not isStoreEnabled
+		elseif buttonName == 'StoreMicroButton' then
+			shouldAddButton = isStoreEnabled
+		else
+			shouldAddButton = true
+		end
+
+		if shouldAddButton then
+			table.insert(self.overrideButtons, _G[buttonName])
+		end
+	end
+end
+
+function MenuBar:ReloadButtons()
+	self:UpdateActiveButtons()
+
+	MenuBar.proto.ReloadButtons(self)
 end
 
 function MenuBar:DisableMenuButton(button, disabled)
@@ -166,7 +166,7 @@ function MenuBar:DisableMenuButton(button, disabled)
 	disabledButtons[button:GetName()] = disabled or false
 	self.sets.disabled = disabledButtons
 
-	self:Layout()
+	self:ReloadButtons()
 end
 
 function MenuBar:IsMenuButtonDisabled(button)
@@ -190,59 +190,15 @@ function MenuBar:Layout()
 end
 
 function MenuBar:LayoutNormal()
-	self:UpdateActiveButtons()
-
-	for i, button in pairs(self.buttons) do
-		button:Hide()
+	for _, name in pairs(MICRO_BUTTONS) do
+		_G[name]:Hide()
 	end
 
-	local numButtons = #self.activeButtons
-	if numButtons == 0 then
-		self:SetSize(36, 36)
-		return
-	end
-
-	local cols = min(self:NumColumns(), numButtons)
-	local rows = ceil(numButtons / cols)
-
-	local pW, pH = self:GetPadding()
-	local spacing = self:GetSpacing()
-
-	local isLeftToRight = self:GetLeftToRight()
-	local isTopToBottom = self:GetTopToBottom()
-
-	local firstButton = self.buttons[1]
-	local w = firstButton:GetWidth() + spacing - WIDTH_OFFSET
-	local h = firstButton:GetHeight() + spacing - HEIGHT_OFFSET
-
-	for i, button in pairs(self.activeButtons) do
-		local col, row
-
-		if isLeftToRight then
-			col = (i-1) % cols
-		else
-			col = (cols-1) - (i-1) % cols
-		end
-
-		if isTopToBottom then
-			row = ceil(i / cols) - 1
-		else
-			row = rows - ceil(i / cols)
-		end
-
-		button:SetParent(self.header)
-		button:ClearAllPoints()
-		button:SetPoint('TOPLEFT', w*col + pW, -(h*row + pH) + HEIGHT_OFFSET)
+	for _, button in pairs(self.buttons) do
 		button:Show()
 	end
 
-	-- Update bar size, if we're not in combat
-	-- TODO: manage bar size via secure code
-	if not InCombatLockdown() then
-		local newWidth = max(w*cols - spacing + pW*2 + WIDTH_OFFSET, 8)
-		local newHeight = max(h*ceil(numButtons / cols) - spacing + pH*2, 8)
-		self:SetSize(newWidth, newHeight)
-	end
+	MenuBar.proto.Layout(self)
 end
 
 function MenuBar:LayoutPetBattle()
@@ -254,49 +210,21 @@ function MenuBar:LayoutOverrideUI()
 end
 
 function MenuBar:FixButtonPositions()
-	local isStoreEnabled = C_StorePublic.IsEnabled()
-	local overrideButtons = {}
+	self:UpdateOverrideBarButtons()
 
-	for i, buttonName in ipairs(MICRO_BUTTONS) do
-		local button = _G[buttonName]
-		button:Hide()
+	local l, r, t, b = self:GetButtonInsets()
 
-		local shouldAddButton
-
-		if buttonName == 'HelpMicroButton' then
-			shouldAddButton = not isStoreEnabled
-		elseif buttonName == 'StoreMicroButton' then
-			shouldAddButton = isStoreEnabled
-		else
-			shouldAddButton = true
-		end
-
-		if shouldAddButton then
-			table.insert(overrideButtons, button)
-		end
-	end
-
-	for i, button in ipairs(overrideButtons) do
+	for i, button in ipairs(self.overrideButtons) do
 		if i > 1 then
 			button:ClearAllPoints()
 			if i == 7 then
-				button:SetPoint('TOPLEFT', overrideButtons[1], 'BOTTOMLEFT', 0, HEIGHT_OFFSET + 4)
+				button:SetPoint('TOPLEFT', self.overrideButtons[1], 'BOTTOMLEFT', 0, 4 + (t - b))
 			else
-				button:SetPoint('BOTTOMLEFT', overrideButtons[i - 1], 'BOTTOMRIGHT', -WIDTH_OFFSET, 0)
+				button:SetPoint('BOTTOMLEFT', self.overrideButtons[i - 1], 'BOTTOMRIGHT', (l - r), 0)
 			end
 		end
 
 		button:Show()
-	end
-end
-
-function MenuBar:UpdateActiveButtons()
-	for i = 1, #self.activeButtons do self.activeButtons[i] = nil end
-
-	for i, button in ipairs(self.buttons) do
-		if not self:IsMenuButtonDisabled(button) then
-			table.insert(self.activeButtons, button)
-		end
 	end
 end
 
@@ -337,8 +265,8 @@ local function Menu_AddDisableMenuButtonsPanel(menu)
 	local panel = menu:NewPanel(LibStub('AceLocale-3.0'):GetLocale('Dominos-Config').DisableMenuButtons)
 	panel.width = 200
 
-	for i, buttonName in ipairs(MICRO_BUTTONS) do
-		Panel_AddDisableMenuButtonCheckbox(panel, _G[buttonName], MICRO_BUTTON_NAMES[buttonName])
+	for i, name in ipairs(MICRO_BUTTONS) do
+		Panel_AddDisableMenuButtonCheckbox(panel, _G[name], MICRO_BUTTON_NAMES[i])
 	end
 
 	return panel
@@ -364,6 +292,7 @@ end
 local MenuBarController = Dominos:NewModule('MenuBar')
 
 function MenuBarController:OnInitialize()
+
 	-- fixed blizzard nil bug
 	if not _G['AchievementMicroButton_Update'] then
 		_G['AchievementMicroButton_Update'] = function() end

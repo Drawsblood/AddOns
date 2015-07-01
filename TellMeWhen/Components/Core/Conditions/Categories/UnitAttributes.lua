@@ -25,7 +25,280 @@ local Env = CNDT.Env
 
 local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_UNIT", 3, L["CNDTCAT_ATTRIBUTES_UNIT"], false, false)
 
-ConditionCategory:RegisterCondition(1,	 "EXISTS", {
+
+
+
+
+
+
+local specNameToRole = {}
+local SPECS = CNDT:NewModule("Specs", "AceEvent-3.0")
+function SPECS:UpdateUnitSpecs()
+	local _, z = IsInInstance()
+
+	if next(Env.UnitSpecs) then
+		wipe(Env.UnitSpecs)
+		TMW:Fire("TMW_UNITSPEC_UPDATE")
+	end
+
+	if z == "arena" then
+		for i = 1, GetNumArenaOpponents() do
+			local unit = "arena" .. i
+
+			local name, server = UnitName(unit)
+			if name and name ~= UNKNOWN then
+				local specID = GetArenaOpponentSpec(i)
+				name = name .. (server and "-" .. server or "")
+				Env.UnitSpecs[name] = specID
+			end
+		end
+
+		TMW:Fire("TMW_UNITSPEC_UPDATE")
+
+	elseif z == "pvp" then
+		RequestBattlefieldScoreData()
+
+		for i = 1, GetNumBattlefieldScores() do
+			name, _, _, _, _, _, _, _, classToken, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(i)
+			if name then
+				local specID = specNameToRole[classToken][talentSpec]
+				Env.UnitSpecs[name] = specID
+			end
+		end
+		
+		TMW:Fire("TMW_UNITSPEC_UPDATE")
+	end
+end
+function SPECS:PrepareUnitSpecEvents()
+	SPECS:RegisterEvent("UPDATE_WORLD_STATES",   "UpdateUnitSpecs")
+	SPECS:RegisterEvent("UNIT_NAME_UPDATE",   "UpdateUnitSpecs")
+	SPECS:RegisterEvent("ARENA_OPPONENT_UPDATE", "UpdateUnitSpecs")
+	SPECS:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdateUnitSpecs")
+	SPECS:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateUnitSpecs")
+	SPECS.PrepareUnitSpecEvents = TMW.NULLFUNC
+end
+ConditionCategory:RegisterCondition(0.1,  "UNITSPEC", {
+	text = L["CONDITIONPANEL_UNITSPEC"],
+	tooltip = L["CONDITIONPANEL_UNITSPEC_DESC"],
+
+	bitFlagTitle = L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"],
+	bitFlags = (function()
+		local t = {}
+		for i = 1, GetNumClasses() do
+			local _, class, classID = GetClassInfo(i)
+			specNameToRole[class] = {}
+
+			for j = 1, GetNumSpecializationsForClassID(classID) do
+				local specID, spec, desc, icon = GetSpecializationInfoForClassID(classID, j)
+				specNameToRole[class][spec] = specID
+				t[specID] = {
+					order = specID,
+					text = PLAYER_CLASS:format(RAID_CLASS_COLORS[class].colorStr, spec, LOCALIZED_CLASS_NAMES_MALE[class]),
+					icon = icon,
+					tcoords = CNDT.COMMON.standardtcoords
+				}
+			end
+		end
+		return t
+	end)(),
+
+	icon = function() return select(4, GetSpecializationInfo(1)) end,
+	tcoords = CNDT.COMMON.standardtcoords,
+
+	Env = {
+		UnitSpecs = {},
+		UnitSpec = function(unit)
+			if UnitIsUnit(unit, "player") then
+				local spec = GetSpecialization()
+				return spec and GetSpecializationInfo(spec) or 0
+			else
+				local name, server = UnitName(unit)
+				if name then
+					name = name .. (server and "-" .. server or "")
+					return Env.UnitSpecs[name] or 0
+				end
+			end
+
+			return 0
+		end,
+	},
+	funcstr = function(c)
+		return [[ BITFLAGSMAPANDCHECK( UnitSpec(c.Unit) ) ]]
+	end,
+	events = function(ConditionObject, c)
+		if unit ~= "player" then
+			-- Don't do these if we're definitely checking player,
+			-- since there's really no reason to.
+			SPECS:PrepareUnitSpecEvents()
+			SPECS:UpdateUnitSpecs()
+		end
+
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("TMW_UNITSPEC_UPDATE"),
+			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE")
+	end,
+})
+
+
+TMW:RegisterUpgrade(73019, {
+	-- Convert "CLASS" to "CLASS2"
+	classes = {
+		"DEATHKNIGHT",
+		"DRUID",
+		"HUNTER",
+		"MAGE",
+		"PRIEST",
+		"PALADIN",
+		"ROGUE",
+		"SHAMAN",
+		"WARLOCK",
+		"WARRIOR",
+		"MONK",
+	},
+	condition = function(self, condition)
+		if condition.Type == "CLASS" then
+			condition.Type = "CLASS2"
+			condition.Checked = false
+			for i = 1, GetNumClasses() do
+				local name, token, classID = GetClassInfoByID(i)
+				if token == self.classes[condition.Level] then
+					condition.BitFlags = {[i] = true}
+					return
+				end
+			end
+		end
+	end,
+})
+ConditionCategory:RegisterCondition(0.2,  "CLASS2", {
+	text = L["CONDITIONPANEL_CLASS"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"],
+	bitFlags = (function()
+		local t = {}
+		for i = 1, GetNumClasses() do
+			local name, token, classID = GetClassInfoByID(i)
+			t[i] = {
+				order = i,
+				text = PLAYER_CLASS_NO_SPEC:format(RAID_CLASS_COLORS[token].colorStr, name),
+				icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
+				tcoords = {
+					(CLASS_ICON_TCOORDS[token][1]+.02),
+					(CLASS_ICON_TCOORDS[token][2]-.02),
+					(CLASS_ICON_TCOORDS[token][3]+.02),
+					(CLASS_ICON_TCOORDS[token][4]-.02),
+				}
+			}
+		end
+		return t
+	end)(),
+
+	icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
+	tcoords = {
+		CLASS_ICON_TCOORDS[pclass][1]+.02,
+		CLASS_ICON_TCOORDS[pclass][2]-.02,
+		CLASS_ICON_TCOORDS[pclass][3]+.02,
+		CLASS_ICON_TCOORDS[pclass][4]-.02,
+	},
+
+	Env = {
+		UnitClass = UnitClass,
+	},
+	funcstr = function(c)
+		return [[ BITFLAGSMAPANDCHECK( select(3, UnitClass(c.Unit)) ) ]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)) -- classes cant change, so this is all we should need
+	end,
+})
+
+
+TMW:RegisterUpgrade(73019, {
+	playerDungeonRoles = {
+		"NONE",
+		"DAMAGER",
+		"HEALER",
+		"TANK",
+	},
+	condition = function(self, condition)
+		if condition.Type == "ROLE" then
+			condition.Type = "ROLE2"
+			condition.Checked = false
+			CNDT:ConvertSliderCondition(condition, 1, #self.playerDungeonRoles, self.playerDungeonRoles)
+		end
+	end,
+})
+ConditionCategory:RegisterCondition(0.3,  "ROLE2", {
+	text = L["CONDITIONPANEL_ROLE"],
+	tooltip = L["CONDITIONPANEL_ROLE_DESC"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
+	bitFlags = {
+		NONE = 		{order = 1, text=NONE },
+		TANK = 		{order = 2, text=TANK },
+		HEALER = 	{order = 3, text=HEALER },
+		DAMAGER = 	{order = 4, text=DAMAGER },
+	},
+
+	icon = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
+	tcoords = {GetTexCoordsForRole("DAMAGER")},
+	Env = {
+		UnitGroupRolesAssigned = UnitGroupRolesAssigned,
+	},
+	funcstr = [[BITFLAGSMAPANDCHECK( UnitGroupRolesAssigned(c.Unit) ) ]],
+	events = function(ConditionObject, c)
+		-- The unit change events should actually cover many of the changes
+		-- (at least for party and raid units, but roles only exist in party and raid anyway.)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("PLAYER_ROLES_ASSIGNED"),
+			ConditionObject:GenerateNormalEventString("ROLE_CHANGED_INFORM")
+	end,
+})
+
+
+TMW:RegisterUpgrade(73019, {
+	condition = function(self, condition)
+		if condition.Type == "RAIDICON" then
+			condition.Type = "RAIDICON2"
+			condition.Checked = false
+			CNDT:ConvertSliderCondition(condition, 0, 8)
+		end
+	end,
+})
+ConditionCategory:RegisterCondition(0.4,  "RAIDICON2", {
+	text = L["CONDITIONPANEL_RAIDICON"],
+	tooltip = L["CONDITIONPANEL_RAIDICON_DESC"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_RAIDICON"],
+	bitFlags = (function()
+		local t = {[0]=NONE}
+		for i = 1, 8 do  -- Dont use NUM_RAID_ICONS since it is defined in Blizzard's CRF manager addon, which might not be loaded
+			t[i] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_"..i..":0|t ".._G["RAID_TARGET_"..i]
+		end
+		return t
+	end)(),
+
+	icon = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_8",
+
+	Env = {
+		GetRaidTargetIndex = GetRaidTargetIndex,
+	},
+	funcstr = [[ BITFLAGSMAPANDCHECK( GetRaidTargetIndex(c.Unit) or 0 ) ]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("RAID_TARGET_UPDATE")
+	end,
+})
+
+
+ConditionCategory:RegisterSpacer(0.8)
+
+
+
+ConditionCategory:RegisterCondition(1,    "EXISTS", {
 	text = L["CONDITIONPANEL_EXISTS"],
 	min = 0,
 	max = 1,
@@ -55,7 +328,8 @@ ConditionCategory:RegisterCondition(1,	 "EXISTS", {
 		--end
 	end,
 })
-ConditionCategory:RegisterCondition(2,	 "ALIVE", {
+
+ConditionCategory:RegisterCondition(2,    "ALIVE", {
 	text = L["CONDITIONPANEL_ALIVE"],
 	tooltip = L["CONDITIONPANEL_ALIVE_DESC"],
 	min = 0,
@@ -74,7 +348,8 @@ ConditionCategory:RegisterCondition(2,	 "ALIVE", {
 			ConditionObject:GenerateNormalEventString("UNIT_HEALTH", CNDT:GetUnit(c.Unit))
 	end,
 })
-ConditionCategory:RegisterCondition(3,	 "COMBAT", {
+
+ConditionCategory:RegisterCondition(3,    "COMBAT", {
 	text = L["CONDITIONPANEL_COMBAT"],
 	min = 0,
 	max = 1,
@@ -98,7 +373,8 @@ ConditionCategory:RegisterCondition(3,	 "COMBAT", {
 		end
 	end,
 })
-ConditionCategory:RegisterCondition(4,	 "VEHICLE", {
+
+ConditionCategory:RegisterCondition(4,    "VEHICLE", {
 	text = L["CONDITIONPANEL_VEHICLE"],
 	min = 0,
 	max = 1,
@@ -118,7 +394,8 @@ ConditionCategory:RegisterCondition(4,	 "VEHICLE", {
 			ConditionObject:GenerateNormalEventString("UNIT_VEHICLE", CNDT:GetUnit(c.Unit))
 	end,
 })
-ConditionCategory:RegisterCondition(5,	 "PVPFLAG", {
+
+ConditionCategory:RegisterCondition(5,    "PVPFLAG", {
 	text = L["CONDITIONPANEL_PVPFLAG"],
 	min = 0,
 	max = 1,
@@ -136,7 +413,8 @@ ConditionCategory:RegisterCondition(5,	 "PVPFLAG", {
 			ConditionObject:GenerateNormalEventString("UNIT_FACTION", CNDT:GetUnit(c.Unit))
 	end,
 })
-ConditionCategory:RegisterCondition(6,	 "REACT", {
+
+ConditionCategory:RegisterCondition(6,    "REACT", {
 	text = L["ICONMENU_REACT"],
 	min = 1,
 	max = 2,
@@ -157,7 +435,8 @@ ConditionCategory:RegisterCondition(6,	 "REACT", {
 			ConditionObject:GenerateNormalEventString("UNIT_FLAGS", "player")
 	end,
 })
-ConditionCategory:RegisterCondition(6.2, "ISPLAYER", {
+
+ConditionCategory:RegisterCondition(6.2,  "ISPLAYER", {
 	text = L["ICONMENU_ISPLAYER"],
 	min = 0,
 	max = 1,
@@ -176,11 +455,7 @@ ConditionCategory:RegisterCondition(6.2, "ISPLAYER", {
 	end,
 })
 
-
-ConditionCategory:RegisterSpacer(6.5)
-
-
-ConditionCategory:RegisterCondition(6.7, "INCHEALS", {
+ConditionCategory:RegisterCondition(6.7,  "INCHEALS", {
 	text = L["INCHEALS"],
 	tooltip = L["INCHEALS_DESC"],
 	range = 50000,
@@ -201,11 +476,12 @@ ConditionCategory:RegisterCondition(6.7, "INCHEALS", {
 })
 
 
+
 ConditionCategory:RegisterSpacer(6.9)
 
 
-Env.GetUnitSpeed = GetUnitSpeed
-ConditionCategory:RegisterCondition(7,	 "SPEED", {
+
+ConditionCategory:RegisterCondition(7,    "SPEED", {
 	text = L["SPEED"],
 	tooltip = L["SPEED_DESC"],
 	min = 0,
@@ -214,26 +490,30 @@ ConditionCategory:RegisterCondition(7,	 "SPEED", {
 	formatter = TMW.C.Formatter.PERCENT,
 	icon = "Interface\\Icons\\ability_rogue_sprint",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetUnitSpeed = GetUnitSpeed,
+	},
 	funcstr = [[GetUnitSpeed(c.Unit)/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
 	-- events = absolutely no events
 })
-ConditionCategory:RegisterCondition(8,	 "RUNSPEED", {
+
+ConditionCategory:RegisterCondition(8,    "RUNSPEED", {
 	text = L["RUNSPEED"],
+	tooltip = L["RUNSPEED_DESC"],
 	min = 0,
 	max = 500,
 	percent = true,
 	formatter = TMW.C.Formatter.PERCENT,
 	icon = "Interface\\Icons\\ability_rogue_sprint",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetUnitSpeed = GetUnitSpeed,
+	},
 	funcstr = [[select(2, GetUnitSpeed(c.Unit))/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
 	-- events = absolutely no events
 })
 
-
-ConditionCategory:RegisterSpacer(8.1)
-
-
-ConditionCategory:RegisterCondition(8.5, "LIBRANGECHECK", {
+ConditionCategory:RegisterCondition(8.5,  "LIBRANGECHECK", {
 	text = L["CNDT_RANGE"],
 	tooltip = L["CNDT_RANGE_DESC"],
 	min = 0,
@@ -294,10 +574,34 @@ ConditionCategory:RegisterCondition(8.5, "LIBRANGECHECK", {
 })
 
 
+
 ConditionCategory:RegisterSpacer(8.9)
 
 
-ConditionCategory:RegisterCondition(9,	 "NAME", {
+
+ConditionCategory:RegisterCondition(8.95, "UNITISUNIT", {
+	text = L["CONDITIONPANEL_UNITISUNIT"],
+	tooltip = L["CONDITIONPANEL_UNITISUNIT_DESC"],
+	min = 0,
+	max = 1,
+	nooperator = true,
+	name = function(editbox) TMW:TT(editbox, "UNITTWO", "CONDITIONPANEL_UNITISUNIT_EBDESC") editbox.label = L["UNITTWO"] end,
+	useSUG = "units",
+	formatter = TMW.C.Formatter.BOOL,
+	icon = "Interface\\Icons\\spell_holy_prayerofhealing",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitIsUnit = UnitIsUnit,
+	},
+	funcstr = [[BOOLCHECK( UnitIsUnit(c.Unit, c.Unit2) )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Name))
+	end,
+})
+
+ConditionCategory:RegisterCondition(9,    "NAME", {
 	text = L["CONDITIONPANEL_NAME"],
 	min = 0,
 	max = 1,
@@ -316,7 +620,8 @@ ConditionCategory:RegisterCondition(9,	 "NAME", {
 			ConditionObject:GenerateNormalEventString("UNIT_NAME_UPDATE", CNDT:GetUnit(c.Unit))
 	end,
 })
-ConditionCategory:RegisterCondition(9.5, "NPCID", {
+
+ConditionCategory:RegisterCondition(9.5,  "NPCID", {
 	text = L["CONDITIONPANEL_NPCID"],
 	tooltip = L["CONDITIONPANEL_NPCID_DESC"],
 	min = 0,
@@ -336,7 +641,8 @@ ConditionCategory:RegisterCondition(9.5, "NPCID", {
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
 	end,
 })
-ConditionCategory:RegisterCondition(10,	 "LEVEL", {
+
+ConditionCategory:RegisterCondition(10,   "LEVEL", {
 	text = L["CONDITIONPANEL_LEVEL"],
 	min = -1,
 	max = GetMaxPlayerLevel() + 3,
@@ -359,266 +665,44 @@ ConditionCategory:RegisterCondition(10,	 "LEVEL", {
 	end,
 })
 
-
-local Classes = {
-	"DEATHKNIGHT",
-	"DRUID",
-	"HUNTER",
-	"MAGE",
-	"PRIEST",
-	"PALADIN",
-	"ROGUE",
-	"SHAMAN",
-	"WARLOCK",
-	"WARRIOR",
-	"MONK",
-}
-ConditionCategory:RegisterCondition(11,	 "CLASS", {	-- OLD
-	old = true,
-
-	text = L["CONDITIONPANEL_CLASS"],
-	min = 1,
-	max = #Classes,
-	texttable = function(k) return Classes[k] and LOCALIZED_CLASS_NAMES_MALE[Classes[k]] end,
-	icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
-	nooperator = true,
-	tcoords = {
-		CLASS_ICON_TCOORDS[pclass][1]+.02,
-		CLASS_ICON_TCOORDS[pclass][2]-.02,
-		CLASS_ICON_TCOORDS[pclass][3]+.02,
-		CLASS_ICON_TCOORDS[pclass][4]-.02,
+TMW:RegisterUpgrade(73019, {
+	unitClassifications = {
+		"normal",
+		"rare",
+		"elite",
+		"rareelite",
+		"worldboss",
 	},
-	Env = {
-		UnitClass = UnitClass,
-	},
-	funcstr = function(c)
-		return [[select(2, UnitClass(c.Unit)) == "]] .. (Classes[c.Level] or "whoops") .. "\""
-	end,
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)) -- classes cant change, so this is all we should need
+	condition = function(self, condition)
+		if condition.Type == "CLASSIFICATION" then
+			condition.Type = "CLASSIFICATION2"
+			condition.Checked = false
+			CNDT:ConvertSliderCondition(condition, 1, #self.unitClassifications, self.unitClassifications)
+		end
 	end,
 })
-
-
-local function GetClassText(classID)
-	local name, token, classID = GetClassInfoByID(classID)
-	if not name then
-		return nil
-	end
-
-	return "|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:0:0:0:0:256:256:" ..
-		(CLASS_ICON_TCOORDS[token][1]+.02)*256 .. ":" .. 
-		(CLASS_ICON_TCOORDS[token][2]-.02)*256 .. ":" .. 
-		(CLASS_ICON_TCOORDS[token][3]+.02)*256 .. ":" .. 
-		(CLASS_ICON_TCOORDS[token][4]-.02)*256 .. "|t " ..
-		PLAYER_CLASS_NO_SPEC:format(RAID_CLASS_COLORS[token].colorStr, name)
-end
-ConditionCategory:RegisterCondition(11,	 "CLASS2", {
-	text = L["CONDITIONPANEL_CLASS"],
-
-	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"],
-	bitFlags = {
-		[ 1  ] = GetClassText(1),	--WARRIOR
-		[ 2  ] = GetClassText(2),	--PALADIN
-		[ 3  ] = GetClassText(3),	--HUNTER
-		[ 4  ] = GetClassText(4),	--ROGUE
-		[ 5  ] = GetClassText(5),	--PRIEST
-		[ 6  ] = GetClassText(6), 	--DEATHKNIGHT
-		[ 7  ] = GetClassText(7),	--SHAMAN
-		[ 8  ] = GetClassText(8),	--MAGE
-		[ 9  ] = GetClassText(9),	--WARLOCK
-		[ 10 ] = GetClassText(10),	--MONK
-		[ 11 ] = GetClassText(11),	--DRUID
-		[ 12 ] = GetClassText(12), 	-- These are harmless and will automatically support new classes.
-		[ 13 ] = GetClassText(13),	-- If there are no new classes to fill them, they will just be nil
-	},
-
-	icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
-	tcoords = {
-		CLASS_ICON_TCOORDS[pclass][1]+.02,
-		CLASS_ICON_TCOORDS[pclass][2]-.02,
-		CLASS_ICON_TCOORDS[pclass][3]+.02,
-		CLASS_ICON_TCOORDS[pclass][4]-.02,
-	},
-
-	Env = {
-		UnitClass = UnitClass,
-	},
-	funcstr = function(c)
-		return [[ BITFLAGSMAPANDCHECK( select(3, UnitClass(c.Unit)) ) ]]
-	end,
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)) -- classes cant change, so this is all we should need
-	end,
-})
-
-
-
-local function GetSpecText(specID)
-	local id, name, description, icon, background, role, class = GetSpecializationInfoByID(specID)
-
-	return 
-	--"|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:0:0:0:0:256:256:" ..
-	--	(CLASS_ICON_TCOORDS[class][1]+.02)*256 .. ":" .. 
-	--	(CLASS_ICON_TCOORDS[class][2]-.02)*256 .. ":" .. 
-	--	(CLASS_ICON_TCOORDS[class][3]+.02)*256 .. ":" .. 
-	--	(CLASS_ICON_TCOORDS[class][4]-.02)*256 .. "|t " .. 
-		"|T" .. icon .. ":0:0:0:0:32:32:2.24:29.76:2.24:29.76|t " .. PLAYER_CLASS:format(RAID_CLASS_COLORS[class].colorStr, name, LOCALIZED_CLASS_NAMES_MALE[class])	
-end
-local specNameToRole = {}
-local SPECS = CNDT:NewModule("Specs", "AceEvent-3.0")
-function SPECS:UpdateUnitSpecs()
-	local _, z = IsInInstance()
-
-	wipe(Env.UnitSpecs)
-
-	if z == "arena" then
-		for i = 1, GetNumArenaOpponents() do
-			local unit = "arena" .. i
-
-			local name, server = UnitName(unit)
-			if name and server then
-				local specID = GetArenaOpponentSpec(i)
-				name = name .. "-" .. server
-				Env.UnitSpecs[name] = specID
-			end
-		end
-
-		TMW:Fire("TMW_UNITSPEC_UPDATE")
-
-	elseif z == "pvp" then
-		RequestBattlefieldScoreData()
-
-		for i = 1, GetNumBattlefieldScores() do
-			name, _, _, _, _, _, _, _, classToken, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(i)
-			local specID = specNameToRole[classToken][talentSpec]
-			Env.UnitSpecs[name] = specID
-		end
-		
-		TMW:Fire("TMW_UNITSPEC_UPDATE")
-	end
-
-end
-function SPECS:PrepareUnitSpecEvents()
-	for i = 1, GetNumClasses() do
-		local _, class, classID = GetClassInfo(i)
-		specNameToRole[class] = {}
-		for j = 1, GetNumSpecializationsForClassID(classID) do
-			local specID, spec = GetSpecializationInfoForClassID(classID, j)
-			specNameToRole[class][spec] = specID
-		end
-	end
-
-	SPECS:RegisterEvent("UPDATE_WORLD_STATES",   "UpdateUnitSpecs")
-	SPECS:RegisterEvent("ARENA_OPPONENT_UPDATE", "UpdateUnitSpecs")
-	SPECS:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdateUnitSpecs")
-	SPECS:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateUnitSpecs")
-	SPECS.PrepareUnitSpecEvents = TMW.NULLFUNC
-end
-ConditionCategory:RegisterCondition(11.1, "UNITSPEC", {
-	text = L["CONDITIONPANEL_UNITSPEC"],
-	tooltip = L["CONDITIONPANEL_UNITSPEC_DESC"],
-
-	bitFlagTitle = L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"],
-	bitFlags = {
-	    [ 62  ] = GetSpecText(62),  	-- Mage: Arcane
-	    [ 63  ] = GetSpecText(63),  	-- Mage: Fire
-	    [ 64  ] = GetSpecText(64),  	-- Mage: Frost
-	    [ 65  ] = GetSpecText(65), 		-- Paladin: Holy
-	    [ 66  ] = GetSpecText(66), 		-- Paladin: Protection
-	    [ 70  ] = GetSpecText(70), 		-- Paladin: Retribution
-	    [ 71  ] = GetSpecText(71), 		-- Warrior: Arms
-	    [ 72  ] = GetSpecText(72), 		-- Warrior: Fury
-	    [ 73  ] = GetSpecText(73), 		-- Warrior: Protection
-	    [ 102 ] = GetSpecText(102), 	-- Druid: Balance
-	    [ 103 ] = GetSpecText(103), 	-- Druid: Feral
-	    [ 104 ] = GetSpecText(104), 	-- Druid: Guardian
-	    [ 105 ] = GetSpecText(105), 	-- Druid: Restoration
-	    [ 250 ] = GetSpecText(250), 	-- Death Knight: Blood
-	    [ 251 ] = GetSpecText(251), 	-- Death Knight: Frost
-	    [ 252 ] = GetSpecText(252), 	-- Death Knight: Unholy
-	    [ 253 ] = GetSpecText(253), 	-- Hunter: Beast Mastery
-	    [ 254 ] = GetSpecText(254), 	-- Hunter: Marksmanship
-	    [ 255 ] = GetSpecText(255), 	-- Hunter: Survival
-	    [ 256 ] = GetSpecText(256), 	-- Priest: Discipline
-	    [ 257 ] = GetSpecText(257), 	-- Priest: Holy
-	    [ 258 ] = GetSpecText(258), 	-- Priest: Shadow
-	    [ 259 ] = GetSpecText(259), 	-- Rogue: Assassination
-	    [ 260 ] = GetSpecText(260), 	-- Rogue: Combat
-	    [ 261 ] = GetSpecText(261), 	-- Rogue: Subtlety
-	    [ 262 ] = GetSpecText(262), 	-- Shaman: Elemental
-	    [ 263 ] = GetSpecText(263), 	-- Shaman: Enhancement
-	    [ 264 ] = GetSpecText(264), 	-- Shaman: Restoration
-	    [ 265 ] = GetSpecText(265), 	-- Warlock: Affliction
-	    [ 266 ] = GetSpecText(266), 	-- Warlock: Demonology
-	    [ 267 ] = GetSpecText(267), 	-- Warlock: Destruction
-	    [ 268 ] = GetSpecText(268), 	-- Monk: Brewmaster
-	    [ 269 ] = GetSpecText(269), 	-- Monk: Windwalker
-	    [ 270 ] = GetSpecText(270), 	-- Monk: Mistweaver
-	},
-
-	icon = function() return select(4, GetSpecializationInfo(1)) end,
-	tcoords = CNDT.COMMON.standardtcoords,
-
-	Env = {
-		UnitSpecs = {},
-		UnitSpec = function(unit)
-			if UnitIsUnit(unit, "player") then
-				local spec = GetSpecialization()
-				return spec and GetSpecializationInfo(spec) or 0
-			else
-				local name, server = UnitName(unit)
-				if name and server then
-					name = name .. "-" .. server
-					return Env.UnitSpecs[name] or 0
-				end
-			end
-
-			return 0
-		end,
-	},
-	funcstr = function(c)
-		return [[ BITFLAGSMAPANDCHECK( UnitSpec(c.Unit) ) ]]
-	end,
-	events = function(ConditionObject, c)
-		SPECS:PrepareUnitSpecEvents()
-		SPECS:UpdateUnitSpecs()
-
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("TMW_UNITSPEC_UPDATE"),
-			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE")
-	end,
-})
-
-
-
-
-local unitClassifications = {
-	"normal",
-	"rare",
-	"elite",
-	"rareelite",
-	"worldboss",
-}
-for k, v in pairs(unitClassifications) do
-	unitClassifications[v] = k
-end
-ConditionCategory:RegisterCondition(12,	 "CLASSIFICATION", {
+ConditionCategory:RegisterCondition(12.1, "CLASSIFICATION2", {
 	text = L["CONDITIONPANEL_CLASSIFICATION"],
-	min = 1,
-	max = #unitClassifications,
+	tooltip = L["CONDITIONPANEL_CLASSIFICATION_DESC"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
+	bitFlags = {
+		normal    = {order = 1, text = L["normal"]},
+		rare      = {order = 2, text = L["rare"]},
+		elite     = {order = 3, text = L["elite"]},
+		rareelite = {order = 4, text = L["rareelite"]},
+		worldboss = {order = 5, text = L["worldboss"]},
+	},
+
 	defaultUnit = "target",
-	texttable = function(k) return L[unitClassifications[k]] end,
+
 	icon = "Interface\\Icons\\achievement_pvp_h_03",
 	tcoords = CNDT.COMMON.standardtcoords,
+
 	Env = {
-		unitClassifications = unitClassifications,
 		UnitClassification = UnitClassification,
 	},
-	funcstr = [[(unitClassifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]],
+	funcstr = [[BITFLAGSMAPANDCHECK( UnitClassification(c.Unit) or "" )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -626,10 +710,7 @@ ConditionCategory:RegisterCondition(12,	 "CLASSIFICATION", {
 	end,
 })
 
-
-
-
-ConditionCategory:RegisterCondition(13,	 "CREATURETYPE", {
+ConditionCategory:RegisterCondition(13,   "CREATURETYPE", {
 	text = L["CONDITIONPANEL_CREATURETYPE"],
 	min = 0,
 	max = 1,
@@ -655,77 +736,12 @@ ConditionCategory:RegisterCondition(13,	 "CREATURETYPE", {
 })
 
 
+
 ConditionCategory:RegisterSpacer(13.5)
 
 
-local playerDungeonRoles = {
-	"NONE",
-	"DAMAGER",
-	"HEALER",
-	"TANK",
-}
-for k, v in pairs(playerDungeonRoles) do
-	playerDungeonRoles[v] = k
-end
-ConditionCategory:RegisterCondition(14,	 "ROLE", {
-	text = L["CONDITIONPANEL_ROLE"],
-	min = 1,
-	max = #playerDungeonRoles,
-	texttable = setmetatable({}, {__index = function(t, k) return _G[playerDungeonRoles[k]] end}),
-	icon = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
-	tcoords = {GetTexCoordsForRole("DAMAGER")},
-	Env = {
-		playerDungeonRoles = playerDungeonRoles,
-		UnitGroupRolesAssigned = UnitGroupRolesAssigned,
-	},
-	funcstr = [[(playerDungeonRoles[UnitGroupRolesAssigned(c.Unit)] or 1) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		-- the unit change events should actually cover many of the changes (at least for party and raid units, but roles only exist in party and raid anyway.)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("PLAYER_ROLES_ASSIGNED"),
-			ConditionObject:GenerateNormalEventString("ROLE_CHANGED_INFORM")
-	end,
-})
 
-ConditionCategory:RegisterCondition(15,	 "RAIDICON", {
-	text = L["CONDITIONPANEL_RAIDICON"],
-	min = 0,
-	max = 8,
-	texttable = setmetatable({[0]=NONE}, {__index = function(t, k) return "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_"..k..":0|t ".._G["RAID_TARGET_"..k] end}),
-	icon = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_8",
-	Env = {
-		GetRaidTargetIndex = GetRaidTargetIndex,
-	},
-	funcstr = [[(GetRaidTargetIndex(c.Unit) or 0) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("RAID_TARGET_UPDATE")
-	end,
-})
-ConditionCategory:RegisterCondition(16,	 "UNITISUNIT", {
-	text = L["CONDITIONPANEL_UNITISUNIT"],
-	tooltip = L["CONDITIONPANEL_UNITISUNIT_DESC"],
-	min = 0,
-	max = 1,
-	nooperator = true,
-	name = function(editbox) TMW:TT(editbox, "UNITTWO", "CONDITIONPANEL_UNITISUNIT_EBDESC") editbox.label = L["UNITTWO"] end,
-	useSUG = "units",
-	formatter = TMW.C.Formatter.BOOL,
-	icon = "Interface\\Icons\\spell_holy_prayerofhealing",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		UnitIsUnit = UnitIsUnit,
-	},
-	funcstr = [[BOOLCHECK( UnitIsUnit(c.Unit, c.Unit2) )]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Name))
-	end,
-})
-ConditionCategory:RegisterCondition(17,	 "THREATSCALED", {
+ConditionCategory:RegisterCondition(17,   "THREATSCALED", {
 	text = L["CONDITIONPANEL_THREAT_SCALED"],
 	tooltip = L["CONDITIONPANEL_THREAT_SCALED_DESC"],
 	min = 0,
@@ -735,12 +751,14 @@ ConditionCategory:RegisterCondition(17,	 "THREATSCALED", {
 	icon = "Interface\\Icons\\spell_misc_emotionangry",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
+		UnitExists = UnitExists,
 		UnitDetailedThreatSituation = UnitDetailedThreatSituation,
 	},
-	funcstr = [[(select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]],
+	funcstr = [[UnitExists(c.Unit) and ((select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level)]],
 	-- events = absolutely no events
 })
-ConditionCategory:RegisterCondition(18,	 "THREATRAW", {
+
+ConditionCategory:RegisterCondition(18,   "THREATRAW", {
 	text = L["CONDITIONPANEL_THREAT_RAW"],
 	tooltip = L["CONDITIONPANEL_THREAT_RAW_DESC"],
 	min = 0,
@@ -750,8 +768,9 @@ ConditionCategory:RegisterCondition(18,	 "THREATRAW", {
 	icon = "Interface\\Icons\\spell_misc_emotionhappy",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
+		UnitExists = UnitExists,
 		UnitDetailedThreatSituation = UnitDetailedThreatSituation,
 	},
-	funcstr = [[(select(4, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]],
+	funcstr = [[UnitExists(c.Unit) and ((select(4, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level)]],
 	-- events = absolutely no events
 })

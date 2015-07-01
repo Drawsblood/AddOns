@@ -16,7 +16,6 @@ local OvaleProfiler = Ovale.OvaleProfiler
 -- Forward declarations for module dependencies.
 local OvaleAura = nil
 local OvaleFuture = nil
-local OvaleGUID = nil
 local OvaleData = nil
 local OvaleState = nil
 
@@ -43,6 +42,9 @@ local INFINITY = math.huge
 OvaleDebug:RegisterDebugging(OvalePower)
 -- Register for profiling.
 OvaleProfiler:RegisterProfiling(OvalePower)
+
+-- Player's GUID.
+local self_playerGUID = nil
 
 -- Table of functions to update spellcast information to register with OvaleFuture.
 local self_updateSpellcastInfo = {}
@@ -140,55 +142,10 @@ end
 OvalePower.POOLED_RESOURCE = {
 	["DRUID"] = "energy",
 	["HUNTER"] = "focus",
+	["MONK"] = "energy",
 	["ROGUE"] = "energy"
 }
 --</public-static-properties>
-
---<private-static-methods>
--- Manage spellcast[power] information.
-local function SaveToSpellcast(spellcast, atTime)
-	local spellId = spellcast.spellId
-	if spellId then
-		local si = OvaleData.spellInfo[spellId]
-		for _, powerType in pairs(self_SpellcastInfoPowerTypes) do
-			if si[powerType] == "finisher" then
-				-- Get the maximum cost of the finisher.
-				local maxCostParam = "max_" .. powerType
-				local maxCost = si[maxCostParam] or 1
-				local target = OvaleGUID:GetUnitId(spellcast.target)
-				local cost = OvaleData:GetSpellInfoProperty(spellId, atTime, powerType, target)
-				if cost == "finisher" then
-					-- This finisher costs up to maxCost resources.
-					local power = OvalePower:GetPower(powerType, atTime)
-					if power > maxCost then
-						cost = maxCost
-					else
-						cost = power
-					end
-				elseif cost == 0 then
-					-- If this is a finisher that costs no resources, then treat it as using the maximum cost.
-					cost = maxCost
-				end
-				-- Save the cost to the spellcast table.
-				spellcast[powerType] = cost
-			end
-		end
-	end
-end
-
-local function UpdateFromSpellcast(dest, spellcast)
-	for _, powerType in pairs(self_SpellcastInfoPowerTypes) do
-		if spellcast[powerType] then
-			dest[powerType] = spellcast[powerType]
-		end
-	end
-end
-
-do
-	self_updateSpellcastInfo.SaveToSpellcast = SaveToSpellcast
-	self_updateSpellcastInfo.UpdateFromSpellcast = UpdateFromSpellcast
-end
---</private-static-methods>
 
 --<public-static-methods>
 function OvalePower:OnInitialize()
@@ -196,7 +153,6 @@ function OvalePower:OnInitialize()
 	OvaleAura = Ovale.OvaleAura
 	OvaleData = Ovale.OvaleData
 	OvaleFuture = Ovale.OvaleFuture
-	OvaleGUID = Ovale.OvaleGUID
 	OvaleState = Ovale.OvaleState
 
 	-- Create the tooltip used for scanning.
@@ -220,6 +176,7 @@ function OvalePower:OnInitialize()
 end
 
 function OvalePower:OnEnable()
+	self_playerGUID = Ovale.playerGUID
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "EventHandler")
 	self:RegisterEvent("PLAYER_LEVEL_UP", "EventHandler")
 	self:RegisterEvent("UNIT_DISPLAYPOWER")
@@ -234,13 +191,13 @@ function OvalePower:OnEnable()
 	for powerType in pairs(self.POWER_INFO) do
 		OvaleData:RegisterRequirement(powerType, "RequirePowerHandler", self)
 	end
+	OvaleFuture:RegisterSpellcastInfo(self)
 	OvaleState:RegisterState(self, self.statePrototype)
-	OvaleFuture:RegisterSpellcastInfo(self_updateSpellcastInfo)
 end
 
 function OvalePower:OnDisable()
 	OvaleState:UnregisterState(self)
-	OvaleFuture:UnregisterSpellcastInfo(self_updateSpellcastInfo)
+	OvaleFuture:UnregisterSpellcastInfo(self)
 	for powerType in pairs(self.POWER_INFO) do
 		OvaleData:UnregisterRequirement(powerType)
 	end
@@ -305,10 +262,18 @@ function OvalePower:UpdateMaxPower(event, powerType)
 	self:StartProfiling("OvalePower_UpdateMaxPower")
 	if powerType then
 		local powerInfo = self.POWER_INFO[powerType]
-		self.maxPower[powerType] = API_UnitPowerMax("player", powerInfo.id, powerInfo.segments)
+		local maxPower = API_UnitPowerMax("player", powerInfo.id, powerInfo.segments)
+		if self.maxPower[powerType] ~= maxPower then
+			self.maxPower[powerType] = maxPower
+			Ovale.refreshNeeded[self_playerGUID] = true
+		end
 	else
 		for powerType, powerInfo in pairs(self.POWER_INFO) do
-			self.maxPower[powerType] = API_UnitPowerMax("player", powerInfo.id, powerInfo.segments)
+			local maxPower = API_UnitPowerMax("player", powerInfo.id, powerInfo.segments)
+			if self.maxPower[powerType] ~= maxPower then
+				self.maxPower[powerType] = maxPower
+				Ovale.refreshNeeded[self_playerGUID] = true
+			end
 		end
 	end
 	self:StopProfiling("OvalePower_UpdateMaxPower")
@@ -318,31 +283,45 @@ function OvalePower:UpdatePower(event, powerType)
 	self:StartProfiling("OvalePower_UpdatePower")
 	if powerType then
 		local powerInfo = self.POWER_INFO[powerType]
-		local oldPower = self.power[powerType]
 		local power = API_UnitPower("player", powerInfo.id, powerInfo.segments)
-		self.power[powerType] = power
-		self:Debug(true, "%s: %d -> %d (%s).", event, oldPower, power, powerType)
+		if self.power[powerType] ~= power then
+			self.power[powerType] = power
+			Ovale.refreshNeeded[self_playerGUID] = true
+		end
+		self:DebugTimestamp("%s: %d -> %d (%s).", event, self.power[powerType], power, powerType)
 	else
 		for powerType, powerInfo in pairs(self.POWER_INFO) do
-			local oldPower = self.power[powerType]
 			local power = API_UnitPower("player", powerInfo.id, powerInfo.segments)
-			self.power[powerType] = power
-			self:Debug(true, "%s: %d -> %d (%s).", event, oldPower, power, powerType)
+			if self.power[powerType] ~= power then
+				self.power[powerType] = power
+				Ovale.refreshNeeded[self_playerGUID] = true
+			end
+			self:DebugTimestamp("%s: %d -> %d (%s).", event, self.power[powerType], power, powerType)
 		end
 	end
+	Ovale.refreshNeeded[self_playerGUID] = true
 	self:StopProfiling("OvalePower_UpdatePower")
 end
 
 function OvalePower:UpdatePowerRegen(event)
 	self:StartProfiling("OvalePower_UpdatePowerRegen")
-	self.inactiveRegen, self.activeRegen = API_GetPowerRegen()
+	local inactiveRegen, activeRegen = API_GetPowerRegen()
+	if self.inactiveRegen ~= inactiveRegen or self.activeRegen ~= activeRegen then
+		self.inactiveRegen, self.activeRegen = inactiveRegen, activeRegen
+		Ovale.refreshNeeded[self_playerGUID] = true
+	end
 	self:StopProfiling("OvalePower_UpdatePowerRegen")
 end
 
 function OvalePower:UpdatePowerType(event)
 	self:StartProfiling("OvalePower_UpdatePowerType")
 	local currentType, currentToken = API_UnitPowerType("player")
-	self.powerType = self.POWER_TYPE[currentType]
+	local powerType = self.POWER_TYPE[currentType]
+	if self.powerType ~= powerType then
+		self.powerType = powerType
+		Ovale.refreshNeeded[self_playerGUID] = true
+	end
+	Ovale.refreshNeeded[self_playerGUID] = true
 	self:StopProfiling("OvalePower_UpdatePowerType")
 end
 
@@ -395,24 +374,29 @@ end
 
 -- Get power cost of the spell.
 -- NOTE: Mirrored in statePrototype below.
-function OvalePower:PowerCost(spellId, powerType, atTime, target, maximumCost)
+function OvalePower:PowerCost(spellId, powerType, atTime, targetGUID, maximumCost)
 	OvalePower:StartProfiling("OvalePower_PowerCost")
 	local buffParam = "buff_" .. powerType
 	local spellCost = 0
+	local spellRefund = 0
 	local si = OvaleData.spellInfo[spellId]
 	if si and si[powerType] then
+		-- Get references to mirrored methods used.
+		local GetAura, GetAuraByGUID, IsActiveAura
+		local GetSpellInfoProperty
+		local auraModule, dataModule
+		GetAura, auraModule = self:GetMethod("GetAura", OvaleAura)
+		GetAuraByGUID, auraModule = self:GetMethod("GetAuraByGUID", OvaleAura)
+		IsActiveAura, auraModule = self:GetMethod("IsActiveAura", OvaleAura)
+		GetSpellInfoProperty, dataModule = self:GetMethod("GetSpellInfoProperty", OvaleData)
+
 		--[[
 			cost == 0 means the that spell uses no resources.
 			cost > 0 means that the spell costs resources.
 			cost < 0 means that the spell generates resources.
 			cost == "finisher" means that the spell uses all of the resources (zeroes it out).
 		--]]
-		local cost
-		if self.GetSpellInfoProperty then
-			cost = self.GetSpellInfoProperty(self, spellId, atTime, powerType, target)
-		else
-			cost = OvaleData:GetSpellInfoProperty(spellId, atTime, powerType, target)
-		end
+		local cost = GetSpellInfoProperty(dataModule, spellId, atTime, powerType, targetGUID)
 		if cost == "finisher" then
 			-- This spell is a finisher so compute the cost based on the amount of resources consumed.
 			cost = self:GetPower(powerType, atTime)
@@ -438,14 +422,8 @@ function OvalePower:PowerCost(spellId, powerType, atTime, target, maximumCost)
 			local buffAmountParam = buffParam .. "_amount"
 			local buffExtra = si[buffExtraParam]
 			if buffExtra then
-				local aura, isActiveAura
-				if self.GetAura then
-					aura = self.GetAura(self, "player", buffExtra, nil, true)
-					isActiveAura = self.IsActiveAura(self, aura, atTime)
-				else
-					aura = OvaleAura:GetAura("player", buffExtra, nil, true)
-					isActiveAura = OvaleAura:IsActiveAura(aura, atTime)
-				end
+				local aura = GetAura(auraModule, "player", buffExtra, nil, true)
+				local isActiveAura = IsActiveAura(auraModule, aura, atTime)
 				if isActiveAura then
 					local buffAmount = si[buffAmountParam] or -1
 					-- Check if this aura has a stacking effect.
@@ -466,14 +444,8 @@ function OvalePower:PowerCost(spellId, powerType, atTime, target, maximumCost)
 		for suffix, reduction in pairs(BUFF_PERCENT_REDUCTION) do
 			local buffPercentReduction = si[buffParam .. suffix]
 			if buffPercentReduction then
-				local aura, isActiveAura
-				if self.GetAura then
-					aura = self.GetAura(self, "player", buffPercentReduction)
-					isActiveAura = self.IsActiveAura(self, aura, atTime)
-				else
-					aura = OvaleAura:GetAura("player", buffPercentReduction)
-					isActiveAura = OvaleAura:IsActiveAura(aura, atTime)
-				end
+				local aura = GetAuraByGUID(auraModule, self_playerGUID, buffPercentReduction)
+				local isActiveAura = IsActiveAura(auraModule, aura, atTime)
 				if isActiveAura then
 					-- Check if this aura has a stacking effect.
 					local siAura = OvaleData.spellInfo[buffPercentReduction]
@@ -502,12 +474,7 @@ function OvalePower:PowerCost(spellId, powerType, atTime, target, maximumCost)
 			Add these additional resources to the cost after checking if the spell is resource-free for the base cost.
 		--]]
 		local extraPowerParam = "extra_" .. powerType
-		local extraPower
-		if self.GetSpellInfoProperty then
-			extraPower = self.GetSpellInfoProperty(self, spellId, atTime, extraPowerParam, target)
-		else
-			extraPower = OvaleData:GetSpellInfoProperty(spellId, atTime, extraPowerParam, target)
-		end
+		local extraPower = GetSpellInfoProperty(dataModule, spellId, atTime, extraPowerParam, targetGUID)
 		if extraPower then
 			if not maximumCost then
 				-- Clamp the extra power to the remaining power.
@@ -526,6 +493,15 @@ function OvalePower:PowerCost(spellId, powerType, atTime, target, maximumCost)
 		end
 		-- Round up to whole number of resources.
 		spellCost = ceil(cost)
+
+		local refundParam = "refund_" .. powerType
+		local refund = GetSpellInfoProperty(dataModule, spellId, atTime, refundParam, targetGUID)
+		if refund == "cost" then
+			refund = spellCost
+		end
+		refund = refund or 0
+		-- Round up to whole number of resources.
+		spellRefund = ceil(refund)
 	else
 		-- Determine cost using information from the spell tooltip if there is no SpellInfo() for the spell's cost.
 		local cost = OvalePower:GetSpellCost(spellId, powerType)
@@ -534,17 +510,22 @@ function OvalePower:PowerCost(spellId, powerType, atTime, target, maximumCost)
 		end
 	end
 	OvalePower:StopProfiling("OvalePower_PowerCost")
-	return spellCost
+	return spellCost, spellRefund
 end
 
 -- Run-time check that the player has enough power.
 -- NOTE: Mirrored in statePrototype below.
-function OvalePower:RequirePowerHandler(spellId, atTime, requirement, tokenIterator, target)
+function OvalePower:RequirePowerHandler(spellId, atTime, requirement, tokens, index, targetGUID)
 	local verified = false
-	local cost = tokenIterator()
+	-- If index isn't given, then tokens holds the actual token value.
+	local cost = tokens
+	if index then
+		cost = tokens[index]
+		index = index + 1
+	end
 	if cost then
 		local powerType = requirement
-		cost = self:PowerCost(spellId, powerType, atTime, target)
+		cost = self:PowerCost(spellId, powerType, atTime, targetGUID)
 		if cost > 0 then
 			local power = self:GetPower(powerType, atTime)
 			if power >= cost then
@@ -560,7 +541,7 @@ function OvalePower:RequirePowerHandler(spellId, atTime, requirement, tokenItera
 	else
 		Ovale:OneTimeMessage("Warning: requirement '%s' is missing a cost argument.", requirement)
 	end
-	return verified, requirement
+	return verified, requirement, index
 end
 
 function OvalePower:DebugPower()
@@ -570,6 +551,49 @@ function OvalePower:DebugPower()
 	end
 	self:Print("Active regen: %f", self.activeRegen)
 	self:Print("Inactive regen: %f", self.inactiveRegen)
+end
+
+-- Copy power information from the spellcast to the destination table.
+function OvalePower:CopySpellcastInfo(spellcast, dest)
+	for _, powerType in pairs(self_SpellcastInfoPowerTypes) do
+		if spellcast[powerType] then
+			dest[powerType] = spellcast[powerType]
+		end
+	end
+end
+
+-- Save power information to the spellcast.
+function OvalePower:SaveSpellcastInfo(spellcast, atTime, state)
+	local spellId = spellcast.spellId
+	if spellId then
+		local si = OvaleData.spellInfo[spellId]
+		if si then
+			local dataModule = state or OvaleData
+			local powerModule = state or self
+			for _, powerType in pairs(self_SpellcastInfoPowerTypes) do
+				if si[powerType] == "finisher" then
+					-- Get the maximum cost of the finisher.
+					local maxCostParam = "max_" .. powerType
+					local maxCost = si[maxCostParam] or 1
+					local cost = dataModule:GetSpellInfoProperty(spellId, atTime, powerType, spellcast.target)
+					if cost == "finisher" then
+						-- This finisher costs up to maxCost resources.
+						local power = powerModule:GetPower(powerType, atTime)
+						if power > maxCost then
+							cost = maxCost
+						else
+							cost = power
+						end
+					elseif cost == 0 then
+						-- If this is a finisher that costs no resources, then treat it as using the maximum cost.
+						cost = maxCost
+					end
+					-- Save the cost to the spellcast table.
+					spellcast[powerType] = cost
+				end
+			end
+		end
+	end
 end
 --</public-static-methods>
 
@@ -677,7 +701,6 @@ end
 -- Update the state of the simulator for the power cost of the given spell.
 statePrototype.ApplyPowerCost = function(state, spellId, targetGUID, atTime, spellcast)
 	OvalePower:StartProfiling("OvalePower_state_ApplyPowerCost")
-	local target = OvaleGUID:GetUnitId(targetGUID)
 	local si = OvaleData.spellInfo[spellId]
 
 	-- Update power using information from the spell tooltip if there is no SpellInfo() for the spell's cost.
@@ -691,10 +714,10 @@ statePrototype.ApplyPowerCost = function(state, spellId, targetGUID, atTime, spe
 	if si then
 		-- Update power state.
 		for powerType, powerInfo in pairs(OvalePower.POWER_INFO) do
-			local cost = state:PowerCost(spellId, powerType, atTime, target)
+			local cost, refund = state:PowerCost(spellId, powerType, atTime, targetGUID)
 			local power = state[powerType] or 0
 			if cost then
-				power = power - cost
+				power = power - cost + refund
 				-- Add any power regenerated or consumed before the next spell can be cast.
 				local seconds = state.nextCast - atTime
 				if seconds > 0 then
@@ -719,11 +742,11 @@ end
 
 -- Return the number of seconds before enough of the given power type is available for the spell.
 -- If not powerType is given, the the pooled resource for that class is used.
-statePrototype.TimeToPower = function(state, spellId, atTime, target, powerType)
+statePrototype.TimeToPower = function(state, spellId, atTime, targetGUID, powerType)
 	local seconds = 0
 	powerType = powerType or OvalePower.POOLED_RESOURCE[state.class]
 	if powerType then
-		local cost = state:PowerCost(spellId, powerType, atTime, target)
+		local cost = state:PowerCost(spellId, powerType, atTime, targetGUID)
 		local power = state:GetPower(powerType, atTime)
 		local powerRate = state.powerRate[powerType]
 		if power < cost then

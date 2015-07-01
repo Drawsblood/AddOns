@@ -76,19 +76,20 @@ CNDT.COMMON.standardtcoords = {0.07, 0.93, 0.07, 0.93}
 CNDT.Condition_Defaults = {
 	n 					= 0,
 	["**"] = {
-		AndOr 	   		= "AND",
-		Type 	   		= "",
-		Icon 	   		= "",
-		Operator   		= "==",
-		Level 	   		= 0,
-		Unit 	   		= "player",
-		Name 	   		= "",
-		Name2 	   		= "",
-		PrtsBefore 		= 0,
-		PrtsAfter  		= 0,
+		AndOr			= "AND",
+		Type			= "",
+		Icon			= "",
+		Operator		= "==",
+		Level			= 0,
+		Unit			= "player",
+		Name			= "",
+		Name2			= "",
+		PrtsBefore		= 0,
+		PrtsAfter		= 0,
 		Checked			= false,
-		Checked2   		= false,
-		Runes 	   		= {},
+		Checked2		= false,
+
+		-- Runes 		= {}, -- Deprecated
 
 		-- IMPORTANT: This setting can be a number OR a table.
 		BitFlags		= 0x0, -- may also be a table.
@@ -466,7 +467,40 @@ TMW:RegisterUpgrade(20100, {
 	end,
 })
 
-
+function CNDT:ConvertSliderCondition(condition, min, max, flagRemap)
+    local op = condition.Operator
+    local flags = {}
+    condition.BitFlags = flags
+    if op == "==" then
+        flags[condition.Level] = true
+    elseif op == "<=" then
+        for i = min, condition.Level do
+            flags[i] = true
+        end
+    elseif op == "<" then
+        for i = min, condition.Level-1 do
+            flags[i] = true
+        end
+    elseif op == ">" then
+        for i = condition.Level+1, max do
+            flags[i] = true
+        end
+    elseif op == ">=" then
+        for i = condition.Level, max do
+            flags[i] = true
+        end
+    elseif op == "~=" then
+        flags[condition.Level] = true
+        condition.Checked = true
+    end
+    if flagRemap then
+        local fc = CopyTable(flags)
+        wipe(flags)
+        for k, v in pairs(fc) do 
+            flags[flagRemap[k]] = v 
+        end
+    end
+end
 
 
 
@@ -519,7 +553,10 @@ CNDT.Env = {
 	}),
 
 	-- Stores references to BitFlags settings tables.
-	TABLES = setmetatable({}, {__mode='kv'}),
+	-- Don't make it weak because sometimes tables in use can get GCd
+	-- if their settings table has been removed but the condition
+	-- is still registered for updating.
+	TABLES = {}, --setmetatable({}, {__mode='kv'}),
 	
 	-- These are here as a primitive security measure to prevent some of the most basic forms of malicious Lua conditions.
 	-- This list isn't even exhaustive, and it is in no way cracker-proof, but its a start.
@@ -599,29 +636,51 @@ end
 function CNDT:GROUP_ROSTER_UPDATE()
 	TMW.UNITS:UpdateTankAndAssistMap()
 	
-	for oldunit in pairs(Env) do
-		if CNDT.SpecialUnitsUsed[oldunit] then
-			TMW.UNITS:SubstituteSpecialUnit(oldunit, Env, oldunit, true)
+	for oldUnit in pairs(Env) do
+		if CNDT.SpecialUnitsUsed[oldUnit] then
+			local newUnit = TMW.UNITS:SubstituteSpecialUnit(oldUnit)
+			Env[oldUnit] = newUnit or oldUnit
 		end
 	end
 end
 
 
 function CNDT:GetTableSubstitution(tbl)
-	if type(tbl) ~= "table" then
-		error("not a table")
-	end
+	TMW:ValidateType("CNDT:GetTableSubstitution(tbl)", "tbl", tbl, "table")
 
+	-- We used to check the format of the address explicitly,
+	-- but ticket 1076 demonstrates that sometimes it can be in the format
+	-- "table: 0000000312EBEB0" (the format I get), or "table: 0x1ba1bbb00" (from the ticket)
+	-- so instead we just check that the metatable exists.
 	local address = tostring(tbl)
-	if not address:match("^table: [0-9A-F]*$") then
-		error("can't substitute tables with __tostring metamethods")
+	if TMW.approachTable(tbl, getmetatable, "__tostring") then
+		error("can't substitute tables with __tostring metamethods: " .. address)
 	end
 
-	local var = address:gsub(": ", "_")
+	local var = address:gsub(":", "_"):gsub(" ", "")
 	CNDT.Env.TABLES[var] = tbl
 
 	return "TABLES." .. var
 end
+
+function CNDT:GetBitFlag(conditionSettings, index)
+	if type(conditionSettings.BitFlags) == "table" then
+		return conditionSettings.BitFlags[index]
+	else
+		local flag = bit.lshift(1, index-1)
+		return bit.band(conditionSettings.BitFlags, flag) == flag
+	end
+end
+
+function CNDT:ToggleBitFlag(conditionSettings, index)
+	if type(conditionSettings.BitFlags) == "table" then
+		conditionSettings.BitFlags[index] = (not conditionSettings.BitFlags[index]) and true or nil
+	else
+		local flag = bit.lshift(1, index-1)
+		conditionSettings.BitFlags = bit.bxor(conditionSettings.BitFlags, flag)
+	end
+end
+
 
 CNDT.Substitutions = {
 
@@ -954,6 +1013,13 @@ function CNDT:CheckParentheses(settings)
 	-- Second return is a localized error message if they are invalid.
 
 	if settings.n < 3 then
+		-- Remove hanging parens from condition settings with less than 3 conditions.
+		-- This prevents issues with post-user condition modifying via ConditionObjectConstructor,
+		-- and just ensures general sanity.
+		for _, Condition in TMW:InNLengthTable(settings) do
+			Condition.PrtsBefore = 0
+			Condition.PrtsAfter = 0
+		end
 		return true
 	end
 	

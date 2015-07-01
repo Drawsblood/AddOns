@@ -11,22 +11,12 @@ _G[addonName] = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "A
 local addon = _G[addonName]
 
 local THIS_ACCOUNT = "Default"
--- local commPrefix = "DS_Craft"
-
-local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
-
-local MSG_SEND_LOGIN								= 1	-- Sends a login message, to request crafts to other players
-local MSG_LOGIN_REPLY							= 2	-- ..reply
-local MSG_SEND_PROFESSION						= 3	-- Sends a profession link, or profession id if no full link
 
 local SECONDSPERDAY = 86400
 local THREEOCLOCK = 10800
 
 local AddonDB_Defaults = {
 	global = {
-		Options = {
-			BroadcastProfs = true,					-- Broadcast professions at login or not
-		},
 		Guilds = {
 			['*'] = {			-- ["Account.Realm.Name"] 
 				Members = {
@@ -132,108 +122,6 @@ local function GetVersion()
 	local _, version = GetBuildInfo()
 	return tonumber(version)
 end
-
--- local function SaveVersion(sender, version)
-	-- local thisGuild = GetThisGuild()
-	-- if thisGuild and sender and version then
-		-- thisGuild.Members[sender].Version = version
-	-- end
--- end
-
--- local function GuildBroadcast(messageType, ...)
-	-- local serializedData = addon:Serialize(messageType, ...)
-	-- addon:SendCommMessage(commPrefix, serializedData, "GUILD")
--- end
-
--- local function GuildWhisper(player, messageType, ...)
-	-- if DataStore:IsGuildMemberOnline(player) then
-		-- local serializedData = addon:Serialize(messageType, ...)
-		-- addon:SendCommMessage(commPrefix, serializedData, "WHISPER", player)
-	-- end
--- end
-
--- local professionQueue		-- queue containing the professions to send to guildmates
--- local professionTimer		-- timer used to control the pace at which professions are placed on comm channels.
-
--- local function SendProfession()
-	-- if #professionQueue == 0 then					-- nothing left in the queue ? cancel the timer & exit
-		-- addon:CancelTimer(professionTimer)
-		-- professionTimer = nil
-		-- return
-	-- end
-	
-	-- -- send the last profession found in the queue, then remove it 
-	-- local profession = professionQueue[#professionQueue]		-- last element
-	-- local alt = profession[1]
-	-- local data = profession[2]
-	-- local index = profession[3]
-	-- local recipient = profession[4]
-	-- -- DEFAULT_CHAT_FRAME:AddMessage(format("sending %s, %s to %s (size : %d)", alt, index, recipient or "guild", #professionQueue ))
-	
-	-- if profession[4] then		-- recipient found ? 
-		-- GuildWhisper(recipient, MSG_SEND_PROFESSION, alt, data, index)
-	-- else
-		-- GuildBroadcast(MSG_SEND_PROFESSION, alt, data, index)
-	-- end
-	
-	-- table.remove(professionQueue)
--- end
-
--- local function QueueCharacterProfessions(character, recipient)
-	-- local index = 1
-	-- local _, _, alt = strsplit(".", character)
-
-	-- for profName, profession in pairs(addon.db.global.Characters[character].Professions) do
-		-- local spellID = GetProfessionID(profName) or 0
-		-- local data = profession.FullLink or spellID
-
-		-- if profession.isPrimary then
-			-- table.insert(professionQueue, { alt, data, index, recipient })
-			-- index = index + 1
-		-- elseif profession.isSecondary then
-			-- if profName == GetSpellInfo(SPELL_ID_COOKING) then
-				-- table.insert(professionQueue, { alt, data, 3, recipient })			--				index = 3
-			-- end
-		-- end
-	-- end
--- end
-
--- local function SendAllProfessions(alts, recipient)
-	-- if GetOption("BroadcastProfs") == false then
-		-- return
-	-- end
-
-	-- professionQueue = professionQueue or {}
-	
-	-- -- sends the professions of the current character + his alts
-	-- local character = DataStore:GetCharacter()	-- this character
-	-- QueueCharacterProfessions(character, recipient)
-	
-	-- if strlen(alts) > 0 then
-		-- for _, name in pairs( { strsplit("|", alts) }) do	-- then all his alts
-			-- character = DataStore:GetCharacter(name)
-			-- if character then
-				-- QueueCharacterProfessions(character, recipient)
-			-- end
-		-- end
-	-- end
-	
-	-- -- reuse current timer if already available (may be the case if 2 players connect simultaneously)
-	-- professionTimer = professionTimer or addon:ScheduleRepeatingTimer(SendProfession, 0.5)		-- send 1 profession every half-second, max 15 seconds for 30 professions on a realm
--- end
-
--- local function SaveProfession(sender, alt, data, index)
-	-- local thisGuild = GetThisGuild()
-	-- if thisGuild and sender then
-		-- local version = thisGuild.Members[sender].Version
-		-- local member = thisGuild.Members[alt]
-		
-		-- member.Version = version
-		-- member.Professions[index] = data
-		-- member.lastUpdate = time()
-	-- end
-	-- addon:SendMessage("DATASTORE_GUILD_PROFESSION_RECEIVED", sender, alt, data, index)
--- end
 
 local function ClearExpiredProfessions()
 	-- this function will clear all the guild profession links that were saved with a build number anterior to the current one (they're invalid after a patch anyway)
@@ -791,16 +679,18 @@ local function _GetProfession1(character)
 	local profession = _GetProfession(character, character.Prof1)
 	if profession then
 		local rank, maxRank, spellID = _GetProfessionInfo(profession)
-		return rank, maxRank, spellID, character.Prof1
+		return rank or 0, maxRank or 0, spellID, character.Prof1
 	end
+	return 0, 0, nil, nil
 end
 
 local function _GetProfession2(character)
 	local profession = _GetProfession(character, character.Prof2)
 	if profession then
 		local rank, maxRank, spellID = _GetProfessionInfo(profession)
-		return rank, maxRank, spellID, character.Prof2
+		return rank or 0, maxRank or 0, spellID, character.Prof2
 	end
+	return 0, 0, nil, nil
 end
 
 local function _GetFirstAidRank(character)
@@ -873,39 +763,10 @@ local PublicMethods = {
 	IsArtifactKnown = _IsArtifactKnown,
 }
 
--- *** Guild Comm ***
--- local function OnGuildAltsReceived(self, sender, alts)
-	-- if sender == UnitName("player") then				-- if I receive my own list of alts in the same guild, same realm, same account..
-		-- GuildBroadcast(MSG_SEND_LOGIN, GetVersion())
-		-- addon:ScheduleTimer(SendAllProfessions, 5, alts)	-- broadcast my crafts to the guild 5 seconds later, to decrease the load at startup
-	-- end
--- end
-
--- local GuildCommCallbacks = {
-	-- [MSG_SEND_LOGIN] = function(sender, version)
-			-- local player = UnitName("player")
-			-- if sender ~= player then						-- don't send back to self
-				-- GuildWhisper(sender, MSG_LOGIN_REPLY, GetVersion())
-				-- local alts = DataStore:GetGuildMemberAlts(player)			-- get my own alts
-				-- if alts then
-					-- SendAllProfessions(alts, sender)	-- when another player sends me his login, reply with my own crafts
-				-- end
-			-- end
-			-- SaveVersion(sender, version)
-		-- end,
-	-- [MSG_LOGIN_REPLY] = function(sender, version)
-			-- SaveVersion(sender, version)
-		-- end,
-	-- [MSG_SEND_PROFESSION] = function(sender, alt, data, index)
-			-- SaveProfession(sender, alt, data, index)
-		-- end,
--- }
-
 function addon:OnInitialize()
 	addon.db = LibStub("AceDB-3.0"):New(addonName .. "DB", AddonDB_Defaults)
 
 	DataStore:RegisterModule(addonName, addon, PublicMethods)
-	-- DataStore:SetGuildCommCallbacks(commPrefix, GuildCommCallbacks)
 	DataStore:SetCharacterBasedMethod("GetProfession")
 	DataStore:SetCharacterBasedMethod("GetProfessions")
 	
@@ -919,9 +780,6 @@ function addon:OnInitialize()
 	
 	DataStore:SetGuildBasedMethod("GetGuildCrafters")
 	DataStore:SetGuildBasedMethod("GetGuildMemberProfession")
-	
-	-- addon:RegisterMessage("DATASTORE_GUILD_ALTS_RECEIVED", OnGuildAltsReceived)
-	-- addon:RegisterComm(commPrefix, DataStore:GetGuildCommHandler())
 end
 
 function addon:OnEnable()

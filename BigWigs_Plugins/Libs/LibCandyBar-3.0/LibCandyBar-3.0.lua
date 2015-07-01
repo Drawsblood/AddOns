@@ -20,7 +20,7 @@ local CreateFrame, error, setmetatable, UIParent = CreateFrame, error, setmetata
 if not LibStub then error("LibCandyBar-3.0 requires LibStub.") end
 local cbh = LibStub:GetLibrary("CallbackHandler-1.0")
 if not cbh then error("LibCandyBar-3.0 requires CallbackHandler-1.0") end
-local lib, old = LibStub:NewLibrary("LibCandyBar-3.0", 83) -- Bump minor on changes
+local lib, old = LibStub:NewLibrary("LibCandyBar-3.0", 90) -- Bump minor on changes
 if not lib then return end
 lib.callbacks = lib.callbacks or cbh:New(lib)
 local cb = lib.callbacks
@@ -139,7 +139,7 @@ end
 
 local function restyleBar(self)
 	if not self.running then return end
-	-- In the past we used a :GetTexture check here, but as of WoW v5 it randomly returns nil, so use our own variable.
+	-- In the past we used a :GetTexture check here, but as of WoW v5 it randomly returns nil, so use our own trustworthy variable.
 	if self.candyBarIconFrame.icon then
 		self.candyBarBar:SetPoint("TOPLEFT", self.candyBarIconFrame, "TOPRIGHT")
 		self.candyBarBar:SetPoint("BOTTOMLEFT", self.candyBarIconFrame, "BOTTOMRIGHT")
@@ -187,6 +187,26 @@ function barPrototype:Get(key) return self.data and self.data[key] end
 -- @param b Blue component (0-1)
 -- @param a Alpha (0-1)
 function barPrototype:SetColor(...) self.candyBarBar:SetStatusBarColor(...) end
+--- Sets the color of the bar label and bar duration text.
+-- @paramsig r, g, b, a
+-- @param r Red component (0-1)
+-- @param g Green component (0-1)
+-- @param b Blue component (0-1)
+-- @param a Alpha (0-1)
+function barPrototype:SetTextColor(...)
+	self.candyBarLabel:SetTextColor(...)
+	self.candyBarDuration:SetTextColor(...)
+end
+--- Sets the shadow color of the bar label and bar duration text.
+-- @paramsig r, g, b, a
+-- @param r Red component (0-1)
+-- @param g Green component (0-1)
+-- @param b Blue component (0-1)
+-- @param a Alpha (0-1)
+function barPrototype:SetShadowColor(...)
+	self.candyBarLabel:SetShadowColor(...)
+	self.candyBarDuration:SetShadowColor(...)
+end
 --- Sets the texture of the bar.
 -- This should only be needed on running bars that get changed on the fly.
 -- @param texture Path to the bar texture.
@@ -194,12 +214,34 @@ function barPrototype:SetTexture(texture)
 	self.candyBarBar:SetStatusBarTexture(texture)
 	self.candyBarBackground:SetTexture(texture)
 end
+--- Returns the label (text) currently set on the bar.
+function barPrototype:GetLabel()
+	return self.candyBarLabel.text
+end
 --- Sets the label on the bar.
 -- @param text Label text.
-function barPrototype:SetLabel(text) self.candyBarLabel:SetText(text); restyleBar(self) end
+function barPrototype:SetLabel(text)
+	self.candyBarLabel.text = text
+	self.candyBarLabel:SetText(text)
+	restyleBar(self)
+end
+--- Returns the icon texture path currently set on the bar, if it has an icon set.
+function barPrototype:GetIcon()
+	return self.candyBarIconFrame.icon
+end
 --- Sets the icon next to the bar.
 -- @param icon Path to the icon texture or nil to not display an icon.
-function barPrototype:SetIcon(icon) self.candyBarIconFrame:SetTexture(icon); self.candyBarIconFrame.icon = icon; restyleBar(self) end
+-- @param ... Optional icon coordinates for texture trimming.
+function barPrototype:SetIcon(icon, ...)
+	self.candyBarIconFrame.icon = icon
+	self.candyBarIconFrame:SetTexture(icon)
+	if ... then
+		self.candyBarIconFrame:SetTexCoord(...)
+	else
+		self.candyBarIconFrame:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+	end
+	restyleBar(self)
+end
 --- Sets wether or not the time indicator on the right of the bar should be shown.
 -- Time is shown by default.
 -- @param bool true to show the time, false/nil to hide the time.
@@ -270,10 +312,9 @@ function lib:New(texture, width, height)
 		local frame = CreateFrame("Frame", nil, UIParent)
 		bar = setmetatable(frame, barPrototype_meta)
 
-		local icon = bar:CreateTexture(nil, "LOW")
+		local icon = bar:CreateTexture()
 		icon:SetPoint("TOPLEFT")
 		icon:SetPoint("BOTTOMLEFT")
-		icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 		icon:Show()
 		bar.candyBarIconFrame = icon
 
@@ -294,14 +335,14 @@ function lib:New(texture, width, height)
 		iconBackdrop:SetFrameLevel(0)
 		bar.candyBarIconFrameBackdrop = iconBackdrop
 
-		local duration = statusbar:CreateFontString(nil, "ARTWORK", GameFontHighlightSmallOutline)
+		local duration = statusbar:CreateFontString(nil, "OVERLAY", GameFontHighlightSmallOutline)
 		duration:SetPoint("RIGHT", statusbar, "RIGHT", -2, 0)
 		bar.candyBarDuration = duration
 
-		local name = statusbar:CreateFontString(nil, "ARTWORK", GameFontHighlightSmallOutline)
-		name:SetPoint("LEFT", statusbar, "LEFT", 2, 0)
-		name:SetPoint("RIGHT", statusbar, "RIGHT", -2, 0)
-		bar.candyBarLabel = name
+		local label = statusbar:CreateFontString(nil, "OVERLAY", GameFontHighlightSmallOutline)
+		label:SetPoint("TOPLEFT", statusbar, "TOPLEFT", 2, 0)
+		label:SetPoint("BOTTOMRIGHT", statusbar, "BOTTOMRIGHT", -2, 0)
+		bar.candyBarLabel = label
 
 		local updater = bar:CreateAnimationGroup()
 		updater:SetLooping("REPEAT")
@@ -327,6 +368,7 @@ function lib:New(texture, width, height)
 	end
 
 	bar.candyBarBackground:SetVertexColor(0.5, 0.5, 0.5, 0.3)
+	bar.candyBarBar:SetStatusBarColor(0.5, 0.5, 0.5, 1)
 	bar:ClearAllPoints()
 	bar:SetWidth(width)
 	bar:SetHeight(height)
@@ -334,6 +376,7 @@ function lib:New(texture, width, height)
 	bar:SetScale(1)
 	bar:SetAlpha(1)
 	bar:SetClampedToScreen(false)
+	bar:EnableMouse(false)
 
 	bar.candyBarLabel:SetTextColor(1,1,1,1)
 	bar.candyBarLabel:SetJustifyH("CENTER")

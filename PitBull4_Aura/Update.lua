@@ -43,6 +43,8 @@ local wipe = _G.table.wipe
 -- [13] = is_stealable
 -- [14] = should_consolodate
 -- [15] = spell_id
+-- [16] = can_apply_aura
+-- [17] = boss_debuff
 local list = {}
 
 -- pool of available entries to be used in list
@@ -50,7 +52,7 @@ local pool = {}
 
 -- The final index of the entries.  We need this so we can always
 -- get all values when copying or using unpack.
-local ENTRY_END = 15
+local ENTRY_END = 17
 
 -- Table we store the weapon enchant info in.
 -- This table is never cleared and entries are reused.
@@ -124,26 +126,20 @@ local function get_aura_list(list, unit, db, is_buff, frame)
 		-- Note entry[2] says if the aura is a weapon enchant
 		entry[1], entry[2], entry[3], entry[4], entry[5], entry[6],
 			entry[7], entry[8], entry[9], entry[10], entry[11],
-			entry[12], entry[13], entry[14], entry[15] =
+			entry[12], entry[13], entry[14], entry[15], entry[16],
+			entry[17] =
 			id, nil, nil, is_buff, UnitAura(unit, id, filter)
+
+		if not entry[5] then
+			-- No more auras, break the outer loop
+			break
+		end
 
 		-- Hack to get around a Blizzard bug.  The Enrage debuff_type
 		-- gets set to "" instead of "Enrage" like it should.
 		-- Once this is fixed this code should be removed.
 		if entry[9] == "" then
 			entry[9] = "Enrage"
-		end
-
-		-- Make pre 3.1.0 clients emulate the return of the caster
-		-- argument in the new 3.1.0 clients.  Once 3.1.0 is
-		-- live for everyone this can be removed
-		if entry[12] == 1 then
-			entry[12] = "player"
-		end
-
-		if not entry[5] then
-			-- No more auras, break the outer loop
-			break
 		end
 
 		-- Pass the entry through to the Highlight system
@@ -276,7 +272,7 @@ local function set_weapon_entry(list, is_enchant, time_left, expiration_time, co
 	end
 
 	-- No such enchant, clear the table
-	if is_enchant ~= 1 then
+	if not is_enchant then
 		wipe(entry)
 		return
 	end
@@ -498,9 +494,15 @@ local function set_aura(frame, db, aura_controls, aura, i, is_friend)
 	count_text:SetText(count > 1 and count or "")
 
 	if db.cooldown[rule] and duration and duration > 0 then
-		CooldownFrame_SetTimer(control.cooldown, expiration_time - duration, duration, 1)
-		control.cooldown:Show()
+		local cooldown = control.cooldown
+		-- Avoid updating the cooldown frame if nothing changed to stop the flashing Aura
+		-- problem since 4.0.1.
+		if not unchanged or not cooldown:IsShown() then
+			cooldown:Show()
+			CooldownFrame_SetTimer(cooldown, expiration_time - duration, duration, 1)
+		end
 	else
+		control.cooldown:SetCooldown(0, 0)
 		control.cooldown:Hide()
 	end
 
@@ -826,14 +828,14 @@ function PitBull4_Aura:UpdateWeaponEnchants(force)
 	-- to compare against the current values to look for changes.
 	local old_mh, old_mh_count, old_mh_expiration_time
 	if mh_entry then
-		old_mh = mh_entry[2] ~= nil and 1 or nil
+		old_mh = mh_entry[2] ~= nil and true or false
 		old_mh_count = mh_entry[8]
 		old_mh_expiration_time = mh_entry[11]
 	end
 
 	local old_oh, old_oh_count, old_oh_expiration_time
 	if oh_entry then
-		old_oh = oh_entry[2] ~= nil and 1 or nil
+		old_oh = oh_entry[2] ~= nil and true or false
 		old_oh_count = oh_entry[8]
 		old_oh_expiration_time = oh_entry[11]
 	end

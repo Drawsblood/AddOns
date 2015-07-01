@@ -1,4 +1,4 @@
-## Interface: 60000
+## Interface: 60200
 ## Title: PitBull4 |r[|cffeda55fShadow orbs|r]
 ## Title-deDE: PitBull4 |r[|cffeda55fSchattenkugeln|r]
 ## Title-esES: PitBull4 |r[|cffeda55fOrbes de las Sombras|r]
@@ -19,9 +19,9 @@
 ## DefaultState: enabled
 ## LoadOnDemand: 1
 ## Dependencies: PitBull4
-## Version: v4.0.0-beta54
+## Version: v4.0.0-beta56
 ## X-PitBull4-Condition: return select(2, UnitClass("player")) == "PRIEST" and select(4, GetBuildInfo()) >= 50000
-## X-Curse-Packaged-Version: v4.0.0-beta54
+## X-Curse-Packaged-Version: v4.0.0-beta56
 ## X-Curse-Project-Name: PitBull Unit Frames 4.0
 ## X-Curse-Project-ID: pitbull4
 ## X-Curse-Repository-ID: wow/pitbull4/mainline

@@ -1,11 +1,11 @@
-## Interface: 60000
+## Interface: 60100
 ## Title: i|cffffffaaGear|r
-## Version: 6.0.2.2
+## Version: 6.1.1
 ## Notes: Not just a durability display broker!
 ## Author: grdn
 ## SavedVariables: iGearDB
 ## OptionalDeps: Ace3, iLib, LibCrayon-3.0, LibDialog-1.0
-## X-Curse-Packaged-Version: 6.0.2.2
+## X-Curse-Packaged-Version: 6.1.1
 ## X-Curse-Project-Name: iGear
 ## X-Curse-Project-ID: igear
 ## X-Curse-Repository-ID: wow/igear/mainline

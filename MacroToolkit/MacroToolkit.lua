@@ -112,6 +112,7 @@ function MT:eventHandler(this, event, arg1, ...)
 			if MT.db.profile.override then
 				MT.showmacroframe = ShowMacroFrame
 				ShowMacroFrame = showtoolkit
+				MT.origMTText = MacroFrameText
 			end
 			local mtbutton = CreateFrame("Button", "MacroToolkitOpen", MacroFrame, "UIPanelButtonTemplate")
 			mtbutton:SetText(L["Toolkit"])

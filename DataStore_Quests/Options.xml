@@ -3,30 +3,34 @@
 
 	<Frame parentKey="QuestsOptions" parent="DataStoreFrames" hidden="true">
 		<Size x="615" y="306" />
+		<KeyValues>
+			<KeyValue key="module" value="DataStore_Quests" />
+		</KeyValues>
 		<Frames>
-			<CheckButton parentKey="TrackTurnIns" inherits="InterfaceOptionsCheckButtonTemplate">
-				<Size x="20" y="20"/>
+			<CheckButton parentKey="TrackTurnIns" inherits="DataStoreToggleableOptionTemplate">
 				<Anchors> 
 					<Anchor point="TOPLEFT" x="40" y="-40" />
-				</Anchors>      
-				<Scripts>
-					<OnClick>
-						DataStore:ToggleOption(self, "DataStore_Quests", "TrackTurnIns")
-					</OnClick>
-				</Scripts>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="option" value="TrackTurnIns" />
+					<KeyValue key="locLabel" value="TRACK_TURNINS_LABEL" />
+					<KeyValue key="locTitle" value="TRACK_TURNINS_TITLE" />
+					<KeyValue key="locEnabled" value="TRACK_TURNINS_ENABLED" />
+					<KeyValue key="locDisabled" value="TRACK_TURNINS_DISABLED" />
+				</KeyValues>
 			</CheckButton>
-			<CheckButton parentKey="AutoUpdateHistory" inherits="InterfaceOptionsCheckButtonTemplate">
-				<Size x="20" y="20"/>
+			<CheckButton parentKey="AutoUpdateHistory" inherits="DataStoreToggleableOptionTemplate">
 				<Anchors> 
 					<Anchor point="TOP" relativeKey="$parent.TrackTurnIns" relativePoint="BOTTOM" x="0" y="-10" />
-				</Anchors> 
-				<Scripts>
-					<OnClick>
-						DataStore:ToggleOption(self, "DataStore_Quests", "AutoUpdateHistory")
-					</OnClick>
-				</Scripts>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="option" value="AutoUpdateHistory" />
+					<KeyValue key="locLabel" value="AUTO_UPDATE_LABEL" />
+					<KeyValue key="locTitle" value="AUTO_UPDATE_TITLE" />
+					<KeyValue key="locEnabled" value="AUTO_UPDATE_ENABLED" />
+					<KeyValue key="locDisabled" value="AUTO_UPDATE_DISABLED" />
+				</KeyValues>
 			</CheckButton>
 		</Frames>
 	</Frame>
-	
 </Ui>

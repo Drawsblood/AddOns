@@ -6,15 +6,19 @@
 local mod, CL = BigWigs:NewBoss("Gruul", 988, 1161)
 if not mod then return end
 mod:RegisterEnableMob(76877)
---mod.engageId = 1691
+mod.engageId = 1691
+mod.respawnTime = 29.5
 
 --------------------------------------------------------------------------------
 -- Locals
 --
 
 local rampaging = nil
+local sliceTimer = nil
+local first = nil
 local smashCount = 1
 local slamCount = 1
+local sliceCount = 1
 
 --------------------------------------------------------------------------------
 -- Localization
@@ -22,7 +26,7 @@ local slamCount = 1
 
 local L = mod:NewLocale("enUS", true)
 if L then
-
+	L.first_ability = "Smash or Slam"
 end
 L = mod:GetLocale()
 
@@ -32,147 +36,155 @@ L = mod:GetLocale()
 
 function mod:GetOptions()
 	return {
-		165300,
-		155080, 155301, {155078, "FLASH"}, {155326, "PROXIMITY"}, 155730, 155539, {173192, "FLASH"},
-		"bosskill"
-	}, {
-		[165300] = "mythic",
-		[155080] = "general"
+		155080, -- Inferno Slice
+		155301, -- Overhead Smash
+		155078, -- Overwhelming Blows
+		{155326, "PROXIMITY"}, -- Petrifying Slam
+		155539, -- Destructive Rampage
+		{173192, "FLASH"}, -- Cave In
+		"berserk",
 	}
 end
 
 function mod:OnBossEnable()
 	self:Log("SPELL_CAST_START", "InfernoSlice", 155080)
+	self:Log("SPELL_CAST_SUCCESS", "InfernoSliceSuccess", 155080)
 	self:Log("SPELL_CAST_START", "OverheadSmash", 155301)
-	self:Log("SPELL_AURA_APPLIED", "OverwhelmingBlows", 155078)
 	self:Log("SPELL_AURA_APPLIED_DOSE", "OverwhelmingBlows", 155078)
 	self:Log("SPELL_AURA_APPLIED", "PetrifyingSlam", 155323)
-	self:Log("SPELL_AURA_APPLIED", "PetrifiedApplied", 155506)
-	self:Log("SPELL_AURA_REMOVED", "PetrifiedRemoved", 155506)
-	self:Log("SPELL_CAST_SUCCESS", "CrumblingRoar", 155730)
 	self:Log("SPELL_AURA_APPLIED", "DestructiveRampage", 155539)
 	self:Log("SPELL_AURA_REMOVED", "DestructiveRampageOver", 155539)
 	self:Log("SPELL_PERIODIC_DAMAGE", "CaveInDamage", 173192)
 	self:Log("SPELL_PERIODIC_MISSED", "CaveInDamage", 173192)
-	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "boss1")
 end
 
 function mod:OnEngage()
 	rampaging = nil
-	smashCount, slamCount = 1, 1
-	self:Bar(155080, 14) -- Inferno Slice
-	self:CDBar(155539, 105) -- Destructive Rampage (105-115)
-	-- XXX not sure about these... can cast either first around 22s, then the second varies (30~43s), then they stablize
-	--self:CDBar(155326, 22) -- Petrifying Slam
-	--self:CDBar(155301, 30) -- Overhead Smash
+	first = nil
+	sliceTimer = nil
+	smashCount, slamCount, sliceCount = 1, 1, 1
+	self:Bar(155080, self:Mythic() and 9.5 or 14.5, CL.count:format(self:SpellName(155080), sliceCount)) -- Inferno Slice
+	self:CDBar(155539, 105) -- Destructive Rampage. Seems he'll always wait for 6 (8 or 9? in mythic) Inferno Slices
+	-- it seems that one of these is picked to cast first, slam tends to be sooner, smash can be either 21 or 27 (or 30?)
+	self:CDBar(155301, 21, L.first_ability, "ability_kilruk_reave") -- what to use for a key? z.z
+	self:CDBar(155326, 21, L.first_ability, "ability_kilruk_reave") -- both!?
+	--self:CDBar(155301, 21) -- Overhead Smash
+	--self:CDBar(155326, 21) -- Petrifying Slam
+	self:Berserk(self:Normal() and 480 or 360)
 end
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
 
-function mod:UNIT_SPELLCAST_SUCCEEDED(_, spellName, _, _, spellId)
-	if spellId == 165303 then -- Flare (Mythic)
-		self:CDBar(165300, 6)
+do
+	local function sliceBar(self, spellId, spellName)
+		-- gains 50% of his rage if he hits less than 4 targets
+		sliceTimer = nil
+		self:Bar(spellId, UnitPower("boss1") > 49 and 5 or 10, CL.count:format(spellName, sliceCount))
+	end
+
+	function mod:InfernoSlice(args)
+		self:StopBar(CL.count:format(args.spellName, sliceCount)) -- just in case
+		self:Message(args.spellId, "Urgent", "Warning", CL.casting:format(CL.count:format(args.spellName, sliceCount)))
+		sliceCount = sliceCount + 1
+	end
+
+	function mod:InfernoSliceSuccess(args)
+		if not self:Mythic() then
+			self:Bar(args.spellId, 15, CL.count:format(args.spellName, sliceCount))
+		else
+			sliceTimer = self:ScheduleTimer(sliceBar, 0.5, self, args.spellId, args.spellName)
+		end
 	end
 end
 
-function mod:InfernoSlice(args)
-	self:Message(args.spellId, "Attention", "Alert", CL.casting:format(args.spellName))
-	self:CDBar(args.spellId, 17.5) -- slice x6 then rampage
-end
-
 function mod:OverwhelmingBlows(args)
-	if self:Tank(args.destName) then
-		--self:StackMessage(args.spellId, args.destName, args.amount, "Attention")
-	else -- you're too close!
-		self:Message(args.spellId, "Personal", "Alarm", CL.you:format(args.spellName))
-		self:Flash(args.spellId)
+	if self:Tank() and self:Tank(args.destName) and args.amount % 2 == 0 then -- stacks every 3s
+		self:StackMessage(args.spellId, args.destName, args.amount, "Attention")
 	end
 end
 
 function mod:OverheadSmash(args)
 	if rampaging then return end
-	self:Message(args.spellId, "Attention")
-	if smashCount < 3 then -- smash smash rampage
-		self:CDBar(args.spellId, smashCount == 1 and 22 or 38)
-	end
+	self:Message(args.spellId, "Attention", "Info")
 	smashCount = smashCount + 1
+	if smashCount < 4 then -- smash smash smash rampage
+		self:CDBar(args.spellId, 21)
+	end
+	if not first then
+		self:CDBar(155326, 15) -- Petrifying Slam. Uncommonly second, not sure how predictable this is
+		first = true
+	end
 end
 
 do
 	local petrifyTargets, petrifyOnMe, scheduled = {}, nil, nil
-	local function openProximity()
+	local function openProximity(self)
 		if not petrifyOnMe then
-			mod:Message(155326, "Attention", "Info")
-			mod:OpenProximity(155326, 8, petrifyTargets)
+			self:Message(155326, "Urgent", "Alert") -- Petrifying Slam
+			self:Bar(155326, 9, 155530) -- Shatter
+			self:OpenProximity(155326, 8, petrifyTargets)
 		end
+		self:ScheduleTimer("CloseProximity", 9, 155326)
 		scheduled = nil
 	end
 
 	function mod:PetrifyingSlam(args)
 		if not scheduled then
-			if slamCount < 2 then -- slam rampage
-				self:Bar(args.spellId, 60.7)
-			end
 			slamCount = slamCount + 1
+			if slamCount < 3 then -- slam slam rampage
+				self:CDBar(155326, 61) -- 61-64
+			end
 			wipe(petrifyTargets)
 			petrifyOnMe = nil
-			scheduled = self:ScheduleTimer(openProximity, 0.1)
+			scheduled = self:ScheduleTimer(openProximity, 0.2, self)
+			if not first then
+				self:CDBar(155301, 21) -- Overhead Smash 21-24
+				first = true
+			end
 		end
 		petrifyTargets[#petrifyTargets+1] = args.destName
 		if self:Me(args.destGUID) then
 			self:Message(155326, "Personal", "Alarm", CL.you:format(args.spellName))
-			self:Bar(155326, 4, 155506) -- Petrified
+			self:Bar(155326, 7, 155506) -- Petrified
+			-- Shattering Roar is 2s after Petrified, don't think it merits another bar
 			self:OpenProximity(155326, 8)
 			petrifyOnMe = true
 		end
 	end
-
-	function mod:PetrifiedApplied(args)
-		-- don't need proximity after getting stunned (everyone in mythic)
-		if not petrifyOnMe then
-			self:CloseProximity(155326)
-		end
-	end
-
-	function mod:PetrifiedRemoved(args)
-		-- and close it for everyone else when they get shattered
-		self:CloseProximity(155326)
-	end
 end
 
-function mod:CrumblingRoar(args)
-	self:Message(args.spellId, "Urgent")
-end
-
-function mod:DestructiveRampage(args)
-	self:Message(args.spellId, "Important")
+function mod:DestructiveRampage(args) -- Phase 2
+	self:Message(args.spellId, "Important", "Long")
 	self:Bar(args.spellId, 30)
 	rampaging = true
-	self:StopBar(155080) -- Inferno Slice
+	if sliceTimer then
+		self:CancelTimer(sliceTimer)
+	end
+	self:StopBar(CL.count:format(self:SpellName(155080), sliceCount)) -- Inferno Slice
 	self:StopBar(155326) -- Petrifying Slam
 	self:StopBar(155301) -- Overhead Smash
 end
 
-function mod:DestructiveRampageOver(args)
+function mod:DestructiveRampageOver(args) -- Phase 2 over
 	self:Message(args.spellId, "Positive", "Info", CL.over:format(args.spellName))
-	self:Bar(args.spellId, self:LFR() and 115 or 80)
+	self:CDBar(args.spellId, 113)
 	rampaging = nil
-	smashCount, slamCount = 1, 1
-	self:Bar(155080, 17) -- Inferno Slice
-	self:Bar(155326, 25.3) -- Petrifying Slam
-	self:Bar(155301, 46) -- Overhead Smash
+	smashCount, slamCount, sliceCount = 1, 1, 1
+	self:Bar(155080, self:Mythic() and 13 or 17, CL.count:format(self:SpellName(155080), sliceCount)) -- Inferno Slice
+	self:CDBar(155326, 25) -- Petrifying Slam
+	self:CDBar(155301, 31) -- Overhead Smash
 end
 
 do
 	local prev = 0
 	function mod:CaveInDamage(args)
 		local t = GetTime()
-		if self:Me(args.destGUID) and t-prev > 3 then
-			self:Message(args.spellId, "Personal", "Alarm", CL.you:format(args.spellName))
-			self:Flash(args.spellId)
+		if self:Me(args.destGUID) and t-prev > 2 then
 			prev = t
+			self:Message(args.spellId, "Personal", "Alarm", CL.underyou:format(args.spellName))
+			self:Flash(args.spellId)
 		end
 	end
 end

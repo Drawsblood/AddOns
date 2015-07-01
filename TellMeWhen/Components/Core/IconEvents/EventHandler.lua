@@ -339,6 +339,8 @@ end
 
 	
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
+	wipe(icon.EventHandlersSet)
+	
 	-- Setup all of an icon's events.
 
 	wipe(icon.EventHandlersSet)
@@ -406,7 +408,6 @@ end)
 -- Base class for EventHandlers that have sub-handlers (e.g. animations and announcements).
 TMW:NewClass("EventHandler_ColumnConfig", "EventHandler"){
 	OnNewInstance_ColumnConfig = function(self)
-		self.ConfigFrameData = {}
 	end,
 }
 
@@ -435,7 +436,8 @@ TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
 	-- God, this is a awful hack.
 	-- TODO: Make this not a hack.
 	if class.className == "IconType" then
-		class:RegisterIconEvent(1000, "WCSP", {
+		class:RegisterIconEvent(2, "WCSP", {
+			category = L["EVENT_CATEGORY_CONDITION"],
 			text = L["SOUND_EVENT_WHILECONDITION"],
 			desc = L["SOUND_EVENT_WHILECONDITION_DESC"],
 			settings = {
@@ -454,6 +456,7 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 
 	OnNewInstance_WhileConditions = function(self)
 		self.MapConditionObjectToEventSettings = {}
+		self.EventSettingsToConditionObject = {}
 		self.UpdatesQueued = {}
 
 		TMW:RegisterCallback("TMW_ICON_DISABLE", self)
@@ -468,6 +471,7 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 				if ic == icon then
 					ConditionObject:RequestAutoUpdates(eventSettings, false)
 					matches[eventSettings] = nil
+					self.EventSettingsToConditionObject[eventSettings] = nil
 				end
 			end
 		end
@@ -503,15 +507,19 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 				self.MapConditionObjectToEventSettings[ConditionObject] = matches
 			end
 			matches[eventSettings] = icon
+
+			-- Allow backwards lookups of this, too.
+			self.EventSettingsToConditionObject[eventSettings] = ConditionObject
+
 			
 			-- Listen for changes in condition state so that we can ask
 			-- the event handler to do what it needs to do.
 			TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", self)
 
 
-			-- Check condition state right now so the animation is always up-to-date with the state.
-			-- This might end up not doing anything since this code is called during TMW_ICON_SETUP_PRE
-			self:CheckState(ConditionObject)
+			-- DO NOT check the state right here, since animations might be missing required components. 
+			-- just let it happen during the queued update for TMW_ICON_SETUP_POST
+			-- self:CheckState(ConditionObject)
 
 			-- Queue an update during TMW_ICON_SETUP_POST, 
 			-- because animations might be missing required icon components when this is triggered.

@@ -604,6 +604,7 @@ function WeakAuras.ConstructOptions(prototype, data, startorder, subPrefix, subS
           name = arg.display,
           order = order,
           hidden = hidden,
+          desc = arg.desc,
           get = function() return trigger["use_"..realname]; end,
           set = function(info, v)
             trigger["use_"..realname] = v;
@@ -927,7 +928,7 @@ function WeakAuras.ConstructOptions(prototype, data, startorder, subPrefix, subS
             type = "toggle",
             name = L["Specific Unit"],
             order = order,
-            hidden = function() return (not trigger["use_specific_"..realname]) or (type(hidden) == "function" and hidden() or hidden) end,
+            hidden = function() return (not trigger["use_specific_"..realname]) or (type(hidden) == "function" and hidden(trigger)) or (type(hidden) ~= "function" and hidden) end,
             get = function() return true end,
             set = function(info, v)
               trigger["use_specific_"..realname] = nil;
@@ -940,7 +941,7 @@ function WeakAuras.ConstructOptions(prototype, data, startorder, subPrefix, subS
             name = L["Specific Unit"],
             desc = L["Can be a name or a UID (e.g., party1). Only works on friendly players in your group."],
             order = order,
-            hidden = function() return (not trigger["use_specific_"..realname]) or (type(hidden) == "function" and hidden() or hidden) end,
+            hidden = function() return (not trigger["use_specific_"..realname]) or (type(hidden) == "function" and hidden(trigger)) or (type(hidden) ~= "function" and hidden) end,
             get = function() return trigger[realname] end,
             set = function(info, v)
               trigger[realname] = v;
@@ -1234,6 +1235,11 @@ function WeakAuras.ShowOptions(msg)
   frame.buttonsScroll.frame:Show();
   WeakAuras.LockUpdateInfo();
   
+  if (frame.needsSort) then
+    WeakAuras.SortDisplayButtons();
+    frame.needsSort = nil;
+  end
+
   frame:Show();
   frame:PickOption("New");
   if not(firstLoad) then
@@ -2094,6 +2100,58 @@ function WeakAuras.AddOption(id, data)
           WeakAuras.Add(data);
         end,
         args = {
+          init_header = {
+            type = "header",
+            name = L["On Init"],
+            order = 0.005
+          },
+          init_do_custom = {
+            type = "toggle",
+            name = L["Custom"],
+            order = 0.011,
+            width = "double"
+          },
+          init_custom = {
+            type = "input",
+            width = "normal",
+            name = L["Custom Code"],
+            order = 0.013,
+            multiline = true,
+            hidden = function() return not data.actions.init.do_custom end
+          },
+          init_expand = {
+            type = "execute",
+            order = 0.014,
+            name = L["Expand Text Editor"],
+            func = function()
+              WeakAuras.TextEditor(data, {"actions", "init", "custom"}, true)
+            end,
+            hidden = function() return not data.actions.init.do_custom end
+          },
+          init_customError = {
+            type = "description",
+            name = function()
+              if not(data.actions.init.custom) then
+                return "";
+              end
+              local _, errorString = loadstring("return function() "..data.actions.init.custom.." end");
+              return errorString and "|cFFFF0000"..errorString or "";
+            end,
+            width = "double",
+            order = 0.015,
+            hidden = function()
+              if not(data.actions.init.do_custom and data.actions.init.custom) then
+                return true;
+              else
+                local loadedFunction, errorString = loadstring("return function() "..data.actions.init.custom.." end");
+                if(errorString and not loadedFunction) then
+                  return false;
+                else
+                  return true;
+                end
+              end
+            end
+          },
           start_header = {
             type = "header",
             name = L["On Show"],
@@ -6026,10 +6084,10 @@ function WeakAuras.CreateFrame()
     db.frame = db.frame or {};
     db.frame.xOffset = xOffset;
     db.frame.yOffset = yOffset;
-	if(not frame.minimized) then
-		db.frame.width = frame:GetWidth();
-		db.frame.height = frame:GetHeight();
-	end
+  if(not frame.minimized) then
+    db.frame.width = frame:GetWidth();
+    db.frame.height = frame:GetHeight();
+  end
     frame:ClearAllPoints();
     frame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", xOffset, yOffset);
   end
@@ -6852,6 +6910,7 @@ function WeakAuras.CreateFrame()
       importexportbox.editBox:SetScript("OnMouseUp", nil);
       importexportbox.editBox:SetScript("OnTextChanged", function()
         local str = importexportbox:GetText();
+        str = str:match( "^%s*(.-)%s*$" )
         importexportbox:SetLabel(""..#str);
         if(#str > 20) then
           WeakAuras.ImportString(str);
@@ -7966,7 +8025,9 @@ tXmdmY4fDE5]];
       if (not yOffset) then
         yOffset = displayButtons[id].frame.yOffset;
       end
-      self.buttonsScroll:SetScrollPos(yOffset, yOffset - 32);
+      if (yOffset) then
+        self.buttonsScroll:SetScrollPos(yOffset, yOffset - 32);
+      end
       if(data.controlledChildren) then
         for index, childId in pairs(data.controlledChildren) do
           displayButtons[childId]:PriorityShow(1);
@@ -8262,10 +8323,14 @@ function WeakAuras.SortDisplayButtons(filter, overrideReset)
   end
 end
 
-WeakAuras.loadFrame:SetScript("OnEvent", function()
-  WeakAuras.ScanForLoads();
-  if(frame and frame:IsVisible()) then
-    WeakAuras.SortDisplayButtons();
+WeakAuras.loadFrame:SetScript("OnEvent", function (self, event, arg1)
+  WeakAuras.ScanForLoads(self, event, arg1);
+  if(frame) then
+    if (frame:IsVisible()) then
+      WeakAuras.SortDisplayButtons();
+    else
+      frame.needsSort = true;
+    end
   end
 end);
 

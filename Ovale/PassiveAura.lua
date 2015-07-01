@@ -21,16 +21,12 @@ local exp = math.exp
 local log = math.log
 local pairs = pairs
 local API_GetTime = GetTime
-local API_UnitClass = UnitClass
-local API_UnitGUID = UnitGUID
 local INFINITY = math.huge
 local INVSLOT_TRINKET1 = INVSLOT_TRINKET1
 local INVSLOT_TRINKET2 = INVSLOT_TRINKET2
 
--- Player's class.
-local _, self_class = API_UnitClass("player")
 -- Player's GUID.
-local self_guid = nil
+local self_playerGUID = nil
 -- Trinket slot IDs list.
 local TRINKET_SLOTS = { INVSLOT_TRINKET1, INVSLOT_TRINKET2 }
 
@@ -140,7 +136,7 @@ function OvalePassiveAura:OnInitialize()
 end
 
 function OvalePassiveAura:OnEnable()
-	self_guid = API_UnitGUID("player")
+	self_playerGUID = Ovale.playerGUID
 	self:RegisterMessage("Ovale_EquipmentChanged")
 	self:RegisterMessage("Ovale_SpecializationChanged")
 end
@@ -173,9 +169,9 @@ function OvalePassiveAura:UpdateIncreasedCritEffectMetaGem()
 		local ending = INFINITY
 		local stacks = 1
 		local value = INCREASED_CRIT_EFFECT[spellId]
-		OvaleAura:GainedAuraOnGUID(self_guid, start, spellId, self_guid, "HELPFUL", nil, nil, stacks, nil, duration, ending, nil, name, value, nil, nil)
+		OvaleAura:GainedAuraOnGUID(self_playerGUID, start, spellId, self_playerGUID, "HELPFUL", nil, nil, stacks, nil, duration, ending, nil, name, value, nil, nil)
 	else
-		OvaleAura:LostAuraOnGUID(self_guid, now, spellId, self_guid)
+		OvaleAura:LostAuraOnGUID(self_playerGUID, now, spellId, self_playerGUID)
 	end
 end
 
@@ -215,15 +211,15 @@ function OvalePassiveAura:UpdateAmplification()
 		local stacks = 1
 		local value1 = critDamageIncrease
 		local value2 = statMultiplier
-		OvaleAura:GainedAuraOnGUID(self_guid, start, spellId, self_guid, "HELPFUL", nil, nil, stacks, nil, duration, ending, nil, name, value1, value2, nil)
+		OvaleAura:GainedAuraOnGUID(self_playerGUID, start, spellId, self_playerGUID, "HELPFUL", nil, nil, stacks, nil, duration, ending, nil, name, value1, value2, nil)
 	else
-		OvaleAura:LostAuraOnGUID(self_guid, now, spellId, self_guid)
+		OvaleAura:LostAuraOnGUID(self_playerGUID, now, spellId, self_playerGUID)
 	end
 end
 
 function OvalePassiveAura:UpdateReadiness()
 	local specialization = OvalePaperDoll:GetSpecialization()
-	local spellId = READINESS_ROLE[self_class] and READINESS_ROLE[self_class][specialization]
+	local spellId = READINESS_ROLE[Ovale.playerClass] and READINESS_ROLE[Ovale.playerClass][specialization]
 	if spellId then
 		local hasReadiness = false
 		local cdMultiplier
@@ -262,9 +258,9 @@ function OvalePassiveAura:UpdateReadiness()
 			local ending = INFINITY
 			local stacks = 1
 			local value = cdMultiplier
-			OvaleAura:GainedAuraOnGUID(self_guid, start, spellId, self_guid, "HELPFUL", nil, nil, stacks, nil, duration, ending, nil, name, value, nil, nil)
+			OvaleAura:GainedAuraOnGUID(self_playerGUID, start, spellId, self_playerGUID, "HELPFUL", nil, nil, stacks, nil, duration, ending, nil, name, value, nil, nil)
 		else
-			OvaleAura:LostAuraOnGUID(self_guid, now, spellId, self_guid)
+			OvaleAura:LostAuraOnGUID(self_playerGUID, now, spellId, self_playerGUID)
 		end
 	end
 end

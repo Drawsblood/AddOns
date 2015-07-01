@@ -9,7 +9,7 @@ local GetSpellInfo, GetSpellTexture, GetSpellDescription, EJ_GetSectionInfo = Ge
 local type, next, tonumber, gsub, lshift, band = type, next, tonumber, gsub, bit.lshift, bit.band
 
 -- Option bitflags
-local coreToggles = { "BAR", "MESSAGE", "ICON", "PULSE", "SOUND", "SAY", "PROXIMITY", "FLASH", "ME_ONLY", "EMPHASIZE", "TANK", "HEALER", "TANK_HEALER", "DISPEL", "ALTPOWER", "VOICE" }
+local coreToggles = { "BAR", "MESSAGE", "ICON", "PULSE", "SOUND", "SAY", "PROXIMITY", "FLASH", "ME_ONLY", "EMPHASIZE", "TANK", "HEALER", "TANK_HEALER", "DISPEL", "ALTPOWER", "VOICE", "COUNTDOWN"}
 for i, toggle in next, coreToggles do
 	C[toggle] = lshift(1, i - 1)
 	if L[toggle] then
@@ -180,8 +180,8 @@ function BigWigs:GetBossOptionDetails(module, bossOption)
 			if not spellName then error(("Invalid option %d in module %s."):format(option, module.name)) end
 			local desc = GetSpellDescription(option)
 			if not desc then BigWigs:Print(("No spell description was returned for id %d!"):format(option)) desc = "" end
-			local roleIcon, roleDesc = getRoleStrings(module, spellName)
-			return spellName, spellName..roleIcon, roleDesc..desc, icon
+			local roleIcon, roleDesc = getRoleStrings(module, option)
+			return option, spellName..roleIcon, roleDesc..desc, icon
 		else
 			-- This is an EncounterJournal ID
 			local title, description, _, abilityIcon, displayInfo = EJ_GetSectionInfo(-option)

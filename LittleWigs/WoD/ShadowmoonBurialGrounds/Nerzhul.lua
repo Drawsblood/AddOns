@@ -6,6 +6,7 @@
 local mod, CL = BigWigs:NewBoss("Ner'zhul", 969, 1160)
 if not mod then return end
 mod:RegisterEnableMob(76407)
+--BOSS_KILL#1682#Ner'zhul
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -32,7 +33,6 @@ function mod:GetOptions()
 		154442, -- Malevolence
 		154350, -- Omen of Death
 		-9680, -- Ritual of Bones
-		"bosskill",
 	}
 end
 

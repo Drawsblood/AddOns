@@ -51,7 +51,7 @@ if not L then return end
 	
 	
 --	restack
---	L["RESTACK"] = "stapeln und umordnen"
+	L["RESTACK"] = "stapeln und umordnen"
 	L["RESTACK_TEXT"] = "Stapel werden maximal aufgef\195\188llt und Gegenst\195\164nde in ihre Spezialtaschen umgeordnet"
 	L["RESTACK_FAIL_WAIT"] = "Die Gegenst\195\164nde werden bereits gestapelt und umgeordnet, bitte warten"
 	L["RESTACK_FAIL_ACCESS"] = "Du hast keine Rechte um die Gegenst\195\164nde in Fach %2$s der %1$s zu stapeln oder umzuordnen"
@@ -82,11 +82,13 @@ if not L then return end
 	
 --	bag names - used to name the empty slots in the status frame (and LDB)
 	L["STATUS_NAME_BAG"] = "Taschen"
+--	L["STATUS_NAME_COOKING"] = ""
 	L["STATUS_NAME_CRITTER"] = "Begleiter"
 	L["STATUS_NAME_ENCHANTING"] = "Verzaubern"
 	L["STATUS_NAME_ENGINEERING"] = "Ingenieur"
 	L["STATUS_NAME_GEAR"] = "Ausr\195\188stung"
 	L["STATUS_NAME_GEM"] = "Edelsteine"
+--	L["STATUS_NAME_HEIRLOOM"] = ""
 	L["STATUS_NAME_HERB"] = "Kr\195\164uter"
 	L["STATUS_NAME_INSCRIPTION"] = "Inschriftenkunde"
 	L["STATUS_NAME_KEY"] = "Schl\195\188ssel"
@@ -94,9 +96,9 @@ if not L then return end
 	L["STATUS_NAME_MAIL"] = "Post"
 	L["STATUS_NAME_MINING"] = "Bergbau"
 	L["STATUS_NAME_MOUNT"] = "Reittier"
-	L["STATUS_NAME_TOKEN"] = "Abzeichen"
+--	L["STATUS_NAME_REAGENTBANK"] = ""
 --	L["STATUS_NAME_TACKLE"] = ""
---	L["STATUS_NAME_COOKING"] = ""
+	L["STATUS_NAME_TOKEN"] = "Abzeichen"
 --	L["STATUS_NAME_TOY"] = ""
 	
 	
@@ -168,6 +170,7 @@ if not L then return end
 	L["MENU_BAR_CATEGORY_HIDDEN_TEXT"] = "Versteckt eine Kategorie.\n\nGegenst\195\164nde, die sich in einer versteckten Kategorie befinden, werden in der normalen Ansicht nicht angezeigt."
 --	L["MENU_BAR_CATEGORY_MOVE_START_TEXT"] = ""
 --	L["MENU_BAR_CATEGORY_MOVE_COMPLETE_TEXT"] = ""
+--	L["MENU_BAR_BAG_ASSIGN_TEXT"] = ""
 	L["MENU_BAR_OPTIONS"] = "Leisteneinstellungen"
 	L["MENU_BAR_CLEAR_TEXT"] = "Entfernt alle dieser Leiste zugeordneten Kategorien, mit Ausnahme der Standardkategorie."
 	L["MENU_BAR_INSERT_TEXT"] = "F\195\188gt an dieser Stelle eine Leiste ein, welche alle Kategorien um eins nach oben verschiebt."
@@ -205,6 +208,8 @@ if not L then return end
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_LOW"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_MEDIUM"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_HIGH"] = ""
+	
+--	L["CONFIG_SYSTEM_RESTACK_TEXT"] = ""
 	
 	L["CONFIG_SYSTEM_TOOLTIP"] = "Hinweistexte"
 	L["CONFIG_SYSTEM_TOOLTIP_ENABLE_TEXT"] = "Bestimmt, ob Hinweistexte angezeigt werden."
@@ -366,6 +371,8 @@ if not L then return end
 	L["CONFIG_SETTINGS_ITEMS_TINT_USABLE_TEXT"] = "Benutzbare Gegenst\195\164nde rot einf\195\164rben"
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS_TEXT"] = ""
 	
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = ""
@@ -384,6 +391,7 @@ if not L then return end
 --	L["CONFIG_SETTINGS_ITEMS_NEW"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_NEW_ENABLED_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_NEW_CUTOFF_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_NEW_RESET_TEXT"] = ""
 	
 	L["CONFIG_SETTINGS_ITEMS_AGE"] = "Item-Alter"
 	L["CONFIG_SETTINGS_ITEMS_AGE_SHOW_TEXT"] = "Ein/Aus der Item-Alter-Funktion"
@@ -407,6 +415,8 @@ if not L then return end
 --	L["CONFIG_SETTINGS_EMPTY_STATUS"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION_TEXT"] = ""
 	
 	
 -- sorting
@@ -414,6 +424,8 @@ if not L then return end
 	
 	L["CONFIG_SORTING_SORT"] = "Sortierung"
 	
+--	L["CONFIG_SORTING_METHOD"] = ""
+--	L["CONFIG_SORTING_METHODS"] = ""
 	L["CONFIG_SORTING_METHOD_TEXT"] = "Bestimme, wie du deine Gegenst\195\164nde sortieren willst."
 	L["CONFIG_SORTING_METHOD_BAGSLOT"] = "Tasche / Platz"
 	L["CONFIG_SORTING_METHOD_BAGSLOT_TEXT"] = "Sortiert das Inventar anhand der Taschen und Platznummern."
@@ -421,6 +433,7 @@ if not L then return end
 	L["CONFIG_SORTING_METHOD_USER_TEXT"] = "Du bestimmst, wie deine Taschen sortiert werden sollen."
 	
 --	L["CONFIG_SORTING_BAG"] = ""
+--	L["CONFIG_SORTING_BAGS"] = ""
 --	L["CONFIG_SORTING_BAG_TEXT"] = ""
 	
 --	L["CONFIG_SORTING_INCLUDE_NAME"] = ""
@@ -626,6 +639,8 @@ if not L then return end
 --	L["NO_DATA_AVAILABLE"] = ""
 --	L["TOOLTIP_PURCHASE_BANK_BAG_SLOT"] = ""
 --	L["TOOLTIP_PURCHASE_BANK_TAB_REAGENT"] = ""
+--	L["LABEL"] = ""
+--	L["ABORTED"] = ""
 	
 	
 -- libdatabroker

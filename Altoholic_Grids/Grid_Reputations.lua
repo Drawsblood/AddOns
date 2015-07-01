@@ -1,13 +1,8 @@
 local addonName = "Altoholic"
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
-
-local WHITE		= "|cFFFFFFFF"
-local GREEN		= "|cFF00FF00"
-local TEAL		= "|cFF00FF9A"
-local YELLOW	= "|cFFFFFF00"
-local DARK_RED = "|cFFF00000"
 
 -- *** Reputations ***
 local CAT_GUILD = 7
@@ -251,6 +246,7 @@ local OPTION_FACTION = "UI.Tabs.Grids.Reputations.CurrentFactionGroup"
 
 local currentFaction
 local currentDDMText
+local dropDownFrame
 
 local function BuildView()
 	view = view or {}
@@ -310,10 +306,8 @@ local function AddGuildsToFactionsTable(realm, account)
 	end
 end
 
-local DDM_AddCloseMenu = addon.Helpers.DDM_AddCloseMenu
-
 local function OnFactionChange(self, xpackIndex, factionGroupIndex)
-	CloseDropDownMenus()
+	dropDownFrame:Close()
 
 	addon:SetOption(OPTION_XPACK, xpackIndex)
 	addon:SetOption(OPTION_FACTION, factionGroupIndex)
@@ -329,7 +323,7 @@ end
 local lastRealm, lastAccount
 
 local function OnGuildSelected(self)
-	CloseDropDownMenus()
+	dropDownFrame:Close()
 	
 	addon:SetOption(OPTION_XPACK, CAT_GUILD)
 	addon:SetOption(OPTION_FACTION, 1)
@@ -350,6 +344,7 @@ local function OnGuildSelected(self)
 end
 
 local function OnAllInOneSelected(self)
+	dropDownFrame:Close()
 	addon:SetOption(OPTION_XPACK, CAT_ALLINONE)
 	addon:SetOption(OPTION_FACTION, 1)
 	
@@ -357,13 +352,12 @@ local function OnAllInOneSelected(self)
 	addon.Tabs.Grids:SetViewDDMText(currentDDMText)
 	isViewValid = nil
 	addon.Tabs.Grids:Update()
-	
 end
 
-local function DropDown_Initialize(self, level)
+local function DropDown_Initialize(frame, level)
 	if not level then return end
 
-	local info = UIDropDownMenu_CreateInfo()
+	local info = frame:CreateInfo()
 	
 	local currentXPack = addon:GetOption(OPTION_XPACK)
 	local currentFactionGroup = addon:GetOption(OPTION_FACTION)
@@ -374,7 +368,7 @@ local function DropDown_Initialize(self, level)
 			info.hasArrow = 1
 			info.checked = (currentXPack == xpackIndex)
 			info.value = xpackIndex
-			UIDropDownMenu_AddButton(info, level)
+			frame:AddButtonInfo(info, level)
 		end
 		
 		-- Guild factions
@@ -382,24 +376,26 @@ local function DropDown_Initialize(self, level)
 		info.hasArrow = nil
 		info.func = OnGuildSelected
 		info.checked = (currentXPack == CAT_GUILD)
-		UIDropDownMenu_AddButton(info, level)
+		frame:AddButtonInfo(info, level)
 
 		info.text = L["All-in-one"]
 		info.hasArrow = nil
 		info.func = OnAllInOneSelected
 		info.checked = (currentXPack == CAT_ALLINONE)
-		UIDropDownMenu_AddButton(info, level)
+		frame:AddButtonInfo(info, level)
 		
-		DDM_AddCloseMenu()
+		frame:AddCloseMenu()
 	
 	elseif level == 2 then
-		for factionGroupIndex, factionGroup in ipairs(Factions[UIDROPDOWNMENU_MENU_VALUE]) do
+		local menuValue = frame:GetCurrentOpenMenuValue()
+		
+		for factionGroupIndex, factionGroup in ipairs(Factions[menuValue]) do
 			info.text = factionGroup.name
 			info.func = OnFactionChange
-			info.checked = ((currentXPack == UIDROPDOWNMENU_MENU_VALUE) and (currentFactionGroup == factionGroupIndex))
-			info.arg1 = UIDROPDOWNMENU_MENU_VALUE
+			info.checked = ((currentXPack == menuValue) and (currentFactionGroup == factionGroupIndex))
+			info.arg1 = menuValue
 			info.arg2 = factionGroupIndex
-			UIDropDownMenu_AddButton(info, level)
+			frame:AddButtonInfo(info, level)
 		end
 	end
 end
@@ -446,7 +442,7 @@ local callbacks = {
 	RowSetup = function(self, rowFrame, dataRowID)
 			currentFaction = view[dataRowID]
 
-			rowFrame.Name.Text:SetText(WHITE .. currentFaction.name)
+			rowFrame.Name.Text:SetText(colors.white .. currentFaction.name)
 			rowFrame.Name.Text:SetJustifyH("LEFT")
 		end,
 	RowOnEnter = function()	end,
@@ -483,9 +479,9 @@ local callbacks = {
 				local vc = VertexColors[status]
 				button.Background:SetVertexColor(vc.r, vc.g, vc.b);
 				
-				local color = WHITE
+				local color = colors.white
 				if status == FACTION_STANDING_LABEL1 or status == FACTION_STANDING_LABEL2 then
-					color = DARK_RED
+					color = colors.darkred
 				end
 
 				button.key = character
@@ -509,7 +505,7 @@ local callbacks = {
 			
 			AltoTooltip:SetOwner(frame, "ANCHOR_LEFT");
 			AltoTooltip:ClearLines();
-			AltoTooltip:AddLine(DataStore:GetColoredCharacterName(character) .. WHITE .. " @ " ..	TEAL .. faction,1,1,1);
+			AltoTooltip:AddLine(DataStore:GetColoredCharacterName(character) .. colors.white .. " @ " ..	colors.teal .. faction,1,1,1);
 
 			rate = format("%d", floor(rate)) .. "%"
 			AltoTooltip:AddLine(format("%s: %d/%d (%s)", status, currentLevel, maxLevel, rate),1,1,1 )
@@ -519,7 +515,7 @@ local callbacks = {
 			if suggestion then
 				AltoTooltip:AddLine(" ",1,1,1)
 				AltoTooltip:AddLine("Suggestion: ",1,1,1)
-				AltoTooltip:AddLine(TEAL .. suggestion,1,1,1)
+				AltoTooltip:AddLine(colors.teal .. suggestion,1,1,1)
 			end
 			
 			AltoTooltip:AddLine(" ",1,1,1)
@@ -534,7 +530,7 @@ local callbacks = {
 			AltoTooltip:AddLine(format("%s = %s", ICON_READY, FACTION_STANDING_LABEL8), 1, 1, 1)
 			
 			AltoTooltip:AddLine(" ",1,1,1)
-			AltoTooltip:AddLine(GREEN .. L["Shift+Left click to link"])
+			AltoTooltip:AddLine(colors.green .. L["Shift+Left click to link"])
 			AltoTooltip:Show()
 			
 		end,
@@ -556,7 +552,8 @@ local callbacks = {
 	OnLeave = function(self)
 			AltoTooltip:Hide() 
 		end,
-	InitViewDDM = function(frame, title) 
+	InitViewDDM = function(frame, title)
+			dropDownFrame = frame
 			frame:Show()
 			title:Show()
 
@@ -574,10 +571,10 @@ local callbacks = {
 				AddGuildsToFactionsTable(realm, account)
 			end
 			
-			UIDropDownMenu_SetWidth(frame, 100) 
-			UIDropDownMenu_SetButtonWidth(frame, 20)
-			UIDropDownMenu_SetText(frame, currentDDMText)
-			addon:DDM_Initialize(frame, DropDown_Initialize)
+			frame:SetMenuWidth(100) 
+			frame:SetButtonWidth(20)
+			frame:SetText(currentDDMText)
+			frame:Initialize(DropDown_Initialize, "MENU_NO_BORDERS")
 		end,
 }
 

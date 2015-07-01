@@ -228,7 +228,7 @@
 				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
 			</Button>
 			
-			<ScrollFrame name="$parentScrollFrame" inherits="FauxScrollFrameTemplate">
+			<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="AltoUIPanelScrollFrameTemplate">
 				<Size x="250" y="306" />
 				<Anchors>
 					<Anchor point="TOPLEFT" x="3" y="0" />
@@ -253,7 +253,7 @@
 				</Layers>
 				<Scripts>
 					<OnVerticalScroll>
-						FauxScrollFrame_OnVerticalScroll(self, offset, 18, Altoholic.Calendar.UpdateEvents)
+						self:OnVerticalScroll(offset, 18, Altoholic.Calendar.UpdateEvents)
 					</OnVerticalScroll>
 				</Scripts>
 			</ScrollFrame>
@@ -328,7 +328,6 @@
 					<Anchor point="TOPLEFT" relativeTo="$parentEntry13" relativePoint="BOTTOMLEFT" />
 				</Anchors>
 			</Button>
-
 		</Frames>
 		<Scripts>
 			<OnLoad>

@@ -138,6 +138,29 @@ L["Descending"] = "Descending"
 -- L["Eclipse Power"] = ""
 -- L["Eclipse Type"] = ""
 L["Emote"] = "Emote"
+-- L["Encounter ID"] = ""
+L["EncounterID List"] = [=[IDs los jefes actuales:
+
+Ogrópolis:
+Kargath: 1721
+El Carnicero: 1706
+Tectus: 1722
+Frondaespora: 1720
+Gemelos ogrones: 1719
+Koragh: 1723
+Mar'gok: 1705
+
+Fundición Roca Negra:
+Gruul: 1691
+Tragamenas: 1696
+Darmac: 1694
+Ka'graz: 1689
+Hans'gar y Franzok: 1693
+Thogar: 1692
+El Horno de Fundición: 1690
+Kromog: 1713
+Las Doncellas de Hierro: 1695
+Puño Negro: 1704]=] -- Needs review
 -- L["Energize"] = ""
 -- L["Energy"] = ""
 -- L["Enrage"] = ""

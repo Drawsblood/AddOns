@@ -76,7 +76,8 @@ function mod:IsTalentAvailable(guid, talentIndex)
 	local available = false
 
 	for key, spellInfo in pairs(info.talents) do
-		if (spellInfo.idx == talentIndex) then
+		-- print(spellInfo.talent_id, talentIndex)
+		if ((spellInfo.tier * spellInfo.column) == talentIndex) then
 			available = true
 			break
 		end

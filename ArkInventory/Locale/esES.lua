@@ -82,11 +82,13 @@ if not L then return end
 	
 --	bag names - used to name the empty slots in the status frame
 	L["STATUS_NAME_BAG"] = "Bolsa"
+--	L["STATUS_NAME_COOKING"] = ""
 --	L["STATUS_NAME_CRITTER"] = ""
 	L["STATUS_NAME_ENCHANTING"] = "Encant"
 	L["STATUS_NAME_ENGINEERING"] = "Ing"
 --	L["STATUS_NAME_GEAR"] = ""
 --	L["STATUS_NAME_GEM"] = ""
+--	L["STATUS_NAME_HEIRLOOM"] = ""
 	L["STATUS_NAME_HERB"] = "Hierba"
 --	L["STATUS_NAME_INSCRIPTION"] = ""
 	L["STATUS_NAME_KEY"] = "Llave"
@@ -94,9 +96,9 @@ if not L then return end
 --	L["STATUS_NAME_MAIL"] = ""
 --	L["STATUS_NAME_MINING"] = ""
 --	L["STATUS_NAME_MOUNT"] = ""
---	L["STATUS_NAME_TOKEN"] = ""
+--	L["STATUS_NAME_REAGENTBANK"] = ""
 --	L["STATUS_NAME_TACKLE"] = ""	
---	L["STATUS_NAME_COOKING"] = ""
+--	L["STATUS_NAME_TOKEN"] = ""
 --	L["STATUS_NAME_TOY"] = ""
 	
 	
@@ -168,6 +170,7 @@ if not L then return end
 --	L["MENU_BAR_CATEGORY_HIDDEN_TEXT"] = ""
 --	L["MENU_BAR_CATEGORY_MOVE_START_TEXT"] = ""
 --	L["MENU_BAR_CATEGORY_MOVE_COMPLETE_TEXT"] = ""
+--	L["MENU_BAR_BAG_ASSIGN_TEXT"] = ""
 --	L["MENU_BAR_OPTIONS"] = ""
 --	L["MENU_BAR_CLEAR_TEXT"] = ""
 --	L["MENU_BAR_INSERT_TEXT"] = ""
@@ -205,6 +208,8 @@ if not L then return end
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_LOW"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_MEDIUM"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_HIGH"] = ""
+	
+--	L["CONFIG_SYSTEM_RESTACK_TEXT"] = ""
 	
 --	L["CONFIG_SYSTEM_TOOLTIP"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_ENABLE_TEXT"] = ""
@@ -366,6 +371,8 @@ if not L then return end
 --	L["CONFIG_SETTINGS_ITEMS_TINT_USABLE_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS_TEXT"] = ""
 	
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = ""
@@ -408,6 +415,8 @@ if not L then return end
 --	L["CONFIG_SETTINGS_EMPTY_STATUS"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION_TEXT"] = ""
 	
 	
 -- sorting
@@ -415,6 +424,8 @@ if not L then return end
 	
 --	L["CONFIG_SORTING_SORT"] = ""
 	
+--	L["CONFIG_SORTING_METHOD"] = ""
+--	L["CONFIG_SORTING_METHODS"] = ""
 --	L["CONFIG_SORTING_METHOD_TEXT"] = ""
 --	L["CONFIG_SORTING_METHOD_BAGSLOT"] = ""
 --	L["CONFIG_SORTING_METHOD_BAGSLOT_TEXT"] = ""
@@ -422,6 +433,7 @@ if not L then return end
 --	L["CONFIG_SORTING_METHOD_USER_TEXT"] = ""
 	
 --	L["CONFIG_SORTING_BAG"] = ""
+--	L["CONFIG_SORTING_BAGS"] = ""
 --	L["CONFIG_SORTING_BAG_TEXT"] = ""
 	
 --	L["CONFIG_SORTING_INCLUDE_NAME"] = ""
@@ -627,6 +639,8 @@ if not L then return end
 --	L["NO_DATA_AVAILABLE"] = ""
 --	L["TOOLTIP_PURCHASE_BANK_BAG_SLOT"] = ""
 --	L["TOOLTIP_PURCHASE_BANK_TAB_REAGENT"] = ""
+--	L["LABEL"] = ""
+--	L["ABORTED"] = ""
 	
 	
 -- libdatabroker

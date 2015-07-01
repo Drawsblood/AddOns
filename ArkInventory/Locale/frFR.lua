@@ -51,7 +51,7 @@ if not L then return end
 	
 	
 --	restack
---	L["RESTACK"] = "Empiler les objets"
+	L["RESTACK"] = "Empiler les objets"
 	L["RESTACK_TEXT"] = "Empiler les objets pouvant l'être et essai de remplir les emplacements vide des sacs spéciaux"
 	L["RESTACK_FAIL_WAIT"] = "Une opération d'empilage est en cours, veuillez attendre qu'elle se termine"
 	L["RESTACK_FAIL_ACCESS"] = "Vous n'avez pas l'autorisation pour empiler le casier %2$s de la %1$s"
@@ -82,11 +82,13 @@ if not L then return end
 	
 --	bag names - used to name the empty slots in the status frame
 	L["STATUS_NAME_BAG"] = "Sac"
+--	L["STATUS_NAME_COOKING"] = ""
 	L["STATUS_NAME_CRITTER"] = "Comp"
 	L["STATUS_NAME_ENCHANTING"] = "Ench"
 	L["STATUS_NAME_ENGINEERING"] = "Ing"
 	L["STATUS_NAME_GEAR"] = "Equip"
 	L["STATUS_NAME_GEM"] = "Gemme"
+--	L["STATUS_NAME_HEIRLOOM"] = ""
 	L["STATUS_NAME_HERB"] = "Herbe"
 	L["STATUS_NAME_INSCRIPTION"] = "Calli"
 	L["STATUS_NAME_KEY"] = "Clé"
@@ -94,9 +96,9 @@ if not L then return end
 	L["STATUS_NAME_MAIL"] = "Courrier"
 	L["STATUS_NAME_MINING"] = "Minerai"
 	L["STATUS_NAME_MOUNT"] = "Monture"
-	L["STATUS_NAME_TOKEN"] = "Insigne"
+--	L["STATUS_NAME_REAGENTBANK"] = ""
 --	L["STATUS_NAME_TACKLE"] = ""
---	L["STATUS_NAME_COOKING"] = ""
+	L["STATUS_NAME_TOKEN"] = "Insigne"
 --	L["STATUS_NAME_TOY"] = ""
 	
 	
@@ -168,6 +170,7 @@ if not L then return end
 	L["MENU_BAR_CATEGORY_HIDDEN_TEXT"] = "Cliquer pour changer le status cacher de la catégorie.\n\nLes objets dans la catégorie cachée n'apparaitront pas en mode normal"
 --	L["MENU_BAR_CATEGORY_MOVE_START_TEXT"] = ""
 --	L["MENU_BAR_CATEGORY_MOVE_COMPLETE_TEXT"] = ""
+--	L["MENU_BAR_BAG_ASSIGN_TEXT"] = ""
 	L["MENU_BAR_OPTIONS"] = "Options des groupes"
 	L["MENU_BAR_CLEAR_TEXT"] = "Supprimer toutes les catégories assignées actuellement à ce groupe sauf la catégorie par défaut"
 	L["MENU_BAR_INSERT_TEXT"] = "Insérer un groupe vide ici en déplacant toutes les catégories d'un groupe vers le haut"
@@ -205,6 +208,8 @@ if not L then return end
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_LOW"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_MEDIUM"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_HIGH"] = ""
+	
+--	L["CONFIG_SYSTEM_RESTACK_TEXT"] = ""
 	
 	L["CONFIG_SYSTEM_TOOLTIP"] = "Bulle d'information"
 	L["CONFIG_SYSTEM_TOOLTIP_ENABLE_TEXT"] = "Montrer les informations supplémentaires dans la bulle d'information"
@@ -366,6 +371,8 @@ if not L then return end
 	L["CONFIG_SETTINGS_ITEMS_TINT_USABLE_TEXT"] = "Teinter les objets inutilisables en rouge"
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS_TEXT"] = ""
 	
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = ""
@@ -408,6 +415,8 @@ if not L then return end
 --	L["CONFIG_SETTINGS_EMPTY_STATUS"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION_TEXT"] = ""
 	
 	
 -- sorting
@@ -415,13 +424,16 @@ if not L then return end
 	
 	L["CONFIG_SORTING_SORT"] = "Tri"
 	
+--	L["CONFIG_SORTING_METHOD"] = ""
+--	L["CONFIG_SORTING_METHODS"] = ""
+	L["CONFIG_SORTING_METHOD_TEXT"] = "Choisir comment vous voulez trier vos objets"
 	L["CONFIG_SORTING_METHOD_BAGSLOT"] = "Sac / Emplacement"
 	L["CONFIG_SORTING_METHOD_BAGSLOT_TEXT"] = "Trier vos objets par sac et numéro d'emplacement"
 	L["CONFIG_SORTING_METHOD_USER"] = "Défini par l'utilisateur"
 	L["CONFIG_SORTING_METHOD_USER_TEXT"] = "Trier vos objets selon l'odre que vous avez défini"
-	L["CONFIG_SORTING_METHOD_TEXT"] = "Choisir comment vous voulez trier vos objets"
 	
 --	L["CONFIG_SORTING_BAG"] = ""
+--	L["CONFIG_SORTING_BAGS"] = ""
 --	L["CONFIG_SORTING_BAG_TEXT"] = ""
 	
 	L["CONFIG_SORTING_INCLUDE_NAME"] = "Nom d'objet"
@@ -627,6 +639,8 @@ if not L then return end
 --	L["NO_DATA_AVAILABLE"] = ""
 --	L["TOOLTIP_PURCHASE_BANK_BAG_SLOT"] = ""
 --	L["TOOLTIP_PURCHASE_BANK_TAB_REAGENT"] = ""
+--	L["LABEL"] = ""
+--	L["ABORTED"] = ""
 	
 	
 -- libdatabroker

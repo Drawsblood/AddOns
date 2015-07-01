@@ -210,17 +210,9 @@
 					<KeyValue key="option" value="UI.Tabs.Search.ItemInfoAutoQuery" />
 				</KeyValues>
 			</CheckButton>
-			<CheckButton parentKey="SortDescending" inherits="AltoToggleableOptionTemplate">
-				<Anchors> 
-					<Anchor point="TOPLEFT" relativeKey="$parent.ItemInfoAutoQuery" relativePoint="BOTTOMLEFT" x="0" y="-40" />
-				</Anchors>
-				<KeyValues>
-					<KeyValue key="option" value="UI.Tabs.Search.SortDescending" />
-				</KeyValues>
-			</CheckButton>
 			<CheckButton parentKey="IncludeNoMinLevel" inherits="AltoToggleableOptionTemplate">
 				<Anchors> 
-					<Anchor point="TOP" relativeKey="$parent.SortDescending" relativePoint="BOTTOM" x="0" y="-10" />
+					<Anchor point="TOPLEFT" relativeKey="$parent.ItemInfoAutoQuery" relativePoint="BOTTOMLEFT" x="0" y="-40" />
 				</Anchors>
 				<KeyValues>
 					<KeyValue key="option" value="UI.Tabs.Search.IncludeNoMinLevel" />
@@ -328,9 +320,17 @@
 					<KeyValue key="option" value="UI.Tooltip.ShowItemCount" />
 				</KeyValues>
 			</CheckButton>
-			<CheckButton parentKey="ShowTotalItemCount" inherits="AltoToggleableOptionTemplate">
+			<CheckButton parentKey="ShowSimpleCount" inherits="AltoToggleableOptionTemplate">
 				<Anchors> 
 					<Anchor point="TOPLEFT" relativeKey="$parent.ShowItemCount" relativePoint="BOTTOMLEFT" x="0" y="-10" />
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="option" value="UI.Tooltip.ShowSimpleCount" />
+				</KeyValues>
+			</CheckButton>
+			<CheckButton parentKey="ShowTotalItemCount" inherits="AltoToggleableOptionTemplate">
+				<Anchors> 
+					<Anchor point="TOPLEFT" relativeKey="$parent.ShowSimpleCount" relativePoint="BOTTOMLEFT" x="0" y="-10" />
 				</Anchors>
 				<KeyValues>
 					<KeyValue key="option" value="UI.Tooltip.ShowTotalItemCount" />
@@ -344,17 +344,9 @@
 					<KeyValue key="option" value="UI.Tooltip.ShowKnownRecipes" />
 				</KeyValues>
 			</CheckButton>
-			<CheckButton parentKey="ShowKnownPets" inherits="AltoToggleableOptionTemplate">
-				<Anchors> 
-					<Anchor point="TOPLEFT" relativeKey="$parent.ShowKnownRecipes" relativePoint="BOTTOMLEFT" x="0" y="-10" />
-				</Anchors>      
-				<KeyValues>
-					<KeyValue key="option" value="UI.Tooltip.ShowKnownPets" />
-				</KeyValues>
-			</CheckButton>
 			<CheckButton parentKey="ShowItemID" inherits="AltoToggleableOptionTemplate">
 				<Anchors> 
-					<Anchor point="TOPLEFT" relativeKey="$parent.ShowKnownPets" relativePoint="BOTTOMLEFT" x="0" y="-10" />
+					<Anchor point="TOPLEFT" relativeKey="$parent.ShowKnownRecipes" relativePoint="BOTTOMLEFT" x="0" y="-10" />
 				</Anchors>
 				<KeyValues>
 					<KeyValue key="option" value="UI.Tooltip.ShowItemID" />

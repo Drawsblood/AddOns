@@ -13,7 +13,7 @@ L[">="] = ">= (Größergleich)"
 L["!="] = "!= (Ungleich)"
 L["10 Man Raid"] = "10er-Schlachtzug"
 L["25 Man Raid"] = "25er-Schlachtzug"
--- L["40 Man Raid"] = ""
+L["40 Man Raid"] = "40er-Schlachtzug" -- Needs review
 L["5 Man Dungeon"] = "5er Gruppe"
 L["Absorb"] = "Absorbieren"
 L["Absorbed"] = "Absorbiert"
@@ -115,7 +115,7 @@ L["Death Knight"] = "Todesritter"
 L["Death Knight Rune"] = "Todesritter Runen"
 L["Death Rune"] = "Todes Rune"
 L["Debuff"] = "Debuff"
--- L["Defensive"] = ""
+L["Defensive"] = "Defensiv" -- Needs review
 L["Deflect"] = "Umlenken"
 L["Demonic Fury"] = "Dämonischer Furor"
 L["Descending"] = "Absteigend"
@@ -138,6 +138,44 @@ L["Eclipse Direction"] = "Finsternisausrichtung"
 L["Eclipse Power"] = "Finsternisenergie"
 L["Eclipse Type"] = "Finsternistyp"
 L["Emote"] = "Emote"
+L["Encounter ID"] = "Boss ID" -- Needs review
+L["EncounterID List"] = [=[Aktuelle Raid Tier IDs:
+
+Hellfire Citadel:
+  Höllenfeuerangriff: 1778
+  Eiserner Häscher: 1785
+  Kormrok: 1787
+  Hoher Rat des Höllenfeuers: 1798
+  Kilrogg Totauge: 1786
+  Blutschatten: 1783
+  Schattenfürst Iskar: 1788
+  Xhul'horac: 1800
+  Teufelslord Zakuun: 1777
+  Socrethar der Ewige: 1794
+  Tyrannin Velhari: 1784
+  Mannoroth: 1795
+  Archimonde: 1799
+
+Hochfels:
+ Kargath: 1721
+ Der Schlächter: 1706
+ Tectus: 1722
+ Farnspore: 1720
+ Ogronzwillinge: 1719
+ Ko'ragh: 1723
+ Kaiser Mar'gok: 1705
+
+Schwarzfelsgießerei:
+ Gruul: 1691
+ Erzfresser: 1696
+ Abrichter Darmac: 1694
+ Flammenbändigerin Ka'graz: 1689
+ Hans'gar und Franzok: 1693
+ Zugführer Thogar: 1692
+ Der Schmelzofen: 1690
+ Kromog: 1713
+ Die Eisernen Jungfern: 1695
+ Schwarzfaust: 1704]=]
 L["Energize"] = "Aufladen (ENERGIZE)"
 L["Energy"] = "Energie"
 L["Enrage"] = "Wut"
@@ -152,18 +190,18 @@ L["Extra Attacks"] = "Extra Angriffe (EXTRA_ATTACKS)"
 L["Extra Spell Name"] = "Extra Zaubername"
 L["Fade In"] = "Aufblenden"
 L["Fade Out"] = "Abblenden"
--- L["Fail Alert"] = ""
+L["Fail Alert"] = "Warnung für Fehlschlag" -- Needs review
 L["Falling"] = "Fallen (FALLING)"
 L["Fatigue"] = "Erschöpfung (FATIGUE)"
 L["Fire"] = "Feuer"
 L["First Tree"] = "Erster Talentbaum"
 L["Flash"] = "Aufblitzen"
--- L["Flex Raid"] = ""
+L["Flex Raid"] = "Flexibler Schlachtzug" -- Needs review
 L["Flip"] = "Umdrehen"
 L["Focus"] = "Fokus"
 L["Form"] = "Form"
 L["Friendly"] = "Freundlich"
--- L["Friendly Fire"] = ""
+L["Friendly Fire"] = "Eigenbeschuss" -- Needs review
 L["From"] = "Von"
 L["Frost Rune #1"] = "Frost Rune #1"
 L["Frost Rune #2"] = "Frost Rune #2"
@@ -176,7 +214,7 @@ L["Gradient Pulse"] = "Gradient Pulse"
 L["Group"] = "Gruppe"
 L["Group %s"] = "Gruppe %s"
 L["Grow"] = "Wachsen"
--- L["GTFO Alert"] = ""
+L["GTFO Alert"] = "GTFO Warnung" -- Needs review
 L["Guild"] = "Gilde"
 L["Happiness"] = "Zufriedenheit"
 L["HasPet"] = "Begleiter aktiv"
@@ -186,7 +224,7 @@ L["Health"] = "Lebenspunkte"
 L["Health (%)"] = "Lebenspunkte (%)"
 L["Heroic"] = "Heroisch"
 L["Hide"] = "Verbergen"
--- L["High Damage"] = ""
+L["High Damage"] = "Hoher Schaden" -- Needs review
 L["Higher Than Tank"] = "Höher als der Tank"
 L["Holy Power"] = "Heilige Kraft"
 L["Hostile"] = "Feindlich"
@@ -218,7 +256,7 @@ L["Leech"] = "Saugen (LEECH)"
 L["Left"] = "Links"
 L["Left to Right"] = "Links -> Rechts"
 L["Level"] = "Level"
--- L["Low Damage"] = ""
+L["Low Damage"] = "Niedriger Schaden" -- Needs review
 L["Lower Than Tank"] = "Niedriger als der Tank"
 L["Lunar"] = "Lunar"
 L["Lunar Power"] = "Lunarenergie"
@@ -265,7 +303,7 @@ L["Paladin"] = "Paladin"
 L["Parry"] = "Parieren"
 L["Party"] = "Gruppe"
 L["Party Kill"] = "Gruppen Tod (PARTY_KILL)"
--- L["Passive"] = ""
+L["Passive"] = "Passiv" -- Needs review
 L["Paused"] = "Pausiert"
 L["Periodic Spell"] = "Periodischer Zauber (PERIODIC_SPELL)"
 L["Pet"] = "Begleiter"

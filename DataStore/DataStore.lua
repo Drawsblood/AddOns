@@ -35,16 +35,12 @@ local currentCharacterKey
 local currentGuildKey
 
 -- Message types
-local MSG_ANNOUNCELOGIN				= 1	-- broacast at login
+local MSG_ANNOUNCELOGIN				= 1	-- broadcast at login
 local MSG_LOGINREPLY					= 2	-- reply to MSG_ANNOUNCELOGIN
 
 local AddonDB_Defaults = {
 	global = {
-		Guilds = {
-			['*'] = {				-- ["Account.Realm.Name"]
-				faction = nil,
-			}
-		},
+		Guilds = {},				-- no 'magic key' ['*'] to avoid listing an additional "wrong" guild when the guild is actually on another realm
 		Characters = {
 			['*'] = {				-- ["Account.Realm.Name"]
 				faction = nil,
@@ -55,8 +51,12 @@ local AddonDB_Defaults = {
 			--	["Account.Realm.Name"]  = true means the char is shared,
 			--	["Account.Realm.Name.Module"]  = true means the module is shared for that char
 		},
-		ConnectedRealms = {
-		},
+		ConnectedRealms = {},
+		-- ShortToLongGuildKeys = {
+			-- relationship between "short" and "long" realm names, 
+			-- ex: ["Default.MarécagedeZangar.MyGuild"] = "Default.Marécage de Zangar.MyGuild"
+			-- necessary for guild banks on other realms..
+		-- },
 	}
 }
 
@@ -169,12 +169,29 @@ local function OnPlayerGuildUpdate()
 	-- at login this event is called between OnEnable and PLAYER_ALIVE, where GetGuildInfo returns a wrong value
 	-- however, the value returned here is correct
 	if IsInGuild() and not currentGuildName then		-- the event may be triggered multiple times, and GetGuildInfo may return incoherent values in subsequent calls, so only save if we have no value.
-		currentGuildName = GetGuildInfo("player")
-		if currentGuildName then
-			Guilds[GetKey(currentGuildName)].faction = UnitFactionGroup("player")
+		local realmName, _
+		currentGuildName, _, _, realmName = GetGuildInfo("player")		-- realmName will be nil if guild is on the same realm as the character
+		
+		if currentGuildName and not realmName then	-- ONLY save the guild key if the realm is nil (= current realm)
+			local guildKey = GetKey(currentGuildName)
+			if not Guilds[guildKey] then
+				Guilds[guildKey] = {}
+			end
+
+			Guilds[guildKey].faction = UnitFactionGroup("player")
+			
 			-- the first time a valid value is found, broadcast to guild, it must happen here for a standard login, but won't work here after a reloadui since this event is not triggered
 			GuildBroadcast(MSG_ANNOUNCELOGIN, GetAlts(currentGuildName))
 			addon:SendMessage("DATASTORE_ANNOUNCELOGIN", currentGuildName)
+
+			-- Save a relationship between the "short" and the "long" version of the guild key
+			-- local _, shortRealmName = UnitFullName("player")		-- returns : "Thaoky", "MarécagedeZangar"
+			-- local shortGuildKey = format("%s.%s.%s", THIS_ACCOUNT, shortRealmName, currentGuildName)		-- "Default.MarécagedeZangar.MyGuild"
+					
+			-- The following is necessary because when the player visits the bank of a guild from another realm, 
+			-- only the short realm name will be returned.
+			-- ["Default.MarécagedeZangar.MyGuild"] = "Default.Marécage de Zangar.MyGuild"
+			-- addon.db.global.ShortToLongGuildKeys[shortGuildKey] = guildKey	
 		end
 	end
 	Characters[GetKey()].guildName = currentGuildName
@@ -523,6 +540,24 @@ function addon:GetGuild(name, realm, account)
 	end
 end
 
+-- Tentative fix for the double counters in the tooltip.. guilds from another realm should be properly saved, review after 6.1
+-- function addon:GetGuild(name, realm, account)
+	-- local guildName, _, _, realmName = GetGuildInfo("player")		-- realmName will be nil if guild is on the same realm as the character
+	-- local key
+	
+	-- if not realmName then										-- the current guild is on this realm
+		-- name = name or guildName								-- assume the caller knows what he is doing ..
+		-- key = GetKey(name, realm, account)					-- .. and attempt to get a valid key
+	-- else				-- if realmName is not nil, the guild is on another realm than the current
+		-- local shortGuildKey = format("%s.%s.%s", THIS_ACCOUNT, realmName, guildName)		-- "Default.MarécagedeZangar.MyGuild"
+		-- key = addon.db.global.ShortToLongGuildKeys[shortGuildKey]
+	-- end
+	
+	-- if key and Guilds[key] then		-- if the key is known, return it to caller, it can be passed to other modules
+		-- return key
+	-- end	
+-- end
+
 function addon:GetGuilds(realm, account)
 	-- get a list of guilds on a given realm/account
 	realm = realm or GetRealmName()
@@ -532,7 +567,7 @@ function addon:GetGuilds(realm, account)
 	local accountKey, realmKey, guildKey
 	for k, _ in pairs(Guilds) do
 		accountKey, realmKey, guildKey = strsplit(".", k)
-
+		
 		if accountKey and realmKey then
 			if accountKey == account and realmKey == realm then
 				out[guildKey] = k

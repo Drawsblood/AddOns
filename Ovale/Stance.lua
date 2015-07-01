@@ -16,7 +16,6 @@ local OvaleProfiler = Ovale.OvaleProfiler
 
 -- Forward declarations for module dependencies.
 local OvaleData = nil
-local OvaleGUID = nil
 local OvaleState = nil
 
 local ipairs = ipairs
@@ -121,7 +120,6 @@ OvaleStance.STANCE_NAME = STANCE_NAME
 function OvaleStance:OnInitialize()
 	-- Resolve module dependencies.
 	OvaleData = Ovale.OvaleData
-	OvaleGUID = Ovale.OvaleGUID
 	OvaleState = Ovale.OvaleState
 
 end
@@ -196,9 +194,10 @@ do
 	end
 end
 
--- Return the current stance's name.
-function OvaleStance:GetStance()
-	return self.stanceList[self.stance]
+-- Return the name of the given stance or the current stance.
+function OvaleStance:GetStance(stanceId)
+	stanceId = stanceId or self.stance
+	return self.stanceList[stanceId]
 end
 
 -- Return true if the current stance matches the given name.
@@ -208,7 +207,7 @@ function OvaleStance:IsStance(name)
 		if type(name) == "number" then
 			return name == self.stance
 		else
-			return name == OvaleStance.stanceList[self.stance]
+			return name == OvaleStance:GetStance(self.stance)
 		end
 	end
 	return false
@@ -221,10 +220,12 @@ end
 
 function OvaleStance:ShapeshiftEventHandler()
 	self:StartProfiling("OvaleStance_ShapeshiftEventHandler")
+	local oldStance = self.stance
 	local newStance = API_GetShapeshiftForm()
-	if self.stance ~= newStance then
+	if oldStance ~= newStance then
 		self.stance = newStance
-		self:SendMessage("Ovale_StanceChanged")
+		Ovale.refreshNeeded[Ovale.playerGUID] = true
+		self:SendMessage("Ovale_StanceChanged", self:GetStance(newStance), self:GetStance(oldStance))
 	end
 	self:StopProfiling("OvaleStance_ShapeshiftEventHandler")
 end
@@ -237,9 +238,14 @@ end
 
 -- Run-time check that the player is in a certain stance.
 -- NOTE: Mirrored in statePrototype below.
-function OvaleStance:RequireStanceHandler(spellId, atTime, requirement, tokenIterator, target)
+function OvaleStance:RequireStanceHandler(spellId, atTime, requirement, tokens, index, targetGUID)
 	local verified = false
-	local stance = tokenIterator()
+	-- If index isn't given, then tokens holds the actual token value.
+	local stance = tokens
+	if index then
+		stance = tokens[index]
+		index = index + 1
+	end
 	if stance then
 		local isBang = false
 		if substr(stance, 1, 1) == "!" then
@@ -253,14 +259,14 @@ function OvaleStance:RequireStanceHandler(spellId, atTime, requirement, tokenIte
 		end
 		local result = verified and "passed" or "FAILED"
 		if isBang then
-			self:Log("    Require stance '%s': %s", stance, result)
+			self:Log("    Require NOT stance '%s': %s", stance, result)
 		else
-			self:Log("    Require NOT stance 's': %s", stance, result)
+			self:Log("    Require stance '%s': %s", stance, result)
 		end
 	else
 		Ovale:OneTimeMessage("Warning: requirement '%s' is missing a stance argument.", requirement)
 	end
-	return verified, requirement
+	return verified, requirement, index
 end
 --</public-static-methods>
 
@@ -296,8 +302,7 @@ end
 -- Apply the effects of the spell on the player's state, assuming the spellcast completes.
 function OvaleStance:ApplySpellAfterCast(state, spellId, targetGUID, startCast, endCast, isChanneled, spellcast)
 	self:StartProfiling("OvaleStance_ApplySpellAfterCast")
-	local target = OvaleGUID:GetUnitId(targetGUID)
-	local stance = state:GetSpellInfoProperty(spellId, endCast, "to_stance", target)
+	local stance = state:GetSpellInfoProperty(spellId, endCast, "to_stance", targetGUID)
 	if stance then
 		if type(stance) == "string" then
 			stance = self.stanceId[stance]

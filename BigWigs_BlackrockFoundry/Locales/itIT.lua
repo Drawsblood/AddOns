@@ -1,34 +1,45 @@
 local L = BigWigs:NewBossLocale("Gruul", "itIT")
 if not L then return end
 if L then
+L["first_ability"] = "Schianto o Contusione"
 
 end
 
 L = BigWigs:NewBossLocale("Oregorger", "itIT")
 if L then
-	--L.berserk_trigger = "Oregorger has gone insane from hunger!"
 
-	--L.shard_explosion = "Explosive Shard Explosion"
-	--L.shard_explosion_desc = "Separate emphasized bar for the explosion."
-
-	--L.hunger_drive_power = "%dx %s - %d ore to go!"
 end
 
 L = BigWigs:NewBossLocale("The Blast Furnace", "itIT")
 if L then
-	--L.heat_increased_message = "Heat increased! Blast every %ss"
-end
-
-L = BigWigs:NewBossLocale("Hans'gar and Franzok", "itIT")
-if L then
+L["bombs_dropped"] = "Bombe sganciate! (%d)"
+L["bombs_dropped_p2"] = "Ingegnere ucciso, bombe rilasciate!"
+L["custom_off_firecaller_marker"] = "Marcatore Invocatore del Fuoco"
+L["custom_off_firecaller_marker_desc"] = [=[Evidenzia gli Invocatori del Fuoco con {rt7}{rt6}, richiede assistente o capo-incursione.
+|cFFFF0000Solo 1 persona nell'incursione dovrebbe attivare questa opzione per evitare conflitti con l'evidenziazione.|r
+|cFFADFF2FSUGGERIMENTO: Se l'incursione ha scelto te per questo ruolo, spostare velocemente il mouse sopra i mob è la soluzione più rapida per marcarli.|r]=]
+L["custom_on_shieldsdown_marker"] = "Marcatore Scudo Protettivo Disattivasto "
+L["custom_on_shieldsdown_marker_desc"] = "Evidenzia un'Elementalistta Primordiale vulnerabile con {rt8}, richiede capoincursione o assistente."
+L["engineer"] = "Apparizione Ingengeri della Fornace"
+L["engineer_desc"] = "Durante la Fase 1, appariranno continuamente 2 Ingegneri della Fornace, uno per ogni lato della stanza."
+L["firecaller"] = "Apparizione Invocatori del Fuoco"
+L["firecaller_desc"] = "Durante la Fase 2, appariranno continuamente 2 Invocatori del Fuoco, uno per ogni lato della stanza."
+L["guard"] = "Apparizione Guardia di Sicurezza"
+L["guard_desc"] = "Durante la Fase 1, appariranno continuamente 2 Guardia di Sicurezza, una per ogni lato della stanza. Durante la Fase 2, 1 Guardia di Sicurezza apparirà continuamente all'ingresso della stanza."
+L["heat_increased_message"] = "Calore aumentato! Ondata ogni %ss"
+L["operator"] = "Marcatore Addetto ai Mantici"
+L["operator_desc"] = "Durante la Fase 1, appariranno continuamente 2 Addetti ai Mantici, uno per ogni lato della stanza."
 
 end
 
 L = BigWigs:NewBossLocale("Flamebender Ka'graz", "itIT")
 if L then
-	--L.molten_torrent_self = "Molten Torrent on you"
-	--L.molten_torrent_self_desc = "Special countdown when Molten Torrent is on you."
-	--L.molten_torrent_self_bar = "You explode!"
+L["custom_off_wolves_marker"] = "Marcatore Lupo delle Braci"
+L["custom_off_wolves_marker_desc"] = "Evidenzia i Lupi delle Braci {rt3}{rt4}{rt5}{rt6}, richiede capoincursione o assistente."
+L["molten_torrent_self"] = "Taglio di Lava su di te"
+L["molten_torrent_self_bar"] = "Stai per esplodere!"
+L["molten_torrent_self_desc"] = "Tempo di Recupero aggiuntivo quando Taglio di Lava è su di te."
+
 end
 
 L = BigWigs:NewBossLocale("Kromog", "itIT")
@@ -38,45 +49,67 @@ end
 
 L = BigWigs:NewBossLocale("Beastlord Darmac", "itIT")
 if L then
-	--L.next_mount = "Mounting soon!"
+L["custom_off_conflag_marker"] = "Marcatore Pirocombusione"
+L["custom_off_conflag_marker_desc"] = [=[Evidenzia i bersagli di Pirocombustione con {rt1}{rt2}{rt3}, richiede capoincursione o assistente.
+|cFFFF0000Solo 1 persona nell'incursione dovrebbe attivare questa opzione per evitare conflitti con l'evidenziazione.|r]=]
+L["custom_off_pinned_marker"] = "Marcatore Blocco sul Posto"
+L["custom_off_pinned_marker_desc"] = [=[Evidenzia le Lancie Bloccanti con {rt8}{rt7}{rt6}{rt5}{rt4}, richiede assistente o capo-incursione.
+|cFFFF0000Solo 1 persona nell'incursione dovrebbe attivare questa opzione per evitare conflitti con l'evidenziazione.|r
+|cFFADFF2FSUGGERIMENTO: Se l'incursione ha scelto te per questo ruolo, spostare velocemente il mouse sopra i mob è la soluzione più rapida per marcarli.|r]=]
+L["next_mount"] = "In sella tra poco!"
 
-	--L.custom_off_pinned_marker = "Pin Down marker"
-	--L.custom_off_pinned_marker_desc = "Mark pinning spears with {rt8}{rt7}{rt6}{rt5}{rt4}, requires promoted or leader.\n|cFFFF0000Only 1 person in the raid should have this enabled to prevent marking conflicts.|r\n|cFFADFF2FTIP: If the raid has chosen you to turn this on, quickly mousing over the spears is the fastest way to mark them.|r"
-
-	--L.custom_off_conflag_marker = "Conflagration marker"
-	--L.custom_off_conflag_marker_desc = "Mark conflagration targets with {rt1}{rt2}{rt3}, requires promoted or leader.\n|cFFFF0000Only 1 person in the raid should have this enabled to prevent marking conflicts.|r"
 end
 
 L = BigWigs:NewBossLocale("Operator Thogar", "itIT")
 if L then
-	--L.cauterizing_bolt_message = "Your focus is casting Cauterizing Bolt!"
+L["adds_train"] = "Servitori Treno"
+L["big_add_train"] = "Servitore Maggiore del Treno"
+L["cannon_train"] = "Cannone del Treno"
+L["custom_on_firemender_marker"] = "Marcatore Curatore del Fuoco Grom'kar"
+L["custom_on_firemender_marker_desc"] = "Evidenzia i Curatori del Fuoco Grom'kar con {rt7}, richiede capoincursione o assistente."
+L["custom_on_manatarms_marker"] = "Marcatore Fante Corazzato Grom'kar"
+L["custom_on_manatarms_marker_desc"] = "Evidenzia i Fanti Corazzati Grom'kar con {rt8}, richiede capoincursione o assistente."
+L["deforester"] = "Disboscatore"
+L["lane"] = "Binario %s: %s"
+L["random"] = "Treni casuali"
+L["train"] = "Treno"
+L["trains"] = "Avvisi del Treno"
+L["trains_desc"] = "Mostra timer e messaggi per ogni binario per quando arriva ogni treno. I binari sono numerati dal Boss fino all'entrata. Per esempio, Boss 1 2 3 4 Entrata"
 
-	--L.trains = "Train warnings"
-	--L.trains_desc = "Shows timers and messages for each lane for when the next train is coming. Lanes are numbered from the boss to the entrace, ie, Boss 1 2 3 4 Entrance."
-
-	--L.lane = "Lane %s: %s"
-	--L.train = "Train"
-	--L.adds_train = "Adds train"
-	--L.big_add_train = "Big add train"
-	--L.cannon_train = "Cannon train"
-	--L.random = "Random trains"
 end
 
 L = BigWigs:NewBossLocale("The Iron Maidens", "itIT")
 if L then
-	--L.ship_trigger = "prepares to man the Dreadnaught's Main Cannon!"
+L["custom_off_heartseeker_marker"] = "Marcatore Centracuori Inzuppato di Sangue"
+L["custom_off_heartseeker_marker_desc"] = "Evidenzia i bersagli della Centracuori con {rt1}{rt2}{rt3}, richiede capoincursione o assistente."
+L["power_message"] = "%d Furia di Ferro!"
+L["ship"] = "Salta sulla Corazzata"
+L["ship_trigger"] = "si prepara a usare il Cannone Principale della Corazzata!"
 
-	--L.ship = "Jump to Ship: %s"
-
-	--L.custom_off_heartseeker_marker = "Bloodsoaked Heartseeker marker"
-	--L.custom_off_heartseeker_marker_desc = "Marks Heartseeker targets with {rt1}{rt2}{rt3}, requires promoted or leader."
-
-	--L.power_message = "%d Iron Fury!"
 end
 
 L = BigWigs:NewBossLocale("Blackhand", "itIT")
 if L then
-	--L.custom_off_markedfordeath_marker = "Marked for Death marker"
-	--L.custom_off_markedfordeath_marker_desc = "Mark Marked for Death targets with {rt1}{rt2}, requires promoted or leader."
+L["custom_off_markedfordeath_marker"] = "Marcatore Marchio della Morte"
+L["custom_off_markedfordeath_marker_desc"] = "Evidenzia i bersagli di Marchio della Morte con {rt1}{rt2}{rt3}, richiede capoincursione o assistente."
+L["custom_off_massivesmash_marker"] = "Marcatore Frantumazione Devastante Massiccia"
+L["custom_off_massivesmash_marker_desc"] = "Evidenzia il difensore coolpito da Frantumazione Devastante Massiccia con {rt6}, richiede capoincursione o assistente."
+
+end
+
+L = BigWigs:NewBossLocale("Blackrock Foundry Trash", "itIT")
+if L then
+L["beasttender"] = "Curatore delle Bestie Spaccatuono"
+L["brute"] = "Bruto dell'Officina delle Scorie"
+L["earthbinder"] = "Plasmaterra di Ferro"
+L["enforcer"] = "Scagnozzo Roccianera"
+L["furnace"] = "Scarico dell'Altoforno"
+L["gnasher"] = "Masticatore Scheggianera"
+L["gronnling"] = "Protogronn Lavoratore"
+L["guardian"] = "Guardiano dell'Officina"
+L["hauler"] = "Ogron Trasportatore"
+L["mistress"] = "Signora della Forgia Manfiammante"
+L["taskmaster"] = "Coordinatore di Ferro"
+
 end
 

@@ -290,12 +290,6 @@ function CNDT:TypeMenu_DropDown()
 				if not conditionData.IS_SPACER then
 					local shouldAdd = conditionData:ShouldList()
 					
-					if CurrentConditionSet.ConditionTypeFilter then
-						if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
-							shouldAdd = false
-						end
-					end
-					
 					if shouldAdd then
 						shouldAddCategory = true
 						break
@@ -337,12 +331,6 @@ function CNDT:TypeMenu_DropDown()
 				local selected = conditionData.identifier == conditionSettings.Type
 				local shouldAdd = selected or conditionData:ShouldList() --or TMW.debug
 				
-				if shouldAdd and not conditionData.IS_SPACER and CurrentConditionSet.ConditionTypeFilter then
-					if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
-						shouldAdd = false
-					end
-				end
-				
 				if shouldAdd then
 					if hasAddedOneCondition and queueSpacer then
 						TMW.DD:AddSpacer()
@@ -357,30 +345,33 @@ function CNDT:TypeMenu_DropDown()
 	end
 end
 
-function CNDT:TypeMenu_DropDown_OnClick(data)
-	TMW.DD.OPEN_MENU:SetText(data.text)
-	
-	local group = TMW.DD.OPEN_MENU:GetParent()
-	
-	local condition = group:GetConditionSettings()
-	if data.defaultUnit and condition.Unit == "player" then
-		condition.Unit = data.defaultUnit
+function CNDT:SelectType(CndtGroup, conditionData)
+
+	local condition = CndtGroup:GetConditionSettings()
+	if conditionData.defaultUnit and condition.Unit == "player" then
+		condition.Unit = conditionData.defaultUnit
 	end
 
-	get(data.applyDefaults, data, condition)
+	get(conditionData.applyDefaults, conditionData, condition)
 
-	if condition.Type ~= self.value then
-		condition.Type = self.value
+	if condition.Type ~= conditionData.identifier then
+		condition.Type = conditionData.identifier
 
 		-- wipe this, since flags mean totally different things for different conditions.
 		-- and having some flags set that a condition doesn't know about could screw things up.
 		condition.BitFlags = 0
 	end
 	
-	group:LoadAndDraw()
+	CndtGroup:LoadAndDraw()
 	TMW.IE:ScheduleIconSetup()
 	
 	TMW.DD:CloseDropDownMenus()
+end
+
+function CNDT:TypeMenu_DropDown_OnClick(data)	
+	local group = TMW.DD.OPEN_MENU:GetParent()
+
+	CNDT:SelectType(group, data)
 end
 
 
@@ -473,33 +464,52 @@ function CNDT:OperatorMenu_DropDown_OnClick(frame)
 	TMW.IE:ScheduleIconSetup()
 end
 
+function CNDT:InBitflags(bitFlags)
+	local tableValues = type(select(2, next(bitFlags))) == "table"
+	return TMW:OrderedPairs(bitFlags, tableValues and TMW.OrderSort or nil, tableValues)
+end
 
 function CNDT:BitFlags_DropDown()
 	local group = self:GetParent()
 	local conditionData = group:GetConditionData()
 	local conditionSettings = group:GetConditionSettings()
 
-	for index, name in TMW:OrderedPairs(conditionData.bitFlags) do
+	local tableValues = type(select(2, next(conditionData.bitFlags))) == "table"
+
+	for index, data in CNDT:InBitflags(conditionData.bitFlags) do
+		local name = get(data, "text")
+
 		local info = TMW.DD:CreateInfo()
 
 		info.text = name
 
-		--info.tooltipTitle = name
-		--info.tooltipText = 
+		if type(data) == "table" then
+			info.tooltipTitle = name
+			info.tooltipText = data.tooltip
+
+			info.icon = data.icon
+
+			if data.tcoords then
+				info.tCoordLeft = data.tcoords[1]
+				info.tCoordRight = data.tcoords[2]
+				info.tCoordTop = data.tcoords[3]
+				info.tCoordBottom = data.tcoords[4]
+			end
+		end
+
 
 		info.value = index
-		if type(conditionSettings.BitFlags) == "table" then
-			info.checked = conditionSettings.BitFlags[index]
-		else
-			local flag = bit.lshift(1, index-1)
-			info.checked = bit.band(conditionSettings.BitFlags, flag) == flag
-		end
+		info.checked = CNDT:GetBitFlag(conditionSettings, index)
 		info.keepShownOnClick = true
 		info.isNotRadio = true
 		info.func = CNDT.BitFlags_DropDown_OnClick
 		info.arg1 = self
 
 		TMW.DD:AddButton(info)
+
+		if type(data) == "table" and data.space then
+			TMW.DD:AddSpacer()
+		end
 	end
 end
 
@@ -509,12 +519,7 @@ function CNDT:BitFlags_DropDown_OnClick(frame)
 
 	local index = self.value
 
-	if type(conditionSettings.BitFlags) == "table" then
-		conditionSettings.BitFlags[index] = (not conditionSettings.BitFlags[index]) and true or nil
-	else
-		local flag = bit.lshift(1, index-1)
-		conditionSettings.BitFlags = bit.bxor(conditionSettings.BitFlags, flag)
-	end
+	CNDT:ToggleBitFlag(conditionSettings, index)
 
 	TMW.IE:ScheduleIconSetup()
 	group:LoadAndDraw()
@@ -524,31 +529,17 @@ end
 
 
 ---------- Runes ----------
-function CNDT:RuneHandler(rune)
-	local id = rune:GetID()
-	local pair
-	if id > 6 then
-		pair = _G[gsub(rune:GetName(), "Death", "")]
-	else
-		pair = _G[rune:GetName() .. "Death"]
-	end
-	if rune:GetChecked() ~= nil then
-		pair:SetChecked(nil)
-	end
-end
-
 function CNDT:Rune_GetChecked()
 	return self.checked
 end
 
 function CNDT:Rune_SetChecked(checked)
-	self.checked = checked
 	if checked then
+		self.checked = true
 		self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
-	elseif checked == nil then
+	else
+		self.checked = false
 		self.Check:SetTexture(nil)
-	elseif checked == false then
-		self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
 	end
 end
 
@@ -694,6 +685,8 @@ end
 function CndtGroup:LoadAndDraw()
 	local conditionData = self:GetConditionData()
 	local conditionSettings = self:GetConditionSettings()
+
+	TMW.IE:ScheduleIconSetup()
 	
 	TMW:Fire("TMW_CNDT_GROUP_DRAWGROUP", self, conditionData, conditionSettings)
 end
@@ -747,11 +740,18 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 
 	local text = conditionData and conditionData.text or conditionSettings.Type
-	CndtGroup.Type:SetText(text)
+	local tooltip = conditionData and conditionData.tooltip
+	--CndtGroup.Type:SetText("")
 
-	if conditionData then
-		TMW:TT(CndtGroup.Type, conditionData.text, conditionData.tooltip, 1, 1)
+	if not conditionData or conditionData.identifier ~= "" then
+		CndtGroup.Type.EditBox:SetText(text)
+		CndtGroup.Type.EditBox:SetCursorPosition(0)
+	else
+		CndtGroup.Type.EditBox:SetText("")
 	end
+
+	TMW:TT(CndtGroup.Type, text, tooltip, 1, 1)
+	TMW:TT(CndtGroup.Type.EditBox, text, tooltip, 1, 1)
 end)
 
 -- Operator
@@ -787,16 +787,6 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	else
 		CndtGroup.TextIcon:SetText(nil)
 		CndtGroup.Icon:Hide()
-	end
-end)
-
--- Runes
-TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
-
-	for k, rune in pairs(CndtGroup.Runes) do
-		if type(rune) == "table" then
-			rune:SetChecked(conditionSettings.Runes[rune:GetID()])
-		end
 	end
 end)
 
@@ -1001,6 +991,24 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	end
 end)
 
+-- Runes
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+	if conditionData and conditionData.runesConfig then
+
+		for k, rune in pairs(CndtGroup.Runes) do
+			if type(rune) == "table" then
+				local index = rune.key
+				rune:SetChecked(CNDT:GetBitFlag(conditionSettings, index))
+			end
+		end
+
+		CndtGroup.Runes:Show()
+		CndtGroup.Slider:SetWidth(217)
+	else
+		CndtGroup.Runes:Hide()
+	end
+end)
+
 -- BitFlags dropdown
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 
@@ -1026,8 +1034,8 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		if type(conditionSettings.BitFlags) == "number" then
 
 			local switch
-			for index, name in pairs(conditionData.bitFlags) do
-				if type(index) ~= "number" or index >= 32 then
+			for index, _ in pairs(conditionData.bitFlags) do
+				if type(index) ~= "number" or index >= 32 or index < 1 then
 					switch = true
 					break
 				end
@@ -1037,8 +1045,8 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 				local flagsOld = conditionSettings.BitFlags
 				conditionSettings.BitFlags = {}
 
-				for index, name in pairs(conditionData.bitFlags) do
-					if type(index) == "number" and index < 32 then
+				for index, _ in pairs(conditionData.bitFlags) do
+					if type(index) == "number" and index < 32 and index >= 1 then
 						local flag = bit.lshift(1, index-1)
 						local flagSet = bit.band(flagsOld, flag) == flag
 						conditionSettings.BitFlags[index] = flagSet and true or nil
@@ -1048,15 +1056,9 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		end
 
 		local text = ""
-		for index, name in TMW:OrderedPairs(conditionData.bitFlags) do
-
-			local flagSet
-			if type(conditionSettings.BitFlags) == "table" then
-				flagSet = conditionSettings.BitFlags[index]
-			else
-				local flag = bit.lshift(1, index-1)
-				flagSet = bit.band(conditionSettings.BitFlags, flag) == flag
-			end
+		for index, data in CNDT:InBitflags(conditionData.bitFlags) do
+			local name = get(data, "text")
+			local flagSet = CNDT:GetBitFlag(conditionSettings, index)
 
 			if flagSet then
 				if conditionSettings.Checked then
@@ -1105,6 +1107,10 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		if conditionData.funcstr == "DEPRECATED" then
 			CndtGroup.Deprecated:SetFormattedText(TMW.L["CNDT_DEPRECATED_DESC"], get(conditionData.text))
 
+			if CndtGroup.Deprecated:IsShown() then
+				CndtGroup:SetHeight(CndtGroup:GetHeight() - CndtGroup.Deprecated:GetHeight())
+				CndtGroup.Deprecated:Hide()
+			end
 			if not CndtGroup.Deprecated:IsShown() then
 				-- Need to reset the height to 0 before calling GetStringHeight
 				-- for consistency. Causes weird behavior if we don't do this.
@@ -1114,7 +1120,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 				CndtGroup:SetHeight(CndtGroup:GetHeight() + CndtGroup.Deprecated:GetHeight())
 				CndtGroup.Deprecated:Show()
 			end
-		else
+		elseif not conditionData.customDeprecated then
 			if CndtGroup.Deprecated:IsShown() then
 				CndtGroup:SetHeight(CndtGroup:GetHeight() - CndtGroup.Deprecated:GetHeight())
 				CndtGroup.Deprecated:Hide()
@@ -1155,4 +1161,61 @@ function CndtGroup:GetConditionData()
 	end
 end
 
+
+
+local SUG = TMW.SUG
+local strfindsug = SUG.strfindsug
+local Module = SUG:NewModule("conditions", SUG:GetModule("default"), "AceEvent-3.0")
+Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
+function Module:Table_Get()
+	return CNDT.ConditionsByType
+end
+function Module.Sorter_ByName(a, b)
+	local nameA, nameB = CNDT.ConditionsByType[a].text, CNDT.ConditionsByType[b].text
+	if nameA == nameB then
+		--sort identical names by ID
+		return a < b
+	else
+		--sort by name
+		return nameA < nameB
+	end
+end
+function Module:Table_GetSorter()
+	return self.Sorter_ByName
+end
+function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	for identifier, conditionData in pairs(tbl) do
+		local text = conditionData.text
+		text = text and text:lower()
+		if conditionData:ShouldList() and text and (strfindsug(text) or strfind(text, SUG.lastName)) then
+			suggestions[#suggestions + 1] = identifier
+		end
+	end
+end
+function Module:Entry_AddToList_1(f, identifier)
+	local conditionData = CNDT.ConditionsByType[identifier]
+
+	f.Name:SetText(conditionData.text)
+
+	f.insert = identifier
+
+	f.tooltiptitle = conditionData.text
+	f.tooltiptext = conditionData.category.name
+	if conditionData.tooltip then
+		f.tooltiptext = f.tooltiptext .. "\r\n\r\n" .. conditionData.tooltip
+	end
+
+	f.Icon:SetTexture(get(conditionData.icon))
+	if conditionData.tcoords then
+		f.Icon:SetTexCoord(unpack(conditionData.tcoords))
+	end
+end
+function Module:Entry_OnClick(frame, button)
+	local CndtGroup = SUG.Box:GetParent():GetParent()
+
+	CNDT:SelectType(CndtGroup, CNDT.ConditionsByType[frame.insert])
+	
+	SUG.Box:ClearFocus()
+end
 

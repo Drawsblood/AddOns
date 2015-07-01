@@ -138,3 +138,13 @@ GTFO.SpellID["101885"] = {
 	--desc = "Abominable Crush (The Abominable Greench, Feast of Winter Veil)";
 	sound = 3;
 };
+
+GTFO.SpellID["179807"] = {
+	--desc = "Electrified Tripwire (Darkmoon Faire)";
+	sound = 2;
+};
+
+GTFO.SpellID["153310"] = {
+	--desc = "Dazing Shot (Darkmoon Faire)";
+	sound = 3;
+};

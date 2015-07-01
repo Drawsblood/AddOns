@@ -20,11 +20,7 @@ local pairs = pairs
 local tinsert = table.insert
 local type = type
 local API_InterfaceOptionsFrame_OpenToCategory = InterfaceOptionsFrame_OpenToCategory
-local API_UnitClass = UnitClass
 -- GLOBALS: LibStub
-
--- Player's class.
-local _, self_class = API_UnitClass("player")
 
 -- List of registered modules providing options.
 local self_register = {}
@@ -61,7 +57,6 @@ OvaleOptions.defaultDB = {
 			raccourcis = true,
 			smallIconScale = 0.8,
 			targetText = "●",
-			updateInterval = 0.1,
 			-- Options
 			iconShiftX = 0,
 			iconShiftY = 0,
@@ -70,6 +65,7 @@ OvaleOptions.defaultDB = {
 			predictif = false,
 			secondIconScale = 1,
 			-- Advanced
+			taggedEnemies = false,
 			auraLag = 400,
 		},
 	},
@@ -300,21 +296,6 @@ OvaleOptions.options = {
 							name = L["Caractère de portée"],
 							desc = L["Ce caractère est affiché dans un coin de l'icône pour indiquer si la cible est à portée"],
 						},
-						updateInterval =
-						{
-							order = 100,
-							type = "range",
-							name = L["Update interval"],
-							desc = L["Maximum time to wait (in milliseconds) before refreshing icons."],
-							min = 0, max = 500, step = 10,
-							get = function(info)
-								return Ovale.db.profile.apparence.updateInterval * 1000
-							end,
-							set = function(info, value)
-								Ovale.db.profile.apparence.updateInterval = value / 1000
-								OvaleOptions:SendMessage("Ovale_OptionChanged")
-							end
-						},
 					},
 				},
 				optionsAppearance =
@@ -378,9 +359,15 @@ OvaleOptions.options = {
 					name = "Advanced",
 					args =
 					{
+						taggedEnemies = {
+							order = 10,
+							type = "toggle",
+							name = L["Only count tagged enemies"],
+							desc = L["Only count a mob as an enemy if it is directly affected by a player's spells."],
+						},
 						auraLag =
 						{
-							order = 10,
+							order = 20,
 							type = "range",
 							name = L["Aura lag"],
 							desc = L["Lag (in milliseconds) between when an spell is cast and when the affected aura is applied or removed"],
@@ -426,6 +413,14 @@ OvaleOptions.options = {
 					name = "Ping for Ovale users in group",
 					type = "execute",
 					func = function() Ovale:VersionCheck() end,
+				},
+				refresh = {
+					name = L["Display refresh statistics"],
+					type = "execute",
+					func = function()
+						local avgRefresh, minRefresh, maxRefresh, count = Ovale:GetRefreshIntervalStatistics()
+						Ovale:Print("Refresh intervals: count = %d, avg = %d, min = %d, max = %d (ms)", count, avgRefresh, minRefresh, maxRefresh)
+					end,
 				},
 			},
 		},

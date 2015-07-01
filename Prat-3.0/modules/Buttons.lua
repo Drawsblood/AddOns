@@ -312,8 +312,8 @@ L:AddLocale("zhCN",
 	["Set Position"] = "设置位置",
 	["Sets position of chat menu and arrows for all chat windows."] = "设置所有聊天窗口的聊天目录及箭头位置",
 	["Show Arrows"] = "显示箭头",
-	-- showbnet_desc = "",
-	-- showbnet_name = "",
+	showbnet_desc = "显示社交菜单", -- Needs review
+	showbnet_name = "显示社交菜单", -- Needs review
 	["Show Chat%d Arrows"] = "显示聊天%d箭头",
 	showmenu_desc = "显示聊天菜单", -- Needs review
 	showmenu_name = "显示菜单", -- Needs review
@@ -363,10 +363,10 @@ L:AddLocale("zhTW",
 	Default = "預設值",
 	["Right, Inside Frame"] = "右側，內部框架",
 	["Right, Outside Frame"] = "右側，外部框架",
-	scrollReminder_desc = "當不在聊天視窗底部時顯示剩餘按鈕", -- Needs review
-	scrollReminder_name = "顯示視窗可下卷的提示信號", -- Needs review
+	scrollReminder_desc = "當不在聊天視窗底部時顯示剩餘按鈕",
+	scrollReminder_name = "顯示視窗可下卷的提示信號",
 	["Set Position"] = "設定位置",
-	["Sets position of chat menu and arrows for all chat windows."] = "設定聊天選單的位置與所有聊天視窗的箭頭。", -- Needs review
+	["Sets position of chat menu and arrows for all chat windows."] = "設定聊天選單的位置與所有聊天視窗的箭頭。",
 	["Show Arrows"] = "顯示箭頭",
 	showbnet_desc = "顯示社交選單",
 	showbnet_name = "顯示社交選單",
@@ -375,8 +375,8 @@ L:AddLocale("zhTW",
 	showmenu_name = "顯示選單",
 	showminimize_desc = "顯示最小化按鈕",
 	showminimize_name = "顯示最小化按鈕",
-	["Toggle showing chat arrows for each chat window."] = "點擊顯示每個聊天視窗的聊天箭頭", -- Needs review
-	["Toggles navigation arrows on and off."] = "開啟/關閉輸入箭頭", -- Needs review
+	["Toggle showing chat arrows for each chat window."] = "點擊顯示每個聊天視窗的聊天箭頭",
+	["Toggles navigation arrows on and off."] = "開啟/關閉輸入箭頭",
 }
 
 )

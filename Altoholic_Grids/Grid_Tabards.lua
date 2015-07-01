@@ -1,7 +1,6 @@
 local addonName = "Altoholic"
 local addon = _G[addonName]
-
-local WHITE		= "|cFFFFFFFF"
+local colors = addon.Colors
 
 local ICON_NOTREADY = "\124TInterface\\RaidFrame\\ReadyCheck-NotReady:14\124t"
 local ICON_READY = "\124TInterface\\RaidFrame\\ReadyCheck-Ready:14\124t"
@@ -80,7 +79,7 @@ local callbacks = {
 			_, _, _, _, _, _, _, currentItemID = GetAchievementCriteriaInfoByID(621, tabardList[dataRowID] )
 			
 			if tabardName then
-				rowFrame.Name.Text:SetText(WHITE .. tabardName)
+				rowFrame.Name.Text:SetText(colors.white .. tabardName)
 				rowFrame.Name.Text:SetJustifyH("LEFT")
 			end
 		end,

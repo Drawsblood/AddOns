@@ -935,14 +935,14 @@ Click para pegar en el chat.]=],
 	TargetManaDeficit = "DéficitManaObjetivo",
 	TargetName = "NombreObjetivo",
 	TargetPercentHP = "PorcentVidaObjetivo",
-	TargetPossesive = "PosesiónObjetivo", -- Needs review
+	TargetPossesive = "PosesiónObjetivo",
 	TargetPronoun = "PronombreObjetivo",
 	TargetRace = "RazaObjetivo",
 	TargetTargetName = "ObjetivoObjetivoNombre",
 	["unknown sex"] = "Sexo desconocido",
 	["user defined substition \"%s\" not found"] = "sustitución definida por el usuario \"%s\" no encontrada",
 	["User defined substitutions"] = "Sustituciones definidas por el usuario",
-	usersub_ = true, -- Needs review
+	usersub_ = "sub usuario_",
 	["user substitutions index (usersubs_idx) doesn't exist! oh dear."] = "¡no existe un índice de sustituciones de usuario (usersubs_idx)!.",
 }
 

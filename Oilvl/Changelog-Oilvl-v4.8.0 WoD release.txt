@@ -1,0 +1,15 @@
+------------------------------------------------------------------------
+r290 | olzenkhaw | 2015-06-23 12:59:31 +0000 (Tue, 23 Jun 2015) | 1 line
+Changed paths:
+   A /tags/v4.8.0 WoD release (from /trunk:289)
+
+4.8.0 - Added Hellfire Citadel Raid Progression Details
+------------------------------------------------------------------------
+r289 | olzenkhaw | 2015-06-23 12:58:57 +0000 (Tue, 23 Jun 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/Oilvlconfig.lua
+
+4.8.0 - Added Hellfire Citadel Raid Progression Details
+------------------------------------------------------------------------

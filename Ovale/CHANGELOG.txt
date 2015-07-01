@@ -1,95 +1,46 @@
-Ovale Spell Priority 6.0.43
+Ovale Spell Priority 6.2.6
+==========================
 
-Changes from version 6.0.42:
+Changes from version 6.2.5:
+---------------------------
 
-- Test compiling every registered script.
+-   Regenerate scripts based on SimulationCraft profiles from 2015-06-30.
 
-- Regenerate scripts based on SimulationCraft 603-23 profiles.
+    Add Shatterlance buff from the Archimonde trinket to the mage spell
+    database to support the latest frost mage profile.
 
-- Merge Tier17M profiles from SimulationCraft 603-23.
+-   Merge branch 'simulationcraft'.
 
-- Update MMO-Champion rogue profiles to 2015-01-13.
+    Pull in changes from SimulationCraft git master from 2015-06-30.
 
-- Warrior: Berserker's Rage generates 10 Rage and triggers Enrage.
+-   Import Tier18M profiles from SimulationCraft git master from 2015-06-30.
 
-- Translate SimulationCraft's buff.enrage.{up,down,remains} operand.
+-   Mage: Only do "end of fight" burn as arcane if there is one enemy.
 
-Map buff.enrage.{up,down,remains} onto IsEnraged() and EnrageRemaining()
-so that more types of Enrage buffs are detected.
+-   Strictly filter for actions to or against friendly group members.
 
-- Remove "enrage_buff" spell list and add the Warrior Enrage buff.
+    Add a function to determine whether a mob is a friendly group member and
+    use it to filter out CLEU actions.  This fixes situations where a
+    player-controlled unit that was outside the group was triggering enemies
+    being added or removed.
 
-- Add EnrageRemaining() script condition.
+    Also check for a proper GUID and name for the source and destination GUIDs
+    in the CLEU handler.  This filters out environmental damage as well as
+    damage from unattackable mobs.
 
-EnrageRemaining() returns the remaining number of seconds that the target
-is Enraged.
+    Add checks for other CLEU events that are triggered by a unit dying so the
+    enemy count is reduced more quickly.
 
-- Fix typo for name of "enrage" property of an aura.
+    Only track events that cause tagging by either the enemy or your group,
+    but filter out ticking DoT damage from triggering enemy updates.  Ticking
+    DoT damage causes false positives after the casting mob has died.  Filter
+    out these events from triggering the update of the enemy count.
 
-This fixes the IsEnraged() script condition to actually work.
+    This is potentially wrong in the scenario where you join a raid group or
+    get in range of a friendly group member who has an existing DoT ticking on
+    them and the caster is no longer being attacked or casts any other
+    dangerous spells.  In this case, it's likely that the caster is no longer
+    a threat, so arguably not counting that caster makes sense.
 
-- Add "debuffTYpe" parameter to state:AddAuraToGUID().
-
-This change also adds support for "curse=1", "disease=1", "enrage=1",
-"magic=1" and "poison=1" SpellInfo() parameters to allow tagging auras as
-one of those debuff/dispel types.
-
-- Detect auras that are an Enrage effect through their debuff/dispel type.
-
-UnitAura() returns a dispel type that is the empty string if the aura is
-an Enrage effect.  Remove optional dependency on LibDispellable-1.0 that
-was only used to determine whether an aura was an Enrage effect.
-
-- Remove features that have been deprecated for over a year.
-
-Fixes ticket 534 by @amey1956.
-
-- Really suggest off-GCD spells off the GCD.
-
-Before this change, the first off-GCD spell wasn't suggested until the
-GCD was off cooldown.
-
-Fixes ticket 519 by @rilot.
-
-- "-" is a magic character in Lua patterns and needs to be escaped.
-
-Fixes ticket 529 by @Wiljo where "SHIFT-3" was being shortened to "ST-3"
-instead of "S3".
-
-- Make release.sh work in fresh Git repositories.
-
-Be more resilient if there are no tags in the repository, and
-automatically determine the title of the project from the TOC file.
-
-This makes release.sh more reusable in other projects.
-
-- Add more documentation for release.sh.
-
-- Simplify the check for a release tag.
-
-- Determine top-level and release directories automatically.
-
-Search upward for the first .git directory starting from the current
-directory and set that as the top-level directory of the Git checkout.
-
-By default, put releases into a "release" subdirectory of the top-level
-directory.
-
-- Improve how files are ignored when copying files in release.sh.
-
-- Ignore all dotfiles in release.sh.
-- Ignore copying and packaging files in the release directory.
-
-Use the name of the given release directory instead of hard-coding
-"release" in the top-level directory to ignore.
-
-Move the check for "tmp" to ignore from release.sh to .pkgmeta.
-
-- Add list of tools (external programs) used in release.sh.
-
-This is partly for documentation so that it's clear what external programs
-are needed to portably use this script on a different platform.
-
-- Improve visual emphasis of questions in the FAQ.
-
-- Shorten answer to how closely default scripts mirror SimC APLs.
+    These changes improve the accuracy of the count of the number of enemies
+    on the battlefield.

@@ -16,7 +16,7 @@ do
 	colorize = setmetatable({}, { __index =
 		function(self, key)
 			if not r then r, g, b = GameFontNormal:GetTextColor() end
-			self[key] = string.format("|cff%02x%02x%02x%s|r", r * 255, g * 255, b * 255, key)
+			self[key] = ("|cff%02x%02x%02x%s|r"):format(r * 255, g * 255, b * 255, key)
 			return self[key]
 		end
 	})
@@ -30,6 +30,10 @@ local icon = LibStub("LibDBIcon-1.0", true)
 local acr = LibStub("AceConfigRegistry-3.0")
 local acd = LibStub("AceConfigDialog-3.0")
 local AceGUI = LibStub("AceGUI-3.0")
+
+local loader = BigWigsLoader
+local GetAreaMapInfo = loader.GetAreaMapInfo
+local fakeWorldZones = loader.fakeWorldZones
 
 local colorModule
 local soundModule
@@ -136,13 +140,6 @@ local acOptions = {
 					order = 14,
 					width = "full",
 				},
-				sound = {
-					type = "toggle",
-					name = L.sound,
-					desc = L.soundDesc,
-					order = 21,
-					width = "half",
-				},
 				flash = {
 					type = "toggle",
 					name = L.flashScreen,
@@ -178,33 +175,11 @@ local acOptions = {
 					order = 30,
 					width = "full",
 				},
-				showBlizzardWarnings = {
-					type = "toggle",
-					name = L.showBlizzWarnings,
-					desc = L.showBlizzWarningsDesc,
-					set = function(info, value)
-						local key = info[#info]
-						local plugin = BigWigs:GetPlugin("BossBlock")
-						plugin:Disable()
-						BigWigs.db.profile[key] = value
-						options:SendMessage("BigWigs_CoreOptionToggled", key, value)
-						plugin:Enable()
-					end,
-					order = 31,
-					width = "full",
-				},
 				showZoneMessages = {
 					type = "toggle",
 					name = L.zoneMessages,
 					desc = L.zoneMessagesDesc,
 					order = 32,
-					width = "full",
-				},
-				blockmovies = {
-					type = "toggle",
-					name = L.blockMovies,
-					desc = L.blockMoviesDesc,
-					order = 33,
 					width = "full",
 				},
 				separator4 = {
@@ -302,91 +277,103 @@ local function findPanel(name, parent)
 	end
 end
 
-function options:OnInitialize()
-	acOptions.args.general.args.profileOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(BigWigs.db)
-	acOptions.args.general.args.profileOptions.order = 1
-	LibStub("LibDualSpec-1.0"):EnhanceOptions(acOptions.args.general.args.profileOptions, BigWigs.db)
+do
+	local addonName = ...
+	local f = CreateFrame("Frame")
+	f:RegisterEvent("ADDON_LOADED")
+	local function Initialize(_, _, addon)
+		if addon ~= addonName then return end
 
-	acr:RegisterOptionsTable("BigWigs", getOptions, true)
-	acd:SetDefaultSize("BigWigs", 858,660)
-	--local mainOpts = acd:AddToBlizOptions("BigWigs", "Big Wigs")
-	--mainOpts:HookScript("OnShow", function()
-	--	BigWigs:Enable()
-	--	local p = findPanel("Big Wigs")
-	--	if p and p.element.collapsed then OptionsListButtonToggle_OnClick(p.toggle) end
-	--end)
-    --
-	--local about = self:GetPanel(L.about, "Big Wigs")
-	--about:SetScript("OnShow", function(frame)
-	--	local fields = {
-	--		L.developers,
-	--		L.license,
-	--		L.website,
-	--		L.contact,
-	--	}
-	--	local fieldData = {
-	--		"Funkydude, Maat, Nebula169",
-	--		L.allRightsReserved,
-	--		"http://www.wowace.com/addons/big-wigs/",
-	--		L.ircChannel,
-	--	}
-	--	local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-	--	title:SetPoint("TOPLEFT", 16, -16)
-	--	title:SetText(L.about)
-    --
-	--	local subtitle = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	--	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
-	--	subtitle:SetWidth(frame:GetWidth() - 24)
-	--	subtitle:SetJustifyH("LEFT")
-	--	subtitle:SetJustifyV("TOP")
-	--	local noteKey = "Notes"
-	--	if GetAddOnMetadata("BigWigs", "Notes-" .. GetLocale()) then noteKey = "Notes-" .. GetLocale() end
-	--	local notes = GetAddOnMetadata("BigWigs", noteKey)
-	--	subtitle:SetText(notes .. " |cff44ff44" .. BigWigsLoader:GetReleaseString() .. "|r")
-    --
-	--	local anchor = nil
-	--	for i, field in next, fields do
-	--		local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-	--		title:SetWidth(120)
-	--		if not anchor then
-	--			title:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 0, -16)
-	--		else
-	--			title:SetPoint("TOP", anchor, "BOTTOM", 0, -6)
-	--			title:SetPoint("LEFT", subtitle)
-	--		end
-	--		title:SetNonSpaceWrap(true)
-	--		title:SetJustifyH("LEFT")
-	--		title:SetText(field)
-	--		local detail = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	--		detail:SetPoint("TOPLEFT", title, "TOPRIGHT")
-	--		detail:SetWidth(frame:GetWidth() - 144)
-	--		detail:SetJustifyH("LEFT")
-	--		detail:SetJustifyV("TOP")
-	--		detail:SetText(fieldData[i])
-    --
-	--		anchor = detail
-	--	end
-	--	local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-	--	title:SetPoint("TOP", anchor, "BOTTOM", 0, -16)
-	--	title:SetPoint("LEFT", subtitle)
-	--	title:SetWidth(frame:GetWidth() - 24)
-	--	title:SetJustifyH("LEFT")
-	--	title:SetJustifyV("TOP")
-	--	title:SetText(L.thanks)
-	--	local detail = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	--	detail:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -4)
-	--	detail:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -24, -24)
-	--	detail:SetJustifyH("LEFT")
-	--	detail:SetJustifyV("TOP")
-	--	detail:SetText(BIGWIGS_AUTHORS)
-    --
-	--	frame:SetScript("OnShow", nil)
-	--end)
+		acOptions.args.general.args.profileOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(BigWigs.db)
+		acOptions.args.general.args.profileOptions.order = 1
+		LibStub("LibDualSpec-1.0"):EnhanceOptions(acOptions.args.general.args.profileOptions, BigWigs.db)
 
-	colorModule = BigWigs:GetPlugin("Colors")
-	soundModule = BigWigs:GetPlugin("Sounds")
-	acr:RegisterOptionsTable("Big Wigs: Colors Override", colorModule:SetColorOptions("dummy", "dummy"), true)
-	acr:RegisterOptionsTable("Big Wigs: Sounds Override", soundModule:SetSoundOptions("dummy", "dummy"), true)
+		acr:RegisterOptionsTable("BigWigs", getOptions, true)
+		acd:SetDefaultSize("BigWigs", 858,660)
+		--local mainOpts = acd:AddToBlizOptions("BigWigs", "Big Wigs")
+		--mainOpts:HookScript("OnShow", function()
+		--	BigWigs:Enable()
+		--	local p = findPanel("Big Wigs")
+		--	if p and p.element.collapsed then OptionsListButtonToggle_OnClick(p.toggle) end
+		--end)
+		--
+		--local about = self:GetPanel(L.about, "Big Wigs")
+		--about:SetScript("OnShow", function(frame)
+		--	local fields = {
+		--		L.developers,
+		--		L.license,
+		--		L.website,
+		--		L.contact,
+		--	}
+		--	local fieldData = {
+		--		"Funkydude, Maat, Nebula169",
+		--		L.allRightsReserved,
+		--		"http://www.wowace.com/addons/big-wigs/",
+		--		L.ircChannel,
+		--	}
+		--	local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+		--	title:SetPoint("TOPLEFT", 16, -16)
+		--	title:SetText(L.about)
+		--
+		--	local subtitle = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		--	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
+		--	subtitle:SetWidth(frame:GetWidth() - 24)
+		--	subtitle:SetJustifyH("LEFT")
+		--	subtitle:SetJustifyV("TOP")
+		--	local noteKey = "Notes"
+		--	if GetAddOnMetadata("BigWigs", "Notes-" .. GetLocale()) then noteKey = "Notes-" .. GetLocale() end
+		--	local notes = GetAddOnMetadata("BigWigs", noteKey)
+		--	subtitle:SetText(notes .. " |cff44ff44" .. loader:GetReleaseString() .. "|r")
+		--
+		--	local anchor = nil
+		--	for i, field in next, fields do
+		--		local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+		--		title:SetWidth(120)
+		--		if not anchor then
+		--			title:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 0, -16)
+		--		else
+		--			title:SetPoint("TOP", anchor, "BOTTOM", 0, -6)
+		--			title:SetPoint("LEFT", subtitle)
+		--		end
+		--		title:SetNonSpaceWrap(true)
+		--		title:SetJustifyH("LEFT")
+		--		title:SetText(field)
+		--		local detail = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		--		detail:SetPoint("TOPLEFT", title, "TOPRIGHT")
+		--		detail:SetWidth(frame:GetWidth() - 144)
+		--		detail:SetJustifyH("LEFT")
+		--		detail:SetJustifyV("TOP")
+		--		detail:SetText(fieldData[i])
+		--
+		--		anchor = detail
+		--	end
+		--	local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+		--	title:SetPoint("TOP", anchor, "BOTTOM", 0, -16)
+		--	title:SetPoint("LEFT", subtitle)
+		--	title:SetWidth(frame:GetWidth() - 24)
+		--	title:SetJustifyH("LEFT")
+		--	title:SetJustifyV("TOP")
+		--	title:SetText(L.thanks)
+		--	local detail = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		--	detail:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -4)
+		--	detail:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -24, -24)
+		--	detail:SetJustifyH("LEFT")
+		--	detail:SetJustifyV("TOP")
+		--	detail:SetText(BIGWIGS_AUTHORS)
+		--
+		--	frame:SetScript("OnShow", nil)
+		--end)
+
+		colorModule = BigWigs:GetPlugin("Colors")
+		soundModule = BigWigs:GetPlugin("Sounds")
+		acr:RegisterOptionsTable("Big Wigs: Colors Override", colorModule:SetColorOptions("dummy", "dummy"), true)
+		acr:RegisterOptionsTable("Big Wigs: Sounds Override", soundModule:SetSoundOptions("dummy", "dummy"), true)
+
+		f:UnregisterEvent("ADDON_LOADED")
+		-- Wait with nilling, we don't know how many addons will load during this same execution.
+		loader.CTimerAfter(5, function() f:SetScript("OnEvent", nil) end)
+	end
+	f:SetScript("OnEvent", Initialize)
 end
 
 function options:OnEnable()
@@ -404,7 +391,7 @@ function options:OnEnable()
 	self:RegisterMessage("BigWigs_StopConfigureMode")
 
 	local tmp, tmpZone = {}, {}
-	for k in next, BigWigsLoader:GetZoneMenus() do
+	for k in next, loader:GetZoneMenus() do
 		local zone = translateZoneID(k)
 		if zone then
 			tmp[zone] = k
@@ -416,6 +403,8 @@ function options:OnEnable()
 		local zone = tmpZone[i]
 		self:GetZonePanel(tmp[zone])
 	end
+
+	self.OnEnable = nil
 end
 
 function options:Open()
@@ -509,7 +498,7 @@ end
 local function getSlaveToggle(label, desc, key, module, flag, master)
 	local toggle = AceGUI:Create("CheckBox")
 	toggle:SetLabel(colorize[label])
-	if flag == C.MESSAGE or flag == C.ME_ONLY or flag == C.FLASH or flag == C.PULSE then
+	if flag == C.MESSAGE or flag == C.ME_ONLY or flag == C.FLASH or flag == C.PULSE or flag == C.EMPHASIZE or flag == C.COUNTDOWN then
 		toggle:SetRelativeWidth(0.5)
 	else
 		toggle:SetFullWidth(true)
@@ -562,7 +551,18 @@ local function advancedToggles(dbKey, module, check)
 			end
 		end
 	end
-	advancedOptions[#advancedOptions + 1] = getSlaveToggle(L.EMPHASIZE, L.EMPHASIZE_desc, dbKey, module, C.EMPHASIZE, check)
+
+	local emphasizeGroup = AceGUI:Create("InlineGroup")
+	emphasizeGroup:SetLayout("Flow")
+	emphasizeGroup:SetFullWidth(true)
+
+	local emphasize = getSlaveToggle(L.EMPHASIZE, L.EMPHASIZE_desc, dbKey, module, C.EMPHASIZE, check)
+	emphasizeGroup:AddChild(emphasize)
+
+	local countdown = getSlaveToggle(L.COUNTDOWN, L.COUNTDOWN_desc, dbKey, module, C.COUNTDOWN, check)
+	emphasizeGroup:AddChild(countdown)
+
+	advancedOptions[#advancedOptions + 1] = emphasizeGroup
 
 	return unpack(advancedOptions)
 end
@@ -582,7 +582,7 @@ local function advancedTabSelect(widget, callback, tab)
 		local group = AceGUI:Create("SimpleGroup")
 		group:SetFullWidth(true)
 		widget:AddChild(group)
-		soundModule:SetSoundOptions(module.name, key, module.toggleDefaults[key])
+		soundModule:SetSoundOptions(module.name, key, module.db.profile[key])
 		acd:Open("Big Wigs: Sounds Override", group)
 	elseif tab == "colors" then
 		local group = AceGUI:Create("SimpleGroup")
@@ -705,6 +705,7 @@ end
 
 local listAbilitiesInChat = nil
 do
+	local SendChatMessage = loader.SendChatMessage
 	local function output(channel, ...)
 		if channel then
 			SendChatMessage(strjoin(" ", ...), channel)
@@ -739,13 +740,17 @@ do
 			if type(o) == "number" then
 				if o > 0 then
 					local link = GetSpellLink(o)
-					if currentSize + #link + 1 > 255 then
-						printList(channel, header, abilities)
-						wipe(abilities)
-						currentSize = 0
+					if not link then
+						BigWigs:Print(("Failed to fetch the link for spell id %d."):format(key))
+					else
+						if currentSize + #link + 1 > 255 then
+							printList(channel, header, abilities)
+							wipe(abilities)
+							currentSize = 0
+						end
+						abilities[#abilities + 1] = link
+						currentSize = currentSize + #link + 1
 					end
-					abilities[#abilities + 1] = link
-					currentSize = currentSize + #link + 1
 				else
 					local _, _, _, _, _, _, _, _, link = EJ_GetSectionInfo(-o)
 					if currentSize + #link + 1 > 255 then
@@ -765,7 +770,7 @@ end
 local function SecondsToTime(time)
 	local m = floor(time/60)
 	local s = mod(time, 60)
-	return format("%d:%02d", m, s)
+	return ("%d:%02d"):format(m, s)
 end
 
 local function populateToggleOptions(widget, module)
@@ -1104,12 +1109,15 @@ end
 
 local function onZoneShow(frame)
 	local zoneId = frame.id
+	if zoneId then
+		local instanceId = fakeWorldZones[zoneId] and zoneId or GetAreaMapInfo(zoneId)
 
-	-- Make sure all the bosses for this zone are loaded.
-	BigWigsLoader:LoadZone(zoneId)
+		-- Make sure all the bosses for this zone are loaded.
+		loader:LoadZone(instanceId)
+	end
 
 	-- Does this zone have a module list?
-	local moduleList = BigWigsLoader:GetZoneMenus()[zoneId]
+	local moduleList = loader:GetZoneMenus()[zoneId]
 
 	-- This zone has no modules, nor is the panel related to a module.
 	if not moduleList and not frame.module then
@@ -1252,7 +1260,8 @@ do
 
 	function options:GetZonePanel(zoneId)
 		local zoneName = translateZoneID(zoneId)
-		local parent = BigWigsLoader.zoneTbl[zoneId] and addonNameToHeader[BigWigsLoader.zoneTbl[zoneId]] or addonNameToHeader.BigWigs_WarlordsOfDraenor
+		local instanceId = fakeWorldZones[zoneId] and zoneId or GetAreaMapInfo(zoneId)
+		local parent = loader.zoneTbl[instanceId] and addonNameToHeader[loader.zoneTbl[instanceId]] or addonNameToHeader.BigWigs_WarlordsOfDraenor
 		local panel, justCreated = self:GetPanel(zoneName, parent, zoneId)
 		if justCreated then
 			panel:SetScript("OnShow", onZoneShow)
@@ -1267,28 +1276,15 @@ do
 	function options:Register(message, moduleName, module)
 		if registered[module.name] then return end
 		registered[module.name] = true
-		if (module.toggleOptions or module.GetOptions) and not module:IsBossModule() then
-			local panel, created = self:GetPanel("BigWigs_".. moduleName) -- XXX temp
-			if created then
-				panel:SetScript("OnShow", onZoneShow)
-				panel:SetScript("OnHide", onZoneHide)
-				panel.module = module
-			end
-		end
 		if module.pluginOptions then
 			if type(module.pluginOptions) == "function" then
 				pluginRegistry[module.name] = module.pluginOptions
 			else
 				acOptions.args.general.args[module.name] = module.pluginOptions
 			end
-		end
-		if module.subPanelOptions then
+		elseif module.subPanelOptions then
 			local key = module.subPanelOptions.key
-			local name = "BigWigs_".. module.subPanelOptions.name -- XXX temp
 			local options = module.subPanelOptions.options
-			--acr:RegisterOptionsTable(key, options, true)
-			--module.subPanelOptionsPanel = acd:AddToBlizOptions(key, name)
-
 			if type(options) == "function" then
 				subPanelRegistry[key] = options
 			else

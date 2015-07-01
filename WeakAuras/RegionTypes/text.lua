@@ -42,9 +42,12 @@ local function modify(parent, region, data)
     local fontPath = SharedMedia:Fetch("font", data.font);
     text:SetFont(fontPath, data.fontSize <= 35 and data.fontSize or 35, data.outline and "OUTLINE" or nil);
     text:SetTextHeight(data.fontSize);
+    if not text:GetFont() then -- Font invalid, set the font but keep the setting
+        text:SetFont("Fonts\\FRIZQT__.TTF", data.fontSize <= 35 and data.fontSize or 35, data.outline and "OUTLINE" or nil);
+    end
     if text:GetFont() then
         text:SetText(data.displayText);
-    else end
+    end
     text.displayText = data.displayText;
     text:SetJustifyH(data.justify);
 
@@ -67,7 +70,7 @@ local function modify(parent, region, data)
         end
 
         if(textStr ~= text.displayText) then
-            text:SetText(textStr);
+            if text:GetFont() then text:SetText(textStr); end
         end
         if(#textStr ~= #text.displayText) then
             data.width = text:GetWidth();
@@ -91,7 +94,10 @@ local function modify(parent, region, data)
     if (customTextFunc) then
         local values = region.values;
         region.UpdateCustomText = function()
+            WeakAuras.ActivateAuraEnvironment(data.id);
             local custom = customTextFunc(region.expirationTime, region.duration, values.progress, values.duration, values.name, values.icon, values.stacks);
+            WeakAuras.ActivateAuraEnvironment(nil);
+            custom = WeakAuras.EnsureString(custom);
             if(custom ~= values.custom) then
                 values.custom = custom;
                 UpdateText();
@@ -124,12 +130,14 @@ local function modify(parent, region, data)
 
     local function UpdateTime()
         local remaining = region.expirationTime - GetTime();
-        local progress = remaining / region.duration;
-
-        if(data.inverse) then
-            progress = 1 - progress;
+        local progress
+        if region.duration > 0 then
+            progress = remaining / region.duration;
+            if(data.inverse) then
+                progress = 1 - progress;
+            end
+            progress = progress > 0.0001 and progress or 0.0001;
         end
-        progress = progress > 0.0001 and progress or 0.0001;
 
         local remainingStr = "";
         if(remaining == math.huge) then
@@ -196,7 +204,7 @@ local function modify(parent, region, data)
                 region:SetScript("OnUpdate", UpdateTime);
             else
                 region:SetScript("OnUpdate", nil);
-                UpdateText();
+                UpdateTime();
             end
         end
     end

@@ -50,6 +50,8 @@ Prat:AddModuleToLoad(function()
     font_desc = "Use the same font you are using on the chatframe",
     fontsize_name = "Font Size",
     fontsize_desc = "Set the chat bubble font size",
+    transparent_name = "Transparent Bubbles",
+    transparent_desc = "Hide background and border textures from chat bubbles. (/reload required to undo this option)",
   })
   --@end-debug@]===]
 
@@ -74,6 +76,8 @@ Prat:AddModuleToLoad(function()
 	module_name = "Bubbles",
 	shorten_desc = "Shorten the chat bubbles down to a single line each. Mouse over the bubble to expand the text.",
 	shorten_name = "Shorten Bubbles",
+	transparent_desc = "Hide background and border textures from chat bubbles. (/reload required to undo this option)",
+	transparent_name = "Transparent Bubbles",
 }
 
   )
@@ -93,6 +97,8 @@ Prat:AddModuleToLoad(function()
 	module_name = "Bulles",
 	shorten_desc = "Raccourci le texte des bulles à une seule ligne. Mettre la souris sur la bulle pour étendre la bulle et voir le texte en entier.",
 	shorten_name = "Raccourcir les bulles",
+	-- transparent_desc = "",
+	-- transparent_name = "",
 }
 
   )
@@ -112,6 +118,8 @@ Prat:AddModuleToLoad(function()
 	module_name = "Blasen",
 	shorten_desc = "Verkürze die Sprechblasen zu einem Einzeiler. Überfahren, der Blase, mit der Maus erweitert den Text",
 	shorten_name = "Verkürze Sprechblasen",
+	transparent_desc = "Ausblenden des Hintergrunds und den Randstrukturen von Sprechblasen. (/reload ist erforderlich, um diese Option rückgängig zu machen)",
+	transparent_name = "Transparente Blasen",
 }
 
   )
@@ -131,6 +139,8 @@ Prat:AddModuleToLoad(function()
 	module_name = "말풍선",
 	-- shorten_desc = "",
 	shorten_name = "말풍선 축소",
+	-- transparent_desc = "",
+	-- transparent_name = "",
 }
 
   )
@@ -150,6 +160,8 @@ Prat:AddModuleToLoad(function()
 	-- module_name = "",
 	-- shorten_desc = "",
 	-- shorten_name = "",
+	-- transparent_desc = "",
+	-- transparent_name = "",
 }
 
   )
@@ -169,6 +181,8 @@ Prat:AddModuleToLoad(function()
 	module_name = "Облачка",
 	shorten_desc = "Уменьшать облачка чата до одной строки. Наведите курсор на облачко, чтобы открыть текст полностью.",
 	shorten_name = "Уменьшать облачка",
+	-- transparent_desc = "",
+	-- transparent_name = "",
 }
 
   )
@@ -186,8 +200,11 @@ Prat:AddModuleToLoad(function()
 	icons_name = "显示团队图标", -- Needs review
 	module_desc = "聊天泡泡相关自定义", -- Needs review
 	module_name = "泡泡", -- Needs review
-	-- shorten_desc = "",
-	-- shorten_name = "",
+	shorten_desc = [=[缩短每个聊天气泡至一行. 鼠标移过气泡时展开文本.
+]=], -- Needs review
+	shorten_name = "缩短气泡", -- Needs review
+	-- transparent_desc = "",
+	-- transparent_name = "",
 }
 
   )
@@ -207,6 +224,8 @@ Prat:AddModuleToLoad(function()
 	-- module_name = "",
 	-- shorten_desc = "",
 	-- shorten_name = "",
+	-- transparent_desc = "",
+	-- transparent_name = "",
 }
 
   )
@@ -226,6 +245,8 @@ Prat:AddModuleToLoad(function()
 	module_name = "對話泡泡",
 	-- shorten_desc = "",
 	shorten_name = "縮短氣泡",
+	-- transparent_desc = "",
+	-- transparent_name = "",
 }
 
   )
@@ -241,6 +262,7 @@ Prat:AddModuleToLoad(function()
       format = true,
       icons = true,
       font = true,
+      transparent = false,
       fontsize = 14,
     }
   })
@@ -261,6 +283,7 @@ Prat:AddModuleToLoad(function()
       format = toggleOption,
       icons = toggleOption,
       font = toggleOption,
+      transparent = toggleOption,
       fontsize = {
         name = function(info) return L[info[#info] .. "_name"] end,
         desc = function(info) return L[info[#info] .. "_desc"] end,
@@ -304,8 +327,9 @@ Prat:AddModuleToLoad(function()
     self.icons = self.db.profile.icons
     self.font = self.db.profile.font
     self.fontsize = self.db.profile.fontsize
+    self.transparent = self.db.profile.transparent
 
-    if self.shorten or self.color or self.format or self.icons or self.font then
+    if self.shorten or self.color or self.format or self.icons or self.font or self.transparent then
       self.update:Show()
     else
       self.update:Hide()
@@ -373,6 +397,12 @@ Prat:AddModuleToLoad(function()
       local a, b, c = fontstring:GetFont()
 
       fontstring:SetFont(ChatFrame1:GetFont(), self.fontsize, c)
+    end
+
+    if self.transparent then
+       -- Hide the border and background textures of the chat bubble
+       --FIXME: remove texture from bubble tail
+       frame:SetBackdrop(nil) -- remove texture from bubble (borders and background)
     end
 
     if self.icons then

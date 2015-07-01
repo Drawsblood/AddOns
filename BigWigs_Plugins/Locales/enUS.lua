@@ -2,6 +2,11 @@ local L = LibStub("AceLocale-3.0"):NewLocale("Big Wigs: Plugins", "enUS", true)
 
 L.general = "General"
 
+L.positionX = "X Position"
+L.positionY = "Y Position"
+L.positionExact = "Exact Positioning"
+L.positionDesc = "Type in the box or move the slider if you need exact positioning from the anchor."
+
 -----------------------------------------------------------------------
 -- AltPower.lua
 --
@@ -84,10 +89,27 @@ L.sendBreak = "Sending a break timer to Big Wigs and DBM users."
 L.breakStarted = "Break timer started by %s user %s."
 L.breakStopped = "Break timer cancelled by %s."
 L.breakBar = "Break time"
-L.breakAnnounce = "%g |4minute:minutes; break starts now!"
 L.breakMinutes = "Break ends in %d |4minute:minutes;!"
 L.breakSeconds = "Break ends in %d |4second:seconds;!"
 L.breakFinished = "Break time is now over!"
+
+-----------------------------------------------------------------------
+-- BossBlock.lua
+--
+
+L.bossBlock = "Boss Block"
+L.bossBlockDesc = "Configure the various things you can block during a boss encounter."
+L.movieBlocked = "You've seen this movie before, skipping it."
+L.blockEmotes = "Block middle-screen emotes"
+L.blockEmotesDesc = "Some bosses show emotes for certain abilities, these messages are both way too long and descriptive. We try to produce smaller, more fitting messages that do not interfere with the gameplay, and don't tell you specifically what to do.\n\nPlease note: Boss emotes will still be visible in chat if you wish to read them."
+L.blockMovies = "Block repeated movies"
+L.blockMoviesDesc = "Boss encounter movies will only be allowed to play once (so you can watch each one) and will then be blocked."
+L.blockGarrison = "Block garrison popups"
+L.blockGarrisonDesc = "Garrison popups show for a few things, but mainly when a follower mission is completed.\n\nThese popups can cover up critical parts of your UI during a boss fight, so we recommend blocking them."
+L.blockGuildChallenge = "Block guild challenge popups"
+L.blockGuildChallengeDesc = "Guild challenge popups show for a few things, mainly when a group in your guild completes a heroic dungeon or a challenge mode dungeon.\n\nThese popups can cover up critical parts of your UI during a boss fight, so we recommend blocking them."
+L.blockSpellErrors = "Block spell failed messages"
+L.blockSpellErrorsDesc = "Messages such as \"Spell is not ready yet\" that usually show at the top of the screen will be blocked."
 
 -----------------------------------------------------------------------
 -- Colors.lua
@@ -121,11 +143,13 @@ L.superEmphasize = "Super Emphasize"
 L.superEmphasizeDesc = "Boosts related messages or bars of a specific boss encounter ability.\n\nHere you configure exactly what should happen when you toggle on the Super Emphasize option in the advanced section for a boss encounter ability.\n\n|cffff4411Note that Super Emphasize is off by default for all abilities.|r\n"
 L.uppercase = "UPPERCASE"
 L.uppercaseDesc = "Uppercases all messages related to a super emphasized option."
-L.doubleSize = "Double size"
-L.doubleSizeDesc = "Doubles the size of super emphasized bars and messages."
-L.countdown = "Countdown"
-L.countdownDesc = "If a related timer is longer than 5 seconds, a vocal and visual countdown will be added for the last 5 seconds. Imagine someone counting down \"5... 4... 3... 2... 1... COUNTDOWN!\" and big numbers in the middle of your screen."
 L.superEmphasizeDisableDesc = "Disable Super Emphasize for all modules that use it."
+L.textCountdown = "Text countdown"
+L.textCountdownDesc = "Show a visual counter during a count down."
+L.countdownColor = "Countdown color"
+L.countdownVoice = "Countdown voice"
+L.countdownTest = "Test countdown"
+L.countdownAt = "Countdown at... (seconds)"
 
 -----------------------------------------------------------------------
 -- Messages.lua
@@ -170,7 +194,6 @@ L.fadeTimeDesc = "How long to fade out a message, in seconds"
 L.customRange = "Custom range indicator"
 L.proximityTitle = "%d yd / %d |4player:players;" -- yd = yards (short)
 L.proximity_name = "Proximity"
-L.sound = "Sound"
 L.soundDelay = "Sound delay"
 L.soundDelayDesc = "Specify how long Big Wigs should wait between repeating the specified sound when someone is too close to you."
 
@@ -209,11 +232,16 @@ L.secondary = "Secondary"
 L.secondaryDesc = "The second raid target icon that a encounter script should use."
 
 -----------------------------------------------------------------------
--- Sound.lua
+-- Respawn.lua
 --
 
-L.defaultOnly = "Default only"
-L.soundDefaultDescription = "With this option set, Big Wigs will only use the default Blizzard raid warning sound for messages that come with a sound alert. Note that only some messages from encounter scripts will trigger a sound alert."
+L.respawn = "Respawn"
+L.showRespawnBar = "Show respawn bar"
+L.showRespawnBarDesc = "Show a bar after you wipe on a boss displaying the time until the boss respawns."
+
+-----------------------------------------------------------------------
+-- Sound.lua
+--
 
 L.Sounds = "Sounds"
 
@@ -222,12 +250,14 @@ L.Info = "Info"
 L.Alert = "Alert"
 L.Long = "Long"
 L.Warning = "Warning"
-L.Victory = "Victory"
 
 L.Beware = "Beware (Algalon)"
 L.FlagTaken = "Flag Taken (PvP)"
 L.Destruction = "Destruction (Kil'jaeden)"
 L.RunAway = "Run Away Little Girl (Big Bad Wolf)"
+
+L.sound = "Sound"
+L.soundDesc = "Messages might come with a sound. Some people find it easier to listen for these after they've learned which sound goes with which message, as opposed to reading the actual messages."
 
 L.customSoundDesc = "Play the selected custom sound instead of the one supplied by the module"
 L.resetAllCustomSound = "If you've customized sounds for any boss encounter settings, this button will reset ALL of them so the sounds defined here will be used instead."
@@ -251,4 +281,18 @@ L.countWipes = "Count Wipes"
 L.recordBestTime = "Remember Best Time"
 L.createTimeBar = "Show 'Best Time' bar"
 L.bestTimeBar = "Best Time"
+
+-----------------------------------------------------------------------
+-- Victory.lua
+--
+
+L.Victory = "Victory"
+L.victoryHeader = "Configure the actions that should be taken after you defeat a boss encounter."
+L.victorySound = "Play a victory sound"
+L.victoryMessages = "Show boss defeat messages"
+L.victoryMessageBigWigs = "Show the Big Wigs message"
+L.victoryMessageBigWigsDesc = "The Big Wigs message is a simple \"boss has been defeated\" message."
+L.victoryMessageBlizzard = "Show the Blizzard message"
+L.victoryMessageBlizzardDesc = "The Blizzard message is a very large \"boss has been defeated\" animation in the middle of your screen."
+L.defeated = "%s has been defeated"
 

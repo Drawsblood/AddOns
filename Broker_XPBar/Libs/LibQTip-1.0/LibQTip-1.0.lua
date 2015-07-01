@@ -1,5 +1,5 @@
 local MAJOR = "LibQTip-1.0"
-local MINOR = 42 -- Should be manually increased
+local MINOR = 44 -- Should be manually increased
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
@@ -46,6 +46,8 @@ lib.tooltipHeap = lib.tooltipHeap or {}
 lib.frameHeap = lib.frameHeap or {}
 lib.tableHeap = lib.tableHeap or {}
 
+lib.onReleaseHandlers = lib.onReleaseHandlers or {}
+
 local tipPrototype = lib.tipPrototype
 local tipMetatable = lib.tipMetatable
 
@@ -56,6 +58,17 @@ local cellPrototype = lib.cellPrototype
 local cellMetatable = lib.cellMetatable
 
 local activeTooltips = lib.activeTooltips
+
+local highlightFrame = CreateFrame("Frame", nil, UIParent)
+highlightFrame:SetFrameStrata("TOOLTIP")
+highlightFrame:Hide()
+
+local DEFAULT_HIGHLIGHT_TEXTURE_PATH = [[Interface\QuestFrame\UI-QuestTitleHighlight]]
+
+local highlightTexture = highlightFrame:CreateTexture(nil, "OVERLAY")
+highlightTexture:SetTexture(DEFAULT_HIGHLIGHT_TEXTURE_PATH)
+highlightTexture:SetBlendMode("ADD")
+highlightTexture:SetAllPoints(highlightFrame)
 
 ------------------------------------------------------------------------------
 -- Private methods for Caches and Tooltip
@@ -344,7 +357,15 @@ function ReleaseTooltip(tooltip)
 
 	tooltip:Hide()
 
-	if tooltip.OnRelease then
+	local releaseHandler = lib.onReleaseHandlers[tooltip]
+	if releaseHandler then
+		lib.onReleaseHandlers[tooltip] = nil
+
+		local success, errorMessage = pcall(releaseHandler, tooltip)
+		if not success then
+			geterrorhandler()(errorMessage)
+		end
+	elseif tooltip.OnRelease then
 		local success, errorMessage = pcall(tooltip.OnRelease, tooltip)
 		if not success then
 			geterrorhandler()(errorMessage)
@@ -378,6 +399,10 @@ function ReleaseTooltip(tooltip)
 
 	layoutCleaner.registry[tooltip] = nil
 	tinsert(tooltipHeap, tooltip)
+
+	highlightTexture:SetTexture(DEFAULT_HIGHLIGHT_TEXTURE_PATH)
+	highlightTexture:SetTexCoord(0, 1, 0, 1)
+
 	--[===[@debug@
 	usedTooltips = usedTooltips - 1
 	--@end-debug@]===]
@@ -1098,6 +1123,14 @@ function tipPrototype:SetLineTextColor(lineNum, r, g, b, a)
 	end
 end
 
+function tipPrototype:SetHighlightTexture(...)
+	return highlightTexture:SetTexture(...)
+end
+
+function tipPrototype:SetHighlightTexCoord(...)
+	highlightTexture:SetTexCoord(...)
+end
+
 do
 	local function checkFont(font, level, silent)
 		local bad = false
@@ -1190,28 +1223,21 @@ function tipPrototype:GetColumnCount() return #self.columns end
 ------------------------------------------------------------------------------
 -- Frame Scripts
 ------------------------------------------------------------------------------
-local highlight = CreateFrame("Frame", nil, UIParent)
-highlight:SetFrameStrata("TOOLTIP")
-highlight:Hide()
-
-highlight._texture = highlight:CreateTexture(nil, "OVERLAY")
-highlight._texture:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
-highlight._texture:SetBlendMode("ADD")
-highlight._texture:SetAllPoints(highlight)
-
 local scripts = {
 	OnEnter = function(frame, ...)
-		highlight:SetParent(frame)
-		highlight:SetAllPoints(frame)
-		highlight:Show()
+		highlightFrame:SetParent(frame)
+		highlightFrame:SetAllPoints(frame)
+		highlightFrame:Show()
+
 		if frame._OnEnter_func then
 			frame:_OnEnter_func(frame._OnEnter_arg, ...)
 		end
 	end,
 	OnLeave = function(frame, ...)
-		highlight:Hide()
-		highlight:ClearAllPoints()
-		highlight:SetParent(nil)
+		highlightFrame:Hide()
+		highlightFrame:ClearAllPoints()
+		highlightFrame:SetParent(nil)
+
 		if frame._OnLeave_func then
 			frame:_OnLeave_func(frame._OnLeave_arg, ...)
 		end
@@ -1314,9 +1340,16 @@ end
 -- :SetAutoHideDelay(0.25) => hides after 0.25sec outside of the tooltip
 -- :SetAutoHideDelay(0.25, someFrame) => hides after 0.25sec outside of both the tooltip and someFrame
 -- :SetAutoHideDelay() => disable auto-hiding (default)
-function tipPrototype:SetAutoHideDelay(delay, alternateFrame)
+function tipPrototype:SetAutoHideDelay(delay, alternateFrame, releaseHandler)
 	local timerFrame = self.autoHideTimerFrame
 	delay = tonumber(delay) or 0
+
+	if releaseHandler then
+		if type(releaseHandler) ~= "function" then
+			error("releaseHandler must be a function", 2)
+		end
+		lib.onReleaseHandlers[self] = releaseHandler
+	end
 
 	if delay > 0 then
 		if not timerFrame then

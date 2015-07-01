@@ -1,11 +1,8 @@
 local addonName = "Altoholic"
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
-
-local WHITE		= "|cFFFFFFFF"
-local GREEN		= "|cFF00FF00"
-local GREY		= "|cFF808080"
 
 local OPTION_FOLLOWERS = "UI.Tabs.Grids.Garrisons.CurrentFollowers"
 
@@ -17,40 +14,6 @@ local collected = {}
 local nonInnFollowers = { 
 	[32] = true,
 	[34] = true,
-	[87] = true,
-	[88] = true,
-	[89] = true,
-	[90] = true,
-	[91] = true,
-	[92] = true,
-	[93] = true,
-	[94] = true,
-	[95] = true,
-	[96] = true,
-	[97] = true,
-	[98] = true,
-	[99] = true,
-	[100] = true,
-	[101] = true,
-	[102] = true,
-	[103] = true,
-	[104] = true,
-	[105] = true,
-	[106] = true,
-	[107] = true,
-	[108] = true,
-	[109] = true,
-	[110] = true,
-	[111] = true,
-	[112] = true,
-	[113] = true,
-	[114] = true,
-	[115] = true,
-	[116] = true,
-	[117] = true,
-	[118] = true,
-	[119] = true,
-	[120] = true,
 	[153] = true,
 	[154] = true,
 	[155] = true,
@@ -59,7 +22,6 @@ local nonInnFollowers = {
 	[168] = true,
 	[170] = true,
 	[171] = true,
-	[172] = true,
 	[176] = true,
 	[177] = true,
 	[178] = true,
@@ -107,9 +69,6 @@ local followerTypes = {
 	L["Recruited at the inn"],
 	L["Not recruited at the inn"],
 }
-
-local DDM_Add = addon.Helpers.DDM_Add
-local DDM_AddCloseMenu = addon.Helpers.DDM_AddCloseMenu
 
 local function SortByFollowerName(a, b)
 	local nameA = C_Garrison.GetFollowerNameByID(a)
@@ -207,13 +166,13 @@ local function OnFollowerFilterChange(self)
 	addon.Tabs.Grids:Update()
 end
 
-local function DropDown_Initialize()
+local function DropDown_Initialize(frame)
 	local currentFollowers = addon:GetOption(OPTION_FOLLOWERS)
 	
 	for i = 1, #followerTypes do
-		DDM_Add(followerTypes[i], i, OnFollowerFilterChange, nil, (i==currentFollowers))
+		frame:AddButton(followerTypes[i], i, OnFollowerFilterChange, nil, (i==currentFollowers))
 	end
-	DDM_AddCloseMenu()
+	frame:AddCloseMenu()
 end
 
 local callbacks = {
@@ -230,7 +189,7 @@ local callbacks = {
 			rowFrame.Name.followerName = name
 
 			if name then
-				rowFrame.Name.Text:SetText(WHITE .. name)
+				rowFrame.Name.Text:SetText(colors.white .. name)
 				rowFrame.Name.Text:SetJustifyH("LEFT")
 			end
 		end,
@@ -264,7 +223,7 @@ local callbacks = {
 				button.key = character
 				button.followerID = id
 				button.Background:SetVertexColor(1.0, 1.0, 1.0);
-				button.Name:SetText(GREEN .. level)
+				button.Name:SetText(colors.green .. level)
 				
 				local r, g, b = GetItemQualityColor(rarity)
 				button.IconBorder:SetVertexColor(r, g, b, 0.5)
@@ -279,19 +238,8 @@ local callbacks = {
 				button.IconBorder:Hide()
 			end
 		end,
-	OnEnter = function(frame) 
-			local character = frame.key
-			if not character then return end
-
-			-- get the follower link
-			local link = DataStore:GetFollowerLink(character, frame.followerID)
-			if not link then return end
-			
-			-- toggle the tooltip, use blizzard's own function for that
-			local _, garrisonFollowerID, quality, level, itemLevel, ability1, ability2, ability3, ability4, trait1, trait2, trait3, trait4 = strsplit(":", link);
-			FloatingGarrisonFollowerTooltip:ClearAllPoints()
-			FloatingGarrisonFollowerTooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT", 1, 1)
-			FloatingGarrisonFollower_Toggle(tonumber(garrisonFollowerID), tonumber(quality), tonumber(level), tonumber(itemLevel), tonumber(ability1), tonumber(ability2), tonumber(ability3), tonumber(ability4), tonumber(trait1), tonumber(trait2), tonumber(trait3), tonumber(trait4))
+	OnEnter = function(frame)
+			addon:DrawFollowerTooltip(frame)
 		end,
 	OnClick = function(frame, button)
 			local character = frame.key
@@ -318,11 +266,18 @@ local callbacks = {
 
 			local currentFollowers = addon:GetOption(OPTION_FOLLOWERS)
 			
-			UIDropDownMenu_SetWidth(frame, 100) 
-			UIDropDownMenu_SetButtonWidth(frame, 20)
-			UIDropDownMenu_SetText(frame, followerTypes[currentFollowers])
-			addon:DDM_Initialize(frame, DropDown_Initialize)
+			frame:SetMenuWidth(100) 
+			frame:SetButtonWidth(20)
+			frame:SetText(followerTypes[currentFollowers])
+			frame:Initialize(DropDown_Initialize, "MENU_NO_BORDERS")
 		end,
 }
+
+local function OnFollowersUpdated()
+	isViewValid = nil
+	addon.Tabs.Grids:Update()
+end
+
+addon:RegisterMessage("DATASTORE_GARRISON_FOLLOWERS_UPDATED", OnFollowersUpdated)
 
 addon.Tabs.Grids:RegisterGrid(11, callbacks)

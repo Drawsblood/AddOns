@@ -1,18 +1,16 @@
-if not _G['ExtraActionBarFrame'] then
-	return
-end
+if not _G['ExtraActionBarFrame'] then return end
 
 --[[ Globals ]]--
 
-local _G = _G
-local Dominos = _G['Dominos']
+local Addon = _G[...]
 local KeyBound = LibStub('LibKeyBound-1.0')
-local Tooltips = Dominos:GetModule('Tooltips')
-local Bindings = Dominos.BindingsController
+local Tooltips = Addon:GetModule('Tooltips')
+local Bindings = Addon.BindingsController
+
 
 --[[ buttons ]]--
 
-local ExtraActionButton = Dominos:CreateClass('CheckButton', Dominos.BindableButton)
+local ExtraActionButton = Addon:CreateClass('CheckButton', Addon.BindableButton)
 
 do
 	local unused = {}
@@ -27,23 +25,14 @@ do
 	end
 
 	function ExtraActionButton:Create(id)
-		local b = self:Bind(_G[('ExtraActionButton%d'):format(id)])
+		local button = self:Bind(_G[('ExtraActionButton%d'):format(id)])
 
-		if b then
-			b.buttonType = 'EXTRAACTIONBUTTON'
-			b:HookScript('OnEnter', self.OnEnter)
-			b:Skin()
+		if button then
+			button.buttonType = 'EXTRAACTIONBUTTON'
+			button:HookScript('OnEnter', self.OnEnter)
+			Addon:GetModule('ButtonThemer'):Register(button, 'Extra Bar')
 
-			return b
-		end
-	end
-
-	--if we have button facade support, then skin the button that way
-	--otherwise, apply the dominos style to the button to make it pretty
-	function ExtraActionButton:Skin()
-		if not Dominos:Masque('Extra Bar', self) then
-			self.icon:SetTexCoord(0.06, 0.94, 0.06, 0.94)
-			self:GetNormalTexture():SetVertexColor(1, 1, 1, 0.5)
+			return button
 		end
 	end
 
@@ -65,7 +54,7 @@ do
 		self:SetParent(nil)
 		self:Hide()
 
-		Tooltips:Unregister(button)
+		Tooltips:Unregister(self)
 		Bindings:Unregister(self)
 	end
 
@@ -78,102 +67,87 @@ end
 
 --[[ bar ]]--
 
-local ExtraBar = Dominos:CreateClass('Frame', Dominos.Frame)
+local ExtraBar = Addon:CreateClass('Frame', Addon.ButtonBar)
 
-function ExtraBar:New()
-	local f = Dominos.Frame.New(self, 'extra')
-	
-	f:LoadButtons()
-	f:Layout()
-	f:UpdateShowBlizzardTexture()
+do
+	function ExtraBar:New()
+		local bar = ExtraBar.proto.New(self, 'extra')
 
-	return f
-end
+		bar:UpdateShowBlizzardTexture()
 
-function ExtraBar:GetDefaults()
-	return {
-		point = 'CENTER',
-		x = -244,
-		y = 0,
-	}
-end
-
-function ExtraBar:GetShowStates()
-	return '[extrabar]show;hide'
-end
-
-function ExtraBar:NumButtons()
-	return 1
-end
-
-function ExtraBar:AddButton(i)
-	local b = ExtraActionButton:New(i)
-
-	if b then
-		b:SetAttribute('showgrid', 1)
-		b:SetParent(self.header)
-		b:Show()
-
-		self.buttons[i] = b
+		return bar
 	end
-end
 
-function ExtraBar:RemoveButton(i)
-	local b = self.buttons[i]
-
-	if b then
-		b:SetParent(nil)
-		b:Hide()
-
-		self.buttons[i] = nil
+	function ExtraBar:GetDefaults()
+		return {
+			point = 'CENTER',
+			x = -244,
+			y = 0,
+		}
 	end
-end
 
-function ExtraBar:ShowBlizzardTexture(enable)
-	self.sets.hideBlizzardTeture = not enable
+	function ExtraBar:GetShowStates()
+		return '[extrabar]show;hide'
+	end
 
-	self:UpdateShowBlizzardTexture()
-end
+	function ExtraBar:NumButtons()
+		return 1
+	end
 
-function ExtraBar:ShowingBlizzardTexture()
-	return not self.sets.hideBlizzardTeture
-end
+	function ExtraBar:GetButton(index)
+		local button = ExtraActionButton:New(index)
 
-function ExtraBar:UpdateShowBlizzardTexture()
-	local showTexture = self:ShowingBlizzardTexture()
+		button:SetAttribute('showgrid', 1)
 
-	for i, button in pairs(self.buttons) do
-		if showTexture then
-			button.style:Show()
-		else
-			button.style:Hide()
+		return button
+	end
+
+	function ExtraBar:ShowBlizzardTexture(show)
+		self.sets.hideBlizzardTeture = not show
+
+		self:UpdateShowBlizzardTexture()
+	end
+
+	function ExtraBar:ShowingBlizzardTexture()
+		return not self.sets.hideBlizzardTeture
+	end
+
+	function ExtraBar:UpdateShowBlizzardTexture()
+		local showTexture = self:ShowingBlizzardTexture()
+
+		for i, button in pairs(self.buttons) do
+			if showTexture then
+				button.style:Show()
+			else
+				button.style:Hide()
+			end
 		end
 	end
-end
 
-function ExtraBar:CreateMenu()
-	local bar = self
-	local menu = Dominos:NewMenu(bar.id)
-	local panel = menu:AddLayoutPanel()
+	function ExtraBar:CreateMenu()
+		local bar = self
+		local menu = Addon:NewMenu(bar.id)
+		local panel = menu:AddLayoutPanel()
 
-	local L = LibStub('AceLocale-3.0'):GetLocale('Dominos-Config')	
-	local showTextureButton = panel:NewCheckButton(L.ExtraBarShowBlizzardTexture)
+		local L = LibStub('AceLocale-3.0'):GetLocale('Dominos-Config')
+		local showTextureButton = panel:NewCheckButton(L.ExtraBarShowBlizzardTexture)
 
-	showTextureButton:SetScript('OnShow', function(self)
-		self:SetChecked(bar:ShowingBlizzardTexture())
-	end)
-	
-	showTextureButton:SetScript('OnClick', function(self) 
-		bar:ShowBlizzardTexture(self:GetChecked())
-	end)
-		
-	menu:AddAdvancedPanel()
-	self.menu = menu
+		showTextureButton:SetScript('OnShow', function(self)
+			self:SetChecked(bar:ShowingBlizzardTexture())
+		end)
+
+		showTextureButton:SetScript('OnClick', function(self)
+			bar:ShowBlizzardTexture(self:GetChecked())
+		end)
+
+		menu:AddAdvancedPanel()
+		self.menu = menu
+	end
 end
 
 --[[ module ]]--
 
-local ExtraBarController = Dominos:NewModule('ExtraBar')
+local ExtraBarController = Addon:NewModule('ExtraBar')
 
 function ExtraBarController:OnInitialize()
 	_G['ExtraActionBarFrame'].ignoreFramePositionManager = true

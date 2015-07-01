@@ -84,7 +84,7 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	    [SPELL_POWER_RUNES] = RUNES,
 	    [SPELL_POWER_RUNIC_POWER] = RUNIC_POWER,
 	    [SPELL_POWER_SOUL_SHARDS] = SOUL_SHARDS,
-	    [SPELL_POWER_ECLIPSE] = ECLIPSE,
+	    [SPELL_POWER_ECLIPSE] = L["ECLIPSE"],
 	    [SPELL_POWER_HOLY_POWER] = HOLY_POWER,
 	    [SPELL_POWER_ALTERNATE_POWER] = L["CONDITIONPANEL_ALTPOWER"],
 	    --[11] = DARK_FORCE,
@@ -176,8 +176,11 @@ local function Value_OnUpdate(icon, time)
 				end
 				
 				local hasParts = hasParts[PowerType]
-				value, maxValue, valueColor = UnitPower(unit, PowerType, parts), UnitPowerMax(unit, PowerType, parts), PowerBarColor[PowerType]
+				value, maxValue, valueColor = UnitPower(unit, PowerType, hasParts), UnitPowerMax(unit, PowerType, hasParts), PowerBarColor[PowerType]
 				if PowerType == SPELL_POWER_ECLIPSE then
+					if GetEclipseDirection() == "none" then
+						value = 0
+					end
 					if value < 0 then
 						valueColor = valueColor.negative
 					else
@@ -227,10 +230,10 @@ function Type:Setup(icon)
 	icon:Update()
 end
 
-TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, typeData_old)
-		local icspv = icon:GetSettingsPerView()
+TMW:RegisterCallback("TMW_CONFIG_ICON_TYPE_CHANGED", function(event, icon, type, oldType)
+	local icspv = icon:GetSettingsPerView()
 
-	if typeData == Type and typeData_old then
+	if type == Type.type then
 		icon:GetSettings().CustomTex = "NONE"
 		local layout = TMW.TEXT:GetTextLayoutForIcon(icon)
 
@@ -238,7 +241,7 @@ TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, ty
 			icspv.Texts[1] = "[(Value / ValueMax * 100):Round:Percent]"
 			icspv.Texts[2] = "[Value:Short \"/\" ValueMax:Short]"
 		end
-	elseif typeData_old == Type then
+	elseif oldType == Type.type then
 		if icspv.Texts[1] == "[(Value / ValueMax * 100):Round:Percent]" then
 			icspv.Texts[1] = nil
 		end

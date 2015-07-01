@@ -4,9 +4,10 @@ addon:SetEnabledState(false)
 addon:SetDefaultModuleState(false)
 
 -- Embed callback handler
-addon.RegisterMessage = BigWigsLoader.RegisterMessage
-addon.UnregisterMessage = BigWigsLoader.UnregisterMessage
-addon.SendMessage = BigWigsLoader.SendMessage
+local loader = BigWigsLoader
+addon.RegisterMessage = loader.RegisterMessage
+addon.UnregisterMessage = loader.UnregisterMessage
+addon.SendMessage = loader.SendMessage
 
 local GetSpellInfo = GetSpellInfo
 
@@ -22,9 +23,11 @@ local bwUtilityFrame = CreateFrame("Frame")
 local bossCore, pluginCore
 
 -- Try to grab unhooked copies of critical loading funcs (hooked by some crappy addons)
-local GetCurrentMapAreaID = BigWigsLoader.GetCurrentMapAreaID
-local SetMapToCurrentZone = BigWigsLoader.SetMapToCurrentZone
-local SendAddonMessage = BigWigsLoader.SendAddonMessage
+local GetCurrentMapAreaID = loader.GetCurrentMapAreaID
+local SetMapToCurrentZone = loader.SetMapToCurrentZone
+local SendAddonMessage = loader.SendAddonMessage
+local GetAreaMapInfo = loader.GetAreaMapInfo
+local GetInstanceInfo = loader.GetInstanceInfo
 
 -- Upvalues
 local next, type = next, type
@@ -87,8 +90,10 @@ end
 function addon:ENCOUNTER_START(_, id)
 	for _, module in next, bossCore.modules do
 		if module.engageId == id then
-			if not module.enabledState then module:Enable() end
-			--module:Engage() -- No engaging until Blizzard fixes this event
+			if not module.enabledState then
+				module:Enable()
+				module:Engage()
+			end
 		end
 	end
 end
@@ -101,7 +106,7 @@ local enablezones, enablemobs, enableyells = {}, {}, {}
 local monitoring = nil
 
 local function enableBossModule(module, noSync)
-	if not module:IsEnabled() then
+	if not module:IsEnabled() and (not module.lastKill or (GetTime() - module.lastKill) > 150) then
 		module:Enable()
 		if not noSync and not module.worldBoss then
 			module:Sync("EnableModule", module:GetName())
@@ -112,8 +117,7 @@ end
 local function shouldReallyEnable(unit, moduleName, mobId)
 	local module = bossCore:GetModule(moduleName)
 	if not module or module:IsEnabled() then return end
-	-- If we pass the Verify Enable func (or it doesn't exist) and it's been > 150 seconds since the module was disabled, then enable it.
-	if (not module.VerifyEnable or module:VerifyEnable(unit, mobId)) and (not module.lastKill or (GetTime() - module.lastKill) > 150) then
+	if (not module.VerifyEnable or module:VerifyEnable(unit, mobId)) then
 		enableBossModule(module)
 	end
 end
@@ -149,14 +153,28 @@ local function unitTargetChanged(event, target)
 end
 
 local function zoneChanged()
+	local id
 	if not IsInInstance() then
-		for _, module in next, bossCore.modules do
-			if module.isEngaged then module:Wipe() end
+		-- We may be hearthing whilst a module is enabled and engaged, only wipe if we're a ghost (released spirit from an old zone).
+		if UnitIsDeadOrGhost("player") then
+			for _, module in next, bossCore.modules do
+				if module.isEngaged then
+					module:Wipe()
+				end
+			end
+		elseif WorldMapFrame:IsShown() then
+			local prevId = GetCurrentMapAreaID()
+			SetMapToCurrentZone()
+			id = GetCurrentMapAreaID()
+			SetMapByID(prevId)
+		else
+			SetMapToCurrentZone()
+			id = GetCurrentMapAreaID()
 		end
 	else
-		SetMapToCurrentZone() -- Hack because Astrolabe likes to screw with map setting in rare situations, so we need to force an update.
+		local _, _, _, _, _, _, _, instanceId = GetInstanceInfo()
+		id = instanceId
 	end
-	local id = GetCurrentMapAreaID()
 	if enablezones[id] then
 		if not monitoring then
 			monitoring = true
@@ -171,10 +189,6 @@ local function zoneChanged()
 		addon:UnregisterEvent("CHAT_MSG_MONSTER_YELL")
 		addon:UnregisterEvent("UPDATE_MOUSEOVER_UNIT")
 		addon:UnregisterEvent("UNIT_TARGET")
-	end
-
-	if id == 953 and addon.db.profile.blockmovies then -- Siege of Orgrimmar
-		addon:SiegeOfOrgrimmarCinematics()
 	end
 end
 
@@ -202,89 +216,6 @@ do
 end
 
 -------------------------------------------------------------------------------
--- Movie Blocking
---
-
-do
-	local knownMovies = {
-		[16] = true, -- Lich King death
-		[73] = true, -- Ultraxion death
-		[74] = true, -- DeathwingSpine engage
-		[75] = true, -- DeathwingSpine death
-		[76] = true, -- DeathwingMadness death
-		[152] = true, -- Garrosh defeat
-	}
-
-	function addon:PLAY_MOVIE(_, id)
-		if knownMovies[id] and self.db.profile.blockmovies then
-			if self.db.global.watchedMovies[id] then
-				self:Print(L.movieBlocked)
-				MovieFrame:Hide()
-			else
-				self.db.global.watchedMovies[id] = true
-			end
-		end
-	end
-
-	-- Cinematic handling
-	local cinematicZones = {
-		["800:1"] = true, -- Firelands bridge lowering
-		["875:1"] = true, -- Gate of the Setting Sun gate breach
-		["930:3"] = true, -- Tortos cave entry -- Doesn't work, apparently Blizzard don't want us to skip this..?
-		["930:7"] = true, -- Ra-Den room opening
-		["953:2"] = true, -- After Immerseus, entry to Fallen Protectors
-		["953:8"] = true, -- Blackfuse room opening, just outside the door
-		["953:9"] = true, -- Blackfuse room opening, in Thok area
-		["953:12"] = true, -- Mythic Garrosh Phase 4
-		["964:1"] = true, -- Bloodmaul Slag Mines, activating bridge to Roltall
-		["969:2"] = true, -- Shadowmoon Burial Grounds, final boss introduction
-		-- 984:1 is Auchindoun, but it unfortunately has 2 cinematics. 1 before the first boss and 1 before the last boss. Workaround?
-		["993:2"] = true, -- Grimrail Depot, boarding the train
-		["993:4"] = true, -- Grimrail Depot, destroying the train
-		["994:3"] = true, -- Highmaul, Kargath Death
-	}
-
-	-- Cinematic skipping hack to workaround an item (Vision of Time) that creates cinematics in Siege of Orgrimmar.
-	function addon:SiegeOfOrgrimmarCinematics()
-		local hasItem
-		for i = 105930, 105935 do -- Vision of Time items
-			local _, _, cd = GetItemCooldown(i)
-			if cd > 0 then hasItem = true end -- Item is found in our inventory
-		end
-		if hasItem and not self.SiegeOfOrgrimmarCinematicsFrame then
-			local tbl = {[149370] = true, [149371] = true, [149372] = true, [149373] = true, [149374] = true, [149375] = true}
-			self.SiegeOfOrgrimmarCinematicsFrame = CreateFrame("Frame")
-			-- frame:UNIT_SPELLCAST_SUCCEEDED:player:Vision of Time Scene 2::227:149371:
-			self.SiegeOfOrgrimmarCinematicsFrame:SetScript("OnEvent", function(_, _, _, _, _, _, spellId)
-				if tbl[spellId] then
-					addon:UnregisterEvent("CINEMATIC_START")
-					addon:ScheduleTimer("RegisterEvent", 10, "CINEMATIC_START")
-				end
-			end)
-			self.SiegeOfOrgrimmarCinematicsFrame:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
-		end
-	end
-
-	function addon:CINEMATIC_START()
-		if self.db.profile.blockmovies then
-			SetMapToCurrentZone()
-			local areaId = GetCurrentMapAreaID() or 0
-			local areaLevel = GetCurrentMapDungeonLevel() or 0
-			local id = ("%d:%d"):format(areaId, areaLevel)
-
-			if cinematicZones[id] then
-				if self.db.global.watchedMovies[id] then
-					self:Print(L.movieBlocked)
-					CinematicFrame_CancelCinematic()
-				else
-					self.db.global.watchedMovies[id] = true
-				end
-			end
-		end
-	end
-end
-
--------------------------------------------------------------------------------
 -- Testing
 --
 
@@ -292,26 +223,18 @@ do
 	local callbackRegistered = nil
 	local messages = {}
 	local colors = {"Important", "Personal", "Urgent", "Attention", "Positive", "Neutral"}
-	local sounds = {"Long", "Info", "Alert", "Alarm", "Victory", "Warning", false, false, false, false, false}
+	local sounds = {"Long", "Info", "Alert", "Alarm", "Warning", false, false, false, false, false}
 
 	local function barStopped(event, bar)
 		local a = bar:Get("bigwigs:anchor")
-		local key = bar.candyBarLabel:GetText()
+		local key = bar:GetLabel()
 		if a and messages[key] then
-			local color = colors[math.random(1, #colors)]
-			local sound = sounds[math.random(1, #sounds)]
-			if random(1, 2) == 2 then
+			local color = colors[random(1, #colors)]
+			local sound = sounds[random(1, #sounds)]
+			if random(1, 4) == 2 then
 				addon:SendMessage("BigWigs_Flash", addon, key)
-				addon:SendMessage("BigWigs_Pulse", addon, key, messages[key])
-				local colors = addon:GetPlugin("Colors", true)
-				local pulseColor
-				if colors then
-					local r, g, b = colors:GetColor("flash")
-					pulseColor = ("|cFF%02x%02x%02x"):format(r*255, g*255, b*255)
-				end
-				addon:Print(L.test .." - ".. (pulseColor or "") ..L.FLASH.. (pulseColor and "|r" or "") .." - ".. L.PULSE ..": |T".. messages[key] ..":15:15:0:0:64:64:4:60:4:60|t")
 			end
-			if sound then addon:Print(L.test .." - ".. L.sound ..": ".. sound) end
+			addon:Print(L.test .." - ".. color ..": ".. key)
 			addon:SendMessage("BigWigs_Message", addon, key, color..": "..key, color, messages[key])
 			addon:SendMessage("BigWigs_Sound", addon, key, sound)
 			messages[key] = nil
@@ -332,35 +255,10 @@ do
 			if not messages[spell] then break end
 		end
 
-		local time = math.random(11, 30)
+		local time = random(11, 30)
 		messages[spell] = icon
 
 		addon:SendMessage("BigWigs_StartBar", addon, spell, spell, time, icon)
-	end
-end
-
-
--------------------------------------------------------------------------------
--- Core syncs
---
-
--- Since this is from addon comms, it's the only place where we allow the module NAME to be passed, instead of the
--- actual module object. ALL other APIs should take module objects as arguments.
-local function coreSync(sync, moduleName, sender)
-	if sync == "EnableModule" then
-		local module = addon:GetBossModule(moduleName, true)
-		if sender ~= pName and module then
-			enableBossModule(module, true)
-		end
-	elseif sync == "Death" then
-		local mod = addon:GetBossModule(moduleName, true)
-		if mod and not mod.engageId and mod:IsEnabled() then
-			mod:Message("bosskill", "Positive", "Victory", L.defeated:format(mod.displayName), false)
-			mod.lastKill = GetTime() -- Add the kill time for the enable check.
-			if mod.OnWin then mod:OnWin() end
-			mod:SendMessage("BigWigs_OnBossWin", mod)
-			mod:Disable()
-		end
 	end
 end
 
@@ -373,7 +271,6 @@ do
 	local times = {}
 	local registered = {
 		BossEngaged = true,
-		Death = true,
 		EnableModule = true,
 	}
 
@@ -395,9 +292,12 @@ do
 					-- print("Engaging " .. tostring(rest) .. " based on engage sync from " .. tostring(nick) .. ".")
 					m:Engage()
 				end
-			elseif sync == "EnableModule" or sync == "Death" then
+			elseif sync == "EnableModule" then
 				if rest and (not times[sync] or t > (times[sync] + 2)) then
-					coreSync(sync, rest, nick)
+					local module = addon:GetBossModule(rest, true)
+					if nick ~= pName and module then
+						enableBossModule(module, true)
+					end
 					times[sync] = t
 				end
 			else
@@ -437,65 +337,95 @@ do
 	end
 end
 
+function addon:RAID_BOSS_WHISPER(_, msg) -- Purely for Transcriptor to assist in logging purposes.
+	if IsInGroup() then
+		local len = msg:len()
+		if len < 230 then -- Safety
+			SendAddonMessage("Transcriptor", msg, IsInGroup(2) and "INSTANCE_CHAT" or "RAID")
+		else
+			local id = msg:match("spell:%d+") or ""
+			self:Print(("Detected a boss whisper with %d characters. %s"):format(len, id))
+		end
+	end
+end
+
 -------------------------------------------------------------------------------
 -- Initialization
 --
 
-function addon:OnInitialize()
-	local defaults = {
-		profile = {
-			sound = true,
-			raidicon = true,
-			flash = true,
-			showBlizzardWarnings = false,
-			showZoneMessages = true,
-			blockmovies = true,
-			fakeDBMVersion = false,
-		},
-		global = {
-			optionShiftIndexes = {},
-			watchedMovies = {},
-		},
-	}
-	local db = LibStub("AceDB-3.0"):New("BigWigs3DB", defaults, true)
-	LibStub("LibDualSpec-1.0"):EnhanceDatabase(db, "BigWigs3DB")
+local initModules = {}
+do
+	local function InitializeModules()
+		local count = #initModules
+		if count > 0 then
+			for i = 1, count do
+				local module = initModules[i]
+				module:Initialize()
+				initModules[i] = nil
+			end
+			-- For LoD users
+			-- ZONE_CHANGED_NEW_AREA > LoadAddOn
+			-- ADDON_LOADED > InitializeModules
+			-- We're in a brand new zone that loaded a new addon and added modules.
+			-- Now force a zone check to be able to enable those modules.
+			zoneChanged()
+		end
+	end
 
 	local function profileUpdate()
 		addon:SendMessage("BigWigs_ProfileUpdate")
 	end
-	db.RegisterCallback(self, "OnProfileChanged", profileUpdate)
-	db.RegisterCallback(self, "OnProfileCopied", profileUpdate)
-	db.RegisterCallback(self, "OnProfileReset", profileUpdate)
-	self.db = db
 
-	-- XXX temp cleanup
-	if self.db.global.seenmovies then
+	local addonName = ...
+	function addon:ADDON_LOADED(_, name)
+		if name ~= addonName then return end
+
+		local defaults = {
+			profile = {
+				raidicon = true,
+				flash = true,
+				showZoneMessages = true,
+				fakeDBMVersion = false,
+			},
+			global = {
+				optionShiftIndexes = {},
+				watchedMovies = {},
+			},
+		}
+		local db = LibStub("AceDB-3.0"):New("BigWigs3DB", defaults, true)
+		LibStub("LibDualSpec-1.0"):EnhanceDatabase(db, "BigWigs3DB")
+
+		db.RegisterCallback(self, "OnProfileChanged", profileUpdate)
+		db.RegisterCallback(self, "OnProfileCopied", profileUpdate)
+		db.RegisterCallback(self, "OnProfileReset", profileUpdate)
+		self.db = db
+
+		-- XXX temp cleanup
 		self.db.global.seenmovies = nil
+		self.db.profile.showBlizzardWarnings = nil
+		self.db.profile.blockmovies = nil
+		self.db.profile.sound = nil
+		--
+
+		self.ADDON_LOADED = InitializeModules
+		InitializeModules()
 	end
-	--
-
-	self:RegisterBossOption("bosskill", L.bosskill, L.bosskill_desc, nil, "Interface\\Icons\\ability_rogue_feigndeath")
-	self:RegisterBossOption("berserk", L.berserk, L.berserk_desc, nil, "Interface\\Icons\\spell_shadow_unholyfrenzy")
-	self:RegisterBossOption("altpower", L.altpower, L.altpower_desc, nil, "Interface\\Icons\\spell_arcane_invocation")
-	self:RegisterBossOption("stages", L.stages, L.stages_desc)
-	self:RegisterBossOption("warmup", L.warmup, L.warmup_desc)
-
-	-- This should ALWAYS be the last action of OnInitialize, it will trigger the loader to
-	-- enable other packs that want to be loaded when the core loads.
-	self:SendMessage("BigWigs_CoreLoaded")
-	self.OnInitialize = nil
+	addon:RegisterEvent("ADDON_LOADED")
 end
 
 function addon:OnEnable()
 	self:RegisterMessage("BigWigs_AddonMessage", chatMsgAddon)
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", zoneChanged)
-	self:RegisterEvent("CINEMATIC_START")
-	self:RegisterEvent("PLAY_MOVIE")
 
 	self:RegisterEvent("ENCOUNTER_START")
 
-	pluginCore:Enable()
-	bossCore:Enable()
+	self:RegisterEvent("RAID_BOSS_WHISPER")
+
+	if IsLoggedIn() then
+		self:EnableModules()
+	else
+		self:RegisterEvent("PLAYER_LOGIN", "EnableModules")
+	end
 
 	zoneChanged()
 	self:SendMessage("BigWigs_CoreEnabled")
@@ -503,17 +433,22 @@ end
 
 function addon:OnDisable()
 	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
-	self:UnregisterEvent("CINEMATIC_START")
-	self:UnregisterEvent("PLAY_MOVIE")
 	self:UnregisterMessage("BigWigs_AddonMessage")
 
 	self:UnregisterEvent("ENCOUNTER_START")
+
+	self:UnregisterEvent("RAID_BOSS_WHISPER")
 
 	zoneChanged() -- Unregister zone events
 	bossCore:Disable()
 	pluginCore:Disable()
 	monitoring = nil
 	self:SendMessage("BigWigs_CoreDisabled")
+end
+
+function addon:EnableModules()
+	pluginCore:Enable()
+	bossCore:Enable()
 end
 
 function addon:Print(msg)
@@ -525,11 +460,20 @@ end
 -- Well .. except the module API, obviously.
 --
 
-function addon:RegisterBossOption(key, name, desc, func, icon)
-	if customBossOptions[key] then
-		error("The custom boss option %q has already been registered."):format(key)
+do
+	function addon:RegisterBossOption(key, name, desc, func, icon)
+		if customBossOptions[key] then
+			error("The custom boss option %q has already been registered."):format(key)
+		end
+		customBossOptions[key] = { name, desc, func, icon }
 	end
-	customBossOptions[key] = { name, desc, func, icon }
+
+	-- Adding core generic toggles
+	addon:RegisterBossOption("bosskill", "Old", "Remove me")
+	addon:RegisterBossOption("berserk", L.berserk, L.berserk_desc, nil, "Interface\\Icons\\spell_shadow_unholyfrenzy")
+	addon:RegisterBossOption("altpower", L.altpower, L.altpower_desc, nil, "Interface\\Icons\\spell_arcane_invocation")
+	addon:RegisterBossOption("stages", L.stages, L.stages_desc)
+	addon:RegisterBossOption("warmup", L.warmup, L.warmup_desc)
 end
 
 function addon:GetCustomBossOptions()
@@ -568,6 +512,7 @@ do
 			addon:Print(errorAlreadyRegistered:format(module))
 		else
 			local m = core:NewModule(module, ...)
+			initModules[#initModules+1] = m
 
 			-- Embed callback handler
 			m.RegisterMessage = addon.RegisterMessage
@@ -668,10 +613,10 @@ do
 					if v > 0 then
 						local n = GetSpellInfo(v)
 						if not n then error(("Invalid spell ID %d in the toggleOptions for module %s."):format(v, module.name)) end
-						module.toggleDefaults[n] = bitflags
+						module.toggleDefaults[v] = bitflags
 					else
 						local n = EJ_GetSectionInfo(-v)
-						if not n then error(("Invalid ej ID %d in the toggleOptions for module %s."):format(-v, module.name)) end
+						if not n then error(("Invalid journal ID (-)%d in the toggleOptions for module %s."):format(-v, module.name)) end
 						module.toggleDefaults[v] = bitflags
 					end
 				end
@@ -707,12 +652,9 @@ do
 
 		self:SendMessage("BigWigs_BossModuleRegistered", module.moduleName, module)
 
-		if not enablezones[module.zoneId] then
-			enablezones[module.zoneId] = true
-			-- We fire zoneChanged() as a backup for LoD users. In rare cases,
-			-- ZONE_CHANGED_NEW_AREA fires before the first module can add its zoneId into the table,
-			-- resulting in a failed check to register UPDATE_MOUSEOVER_UNIT, etc.
-			zoneChanged()
+		local id = module.worldBoss and module.zoneId or GetAreaMapInfo(module.zoneId)
+		if not enablezones[id] then
+			enablezones[id] = true
 		end
 	end
 
@@ -729,6 +671,10 @@ do
 			module.OnRegister = nil
 		end
 		self:SendMessage("BigWigs_PluginRegistered", module.moduleName, module)
+
+		if pluginCore:IsEnabled() then
+			module:Enable() -- Support LoD plugins that load after we're enabled (e.g. zone based)
+		end
 	end
 end
 

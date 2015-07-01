@@ -1,12 +1,12 @@
-## Interface: 60000
+## Interface: 60100
 ## Title: i|cffffffaaLocation|r
-## Version: 6.0.2.2
+## Version: 6.1.1
 ## Notes: The Location display for your broker bar!
 ## Author: grdn
 ## SavedVariables: iLocationDB
-## Dependencies: Blizzard_PetJournal
+## Dependencies: Blizzard_Collections
 ## OptionalDeps: Ace3, iLib, LibTourist-3.0
-## X-Curse-Packaged-Version: 6.0.2.2
+## X-Curse-Packaged-Version: 6.1.1
 ## X-Curse-Project-Name: iLocation
 ## X-Curse-Project-ID: ilocation
 ## X-Curse-Repository-ID: wow/ilocation/mainline

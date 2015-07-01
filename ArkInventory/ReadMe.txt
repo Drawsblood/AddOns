@@ -16,29 +16,28 @@ You can also over-ride the default category by creating a rule that matches eith
 
 
 
-to see how you need to setup sorting go here http://code.google.com/p/arkinventory/wiki/UserGuide_HowTo_Sorting
-to see how to setup rules go here http://code.google.com/p/arkinventory/wiki/RuleFunction
-the FAQ is here http://code.google.com/p/arkinventory/wiki/FAQ
-the wiki is here http://code.google.com/p/arkinventory/w/list
+to see how you need to setup sorting go here https://github.com/arkayenro/arkinventory/wiki/UserGuide_HowTo_Sorting
+to see how to setup rules go here https://github.com/arkayenro/arkinventory/wiki/RuleFunction
+the FAQ is https://github.com/arkayenro/arkinventory/wiki/FAQ
+the wiki is here https://github.com/arkayenro/arkinventory/wiki
 
-please ensure you have read those before you lodge a ticket at http://code.google.com/p/arkinventory/issues/list 
+please ensure you have read those before you lodge a ticket at https://github.com/arkayenro/arkinventory/issues
 
 
 General:
 
-    * home page - http://arkinventory.googlecode.com/
+    * home page - https://github.com/arkayenro/arkinventory/wiki
 	
-	* faq - http://code.google.com/p/arkinventory/wiki/FAQ
+	* faq - https://github.com/arkayenro/arkinventory/wiki/FAQ
 
 	* betas;
 		* backup your saved variables file for arkinventory
 		* when installing a new beta always restore a copy of your saved variabes from the backup you made (so it's starts clean - theres usually no automatic upgrade between beta versions)
 
-	* example rules - http://code.google.com/p/arkinventory/wiki/ExampleRules
+	* example rules - https://github.com/arkayenro/arkinventory/wiki/ExampleRules
 	
 	* download from;
 		* curse gaming - http://wow.curse.com/downloads/wow-addons/details/ark-inventory.aspx
-		* google code - http://code.google.com/p/arkinventory/downloads/list
 		* wow interface - http://www.wowinterface.com/downloads/info6488
 		
 	
@@ -79,4 +78,4 @@ To Do:
 
 
 Version History:
-	* see VersionHistory.txt or http://code.google.com/p/arkinventory/wiki/VersionHistory
+	* see VersionHistory.txt or https://github.com/arkayenro/arkinventory/wiki/VersionHistory

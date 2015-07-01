@@ -14,7 +14,6 @@ mod.engageId = 1705
 
 local phase = 1
 local mineCount, novaCount, aberrationCount, nightCount, glimpseCount = 1, 1, 1, 1, 1
-local p1times = {}
 local addDeathWarned = nil
 local markOfChaosTarget, brandedOnMe, fixateOnMe, replicatingNova, gazeOnMe = nil, nil, nil, nil, nil
 local novaTimer = nil
@@ -26,17 +25,11 @@ local fixateMarks, brandedMarks, gazeTargets = {}, {}, {}
 
 local L = mod:NewLocale("enUS", true)
 if L then
-	L.phase4_trigger = "You know nothing of the power you meddle with"
-
 	L.branded_say = "%s (%d) %dy"
 	L.add_death_soon = "Add dying soon!"
 	L.slow_fixate = "Slow+Fixate"
 
-	L.gaze_target = 176537 -- Gaze of the Abyss (needed a string key so it doesn't conflict with 165595)
-	L.gaze_target_icon = 176537
-	L.gaze_target_message = "Glimpse targeting YOU!"
-
-	L.adds = "Night-Twisted Faithful" -- XXX CL.adds?
+	L.adds = "Night-Twisted Faithful"
 	L.adds_desc = "Timer for when Night-Twisted Faithful enter the fight."
 	L.adds_icon = "spell_shadow_raisedead"
 
@@ -65,7 +58,7 @@ function mod:GetOptions()
 		165116, -- Entropy
 		165876, -- Enveloping Night
 		165243, -- Glimpse of Madness
-		{"gaze_target", "FLASH"},
+		{176537, "FLASH"}, -- Eyes of the Abyss
 		{165595, "PROXIMITY", "SAY"}, -- Gaze of the Abyss
 		"adds", -- Night-Twisted Faithful
 		{176533, "FLASH"}, -- Growing Darkness
@@ -91,7 +84,7 @@ function mod:GetOptions()
 		{158563, "TANK"}, -- Kick to the Face
 		--[[ General ]]--
 		"stages",
-		"bosskill"
+		"berserk",
 	}, {
 		[178607] = "mythic",
 		[159515] = mod.displayName,
@@ -103,8 +96,8 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
-	--self:Log("SPELL_CAST_SUCCESS", "PhaseEnd", 181089) -- XXX 6.1
-	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "PhaseEnd", "boss1")
+	self:Log("SPELL_CAST_SUCCESS", "PhaseEnd", 181089) -- Encounter Event
+	self:Log("SPELL_AURA_APPLIED", "DisplacementPhaseStart", 158013) -- Power of Displacement
 	self:Log("SPELL_AURA_APPLIED", "PhaseStart", 158012, 157964) -- Power of Fortification, Replication
 	self:Log("SPELL_AURA_APPLIED_DOSE", "AcceleratedAssault", 159515)
 	-- Spell, Spell: Displacement, Spell: Fortification, Spell: Replication
@@ -137,10 +130,10 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_APPLIED", "GazeOfTheAbyssApplied", 165595)
 	self:Log("SPELL_AURA_APPLIED_DOSE", "GazeOfTheAbyssApplied", 165595)
 	self:Log("SPELL_AURA_REMOVED", "GazeOfTheAbyssRemoved", 165595)
-	self:Log("SPELL_AURA_APPLIED", "GazeClosestApplied", 176537) -- XXX 6.1 renamed to Eyes of the Abyss
-	self:Log("SPELL_AURA_REMOVED", "GazeClosestRemoved", 176537) -- XXX 6.1 renamed to Eyes of the Abyss
+	self:Log("SPELL_AURA_APPLIED", "EyesOfTheAbyssApplied", 176537)
+	self:Log("SPELL_AURA_REMOVED", "EyesOfTheAbyssRemoved", 176537)
 	self:Log("SPELL_AURA_APPLIED", "GrowingDarknessDamage", 176525)
-	--self:Log("SPELL_CAST_SUCCESS", "ChogallSpawn", 181113) -- XXX 6.1
+	self:Log("SPELL_CAST_SUCCESS", "ChogallSpawn", 181113) -- Encounter Spawn
 
 	self:Death("ReaverDeath", 78549) -- Gorian Reaver
 end
@@ -152,20 +145,15 @@ function mod:OnEngage()
 	addDeathWarned = nil
 	wipe(fixateMarks)
 	wipe(brandedMarks)
-	if not self:Mythic() then
-		local t = GetTime()
-		p1times[156238] = t + 6
-		p1times[156467] = t + 15
-		p1times[156471] = t + 25
-		p1times[158605] = t + 34
-		p1times[157349] = t + 45
-	end
-	self:Bar(156238, 6)  -- Arcane Wrath
+	self:Bar(156238, 6) -- Arcane Wrath
 	self:Bar(156467, 15) -- Destructive Resonance
 	self:Bar(156471, 25, CL.count:format(self:SpellName(-9945), aberrationCount), 156471) -- Arcane Aberration
 	self:Bar(158605, 34) -- Mark of Chaos
 	self:Bar(157349, 45) -- Force Nova
 	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	if self:LFR() then
+		self:Berserk(900)
+	end
 end
 
 function mod:OnBossDisable()
@@ -247,27 +235,20 @@ do
 		self:ScheduleTimer(nextAdd, 30, self) -- could use ScheduleRepeatingTimer, but the first time had to be special and ruin it :(
 	end
 
-	function mod:Phase4(event, msg, unit)
-		if unit ~= EJ_GetEncounterInfo(167) then return end -- Cho'gall from Bastion of Twilight
-		self:UnregisterEvent(event)
-		if phase == 4 then return end -- y u no unregistered
-
-		self:ScheduleTimer(startPhase, 10, self)
-		phase = 4
-		nightCount = 1
-		glimpseCount = 1
-		gazeOnMe = nil
-		wipe(gazeTargets)
-		self:Message("stages", "Neutral", "Long", CL.phase:format(phase), false)
-		self:CDBar("adds", 32, CL.adds, L.adds_icon)
-		self:ScheduleTimer(nextAdd, 32, self)
-		self:DelayedMessage(165876, 80, "Important", CL.soon:format(CL.count:format(self:SpellName(165876), nightCount)), false, "Info")
+	function mod:ChogallSpawn(args)
+		if self:MobId(args.sourceGUID) == 78623 then -- Cho'gall
+			self:ScheduleTimer(startPhase, 10, self)
+			phase = 4
+			nightCount = 1
+			glimpseCount = 1
+			gazeOnMe = nil
+			wipe(gazeTargets)
+			self:Message("stages", "Neutral", "Long", CL.phase:format(phase), false)
+			self:CDBar("adds", 32, CL.adds, L.adds_icon)
+			self:ScheduleTimer(nextAdd, 32, self)
+			self:DelayedMessage(165876, 80, "Important", CL.soon:format(CL.count:format(self:SpellName(165876), nightCount)), false, "Info")
+		end
 	end
-
-	-- XXX for patch 6.1
-	--function mod:ChogallSpawn(args)
-	--	
-	--end
 end
 
 do
@@ -319,19 +300,9 @@ function mod:GlimpseOfMadness(args)
 	self:Bar(args.spellId, 27, CL.count:format(args.spellName, glimpseCount))
 end
 
-do -- GazeOfTheAbyss
+do -- Gaze/Eyes of the Abyss
 	-- I may be trying to be too clever here, but hopefully I over-engineered it enough to play nice
 	-- only show the proximity for people that aren't targeted by an add (debuff will fall off)
-
-	-- debuff scanning because the two add debuffs have the same name :\
-
-	-- XXX fixed for 6.1, renamed to "Eyes of the Abyss" FIXME
-	local function checkDebuff(unit, id)
-		if select(11, UnitDebuff(unit, (GetSpellInfo(id)))) == id then return true end -- only one?
-		for i = 1, 10 do
-			if select(11, UnitDebuff(unit, i)) == id then return true end
-		end
-	end
 
 	local timeLeft, timer = 15, nil
 	local function sayCountdown(self)
@@ -356,7 +327,7 @@ do -- GazeOfTheAbyss
 			timer = self:ScheduleRepeatingTimer(sayCountdown, 1, self)
 
 			updateProximity()
-		elseif not checkDebuff(args.destName, 176537) and not tContains(gazeTargets, args.destName) then -- no "closest" debuff and not currently tracked
+		elseif not UnitDebuff(args.destName, self:SpellName(176537)) and not tContains(gazeTargets, args.destName) then -- no "closest" debuff and not currently tracked
 			gazeTargets[#gazeTargets + 1] = args.destName
 			updateProximity()
 		end
@@ -375,22 +346,22 @@ do -- GazeOfTheAbyss
 		updateProximity()
 	end
 
-	function mod:GazeClosestApplied(args)
+	function mod:EyesOfTheAbyssApplied(args)
 		if self:Me(args.destGUID) then
-			self:Message("gaze_target", "Personal", "Alarm", L.gaze_target_message, 176537)
-			self:Flash("gaze_target")
+			self:Message(args.spellId, "Personal", "Alarm", CL.you:format(self:SpellName(167536)), args.spellId) -- 167536 = "Eyes"
+			self:Flash(args.spellId)
 			if gazeOnMe then return end
 		end
 
 		tDeleteItem(gazeTargets, args.destName)
 		if #gazeTargets == 0 and not gazeOnMe then
-			self:CloseProximity(args.spellId)
+			self:CloseProximity(165595) -- Gaze of the Abyss
 		end
 		updateProximity()
 	end
 
-	function mod:GazeClosestRemoved(args)
-		if not self:Me(args.destGUID) and checkDebuff(args.destName, 165595) and not tContains(gazeTargets, args.destName) then -- check explody debuff
+	function mod:EyesOfTheAbyssRemoved(args)
+		if not self:Me(args.destGUID) and UnitDebuff(args.destName, self:SpellName(165595)) and not tContains(gazeTargets, args.destName) then -- check explody debuff
 			gazeTargets[#gazeTargets + 1] = args.destName
 			updateProximity()
 		end
@@ -431,50 +402,53 @@ function mod:UNIT_HEALTH_FREQUENT(unit)
 	end
 end
 
-function mod:PhaseEnd(unit, spellName, _, _, spellId)
-	if spellId == 164336 or spellId == 164751 or spellId == 164810 then -- Teleport to Displacement, Fortification, Replication
-		phase = phase + 1
-		mineCount, novaCount = 1, 1
+function mod:PhaseEnd()
+	phase = phase + 1
 
-		if spellId == 164336 then -- short intermission for Displacement
-			self:Message("stages", "Neutral", "Long", CL.phase:format(phase), false)
-			self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, unit)
-			 -- first power just pauses the cds for a few seconds
-			local t = GetTime()
-			self:CDBar(156238, p1times[156238]+3.6-t) -- Arcane Wrath
-			self:CDBar(156467, p1times[156467]+3.6-t) -- Destructive Resonance
-			self:CDBar(156471, p1times[156471]+3.6-t, CL.count:format(self:SpellName(-9945), aberrationCount), 156471) -- Arcane Aberration
-			self:CDBar(158605, p1times[158605]+3.6-t) -- Mark of Chaos
-			self:CDBar(157349, p1times[157349]+3.6-t) -- Force Nova
-			wipe(p1times)
-		else
-			self:StopBar(156238) -- Arcane Wrath
-			self:StopBar(156467) -- Destructive Resonance
-			self:StopBar(CL.count:format(self:SpellName(-9945), aberrationCount)) -- Arcane Aberration
-			self:StopBar(158605) -- Mark of Chaos
-			self:StopBar(157349) -- Force Nova
-			self:StopBar(164235) -- Force Nova: Fortification
-			self:CancelTimer(novaTimer)
+	if phase == 2 then -- short intermission for Displacement
+		self:Message("stages", "Neutral", "Long", CL.phase:format(phase), false)
+		self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+		-- attempt #4 it seems more like paused if < 10, then starts casting with a 3s cd to get caught up with expired spells
+		self:StopBar(156467) -- Destructive Resonance
+		if self:BarTimeLeft(156238) < 13 then self:PauseBar(156238) end
+		if self:BarTimeLeft(156467) < 13 then self:PauseBar(156467) end
+		if self:BarTimeLeft(CL.count:format(self:SpellName(-9945), aberrationCount)) < 15 then self:PauseBar(156471, CL.count:format(self:SpellName(-9945), aberrationCount)) end
+		if self:BarTimeLeft(158605) < 13 then self:PauseBar(158605) end
+		if self:BarTimeLeft(157349) < 13 then self:PauseBar(157349) end
+	else
+		self:StopBar(156238) -- Arcane Wrath
+		self:StopBar(156467) -- Destructive Resonance
+		self:StopBar(CL.count:format(self:SpellName(-9945), aberrationCount)) -- Arcane Aberration
+		self:StopBar(158605) -- Mark of Chaos
+		self:StopBar(157349) -- Force Nova
+		self:StopBar(164235) -- Force Nova: Fortification
+		self:CancelTimer(novaTimer)
 
-			aberrationCount = 1
-			self:Bar("volatile_anomaly", spellId == 164810 and 12 or 9, CL.count:format(self:SpellName(L.volatile_anomaly), 1), L.volatile_anomaly_icon)
-			if spellId == 164810 then
-				self:Bar(-9921, 15, nil, "ability_warrior_shieldbreak") -- Gorian Reaver
-				self:DelayedMessage(-9921, 15, "Neutral", nil, false, "Info")
-				self:ScheduleTimer("CDBar", 15, 158563, 27) -- Kick to the Face
-			end
+		mineCount, novaCount, aberrationCount = 1, 1, 1
+		local phaseToCheck = self:Mythic() and 3 or 4
+		self:Bar("volatile_anomaly", phase == phaseToCheck and 12 or 9, CL.count:format(self:SpellName(L.volatile_anomaly), 1), L.volatile_anomaly_icon)
+		if phase == phaseToCheck then
+			self:Bar(-9921, 15, nil, "ability_warrior_shieldbreak") -- Gorian Reaver
+			self:DelayedMessage(-9921, 15, "Neutral", nil, false, "Info")
+			-- Kick can vary, think it's similar to Brackenspore's big adds where they'll wait until after they melee someone to start their abilities
+			self:ScheduleTimer("CDBar", 15, 158563, 25) -- Kick to the Face
 		end
 	end
 end
 
--- XXX for patch 6.1
---function mod:PhaseEnd(args)
---	
---end
+function mod:DisplacementPhaseStart(args)
+	if not self:Mythic() then
+		self:ResumeBar(156238) -- Arcane Wrath
+		self:CDBar(156467, 15) -- Destructive Resonance
+		self:ResumeBar(156471, CL.count:format(self:SpellName(-9945), aberrationCount)) -- Arcane Aberration
+		self:ResumeBar(158605) -- Mark of Chaos
+		self:ResumeBar(157349) -- Force Nova
+	end
+end
 
 function mod:PhaseStart(args)
 	if not self.isEngaged then return end -- In Mythic mode he gains this when he's floating around the room before engage.
-	self:CDBar(156238, 8)  -- Arcane Wrath
+	self:CDBar(156238, 8) -- Arcane Wrath
 	self:CDBar(156467, 18) -- Destructive Resonance
 	self:CDBar(156471, 28, CL.count:format(self:SpellName(-9945), aberrationCount)) -- Arcane Aberration
 	self:CDBar(158605, 38) -- Mark of Chaos
@@ -482,13 +456,11 @@ function mod:PhaseStart(args)
 	if args.spellId ~= 157964 or self:Mythic() then -- Replication is the last phase
 		self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
 	end
-	if args.spellId == 157964 and self:Mythic() then
-		self:RegisterEvent("CHAT_MSG_MONSTER_YELL", "Phase4")
-	end
 end
 
 function mod:AcceleratedAssault(args)
 	if args.amount > 5 and args.amount % 3 == 0 then -- at 5 it stacks every second
+		-- This is the buff the boss gains if he is hitting the same tank. It's not really a stack message on the tank, but this is a clearer way of presenting it.
 		self:StackMessage(args.spellId, self:UnitName("boss1target"), args.amount, "Attention", "Warning")
 	end
 end
@@ -502,18 +474,12 @@ function mod:ArcaneAberration(args)
 		addDeathWarned = nil
 		self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss2")
 	end
-	if not self:Mythic() and phase == 1 then
-		p1times[156471] = GetTime() + 46
-	end
 end
 
 function mod:ArcaneWrath(args)
 	self:Message(156238, "Urgent", self:Healer() and "Alert")
 	self:Bar(156238, 50)
 	wipe(brandedMarks)
-	if not self:Mythic() and phase == 1 then
-		p1times[156238] = GetTime() + 50
-	end
 end
 
 do
@@ -530,25 +496,7 @@ do
 		brandedMarks[#brandedMarks+1] = args.destName
 
 		local _, _, _, amount = UnitDebuff(self:Me(args.destGUID) and "player" or args.destName, args.spellName)
-		if not amount then
-			self:ScheduleTimer(
-				function(dst, spl)
-					local _, _, _, a = UnitDebuff(dst, spl)
-					if a then
-						BigWigs:Print("The debuff scan worked after a delay, tell a developer!")
-						self:ScheduleTimer(error, 0.5, "BigWigs: The debuff scan worked after a delay, tell a developer!")
-					else
-						BigWigs:Print("The debuff scan failed even after a delay, tell a developer!")
-						self:ScheduleTimer(error, 0.5, "BigWigs: The debuff scan failed even after a delay, tell a developer!")
-					end
-				end,
-				0.4, self:Me(args.destGUID) and "player" or args.destName, args.spellName
-			)
-			local _, _, h, w = GetNetStats()
-			BigWigs:Print(("The debuff scan failed, tell a developer! Latency: %d/%d"):format(h, w))
-			self:ScheduleTimer(error, 0.5, ("BigWigs: The debuff scan failed, tell a developer! Latency: %d/%d"):format(h, w))
-			amount = 0 -- don't show count or distance
-		end
+		if not amount then amount = 0 end -- don't show count or distance (never got any reports of this happening, but just to make sure)
 		local isFortification = args.spellId == 164005 or (self:Mythic() and phase == 3)
 		local jumpDistance = (isFortification and 0.75 or 0.5)^(amount - 1) * 200 -- Fortification takes longer to get rid of
 
@@ -592,17 +540,13 @@ end
 do
 	local mineTimes = {
 		[3] = { 24, 15.8, 24, 19.4, 28, 23 },
-		[4] = { 24, },
 	}
 	function mod:DestructiveResonance(args)
 		local sound = self:Healer() or self:Damager() == "RANGED"
 		self:Message(156467, "Important", sound and "Warning")
-		local t = not self:Mythic() and mineTimes[phase] and mineTimes[phase][mineCount] or 15.8
-		self:CDBar(156467, phase == 1 and 24 or t)
+		local t = mineCount == 1 and 24 or (not self:Mythic() and mineTimes[phase] and mineTimes[phase][mineCount]) or 15.8
+		self:CDBar(156467, t)
 		mineCount = mineCount + 1
-		if not self:Mythic() and phase == 1 then
-			p1times[156467] = GetTime() + 24
-		end
 	end
 end
 
@@ -615,9 +559,6 @@ do
 	function mod:ForceNova(args)
 		self:Message(157349, "Urgent")
 		self:CDBar(157349, novaCount == 1 and 46 or 50)
-		if not self:Mythic() and phase == 1 then
-			p1times[157349] = GetTime() + (novaCount == 1 and 46 or 50)
-		end
 		if args.spellId == 164235 or (self:Mythic() and phase == 3) then -- Fortification (three novas)
 			self:Bar(157349, 10.5, 164235) -- 164235 = Force Nova: Fortification
 			novaTimer = self:ScheduleTimer("Bar", 10.5, 157349, 8, 164235)
@@ -641,12 +582,8 @@ do
 		end
 	end
 	function mod:MarkOfChaos(args)
-		--self:TargetMessage(158605, self:UnitName("boss1target"), "Urgent", "Warning", CL.casting:format(self:SpellName(158605)))
 		self:GetBossTarget(printTarget, 0.1, args.sourceGUID)
-		self:Bar(158605, 51)
-		if not self:Mythic() and phase == 1 then
-			p1times[158605] = GetTime() + 51
-		end
+		self:Bar(158605, 51) -- sometimes 50, sometimes 55, but mostly 51
 	end
 end
 
@@ -658,9 +595,7 @@ function mod:MarkOfChaosApplied(args)
 	local isFortification = args.spellId == 164178 or (self:Mythic() and phase == 3)
 	if self:Me(args.destGUID) then
 		self:Flash(158605)
-		if isFortification then -- Fortification (you're rooted)
-			self:Say(158605)
-		end
+		self:Say(158605)
 	elseif isFortification and self:Range(args.destName) < 35 then -- Fortification (target rooted)
 		self:Flash(158605)
 	end
@@ -693,7 +628,7 @@ do
 		self:Bar("stages", first and 65 or 60, CL.intermission, "spell_arcane_blast")
 		count = 1
 		self:DelayedMessage("volatile_anomaly", 2, "Attention", ("%s %d/6"):format(self:SpellName(L.volatile_anomaly), count), L.volatile_anomaly_icon, "Info")
-		-- first add bar is started in :Phases
+		-- first add bar is started in :PhaseEnd
 		self:ScheduleTimer(nextAdd, 2, self)
 	end
 

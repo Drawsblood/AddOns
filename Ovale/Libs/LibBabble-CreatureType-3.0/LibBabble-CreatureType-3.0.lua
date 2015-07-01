@@ -1,6 +1,6 @@
 --[[
 Name: LibBabble-CreatureType-3.0
-Revision: $Rev: 149 $
+Revision: $Rev: 154 $
 Maintainers: ckknight, nevcairiel, Ackis
 Website: http://www.wowace.com/projects/libbabble-creaturetype-3-0/
 Dependencies: None
@@ -8,7 +8,7 @@ License: MIT
 ]]
 
 local MAJOR_VERSION = "LibBabble-CreatureType-3.0"
-local MINOR_VERSION = 90000 + tonumber(("$Rev: 149 $"):match("%d+"))
+local MINOR_VERSION = 90000 + tonumber(("$Rev: 154 $"):match("%d+"))
 
 if not LibStub then error(MAJOR_VERSION .. " requires LibStub.") end
 local lib = LibStub("LibBabble-3.0"):New(MAJOR_VERSION, MINOR_VERSION)
@@ -282,15 +282,15 @@ elseif GAME_LOCALE == "koKR" then
 	["Carrion Bird"] = "독수리",
 	Cat = "살쾡이",
 	Chimaera = "키메라",
-	-- Clefthoof = "",
+	Clefthoof = "갈래발굽", -- Needs review
 	["Core Hound"] = "심장부 사냥개",
 	Crab = "게",
-	-- Crane = "",
+	Crane = "학", -- Needs review
 	Critter = "동물",
 	Crocolisk = "악어",
 	Demon = "악마",
 	Devilsaur = "데빌사우루스",
-	-- Direhorn = "",
+	Direhorn = "공포뿔", -- Needs review
 	Dog = "개",
 	Doomguard = "파멸의 수호병",
 	Dragonhawk = "용매",
@@ -298,12 +298,12 @@ elseif GAME_LOCALE == "koKR" then
 	Elemental = "정령",
 	Felguard = "지옥수호병",
 	Felhunter = "지옥사냥개",
-	-- ["Fel Imp"] = "",
+	["Fel Imp"] = "지옥 임프", -- Needs review
 	Fox = "여우",
 	["Gas Cloud"] = "가스",
 	Ghoul = "구울",
 	Giant = "거인",
-	-- Goat = "",
+	Goat = "염소", -- Needs review
 	Gorilla = "고릴라",
 	Humanoid = "인간형",
 	Hydra = "히드라", -- Needs review
@@ -315,41 +315,41 @@ elseif GAME_LOCALE == "koKR" then
 	["Nether Ray"] = "황천의 가오리",
 	["Non-combat Pet"] = "애완동물",
 	["Not specified"] = "기타",
-	-- Observer = "",
-	-- Porcupine = "",
-	-- Quilen = "",
+	Observer = "감시자", -- Needs review
+	Porcupine = "호저", -- Needs review
+	Quilen = "기렌", -- Needs review
 	Raptor = "랩터",
 	Ravager = "칼날발톱",
 	["Remote Control"] = "무선조종 장난감",
 	Rhino = "코뿔소",
-	-- Riverbeast = "",
+	Riverbeast = "강물하마", -- Needs review
 	Rylak = "라일라크", -- Needs review
 	Scorpid = "전갈",
 	Serpent = "뱀",
 	["Shale Spider"] = "혈암 거미",
-	-- Shivarra = "",
+	Shivarra = "쉬바라", -- Needs review
 	Silithid = "실리시드",
 	Spider = "거미",
 	["Spirit Beast"] = "야수 정령",
 	Sporebat = "포자날개",
-	-- Stag = "",
+	Stag = "사슴", -- Needs review
 	Succubus = "서큐버스",
 	Tallstrider = "타조",
-	-- Terrorguard = "",
+	Terrorguard = "공포수호병", -- Needs review
 	Totem = "토템",
 	Turtle = "거북",
 	Undead = "언데드",
-	-- Voidlord = "",
+	Voidlord = "공허군주", -- Needs review
 	Voidwalker = "보이드워커",
 	["Warp Stalker"] = "차원의 추적자",
 	Wasp = "말벌",
 	["Water Elemental"] = "물 정령",
-	-- ["Water Strider"] = "",
-	-- ["Wild Pet"] = "",
+	["Water Strider"] = "소금쟁이", -- Needs review
+	["Wild Pet"] = "야생 애완동물", -- Needs review
 	["Wind Serpent"] = "천둥매",
 	Wolf = "늑대",
 	Worm = "벌레",
-	-- Wrathguard = "",
+	Wrathguard = "격노수호병", -- Needs review
 }
 elseif GAME_LOCALE == "esES" then
 	lib:SetCurrentTranslations {

@@ -1,52 +1,37 @@
 local addonName = "Altoholic"
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
-local GREEN		= "|cFF00FF00"
-
-local parent = "AltoholicTabSummary"
-local rcMenuName = parent .. "RightClickMenu"	-- name of right click menu frames (add a number at the end to get it)
+local parentName = "AltoholicTabSummary"
+local parent
 
 local OPTION_REALMS = "UI.Tabs.Summary.CurrentRealms"
+local OPTION_FACTIONS = "UI.Tabs.Summary.CurrentFactions"
+local OPTION_LEVELS = "UI.Tabs.Summary.CurrentLevels"
+local OPTION_LEVELS_MIN = "UI.Tabs.Summary.CurrentLevelsMin"
+local OPTION_LEVELS_MAX = "UI.Tabs.Summary.CurrentLevelsMax"
+local OPTION_CLASSES = "UI.Tabs.Summary.CurrentClasses"
+local OPTION_TRADESKILL = "UI.Tabs.Summary.CurrentTradeSkill"
 
 local THISREALM_THISACCOUNT = 1
 local THISREALM_ALLACCOUNTS = 2
 local ALLREALMS_THISACCOUNT = 3
 local ALLREALMS_ALLACCOUNTS = 4
 
-local currentMode
-
-local childrenFrames = {
-	"Summary",
-	"BagUsage",
-	"Skills",
-	"Activity",
-	"Currencies",
-	"GarrisonFollowers",
-}
-
-local childrenObjects		-- these are the tables that actually contain the BuildView & Update methods. Not really OOP, but enough for our needs
+-- local NUM_MENU_ITEMS = 6
 
 addon.Tabs.Summary = {}
 
 local ns = addon.Tabs.Summary		-- ns = namespace
 
 local locationLabels = {
-	[THISREALM_THISACCOUNT] = format("%s %s(%s)", L["This realm"], GREEN, L["This account"]),
-	[THISREALM_ALLACCOUNTS] = format("%s %s(%s)", L["This realm"], GREEN, L["All accounts"]),
-	[ALLREALMS_THISACCOUNT] = format("%s %s(%s)", L["All realms"], GREEN, L["This account"]),
-	[ALLREALMS_ALLACCOUNTS] = format("%s %s(%s)", L["All realms"], GREEN, L["All accounts"]),
+	[THISREALM_THISACCOUNT] = format("%s %s(%s)", L["This realm"], colors.green, L["This account"]),
+	[THISREALM_ALLACCOUNTS] = format("%s %s(%s)", L["This realm"], colors.green, L["All accounts"]),
+	[ALLREALMS_THISACCOUNT] = format("%s %s(%s)", L["All realms"], colors.green, L["This account"]),
+	[ALLREALMS_ALLACCOUNTS] = format("%s %s(%s)", L["All realms"], colors.green, L["All accounts"]),
 }
-
-local function OnRealmFilterChange(self)
-	UIDropDownMenu_SetSelectedValue(AltoholicTabSummary_SelectLocation, self.value);
-	
-	addon:SetOption(OPTION_REALMS, self.value)
-	addon.Characters:BuildList()
-	addon.Characters:BuildView()
-	ns:Refresh()
-end
 
 local function DropDownLocation_Initialize()
 	local info = UIDropDownMenu_CreateInfo();
@@ -81,151 +66,13 @@ local function DropDownLocation_Initialize()
 end
 
 function ns:MenuItem_OnClick(id)
-	childrenObjects = childrenObjects or {
-		addon.Summary,
-		addon.BagUsage,
-		addon.TradeSkills,
-		addon.Activity,
-		addon.Currencies,
-		addon.GarrisonFollowers,
-	}
-
-	for _, v in pairs(childrenFrames) do			-- hide all frames
-		_G[ "AltoholicFrame" .. v]:Hide()
-	end
-
-	ns:SetMode(id)
+	addon.Summary:SetMode(id)
+	addon.Summary:Update()
 	
-	local f = _G[ "AltoholicFrame" .. childrenFrames[id]]
-	local o = childrenObjects[id]
-	
-	if o.BuildView then
-		o:BuildView()
-	end
-	f:Show()
-	o:Update()
-	
-	for i=1, #childrenFrames do 
-		AltoholicTabSummary["MenuItem"..i]:UnlockHighlight()
-	end
-	AltoholicTabSummary["MenuItem"..id]:LockHighlight()
-end
-
-function ns:SetMode(mode)
-	currentMode = mode
-	
-	AltoholicTabSummaryStatus:SetText("")
-	AltoholicTabSummaryToggleView:Show()
-	AltoholicTabSummary_SelectLocation:Show()
-	AltoholicTabSummary_RequestSharing:Show()
-	AltoholicTabSummary_Options:Show()
-	AltoholicTabSummary_OptionsDataStore:Show()
-	
-	local Columns = addon.Tabs.Columns
-	Columns:Init()
-	
-	local title
-
-	if currentMode == 1 then
-		Columns:Add(NAME, 100, function(self) addon.Characters:Sort(self, "GetCharacterName") end)
-		Columns:Add(LEVEL, 60, function(self) addon.Characters:Sort(self, "GetCharacterLevel")	end)
-		Columns:Add(MONEY, 115, function(self)	addon.Characters:Sort(self, "GetMoney") end)
-		Columns:Add(PLAYED, 105, function(self) addon.Characters:Sort(self, "GetPlayTime") end)
-		Columns:Add(XP, 55, function(self) addon.Characters:Sort(self, "GetXPRate") end)
-		Columns:Add(TUTORIAL_TITLE26, 70, function(self) addon.Characters:Sort(self, "GetRestXPRate") end)
-		Columns:Add("AiL", 55, function(self) addon.Characters:Sort(self, "GetAverageItemLevel")	end)
-	
-	elseif currentMode == 2 then
-		Columns:Add(NAME, 100, function(self) addon.Characters:Sort(self, "GetCharacterName") end)
-		Columns:Add(LEVEL, 60, function(self) addon.Characters:Sort(self, "GetCharacterLevel") end)
-		Columns:Add(L["Bags"], 120, function(self) addon.Characters:Sort(self, "GetNumBagSlots") end)
-		Columns:Add(L["free"], 50, function(self) addon.Characters:Sort(self, "GetNumFreeBagSlots") end)
-		Columns:Add(L["Bank"], 190, function(self) addon.Characters:Sort(self, "GetNumBankSlots") end)
-		Columns:Add(L["free"], 50, function(self)	addon.Characters:Sort(self, "GetNumFreeBankSlots")	end)
-		
-	elseif currentMode == 3 then
-		Columns:Add(NAME, 100, function(self) addon.Characters:Sort(self, "GetCharacterName") end)
-		Columns:Add(LEVEL, 60, function(self) addon.Characters:Sort(self, "GetCharacterLevel") end)
-		Columns:Add(L["Prof. 1"], 65, function(self) addon.Characters:Sort(self, "skillName1") end)
-		Columns:Add(L["Prof. 2"], 65, function(self) addon.Characters:Sort(self, "skillName2") end)
-		title = GetSpellInfo(2550)		-- cooking
-		Columns:Add(title, 65, function(self) addon.Characters:Sort(self, "GetCookingRank") end)
-		title = GetSpellInfo(3273)		-- First Aid
-		Columns:Add(title, 65, function(self) addon.Characters:Sort(self, "GetFirstAidRank") end)
-		title = GetSpellInfo(131474)	-- Fishing
-		Columns:Add(title, 65, function(self) addon.Characters:Sort(self, "GetFishingRank") end)
-		title = string.sub(GetSpellInfo(78670), 1, 4)	-- Archaeology
-		Columns:Add(title, 65, function(self) addon.Characters:Sort(self, "GetArchaeologyRank") end)
-		
-	elseif currentMode == 4 then
-		Columns:Add(NAME, 100, function(self) addon.Characters:Sort(self, "GetCharacterName") end)
-		Columns:Add(LEVEL, 60, function(self) addon.Characters:Sort(self, "GetCharacterLevel") end)
-		Columns:Add(L["Mails"], 60, function(self) addon.Characters:Sort(self, "GetNumMails") end)
-		Columns:Add(L["Visited"], 60, function(self) addon.Characters:Sort(self, "GetMailboxLastVisit") end)
-		Columns:Add(AUCTIONS, 70, function(self) addon.Characters:Sort(self, "GetNumAuctions") end)
-		Columns:Add(BIDS, 60, function(self) addon.Characters:Sort(self, "GetNumBids") end)
-		Columns:Add(L["Visited"], 60, function(self) addon.Characters:Sort(self, "GetAuctionHouseLastVisit") end)
-		Columns:Add(LASTONLINE, 90, function(self) addon.Characters:Sort(self, "GetLastLogout") end)
-	
-	elseif currentMode == 5 then
-		Columns:Add(NAME, 100, function(self) addon.Characters:Sort(self, "GetCharacterName") end)
-		Columns:Add(LEVEL, 60, function(self) addon.Characters:Sort(self, "GetCharacterLevel") end)
-		
-		local icon = "Interface\\Icons\\inv_garrison_resource"
-		Columns:Add("   " .. addon:TextureToFontstring(icon, 18, 18), 80, function(self) addon.Characters:Sort(self, "GetGarrisonResources") end)
-		
-		icon = "Interface\\Icons\\inv_apexis_draenor"
-		Columns:Add("        " .. addon:TextureToFontstring(icon, 18, 18), 100, function(self) addon.Characters:Sort(self, "GetApexisCrystals") end)
-		
-		icon = "Interface\\Icons\\ability_animusorbs"
-		Columns:Add("   " .. addon:TextureToFontstring(icon, 18, 18), 60, function(self) addon.Characters:Sort(self, "GetSealsOfFate") end)
-		Columns:Add(L["Honor"], 80, function(self) addon.Characters:Sort(self, "GetHonorPoints") end)
-		Columns:Add(L["Conquest"], 80, function(self) addon.Characters:Sort(self, "GetConquestPoints") end)
-
-	elseif currentMode == 6 then
-		Columns:Add(NAME, 100, function(self) addon.Characters:Sort(self, "GetCharacterName") end)
-		Columns:Add(LEVEL, 60, function(self) addon.Characters:Sort(self, "GetCharacterLevel") end)
-		
-		Columns:Add("   #", 60, function(self) addon.Characters:Sort(self, "GetNumFollowers") end)
-		Columns:Add("Lv 100", 60, function(self) addon.Characters:Sort(self, "GetNumFollowersAtLevel100") end)
-		Columns:Add("Rare", 60, function(self) addon.Characters:Sort(self, "GetNumRareFollowers") end)
-		Columns:Add("Epic", 60, function(self) addon.Characters:Sort(self, "GetNumEpicFollowers") end)
-		Columns:Add("> 615", 60, function(self) addon.Characters:Sort(self, "GetNumFollowersAtiLevel615") end)
-		Columns:Add("> 630", 60, function(self) addon.Characters:Sort(self, "GetNumFollowersAtiLevel630") end)
-		Columns:Add("> 645", 60, function(self) addon.Characters:Sort(self, "GetNumFollowersAtiLevel645") end)
-		
-	end
-end
-
-function ns:Refresh()
-	if AltoholicFrameSummary:IsVisible() then
-		addon.Summary:Update()
-	elseif AltoholicFrameBagUsage:IsVisible() then
-		addon.BagUsage:Update()
-	elseif AltoholicFrameSkills:IsVisible() then
-		addon.TradeSkills:Update()
-	elseif AltoholicFrameActivity:IsVisible() then
-		addon.Activity:Update()
-	elseif AltoholicFrameCurrencies:IsVisible() then
-		addon.Currencies:Update()
-	elseif AltoholicFrameGarrisonFollowers:IsVisible() then
-		addon.GarrisonFollowers:Update()
-	end
-end
-
-function ns:ToggleView(frame)
-	if not frame.isCollapsed then
-		frame.isCollapsed = true
-		AltoholicTabSummaryToggleView:SetNormalTexture("Interface\\Buttons\\UI-PlusButton-Up");
-	else
-		frame.isCollapsed = nil
-		AltoholicTabSummaryToggleView:SetNormalTexture("Interface\\Buttons\\UI-MinusButton-Up"); 
-	end
-
-	if (currentMode >= 1) and (currentMode <= 4) then
-		addon.Characters:ToggleView(frame)
-		ns:Refresh()
-	end
+	-- for i=1, NUM_MENU_ITEMS do 
+		-- AltoholicTabSummary["MenuItem"..i]:UnlockHighlight()
+	-- end
+	-- AltoholicTabSummary["MenuItem"..id]:LockHighlight()
 end
 
 function ns:AccountSharingButton_OnEnter(self)
@@ -252,12 +99,40 @@ function ns:AccountSharingButton_OnClick()
 end
 
 
-local DDM_Add = addon.Helpers.DDM_Add
-local DDM_AddTitle = addon.Helpers.DDM_AddTitle
-local DDM_AddCloseMenu = addon.Helpers.DDM_AddCloseMenu
-local NUM_RC_MENUS = 2
-
 -- ** Icon events **
+local function OnRealmFilterChange(frame)
+	addon:SetOption(OPTION_REALMS, frame.value)
+	addon.Characters:InvalidateView()
+	addon.Summary:Update()
+end
+
+local function OnFactionFilterChange(frame)
+	addon:SetOption(OPTION_FACTIONS, frame.value)
+	addon.Characters:InvalidateView()
+	addon.Summary:Update()
+end
+
+local function OnLevelFilterChange(frame, minLevel, maxLevel)
+	addon:SetOption(OPTION_LEVELS, frame.value)
+	addon:SetOption(OPTION_LEVELS_MIN, minLevel)
+	addon:SetOption(OPTION_LEVELS_MAX, maxLevel)
+	addon.Characters:InvalidateView()
+	addon.Summary:Update()
+end
+
+local function OnTradeSkillFilterChange(frame)
+	addon:SetOption(OPTION_TRADESKILL, frame.value)
+	parent.ContextualMenu:Close()
+	addon.Characters:InvalidateView()
+	addon.Summary:Update()
+end
+
+local function OnClassFilterChange(frame)
+	addon:SetOption(OPTION_CLASSES, frame.value)
+	addon.Characters:InvalidateView()
+	addon.Summary:Update()
+end
+
 local function ShowOptionsCategory(self)
 	addon:ToggleUI()
 	InterfaceOptionsFrame_OpenToCategory(self.value)
@@ -270,9 +145,8 @@ local function ResetAllData_MsgBox_Handler(self, button)
 	addon:Print(L["Information saved in DataStore has been completely deleted !"])
 	
 	-- rebuild the main character table, and all the menus
-	addon.Characters:BuildList()
-	addon.Characters:BuildView()
-	ns:Refresh()
+	addon.Characters:InvalidateView()
+	addon.Summary:Update()
 end
 
 local function ResetAllData()
@@ -298,40 +172,113 @@ local function ResetConnectedRealms()
 	AltoMsgBox:Show()
 end
 
--- ** Menu Icons **
-function ns:Icon_OnEnter(frame)
-	local currentMenuID = frame:GetID()
-	
-	-- hide all
-	for i = 1, NUM_RC_MENUS do
-		if i ~= currentMenuID and _G[ rcMenuName .. i ].visible then
-			ToggleDropDownMenu(1, nil, _G[ rcMenuName .. i ], frame:GetName(), 0, -5);	
-			_G[ rcMenuName .. i ].visible = false
-		end
-	end
 
-	-- show current
-	ToggleDropDownMenu(1, nil, _G[ rcMenuName .. currentMenuID ], frame:GetName(), 0, -5);	
-	_G[ rcMenuName .. currentMenuID ].visible = true
+-- ** Menu Icons **
+local function RealmsIcon_Initialize(frame, level)
+	frame:AddTitle(L["FILTER_REALMS"])
+	local option = addon:GetOption(OPTION_REALMS)
+
+	-- add specific account/realm filters
+	for key, text in ipairs(locationLabels) do
+		frame:AddButton(text, key, OnRealmFilterChange, nil, (key == option))
+	end
+	frame:AddCloseMenu()
 end
 
-local function AltoholicOptionsIcon_Initialize(self, level)
-	DDM_AddTitle(format("%s: %s", GAMEOPTIONS_MENU, addonName))
+local function FactionIcon_Initialize(frame, level)
+	local option = addon:GetOption(OPTION_FACTIONS)
 
-	DDM_Add(GENERAL, AltoholicGeneralOptions, ShowOptionsCategory)
-	DDM_Add(L["Calendar"], AltoholicCalendarOptions, ShowOptionsCategory)
-	DDM_Add(MAIL_LABEL, AltoholicMailOptions, ShowOptionsCategory)
-	DDM_Add(MISCELLANEOUS, AltoholicMiscOptions, ShowOptionsCategory)
-	DDM_Add(SEARCH, AltoholicSearchOptions, ShowOptionsCategory)
-	DDM_Add(L["Tooltip"], AltoholicTooltipOptions, ShowOptionsCategory)
+	frame:AddTitle(L["FILTER_FACTIONS"])
+	frame:AddButton(FACTION_ALLIANCE, 1, OnFactionFilterChange, nil, (option == 1))
+	frame:AddButton(FACTION_HORDE, 2, OnFactionFilterChange, nil, (option == 2))
+	frame:AddButton(L["Both factions"], 3, OnFactionFilterChange, nil, (option == 3))
+	frame:AddCloseMenu()
+end
+
+local function LevelIcon_Initialize(frame, level)
+	local option = addon:GetOption(OPTION_LEVELS)
 	
-	DDM_AddTitle(" ")	
-	DDM_AddTitle(OTHER)	
-	DDM_Add("What's new?", AltoholicWhatsNew, ShowOptionsCategory)
-	DDM_Add("Getting support", AltoholicSupport, ShowOptionsCategory)
-	DDM_Add(L["Memory used"], AltoholicMemoryOptions, ShowOptionsCategory)
-	DDM_Add(HELP_LABEL, AltoholicHelp, ShowOptionsCategory)
-	DDM_AddCloseMenu()
+	frame:AddTitle(L["FILTER_LEVELS"])
+	frame:AddButtonWithArgs(ALL, 1, OnLevelFilterChange, 1, 100, (option == 1))
+	frame:AddTitle()
+	frame:AddButtonWithArgs("1-59", 2, OnLevelFilterChange, 1, 59, (option == 2))
+	frame:AddButtonWithArgs("60-69", 3, OnLevelFilterChange, 60, 69, (option == 3))
+	frame:AddButtonWithArgs("70-79", 4, OnLevelFilterChange, 70, 79, (option == 4))
+	frame:AddButtonWithArgs("80-89", 5, OnLevelFilterChange, 80, 89, (option == 5))
+	frame:AddButtonWithArgs("90-99", 6, OnLevelFilterChange, 90, 99, (option == 6))
+	frame:AddButtonWithArgs("90-100", 7, OnLevelFilterChange, 90, 100, (option == 7))
+	frame:AddButtonWithArgs("100", 8, OnLevelFilterChange, 100, 100, (option == 8))
+	frame:AddCloseMenu()
+end
+
+local function ProfessionsIcon_Initialize(frame, level)
+	if not level then return end
+
+	local tradeskills = addon.TradeSkills.AccountSummaryFiltersSpellIDs
+	local option = addon:GetOption(OPTION_TRADESKILL)
+	
+	if level == 1 then
+		frame:AddTitle(L["FILTER_PROFESSIONS"])
+		frame:AddButton(ALL, 0, OnTradeSkillFilterChange, nil, (option == 0))
+		frame:AddTitle()
+		frame:AddCategoryButton(PRIMARY_SKILLS, 1, level)
+		frame:AddCategoryButton(SECONDARY_SKILLS, 2, level)
+		frame:AddCloseMenu()
+	
+	elseif level == 2 then
+		local spell, icon, _
+		local firstSecondarySkill = addon.TradeSkills.AccountSummaryFirstSecondarySkillIndex
+	
+		if frame:GetCurrentOpenMenuValue() == 1 then				-- Primary professions
+			for i = 1, (firstSecondarySkill - 1) do
+				spell, _, icon = GetSpellInfo(tradeskills[i])
+				frame:AddButton(spell, i, OnTradeSkillFilterChange, icon, (option == i), level)
+			end
+		
+		elseif frame:GetCurrentOpenMenuValue() == 2 then		-- Secondary professions
+			for i = firstSecondarySkill, #tradeskills do
+				spell, _, icon = GetSpellInfo(tradeskills[i])
+				
+				frame:AddButton(spell, i, OnTradeSkillFilterChange, icon, (option == i), level)
+			end
+		end
+	end
+end
+
+local function ClassIcon_Initialize(frame, level)
+	local option = addon:GetOption(OPTION_CLASSES)
+	
+	frame:AddTitle(L["FILTER_CLASSES"])
+	frame:AddButton(ALL, 0, OnClassFilterChange, nil, (option == 0))
+	frame:AddTitle()
+	
+	-- See constants.lua
+	for key, value in ipairs(CLASS_SORT_ORDER) do
+		frame:AddButton(
+			format("|c%s%s", RAID_CLASS_COLORS[value].colorStr, LOCALIZED_CLASS_NAMES_MALE[value]), 
+			key, OnClassFilterChange, nil, (option == key)
+		)
+	end
+	frame:AddCloseMenu()
+end
+
+local function AltoholicOptionsIcon_Initialize(frame, level)
+	frame:AddTitle(format("%s: %s", GAMEOPTIONS_MENU, addonName))
+
+	frame:AddButton(GENERAL, AltoholicGeneralOptions, ShowOptionsCategory)
+	frame:AddButton(L["Calendar"], AltoholicCalendarOptions, ShowOptionsCategory)
+	frame:AddButton(MAIL_LABEL, AltoholicMailOptions, ShowOptionsCategory)
+	frame:AddButton(MISCELLANEOUS, AltoholicMiscOptions, ShowOptionsCategory)
+	frame:AddButton(SEARCH, AltoholicSearchOptions, ShowOptionsCategory)
+	frame:AddButton(L["Tooltip"], AltoholicTooltipOptions, ShowOptionsCategory)
+	
+	frame:AddTitle()
+	frame:AddTitle(OTHER)	
+	frame:AddButton("What's new?", AltoholicWhatsNew, ShowOptionsCategory)
+	frame:AddButton("Getting support", AltoholicSupport, ShowOptionsCategory)
+	frame:AddButton(L["Memory used"], AltoholicMemoryOptions, ShowOptionsCategory)
+	frame:AddButton(HELP_LABEL, AltoholicHelp, ShowOptionsCategory)
+	frame:AddCloseMenu()
 end
 
 local addonList = {
@@ -343,34 +290,52 @@ local addonList = {
 	"DataStore_Quests",
 }
 
-local function DataStoreOptionsIcon_Initialize(self, level)
-	DDM_AddTitle(format("%s: %s", GAMEOPTIONS_MENU, "DataStore"))
+local function DataStoreOptionsIcon_Initialize(frame, level)
+	frame:AddTitle(format("%s: %s", GAMEOPTIONS_MENU, "DataStore"))
 	
 	for _, module in ipairs(addonList) do
 		if _G[module] then	-- only add loaded modules
-			DDM_Add(module, module, ShowOptionsCategory)
+			frame:AddButton(module, module, ShowOptionsCategory)
 		end
 	end
 	
-	DDM_AddTitle(" ")	
+	frame:AddTitle()
+	frame:AddButton(L["Reset all data"], nil, ResetAllData)
+	frame:AddButton(L["Reset connected realms"], nil, ResetConnectedRealms)
+	frame:AddButton(HELP_LABEL, DataStoreHelp, ShowOptionsCategory)
+	frame:AddCloseMenu()
+end
+
+
+local menuIconCallbacks = {
+	RealmsIcon_Initialize,
+	FactionIcon_Initialize,
+	LevelIcon_Initialize,
+	ProfessionsIcon_Initialize,
+	ClassIcon_Initialize,
+	AltoholicOptionsIcon_Initialize,
+	DataStoreOptionsIcon_Initialize,
+}
+
+function ns:Icon_OnEnter(frame)
+	local currentMenuID = frame:GetID()
 	
-	DDM_Add(L["Reset all data"], nil, ResetAllData)
-	DDM_Add(L["Reset connected realms"], nil, ResetConnectedRealms)
-	DDM_Add(HELP_LABEL, DataStoreHelp, ShowOptionsCategory)
-	DDM_AddCloseMenu()
+	local menu = frame:GetParent().ContextualMenu
+	
+	menu:Initialize(menuIconCallbacks[currentMenuID], "LIST")
+	menu:Close()
+	menu:Toggle(frame, 0, 0)
 end
 
 function ns:OnLoad()
-	AltoholicTabSummary.MenuItem1:SetText(L["Account Summary"])
-	AltoholicTabSummary.MenuItem2:SetText(L["Bag Usage"])
-	AltoholicTabSummary.MenuItem4:SetText(L["Activity"])
-	AltoholicTabSummary_RequestSharing:SetText(L["Account Sharing"])
-
-	addon:DDM_Initialize(_G[rcMenuName.."1"], AltoholicOptionsIcon_Initialize)
-	addon:DDM_Initialize(_G[rcMenuName.."2"], DataStoreOptionsIcon_Initialize)
+	parent = _G[parentName]
+	parent.MenuItem1:SetText(L["Account Summary"])
+	parent.MenuItem2:SetText(L["Bag Usage"])
+	parent.MenuItem3:SetText(SKILLS)
+	parent.MenuItem4:SetText(L["Activity"])
+	parent.MenuItem5:SetText(CURRENCY)
+	parent.MenuItem6:SetText(GARRISON_FOLLOWERS_TITLE)
+	parent.RequestSharing:SetText(L["Account Sharing"])
 	
-	local f = AltoholicTabSummary_SelectLocation
-	UIDropDownMenu_SetSelectedValue(f, addon:GetOption(OPTION_REALMS))
-	UIDropDownMenu_SetText(f, select(addon:GetOption(OPTION_REALMS), locationLabels[THISREALM_THISACCOUNT], locationLabels[THISREALM_ALLACCOUNTS], locationLabels[ALLREALMS_THISACCOUNT], locationLabels[ALLREALMS_ALLACCOUNTS]))
-	addon:DDM_Initialize(f, DropDownLocation_Initialize)
+	parent.ClassIcon.Icon:SetTexture(addon:GetCharacterIcon())
 end

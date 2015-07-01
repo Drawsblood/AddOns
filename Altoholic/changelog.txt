@@ -9,6 +9,73 @@ This means cleaning the following files in \WTF\Account\<your_account>\SavedVari
 There WILL be bugs if you use your old files without cleaning them first. 
 Some fixes to work around API changes are too time consuming, so cleaning is required. A meager price to pay once per expansion.
 
+6.1.006 (08/05/2015)
+
+- Updated list of archaeology projects with WoD projects. I apparently messed up and lost the file that contained the update in 6.1.001, it's now ok.
+- Moved several UI templates to their own folder.
+- Completely rewrote the Blizzard's DropDownMenu widget to use my own version. 
+I was tired of some of the constraints of their implementation, and of the loss of time it caused me every time I wanted to use one.
+So I invested some time in making it my way.
+- Account Summary -> The amount of uncollected garrison resources now appears in yellow when resources exceed 300, and in red when they exceed 450.
+- Account Summary -> Added icons with drop-down menus to filter your list of alts by faction, level, profession and class.
+- Account Summary -> Fixed the expand/collapse button that did not work anymore after the complete rewrite of the pane.
+- Achievements lists updated ! (Thanks Bluemage29 for your help !!)
+- Fixed a Lua error when viewing the Guild tab with an character not in a guild.
+
+6.1.005 (20/04/2015)
+
+- The garrison mission tooltip now shows a red exclamation mark '!' when no missions are active.
+- In the account summary, the last column used to sort the view is now remembered, and is restored when you log in again.
+- Character's tab: fixed a lua error when mousing over the professions' icon of a character that does not have 2 professions.
+- Account Summary: modified the garrison followers pane to show followers at iLvl 675 and a column for their weapon/armor iLvl.
+
+6.1.004 (11/04/2015)
+
+- Fixed sorting the account summary by "Last Online" where the order was sometimes incorrect.
+- Added an option to show the tooltip counters without details (no 'equipped', 'bank', ..). Disabled by default.
+- No longer wiping the list of followers before scanning them.
+- Added a tooltip to the garrison resources in the account summary, it now shows when resources were last collected, and when you will reach the maximum of uncollected resources.
+- Fixed incorrect tooltip after multiple searches in the search tab.
+- DataStore_Garrisons: Some clean-up to properly report active missions.
+- The garrison mission tooltip that shows a '*' when missions are complete now shows it in red if all active missions are complete.
+
+6.1.003 (07/04/2015)
+
+REMINDER: If you are looking for a free Heroes of the Storm Beta key for the European Region, you should check the comments section on Curse & WoW Inteface.. I still have a few keys to give away.
+
+- Fixed a few lua errors in the account summary tab.
+- Added Draenor LFR dungeons to the Grids->Dungeon Finder pane.
+
+6.1.002 (06/04/2015)
+
+- Updated scanning of currencies (honor points), total no longer needs to be divided by 100 since 6.1.
+- Updated the garrison followers pane in the account summary to show followers with an iLvl greater than 660.
+- DataStore Characters: updated GetRestXPRate() to account for Pandaren extra rest xp.
+- Fixed Auction House scanning, and cleaning of expired auctions.
+- The summary tab has been fully rewritten so that all 6 panes use the same frames. 
+This will make the addition of future content much easier. 
+Some new features here and there while I was at it (quality of life improvements mostly), I'll let you discover them :)
+This is an update I wanted to do for a long time, and there are more things planned (more filters).. the other tabs will get an update too.
+
+
+6.1.001 (25/02/2015)
+
+- Added support for Garrison missions ! Warnings are not in yet, but available and active missions are now visible in the characters' tab.
+Note: Active missions can only be correctly tracked if the mission is started with this version of Altoholic, so currently active missions will be visible, but their expiration will not. Sorry, this info is not provided by the game, I have to "manually" keep track of it.
+- Fixed the spam of mail expiry warnings, this time for good (hopefully ! feedback appreciated on this one!).
+- Now refreshing the follower's pane immediately when the followers' list is updated.
+- Updated list of followers not recruited at the inn.
+- Updated list of archaeology projects with WoD projects.
+- Cleaned up the .pkgmeta of DataStore modules, my sources tell me this should prevent some problems with the Curse Client :) (Thanks Myrroddin !)
+- Removed "already known/could be learned by" information from tooltips for companions, as they have been account-wide for a while.
+- More code cleanup.
+
+Note: I made several attempts at fixing the double guild bank counters in the tooltip, thanks to all of you who sent me their SV files, the issue is now clear.
+Nevertheless, a complete perfect fix is not yet possible, as Blizzard does not provide the real/full realm name to which the guild actually belongs.
+The best I can get in my case is "MarécagedeZangar" when I actually expect "Marécage de Zangar", and that value is nowhere to be found in the API.
+Long story short, I have to come up with a way to work around this that does not force you guys to respect weird conditions to make it work..
+
+
 6.0.004 (09/01/2015)
 
 A massive code cleanup was performed, it should be mostly transparent for all of you, but code maintenance will be greatly improved for me.

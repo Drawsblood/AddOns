@@ -1,0 +1,12 @@
+tag 2.1.0.5
+61d82ae0487ace0615e3553448991dae00f71c1b
+Benjamin Staneck <staneck@gmail.com>
+2015-06-27 06:35:15 +0200
+
+
+
+--------------------
+
+Benjamin Staneck:
+	- embed LibStataFix
+	- dummy commit to pull in updated translations

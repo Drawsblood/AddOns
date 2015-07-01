@@ -2,7 +2,7 @@ local AddonName, Hermes = ...
 
 Hermes.SPELL_MONITOR_SCHEMA = {
 	["schema"] = 60000,
-	["revision"] = 1,
+	["revision"] = 2,
 	["spellmetadata"] = {
 		-- Death Knight
 		[47528] 	= { ["duration"] = "4" },
@@ -95,6 +95,9 @@ Hermes.SPELL_MONITOR_SCHEMA = {
 		[108281] 	= { ["duration"] = "10" },
 		
 		-- Warlock
+		
+		-- Warrior
+		[114030] = { ["duration"] = "12" }
 	},
 	["requirements"] = {
 		[698] 	= { { ["k"] = 10, ["level"] = 42, } },
@@ -157,6 +160,9 @@ Hermes.SPELL_MONITOR_SCHEMA = {
 		-- Priest
 		[108920] = { { ["k"] = 10, ["level"] = 15, } }, -- Void Tendrils
 		
+		-- Warrior
+		[114030] = { { ["k"] = 10, ["level"] = 75 } },
+		
 		-----------------------------------
 		-- Talent Requirements
 		-----------------------------------
@@ -205,7 +211,6 @@ Hermes.SPELL_MONITOR_SCHEMA = {
 		
 		-- Mage (Frost)
 		[31687] 	= { { ["k"] = 30, ["specialization"] = 64 } },
-		[159916] 	= { { ["k"] = 30, ["specialization"] = 62 } },
 		
 		-- Shaman (Restoration)
 		[98008] 	= { { ["k"] = 30, ["specialization"] = 264 } },
@@ -334,6 +339,8 @@ Hermes.SPELL_MONITOR_SCHEMA = {
 		[108920]	= 30,
 		[102342]	= 120,
 		[76577]		= 60 * 3,
+		
+		[114030]	= 60 * 2,
 	},
 	["adjustments"] = {
 	},

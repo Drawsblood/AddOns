@@ -235,24 +235,26 @@ function MT:CreateMTFrame()
 			ScrollFrameTemplate_OnMouseWheel(MacroToolkitFauxScrollFrame, value)
 			ScrollFrameTemplate_OnMouseWheel(this, value)
 		end)
+	
+	local function ontextchanged(this, userinput)
+		MT:UpdateCharLimit()
+		if not userinput then return end
+		mtframe.textChanged = 1
+		if MT.MTPF then if MT.MTPF.mode == "new" then MT.MTPF:Hide() end end
+		local m,e = MT:FormatMacro(this:GetText())
+		MacroToolkitFauxText:SetText(m)
+		MT:UpdateErrors(e)
+		ScrollingEdit_OnTextChanged(this, this:GetParent())
+		ScrollingEdit_OnTextChanged(MacroToolkitFauxText, MacroToolkitFauxScrollFrame)
+	end
+	
 	local mtmscrollchild = CreateFrame("EditBox", "MacroToolkitText", mtmscroll)
 	mtmscrollchild:SetMultiLine(true)
 	mtmscrollchild:SetAutoFocus(false)
 	mtmscrollchild:SetCountInvisibleLetters(true)
 	mtmscrollchild:SetSize(mtmscroll:GetSize())
-	mtmscrollchild:SetScript("OnTextChanged",
-		function(this, userinput)
-			MT:UpdateCharLimit()
-			if not userinput then return end
-			mtframe.textChanged = 1
-			if MT.MTPF then if MT.MTPF.mode == "new" then MT.MTPF:Hide() end end
-			local m,e = MT:FormatMacro(this:GetText())
-			MacroToolkitFauxText:SetText(m)
-			MT:UpdateErrors(e)
-			ScrollingEdit_OnTextChanged(this, this:GetParent())
-			ScrollingEdit_OnTextChanged(MacroToolkitFauxText, MacroToolkitFauxScrollFrame)
-		end)
-	
+	mtmscrollchild:SetScript("OnTextChanged", ontextchanged)
+		
 	local function reformat(key)
 		if key == "enter" then mtmscrollchild:Insert("\n") end
 		local _, err = MT:FormatMacro(mtmscrollchild:GetText())
@@ -570,6 +572,9 @@ function MT:CreateMTFrame()
 	PanelTemplates_SetTab(mtframe, 1)
 	mtframe:SetScript("OnShow", 
 		function()
+			if MT.db.profile.override then
+				if not (MacroFrameText == MacroToolkitText) then MacroFrameText = MacroToolkitText end
+			end
 			MT:Skin(mtframe)
 			mtframe:SetPoint("BOTTOMLEFT", MT.db.profile.x, MT.db.profile.y)
 			MT:MacroFrameUpdate()
@@ -861,10 +866,15 @@ function MT:CreateMTFrame()
 	mtbind:SetScript("OnClick", function() if not MT.MTKF then MT.MTKF = MT:CreateBindingFrame() end; MT.MTKF:Show() end)
 
 	MT:UpdateInterfaceOptions()
+	tinsert(UISpecialFrames, "MacroToolkitFrame")
 	return mtframe
 end
 
 function MT:UpdateIcon(this, justicon)
+	--this is proving difficult to get working properly, so disabled for the time being
+	return
+	
+	--[[
 	local index, icon = select(3, string.find(this:GetName(), "MTSB(%d+)"))
 	--index = MT:GetExMacroIndex(index)
 	if not index then return end
@@ -935,6 +945,7 @@ function MT:UpdateIcon(this, justicon)
 		if not justicon then SetMacroItem(index, item) end
 	end
 	if justicon then return icon end
+	]]--
 end
 
 function MT:CreateSecureFrames()

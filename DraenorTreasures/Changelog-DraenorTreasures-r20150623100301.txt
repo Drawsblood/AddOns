@@ -1,0 +1,56 @@
+TOM_RUS:
+	- toc bump
+	- Added slash command /drts hidepoi which puts closest treasure to "ignore" list. Added slash command /drts clearhidden to clear list of ignored treasures.
+	- 6.2 prep
+	- Fix incorrect map id's
+	- Disable POI 3209 (duplicate)
+	- Toggle
+	- Sometimes 2 loops are better than one
+	- Fix
+	- Fix
+	- Fix
+	- Fix
+	- Optimize minimap icons code
+	- Split minimap logic from other code
+	- Fix
+	- Added minimap icons for treasures
+	- toc bump
+	- Disable POI 3190 (incorrect duplicate of Cargo of the Raven Queen)
+	- Some debug stuff
+	- Attempt to fix POI's: 3824, 4424, 4425
+	- Disable POI 3163
+	- Disable POI 4196
+	- Fix POI 4027 (now requires Lumber Mill)
+	- Disable POI 4177
+	- Added option to ignore treasure map quest completion
+	- Fix reversed req for Gorgrond treasures
+	- Fix
+	- Fix
+	- Fix
+	- Fix
+	- Fix arrow
+	- Some reorganization
+	- Fix
+	- More fixes
+	- More fixes
+	- Fix lua error
+	- Restore poi's 4417-4421
+	- Really fix Rook's Tacklebox
+	- This should fix Rook's Tacklebox
+	- Fix micro dungeons
+	- And those
+	- Disable those for now
+	- Fix distance
+	- Persistent settings
+	- Improve debug output
+	- Fix
+	- Fix
+	- Fix
+	- Added data description Don't show treasures if treasure map quest is completed to avoid duplicate icons
+	- Added debug slash command
+	- Added slash command to toggle arrow
+	- Refactoring
+	- Added slash command and some fixes
+	- Fix
+	- Display on world map
+	- Initial commit

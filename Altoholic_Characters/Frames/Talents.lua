@@ -1,10 +1,8 @@
 local addonName = "Altoholic"
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
-
-local WHITE		= "|cFFFFFFFF"
-local GREEN		= "|cFF00FF00"
 
 local PLAYER_TREE = "Tree1"
 local GUILD_TREE = "Tree2"
@@ -135,7 +133,7 @@ local function DrawTalent(texture, tier, column, count, id)
 	local itemTexture = _G[itemName .. "IconTexture"]
 	
 	if count and count > 0 then
-		itemCount:SetText(GREEN .. count)
+		itemCount:SetText(colors.green .. count)
 		itemCount:Show()
 		itemTexture:SetDesaturated(false)
 	else
@@ -340,7 +338,7 @@ local function DrawClassIcons(iconGroup, class, character, guildMember)
 		elseif guildMember then
 			count = DataStore:GetGuildMemberNumPointsSpent(currentGuildKey, guildMember, tree, isPrimary and 1 or 2)
 		end
-		itemCount:SetText(WHITE .. count)
+		itemCount:SetText(colors.white .. count)
 		itemCount:Show()
 		itemButton:Show()
 		
@@ -552,7 +550,7 @@ function ns:DropDownMembers_Initialize(level)
 		local guildName = GetGuildInfo("player")
 		
 		if IsInGuild() then
-			info.text = GREEN..guildName
+			info.text = colors.green..guildName
 			info.hasArrow = 1
 			info.checked = nil
 			info.value = 1
@@ -649,7 +647,7 @@ function ns:DropDownMembers_Initialize(level)
 				for guildName, guild in pairs(DataStore:GetGuilds(realm)) do		-- all guilds on this realm
 					if not (realm == thisRealm and guildName == thisGuild) then
 						for _, member in pairs(DataStore:GetGuildTalentsByClass(guild, currentClass)) do
-							info.text = format("%s / %s / %s", WHITE..realm, GREEN..guildName..WHITE, DataStore:GetClassColor(currentClass) .. member)
+							info.text = format("%s / %s / %s", colors.white..realm, colors.green..guildName..colors.white, DataStore:GetClassColor(currentClass) .. member)
 							info.checked = nil
 							info.func = OnOtherGuildMemberChange
 							info.arg1 = guild		-- guild key
@@ -679,9 +677,9 @@ function ns:DropDownMembers_Initialize(level)
 						local _, class = DataStore:GetCharacterClass(key)
 						if class == currentClass and DataStore:GetCharacterLevel(key) >= 10 then
 							if account == "Default" then
-								info.text = format("%s / %s", WHITE..realm, DataStore:GetColoredCharacterName(key) ) 
+								info.text = format("%s / %s", colors.white..realm, DataStore:GetColoredCharacterName(key) ) 
 							else
-								info.text = format("%s / %s %s(%s)", WHITE..realm, DataStore:GetColoredCharacterName(key), GREEN, account ) 
+								info.text = format("%s / %s %s(%s)", colors.white..realm, DataStore:GetColoredCharacterName(key), colors.green, account ) 
 							end
 							info.value = name
 							info.checked = nil

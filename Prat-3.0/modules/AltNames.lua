@@ -730,7 +730,8 @@ Prat:AddModuleToLoad(function()
 	["alt name exists: %s -> %s; not overwriting as set in preferences"] = "马甲名称存在: %s -> %s;没有覆盖参数设置",
 	AltNames = "马甲名称",
 	["Alts:"] = "马甲:",
-	-- autoguildalts_desc = "",
+	autoguildalts_desc = [=[后台自动从公会信息中导入
+]=], -- Needs review
 	-- autoguildalts_name = "",
 	["Be quiet"] = "禁言",
 	["character removed: %s"] = "删除角色: %s",
@@ -839,8 +840,8 @@ Prat:AddModuleToLoad(function()
 	-- ["Delete a character's link to another character as their main."] = "",
 	["Delete alt"] = "Eliminar alternativo",
 	Disabled = "Desactivado",
-	["Display a player's alts in the tooltip"] = "Mostrar los alters de los jugadores en el tooltip", -- Needs review
-	["Display a player's main name in the tooltip"] = "Mostrar el nombre del main del jugador en el tooltip", -- Needs review
+	["Display a player's alts in the tooltip"] = "Mostrar los alters de los jugadores en el tooltip",
+	["Display a player's main name in the tooltip"] = "Mostrar el nombre del main del jugador en el tooltip",
 	-- ["Display main names in the same colour as that of the alt's class (taking the data from the PlayerNames module if it is enabled)"] = "",
 	["Display main names in the same colour as that of the main's class (taking the data from the PlayerNames module if it is enabled)"] = "Mostrar nombres principales en el mismo color que el de su clase principal (tomando los datos del módulo PlayerNames si está habilitado)",
 	["Don't overwrite existing alt <-> main links when importing or adding new alts."] = "No sobreescribir enlaces alternativo <-> principal existentes al importar o añadir nuevos alternativos.",

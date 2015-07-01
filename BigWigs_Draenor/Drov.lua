@@ -18,7 +18,6 @@ function mod:GetOptions()
 		175791, -- Colossal Slam
 		175827, -- Call of Earth
 		{175915, "FLASH"}, -- Acid Breath
-		"bosskill"
 	}
 end
 
@@ -32,10 +31,6 @@ function mod:OnBossEnable()
 	self:Death("Win", 81252)
 end
 
-function mod:OnEngage()
-	--
-end
-
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
@@ -46,7 +41,7 @@ end
 
 function mod:CallOfEarth(args)
 	self:Message(args.spellId, "Attention")
-	self:CDBar(args.spellId, 90.5)
+	self:CDBar(args.spellId, 90)
 	self:Bar(args.spellId, 20, CL.cast:format(args.spellName))
 end
 

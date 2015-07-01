@@ -6,6 +6,7 @@
 local mod, CL = BigWigs:NewBoss("Gug'rokk", 964, 889)
 if not mod then return end
 mod:RegisterEnableMob(74790)
+--BOSS_KILL#1654#Gug'rokk
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -33,7 +34,6 @@ function mod:GetOptions()
 		150755, -- Unstable Slag
 		150677, -- Molten Blast
 		150678, -- Molten Core
-		"bosskill",
 	}
 end
 
@@ -74,6 +74,8 @@ function mod:MoltenBlast(args)
 end
 
 function mod:MoltenCore(args)
-	self:StackMessage(args.spellId, args.destName, args.amount, "Attention")
+	if self:MobId(args.destGUID) == 74790 then -- Filter spell steal
+		self:StackMessage(args.spellId, args.destName, args.amount, "Attention")
+	end
 end
 

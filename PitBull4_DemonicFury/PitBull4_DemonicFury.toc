@@ -1,9 +1,9 @@
-## Interface: 60000
+## Interface: 60200
 ## Title: PitBull4 |r[|cffeda55fDemonic fury|r]
 ## Title-deDE: PitBull4 |r[|cffeda55fDämonische Wut|r]
 ## Title-esES: PitBull4 |r[|cffeda55fFuria demoníaca|r]
 ## Title-frFR: PitBull4 |r[|cffeda55fDemonic fury|r]
-## Title-koKR: PitBull4 |r[|cffeda55fDemonic fury|r]
+## Title-koKR: PitBull4 |r[|cffeda55f악마의 분노|r]
 ## Title-ruRU: PitBull4 |r[|cffeda55fДемоническая ярость|r]
 ## Title-zhCN: PitBull4 |r[|cffeda55f恶魔之怒|r]
 ## Title-zhTW: PitBull4 |r[|cffeda55f惡魔之怒|r]
@@ -11,7 +11,7 @@
 ## Notes-deDE: Zeige einen Balken für Dämonische Wut bei Dämonologie-Hexenmeistern
 ## Notes-esES: Mostrar una barra de furia demoníaca para brujos de demonología.
 ## Notes-frFR: Show a bar for demonic fury for demonology warlocks.
-## Notes-koKR: Show a bar for demonic fury for demonology warlocks.
+## Notes-koKR: 악마 흑마법사를 위한 악마의 분노 바 표시
 ## Notes-ruRU: Показывает полосу демонической ярости для чернокнижников специализации "Демонология"
 ## Notes-zhCN: 显示恶魔学识术士的恶魔之怒
 ## Notes-zhTW: 顯示惡魔術士的惡魔之怒條。
@@ -19,9 +19,9 @@
 ## DefaultState: enabled
 ## LoadOnDemand: 1
 ## Dependencies: PitBull4
-## Version: v4.0.0-beta54
+## Version: v4.0.0-beta56
 ## X-PitBull4-Condition: return select(2, UnitClass("player")) == "WARLOCK" and select(4, GetBuildInfo()) >= 50000
-## X-Curse-Packaged-Version: v4.0.0-beta54
+## X-Curse-Packaged-Version: v4.0.0-beta56
 ## X-Curse-Project-Name: PitBull Unit Frames 4.0
 ## X-Curse-Project-ID: pitbull4
 ## X-Curse-Repository-ID: wow/pitbull4/mainline

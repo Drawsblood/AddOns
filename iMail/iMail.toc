@@ -1,10 +1,10 @@
-## Interface: 60000
+## Interface: 60100
 ## Title: i|cffffffaaMail|r
-## Version: 6.0.2-r1
+## Version: 6.1.1
 ## Notes: LDB replacement for your minimap icon.
 ## Author: grdn
 ## OptionalDeps: Ace3, iLib
-## X-Curse-Packaged-Version: 6.0.2-r1
+## X-Curse-Packaged-Version: 6.1.1
 ## X-Curse-Project-Name: iMail
 ## X-Curse-Project-ID: imail
 ## X-Curse-Repository-ID: wow/imail/mainline

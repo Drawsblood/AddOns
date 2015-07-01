@@ -1,5 +1,6 @@
 local addonName = ...
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
@@ -13,11 +14,6 @@ local addonList = {
 	"Altoholic_Agenda",
 	"Altoholic_Grids",
 }
-
-local WHITE		= "|cFFFFFFFF"
-local GREEN		= "|cFF00FF00"
-local TEAL		= "|cFF00FF9A"
-local ORANGE   = "|cFFFF8400"
 
 local url1 = "http://wow.curse.com/downloads/wow-addons/details/altoholic.aspx"
 local url2 = "http://www.wowinterface.com/downloads/info8533-Altoholic.html"
@@ -40,7 +36,7 @@ local help = {
 			"Go into the 'Account Summary', mouse over the character, right-click it to get the contextual menu, and select 'Delete this Alt'.",
 			"Type /alto or /altoholic to get the list of command line options.",
 			"Go into Altoholic's main option panel, and check 'Show Minimap Icon'.\nYou can also type /alto show.",
-			format("%s%s\n%s\n%s", "The add-on is only released on these two sites, it is recommended NOT TO get it through other means:", GREEN, url1, url2 ),
+			format("%s%s\n%s\n%s", "The add-on is only released on these two sites, it is recommended NOT TO get it through other means:", colors.green, url1, url2 ),
 			"DataStore and its modules take care of storing data for client add-ons; Altoholic itself now only stores very little information. The main purpose of the numerous directories is to offer split databases, instead of one massive database containing all the information required by the add-on.",
 			"Refer to DataStore's own help topic for more information.",
 			"Not anymore. Instead, it supports LibDataBroker (aka LDB), if you really want FuBar, use Broker2FuBar.",
@@ -85,7 +81,7 @@ local help = {
 			"I found a bad translation, how can I help fixing it?",
 		},
 		answers = {
-			format("Use the CurseForge localization tool, at %s|r.", GREEN..url3),
+			format("Use the CurseForge localization tool, at %s|r.", colors.green..url3),
 		}
 	},
 }	
@@ -102,11 +98,11 @@ local support = {
 			"Both Curse and WoWInterface have a ticket section, I also read comments and respond as often as I materially can, so feel free to report in one of these places.",
 			format("%s\n\n%s\n%s\n%s\n%s\n%s\n", 
 				"A few things:",
-				GREEN.."1)|r Make sure you have the latest version of the add-on.\n",
-				GREEN.."2)|r If you suspect a conflict with another add-on, try to reproduce the issue with only Altoholic enabled. As the add-on deals with a lot of things, a conflict is always possible.\n",
-				GREEN.."3)|r Make sure your issue has not been reported by someone else.\n",
-				GREEN.."4)|r Never, ever, report that 'it does not work', this is the most useless sentence in the world! Be specific about what does not work.\n",
-				GREEN.."5)|r DO NOT copy the entire add-on list from Swatter. While conflicts are possible, they are the exception rather than the rule."
+				colors.green.."1)|r Make sure you have the latest version of the add-on.\n",
+				colors.green.."2)|r If you suspect a conflict with another add-on, try to reproduce the issue with only Altoholic enabled. As the add-on deals with a lot of things, a conflict is always possible.\n",
+				colors.green.."3)|r Make sure your issue has not been reported by someone else.\n",
+				colors.green.."4)|r Never, ever, report that 'it does not work', this is the most useless sentence in the world! Be specific about what does not work.\n",
+				colors.green.."5)|r DO NOT copy the entire add-on list from Swatter. While conflicts are possible, they are the exception rather than the rule."
 			),
 			"I'm just human, I make mistakes. But because I'm human, I fix them too, so be patient. This is a project that I develop in my spare time, and it fluctuates a lot.",
 			"No. Only the first error you will get is relevant, it means that something failed during the initialization process of the add-on, or of a library, and this is likely to cause several subsequent errors that are more often than not irrelevant.",
@@ -117,13 +113,72 @@ local support = {
 			"Is there an IRC channel where I could get live support?",
 		},
 		answers = {
-			format("Yes. Join the %s#altoholic|r IRC channel on Freenode : %sirc://irc.freenode.net:6667/|r", WHITE, GREEN),
+			format("Yes. Join the %s#altoholic|r IRC channel on Freenode : %sirc://irc.freenode.net:6667/|r", colors.white, colors.green),
 		}
 	},
 }
 
 -- this content will be subject to frequent changes, do not bother translating it !!
 local whatsnew = {
+	{	name = "6.1.006 Changes",
+		bulletedList = {
+			"Updated list of archaeology projects with WoD projects. I apparently messed up and lost the file that contained the update in 6.1.001, it's now ok.",
+			"Moved several UI templates to their own folder.",
+			"Completely rewrote the Blizzard's DropDownMenu widget to use my own version.",
+			"Account Summary -> The amount of uncollected garrison resources now appears in yellow when resources exceed 300, and in red when they exceed 450.",
+			"Account Summary -> Added icons with drop-down menus to filter your list of alts by faction, level, profession and class.",
+			"Account Summary -> Fixed the expand/collapse button that did not work anymore after the complete rewrite of the pane.",
+			"Achievements lists updated ! (Thanks Bluemage29 for your help !!)",
+			"Fixed a Lua error when viewing the Guild tab with an character not in a guild.",
+		},
+	},
+	{	name = "6.1.005 Changes",
+		bulletedList = {
+			"The garrison mission tooltip now shows a red exclamation mark '!' when no missions are active.",
+			"In the account summary, the last column used to sort the view is now remembered, and is restored when you log in again.",
+			"Character's tab: fixed a lua error when mousing over the professions' icon of a character that does not have 2 professions.",
+			"Account Summary: modified the garrison followers pane to show followers at iLvl 675 and a column for their weapon/armor iLvl.",
+		},
+	},
+	{	name = "6.1.004 Changes",
+		bulletedList = {
+			"Fixed sorting the account summary by 'Last Online' where the order was sometimes incorrect.",
+			"Added an option to show the tooltip counters without details (no 'equipped', 'bank', ..). Disabled by default.",
+			"No longer wiping the list of followers before scanning them.",
+			"Added a tooltip to the garrison resources in the account summary, it now shows when resources were last collected, and when you will reach the maximum of uncollected resources.",
+			"Fixed incorrect tooltip after multiple searches in the search tab.",
+			"DataStore_Garrisons: Some clean-up to properly report active missions.",
+			"The garrison mission tooltip that shows a '*' when missions are complete now shows it in red if all active missions are complete.",
+		},
+	},
+	{	name = "6.1.003 Changes",
+		bulletedList = {
+			"Fixed a few lua errors in the account summary tab.",
+			"Added Draenor LFR dungeons to the Grids->Dungeon Finder pane.",
+		},
+	},
+	{	name = "6.1.002 Changes",
+		bulletedList = {
+			"Updated scanning of currencies (honor points), total no longer needs to be divided by 100 since 6.1.",
+			"Updated the garrison followers pane in the account summary to show followers with an iLvl greater than 660.",
+			"DataStore Characters: updated GetRestXPRate() to account for Pandaren extra rest xp.",
+			"Fixed Auction House scanning, and cleaning of expired auctions.",
+			"The summary tab has been fully rewritten so that all 6 panes use the same frames. ",
+		},
+	},
+	{	name = "6.1.001 Changes",
+		bulletedList = {
+			"Added support for Garrison missions ! Warnings are not in yet, but available and active missions are now visible in the characters' tab.",
+			"Note: Active missions can only be correctly tracked if the mission is started with this version of Altoholic, so currently active missions will be visible, but their expiration will not.",
+			"Fixed the spam of mail expiry warnings, this time for good (hopefully ! feedback appreciated on this one!).",
+			"Now refreshing the follower's pane immediately when the followers' list is updated.",
+			"Updated list of followers not recruited at the inn.",
+			"Updated list of archaeology projects with WoD projects.",
+			"Cleaned up the .pkgmeta of DataStore modules, my sources tell me this should prevent some problems with the Curse Client :) (Thanks Myrroddin !)",
+			"Removed 'already known/could be learned by' information from tooltips for companions, as they have been account-wide for a while.",
+			"More code cleanup.",
+		},
+	},
 	{	name = "6.0.004 Changes",
 		bulletedList = {
 			"A massive code cleanup was performed in the XML frames",
@@ -183,33 +238,6 @@ local whatsnew = {
 			"LibCraftLevels: updated for WoD.",
 			"LibCraftReagent: updated for WoD.",
 			"Currencies pane: removed unrequired tooltip.",
-		},
-	},
-	{	name = "5.4.009 Changes",
-		bulletedList = {
-			"Uncommented the code that actually deletes linked realms.",
-			"DataStore_Crafts: reworked the processing of events that actually trigger profession scanning.",
-			"DataStore_Mails: fixed some problems related to merged realms, it should now work without problems anymore.",
-			"DataStore_Mails: fixed issues where mail attachments (sent or returned) could be saved twice in the recipient's mailbox.",
-			"DataStore : Current character/guild key can now be used by character/guild based methods.",
-			"DataStore : added a few methods to support overriding methods.",
-			"DataStore_Quests : fixed tracking of completed quests.",
-			"Many minor fixes in DataStore_Achievements, Agenda, Containers, Crafts, Inventory, Mails, Talents.",
-		},
-	},
-	{	name = "5.4.008 Changes",
-		bulletedList = {
-			"Fixed MoP factions showing up as numbers.",
-			"Suggested leveling zones are back in the account summary.",
-			"Added an option to reset links between merged realms (some realms were marked as linked though they were not) => DataStore dropdown in the Account Summary.",
-			"Added an option to completely reset the DataStore databases, without having to manually delete the files in the SavedVariables folder => DataStore dropdown in the Account Summary.",
-			"Added an option to remember the faction filter across sessions. (Grids -> Reputations).",
-			"Added an option to remember the currency filter across sessions. (Grids -> Currencies).",
-			"Added an option to remember the companion filter across sessions. (Grids -> Companions).",
-			"Added an option to remember the mount filter across sessions. (Grids -> Mounts).",
-			"Added an option to remember the tradeskills filter across sessions. (Grids -> Tradeskills).",
-			"Added an option to remember the archaeology filter across sessions. (Grids -> Archaeology).",
-			"Item counts for guilds on merged realms should now be visible too (sorry can't test this myself).",
 		},
 	},
 	{	name = "Earlier changes",
@@ -272,7 +300,7 @@ function addon:SetupOptions()
 	local f = AltoholicGeneralOptions
 	
 	-- ** General **
-	f.Title:SetText(TEAL..format("%s %s", addonName, addon.Version))
+	f.Title:SetText(colors.teal..format("%s %s", addonName, addon.Version))
 	f.ShowRestXP150pc.Text:SetText(L["Max rest XP displayed as 150%"])
 	f.BankAutoUpdate.Text:SetText(L["Automatically authorize guild bank updates"])
 	f.BankAutoUpdate.tooltip = format("%s%s%s",
@@ -312,7 +340,7 @@ function addon:SetupOptions()
 	AltoholicGeneralOptions_SliderAlphaText:SetText(format("%s (%1.2f)", L["Transparency"], value));
 	
 	-- ** Memory **
-	AltoholicMemoryOptions_AddonsText:SetText(ORANGE..ADDONS)
+	AltoholicMemoryOptions_AddonsText:SetText(colors.orange..ADDONS)
 	local list = ""
 	for index, module in ipairs(addonList) do
 		list = format("%s%s:\n", list, module)
@@ -331,7 +359,6 @@ function addon:SetupOptions()
 		L["There is a risk of disconnection if the queried item\nis a loot from a high level dungeon.\n\n"],
 		L["|cFF00FF00Disable|r to avoid this risk"])	
 	
-	f.SortDescending.Text:SetText(L["Sort loots in descending order"])
 	f.IncludeNoMinLevel.Text:SetText(L["Include items without level requirement"])
 	f.IncludeMailboxItems.Text:SetText(L["Include mailboxes"])
 	f.IncludeGuildBankItems.Text:SetText(L["Include guild bank(s)"])
@@ -362,8 +389,8 @@ function addon:SetupOptions()
 				
 	-- ** Account Sharing **
 	f = AltoholicAccountSharingOptions
-	f.Text1:SetText(WHITE.."Authorizations")
-	f.Text2:SetText(WHITE..L["Character"])
+	f.Text1:SetText(colors.white.."Authorizations")
+	f.Text2:SetText(colors.white..L["Character"])
 	f.IconNever:SetText("\124TInterface\\RaidFrame\\ReadyCheck-NotReady:14\124t")
 	f.IconAsk:SetText("\124TInterface\\RaidFrame\\ReadyCheck-Waiting:14\124t")
 	f.IconAuto:SetText("\124TInterface\\RaidFrame\\ReadyCheck-Ready:14\124t")
@@ -382,15 +409,15 @@ function addon:SetupOptions()
 
 	AltoholicAccountSharingOptions_InfoButton.tooltip = format("%s\n%s\n\n%s", 
 	
-	WHITE.."This list allows you to automate responses to account sharing requests.",
+	colors.white.."This list allows you to automate responses to account sharing requests.",
 	"You can choose to automatically accept or reject requests, or be asked when a request comes in.",
 	"If account sharing is totally disabled, this list will be ignored, and all requests will be rejected." )
 	
 	
 	-- ** Shared Content **
-	AltoholicSharedContentText1:SetText(WHITE.."Shared Content")
+	AltoholicSharedContentText1:SetText(colors.white.."Shared Content")
 	AltoholicSharedContent_SharedContentInfoButton.tooltip = format("%s\n%s", 
-		WHITE.."Select the content that will be visible to players who send you",
+		colors.white.."Select the content that will be visible to players who send you",
 		"account sharing requests.")
 	
 	
@@ -398,9 +425,9 @@ function addon:SetupOptions()
 	f = AltoholicTooltipOptions
 	f.ShowItemSource.Text:SetText(L["Show item source"])
 	f.ShowItemCount.Text:SetText(L["Show item count per character"])
+	f.ShowSimpleCount.Text:SetText(L["Show item count without details"])
 	f.ShowTotalItemCount.Text:SetText(L["Show total item count"])
 	f.ShowKnownRecipes.Text:SetText(L["Show recipes already known/learnable by"])
-	f.ShowKnownPets.Text:SetText(L["Show pets already known/learnable by"])
 	f.ShowItemID.Text:SetText(L["Show item ID and item level"])
 	f.ShowGatheringNodesCount.Text:SetText(L["Show counters on gathering nodes"])
 	f.ShowCrossFactionCount.Text:SetText(L["Show counters for both factions"])
@@ -411,11 +438,11 @@ function addon:SetupOptions()
 	f.ShowGuildBankCountPerTab.Text:SetText(L["Detailed guild bank count"])
 	L["Show item source"] = nil
 	L["Show item count per character"] = nil
+	L["Show item count without details"] = nil
 	L["Show total item count"] = nil
 	L["Show guild bank count"] = nil
 	L["Show already known/learnable by"] = nil
 	L["Show recipes already known/learnable by"] = nil
-	L["Show pets already known/learnable by"] = nil
 	L["Show item ID and item level"] = nil
 	L["Show counters on gathering nodes"] = nil
 	L["Show counters for both factions"] = nil
@@ -467,14 +494,13 @@ function addon:RestoreOptionsToUI()
 	f = AltoholicSearchOptions
 	
 	f.ItemInfoAutoQuery:SetChecked(O["UI.Tabs.Search.ItemInfoAutoQuery"])
-	f.SortDescending:SetChecked(O["UI.Tabs.Search.SortDescending"])
 	f.IncludeNoMinLevel:SetChecked(O["UI.Tabs.Search.IncludeNoMinLevel"])
 	f.IncludeMailboxItems:SetChecked(O["UI.Tabs.Search.IncludeMailboxItems"])
 	f.IncludeGuildBankItems:SetChecked(O["UI.Tabs.Search.IncludeGuildBankItems"])
 	f.IncludeKnownRecipes:SetChecked(O["UI.Tabs.Search.IncludeKnownRecipes"])
 
-	AltoholicSearchOptionsLootInfo:SetText(GREEN .. O.TotalLoots .. "|r " .. L["Loots"] .. " / " .. GREEN .. O.UnknownLoots .. "|r " .. L["Unknown"])
-	AltoholicSearchOptionsLootInfo:SetText(format("%s%s|r %s / %s%s|r %s", GREEN, O.TotalLoots, L["Loots"], GREEN, O.UnknownLoots, L["Unknown"]))
+	AltoholicSearchOptionsLootInfo:SetText(colors.green .. O.TotalLoots .. "|r " .. L["Loots"] .. " / " .. colors.green .. O.UnknownLoots .. "|r " .. L["Unknown"])
+	AltoholicSearchOptionsLootInfo:SetText(format("%s%s|r %s / %s%s|r %s", colors.green, O.TotalLoots, L["Loots"], colors.green, O.UnknownLoots, L["Unknown"]))
 	
 	f = AltoholicMailOptions
 	AltoholicMailOptions_SliderTimeToNextWarning:SetValue(O["UI.Mail.TimeToNextWarning"])
@@ -493,7 +519,6 @@ function addon:RestoreOptionsToUI()
 	f.ShowItemCount:SetChecked(O["UI.Tooltip.ShowItemCount"])
 	f.ShowTotalItemCount:SetChecked(O["UI.Tooltip.ShowTotalItemCount"])
 	f.ShowKnownRecipes:SetChecked(O["UI.Tooltip.ShowKnownRecipes"])
-	f.ShowKnownPets:SetChecked(O["UI.Tooltip.ShowKnownPets"])
 	f.ShowItemID:SetChecked(O["UI.Tooltip.ShowItemID"])
 	f.ShowGatheringNodesCount:SetChecked(O["UI.Tooltip.ShowGatheringNodesCount"])
 	f.ShowCrossFactionCount:SetChecked(O["UI.Tooltip.ShowCrossFactionCount"])

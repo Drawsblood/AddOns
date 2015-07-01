@@ -105,7 +105,7 @@ end
 
 function ArkInventory.Toybox.Iterate( )
 	local t = ArkInventory.Toybox.data.collection
-	return ArkInventory.spairs( t, function( a, b ) return ( t[a].fullName or "" ) < ( t[b].fullName or "" ) end )
+	return ArkInventory.spairs( t, function( a, b ) return ( t[a].fullname or "" ) < ( t[b].fullname or "" ) end )
 end
 
 function ArkInventory.Toybox.Summon( index )

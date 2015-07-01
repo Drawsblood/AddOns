@@ -32,12 +32,10 @@ function mod:GetOptions()
 		164294, -- Unchecked Growth
 		164275, -- Brittle Bark
 		{164357, "TANK"}, -- Parched Gasp
-		"bosskill",
 	}
 end
 
 function mod:OnBossEnable()
-	-- XXX Target scan agitated water?
 	self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", "CheckBossStatus")
 
 	self:Log("SPELL_AURA_APPLIED", "UncheckedGrowth", 164294)
@@ -46,7 +44,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_SUCCESS", "Energize", 164438)
 	self:Log("SPELL_CAST_START", "ParchedGasp", 164357)
 
-	self:RegisterEvent("CHAT_MSG_MONSTER_EMOTE", "UncheckedGrowthSpawned")
+	self:Log("SPELL_CAST_SUCCESS", "UncheckedGrowthSpawned", 181113) -- Encounter Spawn
 
 	self:Death("Win", 81522)
 end
@@ -80,7 +78,7 @@ function mod:BrittleBarkOver(args)
 end
 
 function mod:Energize(args)
-	if self.isEngaged then
+	if self.isEngaged then -- This happens when killing the trash, we only want it during the encounter.
 		energy = energy + 25
 		if energy < 101 then
 			self:Message(164275, "Neutral", nil, L.energyStatus:format(energy), "spell_lightning_lightningbolt01")
@@ -93,9 +91,7 @@ function mod:ParchedGasp(args)
 	self:CDBar(args.spellId, 11) -- 10-13s
 end
 
-function mod:UncheckedGrowthSpawned(_, msg)
-	if self:Tank() and msg:find(self:SpellName(164294), nil, true) then -- Unchecked Growth
-		self:Message(164294, "Urgent", nil, CL.add_spawned)
-	end
+function mod:UncheckedGrowthSpawned()
+	self:Message(164294, "Urgent", nil, CL.add_spawned)
 end
 

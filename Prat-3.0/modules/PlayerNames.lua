@@ -636,7 +636,7 @@ Prat:AddModuleToLoad(function()
 	["Brackets Use Common Color"] = "括號使用的通用色彩",
 	Class = "職業",
 	["Color by Level Difference"] = "等級差異色彩",
-	coloreverywhere_desc = "當玩家名稱出現在聊天訊息文字中時，為其上色。", -- Needs review
+	coloreverywhere_desc = "當玩家名稱出現在聊天訊息文字中時，為其上色。",
 	coloreverywhere_name = "顏色名字到處",
 	["Enable Alt-Invite"] = "啟用 Alt 按鍵邀請",
 	["Enable Invite Links"] = "啟用邀請連結",
@@ -678,9 +678,9 @@ Prat:AddModuleToLoad(function()
 	["Toggle group invites by alt-clicking on player name."] = "組隊邀請用alt-點擊玩家名稱。",
 	["Toggle level showing."] = "切換等級顯示。",
 	["Toggle raid group showing."] = "切換團隊組隊顯示。",
-	["Toggle showing the raid target icon which is currently on the player."] = "顯示當前玩家的團隊目標圖標", -- Needs review
+	["Toggle showing the raid target icon which is currently on the player."] = "顯示當前玩家的團隊目標圖標",
 	["Toggle tab completion of player names."] = "切換玩家名稱的標籤完成。",
-	["Toggle using a common color for brackets around player names."] = "選擇是否為玩家名稱外的括號使用一個通用顏色", -- Needs review
+	["Toggle using a common color for brackets around player names."] = "選擇是否為玩家名稱外的括號使用一個通用顏色",
 	["Toggle using a common color for unknown player names."] = "切換未知玩家以一般色彩顯示",
 	["Too many matches (%d possible)"] = "太多符合 (可能 %d)",
 	["Unknown Common Color"] = "未知的文字通用顏色",
@@ -694,7 +694,7 @@ Prat:AddModuleToLoad(function()
   )
   --@end-non-debug@
 
-  local module = Prat:NewModule(PRAT_MODULE, "AceEvent-3.0", "AceTimer-3.0")
+  local module = Prat:NewModule(PRAT_MODULE,  "AceHook-3.0", "AceEvent-3.0", "AceTimer-3.0")
   module.L = L
 
 
@@ -994,7 +994,7 @@ Prat:AddModuleToLoad(function()
     self:updatePlayer()
     self.NEEDS_INIT = true
 
-    if IsInGuild() == 1 then
+    if IsInGuild() then
       GuildRoster()
     end
 
@@ -1051,7 +1051,7 @@ Prat:AddModuleToLoad(function()
 
 
   function module:updateGF()
-    if IsInGuild() == 1 then GuildRoster() end
+    if IsInGuild() then GuildRoster() end
     self:updateFriends()
     if GetNumBattlefieldScores() > 0 then
       self:updateBG()
@@ -1581,6 +1581,12 @@ Prat:AddModuleToLoad(function()
   function module:SetAltInvite()
     local enabled = self.db.profile.linkinvite or self.db.profile.altinvite
 
+    if (self.db.profile.altinvite) then
+        self:SecureHook("SetItemRef")
+    else
+        self:Unhook("SetItemRef")
+    end
+
     if enabled then
       for _, v in pairs(Prat.GetModulePatterns(self)) do
         Prat:RegisterPattern(v, self.name)
@@ -1669,6 +1675,12 @@ Prat:AddModuleToLoad(function()
     return false
   end
 
+  function module:SetItemRef(link, ...) 
+      if ( strsub(link, 1, 6) == "player" ) then
+          self:Player_Link(link, ...)
+      end
+  end
+
   function module:Player_Link(link, text, button, ...)
     if self.db.profile.altinvite then
       local name = strsub(link, 8);
@@ -1698,7 +1710,6 @@ Prat:AddModuleToLoad(function()
     local enabled = self.db.profile.linkinvite
 
     if enabled and CanGroupInvite() then
-
       if Prat.CurrentMessage then
         if EVENTS_FOR_INVITE[Prat.CurrentMessage.EVENT] then
           return self:InviteLink(text, name)

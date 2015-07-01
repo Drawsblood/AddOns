@@ -239,7 +239,7 @@ function ArkInventory.Frame_Search_Table_Refresh( frame )
 						
 						if not ignore then
 							
-							local id = ArkInventory.ObjectIDTooltip( sd.h )
+							local id = ArkInventory.ObjectIDCount( sd.h )
 							
 							if not tt[id] then
 								local t = select( 4, ArkInventory.ObjectInfo( sd.h ) )

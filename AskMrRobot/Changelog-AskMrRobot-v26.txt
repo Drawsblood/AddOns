@@ -1,0 +1,8 @@
+2015-06-29  yellowfive  <yellowfive>
+
+[932885bb1a6f] [v26]
+* AskMrRobot-Serializer/AskMrRobot-Serializer.lua, AskMrRobot.toc, Gear.lua, ui/Ui.lua:
+
+bug fix to gear swapping, fixed font issue with asian regions
+
+

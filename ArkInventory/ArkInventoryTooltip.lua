@@ -28,9 +28,9 @@ function ArkInventory.TooltipSetHyperlink( tooltip, h )
 	
 	tooltip:ClearLines( )
 	
-	local class = ArkInventory.ObjectStringDecode( h )
+	local osd = ArkInventory.ObjectStringDecode( h )
 	
-	if h and ( class == "item" or class == "spell" ) then
+	if h and ( osd[1] == "item" or osd[1] == "spell" ) then
 		return tooltip:SetHyperlink( h )
 	end
 	
@@ -157,7 +157,8 @@ function ArkInventory.TooltipSetBattlepet( tooltip, h, i )
 	
 	-- mouseover tooltip for pets is done below at TooltipHookSetUnit
 	
-	local class, speciesID, level, rarity, fullHealth, power, speed = ArkInventory.ObjectStringDecode( h )
+	local osd = ArkInventory.ObjectStringDecode( h )
+	local class, speciesID, level, rarity, fullHealth, power, speed = unpack( osd )
 	
 	if class ~= "battlepet" then return end
 	
@@ -183,7 +184,7 @@ function ArkInventory.TooltipSetBattlepet( tooltip, h, i )
 			if ( rarity == -1 ) then
 				rarity = pd.rarity
 			end
-			name = pd.fullName
+			name = pd.fullname
 		end
 	end
 	
@@ -540,15 +541,15 @@ function ArkInventory.TooltipHook( ... )
 	tooltip.ARK_Data[3] = arg3
 	tooltip.ARK_Data[4] = arg4
 	
-	local h = nil
+	local _, h
 	
 	if not h and tooltip["GetItem"] then
-		h = select( 2, tooltip:GetItem( ) )
-		--ArkInventory.Output( "GetItem = ", h )
+		_, h = tooltip:GetItem( )
+		--ArkInventory.Output( gsub(h, "\124", "\124\124") )
 	end
 	
 	if not h and tooltip["GetSpell"] then
-		h = select( 3, tooltip:GetSpell( ) )
+		_, _, h = tooltip:GetSpell( )
 		if h then
 			h = GetSpellLink( h )
 			--ArkInventory.Output( "GetSpell = ", h )
@@ -556,7 +557,7 @@ function ArkInventory.TooltipHook( ... )
 	end
 	
 	if not h and arg1 then
-		h = select( 2, ArkInventory.ObjectInfo( arg1 ) )
+		_, h = ArkInventory.ObjectInfo( arg1 )
 		--ArkInventory.Output( "arg1 = ", arg1, " / ", h )
 	end
 	
@@ -564,6 +565,8 @@ function ArkInventory.TooltipHook( ... )
 		--ArkInventory.Output( "nothing found" )
 		return
 	end
+	
+	--ArkInventory.Output( "h = ", h )
 	
 	if ArkInventory.db.global.option.tooltip.add.count then
 		ArkInventory.TooltipAddItemCount( tooltip, h )
@@ -649,7 +652,7 @@ end
 
 function ArkInventory.TooltipObjectCountGet( search_id, tooltip )
 	
-	local search_id = ArkInventory.ObjectIDTooltip( search_id )
+	local search_id = ArkInventory.ObjectIDCount( search_id )
 	local cp = ArkInventory.Global.Me
 	
 	if tooltip then

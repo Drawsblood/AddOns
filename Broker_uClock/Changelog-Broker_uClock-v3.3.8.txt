@@ -1,0 +1,12 @@
+tag v3.3.8
+91db2fab3ffdf2636ac28736526113f6fd7cb524
+Ethan Centaurai <ethancentaurai@outlook.com>
+2015-06-27 12:42:36 +0100
+
+Tagging as v.3.3.8.
+
+
+--------------------
+
+Ethan Centaurai:
+	- Bump Interface number to 60200.

@@ -470,6 +470,9 @@ local TempData = { -- temporary table for item to spell translations.
 ["S148392"]={sid=148392,mt=0x02}, -- Spawn of Galakras
 ["S134359"]={sid=134359,mt=0x02}, -- Sky Golem
 
+[120968]={sid=179245,mt=0x01}, -- Chauffeured Chopper / Chauffeured Mekgineer's Chopper (Alliance)
+[122703]={sid=179244,mt=0x01}, -- Chauffeured Chopper / Chauffeured Mechano-Hog (Horde)
+
 
 ["S5784"]={sid=5784,mt=0x01}, -- Felsteed
 ["S13819"]={sid=13819,mt=0x01}, -- Warhorse

@@ -1,18 +1,11 @@
 local addonName = "Altoholic"
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 local BI = LibStub("LibBabble-Inventory-3.0"):GetLookupTable()
 local LCI = LibStub("LibCraftInfo-1.0")
 local LCR = LibStub("LibCraftReagents-1.0")
-
-local WHITE				= "|cFFFFFFFF"
-local TEAL				= "|cFF00FF9A"
-local YELLOW			= "|cFFFFFF00"
-local GREEN				= "|cFF00FF00"
-local RECIPE_GREY		= "|cFF808080"
-local RECIPE_GREEN	= "|cFF40C040"
-local RECIPE_ORANGE	= "|cFFFF8040"
 
 local ICON_PLUS = "Interface\\Buttons\\UI-PlusButton-Up"
 local ICON_MINUS = "Interface\\Buttons\\UI-MinusButton-Up"
@@ -24,16 +17,16 @@ local SKILL_ORANGE = 3
 local SKILL_ANY = 4
 
 local RecipeColors = { 
-	[SKILL_GREY] = RECIPE_GREY,
-	[SKILL_GREEN] = RECIPE_GREEN, 
-	[SKILL_YELLOW] = YELLOW, 
-	[SKILL_ORANGE] = RECIPE_ORANGE, 
+	[SKILL_GREY] = colors.recipeGrey,
+	[SKILL_GREEN] = colors.recipeGreen, 
+	[SKILL_YELLOW] = colors.yellow, 
+	[SKILL_ORANGE] = colors.recipeOrange, 
 }
 local RecipeColorNames = { 
-	[SKILL_GREY] = L["Grey"],
-	[SKILL_GREEN] = BI["Green"], 
-	[SKILL_YELLOW] = BI["Yellow"], 
-	[SKILL_ORANGE] = BI["Orange"], 
+	[SKILL_GREY] = L["COLOR_GREY"],
+	[SKILL_GREEN] = L["COLOR_GREEN"], 
+	[SKILL_YELLOW] = L["COLOR_YELLOW"], 
+	[SKILL_ORANGE] = L["COLOR_ORANGE"], 
 }
 
 local parent = "AltoholicFrameRecipes"
@@ -157,7 +150,8 @@ function ns:Update()
 	
 	_G[parent .. "Info"]:Show()
 	
-	local offset = FauxScrollFrame_GetOffset( _G[ parent.."ScrollFrame" ] );
+	local scrollFrame = _G[ parent.."ScrollFrame" ]
+	local offset = scrollFrame:GetOffset()
 	local DisplayedCount = 0
 	local VisibleCount = 0
 	local DrawGroup = true
@@ -200,7 +194,7 @@ function ns:Update()
 				_G[entry..i.."Craft"]:Hide()
 				
 				local _, _, name = DataStore:GetCraftLineInfo(profession, s.id)
-				_G[entry..i.."RecipeLinkNormalText"]:SetText(TEAL .. name)
+				_G[entry..i.."RecipeLinkNormalText"]:SetText(colors.teal .. name)
 				_G[entry..i.."RecipeLink"]:SetID(0)
 				_G[entry..i.."RecipeLink"]:SetPoint("TOPLEFT", 25, 0)
 
@@ -293,7 +287,7 @@ function ns:Update()
 	
 	_G[parent]:Show()
 	
-	FauxScrollFrame_Update( _G[ parent.."ScrollFrame" ], VisibleCount, VisibleLines, 18);
+	scrollFrame:Update(VisibleCount, VisibleLines, 18)
 end
 
 function ns:SetCurrentProfession(prof)

@@ -15,6 +15,7 @@ local OvaleRunes = Ovale:NewModule("OvaleRunes", "AceEvent-3.0")
 Ovale.OvaleRunes = OvaleRunes
 
 --<private-static-properties>
+local OvaleDebug = Ovale.OvaleDebug
 local OvaleProfiler = Ovale.OvaleProfiler
 
 -- Forward declarations for module dependencies.
@@ -34,14 +35,12 @@ local API_GetRuneCooldown = GetRuneCooldown
 local API_GetRuneType = GetRuneType
 local API_GetSpellInfo = GetSpellInfo
 local API_GetTime = GetTime
-local API_UnitClass = UnitClass
 local INFINITY = math.huge
 
+-- Register for debugging messages.
+OvaleDebug:RegisterDebugging(OvaleRunes)
 -- Register for profiling.
 OvaleProfiler:RegisterProfiling(OvaleRunes)
-
--- Player's class.
-local _, self_class = API_UnitClass("player")
 
 local BLOOD_RUNE = 1
 local UNHOLY_RUNE = 2
@@ -132,7 +131,7 @@ function OvaleRunes:OnInitialize()
 end
 
 function OvaleRunes:OnEnable()
-	if self_class == "DEATHKNIGHT" then
+	if Ovale.playerClass == "DEATHKNIGHT" then
 		-- Initialize rune database.
 		for runeType, slots in ipairs(RUNE_SLOTS) do
 			for _, slot in pairs(slots) do
@@ -151,7 +150,7 @@ function OvaleRunes:OnEnable()
 end
 
 function OvaleRunes:OnDisable()
-	if self_class == "DEATHKNIGHT" then
+	if Ovale.playerClass == "DEATHKNIGHT" then
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 		self:UnregisterEvent("RUNE_POWER_UPDATE")
 		self:UnregisterEvent("RUNE_TYPE_UPDATE")
@@ -163,15 +162,18 @@ function OvaleRunes:OnDisable()
 end
 
 function OvaleRunes:RUNE_POWER_UPDATE(event, slot, usable)
+	self:Debug(event, slot, usable)
 	self:UpdateRune(slot)
 end
 
 function OvaleRunes:RUNE_TYPE_UPDATE(event, slot)
+	self:Debug(event, slot)
 	self:UpdateRune(slot)
 end
 
 function OvaleRunes:UNIT_RANGEDDAMAGE(event, unitId)
 	if unitId == "player" then
+		self:Debug(event)
 		self:UpdateAllRunes()
 	end
 end
@@ -181,20 +183,26 @@ function OvaleRunes:UpdateRune(slot)
 	local rune = self.rune[slot]
 	local runeType = API_GetRuneType(slot)
 	local start, duration, runeReady = API_GetRuneCooldown(slot)
-	rune.type = runeType
-	if start > 0 then
-		-- Rune is on cooldown.
-		rune.startCooldown = start
-		rune.endCooldown = start + duration
+	if runeType and start and duration then
+		rune.type = runeType
+		if start > 0 then
+			-- Rune is on cooldown.
+			rune.startCooldown = start
+			rune.endCooldown = start + duration
+		else
+			-- Rune is active.
+			rune.startCooldown = 0
+			rune.endCooldown = 0
+		end
+		Ovale.refreshNeeded[Ovale.playerGUID] = true
 	else
-		-- Rune is active.
-		rune.startCooldown = 0
-		rune.endCooldown = 0
+		self:Debug("Warning: rune information for slot %d not available.", slot)
 	end
 	self:StopProfiling("OvaleRunes_UpdateRune")
 end
 
-function OvaleRunes:UpdateAllRunes()
+function OvaleRunes:UpdateAllRunes(event)
+	self:Debug(event)
 	for slot = 1, 6 do
 		self:UpdateRune(slot)
 	end
@@ -319,8 +327,7 @@ statePrototype.ApplyRuneCost = function(state, spellId, atTime, spellcast)
 		for i, name in ipairs(RUNE_NAME) do
 			local count = si[name] or 0
 			while count > 0 do
-				local snapshot = spellcast and spellcast.snapshot or nil
-				state:ConsumeRune(spellId, atTime, name, snapshot)
+				state:ConsumeRune(spellId, atTime, name, spellcast)
 				count = count - 1
 			end
 		end

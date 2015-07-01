@@ -1,6 +1,7 @@
 local addonName, vars = ...
 SavedInstances = vars
 local addon = vars
+local addonAbbrev = "SI"
 vars.core = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0", "AceTimer-3.0")
 local core = vars.core
 local L = vars.L
@@ -9,11 +10,11 @@ vars.icon = vars.LDB and LibStub("LibDBIcon-1.0", true)
 
 local QTip = LibStub("LibQTip-1.0")
 local dataobject, db, config
-local maxdiff = 16 -- max number of instance difficulties
+local maxdiff = 23 -- max number of instance difficulties
 local maxcol = 4 -- max columns per player+instance
 
 addon.svnrev = {}
-addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 415 $"):match("%d+"))
+addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 442 $"):match("%d+"))
 
 -- local (optimal) references to provided functions
 local table, math, bit, string, pairs, ipairs, unpack, strsplit, time, type, wipe, tonumber, select, strsub = 
@@ -86,7 +87,9 @@ local currency = {
   789, -- Bloody Coin
   823, -- Apexis Crystal
   824, -- Garrison Resources
+  1101,-- Oil
   994, -- Seal of Tempered Fate
+  1129,-- Seal of Inevitable Fate
 }
 addon.currency = currency
 
@@ -115,11 +118,16 @@ addon.LFRInstances = {
   [849] = { total=3, base=1,  parent=897, altid=nil }, -- Highmaul1: Walled City
   [850] = { total=3, base=4,  parent=897, altid=nil }, -- Highmaul2: Arcane Sanctum
   [851] = { total=1, base=7,  parent=897, altid=nil }, -- Highmaul3: Imperator's Rise
-  [847] = { total=3, base=1,  parent=900, altid=nil }, -- BRF1: Slagworks
-  [846] = { total=3, base=4,  parent=900, altid=nil }, -- BRF2: The Black Forge
-  [848] = { total=3, base=7,  parent=900, altid=nil }, -- BRF3: Iron Assembly
+  [847] = { total=3, base=1,  parent=900, altid=nil, remap={ 1, 2, 7 } }, -- BRF1: Slagworks
+  [846] = { total=3, base=4,  parent=900, altid=nil, remap={ 3, 5, 8 } }, -- BRF2: The Black Forge
+  [848] = { total=3, base=7,  parent=900, altid=nil, remap={ 4, 6, 9 } }, -- BRF3: Iron Assembly
   [823] = { total=1, base=10, parent=900, altid=nil }, -- BRF4: Blackhand's Crucible
 
+  [982] = { total=3, base=1,  parent=989, altid=nil }, -- Hellfire1: Hellbreach
+  [983] = { total=3, base=4,  parent=989, altid=nil }, -- Hellfire2: Halls of Blood
+  [984] = { total=3, base=7,  parent=989, altid=nil, remap={ 7, 8,  11 } }, -- Hellfire3: Bastion of Shadows
+  [985] = { total=3, base=10, parent=989, altid=nil, remap={ 9, 10, 12 } }, -- Hellfire4: Destructor's Rise
+  [986] = { total=1, base=13, parent=989, altid=nil }, -- Hellfire5: Black Gate
 }
 local tmp = {}
 for id, info in pairs(addon.LFRInstances) do
@@ -147,10 +155,15 @@ addon.WorldBosses = {
   [1211] = { quest=37462,  expansion=5, level=100 }, -- Tarlna the Ageless
   --]]
   [1211] = { quest=37462,  expansion=5, level=100, -- Drov/Tarlna share a loot and quest atm
-             name=select(2,EJ_GetCreatureInfo(1,1211)).."/"..select(2,EJ_GetCreatureInfo(1,1291))}, 
+             name=select(2,EJ_GetCreatureInfo(1,1291)):match("^[^ ]+").." / "..
+	          select(2,EJ_GetCreatureInfo(1,1211)):match("^[^ ]+")}, 
   [1291] = { remove=true }, -- Drov cleanup
 
-  [1262] = { quest=37464,  expansion=5, level=100 }, -- Rukhmar
+  [1262] = { quest=37464, expansion=5, level=100 }, -- Rukhmar
+  [1452] = { quest=94015, expansion=5, level=100 }, -- Kazzak
+
+  -- bosses with no EJ entry (eid is a placeholder)
+  [9001] = { quest=38276, name=GARRISON_LOCATION_TOOLTIP.." "..BOSS, expansion=5, level=100 },
 }
 
 local _specialQuests = {
@@ -172,6 +185,7 @@ local _specialQuests = {
   [37638] = { zone=GARRISON_LOCATION_TOOLTIP, aid=9162 }, -- Bronze Defender
   [37639] = { zone=GARRISON_LOCATION_TOOLTIP, aid=9164 }, -- Silver Defender
   [37640] = { zone=GARRISON_LOCATION_TOOLTIP, aid=9165 }, -- Golden Defender
+  [38482] = { zone=GARRISON_LOCATION_TOOLTIP, aid=9826 }, -- Platinum Defender
 }
 function addon:specialQuests()
   for qid, qinfo in pairs(_specialQuests) do
@@ -231,9 +245,11 @@ local QuestExceptions = {
   [33134] = "Regular",  -- Warforged Seals
   [33338] = "Weekly",  -- Empowering the Hourglass
   [33334] = "Weekly",  -- Strong Enough to Survive
+}
 
-  [36058] = "Weekly",  -- Seal of Tempered Fate (Dwarven Bunker)
-  -- Seal of Tempered Fate (quests)
+local WoDSealQuests = {
+  [36058] = "Weekly",  -- Seal of Dwarven Bunker
+  -- Seal of Ashran quests
   [36054] = "Weekly",
   [37454] = "Weekly",
   [37455] = "Weekly",
@@ -247,6 +263,9 @@ local QuestExceptions = {
   [37452] = "Weekly",
   [37453] = "Weekly",
 }
+for k,v in pairs(WoDSealQuests) do
+  QuestExceptions[k] = v
+end
 
 function addon:QuestInfo(questid)
   if not questid or questid == 0 then return nil end
@@ -344,9 +363,13 @@ vars.defaultDB = {
 		D1Color = { 0, 0.6, 0 }, -- dark green
 		D1ClassColor = true,
 		D2Indicator = "BLANK",
-		D2Text = "KILLED/TOTAL",
+		D2Text = "KILLED/TOTALH",
 		D2Color = { 0, 1, 0 }, -- green
 		D2ClassColor = true,
+		D3Indicator = "BLANK",
+		D3Text = "KILLED/TOTALM",
+		D3Color = { 1, 0, 0 }, -- red
+		D3ClassColor = true,
 		R0Indicator = "BLANK",
 		R0Text = "KILLED/TOTAL",
 		R0Color = { 0.6, 0.6, 0 }, -- dark yellow
@@ -420,7 +443,9 @@ vars.defaultDB = {
 		Currency738 = false, -- Lesser Charm of Good Fortune
 		Currency823 = true,  -- Apexis Crystal
   		Currency824 = true,  -- Garrison Resources
+		Currency1101= true,  -- Oil
 		Currency994 = true,  -- Seal of Tempered Fate
+		Currency1129= true,  -- Seal of Inevitable Fate
 		CurrencyMax = false,
 		CurrencyEarned = true,
 	},
@@ -818,22 +843,133 @@ function addon:CategorySize(category)
 	return i
 end
 
+local _instance_exceptions = { 
+  -- workaround a Blizzard bug:
+  -- since 5.0, some old raid lockout tooltips are missing boss kill info
+  -- currently affects 25+ man BC/Vanilla raids (but not Kara or AQ Ruins, go figure)
+  -- starting in 6.1 we have the kill bitmap but no boss names
+  [48] = { -- Molten Core
+    12118, -- Lucifron
+    11982, -- Magmadar
+    12259, -- Gehennas
+    12057, -- Garr
+    12264, -- Shazzrah
+    12056, -- Baron Geddon
+    12098, -- Sulfuron Harbinger
+    11988, -- Golemagg the Incinerator
+    12018, -- Majordomo Executus
+    11502, -- Ragnaros
+  },
+  [50] = { -- Blackwing Lair
+    12435, -- Razorgore the Untamed
+    13020, -- Vaelastrasz the Corrupt
+    12017, -- Boodlord Lashlayer
+    11983, -- Firemaw
+    14601, -- Ebonroc
+    11981, -- Flamegor
+    14020, -- Chromaggus
+    11583, -- Nefarian
+  },
+  [161] = { -- Ahn'Qiraj Temple
+    15263, -- Prophet Skeram
+    15543, -- Princess Yauj (also Vem and Lord Kri)
+    15516, -- Bodyguard Sartura
+    15510, -- Fankriss the Unyielding
+    15299, -- Viscidus
+    15509, -- Princess Huhuran
+    15276, -- Emperor Vek'lor
+    15517, -- Ouro
+    15727, -- C'Thun
+  },
+  [176] = { -- Magtheridon's Lair
+    17257, -- Magtheridon
+  },
+  [177] = { -- Gruul's Lair
+    18831, -- High King Maulgar
+    19044, -- Gruul
+  },
+  [193] = { -- Tempest Keep
+    19514, -- A'lar
+    19516, -- Void Reaver
+    18805, -- High Astromancer Solarian
+    19622, -- Kael'thas Sunstrider
+  },
+  [194] = { -- Serpentshrine Cavern
+    21216, -- Hydross the Unstable
+    21217, -- The Lurker Below
+    21215, -- Leotheras the Blind
+    21214, -- Fathom-Lord Karathress
+    21213, -- Morogrim Tidewalker
+    21212, -- Lady Vashj
+  },
+  [195] = { -- Hyjal Past
+    17767, -- Rage Winterchill
+    17808, -- Anetheron
+    17888, -- Kaz'rogal
+    17842, -- Azgalor
+    17968, -- Archimonde
+  },
+  [196] = { -- Black Temple
+    22887, -- High Warlord Naj'entus
+    22898, -- Supremus
+    22841, -- Shade of Akama
+    22871, -- Teron Gorefiend
+    22948, -- Gurtogg Bloodboil
+    22856, -- Reliquary of Souls
+    22947, -- Mother Shahraz
+    23426, -- Illidari Council
+    22917, -- Illidan Stormrage
+  },
+  [199] = { -- Sunwell
+    24850, -- Kalecgos
+    24882, -- Brutallus
+    25038, -- Felmyst
+    25166, -- Grand Warlock Alythess
+    25741, -- M'uru
+    25315, -- Kil'jaeden
+  },
+}
+function addon:instanceException(LFDID)
+  if not LFDID then return nil end
+  local exc = _instance_exceptions[LFDID]
+  if exc then -- localize boss names
+    local total = 0
+    for idx, id in ipairs(exc) do
+      if type(id) == "number" then
+        scantt:SetOwner(UIParent,"ANCHOR_NONE")
+        scantt:SetHyperlink(("unit:Creature-0-0-0-0-%d:0000000000"):format(id))  
+	local line = scantt:IsShown() and _G[scantt:GetName().."TextLeft1"]
+	line = line and line:GetText()
+	if line and #line > 0 then
+	  exc[idx] = line
+	end
+      end
+      total = total + 1
+    end
+    exc.total = total
+  end
+  return exc
+end
+
 function addon:instanceBosses(instance,toon,diff)
   local killed,total,base = 0,0,1
+  local remap = nil
   local inst = vars.db.Instances[instance]
   local save = inst and inst[toon] and inst[toon][diff]
   if inst.WorldBoss then
     return (save[1] and 1 or 0), 1, 1
   end
   if not inst or not inst.LFDID then return 0,0,1 end
-  total = GetLFGDungeonNumEncounters(inst.LFDID)
+  local exc = addon:instanceException(inst.LFDID)
+  total = (exc and exc.total) or GetLFGDungeonNumEncounters(inst.LFDID)
   local LFR = addon.LFRInstances[inst.LFDID]
   if LFR then
     total = LFR.total or total
     base = LFR.base or base
+    remap = LFR.remap
   end
   if not save then
-      return killed, total, base
+      return killed, total, base, remap
   elseif save.Link then
       local bits = save.Link:match(":(%d+)\124h")
       bits = bits and tonumber(bits)
@@ -850,7 +986,7 @@ function addon:instanceBosses(instance,toon,diff)
       killed = killed + (save[i] and 1 or 0)
     end
   end 
-  return killed, total, base
+  return killed, total, base, remap
 end
 
 local lfrkey = "^"..L["LFR"]..": "
@@ -923,7 +1059,13 @@ local function DifficultyString(instance, diff, toon, expired, killoverride, tot
 	else
 		local inst = vars.db.Instances[instance]
 		if not inst or not inst.Raid then -- 5-man
-		  setting = (diff == 1 and "D1" or "D2")
+		  if diff == 2 then -- heroic
+		    setting = "D2"
+		  elseif diff == 23 then -- mythic
+		    setting = "D3"
+		  else -- normal?
+		    setting = "D1"
+		  end
 		elseif inst.Expansion == 0 then -- classic raid
 		  setting = "R0"
 		elseif diff >= 3 and diff <= 7 then -- pre-WoD raids
@@ -935,9 +1077,13 @@ local function DifficultyString(instance, diff, toon, expired, killoverride, tot
 		end
 	end
 	local prefs = vars.db.Indicators
+	local classcolor = prefs[setting .. "ClassColor"]
+	if classcolor == nil then
+	  classcolor = vars.defaultDB.Indicators[setting .. "ClassColor"]
+	end
 	if expired then
 	  	color = GRAY_COLOR
-	elseif prefs[setting .. "ClassColor"] then
+	elseif classcolor then
 		color = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[vars.db.Toons[toon].Class]
 	else
 	        prefs[setting.."Color"]  = prefs[setting.."Color"] or vars.defaultDB.Indicators[setting.."Color"]
@@ -959,6 +1105,8 @@ local function DifficultyString(instance, diff, toon, expired, killoverride, tot
 	  if killed == 0 and total == 0 then -- boss kill info missing
 	    killed = "*"
 	    total = "*"
+	  elseif killed == 1 and total == 1 then
+	    text = "\124T"..READY_CHECK_READY_TEXTURE..":0|t" -- checkmark
 	  end
 	  text = text:gsub("KILLED",killed)
 	  text = text:gsub("TOTAL",total)
@@ -1005,6 +1153,7 @@ function addon:UpdateInstanceData()
     local instance = vars.db.Instances[info.name]
    if info.remove then -- cleanup hook
     vars.db.Instances[info.name] = nil
+    addon.WorldBosses[eid] = nil
    else
     if not instance then
       added = added + 1
@@ -1119,9 +1268,6 @@ function addon:UpdateInstance(id)
   if id == 852 and expansionLevel == 5 then -- XXX: Molten Core hack
     return nil, nil, true -- ignore Molten Core holiday version, which has no save
   end
-  if (id == 897 or id == 900) and expansionLevel == 4 then -- XXX: Highmaul / Blackrock Foundry hack
-    expansionLevel = 5 -- fix incorrect expansionLevel
-  end
   if id == 767 then -- ignore bogus Ordos entry
     return nil, nil, true
   end
@@ -1200,13 +1346,15 @@ function addon:UpdateToonData()
 				end
 			end
 		end
-		if (i.Holiday and addon.activeHolidays[instance]) or (i.Random) then
+		if (i.Holiday and addon.activeHolidays[instance]) or 
+		   (i.Random and not i.Holiday) then
 		  local id = i.LFDID
 		  GetLFGDungeonInfo(id) -- forces update
 		  local donetoday, money = GetLFGDungeonRewards(id)
 		  local expires = addon:GetNextDailyResetTime()
 		  if donetoday and i.Random and (
 		    (i.LFDID == 258) or  -- random classic dungeon
+		    (i.LFDID == 995 or i.LFDID == 744) or  -- timewalking dungeons
 		    (UnitLevel("player") == 85 and 
 		     (i.LFDID == 300 or i.LFDID == 301 or i.LFDID == 434)) -- reg/her cata and HoT at 85
 		   ) then -- donetoday flag is falsely set for some level/dungeon combos where no daily incentive is available
@@ -1334,6 +1482,18 @@ function addon:UpdateToonData()
 	     db.Quests[id] = nil
 	  end
 	end
+	addon:UpdateCurrency()
+	local zone = GetRealZoneText()
+	if zone and #zone > 0 then
+	  t.Zone = zone
+	end
+	t.LastSeen = time()
+end
+
+function addon:UpdateCurrency()
+	if addon.logout then return end -- currency is unreliable during logout
+	local t = vars.db.Toons[thisToon]
+	t.Money = GetMoney()
 	t.currency = t.currency or {}
 	for _,idx in pairs(currency) do
 	  local ci = t.currency[idx] or {}
@@ -1344,17 +1504,18 @@ function addon:UpdateToonData()
 	  if idx == 390 or idx == 392 or idx == 395 or idx == 396 then -- these have a total max scaled by 100
             ci.totalMax = ci.totalMax and math.floor(ci.totalMax/100)
 	  end
+	  if idx == 1129 then -- Seal of Tempered Fate returns zero for weekly quantities
+	    ci.weeklyMax = 3 -- the max via quests
+	    ci.earnedThisWeek = 0
+	    for id in pairs(WoDSealQuests) do
+	      if IsQuestFlaggedCompleted(id) then
+	        ci.earnedThisWeek = ci.earnedThisWeek + 1
+	      end
+	    end
+	  end
           ci.season = addon:GetSeasonCurrency(idx)
 	  t.currency[idx] = ci
 	end
-        if not addon.logout then
-	  t.Money = GetMoney()
-	end
-	local zone = GetRealZoneText()
-	if zone and #zone > 0 then
-	  t.Zone = zone
-	end
-	t.LastSeen = time()
 end
 
 function addon:QuestIsDarkmoonMonthly()
@@ -1385,7 +1546,7 @@ local function SI_GetQuestReward()
   local t = vars and vars.db.Toons[thisToon]
   if not t then return end
   local id = GetQuestID() or -1
-  local title = GetTitleText() or "<unknown>"
+  local title = GetTitleText() or ""
   local link = nil
   local isMonthly = addon:QuestIsDarkmoonMonthly()
   local isWeekly = QuestIsWeekly()
@@ -1395,6 +1556,15 @@ local function SI_GetQuestReward()
   local index = GetQuestLogIndexByID(id)
   if index and index > 0 then
     link = GetQuestLink(index)
+  end
+  if id > 1 then -- try harder to fetch names
+    local t,l = addon:QuestInfo(id)
+    if not (link and #link > 0) then
+      link = l
+    end
+    if not (title and #title > 0) then
+      title = t or "<unknown>"
+    end
   end
   local questTagID, tagName = GetQuestTagInfo(id)
   if questTagID and tagName then
@@ -1531,7 +1701,11 @@ local function ShowQuestTooltip(cell, arg, ...)
           local line = indicatortip:AddLine()
 	  local link = qi.Link
 	  if not link then -- sometimes missing the actual link due to races, fake it for display to prevent confusion
-	    link = "\124cffffff00["..(qi.Title or "???").."]\124r"
+	    if qi.Title:find("("..LOOT..")") then
+	      link = qi.Title
+	    else
+	      link = "\124cffffff00["..(qi.Title or "???").."]\124r"
+	    end
 	  end
 	  indicatortip:SetCell(line,1,(qi.Zone or ""),"LEFT")
           indicatortip:SetCell(line,2,link,"RIGHT")
@@ -1723,12 +1897,16 @@ local function ShowLFRTooltip(cell, arg, ...)
 	    indicatortip:SetCell(indicatortip:AddLine(), 1, YELLOWFONT .. instance .. FONTEND, "CENTER",3)
 	    local thisinstance = vars.db.Instances[instance]
             local info = thisinstance[toon] and thisinstance[toon][diff]
-	    local killed, total, base = addon:instanceBosses(instance,toon,diff)
+	    local killed, total, base, remap = addon:instanceBosses(instance,toon,diff)
             for i=base,base+total-1 do
-              local bossname = GetLFGDungeonEncounterInfo(thisinstance.LFDID, i);
+	      local bossid = i
+	      if remap then
+	        bossid = remap[i-base+1]
+	      end
+              local bossname = GetLFGDungeonEncounterInfo(thisinstance.LFDID, bossid);
 	      local n = indicatortip:AddLine()
 	      indicatortip:SetCell(n, 1, bossname, "LEFT", 2)
-              if info and info[i] then 
+              if info and info[bossid] then 
                 indicatortip:SetCell(n, 3, REDFONT..ERR_LOOT_GONE..FONTEND, "RIGHT", 1)
               else
                 indicatortip:SetCell(n, 3, GREENFONT..AVAILABLE..FONTEND, "RIGHT", 1)
@@ -1772,7 +1950,7 @@ local function ShowIndicatorTooltip(cell, arg, ...)
 	end
 	if info.Link then
 	  scantt:SetOwner(UIParent,"ANCHOR_NONE")
-	  scantt:SetHyperlink(thisinstance[toon][diff].Link)
+	  scantt:SetHyperlink(info.Link)
 	  local name = scantt:GetName()
 	  local gotbossinfo
 	  for i=2,scantt:NumLines() do
@@ -1786,24 +1964,43 @@ local function ShowIndicatorTooltip(cell, arg, ...)
 	      indicatortip:SetCell(indicatortip:AddLine(),1,coloredText(left),"CENTER",3)
 	    end
 	  end
-	  if not gotbossinfo and info.Link:find(":0|h[",1,true) then
+	  if not gotbossinfo then
+	    local exc = addon:instanceException(thisinstance.LFDID)
+            local bits = tonumber(info.Link:match(":(%d+)\124h"))
+	    if exc and bits then
+	      for i=1,exc.total do
+	        local n = indicatortip:AddLine()
+	        indicatortip:SetCell(n, 1, exc[i], "LEFT", 2)
+		local text = "\124cff00ff00"..BOSS_ALIVE.."\124r"
+                if bit.band(bits,1) > 0 then
+                  text = "\124cffff1f1f"..BOSS_DEAD.."\124r"
+                end
+	        indicatortip:SetCell(n, 3, text, "RIGHT", 1)
+                bits = bit.rshift(bits,1)
+              end
+	    else
 	      indicatortip:SetCell(indicatortip:AddLine(),1,WHITEFONT .. 
 	          L["Boss kill information is missing for this lockout.\nThis is a Blizzard bug affecting certain old raids."] .. 
 		  FONTEND,"CENTER",3)
+            end
 	  end
 	end
 	if info.ID < 0 then
-	  local killed, total, base = addon:instanceBosses(instance,toon,diff)
+	  local killed, total, base, remap = addon:instanceBosses(instance,toon,diff)
           for i=base,base+total-1 do
+	    local bossid = i
+            if remap then
+	      bossid = remap[i-base+1]
+	    end
             local bossname
             if worldboss then
               bossname = addon.WorldBosses[worldboss].name or "UNKNOWN"
             else
-              bossname = GetLFGDungeonEncounterInfo(thisinstance.LFDID, i);
+              bossname = GetLFGDungeonEncounterInfo(thisinstance.LFDID, bossid);
             end
 	    local n = indicatortip:AddLine()
 	    indicatortip:SetCell(n, 1, bossname, "LEFT", 2)
-            if info[i] then 
+            if info[bossid] then 
               indicatortip:SetCell(n, 3, REDFONT..ERR_LOOT_GONE..FONTEND, "RIGHT", 1)
             else
               indicatortip:SetCell(n, 3, GREENFONT..AVAILABLE..FONTEND, "RIGHT", 1)
@@ -1963,7 +2160,7 @@ function core:OnInitialize()
 	RequestRaidInfo() -- get lockout data
 	RequestLFDPlayerLockInfo()
 	vars.dataobject = vars.LDB and vars.LDB:NewDataObject("SavedInstances", {
-		text = addonName,
+		text = addonAbbrev,
 		type = "launcher",
 		icon = "Interface\\Addons\\SavedInstances\\icon.tga",
 		OnEnter = function(frame)
@@ -2018,6 +2215,7 @@ function core:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SYSTEM", "CheckSystemMessage")
 	self:RegisterEvent("CHAT_MSG_CURRENCY", "CheckSystemMessage")
 	self:RegisterEvent("CHAT_MSG_LOOT", "CheckSystemMessage")
+	self:RegisterEvent("CURRENCY_DISPLAY_UPDATE", function() addon:UpdateCurrency() end)
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("TRADE_SKILL_UPDATE")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", RequestRaidInfo)
@@ -2357,7 +2555,7 @@ function addon:HistoryUpdate(forcereset, forcemesg)
     addon.histTextthrottle = math.min(oldestrem+1, addon.histTextthrottle or 15)
     addon.resetDetect:SetScript("OnUpdate", addon.histTextUpdate)
   else
-    vars.dataobject.text = addonName
+    vars.dataobject.text = addonAbbrev
     addon.resetDetect:SetScript("OnUpdate", nil)
   end
 end
@@ -2462,7 +2660,7 @@ function core:Refresh(recoverdaily)
            if weeklyreset and (
 	      (einfo.quest and IsQuestFlaggedCompleted(einfo.quest)) or 
 	      (quests and einfo.quest and quests[einfo.quest]) or
-	      wbsave[einfo.name]
+	      wbsave[einfo.savename or einfo.name]
 	      ) then
              local truename = einfo.name
              local instance = vars.db.Instances[truename] 
@@ -3515,6 +3713,7 @@ local trade_spells = {
 	[175880] = true,	-- Secrets of Draenor
 	[156587] = true,	-- Alchemical Catalyst (4)
 	[168042] = true,	-- Alchemical Catalyst (10), 3 charges w/ 24hr recharge
+	[181643] = "xmute",	-- Transmute: Savage Blood
 
 
         -- Enchanting
@@ -3580,12 +3779,14 @@ local trade_spells = {
 	[169080] = true, 	-- Gearspring Parts
 	[177054] = true,	-- Secrets of Draenor
 
-	[126459] = "item",	-- Blingtron
+	[126459] = "item",	-- Blingtron 4000
+	[161414] = "item",	-- Blingtron 5000
 	[54710]  = "item",	-- MOLL-E
 	[67826]  = "item",	-- Jeeves
 
 	[67833] = "item",	-- Wormhole Generator: Northrend
 	[126755] = "item",	-- Wormhole Generator: Pandaria
+	[163830] = "item",	-- Wormhole Centrifuge
 	[23453] = "item", 	-- Ultrasafe Transporter: Gadgetzhan
 	[36941] = "item",	-- Ultrasafe Transporter: Toshley's Station
 }
@@ -3598,9 +3799,11 @@ local cdname = {
 }
 
 local itemcds = { -- [itemid] = spellid
-	[87214] = 126459, 	-- Blingtron
+	[87214] = 126459, 	-- Blingtron 4000
+	[111821] = 161414, 	-- Blingtron 5000
 	[40768] = 54710, 	-- MOLL-E
 	[49040] = 67826, 	-- Jeeves
+	[112059] = 163830,	-- Wormhole Centrifuge
 	[48933] = 67833,	-- Wormhole Generator: Northrend
 	[87215] = 126755,	-- Wormhole Generator: Pandaria
 	[18986] = 23453, 	-- Ultrasafe Transporter: Gadgetzhan
@@ -3652,13 +3855,16 @@ function core:record_skill(spellID, expires)
   elseif expires ~= 0 then
     local slink = GetSpellLink(spellID)
     if slink and #slink > 0 then  -- tt scan for the full name with profession
+      link = "\124cffffd000\124Henchant:"..spellID.."\124h[X]\124h\124r"
       scantt:SetOwner(UIParent,"ANCHOR_NONE")
-      scantt:SetHyperlink(slink) 
+      scantt:SetHyperlink(link) 
       local l = _G[scantt:GetName().."TextLeft1"]
       l = l and l:GetText()
       if l and #l > 0 then 
         title = l
-        link = "\124cffffd000\124Henchant:"..spellID.."\124h["..l.."]\124h\124r"
+	link = link:gsub("X",l)
+      else
+        link = nil
       end
     end
   end

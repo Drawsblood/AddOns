@@ -1,12 +1,8 @@
 local addonName = "Altoholic"
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
-
-local WHITE		= "|cFFFFFFFF"
-local TEAL		= "|cFF00FF9A"
-local GREEN		= "|cFF00FF00"
-local YELLOW	= "|cFFFFFF00"
 
 local parentName = "AltoholicTabGuild"
 local parent
@@ -24,7 +20,7 @@ local ns = addon.Tabs.Guild		-- ns = namespace
 
 local function OnRosterUpdate()
 	local _, onlineMembers = GetNumGuildMembers()
-	parent.MenuItem1.Text:SetText(format("%s %s(%d)", L["Guild Members"], GREEN, onlineMembers))
+	parent.MenuItem1.Text:SetText(format("%s %s(%d)", L["Guild Members"], colors.green, onlineMembers))
 	
 	addon.Guild.Members:InvalidateView()
 end
@@ -64,19 +60,17 @@ end
 
 function ns:SetMode(mode)
 	currentMode = mode
-
-	local Columns = addon.Tabs.Columns
-	Columns:Init()
 	
 	if mode == 1 then
-		Columns:Add(NAME, 100, function(self) addon.Guild.Members:Sort(self, "name") end)
-		Columns:Add(LEVEL, 60, function(self) addon.Guild.Members:Sort(self, "level") end)
-		Columns:Add("AiL", 65, function(self) addon.Guild.Members:Sort(self, "averageItemLvl") end)
-		Columns:Add(GAME_VERSION_LABEL, 80, function(self) addon.Guild.Members:Sort(self, "version") end)
-		Columns:Add(CLASS, 100, function(self) addon.Guild.Members:Sort(self, "englishClass") end)
-		return
+		parent.SortButtons:ShowChildFrames()
+		parent.SortButtons:SetButton(1, NAME, 100, function(self) addon.Guild.Members:Sort(self, "name") end)
+		parent.SortButtons:SetButton(2, LEVEL, 60, function(self) addon.Guild.Members:Sort(self, "level") end)
+		parent.SortButtons:SetButton(3, "AiL", 65, function(self) addon.Guild.Members:Sort(self, "averageItemLvl") end)
+		parent.SortButtons:SetButton(4, GAME_VERSION_LABEL, 80, function(self) addon.Guild.Members:Sort(self, "version") end)
+		parent.SortButtons:SetButton(5, CLASS, 100, function(self) addon.Guild.Members:Sort(self, "englishClass") end)
+	else
+		parent.SortButtons:HideChildFrames()
 	end
-
 end
 
 function ns:MenuItem_OnClick(id)

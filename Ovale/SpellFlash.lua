@@ -19,6 +19,7 @@ local OvaleStance = nil
 
 local pairs = pairs
 local type = type
+local API_GetTime = GetTime
 local API_UnitHasVehicleUI = UnitHasVehicleUI
 local API_UnitExists = UnitExists
 local API_UnitIsDead = UnitIsDead
@@ -281,21 +282,22 @@ end
 function OvaleSpellFlash:Flash(state, node, element, start, now)
 	-- SpellFlash settings.
 	local db = Ovale.db.profile.apparence.spellFlash
+	now = now or API_GetTime()
 	if self:IsSpellFlashEnabled() and start and start - now <= db.threshold / 1000 then
 		-- Check that element is an action.
 		if element and element.type == "action" then
 			local spellId, spellInfo
 			if element.lowername == "spell" then
-				spellId = element.params[1]
+				spellId = element.positionalParams[1]
 				spellInfo = OvaleData.spellInfo[spellId]
 			end
 			local interrupt = spellInfo and spellInfo.interrupt
 
 			-- Flash color.
 			local color = COLORTABLE["white"]
-			local flash = element.params and element.params.flash
-			local iconFlash = node.params.flash
-			local iconHelp = node.params.help
+			local flash = element.namedParams and element.namedParams.flash
+			local iconFlash = node.namedParams.flash
+			local iconHelp = node.namedParams.help
 			if flash and COLORTABLE[flash] then
 				-- Highest priority is known flash color set in the action parameters.
 				color = COLORTABLE[flash]
@@ -333,7 +335,7 @@ function OvaleSpellFlash:Flash(state, node, element, start, now)
 				SpellFlashCore.FlashAction(spellId, color, size, brightness)
 			elseif element.lowername == "item" then
 				-- Item ID.
-				local itemId = element.params[1]
+				local itemId = element.positionalParams[1]
 				SpellFlashCore.FlashItem(itemId, color, size, brightness)
 			end
 		end

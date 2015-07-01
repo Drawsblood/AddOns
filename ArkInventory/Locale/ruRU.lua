@@ -51,7 +51,7 @@ if not L then return end
 	
 	
 --	restack
---	L["RESTACK"] = "Сжать и собрать"
+	L["RESTACK"] = "Сжать и собрать"
 	L["RESTACK_TEXT"] = "собрать предметы в как можно меньшее количество стэков, используя по возможности слоты специальных сумок"
 	L["RESTACK_FAIL_WAIT"] = "Операция пересборки уже выполняется, пожалуйста подождите"
 	L["RESTACK_FAIL_ACCESS"] = "У вас недостаточно прав, чтобы пересобрать закладку %2$s в %1$s" -- 1 = guild bank, 2 = tab number
@@ -82,11 +82,13 @@ if not L then return end
 	
 --	bag names - used to name the empty slots in the status frame
 	L["STATUS_NAME_BAG"] = "Сумка"
+--	L["STATUS_NAME_COOKING"] = ""
 --	L["STATUS_NAME_CRITTER"] = ""
 	L["STATUS_NAME_ENCHANTING"] = "Чары"
 	L["STATUS_NAME_ENGINEERING"] = "Инжен"
 --	L["STATUS_NAME_GEAR"] = ""
 	L["STATUS_NAME_GEM"] = "Ювел"
+--	L["STATUS_NAME_HEIRLOOM"] = ""
 	L["STATUS_NAME_HERB"] = "Трава"
 	L["STATUS_NAME_INSCRIPTION"] = "Начер"
 	L["STATUS_NAME_KEY"] = "Ключ"
@@ -94,9 +96,9 @@ if not L then return end
 	L["STATUS_NAME_MAIL"] = "Почта"
 	L["STATUS_NAME_MINING"] = "Руда"
 --	L["STATUS_NAME_MOUNT"] = ""
---	L["STATUS_NAME_TOKEN"] = ""
+--	L["STATUS_NAME_REAGENTBANK"] = ""
 --	L["STATUS_NAME_TACKLE"] = ""
---	L["STATUS_NAME_COOKING"] = ""
+--	L["STATUS_NAME_TOKEN"] = ""
 --	L["STATUS_NAME_TOY"] = ""
 	
 	
@@ -168,6 +170,7 @@ if not L then return end
 	L["MENU_BAR_CATEGORY_HIDDEN_TEXT"] = "клик для назначения данной категории статуса скрытой.\n\nпредметы в скрытых категориях не будут видны в обычном режиме."
 --	L["MENU_BAR_CATEGORY_MOVE_START_TEXT"] = ""
 --	L["MENU_BAR_CATEGORY_MOVE_COMPLETE_TEXT"] = ""
+--	L["MENU_BAR_BAG_ASSIGN_TEXT"] = ""
 	L["MENU_BAR_OPTIONS"] = "Настройки полос"
 	L["MENU_BAR_CLEAR_TEXT"] = "убирает все категории, закрепленные за этим набором, за исключением категории по умолчанию."
 	L["MENU_BAR_INSERT_TEXT"] = "добавить пустой набор ячеек сюда, сдвигая все категории на один набор вверх."
@@ -205,6 +208,8 @@ if not L then return end
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_LOW"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_MEDIUM"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_HIGH"] = ""
+	
+--	L["CONFIG_SYSTEM_RESTACK_TEXT"] = ""
 	
 	L["CONFIG_SYSTEM_TOOLTIP"] = "Тултипы"
 	L["CONFIG_SYSTEM_TOOLTIP_ENABLE_TEXT"] = "включить тултипы"
@@ -366,6 +371,8 @@ if not L then return end
 --	L["CONFIG_SETTINGS_ITEMS_TINT_USABLE_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS_TEXT"] = ""
 	
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = ""
@@ -408,6 +415,8 @@ if not L then return end
 --	L["CONFIG_SETTINGS_EMPTY_STATUS"] = "display format"
 --	L["CONFIG_SETTINGS_EMPTY_FIRST"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION_TEXT"] = ""
 	
 	
 -- sorting
@@ -415,6 +424,8 @@ if not L then return end
 	
 	L["CONFIG_SORTING_SORT"] = "Сортировка"
 	
+--	L["CONFIG_SORTING_METHOD"] = ""
+--	L["CONFIG_SORTING_METHODS"] = ""
 --	L["CONFIG_SORTING_METHOD_TEXT"] = ""
 	L["CONFIG_SORTING_METHOD_BAGSLOT"] = "Сумка / Ячейка"
 	L["CONFIG_SORTING_METHOD_BAGSLOT_TEXT"] = "сортирует инвентарь по номеру сумки и ячейки"
@@ -422,6 +433,7 @@ if not L then return end
 	L["CONFIG_SORTING_METHOD_USER_TEXT"] = "сортирует инвентарь тем способом, который выберите Вы"
 	
 --	L["CONFIG_SORTING_BAG"] = ""
+--	L["CONFIG_SORTING_BAGS"] = ""
 --	L["CONFIG_SORTING_BAG_TEXT"] = ""
 	
 	L["CONFIG_SORTING_INCLUDE_NAME"] = "название предмета"
@@ -627,6 +639,8 @@ if not L then return end
 --	L["NO_DATA_AVAILABLE"] = ""
 --	L["TOOLTIP_PURCHASE_BANK_BAG_SLOT"] = ""
 --	L["TOOLTIP_PURCHASE_BANK_TAB_REAGENT"] = ""
+--	L["LABEL"] = ""
+--	L["ABORTED"] = ""
 	
 	
 -- libdatabroker

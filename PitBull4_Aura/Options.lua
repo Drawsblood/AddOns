@@ -411,6 +411,13 @@ PitBull4_Aura:SetDefaults({
 			},
 			built_in = true,
 		},
+		['@Q'] = {
+			display_name = L['Boss debuff'],
+			filter_type = 'Boss debuff',
+			boss_debuff = true,
+			disabled = true,
+			built_in = true,
+		},
 		['//3'] = {
 			display_name = L['Monk can dispel'],
 			filter_type = 'Aura Type',
@@ -957,6 +964,13 @@ PitBull4_Aura:SetDefaults({
 			name_list = self_debuffs.WARRIOR,
 			built_in = true,
 		},
+		['+7'] = {
+			display_name = L['Death Knight can purge'],
+			filter_type = 'Aura Type',
+			whitelist = true,
+			aura_type_list = can_purge.DEATHKNIGHT,
+			built_in = true,
+		},
 		[',7'] = {
 			display_name = L['Druid can purge'],
 			filter_type = 'Aura Type',
@@ -1152,7 +1166,7 @@ PitBull4_Aura:SetDefaults({
 			map_type = 'class',
 			map = {
 				['MONK'] = '@J',
-				['DEATHKNIGHT'] = '@J',
+				['DEATHKNIGHT'] = '+7',
 				['DRUID'] = ',7',
 				['HUNTER'] = '-7',
 				['MAGE'] = '.7',

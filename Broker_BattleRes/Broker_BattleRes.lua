@@ -7,8 +7,6 @@ local dataObj = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Broker_Ba
 	label = "BattleRes",
 	text = "0",
 	OnTooltipShow = function(tooltip)
-		tooltip:SetText("Broker BattleRes", 1, 1, 1)
-
 		local name, instanceType, _, difficultyName, _, _, _, _, instanceGroupSize = GetInstanceInfo()
 		if instanceType == "raid" then
 			tooltip:AddLine(("%s (%s)"):format(name, difficultyName))
@@ -17,9 +15,8 @@ local dataObj = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Broker_Ba
 				duration = 90 / instanceGroupSize * 60
 			end
 			tooltip:AddLine(("%s recharge (%d players)"):format(SecondsToTime(duration), instanceGroupSize))
+			tooltip:AddLine(" ")
 		end
-		tooltip:AddLine(" ")
-
 		if next(history) then
 			tooltip:AddLine("Recently ressed:")
 			for i, name in ipairs(history) do
@@ -51,11 +48,12 @@ frame:SetScript("OnUpdate", function(self, elapsed)
 			return
 		end
 
+		local color = charges > 0 and GREEN_FONT_COLOR_CODE or RED_FONT_COLOR_CODE
 		local time = duration - (GetTime() - started)
 		local m = floor(time / 60)
 		local s = mod(time, 60)
 
-		dataObj.text = ("%d (%02d:%02d)"):format(charges, m, s)
+		dataObj.text = ("%s%d|r |cffffffff(%02d:%02d)|r"):format(color, charges, m, s)
 	end
 end)
 
@@ -73,7 +71,6 @@ function frame:SPELL_UPDATE_CHARGES()
 	if charges then
 		self:UnregisterEvent("SPELL_UPDATE_CHARGES")
 		wipe(history)
-		dataObj.text = "0"
 		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 		self:Show()
 	end
@@ -85,8 +82,8 @@ function frame:ZONE_CHANGED_NEW_AREA()
 	wipe(history)
 	dataObj.text = "0"
 
-	local _, type = IsInInstance()
-	if type == "raid" then
+	local _, instanceType = IsInInstance()
+	if instanceType == "raid" then
 		frame:RegisterEvent("SPELL_UPDATE_CHARGES")
 	end
 end

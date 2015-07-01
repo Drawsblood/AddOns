@@ -1,5 +1,5 @@
 --[[--------------------------------------------------------------------
-    Copyright (C) 2012, 2013, 2014 Johnny C. Lam.
+    Copyright (C) 2012, 2013, 2014, 2015 Johnny C. Lam.
     See the file LICENSE.txt for copying permission.
 --]]----------------------------------------------------------------------
 
@@ -88,10 +88,7 @@ OvaleDebug.options = {
 					name = L["Trace"],
 					desc = L["Trace the next frame update."],
 					func = function()
-						self_traceLog:Clear()
-						OvaleDebug.trace = true
-						OvaleDebug:Log("=== Trace @%f", API_GetTime())
-						OvaleDebug:ScheduleTimer("DisplayTraceLog", 0.5)
+						OvaleDebug:DoTrace(true)
 					end,
 				},
 				traceLog = {
@@ -100,59 +97,6 @@ OvaleDebug.options = {
 					name = L["Show Trace Log"],
 					func = function()
 						OvaleDebug:DisplayTraceLog()
-					end,
-				},
-				traceSpellId = {
-					order = 30,
-					type = "input",
-					name = L["Trace spellcast"],
-					desc = L["Names or spell IDs of spellcasts to watch, separated by semicolons."],
-					get = function(info)
-						local OvaleFuture = Ovale.OvaleFuture
-						if OvaleFuture then
-							local t = OvaleFuture.traceSpellList or {}
-							local s = ""
-							for k, v in pairs(t) do
-								if type(v) == "boolean" then
-									if strlen(s) == 0 then
-										s = k
-									else
-										s = s .. "; " .. k
-									end
-								end
-							end
-							return s
-						else
-							return ""
-						end
-					end,
-					set = function(info, value)
-						local OvaleFuture = Ovale.OvaleFuture
-						if OvaleFuture then
-							local t = {}
-							for s in gmatch(value, "[^;]+") do
-								-- strip leading and trailing whitespace
-								s = gsub(s, "^%s*", "")
-								s = gsub(s, "%s*$", "")
-								if strlen(s) > 0 then
-									local v = tonumber(s)
-									if v then
-										s = API_GetSpellInfo(v)
-										if s then
-											t[v] = true
-											t[s] = v
-										end
-									else
-										t[s] = true
-									end
-								end
-							end
-							if next(t) then
-								OvaleFuture.traceSpellList = t
-							else
-								OvaleFuture.traceSpellList = nil
-							end
-						end
 					end,
 				},
 			},
@@ -175,6 +119,15 @@ end
 
 function OvaleDebug:OnEnable()
 	self_traceLog = LibTextDump:New(OVALE .. " - " .. L["Trace Log"], 750, 500)
+end
+
+function OvaleDebug:DoTrace(displayLog)
+	self_traceLog:Clear()
+	self.trace = true
+	self:Log("=== Trace @%f", API_GetTime())
+	if displayLog then
+		self:ScheduleTimer("DisplayTraceLog", 0.5)
+	end
 end
 
 function OvaleDebug:ResetTrace()
@@ -207,32 +160,29 @@ function OvaleDebug:RegisterDebugging(addon)
 		type = "toggle",
 	}
 	addon.Debug = self.Debug
+	addon.DebugTimestamp = self.DebugTimestamp
 end
 
 --[[
-	Output the parameters as a string to DEFAULT_CHAT_FRAME.  If the first parameter
-	is a boolean or nil, then treat it as a request to insert a timestamp at the
-	beginning of the line.
+	Output the parameters as a string to DEFAULT_CHAT_FRAME.
 --]]
-function OvaleDebug:Debug(addTimestamp, ...)
+function OvaleDebug:Debug(...)
 	local name = self:GetName()
 	if Ovale.db.global.debug[name] then
-		local s
-		if (type(addTimestamp) == "boolean" or type(addTimestamp) == "nil") then
-			if (...) then
-				if addTimestamp then
-					-- Add a yellow timestamp to the start.
-					local now = API_GetTime()
-					s = format("|cffffff00%f|r %s", now, Ovale:MakeString(...))
-				else
-					s = Ovale:MakeString(...)
-				end
-			else
-				s = tostring(addTimestamp)
-			end
-		else
-			s = Ovale:MakeString(addTimestamp, ...)
-		end
+		-- Match output format from AceConsole-3.0 Print() method.
+		DEFAULT_CHAT_FRAME:AddMessage(format("|cff33ff99%s|r: %s", name, Ovale:MakeString(...)))
+	end
+end
+
+--[[
+	Output the parameters as a string to DEFAULT_CHAT_FRAME with a timestamp.
+--]]
+function OvaleDebug:DebugTimestamp(...)
+	local name = self:GetName()
+	if Ovale.db.global.debug[name] then
+		-- Add a yellow timestamp to the start.
+		local now = API_GetTime()
+		local s = format("|cffffff00%f|r %s", now, Ovale:MakeString(...))
 		-- Match output format from AceConsole-3.0 Print() method.
 		DEFAULT_CHAT_FRAME:AddMessage(format("|cff33ff99%s|r: %s", name, s))
 	end

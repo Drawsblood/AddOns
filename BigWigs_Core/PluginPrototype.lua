@@ -4,7 +4,7 @@ local core = BigWigs
 local plugin = {}
 core:GetModule("Plugins"):SetDefaultModulePrototype(plugin)
 
-function plugin:OnInitialize()
+function plugin:Initialize()
 	core:RegisterPlugin(self)
 end
 
@@ -23,6 +23,13 @@ function plugin:OnDisable()
 end
 
 function plugin:IsBossModule() return end
+
+do
+	local C = core.C
+	function plugin:CheckOption(key, flag)
+		return self.db.profile[key] and bit.band(self.db.profile[key], C[flag]) == C[flag]
+	end
+end
 
 do
 	local UnitName = UnitName
@@ -53,6 +60,13 @@ do
 	local partyList = {"player", "party1", "party2", "party3", "party4"}
 	function plugin:GetPartyList()
 		return partyList
+	end
+end
+
+function plugin:UpdateGUI()
+	local acr = LibStub("AceConfigRegistry-3.0", true)
+	if acr then
+		acr:NotifyChange("BigWigs")
 	end
 end
 

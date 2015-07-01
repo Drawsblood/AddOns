@@ -1,4 +1,4 @@
-local MAJOR_VERSION, MINOR_VERSION = "iLib", 504001
+local MAJOR_VERSION, MINOR_VERSION = "iLib", 600100
 if( not LibStub ) then error(MAJOR_VERSION.." requires LibStub"); end
 
 local iLib, oldLib = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION);
@@ -120,6 +120,7 @@ do
 		end
 		
 		for chat, mods in pairs(response) do
+			
 			AceComm.SendCommMessage(iLib, "iLib", _encode("!%"..table.concat(mods, "%")), chat, (chat == "WHISPER" and user or nil), "BULK");
 		end
 		
@@ -327,15 +328,16 @@ local function smart_version_number(addon)
 		return version;
 	end
 	
-	local _, _, major, minor, rev = string.find(version, "(%d*).?(%d*)[.-]?%a*(%d*)");
-	major = tonumber(tonumber(major) and major or 0);
-	minor = tonumber(tonumber(minor) and minor or 0);
-	rev   = tonumber(tonumber( rev ) and  rev  or 0);
+	local _, _, major, minor, rev, release = string.find(version, "(%d*).?(%d*).?(%d*)[.-]?%a*(%d*)");
+	major   = tonumber(tonumber(major)   and major   or 0);
+	minor   = tonumber(tonumber(minor)   and minor   or 0);
+	rev     = tonumber(tonumber( rev )   and  rev    or 0);
+	release = tonumber(tonumber(release) and release or 0);
 	
 	minor = minor > 99 and 99 or minor;
-	rev   = rev   > 999 and 999 or rev;
+	rev   = rev   > 99 and 99 or rev;
 	
-	return (major * 100000) + (minor * 1000) + rev;
+	return (major * 1000000) + (minor * 10000) + (rev * 100) + release;
 end
 
 --- Registers an addon with the iLib

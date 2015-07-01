@@ -433,17 +433,28 @@ local function CheckExpiries()
 	for key, character in pairs(addon.db.global.Characters) do
 		account, realm, charName = strsplit(".", key)
 		
-		if allAccounts or ((allAccounts == false) and (account == THIS_ACCOUNT)) then		-- all accounts, or only current and current was found
-			if allRealms or ((allRealms == false) and (realm == GetRealmName())) then			-- all realms, or only current and current was found
-	
-			-- detect return vs delete
-				local numExpiredMails = _GetNumExpiredMails(character, threshold)
-				if numExpiredMails > 0 then
-					expiryFound = true
-					if reportToChat then		-- if the option is active, report the name of the character to chat, one line per alt.
-						addon:Print(format(L["EXPIRED_EMAILS_WARNING"], charName, realm))
+		-- 2015-02-07 : The problem of expired items is here
+		-- It appears that in older versions, the addon managed to create an invalid character key
+		-- ex: Default.Realm.Player-Realm
+		-- This was due to being able to guild character from merged realms, who would then send mail to an alt.
+		-- These invalid keys should be fully deleted.
+		
+		local pos = string.find(charName, "-")		-- is there a '-' in the character name ? if yes, invalid key ! delete it !
+		if pos then
+			addon.db.global.Characters[key] = nil
+		else
+			if allAccounts or ((allAccounts == false) and (account == THIS_ACCOUNT)) then		-- all accounts, or only current and current was found
+				if allRealms or ((allRealms == false) and (realm == GetRealmName())) then			-- all realms, or only current and current was found
+		
+				-- detect return vs delete
+					local numExpiredMails = _GetNumExpiredMails(character, threshold)
+					if numExpiredMails > 0 then
+						expiryFound = true
+						if reportToChat then		-- if the option is active, report the name of the character to chat, one line per alt.
+							addon:Print(format(L["EXPIRED_EMAILS_WARNING"], charName, realm))
+						end
+						addon:SendMessage("DATASTORE_MAIL_EXPIRY", character, key, threshold, numExpiredMails)
 					end
-					addon:SendMessage("DATASTORE_MAIL_EXPIRY", character, key, threshold, numExpiredMails)
 				end
 			end
 		end

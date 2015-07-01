@@ -1,11 +1,9 @@
 local addonName = "Altoholic"
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
-local WHITE		= "|cFFFFFFFF"
-local GREEN		= "|cFF00FF00"
-local GOLD		= "|cFFFFD700"
 local THIS_ACCOUNT = "Default"
 
 local ICON_PARTIAL = "Interface\\RaidFrame\\ReadyCheck-Waiting"
@@ -18,10 +16,6 @@ local currentCategory	-- current category ( equipment, rep, currencies, etc.. )
 
 local currentRealm = GetRealmName()
 local currentAccount = THIS_ACCOUNT
-
-local DDM_Add = addon.Helpers.DDM_Add
-local DDM_AddTitle = addon.Helpers.DDM_AddTitle
-local DDM_AddCloseMenu = addon.Helpers.DDM_AddCloseMenu
 
 addon.Tabs.Grids = {}
 
@@ -106,73 +100,6 @@ local function UpdateMenuIcons()
 	end
 end
 
-local function UpdateClassIcons()
-	local key = addon:GetOption(format("Tabs.Grids.%s.%s.Column1", currentAccount, currentRealm))
-	if not key then	-- first time this realm is displayed, or reset by player
-	
-		local index = 1
-
-		-- add the first 11 keys found on this realm
-		for characterName, characterKey in pairs(DataStore:GetCharacters(currentRealm, currentAccount)) do	
-			-- ex: : ["Tabs.Grids.Default.MyRealm.Column4"] = "Account.realm.alt7"
-
-			addon:SetOption(format("Tabs.Grids.%s.%s.Column%d", currentAccount, currentRealm, index), characterKey)
-			
-			index = index + 1
-			if index > CHARS_PER_FRAME then
-				break
-			end
-		end
-		
-		while index <= CHARS_PER_FRAME do
-			addon:SetOption(format("Tabs.Grids.%s.%s.Column%d", currentAccount, currentRealm, index), nil)
-			index = index + 1
-		end
-	end
-	
-	local itemName, itemButton
-	local class, _
-	
-	local frame = parent.ClassIcons
-	
-	for i = 1, CHARS_PER_FRAME do
-		itemButton = frame["Icon"..i]
-		
-		key = addon:GetOption(format("Tabs.Grids.%s.%s.Column%d", currentAccount, currentRealm, i))
-		if key then
-			_, class = DataStore:GetCharacterClass(key)
-		end
-		
-		if key and class then
-			local tc = CLASS_ICON_TCOORDS[class]
-		
-			itemButton.Icon:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes");
-			itemButton.Icon:SetTexCoord(tc[1], tc[2], tc[3], tc[4])
-	
-			if DataStore:GetCharacterFaction(key) == "Alliance" then
-				itemButton.IconBorder:SetVertexColor(0.1, 0.25, 1, 0.5)
-			else
-				itemButton.IconBorder:SetVertexColor(1, 0, 0, 0.5)
-			end
-
-		else	-- no key ? display a question mark icon
-			itemButton.Icon:SetTexture(ICON_PARTIAL)
-			itemButton.Icon:SetTexCoord(0, 1, 0, 1)
-			
-			itemButton.IconBorder:SetVertexColor(0, 1, 0, 0.5)
-		end
-		
-		itemButton.Icon:SetWidth(33)
-		itemButton.Icon:SetHeight(33)
-		itemButton.Icon:SetAllPoints(itemButton)
-		
-		itemButton.IconBorder:Show()
-		itemButton:SetWidth(34)
-		itemButton:SetHeight(34)
-		itemButton:Show()
-	end
-end
-
 local gridCallbacks = {}
 
 function ns:RegisterGrid(category, callbacks)
@@ -204,13 +131,14 @@ function ns:MenuItem_OnClick(frame, button)
 end
 
 function ns:Update()
-	UpdateClassIcons()
+	parent.ClassIcons:Update(currentAccount, currentRealm)
 
-	local numRows = 8
 	local frame = AltoholicFrameGrids
+	local scrollFrame = frame.ScrollFrame
+	local numRows = scrollFrame.numRows
 	frame:Show()
 		
-	local offset = FauxScrollFrame_GetOffset(frame.ScrollFrame)
+	local offset = scrollFrame:GetOffset()
 	
 	ns:SetStatus("")
 	
@@ -221,7 +149,7 @@ function ns:Update()
 	local itemButton
 	
 	for rowIndex = 1, numRows do
-		local rowFrame = frame["Entry"..rowIndex]
+		local rowFrame = scrollFrame:GetRow(rowIndex)
 		local dataRowID = rowIndex + offset
 		if dataRowID <= size then	-- if the row is visible
 
@@ -254,7 +182,7 @@ function ns:Update()
 		end
 	end
 
-	FauxScrollFrame_Update(frame.ScrollFrame, size, numRows, 41)
+	scrollFrame:Update(size)
 end
 
 function ns:GetRealm()
@@ -266,21 +194,20 @@ function ns:SetStatus(text)
 end
 
 function ns:SetViewDDMText(text)
-	UIDropDownMenu_SetText(parent.SelectView, text)
+	parent.SelectView:SetText(text)
 end
 
 
 -- ** realm selection **
-local function OnRealmChange(self, account, realm)
+local function OnRealmChange(frame, account, realm)
 	local oldAccount = currentAccount
 	local oldRealm = currentRealm
 
 	currentAccount = account
 	currentRealm = realm
 
-	UIDropDownMenu_ClearAll(parent.SelectRealm);
-	UIDropDownMenu_SetSelectedValue(parent.SelectRealm, account .."|".. realm)
-	UIDropDownMenu_SetText(parent.SelectRealm, GREEN .. account .. ": " .. WHITE.. realm)
+	parent.SelectRealm:SetSelectedValue(format("%s|%s", account, realm))
+	parent.SelectRealm:SetText(format("%s%s: %s%s", colors.green, account, colors.white, realm))
 	
 	if oldRealm and oldAccount then	-- clear the "select char" drop down if realm or account has changed
 		if (oldRealm ~= realm) or (oldAccount ~= account) then
@@ -290,21 +217,21 @@ local function OnRealmChange(self, account, realm)
 	end
 end
 
-function ns:DropDownRealm_Initialize()
+function ns.DropDownRealm_Initialize(frame)
 	if not currentAccount or not currentRealm then return end
 
 	-- this account first ..
-	DDM_AddTitle(GOLD..L["This account"])
+	frame:AddTitle(colors.gold..L["This account"])
 	for realm in pairs(DataStore:GetRealms()) do
-		local info = UIDropDownMenu_CreateInfo()
+		local info = frame:CreateInfo()
 
-		info.text = WHITE..realm
+		info.text = colors.white..realm
 		info.value = format("%s|%s", THIS_ACCOUNT, realm)
 		info.checked = nil
 		info.func = OnRealmChange
 		info.arg1 = THIS_ACCOUNT
 		info.arg2 = realm
-		UIDropDownMenu_AddButton(info, 1)
+		frame:AddButtonInfo(info, 1)
 	end
 
 	-- .. then all other accounts
@@ -317,20 +244,21 @@ function ns:DropDownRealm_Initialize()
 	end
 	
 	if count > 0 then
-		DDM_AddTitle(" ")
-		DDM_AddTitle(GOLD..OTHER)
+		frame:AddTitle()
+		frame:AddTitle(colors.gold..OTHER)
+		
 		for account in pairs(accounts) do
 			if account ~= THIS_ACCOUNT then
 				for realm in pairs(DataStore:GetRealms(account)) do
-					local info = UIDropDownMenu_CreateInfo()
+					local info = frame:CreateInfo()
 
-					info.text = format("%s: %s", GREEN..account, WHITE..realm)
+					info.text = format("%s: %s", colors.green..account, colors.white..realm)
 					info.value = format("%s|%s", account, realm)
 					info.checked = nil
 					info.func = OnRealmChange
 					info.arg1 = account
 					info.arg2 = realm
-					UIDropDownMenu_AddButton(info, 1)
+					frame:AddButtonInfo(info, 1)
 				end
 			end
 		end
@@ -355,24 +283,22 @@ end
 -- ** Menu Icons **
 function ns:Icon_OnEnter(frame)
 	local currentMenuID = frame:GetID()
-	parent.ContextualMenu.menuID = currentMenuID
+	local menu = frame:GetParent():GetParent().ContextualMenu
 
-	-- hide all
-	CloseDropDownMenus()
+	menu.menuID = currentMenuID
+	menu:Close()
+	menu:Toggle(frame, 0, 0)
 
-	-- show current
-	ToggleDropDownMenu(1, nil, parent.ContextualMenu, "AltoholicTabGrids_ClassIcons", (currentMenuID-1)*39, 0)
-	
 	local key = addon:GetOption(format("Tabs.Grids.%s.%s.Column%d", currentAccount, currentRealm, currentMenuID))
 	if key then
-		addon:DrawCharacterTooltip(frame, key)
+		frame:DrawTooltip(key)
 	end
 end
 
-local function ClassIcon_Initialize(self, level)
-	local id = self.menuID
+local function ClassIcon_Initialize(frame, level)
+	local id = frame.menuID
 	
-	DDM_AddTitle(L["Characters"])
+	frame:AddTitle(L["Characters"])
 	local nameList = {}		-- we want to list characters alphabetically
 	for _, character in pairs(DataStore:GetCharacters(currentRealm, currentAccount)) do
 		table.insert(nameList, character)	-- we can add the key instead of just the name, since they will all be like account.realm.name, where account & realm are identical
@@ -383,32 +309,32 @@ local function ClassIcon_Initialize(self, level)
 	local key = addon:GetOption(format("Tabs.Grids.%s.%s.Column%d", currentAccount, currentRealm, id)) or ""
 	
 	for _, character in ipairs(nameList) do
-		local info = UIDropDownMenu_CreateInfo(); 
+		local info = frame:CreateInfo()
 		
 		info.text		= DataStore:GetColoredCharacterName(character)
 		info.value		= character
 		info.func		= OnCharacterChange
 		info.checked	= (key == character)
 		info.arg1		= id
-		UIDropDownMenu_AddButton(info, 1)
+		frame:AddButtonInfo(info, 1)
 	end
 	
-	DDM_AddTitle(" ")
+	frame:AddTitle()
 	
-	local info = UIDropDownMenu_CreateInfo()
+	local info = frame:CreateInfo()
 	info.text		= (id == 1) and RESET or NONE
 	info.value		= "empty"
 	info.func		= OnCharacterChange
 	info.checked	= (key == "")
 	info.arg1		= id
-	UIDropDownMenu_AddButton(info, 1)
+	frame:AddButtonInfo(info, 1)
 
-	DDM_AddCloseMenu()
+	frame:AddCloseMenu()
 end
 
 function ns:OnLoad()
 	parent = _G[parentName]
-	addon:DDM_Initialize(parent.ContextualMenu, ClassIcon_Initialize)
+	parent.ContextualMenu:Initialize(ClassIcon_Initialize, "MENU")
 	
 	-- ** Left Menu **
 	parent.Label1:SetText(L["Realm"])

@@ -96,6 +96,8 @@ local function RegisterShownHiddenTimerCallback()
 end
 
 ConditionCategory:RegisterCondition(1.2,	"ICONSHOWNTME", {
+	old = true,
+
 	text = L["CONDITIONPANEL_ICONSHOWNTIME"],
 	tooltip = L["CONDITIONPANEL_ICONSHOWNTIME_DESC"],
 	range = 30,
@@ -119,6 +121,8 @@ ConditionCategory:RegisterCondition(1.2,	"ICONSHOWNTME", {
 	end,
 })
 ConditionCategory:RegisterCondition(1.3,	"ICONHIDDENTME", {
+	old = true,
+	
 	text = L["CONDITIONPANEL_ICONHIDDENTIME"],
 	tooltip = L["CONDITIONPANEL_ICONHIDDENTIME_DESC"],
 	range = 30,
@@ -323,7 +327,7 @@ ConditionCategory:RegisterCondition(31,	 "LUA", {
 })
 
 TMW:RegisterLuaImportDetector(function(table)
-	if table.Type == "LUA" and table.Name ~= "" then
+	if rawget(table, "Type") == "LUA" and rawget(table, "Name") ~= "" then
 		return table.Name, L["LUACONDITION2"]
 	end
 end)

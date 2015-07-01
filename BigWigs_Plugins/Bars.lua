@@ -194,8 +194,8 @@ do
 		bar.candyBarDuration:SetPoint("RIGHT", bar.candyBarBar, "RIGHT", -2, 0)
 
 		bar.candyBarLabel:ClearAllPoints()
-		bar.candyBarLabel:SetPoint("LEFT", bar.candyBarBar, "LEFT", 2, 0)
-		bar.candyBarLabel:SetPoint("RIGHT", bar.candyBarBar, "RIGHT", -2, 0)
+		bar.candyBarLabel:SetPoint("TOPLEFT", bar.candyBarBar, "TOPLEFT", 2, 0)
+		bar.candyBarLabel:SetPoint("BOTTOMRIGHT", bar.candyBarBar, "BOTTOMRIGHT", -2, 0)
 	end
 
 	local function styleBar(bar)
@@ -550,6 +550,10 @@ do
 			else
 				db[key] = value
 			end
+			if BigWigsAnchor then
+				BigWigsAnchor:RefixPosition()
+				BigWigsEmphasizeAnchor:RefixPosition()
+			end
 		end,
 		args = {
 			custom = {
@@ -562,7 +566,6 @@ do
 						name = L.font,
 						order = 1,
 						values = media:List("font"),
-						--width = "full",
 						itemControl = "DDI-Font",
 					},
 					outline = {
@@ -574,7 +577,6 @@ do
 							OUTLINE = L.thin,
 							THICKOUTLINE = L.thick,
 						},
-						--width = "full",
 					},
 					fontSize = {
 						type = "range",
@@ -583,7 +585,6 @@ do
 						max = 40,
 						min = 6,
 						step = 1,
-						--width = "full",
 					},
 					monochrome = {
 						type = "toggle",
@@ -596,7 +597,6 @@ do
 						name = L.texture,
 						order = 4,
 						values = media:List("statusbar"),
-						--width = "full",
 						itemControl = "DDI-Statusbar",
 					},
 					barStyle = {
@@ -604,7 +604,6 @@ do
 						name = L.style,
 						order = 5,
 						values = barStyleRegister,
-						--width = "full",
 					},
 					align = {
 						type = "select",
@@ -655,7 +654,7 @@ do
 			normal = {
 				type = "group",
 				name = L.regularBars,
-				width = "full",
+				order = 2,
 				args = {
 					growup = {
 						type = "toggle",
@@ -670,35 +669,59 @@ do
 						max = 2.0,
 						step = 0.1,
 						order = 2,
-						width = "full",
+						width = "double",
+					},
+					exactPositioning = {
+						type = "group",
+						name = L.positionExact,
+						order = 3,
+						inline = true,
+						args = {
+							BigWigsAnchor_x = {
+								type = "range",
+								name = L.positionX,
+								desc = L.positionDesc,
+								min = 0,
+								max = 2048,
+								step = 1,
+								order = 1,
+								width = "full",
+							},
+							BigWigsAnchor_y = {
+								type = "range",
+								name = L.positionY,
+								desc = L.positionDesc,
+								min = 0,
+								max = 2048,
+								step = 1,
+								order = 2,
+								width = "full",
+							},
+						},
 					},
 				},
-				order = 2,
 			},
 			emphasize = {
 				type = "group",
 				name = L.emphasizedBars,
-				width = "full",
+				order = 3,
 				args = {
 					emphasize = {
 						type = "toggle",
 						name = L.enable,
 						order = 1,
-						width = "half",
 					},
 					emphasizeMove = {
 						type = "toggle",
 						name = L.move,
 						desc = L.moveDesc,
 						order = 2,
-						width = "half",
 					},
 					emphasizeRestart = {
 						type = "toggle",
 						name = L.restart,
 						desc = L.restartDesc,
 						order = 3,
-						width = "half",
 					},
 					emphasizeGrowup = {
 						type = "toggle",
@@ -713,7 +736,6 @@ do
 						min = 6,
 						max = 20,
 						step = 1,
-						width = "full",
 					},
 					emphasizeScale = {
 						type = "range",
@@ -722,7 +744,34 @@ do
 						min = 0.2,
 						max = 2.0,
 						step = 0.1,
-						width = "full",
+					},
+					exactPositioning = {
+						type = "group",
+						name = L.positionExact,
+						order = 7,
+						inline = true,
+						args = {
+							BigWigsEmphasizeAnchor_x = {
+								type = "range",
+								name = L.positionX,
+								desc = L.positionDesc,
+								min = 0,
+								max = 2048,
+								step = 1,
+								order = 1,
+								width = "full",
+							},
+							BigWigsEmphasizeAnchor_y = {
+								type = "range",
+								name = L.positionY,
+								desc = L.positionDesc,
+								min = 0,
+								max = 2048,
+								step = 1,
+								order = 2,
+								width = "full",
+							},
+						},
 					},
 				},
 				order = 3,
@@ -892,7 +941,7 @@ end
 
 local defaultPositions = {
 	BigWigsAnchor = {"CENTER", "UIParent", "CENTER", 0, -120},
-	BigWigsEmphasizeAnchor = {"TOP", RaidWarningFrame, "BOTTOM", 0, -35}, --Below the default BigWigs message frame
+	BigWigsEmphasizeAnchor = {"TOP", RaidWarningFrame, "BOTTOM", 0, -35}, --Below the Blizzard "Raid Warning" frame
 }
 
 local function onDragHandleMouseDown(self) self:GetParent():StartSizing("BOTTOMRIGHT") end
@@ -907,6 +956,7 @@ local function onDragStop(self)
 	local s = self:GetEffectiveScale()
 	db[self.x] = self:GetLeft() * s
 	db[self.y] = self:GetTop() * s
+	plugin:UpdateGUI() -- Update X/Y if GUI is open.
 end
 
 local function createAnchor(frameName, title)
@@ -1164,13 +1214,13 @@ end
 function plugin:PauseBar(_, module, text)
 	if not normalAnchor then return end
 	for k in next, normalAnchor.bars do
-		if k:Get("bigwigs:module") == module and k.candyBarLabel:GetText() == text then
+		if k:Get("bigwigs:module") == module and k:GetLabel() == text then
 			k:Pause()
 			return
 		end
 	end
 	for k in next, emphasizeAnchor.bars do
-		if k:Get("bigwigs:module") == module and k.candyBarLabel:GetText() == text then
+		if k:Get("bigwigs:module") == module and k:GetLabel() == text then
 			k:Pause()
 			return
 		end
@@ -1180,13 +1230,13 @@ end
 function plugin:ResumeBar(_, module, text)
 	if not normalAnchor then return end
 	for k in next, normalAnchor.bars do
-		if k:Get("bigwigs:module") == module and k.candyBarLabel:GetText() == text then
+		if k:Get("bigwigs:module") == module and k:GetLabel() == text then
 			k:Resume()
 			return
 		end
 	end
 	for k in next, emphasizeAnchor.bars do
-		if k:Get("bigwigs:module") == module and k.candyBarLabel:GetText() == text then
+		if k:Get("bigwigs:module") == module and k:GetLabel() == text then
 			k:Resume()
 			return
 		end
@@ -1201,14 +1251,14 @@ function plugin:StopSpecificBar(_, module, text)
 	if not normalAnchor then return end
 	local dirty = nil
 	for k in next, normalAnchor.bars do
-		if k:Get("bigwigs:module") == module and k.candyBarLabel:GetText() == text then
+		if k:Get("bigwigs:module") == module and k:GetLabel() == text then
 			k:Stop()
 			dirty = true
 		end
 	end
 	if dirty then rearrangeBars(normalAnchor) dirty = nil end
 	for k in next, emphasizeAnchor.bars do
-		if k:Get("bigwigs:module") == module and k.candyBarLabel:GetText() == text then
+		if k:Get("bigwigs:module") == module and k:GetLabel() == text then
 			k:Stop()
 			dirty = true
 		end
@@ -1242,12 +1292,12 @@ end
 function plugin:GetBarTimeLeft(module, text)
 	if not normalAnchor then return end
 	for k in next, normalAnchor.bars do
-		if k:Get("bigwigs:module") == module and k.candyBarLabel:GetText() == text then
+		if k:Get("bigwigs:module") == module and k:GetLabel() == text then
 			return k.remaining
 		end
 	end
 	for k in next, emphasizeAnchor.bars do
-		if k:Get("bigwigs:module") == module and k.candyBarLabel:GetText() == text then
+		if k:Get("bigwigs:module") == module and k:GetLabel() == text then
 			return k.remaining
 		end
 	end
@@ -1315,7 +1365,7 @@ end
 -- Super Emphasize the clicked bar
 clickHandlers.emphasize = function(bar)
 	-- Add 0.2sec here to catch messages for this option triggered when the bar ends.
-	plugin:SendMessage("BigWigs_TempSuperEmphasize", bar:Get("bigwigs:module"), bar:Get("bigwigs:option"), bar.candyBarLabel:GetText(), bar.remaining)
+	plugin:SendMessage("BigWigs_TempSuperEmphasize", bar:Get("bigwigs:module"), bar:Get("bigwigs:option"), bar:GetLabel(), bar.remaining)
 end
 
 -- Report the bar status to the active group type (raid, party, solo)
@@ -1338,8 +1388,9 @@ do
 			return tformat3:format(floor(t + .5))
 		end
 	end
+	local SendChatMessage = BigWigsLoader.SendChatMessage
 	clickHandlers.report = function(bar)
-		local text = ("%s: %s"):format(bar.candyBarLabel:GetText(), timeDetails(bar.remaining))
+		local text = ("%s: %s"):format(bar:GetLabel(), timeDetails(bar.remaining))
 		SendChatMessage(text, (IsInGroup(2) and "INSTANCE_CHAT") or (IsInRaid() and "RAID") or (IsInGroup() and "PARTY") or "SAY")
 	end
 end
@@ -1397,10 +1448,8 @@ function plugin:BigWigs_StartBar(_, module, key, text, time, icon, isApprox)
 	bar:Set("bigwigs:anchor", normalAnchor)
 	bar:Set("bigwigs:option", key)
 	bar:SetColor(colors:GetColor("barColor", module, key))
-	bar.candyBarLabel:SetTextColor(colors:GetColor("barText", module, key))
-	bar.candyBarDuration:SetTextColor(colors:GetColor("barText", module, key))
-	bar.candyBarLabel:SetShadowColor(colors:GetColor("barTextShadow", module, key))
-	bar.candyBarDuration:SetShadowColor(colors:GetColor("barTextShadow", module, key))
+	bar:SetTextColor(colors:GetColor("barText", module, key))
+	bar:SetShadowColor(colors:GetColor("barTextShadow", module, key))
 	bar.candyBarLabel:SetJustifyH(db.align)
 
 	local flags = nil
@@ -1421,15 +1470,24 @@ function plugin:BigWigs_StartBar(_, module, key, text, time, icon, isApprox)
 	bar:SetIcon(db.icon and icon or nil)
 	bar:SetScale(db.scale)
 	bar:SetFill(db.fill)
-	if db.emphasize and time < db.emphasizeTime then
-		self:EmphasizeBar(bar)
-	end
 	if db.interceptMouse and not db.onlyInterceptOnKeypress then
 		refixClickOnBar(true, bar)
 	end
 	currentBarStyler.ApplyStyle(bar)
-	bar:Start()
+
+	if db.emphasize and time < db.emphasizeTime then
+		self:EmphasizeBar(bar, true)
+	else
+		bar:Start() -- Don't fire :Start twice when emphasizeRestart is on
+	end
 	rearrangeBars(bar:Get("bigwigs:anchor"))
+
+	self:SendMessage("BigWigs_BarCreated", self, bar, module, key, text, time, icon, isApprox)
+	-- Check if :EmphasizeBar(bar) was run and trigger the callback.
+	-- Bit of a roundabout method to approaching this so that we purposely keep callbacks firing last.
+	if bar:Get("bigwigs:emphasized") then
+		self:SendMessage("BigWigs_BarEmphasized", self, bar)
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -1442,8 +1500,9 @@ do
 	empUpdate:SetScript("OnLoop", function()
 		for k in next, normalAnchor.bars do
 			if k.remaining < db.emphasizeTime and not k:Get("bigwigs:emphasized") then
-				plugin:EmphasizeBar(k)
 				dirty = true
+				plugin:EmphasizeBar(k)
+				plugin:SendMessage("BigWigs_BarEmphasized", plugin, k)
 			end
 		end
 		if dirty then
@@ -1458,13 +1517,13 @@ do
 	anim:SetDuration(0.2)
 end
 
-function plugin:EmphasizeBar(bar)
+function plugin:EmphasizeBar(bar, start)
 	if db.emphasizeMove then
 		normalAnchor.bars[bar] = nil
 		emphasizeAnchor.bars[bar] = true
 		bar:Set("bigwigs:anchor", emphasizeAnchor)
 	end
-	if db.emphasizeRestart then
+	if start or db.emphasizeRestart then
 		bar:Start() -- restart the bar -> remaining time is a full length bar again after moving it to the emphasize anchor
 	end
 	local module = bar:Get("bigwigs:module")
@@ -1541,15 +1600,18 @@ do
 			timer = nil
 			plugin:SendMessage("BigWigs_Message", plugin, nil, L.pulling, "Attention", "Interface\\Icons\\ability_warrior_charge")
 			plugin:SendMessage("BigWigs_Sound", plugin, nil, "Alarm")
+		elseif timeLeft > 2 and IsEncounterInProgress() then -- Cancel the pull timer if we ninja pulled
+			startPull(0, COMBAT)
 		elseif timeLeft < 11 then
 			plugin:SendMessage("BigWigs_Message", plugin, nil, L.pullIn:format(timeLeft), "Attention")
-			if timeLeft < 6 and BigWigs.db.profile.sound then
-				PlaySoundFile(("Interface\\AddOns\\BigWigs\\Sounds\\%d.ogg"):format(timeLeft), "Master")
+			local module = BigWigs:GetPlugin("Sounds", true)
+			if timeLeft < 6 and module and module.db.profile.sound then
+				plugin:SendMessage("BigWigs_PlayCountdownNumber", plugin, timeLeft)
 			end
 		end
 	end
 	function startPull(seconds, nick, isDBM)
-		if (not UnitIsGroupLeader(nick) and not UnitIsGroupAssistant(nick) and not UnitIsUnit(nick, "player")) or IsEncounterInProgress() then return end
+		if (not UnitIsGroupLeader(nick) and not UnitIsGroupAssistant(nick) and not UnitIsUnit(nick, "player")) or (IsEncounterInProgress() and nick ~= COMBAT) then return end
 		seconds = tonumber(seconds)
 		if not seconds or seconds < 0 or seconds > 60 then return end
 		seconds = floor(seconds)
@@ -1561,6 +1623,7 @@ do
 				timeLeft = 0
 				BigWigs:Print(L.pullStopped:format(nick))
 				plugin:SendMessage("BigWigs_StopBar", plugin, L.pull)
+				plugin:SendMessage("BigWigs_StopPull", plugin, seconds, nick, isDBM)
 				return
 			end
 		end
@@ -1594,6 +1657,7 @@ do
 				BigWigs3DB.breakTime = nil
 				BigWigs:Print(L.breakStopped:format(nick))
 				plugin:SendMessage("BigWigs_StopBar", plugin, L.breakBar)
+				plugin:SendMessage("BigWigs_StopBreak", plugin, seconds, nick, isDBM, reboot)
 				return
 			end
 		end
@@ -1603,9 +1667,6 @@ do
 		end
 
 		BigWigs:Print(L.breakStarted:format(isDBM and "DBM" or "Big Wigs", nick))
-		plugin:SendMessage("BigWigs_Message", plugin, nil, L.breakAnnounce:format(seconds/60), "Attention", "Interface\\Icons\\inv_misc_fork&knife")
-		plugin:SendMessage("BigWigs_Sound", plugin, nil, "Long")
-		plugin:SendMessage("BigWigs_StartBar", plugin, nil, L.breakBar, seconds, "Interface\\Icons\\inv_misc_fork&knife")
 
 		timerTbl = {
 			plugin:ScheduleTimer("SendMessage", seconds - 30, "BigWigs_Message", plugin, nil, L.breakSeconds:format(30), "Urgent", "Interface\\Icons\\inv_misc_fork&knife"),
@@ -1616,14 +1677,19 @@ do
 			plugin:ScheduleTimer(function() BigWigs3DB.breakTime = nil timerTbl = nil end, seconds)
 		}
 		if seconds > 119 then -- 2min
-			timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", seconds - 60, "BigWigs_Message", nil, nil, L.breakMinutes:format(1), "Positive", "Interface\\Icons\\inv_misc_fork&knife")
+			timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", seconds - 60, "BigWigs_Message", plugin, nil, L.breakMinutes:format(1), "Positive", "Interface\\Icons\\inv_misc_fork&knife")
 		end
 		if seconds > 239 then -- 4min
 			local half = seconds / 2
 			local m = half % 60
 			local halfMin = (half - m) / 60
-			timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", half + m, "BigWigs_Message", nil, nil, L.breakMinutes:format(halfMin), "Positive", "Interface\\Icons\\inv_misc_fork&knife")
+			timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", half + m, "BigWigs_Message", plugin, nil, L.breakMinutes:format(halfMin), "Positive", "Interface\\Icons\\inv_misc_fork&knife")
 		end
+
+		plugin:SendMessage("BigWigs_Message", plugin, nil, L.breakMinutes:format(seconds/60), "Attention", "Interface\\Icons\\inv_misc_fork&knife")
+		plugin:SendMessage("BigWigs_Sound", plugin, nil, "Long")
+		plugin:SendMessage("BigWigs_StartBar", plugin, nil, L.breakBar, seconds, "Interface\\Icons\\inv_misc_fork&knife")
+		plugin:SendMessage("BigWigs_StartBreak", plugin, seconds, nick, isDBM, reboot)
 	end
 end
 
@@ -1653,6 +1719,7 @@ end
 -- Slashcommand
 --
 
+local SendAddonMessage = BigWigsLoader.SendAddonMessage
 do
 	local times
 	SlashCmdList.BIGWIGSRAIDBAR = function(input)

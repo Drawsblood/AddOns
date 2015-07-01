@@ -14,6 +14,7 @@ local OvaleProfiler = Ovale.OvaleProfiler
 
 -- Forward declarations for module dependencies.
 local OvaleData = nil
+local OvaleFuture = nil
 local OvaleGUID = nil
 local OvalePaperDoll = nil
 local OvaleSpellBook = nil
@@ -25,7 +26,6 @@ local pairs = pairs
 local API_GetSpellCharges = GetSpellCharges
 local API_GetSpellCooldown = GetSpellCooldown
 local API_GetTime = GetTime
-local API_UnitClass = UnitClass
 
 -- Spell ID for the dummy Global Cooldown spell.
 local GLOBAL_COOLDOWN = 61304
@@ -34,20 +34,6 @@ local GLOBAL_COOLDOWN = 61304
 OvaleDebug:RegisterDebugging(OvaleCooldown)
 -- Register for profiling.
 OvaleProfiler:RegisterProfiling(OvaleCooldown)
-
--- Player's class.
-local _, self_class = API_UnitClass("player")
--- Current age of cooldown state.
-local self_serial = 0
--- Shared cooldown name (sharedcd) to spell table mapping.
-local self_sharedCooldownSpells = {}
-
--- GCD cached information
-local self_gcd = {
-	serial = 0,
-	start = 0,
-	duration = 0,
-}
 
 -- BASE_GCD[class] = { gcd, isCaster }
 local BASE_GCD = {
@@ -69,10 +55,24 @@ local FOCUS_AND_HARMONY = 154555
 local HEADLONG_RUSH = 158836
 --</private-static-properties>
 
+--<public-static-properties>
+-- Current age of cooldown state.
+OvaleCooldown.serial = 0
+-- Shared cooldown name (sharedcd) to spell table mapping.
+OvaleCooldown.sharedCooldown = {}
+-- Cached global cooldown information.
+OvaleCooldown.gcd = {
+	serial = 0,
+	start = 0,
+	duration = 0,
+}
+--</public-static-properties>
+
 --<public-static-methods>
 function OvaleCooldown:OnInitialize()
 	-- Resolve module dependencies.
 	OvaleData = Ovale.OvaleData
+	OvaleFuture = Ovale.OvaleFuture
 	OvaleGUID = Ovale.OvaleGUID
 	OvalePaperDoll = Ovale.OvalePaperDoll
 	OvaleSpellBook = Ovale.OvaleSpellBook
@@ -81,6 +81,9 @@ function OvaleCooldown:OnInitialize()
 end
 
 function OvaleCooldown:OnEnable()
+	self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN", "Update")
+	self:RegisterEvent("BAG_UPDATE_COOLDOWN", "Update")
+	self:RegisterEvent("PET_BAR_UPDATE_COOLDOWN", "Update")
 	self:RegisterEvent("SPELL_UPDATE_CHARGES", "Update")
 	self:RegisterEvent("SPELL_UPDATE_USABLE", "Update")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START", "Update")
@@ -88,11 +91,17 @@ function OvaleCooldown:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	self:RegisterEvent("UNIT_SPELLCAST_START", "Update")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", "Update")
+	self:RegisterEvent("UPDATE_SHAPESHIFT_COOLDOWN", "Update")
+	OvaleFuture:RegisterSpellcastInfo(self)
 	OvaleState:RegisterState(self, self.statePrototype)
 end
 
 function OvaleCooldown:OnDisable()
 	OvaleState:UnregisterState(self)
+	OvaleFuture:UnregisterSpellcastInfo(self)
+	self:UnregisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
+	self:UnregisterEvent("BAG_UPDATE_COOLDOWN")
+	self:UnregisterEvent("PET_BAR_UPDATE_COOLDOWN")
 	self:UnregisterEvent("SPELL_UPDATE_CHARGES")
 	self:UnregisterEvent("SPELL_UPDATE_USABLE")
 	self:UnregisterEvent("UNIT_SPELLCAST_CHANNEL_START")
@@ -100,10 +109,11 @@ function OvaleCooldown:OnDisable()
 	self:UnregisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	self:UnregisterEvent("UNIT_SPELLCAST_START")
 	self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	self:UnregisterEvent("UPDATE_SHAPESHIFT_COOLDOWN")
 end
 
 function OvaleCooldown:UNIT_SPELLCAST_INTERRUPTED(event, unit, name, rank, lineId, spellId)
-	if unit == "player" then
+	if unit == "player" or unit == "pet" then
 		-- Age the current cooldown state.
 		self:Update(event, unit)
 
@@ -114,22 +124,24 @@ function OvaleCooldown:UNIT_SPELLCAST_INTERRUPTED(event, unit, name, rank, lineI
 			Reset the global cooldown forcibly.
 		--]]
 		self:Debug("Resetting global cooldown.")
-		self_gcd.start = 0
-		self_gcd.duration = 0
+		local cd = self.gcd
+		cd.start = 0
+		cd.duration = 0
 	end
 end
 
 function OvaleCooldown:Update(event, unit)
-	if unit == "player" then
+	if not unit or unit == "player" or unit == "pet" then
 		-- Advance age of current cooldown state.
-		self_serial = self_serial + 1
-		self:Debug(event, self_serial)
+		self.serial = self.serial + 1
+		Ovale.refreshNeeded[Ovale.playerGUID] = true
+		self:Debug(event, self.serial)
 	end
 end
 
 -- Empty out the sharedcd table.
 function OvaleCooldown:ResetSharedCooldowns()
-	for name, spellTable in pairs(self_sharedCooldownSpells) do
+	for name, spellTable in pairs(self.sharedCooldown) do
 		for spellId in pairs(spellTable) do
 			spellTable[spellId] = nil
 		end
@@ -137,18 +149,18 @@ function OvaleCooldown:ResetSharedCooldowns()
 end
 
 function OvaleCooldown:IsSharedCooldown(name)
-	local spellTable = self_sharedCooldownSpells[name]
+	local spellTable = self.sharedCooldown[name]
 	return (spellTable and next(spellTable) ~= nil)
 end
 
 function OvaleCooldown:AddSharedCooldown(name, spellId)
-	self_sharedCooldownSpells[name] = self_sharedCooldownSpells[name] or {}
-	self_sharedCooldownSpells[name][spellId] = true
+	self.sharedCooldown[name] = self.sharedCooldown[name] or {}
+	self.sharedCooldown[name][spellId] = true
 end
 
 function OvaleCooldown:GetGlobalCooldown(now)
-	local cd = self_gcd
-	if not cd.start or not cd.serial or cd.serial < self_serial then
+	local cd = self.gcd
+	if not cd.start or not cd.serial or cd.serial < self.serial then
 		now = now or API_GetTime()
 		if now >= cd.start + cd.duration then
 			cd.start, cd.duration = API_GetSpellCooldown(GLOBAL_COOLDOWN)
@@ -162,10 +174,13 @@ end
 -- information.
 function OvaleCooldown:GetSpellCooldown(spellId)
 	local cdStart, cdDuration, cdEnable = 0, 0, 1
-	if self_sharedCooldownSpells[spellId] then
-		for id in pairs(self_sharedCooldownSpells[spellId]) do
+	if self.sharedCooldown[spellId] then
+		for id in pairs(self.sharedCooldown[spellId]) do
 			local start, duration, enable = self:GetSpellCooldown(id)
-			if start then break end
+			if start then
+				cdStart, cdDuration, cdEnable = start, duration, enable
+				break
+			end
 		end
 	else
 		local start, duration, enable
@@ -197,20 +212,20 @@ end
 -- Return the base GCD and caster status.
 function OvaleCooldown:GetBaseGCD()
 	local gcd, isCaster
-	local baseGCD = BASE_GCD[self_class]
+	local baseGCD = BASE_GCD[Ovale.playerClass]
 	if baseGCD then
 		gcd, isCaster = baseGCD[1], baseGCD[2]
 	else
 		gcd, isCaster = 1.5, true
 	end
-	if self_class == "DRUID" then
+	if Ovale.playerClass == "DRUID" then
 		if OvaleStance:IsStance("druid_cat_form") then
 			gcd = 1.0
 			isCaster = false
 		elseif OvaleStance:IsStance("druid_bear_form") then
 			isCaster = false
 		end
-	elseif self_class == "MONK" then
+	elseif Ovale.playerClass == "MONK" then
 		if OvaleStance:IsStance("monk_stance_of_the_fierce_tiger") then
 			gcd = 1.0
 		elseif OvaleStance:IsStance("monk_stance_of_the_sturdy_ox") then
@@ -220,6 +235,25 @@ function OvaleCooldown:GetBaseGCD()
 		end
 	end
 	return gcd, isCaster
+end
+
+-- Copy cooldown information from the spellcast to the destination table.
+function OvaleCooldown:CopySpellcastInfo(spellcast, dest)
+	if spellcast.offgcd then
+		dest.offgcd = spellcast.offgcd
+	end
+end
+
+-- Save cooldown information to the spellcast.
+function OvaleCooldown:SaveSpellcastInfo(spellcast, atTime, state)
+	local spellId = spellcast.spellId
+	if spellId then
+		local dataModule = state or OvaleData
+		local gcd = dataModule:GetSpellInfoProperty(spellId, spellcast.start, "gcd", spellcast.target)
+		if gcd and gcd == 0 then
+			spellcast.offgcd = true
+		end
+	end
 end
 --</public-static-methods>
 
@@ -244,20 +278,6 @@ statePrototype.cd = nil
 -- Initialize the state.
 function OvaleCooldown:InitializeState(state)
 	state.cd = {}
-end
-
--- Reset the state to the current conditions.
-function OvaleCooldown:ResetState(state)
-	self:StartProfiling("OvaleCooldown_ResetState")
-	for _, cd in pairs(state.cd) do
-		-- Remove outdated cooldown state.
-		if cd.serial and cd.serial < self_serial then
-			for k in pairs(cd) do
-				cd[k] = nil
-			end
-		end
-	end
-	self:StopProfiling("OvaleCooldown_ResetState")
 end
 
 -- Release state resources prior to removing from the simulator.
@@ -295,8 +315,7 @@ end
 statePrototype.ApplyCooldown = function(state, spellId, targetGUID, atTime)
 	OvaleCooldown:StartProfiling("OvaleCooldown_state_ApplyCooldown")
 	local cd = state:GetCD(spellId)
-	local target = OvaleGUID:GetUnitId(targetGUID) or state.defaultTarget
-	local duration = state:GetSpellCooldownDuration(spellId, atTime, target)
+	local duration = state:GetSpellCooldownDuration(spellId, atTime, targetGUID)
 
 	if duration == 0 then
 		cd.start = 0
@@ -326,7 +345,7 @@ statePrototype.DebugCooldown = function(state)
 		if cd.start then
 			if cd.charges then
 				OvaleCooldown:Print("Spell %s cooldown: start=%f, duration=%f, charges=%d, maxCharges=%d, chargeStart=%f, chargeDuration=%f",
-					spellId, cd.start, cd.duration, cd.charges, cd.start, cd.duration)
+					spellId, cd.start, cd.duration, cd.charges, cd.maxCharges, cd.chargeStart, cd.chargeDuration)
 			else
 				OvaleCooldown:Print("Spell %s cooldown: start=%f, duration=%f", spellId, cd.start, cd.duration)
 			end
@@ -336,7 +355,7 @@ end
 
 -- Return the GCD after the given spell is cast.
 -- If no spell is given, then returns the GCD after the current spell has been cast.
-statePrototype.GetGCD = function(state, spellId, atTime, target)
+statePrototype.GetGCD = function(state, spellId, atTime, targetGUID)
 	spellId = spellId or state.currentSpellId
 	if not atTime then
 		if state.endCast and state.endCast > state.currentTime then
@@ -345,22 +364,22 @@ statePrototype.GetGCD = function(state, spellId, atTime, target)
 			atTime = state.currentTime
 		end
 	end
-	target = target or state.defaultTarget
+	targetGUID = targetGUID or OvaleGUID:UnitGUID(state.defaultTarget)
 
-	local gcd = spellId and state:GetSpellInfoProperty(spellId, atTime, "gcd", target)
+	local gcd = spellId and state:GetSpellInfoProperty(spellId, atTime, "gcd", targetGUID)
 	if not gcd then
 		local isCaster, haste
 		gcd, isCaster = OvaleCooldown:GetBaseGCD()
-		if self_class == "MONK" and OvaleSpellBook:IsKnownSpell(FOCUS_AND_HARMONY) then
+		if Ovale.playerClass == "MONK" and OvaleSpellBook:IsKnownSpell(FOCUS_AND_HARMONY) then
 			haste = "melee"
-		elseif self_class == "WARRIOR" and OvaleSpellBook:IsKnownSpell(HEADLONG_RUSH) then
+		elseif Ovale.playerClass == "WARRIOR" and OvaleSpellBook:IsKnownSpell(HEADLONG_RUSH) then
 			haste = "melee"
 		end
-		local gcdHaste = spellId and state:GetSpellInfoProperty(spellId, atTime, "gcd_haste", target)
+		local gcdHaste = spellId and state:GetSpellInfoProperty(spellId, atTime, "gcd_haste", targetGUID)
 		if gcdHaste then
 			haste = gcdHaste
 		else
-			local siHaste = spellId and state:GetSpellInfoProperty(spellId, atTime, "haste", target)
+			local siHaste = spellId and state:GetSpellInfoProperty(spellId, atTime, "haste", targetGUID)
 			if siHaste then
 				haste = siHaste
 			end
@@ -390,12 +409,12 @@ statePrototype.GetCD = function(state, spellId)
 
 	-- Populate the cooldown information from the current game state if it is outdated.
 	local cd = state.cd[cdName]
-	if not cd.start or not cd.serial or cd.serial < self_serial then
+	if not cd.start or not cd.serial or cd.serial < OvaleCooldown.serial then
 		local start, duration, enable = OvaleCooldown:GetSpellCooldown(spellId)
 		if si and si.forcecd then
 			start, duration = OvaleCooldown:GetSpellCooldown(si.forcecd)
 		end
-		cd.serial = self_serial
+		cd.serial = OvaleCooldown.serial
 		cd.start = start
 		cd.duration = duration
 		cd.enable = enable
@@ -439,13 +458,13 @@ end
 
 -- Get the duration of a spell's cooldown.  Returns either the current duration if
 -- already on cooldown or the duration if cast at the specified time.
-statePrototype.GetSpellCooldownDuration = function(state, spellId, atTime, target)
+statePrototype.GetSpellCooldownDuration = function(state, spellId, atTime, targetGUID)
 	local start, duration = state:GetSpellCooldown(spellId)
 	if duration > 0 and start + duration > atTime then
 		state:Log("Spell %d is on cooldown for %fs starting at %s.", spellId, duration, start)
 	else
 		local si = OvaleData.spellInfo[spellId]
-		duration = state:GetSpellInfoProperty(spellId, atTime, "cd", target)
+		duration = state:GetSpellInfoProperty(spellId, atTime, "cd", targetGUID)
 		if duration then
 			if si and si.addcd then
 				duration = duration + si.addcd
@@ -459,7 +478,7 @@ statePrototype.GetSpellCooldownDuration = function(state, spellId, atTime, targe
 		state:Log("Spell %d has a base cooldown of %fs.", spellId, duration)
 		if duration > 0 then
 			-- Adjust cooldown duration if it is affected by haste: "cd_haste=melee" or "cd_haste=spell".
-			local haste = state:GetSpellInfoProperty(spellId, atTime, "cd_haste", target)
+			local haste = state:GetSpellInfoProperty(spellId, atTime, "cd_haste", targetGUID)
 			local multiplier = state:GetHasteMultiplier(haste)
 			duration = duration / multiplier
 			-- Adjust cooldown duration if it is affected by a cooldown reduction trinket: "buff_cdr=auraId".

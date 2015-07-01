@@ -76,7 +76,7 @@ Prat:AddModuleToLoad(function()
   {
 	ChannelColorMemory = "채널색깔기억",
 	["Remembers the colors of each channel name."] = "각 채널이름의 색깔을 기억합니다.",
-	["(%w+)%s?(.*)"] = "(%S+)%s?(.*)", -- Needs review
+	["(%w+)%s?(.*)"] = "(%S+)%s?(.*)",
 }
 
   )

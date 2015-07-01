@@ -1077,7 +1077,8 @@ WeakAuras.chat_message_types = {
   CHAT_MSG_RAID_WARNING = L["Raid Warning"],
   CHAT_MSG_SAY = L["Say"],
   CHAT_MSG_WHISPER = L["Whisper"],
-  CHAT_MSG_YELL = L["Yell"]
+  CHAT_MSG_YELL = L["Yell"],
+  CHAT_MSG_SYSTEM = L["System"]
 };
 WeakAuras.send_chat_message_types = {
   WHISPER = L["Whisper"],
@@ -1207,4 +1208,10 @@ WeakAuras.pet_behavior_types = {
   passive = L["Passive"],
   defensive = L["Defensive"],
   assist = L["Assist"]
+};
+
+WeakAuras.cooldown_progress_behavior_types = {
+  showOnCooldown = L["On cooldown"],
+  showOnReady    = L["Not on cooldown"],
+  showAlways     = L["Always"]
 };

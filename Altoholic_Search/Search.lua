@@ -1,15 +1,11 @@
 local addonName = "Altoholic"
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 local LCI = LibStub("LibCraftInfo-1.0")
 
 local THIS_ACCOUNT = "Default"
-local WHITE		= "|cFFFFFFFF"
-local GREEN		= "|cFF00FF00"
-local RED		= "|cFFFF0000"
-local TEAL		= "|cFF00FF9A"
-local YELLOW	= "|cFFFFFF00"
 
 addon.Search = {}
 
@@ -64,11 +60,11 @@ local function Realm_UpdateEx(self, offset, desc)
 			local realm, account, faction = LineDesc:GetRealm(result)
 			local location = addon:GetFactionColour(faction) .. realm
 			if account ~= THIS_ACCOUNT then
-				location = location .. "\n" ..WHITE.. L["Account"] .. ": " ..GREEN.. account
+				location = location .. "\n" ..colors.white .. L["Account"] .. ": " ..colors.green.. account
 			end
 			rowFrame.Stat2:SetText(location)
 			
-			local hex = WHITE
+			local hex = colors.white
 			itemButton = rowFrame.Item
 			itemButton.IconBorder:Hide()
 			
@@ -101,7 +97,9 @@ local function Realm_UpdateEx(self, offset, desc)
 			end
 			
 			local id = LineDesc:GetItemID(result)
-			itemButton:SetID(id or 0)
+			-- itemButton:SetID(id or 0)
+			itemButton.id = id or 0
+			itemButton.link = nil
 			rowFrame:SetID(line)
 			rowFrame:Show()
 		end
@@ -126,7 +124,6 @@ end
 
 local RealmScrollFrame_Desc = {
 	NumLines = 7,
-	LineHeight = 41,
 	Frame = "AltoholicFrameSearch",
 	GetSize = function() return ns:GetNumResults() end,
 	Update = Realm_UpdateEx,
@@ -134,7 +131,7 @@ local RealmScrollFrame_Desc = {
 		[PLAYER_ITEM_LINE] = {
 			GetItemData = function(self, result)		-- GetItemData..just to avoid calling it GetItemInfo
 					-- return name, source, sourceID
-					return GetItemInfo(result.id), TEAL .. result.location, 0 
+					return GetItemInfo(result.id), colors.teal .. result.location, 0 
 				end,
 			GetItemTexture = function(self, result)
 					return (result.id) and GetItemIcon(result.id) or "Interface\\Icons\\Trade_Engraving"
@@ -155,14 +152,14 @@ local RealmScrollFrame_Desc = {
 		[GUILD_ITEM_LINE] = {
 			GetItemData = function(self, result)		-- GetItemData..just to avoid calling it GetItemInfo
 					-- return name, source, sourceID
-					return GetItemInfo(result.id), TEAL .. result.location, 0 
+					return GetItemInfo(result.id), colors.teal .. result.location, 0 
 				end,
 			GetItemTexture = function(self, result)
 					return (result.id) and GetItemIcon(result.id) or "Interface\\Icons\\Trade_Engraving"
 				end,
 			GetCharacter = function(self, result)
 					local _, _, guildName = strsplit(".", result.source)
-					return guildName, GREEN
+					return guildName, colors.green
 				end,
 			GetRealm = function(self, result)
 					local account, realm, name = strsplit(".", result.source)
@@ -246,21 +243,22 @@ local function ScrollFrameUpdate(desc)
 	
 	local frame = _G[desc.Frame]
 	local scrollFrame = frame.ScrollFrame
+	local numRows = scrollFrame.numRows
 	local rowFrame
 
 	-- hide all lines and set their id to 0, the update function is responsible for showing and setting id's of valid lines	
-	for rowIndex = 1, desc.NumLines do
+	for rowIndex = 1, numRows do
 		rowFrame = frame["Entry"..rowIndex]
 		rowFrame:SetID(0)
 		rowFrame:Hide()
 	end
 	
-	local offset = FauxScrollFrame_GetOffset(scrollFrame)
+	local offset = scrollFrame:GetOffset()
 	-- call the update handler
 	desc:Update(offset, desc)
 	
-	local last = (desc:GetSize() < desc.NumLines) and desc.NumLines or desc:GetSize()
-	FauxScrollFrame_Update(scrollFrame, last, desc.NumLines, desc.LineHeight)
+	local last = (desc:GetSize() < numRows) and numRows or desc:GetSize()
+	scrollFrame:Update(last)
 end
 
 function ns:Realm_Update()
@@ -268,10 +266,10 @@ function ns:Realm_Update()
 end
 
 function ns:Loots_Update()
-	local numRows = 7
 	
 	local frame = AltoholicFrameSearch
 	local scrollFrame = frame.ScrollFrame
+	local numRows = scrollFrame.numRows
 	local numResults = ns:GetNumResults()
 	
 	if numResults == 0 then
@@ -279,11 +277,11 @@ function ns:Loots_Update()
 		for rowIndex = 1, numRows do	
 			frame["Entry"..rowIndex]:Hide()
 		end
-		FauxScrollFrame_Update(scrollFrame, numRows, numRows, 41)
+		scrollFrame:Update(numRows)
 		return
 	end
 
-	local offset = FauxScrollFrame_GetOffset(scrollFrame)
+	local offset = scrollFrame:GetOffset()
 
 	local itemButton
 	local rowFrame
@@ -322,12 +320,12 @@ function ns:Loots_Update()
 			
 			itemButton.Icon:SetTexture(GetItemIcon(itemID));
 
-			rowFrame.Stat2:SetText(YELLOW .. itemLevel)
+			rowFrame.Stat2:SetText(colors.yellow .. itemLevel)
 			rowFrame.Name:SetText("|c" .. hex .. itemName)
-			rowFrame.Source.Text:SetText(TEAL .. result.dropLocation)
+			rowFrame.Source.Text:SetText(colors.teal .. result.dropLocation)
 			rowFrame.Source:SetID(0)
 			
-			rowFrame.Stat1:SetText(GREEN .. result.bossName)
+			rowFrame.Stat1:SetText(colors.green .. result.bossName)
 			
 			if (result.count ~= nil) and (result.count > 1) then
 				itemButton.Count:SetText(result.count)
@@ -336,7 +334,8 @@ function ns:Loots_Update()
 				itemButton.Count:Hide()
 			end
 
-			itemButton:SetID(itemID)
+			-- itemButton:SetID(itemID)
+			itemButton.id = itemID
 			rowFrame:Show()
 		else
 			rowFrame:Hide()
@@ -350,9 +349,9 @@ function ns:Loots_Update()
 	end
 	
 	if numResults < numRows then
-		FauxScrollFrame_Update(scrollFrame, numRows, numRows, 41)
+		scrollFrame:Update(numRows)
 	else
-		FauxScrollFrame_Update(scrollFrame, numResults, numRows, 41)
+		scrollFrame:Update(numResults)
 	end
 	
 	if not AltoholicFrameSearch:IsVisible() then
@@ -361,9 +360,9 @@ function ns:Loots_Update()
 end
 
 function ns:Upgrade_Update()
-	local numRows = 7
 	local frame = AltoholicFrameSearch
 	local scrollFrame = frame.ScrollFrame
+	local numRows = scrollFrame.numRows
 	local numResults = ns:GetNumResults()
 	
 	if numResults == 0 then
@@ -371,11 +370,11 @@ function ns:Upgrade_Update()
 		for rowIndex = 1, numRows do	
 			frame["Entry"..rowIndex]:Hide()
 		end
-		FauxScrollFrame_Update(scrollFrame, numRows, numRows, 41)
+		scrollFrame:Update(numRows)
 		return
 	end
 
-	local offset = FauxScrollFrame_GetOffset(scrollFrame)
+	local offset = scrollFrame:GetOffset()
 
 	local itemButton
 	local rowFrame
@@ -411,7 +410,7 @@ function ns:Upgrade_Update()
 			itemButton.Icon:SetTexture(GetItemIcon(itemID));
 
 			rowFrame.Name:SetText("|c" .. hex .. itemName)
-			rowFrame.Source.Text:SetText(TEAL .. result.dropLocation)
+			rowFrame.Source.Text:SetText(colors.teal .. result.dropLocation)
 			rowFrame.Source:SetID(0)
 		
 			for j=1, 6 do
@@ -423,11 +422,11 @@ function ns:Upgrade_Update()
 					diff = tonumber(diff)
 					
 					if diff < 0 then
-						color = RED
+						color = colors.red
 					elseif diff > 0 then 
-						color = GREEN
+						color = colors.green
 					else
-						color = WHITE
+						color = colors.white
 					end
 					
 					stat:SetText(color .. statValue)
@@ -437,7 +436,7 @@ function ns:Upgrade_Update()
 				end
 			end
 
-			rowFrame.ILvl:SetText(YELLOW .. itemLevel)
+			rowFrame.ILvl:SetText(colors.yellow .. itemLevel)
 			rowFrame.ILvl:Show()
 			
 			if (result.count ~= nil) and (result.count > 1) then
@@ -447,7 +446,8 @@ function ns:Upgrade_Update()
 				itemButton.Count:Hide()
 			end
 
-			itemButton:SetID(itemID)
+			-- itemButton:SetID(itemID)
+			itemButton.id = itemID
 			rowFrame:SetID(line)
 			rowFrame:Show()
 		else
@@ -462,9 +462,9 @@ function ns:Upgrade_Update()
 	end
 	
 	if numResults < numRows then
-		FauxScrollFrame_Update( _G[ frame.."ScrollFrame" ], numRows, numRows, 41);
+		scrollFrame:Update(numRows)
 	else
-		FauxScrollFrame_Update( _G[ frame.."ScrollFrame" ], numResults, numRows, 41);
+		scrollFrame:Update(numResults)
 	end
 	
 	if not AltoholicFrameSearch:IsVisible() then
@@ -599,7 +599,7 @@ function ns:SortResults(frame, field)
 	if ns:GetNumResults() == 0 then return end
 
 	local id = frame:GetID()
-	local ascending = frame.ascendingSort
+	local ascending = addon:GetOption("UI.Tabs.Search.SortAscending")
 		
 	if field == "name" then
 		table.sort(results, function(a, b) return SortByName(a, b, ascending) end)
@@ -887,13 +887,13 @@ function ns:FindItem(searchType, searchSubType)
 	
 	if SearchLoots then
 		addon.Tabs.Search:SetMode("loots")
-		if addon:GetOption("UI.Tabs.Search.SortDescending") then 		-- descending sort ?
-			AltoholicTabSearch_Sort3.ascendingSort = true		-- say it's ascending now, it will be toggled
-			ns:SortResults(AltoholicTabSearch_Sort3, "iLvl")
-		else
-			AltoholicTabSearch_Sort3.ascendingSort = nil
-			ns:SortResults(AltoholicTabSearch_Sort3, "iLvl")
-		end
+		-- if addon:GetOption("UI.Tabs.Search.SortDescending") then 		-- descending sort ?
+			-- AltoholicTabSearch.SortButtons.Sort3.ascendingSort = true		-- say it's ascending now, it will be toggled
+			-- ns:SortResults(AltoholicTabSearch.SortButtons.Sort3, "iLvl")
+		-- else
+			-- AltoholicTabSearch.SortButtons.Sort3.ascendingSort = nil
+			-- ns:SortResults(AltoholicTabSearch.SortButtons.Sort3, "iLvl")
+		-- end
 	else
 		addon.Tabs.Search:SetMode("realm")
 	end
@@ -951,8 +951,8 @@ function ns:FindEquipmentUpgrade()
 
 	else	-- simple search, point to simple VerifyUpgrade method
 		addon.Loots:FindUpgrade()
-		AltoholicSearchOptionsLootInfo:SetText( GREEN .. addon:GetOption("TotalLoots") .. "|r " .. L["Loots"] .. " / "
-				.. GREEN .. addon:GetOption("UnknownLoots") .. "|r " .. L["Unknown"])
+		AltoholicSearchOptionsLootInfo:SetText( colors.green .. addon:GetOption("TotalLoots") .. "|r " .. L["Loots"] .. " / "
+				.. colors.green .. addon:GetOption("UnknownLoots") .. "|r " .. L["Unknown"])
 	end
 	
 	filters:ClearFilters()
@@ -970,13 +970,13 @@ function ns:FindEquipmentUpgrade()
 		addon.Tabs.Search:SetMode("loots")
 	end
 	
-	if addon:GetOption("UI.Tabs.Search.SortDescending") then 		-- descending sort ?
-		AltoholicTabSearch_Sort8.ascendingSort = true		-- say it's ascending now, it will be toggled
-		ns:SortResults(AltoholicTabSearch_Sort8, "iLvl")
-	else
-		AltoholicTabSearch_Sort8.ascendingSort = nil
-		ns:SortResults(AltoholicTabSearch_Sort8, "iLvl")
-	end
+	-- if addon:GetOption("UI.Tabs.Search.SortDescending") then 		-- descending sort ?
+		-- AltoholicTabSearch.SortButtons.Sort8.ascendingSort = true		-- say it's ascending now, it will be toggled
+		-- ns:SortResults(AltoholicTabSearch.SortButtons.Sort8, "iLvl")
+	-- else
+		-- AltoholicTabSearch.SortButtons.Sort8.ascendingSort = nil
+		-- ns:SortResults(AltoholicTabSearch.SortButtons.Sort8, "iLvl")
+	-- end
 
 	ns:Update()
 end

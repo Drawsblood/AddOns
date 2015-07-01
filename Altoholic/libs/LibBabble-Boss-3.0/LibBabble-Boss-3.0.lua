@@ -1,6 +1,6 @@
 --[[
 Name: LibBabble-Boss-3.0
-Revision: $Rev: 423 $
+Revision: $Rev: 428 $
 Maintainers: ckknight, nevcairiel, Ackis
 Website: http://www.wowace.com/projects/libbabble-boss-3-0/
 Dependencies: None
@@ -8,7 +8,7 @@ License: MIT
 ]]
 
 local MAJOR_VERSION = "LibBabble-Boss-3.0"
-local MINOR_VERSION = 90000 + tonumber(("$Rev: 423 $"):match("%d+"))
+local MINOR_VERSION = 90000 + tonumber(("$Rev: 428 $"):match("%d+"))
 
 if not LibStub then error(MAJOR_VERSION .. " requires LibStub.") end
 local lib = LibStub("LibBabble-3.0"):New(MAJOR_VERSION, MINOR_VERSION)
@@ -6475,9 +6475,9 @@ elseif GAME_LOCALE == "ptBR" then
 	Chromaggus = "Cromaggus",
 	["Chrono Lord Deja"] = "Crono-lorde Deja",
 	["Chrono-Lord Epoch"] = "Crono-lorde Éon",
-	Claw = "Garra", -- Needs review
+	Claw = "Garra",
 	["Cobalt Guardian"] = "Guardião de Cobalto", -- Needs review
-	["Coilfang Elite"] = "Elite da Câmara dos Vapores", -- Needs review
+	["Coilfang Elite"] = "Presacurva de Elite",
 	["Coilfang Strider"] = "Andarilho Presacurva",
 	["Commander Durand"] = "Comandante Durand", -- Needs review
 	["Commander Kolurg"] = "Comandante Kolurg",
@@ -6495,12 +6495,12 @@ elseif GAME_LOCALE == "ptBR" then
 	Corborus = "Corborus",
 	["Coren Direbrew"] = "Coren Cervatroz",
 	["Corla, Herald of Twilight"] = "Corla, a Arauto do Crepúsculo",
-	["Cosmic Infuser"] = "Infusor Cósmico", -- Needs review
+	["Cosmic Infuser"] = "Infusor Cósmico",
 	["Council of Elders"] = "Conselho dos Anciãos", -- Needs review
-	["Crimson Hammersmith"] = "Marteleito Escarlate", -- Needs review
+	["Crimson Hammersmith"] = "Ferreiro Escarlate",
 	["Crowd Pummeler 9-60"] = "Espanca-gente 9-60",
 	-- Cruelfang = "",
-	["Crystal Fang"] = "Presa de Cristal", -- Needs review
+	["Crystal Fang"] = "Presa de Cristal",
 	["C'Thun"] = "C'Thun",
 	Cyanigosa = "Cyanigosa",
 	Daakara = "Daakara",
@@ -6509,27 +6509,27 @@ elseif GAME_LOCALE == "ptBR" then
 	["Dam'ren"] = "Dam'ren", -- Needs review
 	["Dark Animus"] = "Animus Sombrio", -- Needs review
 	["Dark Coffer"] = "Cofre Sombrio", -- Needs review
-	["Dark Iron Ambassador"] = "Embaixador Ferronegro", -- Needs review
+	["Dark Iron Ambassador"] = "Embaixador Ferro Negro",
 	["Darkmaster Gandling"] = "Umbromestre Gandling",
 	["Dark Shaman Koranthal"] = "Xamã Sombrio Koranthal", -- Needs review
 	["Darkweaver Syth"] = "Tecetrevas Syth",
 	["Deathbound Ward"] = "Guardião Ata-morte", -- Needs review
 	["Deathbringer Saurfang"] = "Carrasco Saurfang",
 	["Death Knight Darkreaver"] = "Cavaleiro da Morte Ravassombra",
-	["Death Knight Understudy"] = "Cavaleiro da Morte Aspirante", -- Needs review
+	["Death Knight Understudy"] = "Cavaleiro da Morte Aspirante",
 	["Deathspeaker High Priest"] = "Sumo Sacerdote Morta-voz", -- Needs review
 	["Death Speaker Jargba"] = "Morta-voz Jargba",
 	["Deathstalker Visceri"] = "Sicário Viscerae", -- Needs review
-	["Deathsworn Captain"] = "Capitão Devoto da Morte", -- Needs review
-	Devastation = "Devastação", -- Needs review
-	["Deviate Faerie Dragon"] = "Dragoleta Anormal", -- Needs review
+	["Deathsworn Captain"] = "Capitão Devoto da Morte",
+	Devastation = "Devastação",
+	["Deviate Faerie Dragon"] = "Dragoleta Anormal",
 	["Devourer of Souls"] = "Devoradora de Almas",
-	["Dextren Ward"] = "Flávio Lúcio", -- Needs review
-	["Digmaster Shovelphlange"] = "Pá-de-flange", -- Needs review
+	["Dextren Ward"] = "Flávio Lúcio",
+	["Digmaster Shovelphlange"] = "Mestre Escavador Pá-de-flange",
 	["Doctor Theolen Krastinov"] = "Doutor Theolen Krastinov",
-	["Doom Lord Kazzak"] = "Senhor da Perdição Kazzak", -- Needs review
+	["Doom Lord Kazzak"] = "Senhor da Perdição Kazzak",
 	["Doom'rel"] = "Ruine'rel",
-	Doomwalker = "Marche-funeste", -- Needs review
+	Doomwalker = "Armagedom",
 	["Dope'rel"] = "Droga'rel",
 	Dorothee = "Doroteia",
 	["Drahga Shadowburner"] = "Drahga Queimasombra",
@@ -6543,11 +6543,11 @@ elseif GAME_LOCALE == "ptBR" then
 	-- ["Drov the Ruiner"] = "",
 	-- Dulhu = "",
 	["Durumu the Forgotten"] = "Durumu, o Esquecido", -- Needs review
-	["Dust Covered Chest"] = "Baú Empoeirado", -- Needs review
-	Dustwraith = "Assombração de Poeira", -- Needs review
+	["Dust Covered Chest"] = "Baú Empoeirado",
+	Dustwraith = "Assombração de Poeira",
 	["Eadric the Pure"] = "Eadric, o Puro",
 	["Earthbreaker Haromm"] = "Rompe-terra Haromm", -- Needs review
-	["Earthcaller Halmgar"] = "Arauto da Terra Halmgar", -- Needs review
+	["Earthcaller Halmgar"] = "Arauto da Terra Halmgar",
 	["Earthrager Ptah"] = "Ptah Furitérreo",
 	-- ["Earthshaper Telu"] = "",
 	Ebonroc = "Petrébano",
@@ -6556,7 +6556,7 @@ elseif GAME_LOCALE == "ptBR" then
 	["Echo of Sylvanas"] = "Eco de Sylvana",
 	["Echo of Tyrande"] = "Eco de Tyrande",
 	["Eck the Ferocious"] = "Eck, o Feroz",
-	["Edwin VanCleef"] = "Edwin VanCleef", -- Needs review
+	["Edwin VanCleef"] = "Edwin VanCleef",
 	["Elder Asani"] = "Ancião Asani", -- Needs review
 	["Elder Brightleaf"] = "Ancião Folhalume",
 	["Elder Ironbranch"] = "Ancião Ramoférreo",
@@ -6573,7 +6573,7 @@ elseif GAME_LOCALE == "ptBR" then
 	["Emperor Vek'lor"] = "Imperador Vek'lor",
 	["Emperor Vek'nilash"] = "Imperador Vek'nilash",
 	-- ["Enforcer Sorka"] = "",
-	Entropius = "Entropius", -- Needs review
+	Entropius = "Entropius",
 	["Eonar's Gift"] = "Dádiva de Eonar", -- Needs review
 	["Epoch Hunter"] = "Caçador das Eras",
 	Erekem = "Erekem",
@@ -6588,9 +6588,9 @@ elseif GAME_LOCALE == "ptBR" then
 	["Exarch Maladaar"] = "Exarca Maladaar",
 	["Expedition Commander"] = "Comandante da Expedição", -- Needs review
 	["Eydis Darkbane"] = "Eydis Ruinatreva",
-	["Eye of C'Thun"] = "Olho de C'Thun", -- Needs review
+	["Eye of C'Thun"] = "Olho de C'Thun",
 	["Faction Champions"] = "Campeões das Facções",
-	["Fallen Champion"] = "Campeão Caído", -- Needs review
+	["Fallen Champion"] = "Campeão Caído",
 	Falric = "Falric",
 	["Falric and Marwyn"] = "Falric e Marwyn",
 	["Fankriss the Unyielding"] = "Fankriss, o Obstinado",
@@ -6599,10 +6599,10 @@ elseif GAME_LOCALE == "ptBR" then
 	Felmyst = "Vilnévoa",
 	Feludius = "Feludius",
 	["Feng the Accursed"] = "Feng, o Amaldiçoado", -- Needs review
-	["Fenrus the Devourer"] = "Fenrus, o Devorador", -- Needs review
+	["Fenrus the Devourer"] = "Fenrus, o Devorador",
 	["Feral Defender"] = "Defensor Feral", -- Needs review
 	Festergut = "Tripapútrida",
-	Feugen = "Feugen", -- Needs review
+	Feugen = "Feugen",
 	["Fineous Darkvire"] = "Fineous Forçanegra",
 	Firemaw = "Fogorja",
 	["Fjola Lightbane"] = "Fiola Ruinaluz",
@@ -6613,16 +6613,16 @@ elseif GAME_LOCALE == "ptBR" then
 	-- ["Fleshrender Nok'gar"] = "",
 	["Foe Reaper 5000"] = "Ceifador de Inimigos 5000",
 	-- ["Foreman Feldspar"] = "",
-	["Foreman Thistlenettle"] = "Encarregado Cardurtiga", -- Needs review
+	["Foreman Thistlenettle"] = "Encarregado Cardurtiga",
 	["Forgemaster Garfrost"] = "Mestre Forjador Criomal",
 	-- ["Forgemaster Gog'duh"] = "",
 	["Forgemaster Throngus"] = "Mestre Forjador Throngus",
-	["Four Horsemen Chest"] = "Baú dos Quatro Cavaleiros", -- Needs review
+	["Four Horsemen Chest"] = "Baú dos Quatro Cavaleiros",
 	-- Franzok = "",
-	["Fras Siabi"] = "Fras Siabi", -- Needs review
+	["Fras Siabi"] = "Fras Siabi",
 	Freya = "Freya",
 	["Frost King Malakk"] = "Rei do Gelo Malakk", -- Needs review
-	["Gahz'ranka"] = "Gahz'ranka", -- Needs review
+	["Gahz'ranka"] = "Gahz'ranka",
 	["Gahz'rilla"] = "Gahz'rilla",
 	Galakras = "Galakras", -- Needs review
 	["Gal'darah"] = "Gal'darah",
@@ -6639,7 +6639,7 @@ elseif GAME_LOCALE == "ptBR" then
 	Gehennas = "Geena",
 	Gekkan = "Gekkan", -- Needs review
 	Gelihast = "Gelihast",
-	Gelk = "Gelk", -- Needs review
+	Gelk = "Gelk",
 	["General Angerforge"] = "General Forjaversa",
 	["General Bjarngrim"] = "General Bjarngrim",
 	["General Drakkisath"] = "General Drakkisath",
@@ -6652,13 +6652,13 @@ elseif GAME_LOCALE == "ptBR" then
 	["General Zarithrian"] = "General Zarithrian",
 	["Ghamoo-ra"] = "Ghamoo-ra",
 	["Ghaz'an"] = "Ghaz'an",
-	["Ghok Bashguud"] = "Ghok Surrabem", -- Needs review
-	Gilnid = "Gilnid", -- Needs review
+	["Ghok Bashguud"] = "Ghok Surrabem",
+	Gilnid = "Gilnid",
 	["Gizrul the Slavener"] = "Gizrul, o Subjugador",
 	["Gloom'rel"] = "Umbra'rel",
 	Glubtok = "Falagrum",
 	Gluth = "Gluth",
-	Glutton = "Glutão", -- Needs review
+	Glutton = "Glutão",
 	["Golemagg the Incinerator"] = "Golemagg, o Incinerador",
 	["Golem Lord Argelmach"] = "Lorde Golem Argelmach",
 	["Goraluk Anvilcrack"] = "Goraluk Rachadastra", -- Needs review
@@ -6666,18 +6666,18 @@ elseif GAME_LOCALE == "ptBR" then
 	["Gorosh the Dervish"] = "Gorosh, o Dervixe",
 	["Gortok Palehoof"] = "Gortok Cascoclaro",
 	["Gothik the Harvester"] = "Gothik, o Ceifador",
-	["Grand Astromancer Capernian"] = "Grã-astromante Capernian", -- Needs review
+	["Grand Astromancer Capernian"] = "Grã-astromante Capernian",
 	["Grand Champions"] = "Grandes Campeões",
 	["Grand Crusader Dathrohan"] = "Grão-cruzado Dathrohan",
 	["Grand Empress Shek'zeer"] = "Grã-imperatriz Shek'zeer", -- Needs review
 	["Grand Magus Telestra"] = "Grã-feiticeira Telestra",
 	["Grandmaster Vorpil"] = "Grão-mestre Vorpil",
-	Grandmother = "Vovózinha", -- Needs review
+	Grandmother = "Avó", -- Needs review
 	["Grand Vizier Ertan"] = "Grã-vizir Ertan",
 	["Grand Warlock Alythess"] = "Grã-bruxa Alythessa",
 	["Grand Warlock Nethekurse"] = "Grão-bruxo Eterrívio",
 	["Grand Widow Faerlina"] = "Grã-viúva Faerlina",
-	["Grethok the Controller"] = "Grethok, o Controlador", -- Needs review
+	["Grethok the Controller"] = "Grethok, o Controlador",
 	["Gri'lek"] = "Gri'lek",
 	Grimlok = "Grimlok",
 	-- ["Grimrail Enforcers"] = "",
@@ -6693,7 +6693,7 @@ elseif GAME_LOCALE == "ptBR" then
 	["Gu Cloudstrike"] = "Gu Golpe da Nuvem", -- Needs review
 	-- ["Gug'rokk"] = "",
 	["Gurtogg Bloodboil"] = "Gurtogg Fervessangue",
-	Gyth = "Gyth", -- Needs review
+	Gyth = "Gyth",
 	Hadronox = "Hadronox",
 	["Hagara the Stormbinder"] = "Hagara, a Tempestigadora",
 	["Haiyan the Unstoppable"] = "Haiyan, o Inexorável", -- Needs review
@@ -8429,7 +8429,7 @@ elseif GAME_LOCALE == "ruRU" then
 	["Aerial Command Unit"] = "Воздушное судно",
 	["Agathelos the Raging"] = "Агателос Свирепый",
 	["Aggem Thorncurse"] = "Аггем Терновое Проклятие",
-	-- ["Ahri'ok Dugru"] = "",
+	["Ahri'ok Dugru"] = "Ахри'ок Дугру", -- Needs review
 	Ahune = "Ахун",
 	["Akil'zon"] = "Акил'зон",
 	-- ["Aknor Steelbringer"] = "",
@@ -8451,7 +8451,7 @@ elseif GAME_LOCALE == "ruRU" then
 	["Amethyst Guardian"] = "Аметистовый страж",
 	Ammunae = "Аммунаэ",
 	["Amnennar the Coldbringer"] = "Амненнар Хладовей",
-	-- ["Ancient Protectors"] = "",
+	["Ancient Protectors"] = "Древние защитники", -- Needs review
 	["Ancient Stone Keeper"] = "Древний Хранитель Камня",
 	Anetheron = "Анетерон",
 	["Anger'rel"] = "Гнев'рел",
@@ -8468,7 +8468,7 @@ elseif GAME_LOCALE == "ruRU" then
 	["Apothecary Baxter"] = "Аптекарь Бакстер",
 	["Apothecary Frye"] = "Аптекарь Фрай",
 	["Apothecary Hummel"] = "Аптекарь Хаммел",
-	-- Araknath = "",
+	Araknath = "Аракнат", -- Needs review
 	["Arcane Watchman"] = "Чародейский стражник",
 	["Arcanist Doan"] = "Чародей Доан",
 	Arcanotron = "Чаротрон",
@@ -8478,7 +8478,7 @@ elseif GAME_LOCALE == "ruRU" then
 	Archimonde = "Архимонд",
 	["Archivist Galford"] = "Архивариус Галфорд",
 	["Archmage Arugal"] = "Верховный маг Аругал",
-	-- ["Archmage Sol"] = "",
+	["Archmage Sol"] = "Верховный маг Сол", -- Needs review
 	Arcurion = "Аркурион",
 	Argaloth = "Аргалот",
 	["Argent Confessor Paletress"] = "Исповедница Серебряного Авангарда Пейлтресс",
@@ -9096,7 +9096,7 @@ elseif GAME_LOCALE == "ruRU" then
 	Nightbane = "Ночная Погибель",
 	-- ["Nitrogg Thundertower"] = "",
 	["Niuzao, The Black Ox"] = "Нюцзао, Черный Бык",
-	Norushen = "Норусхен", -- Needs review
+	Norushen = "Норусхен",
 	["Noth the Plaguebringer"] = "Нот Чумной",
 	["Novos the Summoner"] = "Новос Призыватель",
 	Noxxion = "Ноксион",
@@ -9385,7 +9385,7 @@ elseif GAME_LOCALE == "ruRU" then
 	["Twilight Lord Kelris"] = "Повелитель сумрака Келрис",
 	["Twin Consorts"] = "Наложницы-близнецы",
 	-- ["Twin Ogron"] = "",
-	Ultraxion = "Ульраксион",
+	Ultraxion = "Ультраксион",
 	["Urok Doomhowl"] = "Аррок Смертный Вопль",
 	["Vaelastrasz the Corrupt"] = "Валестраз Порочный",
 	Valiona = "Валиона",

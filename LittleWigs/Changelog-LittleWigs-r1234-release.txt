@@ -1,0 +1,45 @@
+------------------------------------------------------------------------
+r1234 | funkydude | 2015-06-30 19:36:30 +0000 (Tue, 30 Jun 2015) | 1 line
+Changed paths:
+   A /tags/r1234-release (from /trunk:1233)
+
+Tagging as r1234-release
+------------------------------------------------------------------------
+r1233 | funkydude | 2015-06-29 06:26:15 +0000 (Mon, 29 Jun 2015) | 1 line
+Changed paths:
+   M /trunk/TBC/TheShatteredHalls/Nethekurse.lua
+
+TBC/TheShatteredHalls/Nethekurse: Fix Dark Spin message.
+------------------------------------------------------------------------
+r1232 | funkydude | 2015-06-28 21:44:20 +0000 (Sun, 28 Jun 2015) | 1 line
+Changed paths:
+   M /trunk/TBC/TheSlavePens/Rokmar.lua
+
+TBC/TheSlavePens/Rokmar: Fix Frenzy message error.
+------------------------------------------------------------------------
+r1230 | funkydude | 2015-06-27 20:57:58 +0000 (Sat, 27 Jun 2015) | 1 line
+Changed paths:
+   M /trunk/TBC/TheShatteredHalls/KargathBladefist.lua
+   M /trunk/TBC/TheShatteredHalls/Nethekurse.lua
+   M /trunk/TBC/TheShatteredHalls/Omrogg.lua
+
+TBC/TheShatteredHalls: Cleanups.
+------------------------------------------------------------------------
+r1229 | funkydude | 2015-06-27 19:55:39 +0000 (Sat, 27 Jun 2015) | 1 line
+Changed paths:
+   M /trunk/TBC/TheArcatraz/Dalliah.lua
+
+TBC/TheArcatraz/Dalliah: Fix error on heal.
+------------------------------------------------------------------------
+r1227 | funkydude | 2015-06-24 01:30:27 +0000 (Wed, 24 Jun 2015) | 1 line
+Changed paths:
+   M /trunk/LittleWigs.toc
+
+bump toc
+------------------------------------------------------------------------
+r1226 | funkydude | 2015-04-25 15:23:17 +0000 (Sat, 25 Apr 2015) | 1 line
+Changed paths:
+   M /trunk/WotLK/TheNexus/Ormorok.lua
+
+Ormorok: Fix function name.
+------------------------------------------------------------------------

@@ -1,10 +1,8 @@
 local addonName = "Altoholic"
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
-
-local WHITE		= "|cFFFFFFFF"
-local GREEN		= "|cFF00FF00"
 
 local view
 local isViewValid
@@ -74,9 +72,6 @@ local function BuildView()
 	isViewValid = true
 end
 
-local DDM_Add = addon.Helpers.DDM_AddWithArgs
-local DDM_AddCloseMenu = addon.Helpers.DDM_AddCloseMenu
-
 local function OnTokenChange(self, header)
 	addon:SetOption(OPTION_TOKEN, header)
 	addon.Tabs.Grids:SetViewDDMText(header)
@@ -93,12 +88,12 @@ local function OnTokensAllInOne(self)
 	addon.Tabs.Grids:Update()
 end
 
-local function DropDown_Initialize()
+local function DropDown_Initialize(frame)
 	for _, header in ipairs(GetUsedHeaders()) do		-- and add them to the DDM
-		DDM_Add(header, nil, OnTokenChange, header, nil, (addon:GetOption(OPTION_TOKEN) == header))
+		frame:AddButtonWithArgs(header, nil, OnTokenChange, header, nil, (addon:GetOption(OPTION_TOKEN) == header))
 	end
-	DDM_Add(L["All-in-one"], nil, OnTokensAllInOne, nil, nil, (addon:GetOption(OPTION_TOKEN) == nil))
-	DDM_AddCloseMenu()
+	frame:AddButtonWithArgs(L["All-in-one"], nil, OnTokensAllInOne, nil, nil, (addon:GetOption(OPTION_TOKEN) == nil))
+	frame:AddCloseMenu()
 end
 
 local callbacks = {
@@ -114,7 +109,7 @@ local callbacks = {
 			local token = view[dataRowID]
 
 			if token then
-				rowFrame.Name.Text:SetText(WHITE .. token)
+				rowFrame.Name.Text:SetText(colors.white .. token)
 				rowFrame.Name.Text:SetJustifyH("LEFT")
 			end
 		end,
@@ -144,7 +139,7 @@ local callbacks = {
 					count = format("%2.1fk", count/1000)
 				end
 				
-				button.Name:SetText(GREEN..count)
+				button.Name:SetText(colors.green..count)
 				button:SetID(dataRowID)
 				button:Show()
 			else
@@ -162,7 +157,7 @@ local callbacks = {
 			AltoTooltip:AddLine(DataStore:GetColoredCharacterName(character))
 			-- AltoTooltip:AddLine(view[frame:GetParent():GetID()], 1, 1, 1)
 			AltoTooltip:AddLine(view[frame:GetID()], 1, 1, 1)
-			AltoTooltip:AddLine(GREEN..frame.count)
+			AltoTooltip:AddLine(colors.green..frame.count)
 			AltoTooltip:Show()
 		end,
 	OnClick = nil,
@@ -173,10 +168,10 @@ local callbacks = {
 			frame:Show()
 			title:Show()
 			
-			UIDropDownMenu_SetWidth(frame, 100) 
-			UIDropDownMenu_SetButtonWidth(frame, 20)
-			UIDropDownMenu_SetText(frame, addon:GetOption(OPTION_TOKEN) or L["All-in-one"])
-			addon:DDM_Initialize(frame, DropDown_Initialize)
+			frame:SetMenuWidth(100) 
+			frame:SetButtonWidth(20)
+			frame:SetText(addon:GetOption(OPTION_TOKEN) or L["All-in-one"])
+			frame:Initialize(DropDown_Initialize, "MENU_NO_BORDERS")
 		end,
 }
 

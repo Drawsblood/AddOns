@@ -1,10 +1,8 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Big Wigs", "enUS", true, "raw")
 
--- Core.lua
-L.defeated = "%s has been defeated"
+L.temp61Reset = "Due to a change in making my database more efficient, your custom colors, sounds and boss-specific settings will have reset, sorry :(" -- XXX temp 6.1
 
-L.bosskill = "Boss death"
-L.bosskill_desc = "Announce when the boss has been defeated."
+-- Core.lua
 L.berserk = "Berserk"
 L.berserk_desc = "Show a bar and timed warnings for when the boss will go berserk."
 L.altpower = "Alternate power display"
@@ -15,8 +13,6 @@ L.warmup = "Warmup"
 L.warmup_desc = "Time until combat with the boss starts."
 
 L.already_registered = "|cffff0000WARNING:|r |cff00ff00%s|r (|cffffff00%s|r) already exists as a module in Big Wigs, but something is trying to register it again. This usually means you have two copies of this module in your addons folder due to some addon updater failure. It is recommended that you delete any Big Wigs folders you have and then reinstall it from scratch."
-
-L.movieBlocked = "You've seen this movie before, skipping it."
 
 -- Loader / Options.lua
 L.officialRelease = "You are running an official release of Big Wigs %s (revision %d)"
@@ -37,6 +33,7 @@ L.upToDate = "Up to date:"
 L.outOfDate = "Out of date:"
 L.dbmUsers = "DBM users:"
 L.noBossMod = "No boss mod:"
+L.offline = "Offline"
 
 L.blizzRestrictionsZone = "Waiting until combat ends to finish loading due to Blizzard combat restrictions."
 L.finishedLoading = "Combat has ended, Big Wigs has now finished loading."
@@ -55,9 +52,6 @@ L.toggleAnchorsBtn_desc = "Toggle showing or hiding of all the anchors."
 L.testBarsBtn = "Create Test Bar"
 L.testBarsBtn_desc = "Creates a bar for you to test your current display settings with."
 L.sound = "Sound"
-L.soundDesc = "Messages might come with a sound. Some people find it easier to listen for these after they've learned which sound goes with which message, as opposed to reading the actual messages.\n\n|cffff4411Even when off, the default raid warning sound might be played by incoming raid warnings from other players. That sound, however, is different from the sounds we use.|r"
-L.showBlizzWarnings = "Show Blizzard warnings"
-L.showBlizzWarningsDesc = "Blizzard provides their own messages for some abilities on some encounters. In our opinion, these messages are both way too long and descriptive. We try to produce smaller, more fitting messages that do not interfere with the gameplay, and that don't tell you specifically what to do.\n\n|cffff4411When off, Blizzards warnings will not be shown in the middle of the screen, but they will still show in your chat frame.|r"
 L.flashScreen = "Flash Screen"
 L.flashScreenDesc = "Certain abilities are important enough to need your full attention. When these abilities affect you Big Wigs can flash the screen."
 L.raidIcons = "Raid icons"
@@ -71,8 +65,6 @@ L.colors = "Colors"
 L.selectEncounter = "Select encounter"
 L.listAbilities = "List abilities in group chat"
 
-L.blockMovies = "Block boss movies"
-L.blockMoviesDesc = "After you've seen a boss movie once, Big Wigs will prevent it from playing again."
 L.dbmFaker = "Pretend I'm using DBM"
 L.dbmFakerDesc = "If a DBM user does a version check to see who's using DBM, they will see you on the list. Useful for guilds that force using DBM."
 L.chatMessages = "Chat frame messages"
@@ -104,7 +96,7 @@ L.BAR_desc = "Bars are shown for some encounter abilities when appropriate. If t
 L.FLASH_desc = "Some abilities might be more important than others. If you want your screen to flash when this ability is imminent or used, check this option."
 L.ICON_desc = "Big Wigs can mark characters affected by abilities with an icon. This makes them easier to spot."
 L.SAY_desc = "Chat bubbles are easy to spot. Big Wigs will use a say message to announce people nearby about an effect on you."
-L.EMPHASIZE_desc = "Enabling this will SUPER EMPHASIZE any messages or bars associated with this encounter ability. Messages will be bigger, bars will flash and have a different color, sounds will be used to count down when the ability is imminent. Basically you will notice it."
+L.EMPHASIZE_desc = "Enabling this will emphasize any messages associated with this ability, making them larger and more visible. You can set the size and font of emphasized messages in the main options under \"Messages\"."
 L.PROXIMITY = "Proximity display"
 L.PROXIMITY_desc = "Abilities will sometimes require you to spread out. The proximity display will be set up specifically for this ability so that you will be able to tell at-a-glance whether or not you are safe."
 L.ALTPOWER = "Alternate power display"
@@ -119,6 +111,8 @@ L.DISPEL = "Dispeller Only"
 L.DISPEL_desc = "If you want to see warnings for this ability even when you cannot dispel it, disable this option."
 L.VOICE = "Voice"
 L.VOICE_desc = "If you have a voice plugin installed, this option will enable it to play a sound file that speaks this warning out loud for you."
+L.COUNTDOWN = "Countdown"
+L.COUNTDOWN_desc = "If enabled, a vocal and visual countdown will be added for the last 5 seconds. Imagine someone counting down \"5... 4... 3... 2... 1...\" with a big number in the middle of your screen."
 
 L.advanced = "Advanced options"
 L.back = "<< Back"

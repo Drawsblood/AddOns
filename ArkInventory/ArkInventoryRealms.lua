@@ -5,6 +5,7 @@ local tempData
 
 if portal == "US" then
 	ArkInventory.Output( "Loading Connected Realm (", portal, ") Data" )
+	-- source http://us.battle.net/wow/en/blog/11393305
 	tempData = {
 		{ ["Aegwynn"]=true, ["Bonechewer"]=true, ["Daggerspine"]=true, ["Gurubashi"]=true, ["Hakkar"]=true },
 		{ ["Aerie Peak"]=true, ["Ulduar"]=true },
@@ -19,7 +20,6 @@ if portal == "US" then
 		{ ["Antonidas"]=true, ["Uldum"]=true },
 		{ ["Anub'arak"]=true, ["Chromaggus"]=true, ["Chrushridge"]=true, ["Garithos"]=true, ["Nathrezim"]=true, ["Smolderthorn"]=true },
 		{ ["Anvilmar"]=true, ["Undermine"]=true },
-		{ ["Argent Dawn"]=true, ["The Scryers"]=true },
 		{ ["Arygos"]=true, ["Llane"]=true },
 		{ ["Auchindoun"]=true, ["Cho'gall"]=true, ["Laughing Skull"]=true },
 		{ ["Azgalor"]=true, ["Azshara"]=true, ["Destromath"]=true, ["Thunderlord"]=true },
@@ -28,7 +28,7 @@ if portal == "US" then
 		{ ["Black Dragonflight"]=true, ["Gul'dan"]=true, ["Skullcrusher"]=true },
 		{ ["Blackhand"]=true, ["Galakrond"]=true },
 		{ ["Blackwater Raiders"]=true, ["Shadow Council"]=true },
-		{ ["Blackwing Lair"]=true, ["Dethecus"]=true, ["Detheroc"]=true, ["Haomarush"]=true, ["Lethon"]=true, ["Shadowmoon"]=true },
+		{ ["Blackwing Lair"]=true, ["Dethecus"]=true, ["Lethon"]=true, ["Haomarush"]=true },
 		{ ["Bladefist"]=true, ["Kul Tiras"]=true },
 		{ ["Blade's Edge"]=true, ["Thunderhorn"]=true },
 		{ ["Blood Furnace"]=true, ["Mannaroth"]=true, ["Nazjatar"]=true },
@@ -49,7 +49,6 @@ if portal == "US" then
 		{ ["Dreadmaul"]=true, ["Thaurissan"]=true },
 		{ ["Drenden"]=true, ["Arathor"]=true },
 		{ ["Duskwood"]=true, ["Bloodhoof"]=true },
-		{ ["Durotan"]=true, ["Ysera"]=true },
 		{ ["Eitrigg"]=true, ["Shu'halo"]=true },
 		{ ["Eldre'Thalas"]=true, ["Korialstrasz"]=true },
 		{ ["Elune"]=true, ["Gilneas"]=true },
@@ -78,10 +77,16 @@ if portal == "US" then
 		{ ["Nazgrel"]=true, ["Nesingwary"]=true, ["Vek'nilash"]=true },
 		{ ["Nordrassil"]=true, ["Muradin"]=true },
 		{ ["Quel'dorei"]=true, ["Sen'jin"]=true },
+		{ ["Ravenholdt"]=true, ["Twisting Nether"]=true },
 		{ ["Runetotem"]=true, ["Uther"]=true },
 		{ ["Scarlet Crusade"]=true, ["Feathermoon"]=true },
+		{ ["Shadowmoon"]=true, ["Detheroc"]=true }, -- Detheroc is duplicated in the source with another group
 		{ ["Tanaris"]=true, ["Greymane"]=true },
+		{ ["The Scryers"]=true, ["Argent Dawn"]=true },
+		{ ["The Venture Co"]=true, ["Maelstrom"]=true, ["Lightninghoof"]=true },
 		{ ["Uldaman"]=true, ["Ravencrest"]=true },
+		{ ["Ysera"]=true, ["Durotan"]=true },
+		{ ["Cenarion Circle"]=true, ["Sisters of Elune"]=true },
 	}
 end
 

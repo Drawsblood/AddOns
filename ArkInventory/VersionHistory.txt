@@ -8,12 +8,66 @@
  * crafting with items from the bank (not the reagent bank) will not update the item count for the bank (blizzard restriction, they dont allow access to the bank data unless you are there)
  
 *wiki pages*
- * main wiki page - http://code.google.com/p/arkinventory/w/list
- * faq - http://code.google.com/p/arkinventory/wiki/FAQ
- * local help files can be downloaded from http://code.google.com/p/arkinventory/wiki/LocalHelpFiles
-
-
+ * main wiki page - https://github.com/arkayenro/arkinventory/wiki
+ * faq - https://github.com/arkayenro/arkinventory/wiki/FAQ
  
+
+ need to fix: texture backgrounds
+ 
+*3.05.04 (30-JUN-2015)*
+ * fixed - issue with adding/removing/moving bars
+
+*3.05.03 (27-JUN-2015)*
+ * changed - restack menu options
+ * fixed - restack code (shouldnt move profession items, like the swiss army knife, into the bank any more, just crafting reagents that can go into that profession bag)
+ * fixed - embeds for no-lib download
+ 
+*3.05.02 (25-JUN-2015)*
+ * toc updated to 60200
+ 
+*3.05.01 (xx-JUN-2015) Beta 4*
+ * fixed - restack code
+ * changed - category assignment menus are now in internal id order
+ * changed - rule assignment menus are now in priority order
+ 
+*3.05.01 (14-JUN-2015) Beta 3*
+ * fixed - restack code
+ 
+*3.05.01 (13-JUN-2015) Beta 2*
+ * changed - restack action no longer initiates mutliple location restacks, its now per window/location so you have more control over it
+ * changed - restack menu: choice of blizzards cleanup or my restack code
+ * changed - restack menu: auto deposit is now set here
+ * info: cleanup code will compact then if enabled and at the bank will do a deposit all reagents
+ * info: restack code will compact then consolidate
+ * info: compact will condense all items into as few stacks as possible
+ * info: consolidate will move profession items in normal bags and the reagent bank to profession bags, then move crafting items in normal bags to the reagent bank, then move crafting items in your bag to the bank.
+ * info: when auto deposit is enabled and at the bank restack will move items in your bags to the bank (and reagent bank) as part of both the compact and consolidate processes
+ * info: both code variants will abide by the ignore cleanup value assigned to a bag (if items in a bag are not touched by the code then check this setting)
+ 
+*3.05.01 (06-JUN-2015) Beta 1*
+ * removed - player level restictions for mount menus (allows you to pick the chauffered mounts when under level 20)
+ * changed - rule formulas are no longer compressed into a single line.  you can add extra spaces and newlines and they will stay intact now
+ * added - Chauffeured Chopper mount data
+ * fixed - issue with new item flash/animation and search overlay causing new items to not hide when they didnt match the filter
+
+*3.05.00 (25-FEB-2015)*
+ * added - config > settings > location > window > frames > title > online (sets the colour of the character name in the title bar when online)
+ * added - config > settings > location > window > frames > title > offline (sets the colour of the character name in the title bar when offline)
+ * added - config > settings > location > window > frames > search > label (sets the colour of the label in the search bar)
+ * added - config > settings > location > window > frames > search > text (sets the colour of the text in the search bar)
+ * changed - toc set to 60100
+ 
+*3.04.22 (06-JAN-2015)*
+ * added - right click menu off refresh icon to toggle display of hidden categories/stacks
+ * added - config > settings > location > items > limit stacks (range from 0 to 5, 0 will show all stacks, 1-5 will only show that many stacks of an item and hide the rest, toggle show hidden to temporarily see all hidden stacks) - note: displayed stack count does not increase to cater for the hidden stacks
+ * added - rule function: mounttype | mtype ( "L" = land, "A" = flying, "S" = water surface, "U" = underwater, "X" = ignored/unknown)
+ * added - config > settings > location > items > empty slots > sort position (Enabled: Empty slots are sorted first alphabetically | Disabled: empty slots are sorted last alphabetically)
+
+*3.04.21 (22-JAN-2015)*
+ * fixed - issue with first bank bag slot not being draggable
+ * fixed - issue with pet breed text when Battle Pet BreedID addon is not installed
+ * fixed - issue with new item glow showing in offline locations
+ * fixed - issue with offline items still fading when the option was disabled
  
 *3.04.20 (14-JAN-2015)*
  * added - new items category

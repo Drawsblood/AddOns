@@ -176,13 +176,12 @@ end
 
 function ArkInventory.MountJournal.SkillLevel( )
 	
---	if true then return 75 end
-	
 	local skill = 0
 	
 	if UnitLevel( "player" ) < PLAYER_MOUNT_LEVEL then
 		
-		--ArkInventory.Output( "player level is too low for flying" )
+		--ArkInventory.Output( "player level is too low" )
+		skill = 1
 		
 	else
 		
@@ -291,7 +290,7 @@ function ArkInventory.MountJournal.Scan( )
 				--ArkInventory.Output( i, " = ", spell, " / ", string.format("%.12f",spell) )
 				
 				c[i].mt = journal.types[spell] or mt or ArkInventory.Const.MountTypes["x"]
-				c[i].mto = c[i].mt -- save original mount type (user corrections can override this value)
+				c[i].mto = c[i].mt -- save original mount type (user corrections can override the other value)
 				
 			end
 			
@@ -348,7 +347,6 @@ function ArkInventory.MountJournal.ApplyUserCorrections( )
 end
 
 
-
 function ArkInventory:LISTEN_MOUNTJOURNAL_RELOAD( event )
 	
 	if ( event ~= "COMPANION_UPDATE" ) then
@@ -381,4 +379,5 @@ end
 
 -- runtime
 MountJournal:HookScript( "OnHide", ArkInventory.MountJournal.OnHide )
+--CollectionsJournal:HookScript( "OnHide", ArkInventory.MountJournal.OnHide )
 --ArkInventory.MountJournal.FilterActionBackup( )

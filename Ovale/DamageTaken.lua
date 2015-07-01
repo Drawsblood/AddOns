@@ -16,12 +16,18 @@ local OvalePool = Ovale.OvalePool
 local OvaleProfiler = Ovale.OvaleProfiler
 local OvaleQueue = Ovale.OvaleQueue
 
--- Forward declarations for module dependencies.
-local OvaleLatency = nil
-
+local bit_band = bit.band
+local bit_bor = bit.bor
 local strsub = string.sub
 local API_GetTime = GetTime
-local API_UnitGUID = UnitGUID
+local SCHOOL_MASK_ARCANE = SCHOOL_MASK_ARCANE
+local SCHOOL_MASK_FIRE = SCHOOL_MASK_FIRE
+local SCHOOL_MASK_FROST = SCHOOL_MASK_FROST
+local SCHOOL_MASK_HOLY = SCHOOL_MASK_HOLY
+local SCHOOL_MASK_NATURE = SCHOOL_MASK_NATURE
+local SCHOOL_MASK_NONE = SCHOOL_MASK_NONE
+local SCHOOL_MASK_PHYSICAL = SCHOOL_MASK_PHYSICAL
+local SCHOOL_MASK_SHADOW = SCHOOL_MASK_SHADOW
 
 -- Register for debugging messages.
 OvaleDebug:RegisterDebugging(OvaleDamageTaken)
@@ -29,11 +35,13 @@ OvaleDebug:RegisterDebugging(OvaleDamageTaken)
 OvaleProfiler:RegisterProfiling(OvaleDamageTaken)
 
 -- Player's GUID.
-local self_guid = nil
+local self_playerGUID = nil
 -- Damage event pool.
 local self_pool = OvalePool("OvaleDamageTaken_pool")
 -- Time window (past number of seconds) for which damage events are stored.
 local DAMAGE_TAKEN_WINDOW = 20
+-- Bitmask for magic damage.
+local SCHOOL_MASK_MAGIC = bit_bor(SCHOOL_MASK_ARCANE, SCHOOL_MASK_FIRE, SCHOOL_MASK_FROST, SCHOOL_MASK_HOLY, SCHOOL_MASK_NATURE, SCHOOL_MASK_SHADOW)
 --</private-static-properties>
 
 --<public-static-properties>
@@ -42,13 +50,8 @@ OvaleDamageTaken.damageEvent = OvaleQueue:NewDeque("OvaleDamageTaken_damageEvent
 --</public-static-properties>
 
 --<public-static-methods>
-function OvaleDamageTaken:OnInitialize()
-	-- Resolve module dependencies.
-	OvaleLatency = Ovale.OvaleLatency
-end
-
 function OvaleDamageTaken:OnEnable()
-	self_guid = API_UnitGUID("player")
+	self_playerGUID = Ovale.playerGUID
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 end
@@ -62,7 +65,7 @@ end
 function OvaleDamageTaken:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, cleuEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
 	local arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25 = ...
 
-	if destGUID == self_guid and strsub(cleuEvent, -7) == "_DAMAGE" then
+	if destGUID == self_playerGUID and strsub(cleuEvent, -7) == "_DAMAGE" then
 		self:StartProfiling("OvaleDamageTaken_COMBAT_LOG_EVENT_UNFILTERED")
 		local now = API_GetTime()
 		local eventPrefix = strsub(cleuEvent, 1, 6)
@@ -71,9 +74,14 @@ function OvaleDamageTaken:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, cleuEven
 			self:Debug("%s caused %d damage.", cleuEvent, amount)
 			self:AddDamageTaken(now, amount)
 		elseif eventPrefix == "RANGE_" or eventPrefix == "SPELL_" then
-			local spellName, amount = arg13, arg15
-			self:Debug("%s (%s) caused %d damage.", cleuEvent, spellName, amount)
-			self:AddDamageTaken(now, amount)
+			local spellName, spellSchool, amount = arg13, arg14, arg15
+			local isMagicDamage = (bit_band(spellSchool, SCHOOL_MASK_MAGIC) > 0)
+			if isMagicDamage then
+				self:Debug("%s (%s) caused %d magic damage.", cleuEvent, spellName, amount)
+			else
+				self:Debug("%s (%s) caused %d damage.", cleuEvent, spellName, amount)
+			end
+			self:AddDamageTaken(now, amount, isMagicDamage)
 		end
 		self:StopProfiling("OvaleDamageTaken_COMBAT_LOG_EVENT_UNFILTERED")
 	end
@@ -83,33 +91,35 @@ function OvaleDamageTaken:PLAYER_REGEN_ENABLED(event)
 	self_pool:Drain()
 end
 
-function OvaleDamageTaken:AddDamageTaken(timestamp, damage)
+function OvaleDamageTaken:AddDamageTaken(timestamp, damage, isMagicDamage)
 	self:StartProfiling("OvaleDamageTaken_AddDamageTaken")
 	local event = self_pool:Get()
 	event.timestamp = timestamp
 	event.damage = damage
+	event.magic = isMagicDamage
 	self.damageEvent:InsertFront(event)
 	self:RemoveExpiredEvents(timestamp)
+	Ovale.refreshNeeded[self_playerGUID] = true
 	self:StopProfiling("OvaleDamageTaken_AddDamageTaken")
 end
 
 -- Return the total damage taken in the previous time interval (in seconds).
-function OvaleDamageTaken:GetRecentDamage(interval, lagCorrection)
+function OvaleDamageTaken:GetRecentDamage(interval)
 	local now = API_GetTime()
 	local lowerBound = now - interval
-	if lagCorrection then
-		lowerBound = lowerBound - OvaleLatency:GetLatency()
-	end
 	self:RemoveExpiredEvents(now)
 
-	local total = 0
+	local total, totalMagic = 0, 0
 	for i, event in self.damageEvent:FrontToBackIterator() do
 		if event.timestamp < lowerBound then
 			break
 		end
 		total = total + event.damage
+		if event.magic then
+			totalMagic = totalMagic + event.damage
+		end
 	end
-	return total
+	return total, totalMagic
 end
 
 -- Remove all events that are more than DAMAGE_TAKEN_WINDOW seconds before the given timestamp.
@@ -124,6 +134,7 @@ function OvaleDamageTaken:RemoveExpiredEvents(timestamp)
 			end
 			self.damageEvent:RemoveBack()
 			self_pool:Release(event)
+			Ovale.refreshNeeded[self_playerGUID] = true
 		end
 	end
 	self:StopProfiling("OvaleDamageTaken_RemoveExpiredEvents")

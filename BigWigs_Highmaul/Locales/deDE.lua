@@ -17,6 +17,8 @@ if L then
 L["adds_desc"] = "Timer für das Erscheinen von Adds."
 L["custom_off_barrage_marker"] = "Kristallbeschuss markieren"
 L["custom_off_barrage_marker_desc"] = "Markiert die Ziele von Kristallbeschuss mit {rt1}{rt2}{rt3}{rt4}{rt5}, benötigt Leiter oder Assistent."
+L["custom_on_shard_marker"] = "Splitter von Tectus markieren"
+L["custom_on_shard_marker_desc"] = "Markiert die beiden erscheinenden 'Splitter von Tectus' mit {rt8}{rt7}, benötigt Leiter oder Assistent."
 L["motes"] = "Partikel"
 L["shard"] = "Splitter"
 
@@ -26,8 +28,13 @@ L = BigWigs:NewBossLocale("Brackenspore", "deDE")
 if L then
 L["creeping_moss_add_heal"] = "Moos unter GROSSEM ADD (Heilung)"
 L["creeping_moss_boss_heal"] = "Moos unter dem BOSS (Heilung)"
+L["custom_off_spore_shooter_marker"] = "Sporenspeier markieren"
+L["custom_off_spore_shooter_marker_desc"] = [=[Markiert  Sporenspeier mit {rt1}{rt2}{rt3}{rt4}, benötigt Leiter oder Assistent.
+ |cFFFF0000Um Konflikte beim Markieren zu vermeiden, sollte lediglich 1 Person im Raid diese Option aktivieren.|r
+ |cFFADFF2FTIPP: Wenn Du diese Option aktivierst, ist die schnellste Methode zum Markieren das zügige Bewegen des Mauszeigers über die Gegner.|r]=]
 L["mythic_ability"] = "Spezialfähigkeit"
-L["mythic_ability_desc"] = "Zeigt Timer für den nächsten Rufs der Gezeiten oder Explodierenden Pilz an."
+L["mythic_ability_desc"] = "Zeigt Timer für den nächsten Ruf der Gezeiten oder Explodierenden Pilz an."
+L["mythic_ability_wave"] = "Welle kommt!"
 
 end
 
@@ -62,8 +69,6 @@ L["custom_off_branded_marker_desc"] = [=[Markiert die Ziele von Gebrandmarkt mit
 L["custom_off_fixate_marker"] = "Fixieren markieren"
 L["custom_off_fixate_marker_desc"] = [=[Markiert die Ziele von Fixieren mit {rt1}{rt2}, benötigt Leiter oder Assistent.
 |cFFFF0000Um Konflikte beim Markieren zu vermeiden, sollte lediglich 1 Person im Raid diese Option aktivieren.|r]=]
-L["gaze_target_message"] = "Vorgeschmack zielt auf DICH!"
-L["phase4_trigger"] = "Ihr wisst überhaupt nicht, worauf Ihr Euch einlasst"
 L["slow_fixate"] = "Verlangsamen + Fixieren"
 
 end

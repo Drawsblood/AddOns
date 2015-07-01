@@ -17,6 +17,8 @@ if L then
 L["adds_desc"] = "다음 쫄이 언제 전투에 참여하는 지를 확인하기 위한 타이머입니다."
 L["custom_off_barrage_marker"] = "수정 포화 징표 설정"
 L["custom_off_barrage_marker_desc"] = "수정 포화의 대상을 {rt1}{rt2}{rt3}{rt4}{rt5}의 징표로 설정합니다. 공격대장이거나 권한이 필요합니다."
+L["custom_on_shard_marker"] = "텍터스의 조각 징표 설정"
+L["custom_on_shard_marker_desc"] = "두 마리의 '텍터스의 조각'을 {rt8}{rt7}의 징표로 설정합니다. 공격대장이거나 권한이 필요합니다."
 L["motes"] = "자갈"
 L["shard"] = "조각"
 
@@ -26,8 +28,13 @@ L = BigWigs:NewBossLocale("Brackenspore", "koKR")
 if L then
 L["creeping_moss_add_heal"] = "큰 쫄 아래에 덩굴 이끼가 있습니다 (치유 중)"
 L["creeping_moss_boss_heal"] = "보스 아래에 덩굴 이끼가 있습니다 (치유 중)"
+L["custom_off_spore_shooter_marker"] = "포자 식물 징표 설정"
+L["custom_off_spore_shooter_marker_desc"] = [=[포자 식물을 {rt1}{rt2}{rt3}{rt4}의 징표로 설정합니다.
+|cFFFF0000징표 설정에서 문제가 발생하는 것을 막기 위해 공격대에서 오직 1명만 이 옵션을 활성화해야 합니다.|r
+|cFFADFF2F팁: 만약 공격대에서 이 옵션을 사용하기로 결정했다면, 징표를 설정하기 위한 가장 빠른 방법은 몹들 위에 마우스를 올리는 것입니다.|r]=]
 L["mythic_ability"] = "특수 기술"
-L["mythic_ability_desc"] = "다음 해일의 부름이나 곰팡이 폭발이 오기 까지의 시간을 표시해주는 바를 표시합니다."
+L["mythic_ability_desc"] = "다음 해일의 부름이나 곰팡이 폭발까지의 시간을 표시해주는 바를 생성합니다."
+L["mythic_ability_wave"] = "해일이 옵니다!"
 
 end
 
@@ -62,14 +69,13 @@ L["custom_off_branded_marker_desc"] = [=[낙인의 대상을 {rt3}{rt4}의 징�
 L["custom_off_fixate_marker"] = "시선집중 징표 설정"
 L["custom_off_fixate_marker_desc"] = [=[고리안 전투마법사의 시선 집중의 대상을 {rt1}{rt2}의 징표로 설정합니다.
 |cFFFF0000징표 설정에서 문제가 발생하는 것을 막기 위해 공격대에서 오직 1명만 이 옵션을 활성화해야 합니다.|r]=]
-L["gaze_target_message"] = "당신은 심연의 시선의 대상자입니다!"
-L["phase4_trigger"] = "마르고크, 넌 그 힘에 대해 아무것도 모른다."
 L["slow_fixate"] = "감속+시선 집중"
 
 end
 
 L = BigWigs:NewBossLocale("Highmaul Trash", "koKR")
 if L then
+L["arcanist"] = "고리안 비전술사"
 L["oro"] = "오로"
 L["ritualist"] = "파괴자 의식술사"
 L["runemaster"] = "고리안 룬술사"

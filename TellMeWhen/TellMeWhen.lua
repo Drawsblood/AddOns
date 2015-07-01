@@ -15,10 +15,10 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "7.2.2"
+TELLMEWHEN_VERSION = "7.3.3"
 
 TELLMEWHEN_VERSION_MINOR = ""
-local projectVersion = "7.2.2" -- comes out like "6.2.2-21-g4e91cee"
+local projectVersion = "7.3.3" -- comes out like "6.2.2-21-g4e91cee"
 if projectVersion:find("project%-version") then
 	TELLMEWHEN_VERSION_MINOR = "dev"
 elseif strmatch(projectVersion, "%-%d+%-") then
@@ -26,11 +26,11 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 72218 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 73301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 72008 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
-if TELLMEWHEN_VERSIONNUMBER > 73000 or TELLMEWHEN_VERSIONNUMBER < 72000 then
+if TELLMEWHEN_VERSIONNUMBER > 74000 or TELLMEWHEN_VERSIONNUMBER < 73000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS")
 end 
@@ -333,14 +333,14 @@ TMW.BE = {
 		Silenced			= "_47476;_78675;_15487;_1330;114238;_18498;_25046;31935;31117;102051",
 		ReducedHealing		= "115804",
 
-		Stunned				= "_1833;_408;_91800;_113801;5211;22570;19577;24394;44572;_853;_20549;46968;132168;_30283;_7922;64044;91797;_25;_89766;105593;120086;117418;115001;_131402;108194;117526;118905;119392;119381;118345;132169;163505",
+		Stunned				= "_1833;_408;_91800;_113801;5211;22570;19577;24394;44572;_853;_20549;46968;132168;_30283;_7922;64044;91797;_25;_89766;105593;120086;117418;157997;115001;_131402;108194;117526;118905;119392;119381;118345;132169;163505",
 		Incapacitated		= "99;3355;_19386;20066;_118;1776;_6770;115078;115268;107079;31661;82691;123393;_137460;88625;_51514",
-		Rooted				= "_339;_122;_64695;_19387;33395;16979;45334;_87194;63685;102359;_128405;116706;107566;96294;105771;53148;_114404",
+		Rooted				= "_339;_122;_64695;_19387;33395;16979;45334;_87194;63685;102359;_128405;116706;107566;96294;105771;53148;_114404;170996",
 		Shatterable			= "122;33395;_44572;_82691;63685;102051", -- by algus2
 		Disoriented			= "31661;_2094;_51514;99;123393",
-		Slowed				= "_116;_120;_13810;_5116;_8056;_3600;_1715;_12323;116095;_20170;_115180;45524;50435;_15407;_3409;26679;_58180;61391;44614;_7302;_63529;_15571;_7321;_7992;123586;47960;129923", -- by algus2 
+		Slowed				= "_116;_120;_13810;_5116;_8056;_3600;_1715;_12323;116095;_20170;_31589;115000;_115180;45524;50435;51490;_15407;_3409;26679;_58180;61391;44614;_7302;_63529;_15571;_7321;_7992;123586;47960;129923", -- by algus2 
 		Feared				= "_5782;5246;_8122;10326;_137143;_5484;_6789;_87204",
-		Bleeding			= "_1822;_1079;33745;1943;_703;_115767;89775;_11977;106830;77758;155722;16511",
+		Bleeding			= "_1822;_1079;33745;1943;_703;_115767;_11977;106830;77758;155722;16511",
 		
 		CrowdControl		= "_118;33786;_1499;_19386;20066;10326;_9484;_6770;_2094;_51514;_710;_5782;_6358;_605;_82691;115078;115268;107079", -- originally by calico0 of Curse
 		
@@ -360,12 +360,12 @@ TMW.BE = {
 		-- From l337g0g0 of Curse:
 		DamageShield		= "_17;_11426;116849;115295;114908;110913;108416;112048;86273;114214;47753;65148;108008;1463;108366;115635;77535;145441;152118;173260;169373",
 		
-		ImmuneToStun		= "642;45438;48792;1022;33786;710;46924;19263;6615",
-		ImmuneToMagicCC		= "642;45438;48707;33786;710;46924;19263;31224;8178;23920;49039;114028",
-		DefensiveBuffs		= "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;31850;31224;42650;86657;118038;115176;115308;120954;115295;51271;12975;97463;102342;114039",
+		ImmuneToStun		= "642;45438;48792;1022;33786;710;46924;_19263;6615",
+		ImmuneToMagicCC		= "642;45438;48707;33786;710;46924;_19263;31224;8178;23920;49039;114028",
+		DefensiveBuffs		= "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;_19263;6940;31850;31224;42650;86657;118038;115176;115308;120954;115295;51271;12975;97463;102342;114039",
 		MiscHelpfulBuffs	= "10060;23920;68992;2983;1850;53271;1044;31821;45182;114028",
 		SpeedBoosts			= "54861;121557;_2983;_61684;68992;108843;65081;118922;137573;2379;58875;133278;85499;96268;137452;111400;116841;119085;7840;5118;13159;2645;_77761",
-		DamageBuffs			= "1719;12292;50334;5217;3045;77801;31884;51713;12472;57933;51271;_107574;114050;114051",
+		DamageBuffs			= "1719;12292;50334;5217;3045;77801;31884;51713;12472;57933;51271;_107574;114050;114051;113858;113861;113860;112071",
 	},
 	casts = {
 		--prefixing with _ doesnt really matter here since casts only match by name,
@@ -959,7 +959,7 @@ function TMW:ValidateType(argN, methodName, var, reqType)
 		end
 
 
-		error(("Bad argument #%s to %q. %s expected, got %s"):format(argN, methodName, reqType, varTypeName), 3)
+		error(("Bad argument #%s to %q. %s expected, got %s (%s)"):format(argN, methodName, reqType, varTypeName, tostring(var) or "[noval]"), 3)
 	end
 end
 
@@ -1113,7 +1113,7 @@ do -- InNLengthTable
 		if arg then
 			return iter, getstate(0, arg)
 		else
-			error("Bag argument #1 to 'TMW:InNLengthTable(arg)'. Expected table, got nil.", 2)
+			error("Bad argument #1 to 'TMW:InNLengthTable(arg)'. Expected table, got nil.", 2)
 		end
 	end
 end
@@ -2907,8 +2907,10 @@ function TMW:DoUpgrade(type, version, ...)
 	-- delegate out to sub-types
 	if type == "global" then
 		-- delegate to locale
-		for locale, ls in pairs(TMW.db.locale) do
-			TMW:DoUpgrade("locale", version, ls, locale)
+		if TMW.db.sv.locale then
+			for locale, ls in pairs(TMW.db.sv.locale) do
+				TMW:DoUpgrade("locale", version, ls, locale)
+			end
 		end
 
 		-- delegate to groups

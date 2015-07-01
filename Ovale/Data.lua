@@ -10,38 +10,47 @@ Ovale.OvaleData = OvaleData
 
 --<private-static-properties>
 -- Forward declarations for module dependencies.
+local OvaleGUID = nil
 local OvalePaperDoll = nil
 local OvaleState = nil
 
 local format = string.format
-local gmatch = string.gmatch
 local type = type
 local pairs = pairs
 local strfind = string.find
 local tonumber = tonumber
+local wipe = wipe
 local INFINITY = math.huge
 
 -- Registered "run-time requirement" handlers: self_requirement[name] = handler
--- Handler is invoked as handler(state, name, tokenIterator, target).
+-- Handler is invoked as handler(state, name, tokens, index, targetGUID).
 local self_requirement = {}
 
-local STAT_NAMES = { "agility", "bonus_armor", "crit", "haste", "intellect", "mastery", "multistrike", "spirit", "spellpower", "strength", "versatility" }
-local STAT_FULLNAME = {
-	agi = "agility",
-	int = "intellect",
-	str = "strength",
-	spi = "spirit",
+local STAT_NAMES = { "agility", "bonus_armor", "critical_strike", "haste", "intellect", "mastery", "multistrike", "spirit", "spellpower", "strength", "versatility" }
+local STAT_SHORTNAME = {
+	agility = "agi",
+	critical_strike = "crit",
+	intellect = "int",
+	strength = "str",
+	spirit = "spi",
 }
-local TRINKET_USE_NAMES = { "proc", "stacking_proc", "stacking_stat", "stat" }
+local STAT_USE_NAMES = { "trinket_proc", "trinket_stacking_proc", "trinket_stacking_stat", "trinket_stat" }
 --<private-static-properties>
 
 --<public-static-properties>
-OvaleData.itemList = {}
---spell info from the current script (by spellId)
-OvaleData.spellInfo = {}
+-- Export stat tables.
+OvaleData.STAT_NAMES = STAT_NAMES
+OvaleData.STAT_SHORTNAME = STAT_SHORTNAME
+OvaleData.STAT_USE_NAMES = STAT_USE_NAMES
 
-OvaleData.buffSpellList =
-{
+-- Item information from the current script (by item ID).
+OvaleData.itemInfo = {}
+-- Item lists.
+OvaleData.itemList = {}
+-- Spell information from the current script (by spell ID).
+OvaleData.spellInfo = {}
+-- Spell lists.
+OvaleData.buffSpellList = {
 	-- Debuffs
 	fear_debuff = {
 		[  5246] = true, -- Intimidating Shout
@@ -84,7 +93,9 @@ OvaleData.buffSpellList =
 		[116781] = true, -- Legacy of the White Tiger (bremaster/windwalker monk)
 		[126309] = true, -- Still Water (water strider)
 		[126373] = true, -- Fearless Roar (quilen)
+		[128997] = true, -- Spirit Beast Blessing (spirit beast)
 		[160052] = true, -- Strength of the Pack (raptor)
+		[160200] = true, -- Lone Wolf: Ferocity of the Raptor (hunter)
 	},
 	haste_buff = {
 		[ 49868] = true, -- Mind Quickening (shadow priest)
@@ -94,6 +105,7 @@ OvaleData.buffSpellList =
 		[135678] = true, -- Energizing Spores (sporebat)
 		[160003] = true, -- Savage Vigor (rylak)
 		[160074] = true, -- Speed of the Swarm (wasp)
+		[160203] = true, -- Lone Wolf: Haste of the Hyena (hunter)
 	},
 	mastery_buff = {
 		[ 19740] = true, -- Blessing of Might (paladin)
@@ -103,6 +115,7 @@ OvaleData.buffSpellList =
 		[128997] = true, -- Spirit Beast Blessing (spirit beast)
 		[155522] = true, -- Power of the Grave (blood death knight)
 		[160073] = true, -- Plainswalking (tallstrider)
+		[160198] = true, -- Lone Wolf: Grace of the Cat (hunter)
 	},
 	multistrike_buff = {
 		[ 24844] = true, -- Breath of the Winds (wind serpent)
@@ -113,6 +126,7 @@ OvaleData.buffSpellList =
 		[109773] = true, -- Dark Intent (warlock)
 		[113742] = true, -- Swiftblade's Cunning (rogue)
 		[166916] = true, -- Windflurry (windwalker monks)
+		[172968] = true, -- Lone Wolf: Quickness of the Dragonhawk (hunter)
 	},
 	spell_power_multiplier_buff = {
 		[  1459] = true, -- Arcane Brilliance (mage)
@@ -121,6 +135,7 @@ OvaleData.buffSpellList =
 		[109773] = true, -- Dark Intent (warlock)
 		[126309] = true, -- Still Water (water strider)
 		[128433] = true, -- Serpent's Cunning (serpent)
+		[160205] = true, -- Lone Wolf: Wisdom of the Serpent (hunter)
 	},
 	stamina_buff = {
 		[   469] = true, -- Commanding Shout (warrior)
@@ -130,6 +145,7 @@ OvaleData.buffSpellList =
 		[160003] = true, -- Savage Vigor (rylak)
 		[160014] = true, -- Sturdiness (goat)
 		[166928] = true, -- Blood Pact (warlock)
+		[160199] = true, -- Lone Wolf: Fortitude of the Bear (hunter)
 	},
 	str_agi_int_buff = {
 		[  1126] = true, -- Mark of the Wild (druid)
@@ -140,6 +156,7 @@ OvaleData.buffSpellList =
 		[159988] = true, -- Bark of the Wild (dog, riverbeast)
 		[160017] = true, -- Blessing of Kongs (gorilla)
 		[160077] = true, -- Strength of the Earth (worm)
+		[160206] = true, -- Lone Wolf: Power of the Primates (hunter)
 	},
 	versatility_buff = {
 		[  1126] = true, -- Mark of the Wild (druid)
@@ -152,6 +169,7 @@ OvaleData.buffSpellList =
 		[160077] = true, -- Strength of the Earth (worm)
 		[167187] = true, -- Sanctity Aura (retribution paladins)
 		[167188] = true, -- Inspiring Presence (arms/fury warriors)
+		[172967] = true, -- Lone Wolf: Versatility of the Ravager (hunter)
 	},
 
 	-- Target debuffs
@@ -169,6 +187,7 @@ OvaleData.buffSpellList =
 	healing_reduced_debuff = {
 		[  8680] = true, -- Wound Poison (rogue)
 		[ 54680] = true, -- Monstrous Bite (devilsaur)
+		[115625] = true, -- Mortal Cleave (wrathguard)
 		[115804] = true, -- Mortal Wounds (arms/fury warriors, windwalker monk, warlock, carrion bird, scorpid)
 	},
 
@@ -204,188 +223,30 @@ OvaleData.buffSpellList =
 	raid_movement_buff = {
 		[106898] = true, -- Stampeding Roar
 	},
-
-	-- Trinket buffs
-	trinket_proc_agility_buff = {
---		[126554] = true, -- Bottle of Infinite Stars
-		[126690] = true, -- PvP agility trinket (on-use)
-		[126707] = true, -- PvP agility trinket (proc)
-		[126708] = true, -- PvP agility trinket (proc)
---		[128984] = true, -- Relic of Xuen (agility)
---		[138699] = true, -- Vicious Talisman of the Shado-Pan Assault
---		[138938] = true, -- Bad Juju
-		[146308] = true, -- Assurance of Consequence
-		[146310] = true, -- Ticking Ebon Detonator
-		[148896] = true, -- Sigil of Rampage
-		[148903] = true, -- Haromm's Talisman
-		[177597] = true, -- Lucky Double-Sided Coin (on-use)
-	},
-	trinket_proc_bonus_armor_buff = {
-		[176873] = true, -- Tablet of Turnbuckle Teamwork (on-use)
-		[177055] = true, -- Evergaze Arcane Eidolon
-	},
-	trinket_proc_crit_buff = {
---		[138963] = true, -- Unerring Vision of Lei-Shen
-		[162916] = true, -- Skull of War
-		[162918] = true, -- Knight's Badge
-		[162920] = true, -- Sandman's Pouch
-		[165532] = true, -- Bonemaw's Big Toe (on-use)
-		[165532] = true, -- Voidmender's Shadowgem (on-use)
-		[176979] = true, -- Immaculate Living Mushroom
-		[176983] = true, -- Stoneheart Idol
-		[177041] = true, -- Tectus' Beating Heart
-		[177047] = true, -- Goren Soul Repository
-	},
-	trinket_proc_haste_buff = {
-		[165531] = true, -- Fleshrender's Meathook (on-use)
-		[165821] = true, -- Munificent Bonds of Fury
-		[165821] = true, -- Spores of Alacrity
-		[165821] = true, -- Witherbark's Branch
-		[176875] = true, -- Shards of Nothing (on-use)
-		[176879] = true, -- Emblem of Caustic Healing (on-use)
-		[176882] = true, -- Turbulent Focusing Crystal (on-use)
-		[176885] = true, -- Turbulent Seal of Defiance (on-use)
-		[176938] = true, -- Formidable Relic of Blood
-		[176944] = true, -- Formidable Censer of Faith
-		[176981] = true, -- Furyheart Talisman
-		[177036] = true, -- Meaty Dragonspine Trophy
-		[177052] = true, -- Darmac's Unstable Talisman
-	},
-	trinket_proc_intellect_buff = {
---		[126577] = true, -- Light of the Cosmos
-		[126683] = true, -- PvP intellect trinket (on-use)
-		[126705] = true, -- PvP intellect trinket (proc)
---		[128985] = true, -- Relic of Yu'lon
---		[136082] = true, -- Shock-Charger/Static-Caster's Medallion
---		[138898] = true, -- Breath of the Hydra
---		[139133] = true, -- Cha-Ye's Essence of Brilliance (assume 20% crit chance)
-		[146046] = true, -- Purified Bindings of Immerseus
-		[148897] = true, -- Frenzied Crystal of Rage
-		[148906] = true, -- Kardris' Toxic Totem
-	},
-	trinket_proc_mastery_buff = {
-		[165485] = true, -- Kihra's Adrenaline Injector (on-use)
-		[165535] = true, -- Kyrak's Vileblood Serum (on-use)
-		[165535] = true, -- Tharbek's Lucky Pebble
-		[165825] = true, -- Munificent Censer of Tranquility
-		[165825] = true, -- Xeri'tac's Unhatched Egg Sac
-		[165835] = true, -- Munificent Emblem of Terror
-		[176876] = true, -- Pol's Blinded Eye (on-use)
-		[176883] = true, -- Turbulent Vial of Toxin (on-use)
-		[176884] = true, -- Turbulent Relic of Mendacity (on-use)
-		[176940] = true, -- Formidable Jar of Doom
-		[176942] = true, -- Formidable Orb of Putrescence
-		[177044] = true, -- Horn of Screaming Spirits
-		[177057] = true, -- Blast Furnace Door
-	},
-	trinket_proc_multistrike_buff = {
-		[165542] = true, -- Gor'ashan's Lodestone Spike (on-use)
-		[165838] = true, -- Coagulated Genesaur Blood
-		[176874] = true, -- Vial of Convulsive Shadows
-		[176878] = true, -- Beating Heart of the Mountain (on-use)
-		[176881] = true, -- Turbulent Emblem (on-use)
-		[176936] = true, -- Formidable Fang
-		[176987] = true, -- Blackheart Enforcer's Medallion
-		[177039] = true, -- Scales of Doom
-		[177064] = true, -- Elementalist's Shielding Talisman
-	},
-	trinket_proc_spellpower_buff = {
-		[177594] = true, -- Copeland's Clarity (on-use)
-	},
-	trinket_proc_spirit_buff = {
-		[162914] = true, -- Winged Hourglass
-		[177062] = true, -- Ironspike Chew Toy
-	},
-	trinket_proc_strength_buff = {
---		[126582] = true, -- Lei Shen's Final Orders
-		[126679] = true, -- PvP strength trinket (on-use)
-		[126700] = true, -- PvP strength trinket (proc)
-		[126702] = true, -- PvP strength trinket (proc)
---		[128986] = true, -- Relic of Xuen (strength)
---		[138702] = true, -- Brutal Talisman of the Shado-Pan Assault
-		[146245] = true, -- Evil Eye of Galakras
-		[146250] = true, -- Thok's Tail Tip
-		[148899] = true, -- Fusion-Fire Core
-		[177189] = true, -- Scabbard of Kyanos
-	},
-	trinket_proc_versatility_buff = {
-		[165534] = true, -- Enforcer's Stun Grenade (on-use)
-		[165543] = true, -- Emberscale Talisman (on-use)
-		[165543] = true, -- Ragewing's Firefang (on-use)
-		[165840] = true, -- Leaf of the Ancient Protectors
-		[165840] = true, -- Munificent Orb of Ice
-		[165840] = true, -- Munificent Soul of Compassion
-		[176976] = true, -- Mote of the Mountain
-	},
-	trinket_stacking_proc_agility_buff = {
---		[138756] = true, -- Renataki's Soul Charm
-	},
-	trinket_stacking_proc_crit_buff = {
-		[146285] = true, -- Skeer's Bloodsoaked Talisman
-		[177071] = true, -- Humming Blackiron Trigger
-	},
-	trinket_stacking_proc_haste_buff = {
-		[177090] = true, -- Auto-Repairing Autoclave
-		[177104] = true, -- Battering Talisman
-	},
-	trinket_stacking_proc_intellect_buff = {
---		[138786] = true, -- Wushoolay's Final Choice
-		[146184] = true, -- Black Blood of Y'Shaarj
-	},
-	trinket_stacking_proc_multistrike_buff = {
-		[177085] = true, -- Blackiron Micro Crucible
-		[177098] = true, -- Forgemaster's Insignia
-	},
-	trinket_stacking_proc_strength_buff = {
---		[138759] = true, -- Fabled Feather of Ji-Kun
---		[138870] = true, -- Primordius' Talisman of Rage
-	},
 }
--- Spell list aliases.
+-- Add trinket lists to buffSpellList.
 do
-	local list = OvaleData.buffSpellList
-
-	-- Create default, empty lists for "trinket_(proc|stacking_proc|stacking_stat|stat)_<stat>_buff".
-	for _, useName in pairs(TRINKET_USE_NAMES) do
+	for _, useName in pairs(STAT_USE_NAMES) do
+		local name
 		for _, statName in pairs(STAT_NAMES) do
-			local name = format("trinket_%s_%s_buff", useName, statName)
-			list[name] = list[name] or {}
-		end
-	end
-
-	-- Default aliases from "trinket_(stacking_stat|stat)_<stat>_buff" to "trinket_(stacking_proc|proc)_<stat>_buff".
-	for _, statName in pairs(STAT_NAMES) do
-		local name = format("trinket_stacking_proc_%s_buff", statName)
-		local alias = format("trinket_stacking_stat_%s_buff", statName)
-		list[alias] = list[alias] or list[name]
-	end
-	for _, statName in pairs(STAT_NAMES) do
-		local name = format("trinket_proc_%s_buff", statName)
-		local alias = format("trinket_stat_%s_buff", statName)
-		list[alias] = list[alias] or list[name]
-	end
-
-	-- Create aliases for "trinket_(stacking_proc|stacking_stat|proc|stat)_<statAbbreviation>_buff".
-	for _, useName in pairs(TRINKET_USE_NAMES) do
-		for statAbbreviation, statName in pairs(STAT_FULLNAME) do
-			local name = format("trinket_%s_%s_buff", useName, statName)
-			local alias = format("trinket_%s_%s_buff", useName, statAbbreviation)
-			list[alias] = list[alias] or list[name]
-		end
-	end
-
-	-- Create lists for "trinket_(proc|stacking_proc|stacking_stat|stat)_any_buff".
-	for _, useName in pairs(TRINKET_USE_NAMES) do
-		local name = format("trinket_%s_any_buff", useName)
-		list[name] = list[name] or {}
-		for _, statName in pairs(STAT_NAMES) do
-			local listName = format("trinket_%s_%s_buff", useName, statName)
-			if list[listName] then
-				for spellId in pairs(list[listName]) do
-					list[name][spellId] = true
-				end
+			name = useName .. "_" .. statName .. "_buff"
+			OvaleData.buffSpellList[name] = {}
+			local shortName = STAT_SHORTNAME[statName]
+			if shortName then
+				name = useName .. "_" .. shortName .. "_buff"
+				OvaleData.buffSpellList[name] = {}
 			end
 		end
+		name = useName .. "_any_buff"
+		OvaleData.buffSpellList[name] = {}
+	end
+end
+
+-- Create table of default spell lists.
+OvaleData.DEFAULT_SPELL_LIST = {}
+do
+	for name in pairs(OvaleData.buffSpellList) do
+		OvaleData.DEFAULT_SPELL_LIST[name] = true
 	end
 end
 
@@ -393,14 +254,13 @@ end
 --OvaleData.defaultTarget = nil
 --</public-static-properties>
 
---<private-static-methods>
---</private-static-methods>
-
 --<public-static-methods>
 function OvaleData:OnInitialize()
 	-- Resolve module dependencies.
+	OvaleGUID = Ovale.OvaleGUID
 	OvalePaperDoll = Ovale.OvalePaperDoll
 	OvaleState = Ovale.OvaleState
+
 end
 
 function OvaleData:OnEnable()
@@ -419,8 +279,19 @@ function OvaleData:UnregisterRequirement(name)
 	self_requirement[name] = nil
 end
 
-function OvaleData:ResetSpellInfo()
-	self.spellInfo = {}
+function OvaleData:Reset()
+	wipe(self.itemInfo)
+	wipe(self.spellInfo)
+	for k, v in pairs(self.buffSpellList) do
+		if not self.DEFAULT_SPELL_LIST[k] then
+			-- Remove all non-default spell lists.
+			wipe(v)
+			self.buffSpellList[k] = nil
+		elseif strfind(k, "^trinket_") then
+			-- Clear all trinket lists.
+			wipe(v)
+		end
+	end
 end
 
 --[[
@@ -437,6 +308,8 @@ function OvaleData:SpellInfo(spellId)
 				player = {},
 				-- Auras applied by this spell on its target.
 				target = {},
+				-- Auras applied by this spell on the player's pet.
+				pet = {},
 				-- Auras granting extra damage multipliers for this spell.
 				damage = {},
 			},
@@ -487,9 +360,10 @@ end
 
 -- Check "run-time" requirements specified in SpellRequire().
 -- NOTE: Mirrored in statePrototype below.
-function OvaleData:CheckRequirements(spellId, atTime, tokenIterator, target)
-	target = target or self.defaultTarget or "target"
-	local name = tokenIterator()
+function OvaleData:CheckRequirements(spellId, atTime, tokens, index, targetGUID)
+	targetGUID = targetGUID or OvaleGUID:UnitGUID(self.defaultTarget or "target")
+	local name = tokens[index]
+	index = index + 1
 	if name then
 		self:Log("Checking requirements:")
 		local verified = true
@@ -497,20 +371,17 @@ function OvaleData:CheckRequirements(spellId, atTime, tokenIterator, target)
 		while verified and name do
 			local handler = self_requirement[name]
 			if handler then
-				local method, arg = handler[1], handler[2]
-				-- Check for inherited/mirrored method first (for statePrototype).
-				if self[method] then
-					verified, requirement = self[method](self, spellId, atTime, name, tokenIterator, target)
-				else
-					verified, requirement = arg[method](arg, spellId, atTime, name, tokenIterator, target)
-				end
-				name = tokenIterator()
+				local method = handler[1]
+				local arg = self[method] and self or handler[2]
+				verified, requirement, index = arg[method](arg, spellId, atTime, name, tokens, index, targetGUID)
+				name = tokens[index]
+				index = index + 1
 			else
 				Ovale:OneTimeMessage("Warning: requirement '%s' has no registered handler; FAILING requirement.", name)
 				verified = false
 			end
 		end
-		return verified, requirement
+		return verified, requirement, index
 	end
 	return true
 end
@@ -522,37 +393,46 @@ end
 		auraId=refresh		aura is refreshed, no change to stacks
 		auraId=refresh_keep_snapshot
 							aura is refreshed and the snapshot is carried over from the previous aura.
+		auraId=toggle		aura is toggled on or off by the spell.
 		auraId=N, N > 0		N is number of stacks added
 		auraId=0			aura is removed
 		auraId=N, N < 0		N is number of stacks of aura removed
 
 	NOTE: Mirrored in statePrototype below.
 --]]
-function OvaleData:CheckSpellAuraData(auraId, spellData, atTime, target)
-	target = target or "player"
-	local tokenIterator, value, data
-	if strfind(spellData, ",") then
-		-- Lexer for spellData as comma-separated values.
-		tokenIterator = gmatch(spellData, "[^,]+")
-		value = tokenIterator()
+function OvaleData:CheckSpellAuraData(auraId, spellData, atTime, guid)
+	guid = guid or OvaleGUID:UnitGUID("player")
+	local index, value, data
+	if type(spellData) == "table" then
+		-- Comma-separated value.
+		value = spellData[1]
+		index = 2
 	else
 		value = spellData
 	end
 	if value == "count" then
 		-- Advance past the number of stacks of the aura.
-		local N = tokenIterator and tokenIterator() or nil
+		local N
+		if index then
+			N = spellData[index]
+			index = index + 1
+		end
 		if N then
 			data = tonumber(N)
 		else
-			Ovale:OneTimeMessage("Warning: '%d=%s' has '%s' missing final stack count.", auraId, spellData, value)
+			Ovale:OneTimeMessage("Warning: '%d' has '%s' missing final stack count.", auraId, value)
 		end
 	elseif value == "extend" then
 		-- Advance past the number of seconds to extend the aura.
-		local seconds = tokenIterator and tokenIterator() or nil
+		local seconds
+		if index then
+			seconds = spellData[index]
+			index = index + 1
+		end
 		if seconds then
 			data = tonumber(seconds)
 		else
-			Ovale:OneTimeMessage("Warning: '%d=%s' has '%s' missing duration.", auraId, spellData, value)
+			Ovale:OneTimeMessage("Warning: '%d' has '%s' missing duration.", auraId, value)
 		end
 	else
 		local asNumber = tonumber(value)
@@ -560,28 +440,26 @@ function OvaleData:CheckSpellAuraData(auraId, spellData, atTime, target)
 	end
 	-- Verify any run-time requirements for this aura.
 	local verified = true
-	if tokenIterator then
-		verified = self:CheckRequirements(auraId, atTime, tokenIterator, target)
+	if index then
+		verified = self:CheckRequirements(auraId, atTime, spellData, index, guid)
 	end
 	return verified, value, data
 end
 
 -- Check "run-time" requirements specified in SpellInfo().
 -- NOTE: Mirrored in statePrototype below.
-function OvaleData:CheckSpellInfo(spellId, atTime, target)
-	target = target or self.defaultTarget or "target"
+function OvaleData:CheckSpellInfo(spellId, atTime, targetGUID)
+	targetGUID = targetGUID or OvaleGUID:UnitGUID(self.defaultTarget or "target")
 	local verified = true
 	local requirement
 	for name, handler in pairs(self_requirement) do
-		local value = self:GetSpellInfoProperty(spellId, atTime, name, target)
+		local value = self:GetSpellInfoProperty(spellId, atTime, name, targetGUID)
 		if value then
 			local method, arg = handler[1], handler[2]
 			-- Check for inherited/mirrored method first (for statePrototype).
-			if self[method] then
-				verified, requirement = self[method](self, spellId, atTime, name, gmatch(value, ".+"), target)
-			else
-				verified, requirement = arg[method](arg, spellId, atTime, name, gmatch(value, ".+"), target)
-			end
+			arg = self[method] and self or arg
+			local index = (type(value) == "table") and 1 or nil
+			verified, requirement = arg[method](arg, spellId, atTime, name, value, index, targetGUID)
 			if not verified then
 				break
 			end
@@ -592,15 +470,14 @@ end
 
 -- Get SpellInfo property with run-time checks as specified in SpellRequire().
 -- NOTE: Mirrored in statePrototype below.
-function OvaleData:GetSpellInfoProperty(spellId, atTime, property, target)
-	target = target or self.defaultTarget or "target"
+function OvaleData:GetSpellInfoProperty(spellId, atTime, property, targetGUID)
+	targetGUID = targetGUID or OvaleGUID:UnitGUID(self.defaultTarget or "target")
 	local si = OvaleData.spellInfo[spellId]
 	local value = si and si[property]
 	local requirements = si and si.require[property]
 	if requirements then
 		for v, requirement in pairs(requirements) do
-			local tokenIterator = gmatch(requirement, "[^,]+")
-			local verified = self:CheckRequirements(spellId, atTime, tokenIterator, target)
+			local verified = self:CheckRequirements(spellId, atTime, requirement, 1, targetGUID)
 			if verified then
 				value = tonumber(v) or v
 				break
@@ -670,15 +547,8 @@ function OvaleData:GetTickLength(auraId, snapshot)
 	local si = OvaleData.spellInfo[auraId]
 	if si then
 		tick = si.tick or tick
-		local hasteMultiplier = 1
-		if si.haste then
-			if si.haste == "spell" then
-				hasteMultiplier = OvalePaperDoll:GetSpellHasteMultiplier(snapshot)
-			elseif si.haste == "melee" then
-				hasteMultiplier = OvalePaperDoll:GetMeleeHasteMultiplier(snapshot)
-			end
-			tick = tick / hasteMultiplier
-		end
+		local hasteMultiplier = OvalePaperDoll:GetHasteMultiplier(si.haste, snapshot)
+		tick = tick / hasteMultiplier
 	end
 	return tick
 end

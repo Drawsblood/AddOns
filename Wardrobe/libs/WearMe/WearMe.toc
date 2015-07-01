@@ -1,0 +1,7 @@
+## Interface: 60000
+## Title: WearMe
+## Title-deDE: TragMich
+## Notes: Library for equipping, bagging and moving equipment.
+## Notes-deDE: Ein Bibliothek mit Tools zum Anlegen, Einpacken und Benutzen von Ausruestungsgegenstaenden.
+## Author: Karl Isenberg
+WearMe.xml

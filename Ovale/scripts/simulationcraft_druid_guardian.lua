@@ -2,28 +2,30 @@ local OVALE, Ovale = ...
 local OvaleScripts = Ovale.OvaleScripts
 
 do
-	local name = "simulationcraft_druid_guardian_t17m"
-	local desc = "[6.0] SimulationCraft: Druid_Guardian_T17M"
+	local name = "simulationcraft_druid_guardian_t18m"
+	local desc = "[6.2] SimulationCraft: Druid_Guardian_T18M"
 	local code = [[
-# Based on SimulationCraft profile "Druid_Guardian_T17M".
+# Based on SimulationCraft profile "Druid_Guardian_T18M".
 #	class=druid
 #	spec=guardian
 #	talents=0301022
 
 Include(ovale_common)
+Include(ovale_trinkets_mop)
+Include(ovale_trinkets_wod)
 Include(ovale_druid_spells)
 
-AddCheckBox(opt_interrupt L(interrupt) default)
-AddCheckBox(opt_melee_range L(not_in_melee_range))
+AddCheckBox(opt_interrupt L(interrupt) default specialization=guardian)
+AddCheckBox(opt_melee_range L(not_in_melee_range) specialization=guardian)
 
-AddFunction UseItemActions
+AddFunction GuardianUseItemActions
 {
 	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
 
-AddFunction GetInMeleeRange
+AddFunction GuardianGetInMeleeRange
 {
 	if CheckBoxOn(opt_melee_range) and Stance(druid_bear_form) and not target.InRange(mangle) or { Stance(druid_cat_form) or Stance(druid_claws_of_shirvallah) } and not target.InRange(shred)
 	{
@@ -32,7 +34,7 @@ AddFunction GetInMeleeRange
 	}
 }
 
-AddFunction InterruptActions
+AddFunction GuardianInterruptActions
 {
 	if CheckBoxOn(opt_interrupt) and not target.IsFriend() and target.IsInterruptible()
 	{
@@ -58,7 +60,7 @@ AddFunction GuardianDefaultMainActions
 	#healing_touch,if=buff.dream_of_cenarius.react&health.pct<30
 	if BuffPresent(dream_of_cenarius_tank_buff) and HealthPercent() < 30 Spell(healing_touch)
 	#pulverize,if=buff.pulverize.remains<=3.6
-	if BuffRemaining(pulverize_buff) <= 3.6 and target.DebuffStacks(lacerate_debuff) >= 3 Spell(pulverize)
+	if BuffRemaining(pulverize_buff) <= 3.6 and target.DebuffGain(lacerate_debuff) <= BaseDuration(lacerate_debuff) Spell(pulverize)
 	#lacerate,if=talent.pulverize.enabled&buff.pulverize.remains<=(3-dot.lacerate.stack)*gcd&buff.berserk.down
 	if Talent(pulverize_talent) and BuffRemaining(pulverize_buff) <= { 3 - target.DebuffStacks(lacerate_debuff) } * GCD() and BuffExpires(berserk_bear_buff) Spell(lacerate)
 	#lacerate,if=!ticking
@@ -76,7 +78,7 @@ AddFunction GuardianDefaultMainActions
 AddFunction GuardianDefaultShortCdActions
 {
 	#auto_attack
-	GetInMeleeRange()
+	GuardianGetInMeleeRange()
 	#savage_defense,if=buff.barkskin.down
 	if BuffExpires(barkskin_buff) Spell(savage_defense)
 	#maul,if=buff.tooth_and_claw.react&incoming_damage_1s
@@ -88,21 +90,21 @@ AddFunction GuardianDefaultShortCdActions
 AddFunction GuardianDefaultCdActions
 {
 	#skull_bash
-	InterruptActions()
+	GuardianInterruptActions()
 	#blood_fury
 	Spell(blood_fury_apsp)
 	#berserking
 	Spell(berserking)
 	#arcane_torrent
 	Spell(arcane_torrent_energy)
-	#use_item,slot=trinket2
-	UseItemActions()
+	#use_item,slot=finger1
+	GuardianUseItemActions()
 	#barkskin,if=buff.bristling_fur.down
 	if BuffExpires(bristling_fur_buff) Spell(barkskin)
 	#bristling_fur,if=buff.barkskin.down&buff.savage_defense.down
 	if BuffExpires(barkskin_buff) and BuffExpires(savage_defense_buff) Spell(bristling_fur)
-	#berserk,if=buff.pulverize.remains>10
-	if BuffRemaining(pulverize_buff) > 10 Spell(berserk_bear)
+	#berserk,if=(buff.pulverize.remains>10|!talent.pulverize.enabled)&buff.incarnation.down
+	if { BuffRemaining(pulverize_buff) > 10 or not Talent(pulverize_talent) } and BuffExpires(incarnation_son_of_ursoc_buff) Spell(berserk_bear)
 
 	unless Spell(cenarion_ward)
 	{
@@ -116,10 +118,10 @@ AddFunction GuardianDefaultCdActions
 			#natures_vigil
 			Spell(natures_vigil)
 
-			unless BuffPresent(dream_of_cenarius_tank_buff) and HealthPercent() < 30 and Spell(healing_touch) or BuffRemaining(pulverize_buff) <= 3.6 and target.DebuffStacks(lacerate_debuff) >= 3 and Spell(pulverize) or Talent(pulverize_talent) and BuffRemaining(pulverize_buff) <= { 3 - target.DebuffStacks(lacerate_debuff) } * GCD() and BuffExpires(berserk_bear_buff) and Spell(lacerate)
+			unless BuffPresent(dream_of_cenarius_tank_buff) and HealthPercent() < 30 and Spell(healing_touch) or BuffRemaining(pulverize_buff) <= 3.6 and target.DebuffGain(lacerate_debuff) <= BaseDuration(lacerate_debuff) and Spell(pulverize) or Talent(pulverize_talent) and BuffRemaining(pulverize_buff) <= { 3 - target.DebuffStacks(lacerate_debuff) } * GCD() and BuffExpires(berserk_bear_buff) and Spell(lacerate)
 			{
-				#incarnation
-				Spell(incarnation_tank)
+				#incarnation,if=buff.berserk.down
+				if BuffExpires(berserk_bear_buff) Spell(incarnation_son_of_ursoc)
 			}
 		}
 	}
@@ -130,7 +132,7 @@ AddFunction GuardianDefaultCdActions
 AddFunction GuardianPrecombatMainActions
 {
 	#flask,type=greater_draenic_agility_flask
-	#food,type=sleeper_surprise
+	#food,type=sleeper_sushi
 	#mark_of_the_wild,if=!aura.str_agi_int.up
 	if not BuffPresent(str_agi_int_buff any=1) Spell(mark_of_the_wild)
 	#bear_form
@@ -140,39 +142,62 @@ AddFunction GuardianPrecombatMainActions
 	Spell(cenarion_ward)
 }
 
+AddFunction GuardianPrecombatShortCdPostConditions
+{
+	not BuffPresent(str_agi_int_buff any=1) and Spell(mark_of_the_wild) or Spell(bear_form) or Spell(cenarion_ward)
+}
+
+AddFunction GuardianPrecombatCdPostConditions
+{
+	not BuffPresent(str_agi_int_buff any=1) and Spell(mark_of_the_wild) or Spell(bear_form) or Spell(cenarion_ward)
+}
+
 ### Guardian icons.
-AddCheckBox(opt_druid_guardian_aoe L(AOE) specialization=guardian default)
 
-AddIcon specialization=guardian help=shortcd enemies=1 checkbox=!opt_druid_guardian_aoe
+AddCheckBox(opt_druid_guardian_aoe L(AOE) default specialization=guardian)
+
+AddIcon checkbox=!opt_druid_guardian_aoe enemies=1 help=shortcd specialization=guardian
 {
-	GuardianDefaultShortCdActions()
+	unless not InCombat() and GuardianPrecombatShortCdPostConditions()
+	{
+		GuardianDefaultShortCdActions()
+	}
 }
 
-AddIcon specialization=guardian help=shortcd checkbox=opt_druid_guardian_aoe
+AddIcon checkbox=opt_druid_guardian_aoe help=shortcd specialization=guardian
 {
-	GuardianDefaultShortCdActions()
+	unless not InCombat() and GuardianPrecombatShortCdPostConditions()
+	{
+		GuardianDefaultShortCdActions()
+	}
 }
 
-AddIcon specialization=guardian help=main enemies=1
+AddIcon enemies=1 help=main specialization=guardian
 {
 	if not InCombat() GuardianPrecombatMainActions()
 	GuardianDefaultMainActions()
 }
 
-AddIcon specialization=guardian help=aoe checkbox=opt_druid_guardian_aoe
+AddIcon checkbox=opt_druid_guardian_aoe help=aoe specialization=guardian
 {
 	if not InCombat() GuardianPrecombatMainActions()
 	GuardianDefaultMainActions()
 }
 
-AddIcon specialization=guardian help=cd enemies=1 checkbox=!opt_druid_guardian_aoe
+AddIcon checkbox=!opt_druid_guardian_aoe enemies=1 help=cd specialization=guardian
 {
-	GuardianDefaultCdActions()
+	unless not InCombat() and GuardianPrecombatCdPostConditions()
+	{
+		GuardianDefaultCdActions()
+	}
 }
 
-AddIcon specialization=guardian help=cd checkbox=opt_druid_guardian_aoe
+AddIcon checkbox=opt_druid_guardian_aoe help=cd specialization=guardian
 {
-	GuardianDefaultCdActions()
+	unless not InCombat() and GuardianPrecombatCdPostConditions()
+	{
+		GuardianDefaultCdActions()
+	}
 }
 
 ### Required symbols
@@ -193,7 +218,8 @@ AddIcon specialization=guardian help=cd checkbox=opt_druid_guardian_aoe
 # healing_touch
 # heart_of_the_wild_tank
 # heart_of_the_wild_tank_buff
-# incarnation_tank
+# incarnation_son_of_ursoc
+# incarnation_son_of_ursoc_buff
 # lacerate
 # lacerate_debuff
 # maim
@@ -221,5 +247,5 @@ AddIcon specialization=guardian help=cd checkbox=opt_druid_guardian_aoe
 # wild_charge_bear
 # wild_charge_cat
 ]]
-	OvaleScripts:RegisterScript("DRUID", name, desc, code, "reference")
+	OvaleScripts:RegisterScript("DRUID", "guardian", name, desc, code, "script")
 end

@@ -1,4 +1,4 @@
-﻿## Interface: 60000
+﻿## Interface: 60100
 ## Title: DataStore_Auctions
 ## Notes: Stores information about character auctions and bids
 ## Author: Thaoky (EU-Marécages de Zangar)
@@ -8,7 +8,7 @@
 ## SavedVariables: DataStore_AuctionsDB
 ## X-Category: Interface Enhancements
 ## X-Embeds: Ace3
-## X-Curse-Packaged-Version: r41
+## X-Curse-Packaged-Version: r43
 ## X-Curse-Project-Name: DataStore_Auctions
 ## X-Curse-Project-ID: datastore_auctions
 ## X-Curse-Repository-ID: wow/datastore_auctions/mainline

@@ -138,6 +138,29 @@ L["Death Knight Rune"] = "Runa de Cavaleiro da Morte"
 -- L["Eclipse Power"] = ""
 -- L["Eclipse Type"] = ""
 -- L["Emote"] = ""
+-- L["Encounter ID"] = ""
+L["EncounterID List"] = [=[IDs para os chefes atuais:
+
+Malho Imponente:
+Karrath: 1721
+O Açougueiro: 1706
+Tectus: 1722
+Frondísporo: 1720
+Ogrons Gêmeos: 1719
+Koragh: 1723
+Mar'gok: 1705
+
+Fundição da Rocha Negra:
+Gruul: 1691
+Comeferro: 1696
+Darmac:1694
+Dobraflamas Ka'graz: 1689
+Hans'gar e Franzok: 1693
+Thogar: 1692
+A Fornalha Explosiva : 1690
+Kromog: 1713
+As Damas de Ferro: 1695
+Mão Negra: 1704]=] -- Needs review
 -- L["Energize"] = ""
 -- L["Energy"] = ""
 -- L["Enrage"] = ""

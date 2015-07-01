@@ -1,4 +1,4 @@
-## Interface: 60000
+## Interface: 60200
 ## Title: PitBull4 |r[|cffeda55fVisualHeal|r]
 ## Title-deDE: PitBull4 |r[|cffeda55fVisualHeal|r]
 ## Title-esES: PitBull4 |r[|cffeda55fVisualHeal|r]
@@ -11,7 +11,7 @@
 ## Notes-deDE: Zeigt die von dir und anderen Gruppenmitgliedern getätigte Heilung an, noch ehe sie passiert.
 ## Notes-esES: Visualiza las curaciones realizadas por ti y los miembros de tu grupo antes de que se realicen.
 ## Notes-frFR: Visualise les soins prodigués par vous et les membres de votre groupe avant qu'ils n'arrivent.
-## Notes-koKR: Visualises healing done by you and your group members before it happens.
+## Notes-koKR: 자신 또는 그룹원들의 치유량을 미리 보여줍니다.
 ## Notes-ruRU: Визуализирует ваше лечение и лечение членов вашей группы во время его применения.
 ## Notes-zhCN: 预估你和队友即将输出的治疗并图形化显示
 ## Notes-zhTW: 預估你和隊伍成員造成的治療並圖形化顯示。
@@ -19,9 +19,9 @@
 ## DefaultState: enabled
 ## LoadOnDemand: 1
 ## Dependencies: PitBull4
-## Version: v4.0.0-beta54
+## Version: v4.0.0-beta56
 ## X-PitBull4-Condition: return select(4,GetBuildInfo()) >= 40000
-## X-Curse-Packaged-Version: v4.0.0-beta54
+## X-Curse-Packaged-Version: v4.0.0-beta56
 ## X-Curse-Project-Name: PitBull Unit Frames 4.0
 ## X-Curse-Project-ID: pitbull4
 ## X-Curse-Repository-ID: wow/pitbull4/mainline

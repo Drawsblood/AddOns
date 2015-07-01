@@ -83,10 +83,12 @@ do
 	TMW.Classes.Icon.attributes.realAlpha = 0
 
 	Processor:RegisterIconEvent(11, "OnShow", {
+		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONSHOW"],
 		desc = L["SOUND_EVENT_ONSHOW_DESC"],
 	})
 	Processor:RegisterIconEvent(12, "OnHide", {
+		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONHIDE"],
 		desc = L["SOUND_EVENT_ONHIDE_DESC"],
 		settings = {
@@ -94,6 +96,7 @@ do
 		},
 	})
 	Processor:RegisterIconEvent(13, "OnAlphaInc", {
+		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONALPHAINC"],
 		desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
 		settings = {
@@ -109,6 +112,7 @@ do
 		end,
 	})
 	Processor:RegisterIconEvent(14, "OnAlphaDec", {
+		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONALPHADEC"],
 		desc = L["SOUND_EVENT_ONALPHADEC_DESC"],
 		settings = {
@@ -225,16 +229,19 @@ do
 	TMW.Classes.Icon.attributes.duration = 0
 
 	Processor:RegisterIconEvent(21, "OnStart", {
+		category = L["EVENT_CATEGORY_TIMER"],
 		text = L["SOUND_EVENT_ONSTART"],
 		desc = L["SOUND_EVENT_ONSTART_DESC"],
 	})
 
 	Processor:RegisterIconEvent(22, "OnFinish", {
+		category = L["EVENT_CATEGORY_TIMER"],
 		text = L["SOUND_EVENT_ONFINISH"],
 		desc = L["SOUND_EVENT_ONFINISH_DESC"],
 	})
 
 	Processor:RegisterIconEvent(23, "OnDuration", {
+		category = L["EVENT_CATEGORY_TIMER"],
 		text = L["SOUND_EVENT_ONDURATION"],
 		desc = L["SOUND_EVENT_ONDURATION_DESC"],
 		settings = {
@@ -367,7 +374,11 @@ do
 							(lastCheckedDuration > durationToCheck -- Make sure that we just reached this duration (so it doesn't continually fire)
 							or lastCheckedDuration < currentIconDuration -- or make sure that the duration increased since the last time we checked the triggers.
 						) then
-							icon.NextUpdateTime = 0
+							if icon:IsControlled() then
+								icon.group.Controller.NextUpdateTime = 0
+							else
+								icon.NextUpdateTime = 0
+							end
 						--	print(icon, "TRIGGER")
 							--icon:Update()
 							--icon:SetInfo("start, duration", icon.attributes.start, icon.attributes.duration)
@@ -466,7 +477,7 @@ do
 	local Processor = TMW.Classes.IconDataProcessor:New("REVERSE", "reverse")
 	-- Processor:CompileFunctionSegment(t) is default.
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("reverse", nil)
 	end)
 end
@@ -497,6 +508,7 @@ do
 	end
 
 	Processor:RegisterIconEvent(31, "OnSpell", {
+		category = L["EVENT_CATEGORY_CHANGED"],
 		text = L["SOUND_EVENT_ONSPELL"],
 		desc = L["SOUND_EVENT_ONSPELL_DESC"],
 	})
@@ -527,7 +539,7 @@ do
 		category = L["ICON"],
 	})
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("spell", nil)
 	end)
 end
@@ -556,7 +568,7 @@ do
 		--]]
 	end
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("charges, maxCharges", nil, nil)
 	end)
 end
@@ -574,7 +586,7 @@ do
 		-- GLOBALS: value, maxValue, valueColor
 		t[#t+1] = [[
 		
-		if attributes.value ~= value or attributes.maxValue ~= maxValue or attributes.maxValue ~= valueColor then
+		if attributes.value ~= value or attributes.maxValue ~= maxValue or attributes.valueColor ~= valueColor then
 
 			attributes.value = value
 			attributes.maxValue = maxValue
@@ -586,7 +598,7 @@ do
 		--]]
 	end
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("value, maxValue, valueColor", nil, nil, nil)
 	end)
 		
@@ -654,6 +666,7 @@ do
 	end
 
 	Processor:RegisterIconEvent(51, "OnStack", {
+		category = L["EVENT_CATEGORY_CHANGED"],
 		text = L["SOUND_EVENT_ONSTACK"],
 		desc = L["SOUND_EVENT_ONSTACK_DESC"],
 		settings = {
@@ -693,7 +706,7 @@ do
 		end
 	end)
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("stack, stackText", nil, nil)
 	end)
 end
@@ -754,6 +767,7 @@ do
 	end
 
 	Processor:RegisterIconEvent(41, "OnUnit", {
+		category = L["EVENT_CATEGORY_CHANGED"],
 		text = L["SOUND_EVENT_ONUNIT"],
 		desc = L["SOUND_EVENT_ONUNIT_DESC"],
 	})
@@ -797,7 +811,7 @@ do
 		category = L["ICON"],
 	})
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("unit, GUID", nil, nil)
 	end)
 end
@@ -827,8 +841,9 @@ do
 		-- GLOBALS: unit
 		t[#t+1] = [[
 		local dogTagUnit
+		local typeData = icon.typeData
 		
-		if icon.typeData.unitType == "unitid" then
+		if not typeData or typeData.unitType == "unitid" then
 			dogTagUnit = unit
 			if not DogTag.IsLegitimateUnit[dogTagUnit] then
 				dogTagUnit = dogTagUnit and TMW_UNITS:TestUnit(dogTagUnit)
@@ -841,7 +856,7 @@ do
 		end
 		
 		if attributes.dogTagUnit ~= dogTagUnit then
-			doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdate
+			doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdated
 		end
 		--]]
 	end)

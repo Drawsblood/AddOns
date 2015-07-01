@@ -25,7 +25,20 @@ end
 
 local L = AceLocale:NewLocale("Broker_MicroMenu", "deDE")
 if L then 
-	
+	L["Advanced"] = "Erweitert" -- Needs review
+L["Custom Text"] = "Eigener Text" -- Needs review
+L["Disable Coloring"] = "Farben deaktivieren" -- Needs review
+L["Enable"] = "Aktiviert" -- Needs review
+L["Enable this if you want to fine tune the displayed text."] = "Aktiviere dies um den Anzeigetext zu bearbeiten." -- Needs review
+L["fps"] = "FPS" -- Needs review
+L["General"] = "Generell" -- Needs review
+L["ms"] = "ms" -- Needs review
+L["Show FPS First"] = "Zeige FPS zuerst" -- Needs review
+L["Show Home Latency"] = "Zeige eigene Latenz" -- Needs review
+L["Show latency for chat data, auction house stuff some addon data, and various other data."] = "Zeige Latenz für Chat Daten, Auktionshaus und verschiedene Addon Daten." -- Needs review
+L["Show latency for combat data, data from the people around you (specs, gear, enchants, etc.)."] = "Zeige Latenz für Kampf Daten, Daten von Mitspielern um dich herum (Skillung, Ausrüstung, Verzauberungen usw.)" -- Needs review
+L["Show World Latency"] = "Zeige Welt Latenz" -- Needs review
+
 	return
 end
 

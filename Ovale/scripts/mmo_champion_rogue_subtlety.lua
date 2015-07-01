@@ -2,161 +2,110 @@ local OVALE, Ovale = ...
 local OvaleScripts = Ovale.OvaleScripts
 
 do
-	local name = "mmo_champion_rogue_subtlety_t17m"
-	local desc = "[6.0] MMO-Champion: Rogue_Subtlety_T17M"
+	local name = "mmo_champion_rogue_subtlety_17"
+	local desc = "[6.2] MMO-Champion: Rogue_Subtlety_1.7"
 	local code = [[
-# Based on SimulationCraft profile "Rogue_Subtlety_T17M".
+# Based on SimulationCraft profile "Rogue_Subtlety_1.7".
 #	class=rogue
 #	spec=subtlety
-#	talents=http://us.battle.net/wow/en/tool/talent-calculator#cb!1000011
+#	talents=2000032
 #	glyphs=energy/hemorrhaging_veins/vanish
 
 Include(ovale_common)
+Include(ovale_trinkets_mop)
+Include(ovale_trinkets_wod)
 Include(ovale_rogue_spells)
 
 Define(honor_among_thieves_cooldown_buff 51699)
 	SpellInfo(honor_among_thieves_cooldown_buff duration=2.2)
 
-AddCheckBox(opt_interrupt L(interrupt) default)
-AddCheckBox(opt_melee_range L(not_in_melee_range))
-AddCheckBox(opt_potion_agility ItemName(draenic_agility_potion) default)
+AddCheckBox(opt_melee_range L(not_in_melee_range) specialization=subtlety)
+AddCheckBox(opt_potion_agility ItemName(draenic_agility_potion) default specialization=subtlety)
 
-AddFunction UsePotionAgility
+AddFunction SubtletyUsePotionAgility
 {
 	if CheckBoxOn(opt_potion_agility) and target.Classification(worldboss) Item(draenic_agility_potion usable=1)
 }
 
-AddFunction UseItemActions
+AddFunction SubtletyUseItemActions
 {
 	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
 
-AddFunction GetInMeleeRange
-{
-	if CheckBoxOn(opt_melee_range) and not target.InRange(kick)
-	{
-		Spell(shadowstep)
-		Texture(misc_arrowlup help=L(not_in_melee_range))
-	}
-}
-
-AddFunction InterruptActions
-{
-	if CheckBoxOn(opt_interrupt) and not target.IsFriend() and target.IsInterruptible()
-	{
-		if target.InRange(kick) Spell(kick)
-		if not target.Classification(worldboss)
-		{
-			if target.InRange(cheap_shot) Spell(cheap_shot)
-			if target.InRange(deadly_throw) and ComboPoints() == 5 Spell(deadly_throw)
-			if target.InRange(kidney_shot) Spell(kidney_shot)
-			Spell(arcane_torrent_energy)
-			if target.InRange(quaking_palm) Spell(quaking_palm)
-		}
-	}
-}
-
 ### actions.default
 
 AddFunction SubtletyDefaultMainActions
 {
-	#slice_and_dice,if=(buff.slice_and_dice.remains<10.8)&buff.slice_and_dice.remains<target.time_to_die&combo_points>=((target.time_to_die-buff.slice_and_dice.remains)%6)+1
-	if BuffRemaining(slice_and_dice_buff) < 10.8 and BuffRemaining(slice_and_dice_buff) < target.TimeToDie() and ComboPoints() >= { target.TimeToDie() - BuffRemaining(slice_and_dice_buff) } / 6 + 1 Spell(slice_and_dice)
-	#premeditation,if=combo_points<=4&!(buff.shadow_dance.up&energy>100&combo_points>1)&!buff.subterfuge.up|(buff.subterfuge.up&debuff.find_weakness.up)
-	if { ComboPoints() <= 4 and not { BuffPresent(shadow_dance_buff) and Energy() > 100 and ComboPoints() > 1 } and not BuffPresent(subterfuge_buff) or BuffPresent(subterfuge_buff) and target.DebuffPresent(find_weakness_debuff) } and ComboPoints() < 5 Spell(premeditation)
-	#pool_resource,for_next=1
-	#garrote,if=!ticking&time<1
-	if not target.DebuffPresent(garrote_debuff) and TimeInCombat() < 1 Spell(garrote)
-	unless not target.DebuffPresent(garrote_debuff) and TimeInCombat() < 1 and SpellUsable(garrote) and SpellCooldown(garrote) < TimeToEnergyFor(garrote)
-	{
-		#wait,sec=buff.subterfuge.remains-0.1,if=buff.subterfuge.remains>0.5&buff.subterfuge.remains<1.6&time>6
-		unless BuffRemaining(subterfuge_buff) > 0.5 and BuffRemaining(subterfuge_buff) < 1.6 and TimeInCombat() > 6 and BuffRemaining(subterfuge_buff) - 0.1 > 0
-		{
-			#pool_resource,for_next=1
-			#ambush,if=((combo_points<5|(talent.anticipation.enabled&anticipation_charges<3)&(time<1.2|buff.shadow_dance.up|time>5))&active_enemies<4)|((combo_points<5|(talent.anticipation.enabled&anticipation_charges<3)&(time<1.2|buff.shadow_dance.up|time>5))&debuff.find_weakness.down)
-			if { ComboPoints() < 5 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 3 and { TimeInCombat() < 1.2 or BuffPresent(shadow_dance_buff) or TimeInCombat() > 5 } } and Enemies() < 4 or { ComboPoints() < 5 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 3 and { TimeInCombat() < 1.2 or BuffPresent(shadow_dance_buff) or TimeInCombat() > 5 } } and target.DebuffExpires(find_weakness_debuff) Spell(ambush)
-			unless { { ComboPoints() < 5 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 3 and { TimeInCombat() < 1.2 or BuffPresent(shadow_dance_buff) or TimeInCombat() > 5 } } and Enemies() < 4 or { ComboPoints() < 5 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 3 and { TimeInCombat() < 1.2 or BuffPresent(shadow_dance_buff) or TimeInCombat() > 5 } } and target.DebuffExpires(find_weakness_debuff) } and SpellUsable(ambush) and SpellCooldown(ambush) < TimeToEnergyFor(ambush)
-			{
-				#pool_resource,for_next=1,extra_amount=50
-				#shadow_dance,if=energy>=50&buff.stealth.down&buff.vanish.down&debuff.find_weakness.down|(buff.bloodlust.up&(dot.hemorrhage.ticking|dot.garrote.ticking|dot.rupture.ticking))
-				unless { True(pool_energy 50) and BuffExpires(stealthed_buff any=1) and BuffExpires(vanish_buff any=1) and target.DebuffExpires(find_weakness_debuff) or BuffPresent(burst_haste_buff any=1) and { target.DebuffPresent(hemorrhage_debuff) or target.DebuffPresent(garrote_debuff) or target.DebuffPresent(rupture_debuff) } } and SpellUsable(shadow_dance) and SpellCooldown(shadow_dance) < TimeToEnergy(50)
-				{
-					#pool_resource,for_next=1,extra_amount=50
-					#vanish,if=talent.shadow_focus.enabled&energy>=45&energy<=75&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-					unless Talent(shadow_focus_talent) and True(pool_energy 50) and Energy() <= 75 and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(vanish) and SpellCooldown(vanish) < TimeToEnergy(50)
-					{
-						#pool_resource,for_next=1,extra_amount=50
-						#shadowmeld,if=talent.shadow_focus.enabled&energy>=45&energy<=75&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-						unless Talent(shadow_focus_talent) and True(pool_energy 50) and Energy() <= 75 and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(shadowmeld) and SpellCooldown(shadowmeld) < TimeToEnergy(50)
-						{
-							#pool_resource,for_next=1,extra_amount=90
-							#vanish,if=talent.subterfuge.enabled&energy>=90&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-							unless Talent(subterfuge_talent) and True(pool_energy 90) and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(vanish) and SpellCooldown(vanish) < TimeToEnergy(90)
-							{
-								#pool_resource,for_next=1,extra_amount=90
-								#shadowmeld,if=talent.subterfuge.enabled&energy>=90&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-								unless Talent(subterfuge_talent) and True(pool_energy 90) and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(shadowmeld) and SpellCooldown(shadowmeld) < TimeToEnergy(90)
-								{
-									#run_action_list,name=generator,if=talent.anticipation.enabled&anticipation_charges<4&buff.slice_and_dice.up&dot.rupture.remains>2&(buff.slice_and_dice.remains<6|dot.rupture.remains<4)
-									if Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 4 and BuffPresent(slice_and_dice_buff) and target.DebuffRemaining(rupture_debuff) > 2 and { BuffRemaining(slice_and_dice_buff) < 6 or target.DebuffRemaining(rupture_debuff) < 4 } SubtletyGeneratorMainActions()
-									#run_action_list,name=finisher,if=combo_points=5
-									if ComboPoints() == 5 SubtletyFinisherMainActions()
-									#run_action_list,name=generator,if=combo_points<4|(combo_points=4&cooldown.honor_among_thieves.remains>1&energy>70-energy.regen)|talent.anticipation.enabled
-									if ComboPoints() < 4 or ComboPoints() == 4 and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 and Energy() > 70 - EnergyRegenRate() or Talent(anticipation_talent) SubtletyGeneratorMainActions()
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+	#run_action_list,name=opener_ant,if=time<2&!buff.shadow_dance.up&talent.anticipation.enabled
+	if TimeInCombat() < 2 and not BuffPresent(shadow_dance_buff) and Talent(anticipation_talent) SubtletyOpenerAntMainActions()
+	#run_action_list,name=opener_mfd,if=time<3.1&talent.marked_for_death.enabled
+	if TimeInCombat() < 3.1 and Talent(marked_for_death_talent) SubtletyOpenerMfdMainActions()
+	#run_action_list,name=dance_rotation_ant_ref,if=buff.shadow_dance.up&talent.anticipation.enabled&talent.shadow_reflection.enabled
+	if BuffPresent(shadow_dance_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) SubtletyDanceRotationAntRefMainActions()
+	#run_action_list,name=dance_rotation_mfd_ref,if=buff.shadow_dance.up&talent.marked_for_death.enabled&talent.shadow_reflection.enabled
+	if BuffPresent(shadow_dance_buff) and Talent(marked_for_death_talent) and Talent(shadow_reflection_talent) SubtletyDanceRotationMfdRefMainActions()
+	#run_action_list,name=vanish_rotation_ant_ref,if=(buff.vanish.up|buff.subterfuge.up)&talent.anticipation.enabled&talent.shadow_reflection.enabled
+	if { BuffPresent(vanish_buff) or BuffPresent(subterfuge_buff) } and Talent(anticipation_talent) and Talent(shadow_reflection_talent) SubtletyVanishRotationAntRefMainActions()
+	#run_action_list,name=vanish_rotation_mfd_ref,if=(buff.vanish.up|buff.subterfuge.up)&talent.marked_for_death.enabled&talent.shadow_reflection.enabled
+	if { BuffPresent(vanish_buff) or BuffPresent(subterfuge_buff) } and Talent(marked_for_death_talent) and Talent(shadow_reflection_talent) SubtletyVanishRotationMfdRefMainActions()
+	#run_action_list,name=shadowmeld_rotation,if=buff.shadowmeld.up
+	if BuffPresent(shadowmeld_buff) SubtletyShadowmeldRotationMainActions()
+	#call_action_list,name=cd_controller_ant,if=talent.anticipation.enabled
+	if Talent(anticipation_talent) SubtletyCdControllerAntMainActions()
+	#call_action_list,name=cd_controller_mfd,if=talent.marked_for_death.enabled
+	if Talent(marked_for_death_talent) SubtletyCdControllerMfdMainActions()
+	#run_action_list,name=generators_fw_ant,if=(debuff.find_weakness.up|trinket.proc.any.react|trinket.stacking_proc.any.react|buff.archmages_greater_incandescence_agi.react)&talent.anticipation.enabled
+	if { target.DebuffPresent(find_weakness_debuff) or BuffPresent(trinket_proc_any_buff) or BuffPresent(trinket_stacking_proc_any_buff) or BuffPresent(archmages_greater_incandescence_agi_buff) } and Talent(anticipation_talent) SubtletyGeneratorsFwAntMainActions()
+	#run_action_list,name=generators_fw_mfd,if=(debuff.find_weakness.up|trinket.proc.any.react|trinket.stacking_proc.any.react|buff.archmages_greater_incandescence_agi.react)&talent.marked_for_death.enabled
+	if { target.DebuffPresent(find_weakness_debuff) or BuffPresent(trinket_proc_any_buff) or BuffPresent(trinket_stacking_proc_any_buff) or BuffPresent(archmages_greater_incandescence_agi_buff) } and Talent(marked_for_death_talent) SubtletyGeneratorsFwMfdMainActions()
+	#run_action_list,name=generators_ant,if=talent.anticipation.enabled
+	if Talent(anticipation_talent) SubtletyGeneratorsAntMainActions()
+	#run_action_list,name=generators_mfd,if=talent.marked_for_death.enabled
+	if Talent(marked_for_death_talent) SubtletyGeneratorsMfdMainActions()
 }
 
 AddFunction SubtletyDefaultShortCdActions
 {
-	unless BuffRemaining(slice_and_dice_buff) < 10.8 and BuffRemaining(slice_and_dice_buff) < target.TimeToDie() and ComboPoints() >= { target.TimeToDie() - BuffRemaining(slice_and_dice_buff) } / 6 + 1 and Spell(slice_and_dice)
+	#run_action_list,name=opener_ant,if=time<2&!buff.shadow_dance.up&talent.anticipation.enabled
+	if TimeInCombat() < 2 and not BuffPresent(shadow_dance_buff) and Talent(anticipation_talent) SubtletyOpenerAntShortCdActions()
+
+	unless TimeInCombat() < 2 and not BuffPresent(shadow_dance_buff) and Talent(anticipation_talent) and SubtletyOpenerAntShortCdPostConditions()
 	{
-		#pool_resource,for_next=1
-		#garrote,if=!ticking&time<1
-		unless not target.DebuffPresent(garrote_debuff) and TimeInCombat() < 1 and SpellUsable(garrote) and SpellCooldown(garrote) < TimeToEnergyFor(garrote)
+		unless TimeInCombat() < 3.1 and Talent(marked_for_death_talent) and SubtletyOpenerMfdShortCdPostConditions()
 		{
-			#wait,sec=buff.subterfuge.remains-0.1,if=buff.subterfuge.remains>0.5&buff.subterfuge.remains<1.6&time>6
-			unless BuffRemaining(subterfuge_buff) > 0.5 and BuffRemaining(subterfuge_buff) < 1.6 and TimeInCombat() > 6 and BuffRemaining(subterfuge_buff) - 0.1 > 0
+			#run_action_list,name=dance_rotation_ant_ref,if=buff.shadow_dance.up&talent.anticipation.enabled&talent.shadow_reflection.enabled
+			if BuffPresent(shadow_dance_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) SubtletyDanceRotationAntRefShortCdActions()
+
+			unless BuffPresent(shadow_dance_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) and SubtletyDanceRotationAntRefShortCdPostConditions()
 			{
-				#pool_resource,for_next=1
-				#ambush,if=((combo_points<5|(talent.anticipation.enabled&anticipation_charges<3)&(time<1.2|buff.shadow_dance.up|time>5))&active_enemies<4)|((combo_points<5|(talent.anticipation.enabled&anticipation_charges<3)&(time<1.2|buff.shadow_dance.up|time>5))&debuff.find_weakness.down)
-				unless { { ComboPoints() < 5 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 3 and { TimeInCombat() < 1.2 or BuffPresent(shadow_dance_buff) or TimeInCombat() > 5 } } and Enemies() < 4 or { ComboPoints() < 5 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 3 and { TimeInCombat() < 1.2 or BuffPresent(shadow_dance_buff) or TimeInCombat() > 5 } } and target.DebuffExpires(find_weakness_debuff) } and SpellUsable(ambush) and SpellCooldown(ambush) < TimeToEnergyFor(ambush)
+				#run_action_list,name=dance_rotation_mfd_ref,if=buff.shadow_dance.up&talent.marked_for_death.enabled&talent.shadow_reflection.enabled
+				if BuffPresent(shadow_dance_buff) and Talent(marked_for_death_talent) and Talent(shadow_reflection_talent) SubtletyDanceRotationMfdRefShortCdActions()
+
+				unless BuffPresent(shadow_dance_buff) and Talent(marked_for_death_talent) and Talent(shadow_reflection_talent) and SubtletyDanceRotationMfdRefShortCdPostConditions()
 				{
-					#auto_attack
-					GetInMeleeRange()
-					#pool_resource,for_next=1,extra_amount=50
-					#shadow_dance,if=energy>=50&buff.stealth.down&buff.vanish.down&debuff.find_weakness.down|(buff.bloodlust.up&(dot.hemorrhage.ticking|dot.garrote.ticking|dot.rupture.ticking))
-					if Energy() >= 50 and BuffExpires(stealthed_buff any=1) and BuffExpires(vanish_buff any=1) and target.DebuffExpires(find_weakness_debuff) or BuffPresent(burst_haste_buff any=1) and { target.DebuffPresent(hemorrhage_debuff) or target.DebuffPresent(garrote_debuff) or target.DebuffPresent(rupture_debuff) } Spell(shadow_dance)
-					unless { True(pool_energy 50) and BuffExpires(stealthed_buff any=1) and BuffExpires(vanish_buff any=1) and target.DebuffExpires(find_weakness_debuff) or BuffPresent(burst_haste_buff any=1) and { target.DebuffPresent(hemorrhage_debuff) or target.DebuffPresent(garrote_debuff) or target.DebuffPresent(rupture_debuff) } } and SpellUsable(shadow_dance) and SpellCooldown(shadow_dance) < TimeToEnergy(50)
+					unless { BuffPresent(vanish_buff) or BuffPresent(subterfuge_buff) } and Talent(anticipation_talent) and Talent(shadow_reflection_talent) and SubtletyVanishRotationAntRefShortCdPostConditions()
 					{
-						#pool_resource,for_next=1,extra_amount=50
-						#vanish,if=talent.shadow_focus.enabled&energy>=45&energy<=75&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-						if Talent(shadow_focus_talent) and Energy() >= 45 and Energy() <= 75 and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) Spell(vanish)
-						unless Talent(shadow_focus_talent) and True(pool_energy 50) and Energy() <= 75 and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(vanish) and SpellCooldown(vanish) < TimeToEnergy(50)
+						unless { BuffPresent(vanish_buff) or BuffPresent(subterfuge_buff) } and Talent(marked_for_death_talent) and Talent(shadow_reflection_talent) and SubtletyVanishRotationMfdRefShortCdPostConditions()
 						{
-							#pool_resource,for_next=1,extra_amount=50
-							#shadowmeld,if=talent.shadow_focus.enabled&energy>=45&energy<=75&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-							unless Talent(shadow_focus_talent) and True(pool_energy 50) and Energy() <= 75 and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(shadowmeld) and SpellCooldown(shadowmeld) < TimeToEnergy(50)
+							unless BuffPresent(shadowmeld_buff) and SubtletyShadowmeldRotationShortCdPostConditions()
 							{
-								#pool_resource,for_next=1,extra_amount=90
-								#vanish,if=talent.subterfuge.enabled&energy>=90&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-								if Talent(subterfuge_talent) and Energy() >= 90 and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) Spell(vanish)
-								unless Talent(subterfuge_talent) and True(pool_energy 90) and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(vanish) and SpellCooldown(vanish) < TimeToEnergy(90)
+								#call_action_list,name=cd_controller_ant,if=talent.anticipation.enabled
+								if Talent(anticipation_talent) SubtletyCdControllerAntShortCdActions()
+
+								unless Talent(anticipation_talent) and SubtletyCdControllerAntShortCdPostConditions()
 								{
-									#pool_resource,for_next=1,extra_amount=90
-									#shadowmeld,if=talent.subterfuge.enabled&energy>=90&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-									unless Talent(subterfuge_talent) and True(pool_energy 90) and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(shadowmeld) and SpellCooldown(shadowmeld) < TimeToEnergy(90)
+									#call_action_list,name=cd_controller_mfd,if=talent.marked_for_death.enabled
+									if Talent(marked_for_death_talent) SubtletyCdControllerMfdShortCdActions()
+
+									unless Talent(marked_for_death_talent) and SubtletyCdControllerMfdShortCdPostConditions()
 									{
-										#marked_for_death,if=combo_points=0
-										if ComboPoints() == 0 Spell(marked_for_death)
+										unless { target.DebuffPresent(find_weakness_debuff) or BuffPresent(trinket_proc_any_buff) or BuffPresent(trinket_stacking_proc_any_buff) or BuffPresent(archmages_greater_incandescence_agi_buff) } and Talent(anticipation_talent) and SubtletyGeneratorsFwAntShortCdPostConditions()
+										{
+											#run_action_list,name=generators_fw_mfd,if=(debuff.find_weakness.up|trinket.proc.any.react|trinket.stacking_proc.any.react|buff.archmages_greater_incandescence_agi.react)&talent.marked_for_death.enabled
+											if { target.DebuffPresent(find_weakness_debuff) or BuffPresent(trinket_proc_any_buff) or BuffPresent(trinket_stacking_proc_any_buff) or BuffPresent(archmages_greater_incandescence_agi_buff) } and Talent(marked_for_death_talent) SubtletyGeneratorsFwMfdShortCdActions()
+										}
 									}
 								}
 							}
@@ -170,65 +119,42 @@ AddFunction SubtletyDefaultShortCdActions
 
 AddFunction SubtletyDefaultCdActions
 {
-	#potion,name=draenic_agility,if=buff.bloodlust.react|target.time_to_die<40|buff.shadow_reflection.remains>12&(trinket.stat.agi.react|trinket.stat.multistrike.react|buff.archmages_greater_incandescence_agi.react)
-	if BuffPresent(burst_haste_buff any=1) or target.TimeToDie() < 40 or BuffRemaining(shadow_reflection_buff) > 12 and { BuffPresent(trinket_stat_agi_buff) or BuffPresent(trinket_stat_multistrike_buff) or BuffPresent(archmages_greater_incandescence_agi_buff) } UsePotionAgility()
-	#kick
-	InterruptActions()
-	#use_item,slot=trinket2,if=buff.shadow_dance.up
-	if BuffPresent(shadow_dance_buff) UseItemActions()
-	#shadow_reflection,if=buff.shadow_dance.up
-	if BuffPresent(shadow_dance_buff) Spell(shadow_reflection)
-	#blood_fury,if=buff.shadow_dance.up
-	if BuffPresent(shadow_dance_buff) Spell(blood_fury_ap)
-	#berserking,if=buff.shadow_dance.up
-	if BuffPresent(shadow_dance_buff) Spell(berserking)
-	#arcane_torrent,if=energy<60&buff.shadow_dance.up
-	if Energy() < 60 and BuffPresent(shadow_dance_buff) Spell(arcane_torrent_energy)
+	#run_action_list,name=opener_ant,if=time<2&!buff.shadow_dance.up&talent.anticipation.enabled
+	if TimeInCombat() < 2 and not BuffPresent(shadow_dance_buff) and Talent(anticipation_talent) SubtletyOpenerAntCdActions()
 
-	unless BuffRemaining(slice_and_dice_buff) < 10.8 and BuffRemaining(slice_and_dice_buff) < target.TimeToDie() and ComboPoints() >= { target.TimeToDie() - BuffRemaining(slice_and_dice_buff) } / 6 + 1 and Spell(slice_and_dice)
+	unless TimeInCombat() < 2 and not BuffPresent(shadow_dance_buff) and Talent(anticipation_talent) and SubtletyOpenerAntCdPostConditions()
 	{
-		#pool_resource,for_next=1
-		#garrote,if=!ticking&time<1
-		unless not target.DebuffPresent(garrote_debuff) and TimeInCombat() < 1 and SpellUsable(garrote) and SpellCooldown(garrote) < TimeToEnergyFor(garrote)
+		unless TimeInCombat() < 3.1 and Talent(marked_for_death_talent) and SubtletyOpenerMfdCdPostConditions()
 		{
-			#wait,sec=buff.subterfuge.remains-0.1,if=buff.subterfuge.remains>0.5&buff.subterfuge.remains<1.6&time>6
-			unless BuffRemaining(subterfuge_buff) > 0.5 and BuffRemaining(subterfuge_buff) < 1.6 and TimeInCombat() > 6 and BuffRemaining(subterfuge_buff) - 0.1 > 0
+			#run_action_list,name=dance_rotation_ant_ref,if=buff.shadow_dance.up&talent.anticipation.enabled&talent.shadow_reflection.enabled
+			if BuffPresent(shadow_dance_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) SubtletyDanceRotationAntRefCdActions()
+
+			unless BuffPresent(shadow_dance_buff) and Talent(anticipation_talent) and Talent(shadow_reflection_talent) and SubtletyDanceRotationAntRefCdPostConditions()
 			{
-				#pool_resource,for_next=1
-				#ambush,if=((combo_points<5|(talent.anticipation.enabled&anticipation_charges<3)&(time<1.2|buff.shadow_dance.up|time>5))&active_enemies<4)|((combo_points<5|(talent.anticipation.enabled&anticipation_charges<3)&(time<1.2|buff.shadow_dance.up|time>5))&debuff.find_weakness.down)
-				unless { { ComboPoints() < 5 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 3 and { TimeInCombat() < 1.2 or BuffPresent(shadow_dance_buff) or TimeInCombat() > 5 } } and Enemies() < 4 or { ComboPoints() < 5 or Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 3 and { TimeInCombat() < 1.2 or BuffPresent(shadow_dance_buff) or TimeInCombat() > 5 } } and target.DebuffExpires(find_weakness_debuff) } and SpellUsable(ambush) and SpellCooldown(ambush) < TimeToEnergyFor(ambush)
+				#run_action_list,name=dance_rotation_mfd_ref,if=buff.shadow_dance.up&talent.marked_for_death.enabled&talent.shadow_reflection.enabled
+				if BuffPresent(shadow_dance_buff) and Talent(marked_for_death_talent) and Talent(shadow_reflection_talent) SubtletyDanceRotationMfdRefCdActions()
+
+				unless BuffPresent(shadow_dance_buff) and Talent(marked_for_death_talent) and Talent(shadow_reflection_talent) and SubtletyDanceRotationMfdRefCdPostConditions()
 				{
-					#pool_resource,for_next=1,extra_amount=50
-					#shadow_dance,if=energy>=50&buff.stealth.down&buff.vanish.down&debuff.find_weakness.down|(buff.bloodlust.up&(dot.hemorrhage.ticking|dot.garrote.ticking|dot.rupture.ticking))
-					unless { True(pool_energy 50) and BuffExpires(stealthed_buff any=1) and BuffExpires(vanish_buff any=1) and target.DebuffExpires(find_weakness_debuff) or BuffPresent(burst_haste_buff any=1) and { target.DebuffPresent(hemorrhage_debuff) or target.DebuffPresent(garrote_debuff) or target.DebuffPresent(rupture_debuff) } } and SpellUsable(shadow_dance) and SpellCooldown(shadow_dance) < TimeToEnergy(50)
+					#run_action_list,name=vanish_rotation_ant_ref,if=(buff.vanish.up|buff.subterfuge.up)&talent.anticipation.enabled&talent.shadow_reflection.enabled
+					if { BuffPresent(vanish_buff) or BuffPresent(subterfuge_buff) } and Talent(anticipation_talent) and Talent(shadow_reflection_talent) SubtletyVanishRotationAntRefCdActions()
+
+					unless { BuffPresent(vanish_buff) or BuffPresent(subterfuge_buff) } and Talent(anticipation_talent) and Talent(shadow_reflection_talent) and SubtletyVanishRotationAntRefCdPostConditions()
 					{
-						#pool_resource,for_next=1,extra_amount=50
-						#vanish,if=talent.shadow_focus.enabled&energy>=45&energy<=75&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-						unless Talent(shadow_focus_talent) and True(pool_energy 50) and Energy() <= 75 and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(vanish) and SpellCooldown(vanish) < TimeToEnergy(50)
+						#run_action_list,name=vanish_rotation_mfd_ref,if=(buff.vanish.up|buff.subterfuge.up)&talent.marked_for_death.enabled&talent.shadow_reflection.enabled
+						if { BuffPresent(vanish_buff) or BuffPresent(subterfuge_buff) } and Talent(marked_for_death_talent) and Talent(shadow_reflection_talent) SubtletyVanishRotationMfdRefCdActions()
+
+						unless { BuffPresent(vanish_buff) or BuffPresent(subterfuge_buff) } and Talent(marked_for_death_talent) and Talent(shadow_reflection_talent) and SubtletyVanishRotationMfdRefCdPostConditions()
 						{
-							#pool_resource,for_next=1,extra_amount=50
-							#shadowmeld,if=talent.shadow_focus.enabled&energy>=45&energy<=75&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-							if Talent(shadow_focus_talent) and Energy() >= 45 and Energy() <= 75 and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) Spell(shadowmeld)
-							unless Talent(shadow_focus_talent) and True(pool_energy 50) and Energy() <= 75 and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(shadowmeld) and SpellCooldown(shadowmeld) < TimeToEnergy(50)
+							unless BuffPresent(shadowmeld_buff) and SubtletyShadowmeldRotationCdPostConditions()
 							{
-								#pool_resource,for_next=1,extra_amount=90
-								#vanish,if=talent.subterfuge.enabled&energy>=90&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-								unless Talent(subterfuge_talent) and True(pool_energy 90) and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(vanish) and SpellCooldown(vanish) < TimeToEnergy(90)
+								#call_action_list,name=cd_controller_ant,if=talent.anticipation.enabled
+								if Talent(anticipation_talent) SubtletyCdControllerAntCdActions()
+
+								unless Talent(anticipation_talent) and SubtletyCdControllerAntCdPostConditions()
 								{
-									#pool_resource,for_next=1,extra_amount=90
-									#shadowmeld,if=talent.subterfuge.enabled&energy>=90&combo_points<=3&buff.shadow_dance.down&buff.master_of_subtlety.down&debuff.find_weakness.down
-									if Talent(subterfuge_talent) and Energy() >= 90 and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) Spell(shadowmeld)
-									unless Talent(subterfuge_talent) and True(pool_energy 90) and ComboPoints() <= 3 and BuffExpires(shadow_dance_buff) and BuffExpires(master_of_subtlety_buff) and target.DebuffExpires(find_weakness_debuff) and SpellUsable(shadowmeld) and SpellCooldown(shadowmeld) < TimeToEnergy(90)
-									{
-										#run_action_list,name=generator,if=talent.anticipation.enabled&anticipation_charges<4&buff.slice_and_dice.up&dot.rupture.remains>2&(buff.slice_and_dice.remains<6|dot.rupture.remains<4)
-										if Talent(anticipation_talent) and BuffStacks(anticipation_buff) < 4 and BuffPresent(slice_and_dice_buff) and target.DebuffRemaining(rupture_debuff) > 2 and { BuffRemaining(slice_and_dice_buff) < 6 or target.DebuffRemaining(rupture_debuff) < 4 } SubtletyGeneratorCdActions()
-										#run_action_list,name=finisher,if=combo_points=5
-										if ComboPoints() == 5 SubtletyFinisherCdActions()
-										#run_action_list,name=generator,if=combo_points<4|(combo_points=4&cooldown.honor_among_thieves.remains>1&energy>70-energy.regen)|talent.anticipation.enabled
-										if ComboPoints() < 4 or ComboPoints() == 4 and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 and Energy() > 70 - EnergyRegenRate() or Talent(anticipation_talent) SubtletyGeneratorCdActions()
-										#run_action_list,name=pool
-										SubtletyPoolCdActions()
-									}
+									#call_action_list,name=cd_controller_mfd,if=talent.marked_for_death.enabled
+									if Talent(marked_for_death_talent) SubtletyCdControllerMfdCdActions()
 								}
 							}
 						}
@@ -239,63 +165,471 @@ AddFunction SubtletyDefaultCdActions
 	}
 }
 
-### actions.finisher
+### actions.cd_controller_ant
 
-AddFunction SubtletyFinisherMainActions
+AddFunction SubtletyCdControllerAntMainActions
 {
-	#rupture,cycle_targets=1,if=((!ticking|remains<duration*0.3)&active_enemies<=8&(cooldown.death_from_above.remains>0|!talent.death_from_above.enabled)|(buff.shadow_reflection.remains>8&dot.rupture.remains<12))
-	if { not target.DebuffPresent(rupture_debuff) or target.DebuffRemaining(rupture_debuff) < BaseDuration(rupture_debuff) * 0.3 } and Enemies() <= 8 and { SpellCooldown(death_from_above) > 0 or not Talent(death_from_above_talent) } or BuffRemaining(shadow_reflection_buff) > 8 and target.DebuffRemaining(rupture_debuff) < 12 Spell(rupture)
-	#slice_and_dice,if=(buff.slice_and_dice.remains<10.8)&buff.slice_and_dice.remains<target.time_to_die
-	if BuffRemaining(slice_and_dice_buff) < 10.8 and BuffRemaining(slice_and_dice_buff) < target.TimeToDie() Spell(slice_and_dice)
-	#death_from_above
-	Spell(death_from_above)
-	#crimson_tempest,if=(active_enemies>=2&debuff.find_weakness.down)|active_enemies>=3&(cooldown.death_from_above.remains>0|!talent.death_from_above.enabled)
-	if Enemies() >= 2 and target.DebuffExpires(find_weakness_debuff) or Enemies() >= 3 and { SpellCooldown(death_from_above) > 0 or not Talent(death_from_above_talent) } Spell(crimson_tempest)
-	#eviscerate
-	Spell(eviscerate)
+	#call_action_list,name=pool_ant,if=energy+energy.regen*cooldown.shadow_dance.remains<=120
+	if Energy() + EnergyRegenRate() * SpellCooldown(shadow_dance) <= 120 SubtletyPoolAntMainActions()
+	#call_action_list,name=pool_ant,if=(energy<99&cooldown.vanish.up)&!debuff.find_weakness.up
+	if Energy() < 99 and not SpellCooldown(vanish) > 0 and not target.DebuffPresent(find_weakness_debuff) SubtletyPoolAntMainActions()
+	#call_action_list,name=pool_ant,if=(energy+energy.regen*cooldown.vanish.remains<=79&cooldown.shadow_dance.remains-15>cooldown.vanish.remains)&!debuff.find_weakness.up
+	if Energy() + EnergyRegenRate() * SpellCooldown(vanish) <= 79 and SpellCooldown(shadow_dance) - 15 > SpellCooldown(vanish) and not target.DebuffPresent(find_weakness_debuff) SubtletyPoolAntMainActions()
 }
 
-AddFunction SubtletyFinisherCdActions
+AddFunction SubtletyCdControllerAntShortCdActions
 {
-	unless { { not target.DebuffPresent(rupture_debuff) or target.DebuffRemaining(rupture_debuff) < BaseDuration(rupture_debuff) * 0.3 } and Enemies() <= 8 and { SpellCooldown(death_from_above) > 0 or not Talent(death_from_above_talent) } or BuffRemaining(shadow_reflection_buff) > 8 and target.DebuffRemaining(rupture_debuff) < 12 } and Spell(rupture) or BuffRemaining(slice_and_dice_buff) < 10.8 and BuffRemaining(slice_and_dice_buff) < target.TimeToDie() and Spell(slice_and_dice) or Spell(death_from_above) or { Enemies() >= 2 and target.DebuffExpires(find_weakness_debuff) or Enemies() >= 3 and { SpellCooldown(death_from_above) > 0 or not Talent(death_from_above_talent) } } and Spell(crimson_tempest) or Spell(eviscerate)
+	#shadow_dance
+	Spell(shadow_dance)
+	#vanish,if=combo_points+anticipation_charges<=5
+	if ComboPoints() + BuffStacks(anticipation_buff) <= 5 Spell(vanish)
+	#vanish,if=target.time_to_die<16
+	if target.TimeToDie() < 16 Spell(vanish)
+}
+
+AddFunction SubtletyCdControllerAntShortCdPostConditions
+{
+	Energy() + EnergyRegenRate() * SpellCooldown(shadow_dance) <= 120 and SubtletyPoolAntShortCdPostConditions() or Energy() < 99 and not SpellCooldown(vanish) > 0 and not target.DebuffPresent(find_weakness_debuff) and SubtletyPoolAntShortCdPostConditions() or Energy() + EnergyRegenRate() * SpellCooldown(vanish) <= 79 and SpellCooldown(shadow_dance) - 15 > SpellCooldown(vanish) and not target.DebuffPresent(find_weakness_debuff) and SubtletyPoolAntShortCdPostConditions()
+}
+
+AddFunction SubtletyCdControllerAntCdActions
+{
+	#shadowmeld,if=energy>60&debuff.find_weakness.down&cooldown.shadow_dance.remains>10&cooldown.vanish.remains>10&combo_points<=3
+	if Energy() > 60 and target.DebuffExpires(find_weakness_debuff) and SpellCooldown(shadow_dance) > 10 and SpellCooldown(vanish) > 10 and ComboPoints() <= 3 Spell(shadowmeld)
+	#preparation,if=cooldown.vanish.remains>60|target.time_to_die<17
+	if SpellCooldown(vanish) > 60 or target.TimeToDie() < 17 Spell(preparation)
+	#call_action_list,name=pool_ant,if=energy+energy.regen*cooldown.shadow_dance.remains<=120
+	if Energy() + EnergyRegenRate() * SpellCooldown(shadow_dance) <= 120 SubtletyPoolAntCdActions()
+
+	unless Energy() + EnergyRegenRate() * SpellCooldown(shadow_dance) <= 120 and SubtletyPoolAntCdPostConditions()
 	{
-		#run_action_list,name=pool
-		SubtletyPoolCdActions()
+		#call_action_list,name=pool_ant,if=(energy<99&cooldown.vanish.up)&!debuff.find_weakness.up
+		if Energy() < 99 and not SpellCooldown(vanish) > 0 and not target.DebuffPresent(find_weakness_debuff) SubtletyPoolAntCdActions()
+
+		unless Energy() < 99 and not SpellCooldown(vanish) > 0 and not target.DebuffPresent(find_weakness_debuff) and SubtletyPoolAntCdPostConditions()
+		{
+			#call_action_list,name=pool_ant,if=(energy+energy.regen*cooldown.vanish.remains<=79&cooldown.shadow_dance.remains-15>cooldown.vanish.remains)&!debuff.find_weakness.up
+			if Energy() + EnergyRegenRate() * SpellCooldown(vanish) <= 79 and SpellCooldown(shadow_dance) - 15 > SpellCooldown(vanish) and not target.DebuffPresent(find_weakness_debuff) SubtletyPoolAntCdActions()
+		}
 	}
 }
 
-### actions.generator
-
-AddFunction SubtletyGeneratorMainActions
+AddFunction SubtletyCdControllerAntCdPostConditions
 {
-	#fan_of_knives,if=active_enemies>1
-	if Enemies() > 1 Spell(fan_of_knives)
-	#hemorrhage,if=(remains<duration*0.3&target.time_to_die>=remains+duration&debuff.find_weakness.down)|!ticking|position_front
-	if target.DebuffRemaining(hemorrhage_debuff) < BaseDuration(hemorrhage_debuff) * 0.3 and target.TimeToDie() >= target.DebuffRemaining(hemorrhage_debuff) + BaseDuration(hemorrhage_debuff) and target.DebuffExpires(find_weakness_debuff) or not target.DebuffPresent(hemorrhage_debuff) or False(position_front) Spell(hemorrhage)
-	#shuriken_toss,if=energy<65&energy.regen<16
-	if Energy() < 65 and EnergyRegenRate() < 16 Spell(shuriken_toss)
+	Energy() + EnergyRegenRate() * SpellCooldown(shadow_dance) <= 120 and SubtletyPoolAntCdPostConditions() or Energy() < 99 and not SpellCooldown(vanish) > 0 and not target.DebuffPresent(find_weakness_debuff) and SubtletyPoolAntCdPostConditions() or Energy() + EnergyRegenRate() * SpellCooldown(vanish) <= 79 and SpellCooldown(shadow_dance) - 15 > SpellCooldown(vanish) and not target.DebuffPresent(find_weakness_debuff) and SubtletyPoolAntCdPostConditions()
+}
+
+### actions.cd_controller_mfd
+
+AddFunction SubtletyCdControllerMfdMainActions
+{
+	#call_action_list,name=pool_mfd,if=energy+energy.regen*cooldown.shadow_dance.remains<=60
+	if Energy() + EnergyRegenRate() * SpellCooldown(shadow_dance) <= 60 SubtletyPoolMfdMainActions()
+	#call_action_list,name=pool_mfd,if=(energy<99&cooldown.vanish.up)&debuff.find_weakness.remains<5
+	if Energy() < 99 and not SpellCooldown(vanish) > 0 and target.DebuffRemaining(find_weakness_debuff) < 5 SubtletyPoolMfdMainActions()
+	#call_action_list,name=pool_mfd,if=(energy+energy.regen*cooldown.vanish.remains<=79&cooldown.shadow_dance.remains-15>cooldown.vanish.remains)&debuff.find_weakness.remains<5
+	if Energy() + EnergyRegenRate() * SpellCooldown(vanish) <= 79 and SpellCooldown(shadow_dance) - 15 > SpellCooldown(vanish) and target.DebuffRemaining(find_weakness_debuff) < 5 SubtletyPoolMfdMainActions()
+}
+
+AddFunction SubtletyCdControllerMfdShortCdActions
+{
+	#shadow_dance
+	Spell(shadow_dance)
+	#vanish,if=energy>99&debuff.find_weakness.down&cooldown.shadow_dance.remains>15&((combo_points=1&cooldown.honor_among_thieves.remains<1)|(combo_points=2))
+	if Energy() > 99 and target.DebuffExpires(find_weakness_debuff) and SpellCooldown(shadow_dance) > 15 and { ComboPoints() == 1 and BuffRemaining(honor_among_thieves_cooldown_buff) < 1 or ComboPoints() == 2 } Spell(vanish)
+	#vanish,if=target.time_to_die<16
+	if target.TimeToDie() < 16 Spell(vanish)
+}
+
+AddFunction SubtletyCdControllerMfdShortCdPostConditions
+{
+	Energy() + EnergyRegenRate() * SpellCooldown(shadow_dance) <= 60 and SubtletyPoolMfdShortCdPostConditions() or Energy() < 99 and not SpellCooldown(vanish) > 0 and target.DebuffRemaining(find_weakness_debuff) < 5 and SubtletyPoolMfdShortCdPostConditions() or Energy() + EnergyRegenRate() * SpellCooldown(vanish) <= 79 and SpellCooldown(shadow_dance) - 15 > SpellCooldown(vanish) and target.DebuffRemaining(find_weakness_debuff) < 5 and SubtletyPoolMfdShortCdPostConditions()
+}
+
+AddFunction SubtletyCdControllerMfdCdActions
+{
+	#shadowmeld,if=energy>60&debuff.find_weakness.down&cooldown.shadow_dance.remains>10&cooldown.vanish.remains>10&combo_points<=1
+	if Energy() > 60 and target.DebuffExpires(find_weakness_debuff) and SpellCooldown(shadow_dance) > 10 and SpellCooldown(vanish) > 10 and ComboPoints() <= 1 Spell(shadowmeld)
+	#preparation,if=cooldown.vanish.remains>60|target.time_to_die<17
+	if SpellCooldown(vanish) > 60 or target.TimeToDie() < 17 Spell(preparation)
+	#call_action_list,name=pool_mfd,if=energy+energy.regen*cooldown.shadow_dance.remains<=60
+	if Energy() + EnergyRegenRate() * SpellCooldown(shadow_dance) <= 60 SubtletyPoolMfdCdActions()
+
+	unless Energy() + EnergyRegenRate() * SpellCooldown(shadow_dance) <= 60 and SubtletyPoolMfdCdPostConditions()
+	{
+		#call_action_list,name=pool_mfd,if=(energy<99&cooldown.vanish.up)&debuff.find_weakness.remains<5
+		if Energy() < 99 and not SpellCooldown(vanish) > 0 and target.DebuffRemaining(find_weakness_debuff) < 5 SubtletyPoolMfdCdActions()
+
+		unless Energy() < 99 and not SpellCooldown(vanish) > 0 and target.DebuffRemaining(find_weakness_debuff) < 5 and SubtletyPoolMfdCdPostConditions()
+		{
+			#call_action_list,name=pool_mfd,if=(energy+energy.regen*cooldown.vanish.remains<=79&cooldown.shadow_dance.remains-15>cooldown.vanish.remains)&debuff.find_weakness.remains<5
+			if Energy() + EnergyRegenRate() * SpellCooldown(vanish) <= 79 and SpellCooldown(shadow_dance) - 15 > SpellCooldown(vanish) and target.DebuffRemaining(find_weakness_debuff) < 5 SubtletyPoolMfdCdActions()
+		}
+	}
+}
+
+### actions.dance_rotation_ant_ref
+
+AddFunction SubtletyDanceRotationAntRefMainActions
+{
+	#premeditation,if=(combo_points=3&anticipation_charges=3&cooldown.honor_among_thieves.remains>1)|(combo_points<=3&anticipation_charges+combo_points<=5)
+	if { ComboPoints() == 3 and BuffStacks(anticipation_buff) == 3 and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 or ComboPoints() <= 3 and BuffStacks(anticipation_buff) + ComboPoints() <= 5 } and ComboPoints() < 5 Spell(premeditation)
+	#ambush,if=buff.shadow_dance.remains<=0.1
+	if BuffRemaining(shadow_dance_buff) <= 0.1 Spell(ambush)
+	#wait,sec=buff.shadow_dance.remains-0.1,if=(buff.shadow_dance.remains<=1)|energy+energy.regen*buff.shadow_dance.remains<=49
+	unless { BuffRemaining(shadow_dance_buff) <= 1 or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) <= 49 } and BuffRemaining(shadow_dance_buff) - 0.1 > 0
+	{
+		#call_action_list,name=energy_neutral_finishers,if=combo_points=5&buff.shadow_dance.remains>1&buff.shadow_dance.remains<=2
+		if ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 SubtletyEnergyNeutralFinishersMainActions()
+		#call_action_list,name=finishers,if=(combo_points=5&buff.shadow_dance.remains>1&buff.shadow_dance.remains<=2)&((energy+(energy.regen*buff.shadow_dance.remains))>=50)
+		if ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 50 SubtletyFinishersMainActions()
+		#ambush,if=debuff.find_weakness.down
+		if target.DebuffExpires(find_weakness_debuff) Spell(ambush)
+		#fan_of_knives,if=(((combo_points+anticipation_charges)<(10-active_enemies))|(((combo_points+anticipation_charges)=(10-active_enemies))&cooldown.Honor_among_Thieves.remains>1))&(buff.shadow_dance.remains>2)&(dot.rupture.remains<12&dot.rupture.remains>8)&((energy+(energy.regen*buff.shadow_dance.remains))>=72)&active_enemies>=4
+		if { ComboPoints() + BuffStacks(anticipation_buff) < 10 - Enemies() or ComboPoints() + BuffStacks(anticipation_buff) == 10 - Enemies() and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 } and BuffRemaining(shadow_dance_buff) > 2 and target.DebuffRemaining(rupture_debuff) < 12 and target.DebuffRemaining(rupture_debuff) > 8 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and Enemies() >= 4 Spell(fan_of_knives)
+		#ambush,if=(((combo_points+anticipation_charges)<8)|(((combo_points+anticipation_charges)=8)&cooldown.Honor_among_Thieves.remains>1))&(buff.shadow_dance.remains>2)&(dot.rupture.remains<12&dot.rupture.remains>8)&((energy+(energy.regen*buff.shadow_dance.remains))>=72)&active_enemies=1
+		if { ComboPoints() + BuffStacks(anticipation_buff) < 8 or ComboPoints() + BuffStacks(anticipation_buff) == 8 and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 } and BuffRemaining(shadow_dance_buff) > 2 and target.DebuffRemaining(rupture_debuff) < 12 and target.DebuffRemaining(rupture_debuff) > 8 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and Enemies() == 1 Spell(ambush)
+		#call_action_list,name=finishers,if=combo_points=5
+		if ComboPoints() == 5 SubtletyFinishersMainActions()
+		#fan_of_knives,if=((energy+(energy.regen*buff.shadow_dance.remains))>=72)&active_enemies>=5
+		if Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and Enemies() >= 5 Spell(fan_of_knives)
+		#ambush,if=((energy+(energy.regen*buff.shadow_dance.remains))>=72)
+		if Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 Spell(ambush)
+	}
+}
+
+AddFunction SubtletyDanceRotationAntRefShortCdActions
+{
+	#vanish
+	Spell(vanish)
+}
+
+AddFunction SubtletyDanceRotationAntRefShortCdPostConditions
+{
+	BuffRemaining(shadow_dance_buff) <= 0.1 and Spell(ambush) or not { { BuffRemaining(shadow_dance_buff) <= 1 or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) <= 49 } and BuffRemaining(shadow_dance_buff) - 0.1 > 0 } and { ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and SubtletyEnergyNeutralFinishersShortCdPostConditions() or ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 50 and SubtletyFinishersShortCdPostConditions() or target.DebuffExpires(find_weakness_debuff) and Spell(ambush) or { ComboPoints() + BuffStacks(anticipation_buff) < 10 - Enemies() or ComboPoints() + BuffStacks(anticipation_buff) == 10 - Enemies() and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 } and BuffRemaining(shadow_dance_buff) > 2 and target.DebuffRemaining(rupture_debuff) < 12 and target.DebuffRemaining(rupture_debuff) > 8 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and Enemies() >= 4 and Spell(fan_of_knives) or { ComboPoints() + BuffStacks(anticipation_buff) < 8 or ComboPoints() + BuffStacks(anticipation_buff) == 8 and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 } and BuffRemaining(shadow_dance_buff) > 2 and target.DebuffRemaining(rupture_debuff) < 12 and target.DebuffRemaining(rupture_debuff) > 8 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and Enemies() == 1 and Spell(ambush) or ComboPoints() == 5 and SubtletyFinishersShortCdPostConditions() or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and Enemies() >= 5 and Spell(fan_of_knives) or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and Spell(ambush) }
+}
+
+AddFunction SubtletyDanceRotationAntRefCdActions
+{
+	#potion,name=draenic_agility,if=buff.bloodlust.react|target.time_to_die<40|(buff.shadow_reflection.up|(!talent.shadow_reflection.enabled&buff.shadow_dance.up))&(trinket.stat.agi.up|trinket.stat.multistrike.up|buff.archmages_greater_incandescence_agi.up)|((buff.shadow_reflection.up|(!talent.shadow_reflection.enabled&buff.shadow_dance.up))&target.time_to_die<136)
+	if BuffPresent(burst_haste_buff any=1) or target.TimeToDie() < 40 or { BuffPresent(shadow_reflection_buff) or not Talent(shadow_reflection_talent) and BuffPresent(shadow_dance_buff) } and { BuffPresent(trinket_stat_agi_buff) or BuffPresent(trinket_stat_multistrike_buff) or BuffPresent(archmages_greater_incandescence_agi_buff) } or { BuffPresent(shadow_reflection_buff) or not Talent(shadow_reflection_talent) and BuffPresent(shadow_dance_buff) } and target.TimeToDie() < 136 SubtletyUsePotionAgility()
+	#shadow_reflection
+	Spell(shadow_reflection)
+	#use_item,slot=trinket2
+	SubtletyUseItemActions()
+	#use_item,slot=finger1
+	SubtletyUseItemActions()
+	#Arcane_Torrent,if=energy<90
+	if Energy() < 90 Spell(arcane_torrent_energy)
+}
+
+AddFunction SubtletyDanceRotationAntRefCdPostConditions
+{
+	BuffRemaining(shadow_dance_buff) <= 0.1 and Spell(ambush) or not { { BuffRemaining(shadow_dance_buff) <= 1 or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) <= 49 } and BuffRemaining(shadow_dance_buff) - 0.1 > 0 } and { ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and SubtletyEnergyNeutralFinishersCdPostConditions() or ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 50 and SubtletyFinishersCdPostConditions() or target.DebuffExpires(find_weakness_debuff) and Spell(ambush) or { ComboPoints() + BuffStacks(anticipation_buff) < 10 - Enemies() or ComboPoints() + BuffStacks(anticipation_buff) == 10 - Enemies() and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 } and BuffRemaining(shadow_dance_buff) > 2 and target.DebuffRemaining(rupture_debuff) < 12 and target.DebuffRemaining(rupture_debuff) > 8 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and Enemies() >= 4 and Spell(fan_of_knives) or { ComboPoints() + BuffStacks(anticipation_buff) < 8 or ComboPoints() + BuffStacks(anticipation_buff) == 8 and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 } and BuffRemaining(shadow_dance_buff) > 2 and target.DebuffRemaining(rupture_debuff) < 12 and target.DebuffRemaining(rupture_debuff) > 8 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and Enemies() == 1 and Spell(ambush) or ComboPoints() == 5 and SubtletyFinishersCdPostConditions() or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and Enemies() >= 5 and Spell(fan_of_knives) or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and Spell(ambush) }
+}
+
+### actions.dance_rotation_mfd_ref
+
+AddFunction SubtletyDanceRotationMfdRefMainActions
+{
+	#premeditation,if=(combo_points=3&cooldown.honor_among_thieves.remains>1&debuff.find_weakness.up)|(combo_points=0)|(combo_points=1&cooldown.honor_among_thieves.remains>1)|(debuff.find_weakness.up&combo_points<=3)
+	if { ComboPoints() == 3 and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 and target.DebuffPresent(find_weakness_debuff) or ComboPoints() == 0 or ComboPoints() == 1 and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 or target.DebuffPresent(find_weakness_debuff) and ComboPoints() <= 3 } and ComboPoints() < 5 Spell(premeditation)
+	#ambush,if=buff.shadow_dance.remains<=0.1
+	if BuffRemaining(shadow_dance_buff) <= 0.1 Spell(ambush)
+	#wait,sec=buff.shadow_dance.remains-0.1,if=(buff.shadow_dance.remains<=1)|energy+energy.regen*buff.shadow_dance.remains<=49
+	unless { BuffRemaining(shadow_dance_buff) <= 1 or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) <= 49 } and BuffRemaining(shadow_dance_buff) - 0.1 > 0
+	{
+		#call_action_list,name=energy_neutral_finishers,if=combo_points=5&buff.shadow_dance.remains>1&buff.shadow_dance.remains<=2
+		if ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 SubtletyEnergyNeutralFinishersMainActions()
+		#call_action_list,name=finishers,if=(combo_points=5&buff.shadow_dance.remains>1&buff.shadow_dance.remains<=2)&((energy+(energy.regen*buff.shadow_dance.remains))>=50)
+		if ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 50 SubtletyFinishersMainActions()
+		#ambush,if=debuff.find_weakness.down
+		if target.DebuffExpires(find_weakness_debuff) Spell(ambush)
+		#call_action_list,name=finishers,if=combo_points=5
+		if ComboPoints() == 5 SubtletyFinishersMainActions()
+		#ambush,if=((energy+(energy.regen*buff.shadow_dance.remains))>=72)&!(combo_points=4&cooldown.honor_among_thieves.remains<1)
+		if Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and not { ComboPoints() == 4 and BuffRemaining(honor_among_thieves_cooldown_buff) < 1 } Spell(ambush)
+	}
+}
+
+AddFunction SubtletyDanceRotationMfdRefShortCdActions
+{
+	#vanish
+	Spell(vanish)
+
+	unless BuffRemaining(shadow_dance_buff) <= 0.1 and Spell(ambush)
+	{
+		#wait,sec=buff.shadow_dance.remains-0.1,if=(buff.shadow_dance.remains<=1)|energy+energy.regen*buff.shadow_dance.remains<=49
+		unless { BuffRemaining(shadow_dance_buff) <= 1 or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) <= 49 } and BuffRemaining(shadow_dance_buff) - 0.1 > 0
+		{
+			unless ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and SubtletyEnergyNeutralFinishersShortCdPostConditions()
+			{
+				unless ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 50 and SubtletyFinishersShortCdPostConditions() or target.DebuffExpires(find_weakness_debuff) and Spell(ambush)
+				{
+					#marked_for_death,if=combo_points=0
+					if ComboPoints() == 0 Spell(marked_for_death)
+				}
+			}
+		}
+	}
+}
+
+AddFunction SubtletyDanceRotationMfdRefShortCdPostConditions
+{
+	BuffRemaining(shadow_dance_buff) <= 0.1 and Spell(ambush) or not { { BuffRemaining(shadow_dance_buff) <= 1 or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) <= 49 } and BuffRemaining(shadow_dance_buff) - 0.1 > 0 } and { ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and SubtletyEnergyNeutralFinishersShortCdPostConditions() or ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 50 and SubtletyFinishersShortCdPostConditions() or target.DebuffExpires(find_weakness_debuff) and Spell(ambush) or ComboPoints() == 5 and SubtletyFinishersShortCdPostConditions() or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and not { ComboPoints() == 4 and BuffRemaining(honor_among_thieves_cooldown_buff) < 1 } and Spell(ambush) }
+}
+
+AddFunction SubtletyDanceRotationMfdRefCdActions
+{
+	#potion,name=draenic_agility,if=buff.bloodlust.react|target.time_to_die<40|(buff.shadow_reflection.up|(!talent.shadow_reflection.enabled&buff.shadow_dance.up))&(trinket.stat.agi.up|trinket.stat.multistrike.up|buff.archmages_greater_incandescence_agi.up)|((buff.shadow_reflection.up|(!talent.shadow_reflection.enabled&buff.shadow_dance.up))&target.time_to_die<136)
+	if BuffPresent(burst_haste_buff any=1) or target.TimeToDie() < 40 or { BuffPresent(shadow_reflection_buff) or not Talent(shadow_reflection_talent) and BuffPresent(shadow_dance_buff) } and { BuffPresent(trinket_stat_agi_buff) or BuffPresent(trinket_stat_multistrike_buff) or BuffPresent(archmages_greater_incandescence_agi_buff) } or { BuffPresent(shadow_reflection_buff) or not Talent(shadow_reflection_talent) and BuffPresent(shadow_dance_buff) } and target.TimeToDie() < 136 SubtletyUsePotionAgility()
+	#shadow_reflection
+	Spell(shadow_reflection)
+	#use_item,slot=trinket2
+	SubtletyUseItemActions()
+	#use_item,slot=finger1
+	SubtletyUseItemActions()
+	#Arcane_Torrent,if=energy<90
+	if Energy() < 90 Spell(arcane_torrent_energy)
+}
+
+AddFunction SubtletyDanceRotationMfdRefCdPostConditions
+{
+	BuffRemaining(shadow_dance_buff) <= 0.1 and Spell(ambush) or not { { BuffRemaining(shadow_dance_buff) <= 1 or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) <= 49 } and BuffRemaining(shadow_dance_buff) - 0.1 > 0 } and { ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and SubtletyEnergyNeutralFinishersCdPostConditions() or ComboPoints() == 5 and BuffRemaining(shadow_dance_buff) > 1 and BuffRemaining(shadow_dance_buff) <= 2 and Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 50 and SubtletyFinishersCdPostConditions() or target.DebuffExpires(find_weakness_debuff) and Spell(ambush) or ComboPoints() == 5 and SubtletyFinishersCdPostConditions() or Energy() + EnergyRegenRate() * BuffRemaining(shadow_dance_buff) >= 72 and not { ComboPoints() == 4 and BuffRemaining(honor_among_thieves_cooldown_buff) < 1 } and Spell(ambush) }
+}
+
+### actions.energy_neutral_finishers
+
+AddFunction SubtletyEnergyNeutralFinishersMainActions
+{
+	#rupture,cycle_targets=1,if=remains<8
+	if target.DebuffRemaining(rupture_debuff) < 8 Spell(rupture)
+	#slice_and_dice,if=buff.slice_and_dice.remains<12&(buff.shadow_reflection.remains<8|!talent.shadow_reflection.enabled)
+	if BuffRemaining(slice_and_dice_buff) < 12 and { BuffRemaining(shadow_reflection_buff) < 8 or not Talent(shadow_reflection_talent) } Spell(slice_and_dice)
+	#slice_and_dice,if=buff.slice_and_dice.remains<2
+	if BuffRemaining(slice_and_dice_buff) < 2 Spell(slice_and_dice)
+}
+
+AddFunction SubtletyEnergyNeutralFinishersShortCdPostConditions
+{
+	target.DebuffRemaining(rupture_debuff) < 8 and Spell(rupture) or BuffRemaining(slice_and_dice_buff) < 12 and { BuffRemaining(shadow_reflection_buff) < 8 or not Talent(shadow_reflection_talent) } and Spell(slice_and_dice) or BuffRemaining(slice_and_dice_buff) < 2 and Spell(slice_and_dice)
+}
+
+AddFunction SubtletyEnergyNeutralFinishersCdPostConditions
+{
+	target.DebuffRemaining(rupture_debuff) < 8 and Spell(rupture) or BuffRemaining(slice_and_dice_buff) < 12 and { BuffRemaining(shadow_reflection_buff) < 8 or not Talent(shadow_reflection_talent) } and Spell(slice_and_dice) or BuffRemaining(slice_and_dice_buff) < 2 and Spell(slice_and_dice)
+}
+
+### actions.finishers
+
+AddFunction SubtletyFinishersMainActions
+{
+	#rupture,cycle_targets=1,if=remains<8
+	if target.DebuffRemaining(rupture_debuff) < 8 Spell(rupture)
+	#rupture,cycle_targets=1,if=(buff.shadow_reflection.remains>8&dot.rupture.remains<12)
+	if BuffRemaining(shadow_reflection_buff) > 8 and target.DebuffRemaining(rupture_debuff) < 12 Spell(rupture)
+	#death_from_above,if=dot.rupture.remains>20&buff.slice_and_dice.remains>5&debuff.find_weakness.up
+	if target.DebuffRemaining(rupture_debuff) > 20 and BuffRemaining(slice_and_dice_buff) > 5 and target.DebuffPresent(find_weakness_debuff) Spell(death_from_above)
+	#eviscerate,if=dot.rupture.remains>20&buff.slice_and_dice.remains>5&(!cooldown.death_from_above.up|!talent.death_from_above.enabled)
+	if target.DebuffRemaining(rupture_debuff) > 20 and BuffRemaining(slice_and_dice_buff) > 5 and { not { not SpellCooldown(death_from_above) > 0 } or not Talent(death_from_above_talent) } Spell(eviscerate)
+	#slice_and_dice,if=buff.slice_and_dice.remains<12&(buff.shadow_reflection.remains<8|!talent.shadow_reflection.enabled)
+	if BuffRemaining(slice_and_dice_buff) < 12 and { BuffRemaining(shadow_reflection_buff) < 8 or not Talent(shadow_reflection_talent) } Spell(slice_and_dice)
+	#slice_and_dice,if=buff.slice_and_dice.remains<2
+	if BuffRemaining(slice_and_dice_buff) < 2 Spell(slice_and_dice)
+	#crimson_tempest,if=(active_enemies>=3&debuff.find_weakness.down)|active_enemies>=4&(cooldown.death_from_above.remains>0|!talent.death_from_above.enabled)
+	if Enemies() >= 3 and target.DebuffExpires(find_weakness_debuff) or Enemies() >= 4 and { SpellCooldown(death_from_above) > 0 or not Talent(death_from_above_talent) } Spell(crimson_tempest)
+	#death_from_above,if=talent.death_from_above.enabled
+	if Talent(death_from_above_talent) Spell(death_from_above)
+	#eviscerate,if=(!cooldown.death_from_above.up|!talent.death_from_above.enabled)
+	if not { not SpellCooldown(death_from_above) > 0 } or not Talent(death_from_above_talent) Spell(eviscerate)
+}
+
+AddFunction SubtletyFinishersShortCdPostConditions
+{
+	target.DebuffRemaining(rupture_debuff) < 8 and Spell(rupture) or BuffRemaining(shadow_reflection_buff) > 8 and target.DebuffRemaining(rupture_debuff) < 12 and Spell(rupture) or target.DebuffRemaining(rupture_debuff) > 20 and BuffRemaining(slice_and_dice_buff) > 5 and target.DebuffPresent(find_weakness_debuff) and Spell(death_from_above) or target.DebuffRemaining(rupture_debuff) > 20 and BuffRemaining(slice_and_dice_buff) > 5 and { not { not SpellCooldown(death_from_above) > 0 } or not Talent(death_from_above_talent) } and Spell(eviscerate) or BuffRemaining(slice_and_dice_buff) < 12 and { BuffRemaining(shadow_reflection_buff) < 8 or not Talent(shadow_reflection_talent) } and Spell(slice_and_dice) or BuffRemaining(slice_and_dice_buff) < 2 and Spell(slice_and_dice) or { Enemies() >= 3 and target.DebuffExpires(find_weakness_debuff) or Enemies() >= 4 and { SpellCooldown(death_from_above) > 0 or not Talent(death_from_above_talent) } } and Spell(crimson_tempest) or Talent(death_from_above_talent) and Spell(death_from_above) or { not { not SpellCooldown(death_from_above) > 0 } or not Talent(death_from_above_talent) } and Spell(eviscerate)
+}
+
+AddFunction SubtletyFinishersCdPostConditions
+{
+	target.DebuffRemaining(rupture_debuff) < 8 and Spell(rupture) or BuffRemaining(shadow_reflection_buff) > 8 and target.DebuffRemaining(rupture_debuff) < 12 and Spell(rupture) or target.DebuffRemaining(rupture_debuff) > 20 and BuffRemaining(slice_and_dice_buff) > 5 and target.DebuffPresent(find_weakness_debuff) and Spell(death_from_above) or target.DebuffRemaining(rupture_debuff) > 20 and BuffRemaining(slice_and_dice_buff) > 5 and { not { not SpellCooldown(death_from_above) > 0 } or not Talent(death_from_above_talent) } and Spell(eviscerate) or BuffRemaining(slice_and_dice_buff) < 12 and { BuffRemaining(shadow_reflection_buff) < 8 or not Talent(shadow_reflection_talent) } and Spell(slice_and_dice) or BuffRemaining(slice_and_dice_buff) < 2 and Spell(slice_and_dice) or { Enemies() >= 3 and target.DebuffExpires(find_weakness_debuff) or Enemies() >= 4 and { SpellCooldown(death_from_above) > 0 or not Talent(death_from_above_talent) } } and Spell(crimson_tempest) or Talent(death_from_above_talent) and Spell(death_from_above) or { not { not SpellCooldown(death_from_above) > 0 } or not Talent(death_from_above_talent) } and Spell(eviscerate)
+}
+
+### actions.generators_ant
+
+AddFunction SubtletyGeneratorsAntMainActions
+{
+	#call_action_list,name=finishers,if=combo_points=5&combo_points+anticipation_charges>=9
+	if ComboPoints() == 5 and ComboPoints() + BuffStacks(anticipation_buff) >= 9 SubtletyFinishersMainActions()
+	#call_action_list,name=energy_neutral_finishers,if=combo_points=5
+	if ComboPoints() == 5 SubtletyEnergyNeutralFinishersMainActions()
+	#fan_of_knives,if=active_enemies>2
+	if Enemies() > 2 Spell(fan_of_knives)
+	#backstab,if=energy>105
+	if Energy() > 105 Spell(backstab)
+}
+
+### actions.generators_fw_ant
+
+AddFunction SubtletyGeneratorsFwAntMainActions
+{
+	#backstab,if=((combo_points+anticipation_charges)<8)&(dot.rupture.remains<12&dot.rupture.remains>8)&active_enemies=1
+	if ComboPoints() + BuffStacks(anticipation_buff) < 8 and target.DebuffRemaining(rupture_debuff) < 12 and target.DebuffRemaining(rupture_debuff) > 8 and Enemies() == 1 Spell(backstab)
+	#backstab,if=((combo_points+anticipation_charges)<9)&(dot.rupture.remains<10&dot.rupture.remains>8)&active_enemies=1
+	if ComboPoints() + BuffStacks(anticipation_buff) < 9 and target.DebuffRemaining(rupture_debuff) < 10 and target.DebuffRemaining(rupture_debuff) > 8 and Enemies() == 1 Spell(backstab)
+	#call_action_list,name=finishers,if=combo_points=5
+	if ComboPoints() == 5 SubtletyFinishersMainActions()
+	#fan_of_knives,if=active_enemies>2
+	if Enemies() > 2 Spell(fan_of_knives)
 	#backstab
 	Spell(backstab)
 }
 
-AddFunction SubtletyGeneratorCdActions
+AddFunction SubtletyGeneratorsFwAntShortCdPostConditions
 {
-	#run_action_list,name=pool,if=buff.master_of_subtlety.down&buff.shadow_dance.down&debuff.find_weakness.down&(energy+cooldown.shadow_dance.remains*energy.regen<80|energy+cooldown.vanish.remains*energy.regen<60)
-	if BuffExpires(master_of_subtlety_buff) and BuffExpires(shadow_dance_buff) and target.DebuffExpires(find_weakness_debuff) and { Energy() + SpellCooldown(shadow_dance) * EnergyRegenRate() < 80 or Energy() + SpellCooldown(vanish) * EnergyRegenRate() < 60 } SubtletyPoolCdActions()
+	ComboPoints() + BuffStacks(anticipation_buff) < 8 and target.DebuffRemaining(rupture_debuff) < 12 and target.DebuffRemaining(rupture_debuff) > 8 and Enemies() == 1 and Spell(backstab) or ComboPoints() + BuffStacks(anticipation_buff) < 9 and target.DebuffRemaining(rupture_debuff) < 10 and target.DebuffRemaining(rupture_debuff) > 8 and Enemies() == 1 and Spell(backstab) or ComboPoints() == 5 and SubtletyFinishersShortCdPostConditions() or Enemies() > 2 and Spell(fan_of_knives) or Spell(backstab)
+}
 
-	unless Enemies() > 1 and Spell(fan_of_knives) or { target.DebuffRemaining(hemorrhage_debuff) < BaseDuration(hemorrhage_debuff) * 0.3 and target.TimeToDie() >= target.DebuffRemaining(hemorrhage_debuff) + BaseDuration(hemorrhage_debuff) and target.DebuffExpires(find_weakness_debuff) or not target.DebuffPresent(hemorrhage_debuff) or False(position_front) } and Spell(hemorrhage) or Energy() < 65 and EnergyRegenRate() < 16 and Spell(shuriken_toss) or Spell(backstab)
+### actions.generators_fw_mfd
+
+AddFunction SubtletyGeneratorsFwMfdMainActions
+{
+	#call_action_list,name=finishers,if=combo_points=5
+	if ComboPoints() == 5 SubtletyFinishersMainActions()
+	#backstab,if=!(combo_points=4&(cooldown.honor_among_thieves.remains<1))
+	if not { ComboPoints() == 4 and BuffRemaining(honor_among_thieves_cooldown_buff) < 1 } Spell(backstab)
+}
+
+AddFunction SubtletyGeneratorsFwMfdShortCdActions
+{
+	unless ComboPoints() == 5 and SubtletyFinishersShortCdPostConditions()
 	{
-		#run_action_list,name=pool
-		SubtletyPoolCdActions()
+		#marked_for_death,if=combo_points=0
+		if ComboPoints() == 0 Spell(marked_for_death)
 	}
 }
 
-### actions.pool
+### actions.generators_mfd
 
-AddFunction SubtletyPoolCdActions
+AddFunction SubtletyGeneratorsMfdMainActions
 {
-	#preparation,if=!buff.vanish.up&cooldown.vanish.remains>60
-	if not BuffPresent(vanish_buff any=1) and SpellCooldown(vanish) > 60 Spell(preparation)
+	#call_action_list,name=finishers,if=combo_points=5
+	if ComboPoints() == 5 SubtletyFinishersMainActions()
+	#backstab,if=energy>105&!(combo_points=4&cooldown.honor_among_thieves.remains<1)
+	if Energy() > 105 and not { ComboPoints() == 4 and BuffRemaining(honor_among_thieves_cooldown_buff) < 1 } Spell(backstab)
+}
+
+### actions.opener_ant
+
+AddFunction SubtletyOpenerAntMainActions
+{
+	#rupture,if=time<1
+	if TimeInCombat() < 1 Spell(rupture)
+}
+
+AddFunction SubtletyOpenerAntShortCdActions
+{
+	#Vanish,if=time<1
+	if TimeInCombat() < 1 Spell(vanish)
+
+	unless TimeInCombat() < 1 and Spell(rupture)
+	{
+		#shadow_dance
+		Spell(shadow_dance)
+	}
+}
+
+AddFunction SubtletyOpenerAntShortCdPostConditions
+{
+	TimeInCombat() < 1 and Spell(rupture)
+}
+
+AddFunction SubtletyOpenerAntCdActions
+{
+	#shadow_reflection,if=time<1
+	if TimeInCombat() < 1 Spell(shadow_reflection)
+}
+
+AddFunction SubtletyOpenerAntCdPostConditions
+{
+	TimeInCombat() < 1 and Spell(rupture)
+}
+
+### actions.opener_mfd
+
+AddFunction SubtletyOpenerMfdMainActions
+{
+	#premeditation,if=time<1
+	if TimeInCombat() < 1 and ComboPoints() < 5 Spell(premeditation)
+	#ambush,if=time<1
+	if TimeInCombat() < 1 Spell(ambush)
+	#rupture,if=time<2
+	if TimeInCombat() < 2 Spell(rupture)
+	#ambush,if=time<3
+	if TimeInCombat() < 3 Spell(ambush)
+}
+
+AddFunction SubtletyOpenerMfdShortCdPostConditions
+{
+	TimeInCombat() < 1 and Spell(ambush) or TimeInCombat() < 2 and Spell(rupture) or TimeInCombat() < 3 and Spell(ambush)
+}
+
+AddFunction SubtletyOpenerMfdCdPostConditions
+{
+	TimeInCombat() < 1 and Spell(ambush) or TimeInCombat() < 2 and Spell(rupture) or TimeInCombat() < 3 and Spell(ambush)
+}
+
+### actions.pool_ant
+
+AddFunction SubtletyPoolAntMainActions
+{
+	#call_action_list,name=finishers,if=combo_points+anticipation_charges>=9&combo_points=5
+	if ComboPoints() + BuffStacks(anticipation_buff) >= 9 and ComboPoints() == 5 SubtletyFinishersMainActions()
+}
+
+AddFunction SubtletyPoolAntShortCdPostConditions
+{
+	ComboPoints() + BuffStacks(anticipation_buff) >= 9 and ComboPoints() == 5 and SubtletyFinishersShortCdPostConditions()
+}
+
+AddFunction SubtletyPoolAntCdActions
+{
+	unless ComboPoints() + BuffStacks(anticipation_buff) >= 9 and ComboPoints() == 5 and SubtletyFinishersCdPostConditions()
+	{
+		#preparation,if=cooldown.vanish.remains>60|target.time_to_die<17&cooldown.shadow_dance.remains>1
+		if SpellCooldown(vanish) > 60 or target.TimeToDie() < 17 and SpellCooldown(shadow_dance) > 1 Spell(preparation)
+	}
+}
+
+AddFunction SubtletyPoolAntCdPostConditions
+{
+	ComboPoints() + BuffStacks(anticipation_buff) >= 9 and ComboPoints() == 5 and SubtletyFinishersCdPostConditions()
+}
+
+### actions.pool_mfd
+
+AddFunction SubtletyPoolMfdMainActions
+{
+	#call_action_list,name=finishers,if=combo_points=5
+	if ComboPoints() == 5 SubtletyFinishersMainActions()
+}
+
+AddFunction SubtletyPoolMfdShortCdPostConditions
+{
+	ComboPoints() == 5 and SubtletyFinishersShortCdPostConditions()
+}
+
+AddFunction SubtletyPoolMfdCdActions
+{
+	unless ComboPoints() == 5 and SubtletyFinishersCdPostConditions()
+	{
+		#preparation,if=cooldown.vanish.remains>60|target.time_to_die<17&cooldown.shadow_dance.remains>1
+		if SpellCooldown(vanish) > 60 or target.TimeToDie() < 17 and SpellCooldown(shadow_dance) > 1 Spell(preparation)
+	}
+}
+
+AddFunction SubtletyPoolMfdCdPostConditions
+{
+	ComboPoints() == 5 and SubtletyFinishersCdPostConditions()
 }
 
 ### actions.precombat
@@ -303,15 +637,31 @@ AddFunction SubtletyPoolCdActions
 AddFunction SubtletyPrecombatMainActions
 {
 	#flask,type=greater_draenic_agility_flask
-	#food,type=calamari_crepes
+	#food,type=salty_squid_roll
 	#apply_poison,lethal=deadly
 	if BuffRemaining(lethal_poison_buff) < 1200 Spell(deadly_poison)
 	#stealth
-	if BuffExpires(stealthed_buff any=1) Spell(stealth)
+	Spell(stealth)
+	#premeditation,if=!talent.marked_for_death.enabled
+	if not Talent(marked_for_death_talent) and ComboPoints() < 5 Spell(premeditation)
+	#slice_and_dice
+	Spell(slice_and_dice)
 	#premeditation
 	if ComboPoints() < 5 Spell(premeditation)
-	#slice_and_dice,if=buff.slice_and_dice.remains<18
-	if BuffRemaining(slice_and_dice_buff) < 18 Spell(slice_and_dice)
+}
+
+AddFunction SubtletyPrecombatShortCdActions
+{
+	unless BuffRemaining(lethal_poison_buff) < 1200 and Spell(deadly_poison) or Spell(stealth)
+	{
+		#marked_for_death
+		Spell(marked_for_death)
+	}
+}
+
+AddFunction SubtletyPrecombatShortCdPostConditions
+{
+	BuffRemaining(lethal_poison_buff) < 1200 and Spell(deadly_poison) or Spell(stealth) or Spell(slice_and_dice)
 }
 
 AddFunction SubtletyPrecombatCdActions
@@ -320,45 +670,201 @@ AddFunction SubtletyPrecombatCdActions
 	{
 		#snapshot_stats
 		#potion,name=draenic_agility
-		UsePotionAgility()
+		SubtletyUsePotionAgility()
 	}
 }
 
+AddFunction SubtletyPrecombatCdPostConditions
+{
+	BuffRemaining(lethal_poison_buff) < 1200 and Spell(deadly_poison) or Spell(stealth) or Spell(slice_and_dice)
+}
+
+### actions.shadowmeld_rotation
+
+AddFunction SubtletyShadowmeldRotationMainActions
+{
+	#Premeditation
+	if ComboPoints() < 5 Spell(premeditation)
+	#Ambush
+	Spell(ambush)
+}
+
+AddFunction SubtletyShadowmeldRotationShortCdPostConditions
+{
+	Spell(ambush)
+}
+
+AddFunction SubtletyShadowmeldRotationCdPostConditions
+{
+	Spell(ambush)
+}
+
+### actions.vanish_rotation_ant_ref
+
+AddFunction SubtletyVanishRotationAntRefMainActions
+{
+	#premeditation,if=(combo_points=3&anticipation_charges=3&cooldown.honor_among_thieves.remains>1)|(combo_points<=3&anticipation_charges+combo_points<=5)
+	if { ComboPoints() == 3 and BuffStacks(anticipation_buff) == 3 and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 or ComboPoints() <= 3 and BuffStacks(anticipation_buff) + ComboPoints() <= 5 } and ComboPoints() < 5 Spell(premeditation)
+	#premeditation,if=combo_points<=4&buff.vanish.down&buff.subterfuge.remains<1
+	if ComboPoints() <= 4 and BuffExpires(vanish_buff) and BuffRemaining(subterfuge_buff) < 1 and ComboPoints() < 5 Spell(premeditation)
+	#ambush,if=buff.subterfuge.remains<=0.1&buff.vanish.down
+	if BuffRemaining(subterfuge_buff) <= 0.1 and BuffExpires(vanish_buff) Spell(ambush)
+	#wait,sec=buff.subterfuge.remains-0.1,if=(buff.subterfuge.remains<=1&buff.vanish.down)|(energy+energy.regen*buff.subterfuge.remains<=69&buff.vanish.down)
+	unless { BuffRemaining(subterfuge_buff) <= 1 and BuffExpires(vanish_buff) or Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) <= 69 and BuffExpires(vanish_buff) } and BuffRemaining(subterfuge_buff) - 0.1 > 0
+	{
+		#call_action_list,name=energy_neutral_finishers,if=combo_points=5&buff.subterfuge.remains>1&buff.subterfuge.remains<=2&(buff.vanish.remains<2|buff.vanish.down)
+		if ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } SubtletyEnergyNeutralFinishersMainActions()
+		#call_action_list,name=finishers,if=(combo_points=5&buff.subterfuge.remains>1&buff.subterfuge.remains<=2)&(buff.vanish.remains<2|buff.vanish.down)&((energy+energy.regen*buff.subterfuge.remains)>=70)
+		if ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) >= 70 SubtletyFinishersMainActions()
+		#ambush,if=debuff.find_weakness.down
+		if target.DebuffExpires(find_weakness_debuff) Spell(ambush)
+		#call_action_list,name=finishers,if=combo_points=5
+		if ComboPoints() == 5 SubtletyFinishersMainActions()
+		#ambush,if=((energy+(energy.regen*(buff.vanish.remains+1)))>=112)
+		if Energy() + EnergyRegenRate() * { BuffRemaining(vanish_buff) + 1 } >= 112 Spell(ambush)
+	}
+}
+
+AddFunction SubtletyVanishRotationAntRefShortCdPostConditions
+{
+	BuffRemaining(subterfuge_buff) <= 0.1 and BuffExpires(vanish_buff) and Spell(ambush) or not { { BuffRemaining(subterfuge_buff) <= 1 and BuffExpires(vanish_buff) or Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) <= 69 and BuffExpires(vanish_buff) } and BuffRemaining(subterfuge_buff) - 0.1 > 0 } and { ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and SubtletyEnergyNeutralFinishersShortCdPostConditions() or ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) >= 70 and SubtletyFinishersShortCdPostConditions() or target.DebuffExpires(find_weakness_debuff) and Spell(ambush) or ComboPoints() == 5 and SubtletyFinishersShortCdPostConditions() or Energy() + EnergyRegenRate() * { BuffRemaining(vanish_buff) + 1 } >= 112 and Spell(ambush) }
+}
+
+AddFunction SubtletyVanishRotationAntRefCdActions
+{
+	unless BuffRemaining(subterfuge_buff) <= 0.1 and BuffExpires(vanish_buff) and Spell(ambush)
+	{
+		#wait,sec=buff.subterfuge.remains-0.1,if=(buff.subterfuge.remains<=1&buff.vanish.down)|(energy+energy.regen*buff.subterfuge.remains<=69&buff.vanish.down)
+		unless { BuffRemaining(subterfuge_buff) <= 1 and BuffExpires(vanish_buff) or Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) <= 69 and BuffExpires(vanish_buff) } and BuffRemaining(subterfuge_buff) - 0.1 > 0
+		{
+			unless ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and SubtletyEnergyNeutralFinishersCdPostConditions()
+			{
+				unless ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) >= 70 and SubtletyFinishersCdPostConditions() or target.DebuffExpires(find_weakness_debuff) and Spell(ambush)
+				{
+					unless ComboPoints() == 5 and SubtletyFinishersCdPostConditions() or Energy() + EnergyRegenRate() * { BuffRemaining(vanish_buff) + 1 } >= 112 and Spell(ambush)
+					{
+						#preparation,if=cooldown.vanish.remains>60|target.time_to_die<17
+						if SpellCooldown(vanish) > 60 or target.TimeToDie() < 17 Spell(preparation)
+					}
+				}
+			}
+		}
+	}
+}
+
+AddFunction SubtletyVanishRotationAntRefCdPostConditions
+{
+	BuffRemaining(subterfuge_buff) <= 0.1 and BuffExpires(vanish_buff) and Spell(ambush) or not { { BuffRemaining(subterfuge_buff) <= 1 and BuffExpires(vanish_buff) or Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) <= 69 and BuffExpires(vanish_buff) } and BuffRemaining(subterfuge_buff) - 0.1 > 0 } and { ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and SubtletyEnergyNeutralFinishersCdPostConditions() or ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) >= 70 and SubtletyFinishersCdPostConditions() or target.DebuffExpires(find_weakness_debuff) and Spell(ambush) or ComboPoints() == 5 and SubtletyFinishersCdPostConditions() or Energy() + EnergyRegenRate() * { BuffRemaining(vanish_buff) + 1 } >= 112 and Spell(ambush) }
+}
+
+### actions.vanish_rotation_mfd_ref
+
+AddFunction SubtletyVanishRotationMfdRefMainActions
+{
+	#premeditation,if=(combo_points=3&cooldown.honor_among_thieves.remains>1&debuff.find_weakness.up)|(combo_points=0)|(combo_points=1&cooldown.honor_among_thieves.remains>1)|(debuff.find_weakness.up&combo_points<=3)
+	if { ComboPoints() == 3 and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 and target.DebuffPresent(find_weakness_debuff) or ComboPoints() == 0 or ComboPoints() == 1 and BuffRemaining(honor_among_thieves_cooldown_buff) > 1 or target.DebuffPresent(find_weakness_debuff) and ComboPoints() <= 3 } and ComboPoints() < 5 Spell(premeditation)
+	#premeditation,if=combo_points<=4&buff.vanish.down&buff.subterfuge.remains<1
+	if ComboPoints() <= 4 and BuffExpires(vanish_buff) and BuffRemaining(subterfuge_buff) < 1 and ComboPoints() < 5 Spell(premeditation)
+	#ambush,if=buff.subterfuge.remains<=0.1&buff.vanish.down
+	if BuffRemaining(subterfuge_buff) <= 0.1 and BuffExpires(vanish_buff) Spell(ambush)
+	#wait,sec=buff.subterfuge.remains-0.1,if=(buff.subterfuge.remains<=1&buff.vanish.down)|(energy+energy.regen*buff.subterfuge.remains<=69&buff.vanish.down)
+	unless { BuffRemaining(subterfuge_buff) <= 1 and BuffExpires(vanish_buff) or Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) <= 69 and BuffExpires(vanish_buff) } and BuffRemaining(subterfuge_buff) - 0.1 > 0
+	{
+		#call_action_list,name=energy_neutral_finishers,if=combo_points=5&buff.subterfuge.remains>1&buff.subterfuge.remains<=2&(buff.vanish.remains<2|buff.vanish.down)
+		if ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } SubtletyEnergyNeutralFinishersMainActions()
+		#call_action_list,name=finishers,if=(combo_points=5&buff.subterfuge.remains>1&buff.subterfuge.remains<=2)&(buff.vanish.remains<2|buff.vanish.down)&((energy+energy.regen*buff.subterfuge.remains)>=70)
+		if ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) >= 70 SubtletyFinishersMainActions()
+		#ambush,if=debuff.find_weakness.down
+		if target.DebuffExpires(find_weakness_debuff) Spell(ambush)
+		#call_action_list,name=finishers,if=combo_points=5
+		if ComboPoints() == 5 SubtletyFinishersMainActions()
+		#ambush,if=((energy+(energy.regen*(buff.vanish.remains+1)))>=112)&!(combo_points=4&buff.vanish.remains>3)
+		if Energy() + EnergyRegenRate() * { BuffRemaining(vanish_buff) + 1 } >= 112 and not { ComboPoints() == 4 and BuffRemaining(vanish_buff) > 3 } Spell(ambush)
+	}
+}
+
+AddFunction SubtletyVanishRotationMfdRefShortCdPostConditions
+{
+	BuffRemaining(subterfuge_buff) <= 0.1 and BuffExpires(vanish_buff) and Spell(ambush) or not { { BuffRemaining(subterfuge_buff) <= 1 and BuffExpires(vanish_buff) or Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) <= 69 and BuffExpires(vanish_buff) } and BuffRemaining(subterfuge_buff) - 0.1 > 0 } and { ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and SubtletyEnergyNeutralFinishersShortCdPostConditions() or ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) >= 70 and SubtletyFinishersShortCdPostConditions() or target.DebuffExpires(find_weakness_debuff) and Spell(ambush) or ComboPoints() == 5 and SubtletyFinishersShortCdPostConditions() or Energy() + EnergyRegenRate() * { BuffRemaining(vanish_buff) + 1 } >= 112 and not { ComboPoints() == 4 and BuffRemaining(vanish_buff) > 3 } and Spell(ambush) }
+}
+
+AddFunction SubtletyVanishRotationMfdRefCdActions
+{
+	unless BuffRemaining(subterfuge_buff) <= 0.1 and BuffExpires(vanish_buff) and Spell(ambush)
+	{
+		#wait,sec=buff.subterfuge.remains-0.1,if=(buff.subterfuge.remains<=1&buff.vanish.down)|(energy+energy.regen*buff.subterfuge.remains<=69&buff.vanish.down)
+		unless { BuffRemaining(subterfuge_buff) <= 1 and BuffExpires(vanish_buff) or Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) <= 69 and BuffExpires(vanish_buff) } and BuffRemaining(subterfuge_buff) - 0.1 > 0
+		{
+			unless ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and SubtletyEnergyNeutralFinishersCdPostConditions()
+			{
+				unless ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) >= 70 and SubtletyFinishersCdPostConditions() or target.DebuffExpires(find_weakness_debuff) and Spell(ambush)
+				{
+					unless ComboPoints() == 5 and SubtletyFinishersCdPostConditions() or Energy() + EnergyRegenRate() * { BuffRemaining(vanish_buff) + 1 } >= 112 and not { ComboPoints() == 4 and BuffRemaining(vanish_buff) > 3 } and Spell(ambush)
+					{
+						#preparation,if=cooldown.vanish.remains>60|target.time_to_die<17
+						if SpellCooldown(vanish) > 60 or target.TimeToDie() < 17 Spell(preparation)
+					}
+				}
+			}
+		}
+	}
+}
+
+AddFunction SubtletyVanishRotationMfdRefCdPostConditions
+{
+	BuffRemaining(subterfuge_buff) <= 0.1 and BuffExpires(vanish_buff) and Spell(ambush) or not { { BuffRemaining(subterfuge_buff) <= 1 and BuffExpires(vanish_buff) or Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) <= 69 and BuffExpires(vanish_buff) } and BuffRemaining(subterfuge_buff) - 0.1 > 0 } and { ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and SubtletyEnergyNeutralFinishersCdPostConditions() or ComboPoints() == 5 and BuffRemaining(subterfuge_buff) > 1 and BuffRemaining(subterfuge_buff) <= 2 and { BuffRemaining(vanish_buff) < 2 or BuffExpires(vanish_buff) } and Energy() + EnergyRegenRate() * BuffRemaining(subterfuge_buff) >= 70 and SubtletyFinishersCdPostConditions() or target.DebuffExpires(find_weakness_debuff) and Spell(ambush) or ComboPoints() == 5 and SubtletyFinishersCdPostConditions() or Energy() + EnergyRegenRate() * { BuffRemaining(vanish_buff) + 1 } >= 112 and not { ComboPoints() == 4 and BuffRemaining(vanish_buff) > 3 } and Spell(ambush) }
+}
+
 ### Subtlety icons.
-AddCheckBox(opt_rogue_subtlety_aoe L(AOE) specialization=subtlety default)
 
-AddIcon specialization=subtlety help=shortcd enemies=1 checkbox=!opt_rogue_subtlety_aoe
+AddCheckBox(opt_rogue_subtlety_aoe L(AOE) default specialization=subtlety)
+
+AddIcon checkbox=!opt_rogue_subtlety_aoe enemies=1 help=shortcd specialization=subtlety
 {
-	SubtletyDefaultShortCdActions()
+	if not InCombat() SubtletyPrecombatShortCdActions()
+	unless not InCombat() and SubtletyPrecombatShortCdPostConditions()
+	{
+		SubtletyDefaultShortCdActions()
+	}
 }
 
-AddIcon specialization=subtlety help=shortcd checkbox=opt_rogue_subtlety_aoe
+AddIcon checkbox=opt_rogue_subtlety_aoe help=shortcd specialization=subtlety
 {
-	SubtletyDefaultShortCdActions()
+	if not InCombat() SubtletyPrecombatShortCdActions()
+	unless not InCombat() and SubtletyPrecombatShortCdPostConditions()
+	{
+		SubtletyDefaultShortCdActions()
+	}
 }
 
-AddIcon specialization=subtlety help=main enemies=1
+AddIcon enemies=1 help=main specialization=subtlety
 {
 	if not InCombat() SubtletyPrecombatMainActions()
 	SubtletyDefaultMainActions()
 }
 
-AddIcon specialization=subtlety help=aoe checkbox=opt_rogue_subtlety_aoe
+AddIcon checkbox=opt_rogue_subtlety_aoe help=aoe specialization=subtlety
 {
 	if not InCombat() SubtletyPrecombatMainActions()
 	SubtletyDefaultMainActions()
 }
 
-AddIcon specialization=subtlety help=cd enemies=1 checkbox=!opt_rogue_subtlety_aoe
+AddIcon checkbox=!opt_rogue_subtlety_aoe enemies=1 help=cd specialization=subtlety
 {
 	if not InCombat() SubtletyPrecombatCdActions()
-	SubtletyDefaultCdActions()
+	unless not InCombat() and SubtletyPrecombatCdPostConditions()
+	{
+		SubtletyDefaultCdActions()
+	}
 }
 
-AddIcon specialization=subtlety help=cd checkbox=opt_rogue_subtlety_aoe
+AddIcon checkbox=opt_rogue_subtlety_aoe help=cd specialization=subtlety
 {
 	if not InCombat() SubtletyPrecombatCdActions()
-	SubtletyDefaultCdActions()
+	unless not InCombat() and SubtletyPrecombatCdPostConditions()
+	{
+		SubtletyDefaultCdActions()
+	}
 }
 
 ### Required symbols
@@ -368,46 +874,37 @@ AddIcon specialization=subtlety help=cd checkbox=opt_rogue_subtlety_aoe
 # arcane_torrent_energy
 # archmages_greater_incandescence_agi_buff
 # backstab
-# berserking
-# blood_fury_ap
-# cheap_shot
 # crimson_tempest
 # deadly_poison
-# deadly_throw
 # death_from_above
 # death_from_above_talent
 # draenic_agility_potion
 # eviscerate
 # fan_of_knives
 # find_weakness_debuff
-# garrote
-# garrote_debuff
-# hemorrhage
-# hemorrhage_debuff
 # honor_among_thieves_cooldown_buff
 # kick
-# kidney_shot
+# lethal_poison_buff
 # marked_for_death
-# master_of_subtlety_buff
+# marked_for_death_talent
 # premeditation
 # preparation
-# quaking_palm
 # rupture
 # rupture_debuff
 # shadow_dance
 # shadow_dance_buff
-# shadow_focus_talent
 # shadow_reflection
 # shadow_reflection_buff
+# shadow_reflection_talent
 # shadowmeld
+# shadowmeld_buff
 # shadowstep
-# shuriken_toss
 # slice_and_dice
 # slice_and_dice_buff
 # stealth
 # subterfuge_buff
-# subterfuge_talent
 # vanish
+# vanish_buff
 ]]
-	OvaleScripts:RegisterScript("ROGUE", name, desc, code, "script")
+	OvaleScripts:RegisterScript("ROGUE", "subtlety", name, desc, code, "script")
 end

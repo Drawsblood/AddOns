@@ -256,11 +256,11 @@ function dataobj:OnEnter()
 	tooltip:SetCell(y, 2, _G.LFDMicroButton.tooltipText)
 	tooltip:SetLineScript(y, "OnMouseUp", MouseHandler, _G.LFDMicroButton)
 
-	if _G.CompanionsMicroButton then
+	if _G.CollectionsMicroButton then
 		local y, x = tooltip:AddLine()
 		tooltip:SetCell(y, 1, path.."mounts.tga", myProvider)
-		tooltip:SetCell(y, 2, _G.CompanionsMicroButton.tooltipText)
-		tooltip:SetLineScript(y, "OnMouseUp", MouseHandler, _G.CompanionsMicroButton)
+		tooltip:SetCell(y, 2, _G.CollectionsMicroButton.tooltipText)
+		tooltip:SetLineScript(y, "OnMouseUp", MouseHandler, _G.CollectionsMicroButton)
 	end
 	
 	if _G.EJMicroButton then
@@ -305,10 +305,10 @@ function dataobj:OnEnter()
 	tooltip:SetCell(y, 2, _G.GameMenuButtonMacros:GetText())
 	tooltip:SetLineScript(y, "OnMouseUp", MouseHandler, _G.ShowMacroFrame)
 	
-	if _G.GameMenuButtonAddOns then
+	if _G.GameMenuButtonAddons then
 		local y, x = tooltip:AddLine()
-		tooltip:SetCell(y, 2, _G.GameMenuButtonAddOns:GetText())
-		tooltip:SetLineScript(y, "OnMouseUp", MouseHandler, _G.GameMenuButtonAddOns)
+		tooltip:SetCell(y, 2, _G.GameMenuButtonAddons:GetText())
+		tooltip:SetLineScript(y, "OnMouseUp", MouseHandler, _G.GameMenuButtonAddons)
 	end
 	
 	tooltip:SetAutoHideDelay(0.01, self)

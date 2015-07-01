@@ -1,11 +1,11 @@
-## Interface: 60000
+## Interface: 60100
 ## Title: i|cffffffaaMoney|r
-## Version: 6.0.2-r1
+## Version: 6.1.1
 ## Notes: The money display for your broker bar!
 ## Author: grdn
 ## SavedVariables: iMoneyDB
 ## OptionalDeps: Ace3, iLib, LibDialog-1.0
-## X-Curse-Packaged-Version: 6.0.2-r1
+## X-Curse-Packaged-Version: 6.1.1
 ## X-Curse-Project-Name: iMoney
 ## X-Curse-Project-ID: imoney
 ## X-Curse-Repository-ID: wow/imoney/mainline

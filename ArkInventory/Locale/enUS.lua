@@ -51,10 +51,10 @@ if not L then return end
 	
 	
 --	restack
---	L["RESTACK"] = "Restack"
+	L["RESTACK"] = "Restack"
 	L["RESTACK_TEXT"] = "consolidate items into as few stacks as possible and then try to fill up any empty slots in special bags where possible"
-	L["RESTACK_FAIL_WAIT"] = "A restack operation is already in progress please wait for completion"
-	L["RESTACK_FAIL_ACCESS"] = "You don't have enough authority to restack tab %2$s in the %1$s" -- %1$s = guild bank, %2$s = tab number
+	L["RESTACK_FAIL_WAIT"] = "Already in progress please wait for completion"
+	L["RESTACK_FAIL_ACCESS"] = "You don't have enough authority to tab %2$s in the %1$s" -- %1$s = guild bank, %2$s = tab number
 	
 	
 --	vault tab tooltips
@@ -82,11 +82,13 @@ if not L then return end
 	
 --	bag names - used to name the empty slots in the status frame (and LDB)
 	L["STATUS_NAME_BAG"] = "Bag"
+	L["STATUS_NAME_COOKING"] = "Cook"
 	L["STATUS_NAME_CRITTER"] = "Pet"
 	L["STATUS_NAME_ENCHANTING"] = "Ench"
 	L["STATUS_NAME_ENGINEERING"] = "Eng"
 	L["STATUS_NAME_GEAR"] = "Gear"
 	L["STATUS_NAME_GEM"] = "Gem"
+	L["STATUS_NAME_HEIRLOOM"] = "Hrlm"
 	L["STATUS_NAME_HERB"] = "Herb"
 	L["STATUS_NAME_INSCRIPTION"] = "Insc"
 	L["STATUS_NAME_KEY"] = "Key"
@@ -94,11 +96,10 @@ if not L then return end
 	L["STATUS_NAME_MAIL"] = "Mail"
 	L["STATUS_NAME_MINING"] = "Mng"
 	L["STATUS_NAME_MOUNT"] = "Mnt"
-	L["STATUS_NAME_TOKEN"] = "Tkn"
-	L["STATUS_NAME_TACKLE"] = "Fish"
-	L["STATUS_NAME_COOKING"] = "Cook"
-	L["STATUS_NAME_TOY"] = "Toy"
 	L["STATUS_NAME_REAGENTBANK"] = "Rgt"
+	L["STATUS_NAME_TACKLE"] = "Fish"
+	L["STATUS_NAME_TOKEN"] = "Tkn"
+	L["STATUS_NAME_TOY"] = "Toy"
 	
 	
 --	main menu
@@ -363,13 +364,15 @@ if not L then return end
 	
 	L["CONFIG_SETTINGS_ITEMS_PADDING_TEXT"] = "set the amount of space to add between item slots"
 	L["CONFIG_SETTINGS_ITEMS_HIDDEN"] = "Show hidden"
-	L["CONFIG_SETTINGS_ITEMS_HIDDEN_TEXT"] = "show hidden categories"
+	L["CONFIG_SETTINGS_ITEMS_HIDDEN_TEXT"] = "toggle hidden categories and stacks"
 	L["CONFIG_SETTINGS_ITEMS_FADE"] = "Fade offline"
 	L["CONFIG_SETTINGS_ITEMS_FADE_TEXT"] = "fade offline items"
 	L["CONFIG_SETTINGS_ITEMS_TINT_USABLE"] = "Tint Unusable"
 	L["CONFIG_SETTINGS_ITEMS_TINT_USABLE_TEXT"] = "tint unusable items red"
 	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW"] = "Item Level"
 	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW_TEXT"] = "show item level for equippable items"
+	L["CONFIG_SETTINGS_ITEMS_COMPRESS"] = "Stack Limit"
+	L["CONFIG_SETTINGS_ITEMS_COMPRESS_TEXT"] = "only show the first x stacks of an item and hide the rest (use show hidden items to temporarily see all stacks)\nset to zero to always display all stacks\n\nNote: displayed stacks may not be the newest or largest"
 	
 	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = "Display cooldowns for items in the %1$s window"
 	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = "Update on GCD"
@@ -412,6 +415,8 @@ if not L then return end
 	L["CONFIG_SETTINGS_EMPTY_STATUS"] = "Display Format"
 	L["CONFIG_SETTINGS_EMPTY_FIRST"] = "First Only"
 	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = "only show the first x amount of empty slots of each type (may require a refresh to update)\n\nset to zero to show all empty slots"
+	L["CONFIG_SETTINGS_EMPTY_POSITION"] = "Sort Position"
+	L["CONFIG_SETTINGS_EMPTY_POSITION_TEXT"] = "Enabled: Empty slots are sorted first alphabetically\n\nDisabled: empty slots are sorted last alphabetically"
 	
 	
 -- sorting
@@ -634,7 +639,8 @@ if not L then return end
 	L["NO_DATA_AVAILABLE"] = "No Data Available"
 	L["TOOLTIP_PURCHASE_BANK_BAG_SLOT"] = "Click to purchase the next available bank bag slot."
 	L["TOOLTIP_PURCHASE_BANK_TAB_REAGENT"] = "Click to purchase the reagent bank tab."
-	L["HEIGHT"] = "Height"
+	L["LABEL"] = "Label"
+	L["ABORTED"] = "Aborted"
 	
 	
 --	libdatabroker

@@ -51,7 +51,7 @@ if not L then return end
 	
 	
 --	restack
---	L["RESTACK"] = "압축과 쌓기"
+	L["RESTACK"] = "압축과 쌓기"
 	L["RESTACK_TEXT"] = "나뉘어진 더미를 하나로 압축하고 빈 칸 없이 채웁니다."
 --	L["RESTACK_FAIL_WAIT"] = ""
 --	L["RESTACK_FAIL_ACCESS"] = ""
@@ -82,11 +82,13 @@ if not L then return end
 	
 --	bag names - used to name the empty slots in the status frame
 	L["STATUS_NAME_BAG"] = "가방"
+--	L["STATUS_NAME_COOKING"] = ""
 --	L["STATUS_NAME_CRITTER"] = ""
 	L["STATUS_NAME_ENCHANTING"] = "마부"
 	L["STATUS_NAME_ENGINEERING"] = "기공"
 --	L["STATUS_NAME_GEAR"] = ""
 	L["STATUS_NAME_GEM"] = "보석"
+--	L["STATUS_NAME_HEIRLOOM"] = ""
 	L["STATUS_NAME_HERB"] = "약초"
 	L["STATUS_NAME_INSCRIPTION"] = "주각"
 	L["STATUS_NAME_KEY"] = "열쇠"
@@ -94,9 +96,9 @@ if not L then return end
 --	L["STATUS_NAME_MAIL"] = ""
 	L["STATUS_NAME_MINING"] = "광물"
 	L["STATUS_NAME_MOUNT"] = "탈것"
-	L["STATUS_NAME_TOKEN"] = "토큰"
+--	L["STATUS_NAME_REAGENTBANK"] = ""
 --	L["STATUS_NAME_TACKLE"] = ""
---	L["STATUS_NAME_COOKING"] = ""
+	L["STATUS_NAME_TOKEN"] = "토큰"
 --	L["STATUS_NAME_TOY"] = ""
 	
 	
@@ -168,6 +170,7 @@ if not L then return end
 	L["MENU_BAR_CATEGORY_HIDDEN_TEXT"] = "해당 분류의 숨겨진 상태를 전환하려면 클릭하세요.\n\n숨겨진 분류의 아이템은 정상 모드에서 표시되지 않습니다."
 --	L["MENU_BAR_CATEGORY_MOVE_START_TEXT"] = ""
 --	L["MENU_BAR_CATEGORY_MOVE_COMPLETE_TEXT"] = ""
+--	L["MENU_BAR_BAG_ASSIGN_TEXT"] = ""
 --	L["MENU_BAR_OPTIONS"] = ""
 	L["MENU_BAR_CLEAR_TEXT"] = "해당 바의 기본 분류를 제외하고 현재 지정된 모든 분류를 제거합니다."
 	L["MENU_BAR_INSERT_TEXT"] = "모든 분류을 위로 이동시키고 빈 바를 삽입합니다."
@@ -205,6 +208,8 @@ if not L then return end
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_LOW"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_MEDIUM"] = ""
 --	L["CONFIG_SYSTEM_FRAMESTRATA_LEVEL_HIGH"] = ""
+	
+--	L["CONFIG_SYSTEM_RESTACK_TEXT"] = ""
 	
 --	L["CONFIG_SYSTEM_TOOLTIP"] = ""
 --	L["CONFIG_SYSTEM_TOOLTIP_ENABLE_TEXT"] = ""
@@ -366,6 +371,8 @@ if not L then return end
 --	L["CONFIG_SETTINGS_ITEMS_TINT_USABLE_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_ITEMLEVEL_SHOW_TEXT"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS"] = ""
+--	L["CONFIG_SETTINGS_ITEMS_COMPRESS_TEXT"] = ""
 	
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_SHOW_TEXT"] = ""
 --	L["CONFIG_SETTINGS_ITEMS_COOLDOWN_GLOBAL"] = ""
@@ -408,6 +415,8 @@ if not L then return end
 --	L["CONFIG_SETTINGS_EMPTY_STATUS"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_POSITION_TEXT"] = ""
 	
 	
 -- sorting
@@ -415,6 +424,8 @@ if not L then return end
 	
 	L["CONFIG_SORTING_SORT"] = "정렬"
 	
+--	L["CONFIG_SORTING_METHOD"] = ""
+--	L["CONFIG_SORTING_METHODS"] = ""
 --	L["CONFIG_SORTING_METHOD_TEXT"] = ""
 	L["CONFIG_SORTING_METHOD_BAGSLOT"] = "가방 / 칸 순"
 	L["CONFIG_SORTING_METHOD_BAGSLOT_TEXT"] = "인텐토리를 가방과 칸 번호순으로 정렬합니다."
@@ -422,6 +433,7 @@ if not L then return end
 	L["CONFIG_SORTING_METHOD_USER_TEXT"] = "인벤토리를 아이템의 이름순으로 정렬합니다."
 	
 --	L["CONFIG_SORTING_BAG"] = ""
+--	L["CONFIG_SORTING_BAGS"] = ""
 --	L["CONFIG_SORTING_BAG_TEXT"] = ""
 	
 	L["CONFIG_SORTING_INCLUDE_NAME"] = "아이템 이름"
@@ -627,6 +639,8 @@ if not L then return end
 --	L["NO_DATA_AVAILABLE"] = ""
 --	L["TOOLTIP_PURCHASE_BANK_BAG_SLOT"] = ""
 --	L["TOOLTIP_PURCHASE_BANK_TAB_REAGENT"] = ""
+--	L["LABEL"] = ""
+--	L["ABORTED"] = ""
 	
 	
 -- libdatabroker

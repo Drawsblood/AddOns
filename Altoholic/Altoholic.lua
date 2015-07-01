@@ -4,19 +4,11 @@ Written by : Thaoky, EU-Marécages de Zangar
 
 local addonName = ...
 local addon = _G[addonName]
+local colors = addon.Colors
 
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
-local BI = LibStub("LibBabble-Inventory-3.0"):GetLookupTable()
 local LCI = LibStub("LibCraftInfo-1.0")
 local DS
-
-local WHITE		= "|cFFFFFFFF"
-local RED		= "|cFFFF0000"
-local GREEN		= "|cFF00FF00"
-local YELLOW	= "|cFFFFFF00"
-local ORANGE	= "|cFFFF7F00"
-local TEAL		= "|cFF00FF9A"
-local GOLD		= "|cFFFFD700"
 
 local THIS_ACCOUNT = "Default"
 
@@ -25,10 +17,10 @@ local function InitLocalization()
 	-- in versions prior to 3.1.003, they were initialized through global constants named XML_ALTO_???
 	-- the strings stayed in memory for no reason, and could not be included in the automated localization offered by curse, hence the change of approach.
 	
-	AltoholicMinimapButton.tooltip = format("%s\n%s\n%s",	addonName, WHITE..L["Left-click to |cFF00FF00open"], WHITE..L["Right-click to |cFF00FF00drag"] )
+	AltoholicMinimapButton.tooltip = format("%s\n%s\n%s",	addonName, colors.white..L["Left-click to |cFF00FF00open"], colors.white..L["Right-click to |cFF00FF00drag"] )
 	
 	AltoAccountSharing_InfoButton.tooltip = format("%s|r\n%s\n%s\n\n%s",
-		WHITE..L["Account Name"], 
+		colors.white..L["Account Name"], 
 		L["Enter an account name that will be\nused for |cFF00FF00display|r purposes only."],
 		L["This name can be anything you like,\nit does |cFF00FF00NOT|r have to be the real account name."],
 		L["This field |cFF00FF00cannot|r be left empty."])
@@ -40,9 +32,9 @@ local function InitLocalization()
 	
 	AltoAccountSharingName:SetText(L["Account Name"])
 	AltoAccountSharingText1:SetText(L["Send account sharing request to:"])
-	AltoAccountSharingText2:SetText(ORANGE.."Available Content")
-	AltoAccountSharingText3:SetText(ORANGE.."Size")
-	AltoAccountSharingText4:SetText(ORANGE.."Date")
+	AltoAccountSharingText2:SetText(colors.orange.."Available Content")
+	AltoAccountSharingText3:SetText(colors.orange.."Size")
+	AltoAccountSharingText4:SetText(colors.orange.."Date")
 	AltoAccountSharing_UseNameText:SetText(L["Character"])
 	
 	AltoholicFrameTotals:SetText(L["Totals"])
@@ -191,7 +183,7 @@ function AuctionFrameBrowse_UpdateHook()
 		if link and not link:match("battlepet:(%d+)") then		-- if there's a valid item link in this slot ..
 			local itemID = addon:GetIDFromLink(link)
 			local _, _, _, _, _, itemType, itemSubType = GetItemInfo(itemID)
-			if itemType == BI["Recipe"] and itemSubType ~= BI["Book"] then		-- is it a recipe ?
+			if itemType == L["ITEM_TYPE_RECIPE"] and itemSubType ~= L["ITEM_SUBTYPE_BOOK"] then		-- is it a recipe ?
 				
 				local _, couldLearn, willLearn = addon:GetRecipeOwners(itemSubType, link, addon:GetRecipeLevel(link))
 				local tex
@@ -279,7 +271,7 @@ local function MerchantFrame_UpdateMerchantInfoHook()
 				-- also applies to garrison blueprints
 				if IsBOPItemKnown(itemID) then		-- recipe is bop and already known, useless to alts : red.
 					r, g, b = 1, 0, 0
-				elseif itemType == BI["Recipe"] and itemSubType ~= BI["Book"] then		-- is it a recipe ?
+				elseif itemType == L["ITEM_TYPE_RECIPE"] and itemSubType ~= L["ITEM_SUBTYPE_BOOK"] then		-- is it a recipe ?
 					local _, couldLearn, willLearn = addon:GetRecipeOwners(itemSubType, link, addon:GetRecipeLevel(link))
 					if #couldLearn == 0 and #willLearn == 0 then		-- nobody could learn the recipe, neither now nor later : red
 						r, g, b = 1, 0, 0
@@ -329,8 +321,9 @@ function addon:OnEnable()
 
 	InitLocalization()
 	addon:SetupOptions()
+	-- Only needed in debug
+	-- addon.Profiler:Init()
 	addon.Tasks:Init()
-	addon.Profiler:Init()
 	addon.Events:Init()
 	addon:InitTooltip()
 
@@ -340,7 +333,7 @@ function addon:OnEnable()
 	Orig_MerchantFrame_UpdateMerchantInfo = MerchantFrame_UpdateMerchantInfo
 	MerchantFrame_UpdateMerchantInfo = MerchantFrame_UpdateMerchantInfoHook
 	
-	AltoholicFrameName:SetText("Altoholic |cFFFFFFFF".. addon.Version .. " by |cFF69CCF0Thaoky")
+	AltoholicFrameName:SetText(format("Altoholic %s%s by %sThaoky", colors.white, addon.Version, colors.classMage))
 
 	local realm = GetRealmName()
 	local player = UnitName("player")
@@ -376,29 +369,24 @@ end
 
 function addon:ToggleUI()
 	if (AltoholicFrame:IsVisible()) then
-		AltoholicFrame:Hide();
+		AltoholicFrame:Hide()
 	else
-		AltoholicFrame:Show();
+		AltoholicFrame:Show()
 	end
 end
 
 function addon:OnShow()
-	SetPortraitTexture(AltoholicFramePortrait, "player");	
+	SetPortraitTexture(AltoholicFramePortrait, "player")
 	
 	if not addon.Tabs.current then
-		addon.Tabs:OnClick(1)
-		addon.Characters:BuildList()
-		addon.Characters:BuildView()
-		addon.Tabs.Summary:MenuItem_OnClick(1)
-	elseif addon.Tabs.current == 1 then
-		addon.Characters:BuildList()
-		addon.Characters:BuildView()
-		addon.Tabs.Summary:Refresh()
+		addon.Tabs:OnClick("Summary")
+		addon.Tabs.Summary:MenuItem_OnClick(addon:GetOption("UI.Tabs.Summary.CurrentMode"))
 	end
 end
 
 
 -- *** Utility functions ***
+
 function Altoholic:ScrollFrameUpdate(desc)
 	assert(type(desc) == "table")		-- desc is the table that contains a standardized description of the scrollframe
 	
@@ -411,19 +399,14 @@ function Altoholic:ScrollFrameUpdate(desc)
 		_G[ entry..i ]:Hide()
 	end
 	
-	local offset = FauxScrollFrame_GetOffset( _G[ frame.."ScrollFrame" ] )
+	local scrollFrame = _G[ frame.."ScrollFrame" ]
+	local offset = scrollFrame:GetOffset()
+
 	-- call the update handler
 	desc:Update(offset, entry, desc)
 	
 	local last = (desc:GetSize() < desc.NumLines) and desc.NumLines or desc:GetSize()
-	FauxScrollFrame_Update( _G[ frame.."ScrollFrame" ], last, desc.NumLines, desc.LineHeight);
-end
-
-function Altoholic:ClearScrollFrame(name, entry, lines, height)
-	for i=1, lines do					-- Hides all entries of the scrollframe, and updates it accordingly
-		_G[ entry..i ]:Hide()
-	end
-	FauxScrollFrame_Update( name, lines, lines, height);
+	scrollFrame:Update(last, desc.NumLines, desc.LineHeight);
 end
 
 function addon:Item_OnEnter(frame)
@@ -562,14 +545,14 @@ function addon:GetTimeString(seconds)
 	local minutes = floor(seconds / 60);
 	seconds = mod(seconds, 60)
 
-	return format("%s|rd %s|rh %s|rm", WHITE..days, WHITE..hours, WHITE..minutes)
+	return format("%s|rd %s|rh %s|rm", colors.white..days, colors.white..hours, colors.white..minutes)
 end
 
 function addon:GetFactionColour(faction)
 	if faction == "Alliance" then
 		return "|cFF2459FF"
 	else
-		return RED
+		return colors.red
 	end
 end
 
@@ -580,11 +563,11 @@ end
 function Altoholic:FormatDelay(timeStamp)
 	-- timeStamp = value when time() was last called for a given variable (ex: last time the mailbox was checked)
 	if not timeStamp then
-		return YELLOW .. NEVER
+		return colors.yellow .. NEVER
 	end
 	
 	if timeStamp == 0 then
-		return YELLOW .. "N/A"
+		return colors.yellow .. "N/A"
 	end
 	
 	local seconds = (time() - timeStamp)
@@ -669,7 +652,7 @@ function addon:ListCharsOnQuest(questName, player, tooltip)
 	
 	if #CharsOnQuest > 0 then
 		tooltip:AddLine(" ",1,1,1);
-		tooltip:AddLine(GREEN .. L["Are also on this quest:"],1,1,1);
+		tooltip:AddLine(colors.green .. L["Are also on this quest:"],1,1,1);
 		tooltip:AddLine(table.concat(CharsOnQuest, "\n"),1,1,1);
 	end
 end
@@ -694,36 +677,19 @@ function addon:ShowWidgetTooltip(frame)
 	AltoTooltip:Show(); 
 end
 
-function addon:DrawCharacterTooltip(self, character)
-	local name = DS:GetColoredCharacterName(character)
-	if not name then return end
+function addon:DrawFollowerTooltip(frame)
+	local character = frame.key
+	if not character then return end
 
-	AltoTooltip:SetOwner(self, "ANCHOR_LEFT");
-	AltoTooltip:ClearLines();
-	AltoTooltip:AddDoubleLine(name, DS:GetColoredCharacterFaction(character))
-
-	AltoTooltip:AddLine(format("%s %s |r%s %s", L["Level"], 
-		GREEN..DS:GetCharacterLevel(character), DS:GetCharacterRace(character),	DS:GetCharacterClass(character)),1,1,1)
-
-	local zone, subZone = DS:GetLocation(character)
-	AltoTooltip:AddLine(format("%s: %s |r(%s|r)", L["Zone"], GOLD..zone, GOLD..subZone),1,1,1)
+	-- get the follower link
+	local link = DataStore:GetFollowerLink(character, frame.followerID)
+	if not link then return end
 	
-	local restXP = DS:GetRestXP(character)
-	if restXP and restXP > 0 then
-		AltoTooltip:AddLine(format("%s: %s", L["Rest XP"], GREEN..restXP),1,1,1)
-	end
-	
-	AltoTooltip:AddLine("Average iLevel: " .. GREEN .. format("%.1f", DS:GetAverageItemLevel(character)),1,1,1);	
-
-	if IsAddOnLoaded("DataStore_Achievements") then
-		local numAchievements = DS:GetNumCompletedAchievements(character) or 0
-		if numAchievements > 0 then
-			AltoTooltip:AddLine(ACHIEVEMENTS_COMPLETED ..": " .. GREEN .. DS:GetNumCompletedAchievements(character) .. "/"..DS:GetNumAchievements(character))
-			AltoTooltip:AddLine(ACHIEVEMENT_TITLE ..": " .. GREEN .. DS:GetNumAchievementPoints(character))
-		end
-	end
-	
-	AltoTooltip:Show();
+	-- toggle the tooltip, use blizzard's own function for that
+	local _, garrisonFollowerID, quality, level, itemLevel, ability1, ability2, ability3, ability4, trait1, trait2, trait3, trait4 = strsplit(":", link);
+	FloatingGarrisonFollowerTooltip:ClearAllPoints()
+	FloatingGarrisonFollowerTooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT", 1, 1)
+	FloatingGarrisonFollower_Toggle(tonumber(garrisonFollowerID), tonumber(quality), tonumber(level), tonumber(itemLevel), tonumber(ability1), tonumber(ability2), tonumber(ability3), tonumber(ability4), tonumber(trait1), tonumber(trait2), tonumber(trait3), tonumber(trait4))
 end
 
 function addon:SetMsgBoxHandler(func, arg1, arg2)
@@ -766,6 +732,35 @@ function addon:DDM_Initialize(frame, func)
 	frame.initialize = func
 end
 
+local ICON_CHARACTERS_ALLIANCE = "Interface\\Icons\\Achievement_Character_Gnome_Female"
+local ICON_CHARACTERS_HORDE = "Interface\\Icons\\Achievement_Character_Orc_Male"
+-- mini easter egg icons, if you read the code using these, please don't spoil it :)
+local ICON_CHARACTERS_MIDSUMMER = "Interface\\Icons\\INV_Misc_Toy_07"
+local ICON_CHARACTERS_HALLOWSEND_ALLIANCE = "Interface\\Icons\\INV_Mask_06"
+local ICON_CHARACTERS_HALLOWSEND_HORDE = "Interface\\Icons\\INV_Mask_03"
+local ICON_CHARACTERS_DOTD_ALLIANCE = "Interface\\Icons\\INV_Misc_Bone_HumanSkull_02"
+local ICON_CHARACTERS_DOTD_HORDE = "Interface\\Icons\\INV_Misc_Bone_OrcSkull_01"
+local ICON_CHARACTERS_WINTERVEIL_ALLIANCE = "Interface\\Icons\\Achievement_WorldEvent_LittleHelper"
+local ICON_CHARACTERS_WINTERVEIL_HORDE = "Interface\\Icons\\Achievement_WorldEvent_XmasOgre"
+
+function addon:GetCharacterIcon()
+	local faction = UnitFactionGroup("player")
+	local day = (tonumber(date("%m")) * 100) + tonumber(date("%d"))	-- ex: dec 15 = 1215, for easy tests below
+	local icon = (faction == "Alliance") and ICON_CHARACTERS_ALLIANCE or ICON_CHARACTERS_HORDE
+	
+	if (day >= 1215) or (day <= 102) then				-- winter veil
+		icon = (faction == "Alliance") and ICON_CHARACTERS_WINTERVEIL_ALLIANCE or ICON_CHARACTERS_WINTERVEIL_HORDE
+	elseif (day >= 621) and (day <= 704) then			-- midsummer
+		icon = ICON_CHARACTERS_MIDSUMMER
+	elseif (day >= 1018) and (day <= 1031) then		-- hallow's end
+		icon = (faction == "Alliance") and ICON_CHARACTERS_HALLOWSEND_ALLIANCE or ICON_CHARACTERS_HALLOWSEND_HORDE
+	elseif (day >= 1101) and (day <= 1102) then		-- day of the dead
+		icon = (faction == "Alliance") and ICON_CHARACTERS_DOTD_ALLIANCE or ICON_CHARACTERS_DOTD_HORDE
+	end
+	
+	return icon
+end
+
 
 -- ** Calendar stuff **
 local calendarFirstWeekday = 1
@@ -799,14 +794,14 @@ end
 
 
 -- ** Equipment ** 
--- 02/09/2012 : Global to the addon, should be loaded in the core, ideally code should be in its own file. This will happen later.
+-- 02/09/2012 : Global to the add-on, should be loaded in the core, ideally code should be in its own file. This will happen later.
 
 addon.Equipment = {}
 
 local ns = addon.Equipment		-- ns = namespace
 
 -- These two tables are necessary to find equivalences between INVTYPEs returned by GetItemInfo and the actual equipment slots.
--- For instance, the "ranged" slot can contain bows/guns/wans/relics/thrown weapons.
+-- For instance, the "ranged" slot can contain bows/guns/wands/relics/thrown weapons.
 local inventoryTypes = {
 	["INVTYPE_HEAD"] = 1,		-- 1 means first entry in the EquipmentSlots table (just below this one)
 	["INVTYPE_SHOULDER"] = 2,
@@ -835,47 +830,46 @@ local inventoryTypes = {
 }
 
 local slotNames = {
-	[1] = BI["Head"],			-- "INVTYPE_HEAD" 
-	[2] = BI["Shoulder"],	-- "INVTYPE_SHOULDER"
-	[3] = BI["Chest"],		-- "INVTYPE_CHEST",  "INVTYPE_ROBE"
-	[4] = BI["Wrist"],		-- "INVTYPE_WRIST"
-	[5] = BI["Hands"],		-- "INVTYPE_HAND"
-	[6] = BI["Waist"],		-- "INVTYPE_WAIST"
-	[7] = BI["Legs"],			-- "INVTYPE_LEGS"
-	[8] = BI["Feet"],			-- "INVTYPE_FEET"
-	
-	[9] = BI["Neck"],			-- "INVTYPE_NECK"
-	[10] = BI["Back"],		-- "INVTYPE_CLOAK"
-	[11] = BI["Ring"],		-- "INVTYPE_FINGER"
-	[12] = BI["Trinket"],	-- "INVTYPE_TRINKET"
-	[13] = BI["One-Hand"],	-- "INVTYPE_WEAPON"
-	[14] = BI["Two-Hand"],	-- "INVTYPE_2HWEAPON"
-	[15] = BI["Main Hand"],	-- "INVTYPE_WEAPONMAINHAND"
-	[16] = BI["Off Hand"],	-- "INVTYPE_WEAPONOFFHAND", "INVTYPE_HOLDABLE"
-	[17] = BI["Shield"],		-- "INVTYPE_SHIELD"
-	[18] = BI["Ranged"]		-- "INVTYPE_RANGED",  "INVTYPE_THROWN", "INVTYPE_RANGEDRIGHT", "INVTYPE_RELIC"
+	[1] = INVTYPE_HEAD,
+	[2] = INVTYPE_SHOULDER,
+	[3] = INVTYPE_CHEST,
+	[4] = INVTYPE_WRIST,
+	[5] = INVTYPE_HAND,
+	[6] = INVTYPE_WAIST,
+	[7] = INVTYPE_LEGS,
+	[8] = INVTYPE_FEET,
+	[9] = INVTYPE_NECK,
+	[10] = INVTYPE_CLOAK,
+	[11] = INVTYPE_FINGER,
+	[12] = INVTYPE_TRINKET,
+	[13] = INVTYPE_WEAPON,
+	[14] = INVTYPE_2HWEAPON,
+	[15] = INVTYPE_WEAPONMAINHAND,
+	[16] = INVTYPE_WEAPONOFFHAND,
+	[17] = INVTYPE_SHIELD,
+	[18] = INVTYPE_RANGED
 }
 
 local slotTypeInfo = {
-	{ color = "|cFF69CCF0", name = BI["Head"] },
-	{ color = "|cFFABD473", name = BI["Neck"] },
-	{ color = "|cFF69CCF0", name = BI["Shoulder"] },
-	{ color = WHITE, name = BI["Shirt"] },
-	{ color = "|cFF69CCF0", name = BI["Chest"] },
-	{ color = "|cFF69CCF0", name = BI["Waist"] },
-	{ color = "|cFF69CCF0", name = BI["Legs"] },
-	{ color = "|cFF69CCF0", name = BI["Feet"] },
-	{ color = "|cFF69CCF0", name = BI["Wrist"] },
-	{ color = "|cFF69CCF0", name = BI["Hands"] },
-	{ color = ORANGE, name = BI["Ring"] .. " 1" },
-	{ color = ORANGE, name = BI["Ring"] .. " 2" },
-	{ color = ORANGE, name = BI["Trinket"] .. " 1" },
-	{ color = ORANGE, name = BI["Trinket"] .. " 2" },
-	{ color = "|cFFABD473", name = BI["Back"] },
-	{ color = "|cFFFFFF00", name = BI["Main Hand"] },
-	{ color = "|cFFFFFF00", name = BI["Off Hand"] },
-	{ color = "|cFFABD473", name = BI["Ranged"] },
-	{ color = WHITE, name = BI["Tabard"] }
+	{ color = colors.classMage, name = INVTYPE_HEAD },
+	{ color = colors.classHunter, name = INVTYPE_NECK },
+	{ color = colors.classMage, name = INVTYPE_SHOULDER },
+	{ color = colors.white, name = INVTYPE_BODY },
+	{ color = colors.classMage, name = INVTYPE_CHEST },
+	{ color = colors.classMage, name = INVTYPE_WAIST },
+	{ color = colors.classMage, name = INVTYPE_LEGS },
+	{ color = colors.classMage, name = INVTYPE_FEET },
+	{ color = colors.classMage, name = INVTYPE_WRIST },
+	{ color = colors.classMage, name = INVTYPE_HAND },
+	{ color = colors.orange, name = INVTYPE_FINGER .. " 1" },
+	{ color = colors.orange, name = INVTYPE_FINGER .. " 2" },
+	{ color = colors.orange, name = INVTYPE_TRINKET .. " 1" },
+	{ color = colors.orange, name = INVTYPE_TRINKET .. " 2" },
+	{ color = colors.classHunter, name = INVTYPE_CLOAK },
+	{ color = colors.yellow, name = INVTYPE_WEAPONMAINHAND },
+	{ color = colors.yellow, name = INVTYPE_WEAPONOFFHAND },
+	{ color = colors.classHunter, name = INVTYPE_RANGED },
+	{ color = colors.white, name = INVTYPE_TABARD }
 }
 
 function ns:GetSlotName(slot)

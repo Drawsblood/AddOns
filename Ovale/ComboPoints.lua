@@ -17,17 +17,15 @@ local OvaleProfiler = Ovale.OvaleProfiler
 -- Forward declarations for module dependencies.
 local OvaleAura = nil
 local OvaleData = nil
+local OvaleEquipment = nil
 local OvaleFuture = nil
-local OvaleGUID = nil
+local OvalePaperDoll = nil
 local OvaleSpellBook = nil
 local OvaleState = nil
 
 local tinsert = table.insert
 local tremove = table.remove
 local API_GetTime = GetTime
-local API_UnitCanAttack = UnitCanAttack
-local API_UnitClass = UnitClass
-local API_UnitGUID = UnitGUID
 local API_UnitPower = UnitPower
 local MAX_COMBO_POINTS = MAX_COMBO_POINTS
 local UNKNOWN = UNKNOWN
@@ -37,10 +35,8 @@ OvaleDebug:RegisterDebugging(OvaleComboPoints)
 -- Register for profiling.
 OvaleProfiler:RegisterProfiling(OvaleComboPoints)
 
--- Player's class.
-local _, self_class = API_UnitClass("player")
 -- Player's GUID.
-local self_guid = nil
+local self_playerGUID = nil
 
 -- Rogue's Anticipation talent.
 local ANTICIPATION = 115189
@@ -51,6 +47,10 @@ local self_hasAnticipation = false
 -- Rogue's Ruthlessness passive spell.
 local RUTHLESSNESS = 14161
 local self_hasRuthlessness = false
+
+-- Envenom spell ID.
+local ENVENOM = 32645
+local self_hasAssassination4pT17 = false
 
 -- Queue of pending combo point events.
 local self_pendingComboEvents = {}
@@ -77,6 +77,7 @@ local function AddPendingComboEvent(atTime, spellId, guid, reason, combo)
 		combo = combo,
 	}
 	tinsert(self_pendingComboEvents, comboEvent)
+	Ovale.refreshNeeded[self_playerGUID] = true
 end
 
 -- Remove all pending combo point events caused by the given spell on the target GUID.
@@ -95,44 +96,10 @@ local function RemovePendingComboEvents(atTime, spellId, guid, reason, combo)
 			end
 			count = count + 1
 			tremove(self_pendingComboEvents, k)
+			Ovale.refreshNeeded[self_playerGUID] = true
 		end
 	end
 	return count
-end
-
--- Manage spellcast.combo information.
-local function SaveToSpellcast(spellcast, atTime)
-	local spellId = spellcast.spellId
-	if spellId then
-		local si = OvaleData.spellInfo[spellId]
-		if si.combo == "finisher" then
-			local target = OvaleGUID:GetUnitId(spellcast.target)
-			local combo = OvaleData:GetSpellInfoProperty(spellId, atTime, "combo", target)
-			if combo == "finisher" then
-				local min_combo = si.min_combo or si.mincombo or 1
-				if OvaleComboPoints.combo >= min_combo then
-					combo = OvaleComboPoints.combo
-				else
-					combo = min_combo
-				end
-			elseif combo == 0 then
-				-- If this is a finisher that costs no combo points, then treat it as a maximum combo-point finisher.
-				combo = MAX_COMBO_POINTS
-			end
-			spellcast.combo = combo
-		end
-	end
-end
-
-local function UpdateFromSpellcast(dest, spellcast)
-	if spellcast.combo then
-		dest.combo = spellcast.combo
-	end
-end
-
-do
-	self_updateSpellcastInfo.SaveToSpellcast = SaveToSpellcast
-	self_updateSpellcastInfo.UpdateFromSpellcast = UpdateFromSpellcast
 end
 --</private-static-methods>
 
@@ -141,34 +108,37 @@ function OvaleComboPoints:OnInitialize()
 	-- Resolve module dependencies.
 	OvaleAura = Ovale.OvaleAura
 	OvaleData = Ovale.OvaleData
+	OvaleEquipment = Ovale.OvaleEquipment
 	OvaleFuture = Ovale.OvaleFuture
-	OvaleGUID = Ovale.OvaleGUID
+	OvalePaperDoll = Ovale.OvalePaperDoll
 	OvaleSpellBook = Ovale.OvaleSpellBook
 	OvaleState = Ovale.OvaleState
 end
 
 function OvaleComboPoints:OnEnable()
-	self_guid = API_UnitGUID("player")
-	if self_class == "ROGUE" or self_class == "DRUID" then
+	self_playerGUID = Ovale.playerGUID
+	if Ovale.playerClass == "ROGUE" or Ovale.playerClass == "DRUID" then
 		self:RegisterEvent("PLAYER_ENTERING_WORLD", "Update")
 		self:RegisterEvent("PLAYER_TARGET_CHANGED")
 		self:RegisterEvent("UNIT_COMBO_POINTS")
+		self:RegisterEvent("Ovale_EquipmentChanged")
 		self:RegisterMessage("Ovale_SpellFinished")
 		self:RegisterMessage("Ovale_TalentsChanged")
 		OvaleData:RegisterRequirement("combo", "RequireComboPointsHandler", self)
+		OvaleFuture:RegisterSpellcastInfo(self)
 		OvaleState:RegisterState(self, self.statePrototype)
-		OvaleFuture:RegisterSpellcastInfo(self_updateSpellcastInfo)
 	end
 end
 
 function OvaleComboPoints:OnDisable()
-	if self_class == "ROGUE" or self_class == "DRUID" then
+	if Ovale.playerClass == "ROGUE" or Ovale.playerClass == "DRUID" then
 		OvaleState:UnregisterState(self)
-		OvaleFuture:UnregisterSpellcastInfo(self_updateSpellcastInfo)
+		OvaleFuture:UnregisterSpellcastInfo(self)
 		OvaleData:UnregisterRequirement("combo")
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 		self:UnregisterEvent("PLAYER_TARGET_CHANGED")
 		self:UnregisterEvent("UNIT_COMBO_POINTS")
+		self:UnregisterEvent("Ovale_EquipmentChanged")
 		self:UnregisterMessage("Ovale_SpellFinished")
 		self:UnregisterMessage("Ovale_TalentsChanged")
 	end
@@ -190,7 +160,7 @@ function OvaleComboPoints:UNIT_COMBO_POINTS(event, unitId)
 		self:Update()
 
 		local difference = self.combo - oldCombo
-		self:Debug(true, "%s: %d -> %d.", event, oldCombo, self.combo)
+		self:DebugTimestamp("%s: %d -> %d.", event, oldCombo, self.combo)
 
 		-- Remove expired events.
 		local now = API_GetTime()
@@ -218,10 +188,14 @@ function OvaleComboPoints:UNIT_COMBO_POINTS(event, unitId)
 	end
 end
 
-function OvaleComboPoints:Ovale_SpellFinished(event, atTime, spellId, targetGUID, success)
-	self:Debug("%s (%f): Spell %d finished (%s) on %s", event, atTime, spellId, success, targetGUID or UNKNOWN)
+function OvaleComboPoints:Ovale_EquipmentChanged(event)
+	self_hasAssassination4pT17 = (Ovale.playerClass == "ROGUE" and OvalePaperDoll:IsSpecialization("assassination") and OvaleEquipment:GetArmorSetCount("T17") >= 4)
+end
+
+function OvaleComboPoints:Ovale_SpellFinished(event, atTime, spellId, targetGUID, finish)
+	self:Debug("%s (%f): Spell %d finished (%s) on %s", event, atTime, spellId, finish, targetGUID or UNKNOWN)
 	local si = OvaleData.spellInfo[spellId]
-	if si and si.combo == "finisher" and (success == "hit" or success == "critical") then
+	if si and si.combo == "finisher" and finish == "hit" then
 		self:Debug("    Spell %d hit and consumed all combo points.", spellId)
 		AddPendingComboEvent(atTime, spellId, targetGUID, "finisher", "finisher")
 		if self_hasRuthlessness and self.combo == MAX_COMBO_POINTS then
@@ -229,11 +203,15 @@ function OvaleComboPoints:Ovale_SpellFinished(event, atTime, spellId, targetGUID
 			self:Debug("    Spell %d has 100% chance to grant an extra combo point from Ruthlessness.", spellId)
 			AddPendingComboEvent(atTime, spellId, targetGUID, "Ruthlessness", 1)
 		end
-		if self_hasAnticipation and targetGUID ~= self_guid then
+		if self_hasAssassination4pT17 and spellId == ENVENOM then
+			-- The 4pT17 bonus for Assassination rogues causes Envenom to refunds 1 combo point.
+			self:Debug("    Spell %d refunds 1 combo point from Assassination 4pT17 set bonus.", spellId)
+			AddPendingComboEvent(atTime, spellId, targetGUID, "Assassination 4pT17", 1)
+		end
+		if self_hasAnticipation and targetGUID ~= self_playerGUID then
 			-- Anticipation causes offensive finishing moves to consume all Anticipation charges and to grant a combo point for each.
-			local unitId = OvaleGUID:GetUnitId(targetGUID)
-			if unitId and API_UnitCanAttack("player", unitId) then
-				local aura = OvaleAura:GetAuraByGUID(self_guid, ANTICIPATION, "HELPFUL", true)
+			if OvaleSpellBook:IsHarmfulSpell(spellId) then
+				local aura = OvaleAura:GetAuraByGUID(self_playerGUID, ANTICIPATION, "HELPFUL", true)
 				if OvaleAura:IsActiveAura(aura, atTime) then
 					self:Debug("    Spell %d hit with %d Anticipation charges.", spellId, aura.stacks)
 					AddPendingComboEvent(atTime, spellId, targetGUID, "Anticipation", aura.stacks)
@@ -244,7 +222,7 @@ function OvaleComboPoints:Ovale_SpellFinished(event, atTime, spellId, targetGUID
 end
 
 function OvaleComboPoints:Ovale_TalentsChanged(event)
-	if self_class == "ROGUE" then
+	if Ovale.playerClass == "ROGUE" then
 		self_hasAnticipation = OvaleSpellBook:GetTalentPoints(ANTICIPATION_TALENT) > 0
 		self_hasRuthlessness = OvaleSpellBook:IsKnownSpell(RUTHLESSNESS)
 	end
@@ -253,6 +231,7 @@ end
 function OvaleComboPoints:Update()
 	self:StartProfiling("OvaleComboPoints_Update")
 	self.combo = API_UnitPower("player", 4)
+	Ovale.refreshNeeded[self_playerGUID] = true
 	self:StopProfiling("OvaleComboPoints_Update")
 end
 
@@ -284,23 +263,27 @@ end
 
 -- Return the number of combo points required to cast the given spell.
 -- NOTE: Mirrored in statePrototype below.
-function OvaleComboPoints:ComboPointCost(spellId, atTime, target)
+function OvaleComboPoints:ComboPointCost(spellId, atTime, targetGUID)
 	OvaleComboPoints:StartProfiling("OvaleComboPoints_ComboPointCost")
 	local spellCost = 0
+	local spellRefund = 0
 	local si = OvaleData.spellInfo[spellId]
 	if si and si.combo then
-		local cost
-		if self.GetSpellInfoProperty then
-			cost = self.GetSpellInfoProperty(self, spellId, atTime, "combo", target)
-		else
-			cost = OvaleData:GetSpellInfoProperty(spellId, atTime, "combo", target)
-		end
+		-- Get references to mirrored methods used.
+		local GetAura, IsActiveAura
+		local GetSpellInfoProperty
+		local auraModule, dataModule
+		GetAura, auraModule = self:GetMethod("GetAura", OvaleAura)
+		IsActiveAura, auraModule = self:GetMethod("IsActiveAura", OvaleAura)
+		GetSpellInfoProperty, dataModule = self:GetMethod("GetSpellInfoProperty", OvaleData)
+
 		--[[
 			combo == 0 means the that spell uses no resources.
 			combo > 0 means that the spell generates combo points.
 			combo < 0 means that the spell costs combo points.
 			combo == "finisher" means that the spell uses all of the combo points (zeroes it out).
 		--]]
+		local cost = GetSpellInfoProperty(dataModule, spellId, atTime, "combo", targetGUID)
 		if cost == "finisher" then
 			-- This spell is a finisher so compute the cost based on the amount of resources consumed.
 			cost = self:GetComboPoints()
@@ -322,15 +305,8 @@ function OvaleComboPoints:ComboPointCost(spellId, atTime, target)
 			--]]
 			local buffExtra = si.buff_combo
 			if buffExtra then
-				local isActiveAura
-				-- Check for inherited/mirrored method first (for statePrototype).
-				if self.GetAura then
-					local aura = self.GetAura(self, "player", buffExtra, nil, true)
-					isActiveAura = self.IsActiveAura(self, aura, atTime)
-				else
-					local aura = OvaleAura:GetAura("player", buffExtra, nil, true)
-					isActiveAura = OvaleAura:IsActiveAura(aura, atTime)
-				end
+				local aura = GetAura(auraModule, "player", buffExtra, nil, true)
+				local isActiveAura = IsActiveAura(auraModule, aura, atTime)
 				if isActiveAura then
 					local buffAmount = si.buff_combo_amount or 1
 					cost = cost + buffAmount
@@ -339,18 +315,30 @@ function OvaleComboPoints:ComboPointCost(spellId, atTime, target)
 			cost = -1 * cost
 		end
 		spellCost = cost
+
+		local refundParam = "refund_combo"
+		local refund = GetSpellInfoProperty(dataModule, spellId, atTime, refundParam, targetGUID)
+		if refund == "cost" then
+			refund = spellCost
+		end
+		spellRefund = refund or 0
 	end
 	OvaleComboPoints:StopProfiling("OvaleComboPoints_ComboPointCost")
-	return spellCost
+	return spellCost, spellRefund
 end
 
 -- Run-time check that the player has enough combo points.
 -- NOTE: Mirrored in statePrototype below.
-function OvaleComboPoints:RequireComboPointsHandler(spellId, atTime, requirement, tokenIterator, target)
+function OvaleComboPoints:RequireComboPointsHandler(spellId, atTime, requirement, tokens, index, targetGUID)
 	local verified = false
-	local cost = tokenIterator()
+	-- If index isn't given, then tokens holds the actual token value.
+	local cost = tokens
+	if index then
+		cost = tokens[index]
+		index = index + 1
+	end
 	if cost then
-		cost = self:ComboPointCost(spellId, atTime, target)
+		cost = self:ComboPointCost(spellId, atTime, targetGUID)
 		if cost > 0 then
 			local power = self:GetComboPoints()
 			if power >= cost then
@@ -366,7 +354,41 @@ function OvaleComboPoints:RequireComboPointsHandler(spellId, atTime, requirement
 	else
 		Ovale:OneTimeMessage("Warning: requirement '%s' is missing a cost argument.", requirement)
 	end
-	return verified, requirement
+	return verified, requirement, index
+end
+
+-- Copy combo point information from the spellcast to the destination table.
+function OvaleComboPoints:CopySpellcastInfo(spellcast, dest)
+	if spellcast.combo then
+		dest.combo = spellcast.combo
+	end
+end
+
+-- Save combo point finisher information to the spellcast.
+function OvaleComboPoints:SaveSpellcastInfo(spellcast, atTime, state)
+	local spellId = spellcast.spellId
+	if spellId then
+		local si = OvaleData.spellInfo[spellId]
+		if si then
+			local dataModule = state or OvaleData
+			local comboPointModule = state or self
+			if si.combo == "finisher" then
+				local combo = dataModule:GetSpellInfoProperty(spellId, atTime, "combo", spellcast.target)
+				if combo == "finisher" then
+					local min_combo = si.min_combo or si.mincombo or 1
+					if comboPointModule.combo >= min_combo then
+						combo = comboPointModule.combo
+					else
+						combo = min_combo
+					end
+				elseif combo == 0 then
+					-- If this is a finisher that costs no combo points, then treat it as a maximum combo-point finisher.
+					combo = MAX_COMBO_POINTS
+				end
+				spellcast.combo = combo
+			end
+		end
+	end
 end
 --</public-static-methods>
 
@@ -400,7 +422,7 @@ function OvaleComboPoints:ResetState(state)
 	for k = 1, #self_pendingComboEvents do
 		local comboEvent = self_pendingComboEvents[k]
 		if comboEvent.reason == "Anticipation" then
-			state:RemoveAuraOnGUID(self_guid, ANTICIPATION, "HELPFUL", true, comboEvent.atTime)
+			state:RemoveAuraOnGUID(self_playerGUID, ANTICIPATION, "HELPFUL", true, comboEvent.atTime)
 			break
 		end
 	end
@@ -412,10 +434,9 @@ function OvaleComboPoints:ApplySpellAfterCast(state, spellId, targetGUID, startC
 	self:StartProfiling("OvaleComboPoints_ApplySpellAfterCast")
 	local si = OvaleData.spellInfo[spellId]
 	if si and si.combo then
-		local target = OvaleGUID:GetUnitId(targetGUID)
-		local cost = state:ComboPointCost(spellId, endCast, target)
+		local cost, refund = state:ComboPointCost(spellId, endCast, targetGUID)
 		local power = state.combo
-		power = power - cost
+		power = power - cost + refund
 		-- Clamp combo points to lower and upper limits.
 		if power <= 0 then
 			power = 0
@@ -426,10 +447,10 @@ function OvaleComboPoints:ApplySpellAfterCast(state, spellId, targetGUID, startC
 			end
 			-- Anticipation causes offensive finishing moves to consume all Anticipation charges and to grant a combo point for each.
 			if self_hasAnticipation and state.combo > 0 then
-				local aura = state:GetAuraByGUID(self_guid, ANTICIPATION, "HELPFUL", true)
+				local aura = state:GetAuraByGUID(self_playerGUID, ANTICIPATION, "HELPFUL", true)
 				if state:IsActiveAura(aura, endCast) then
 					power = power + aura.stacks
-					state:RemoveAuraOnGUID(self_guid, ANTICIPATION, "HELPFUL", true, endCast)
+					state:RemoveAuraOnGUID(self_playerGUID, ANTICIPATION, "HELPFUL", true, endCast)
 					-- Anticipation charges that are consumed to grant combo points don't overflow into new Anticipation charges.
 					if power > MAX_COMBO_POINTS then
 						power = MAX_COMBO_POINTS
@@ -449,7 +470,7 @@ function OvaleComboPoints:ApplySpellAfterCast(state, spellId, targetGUID, startC
 			if self_hasAnticipation and not si.temp_combo then
 				local stacks = power - MAX_COMBO_POINTS
 				-- Look for a pre-existing Anticipation buff and add to its stack count.
-				local aura = state:GetAuraByGUID(self_guid, ANTICIPATION, "HELPFUL", true)
+				local aura = state:GetAuraByGUID(self_playerGUID, ANTICIPATION, "HELPFUL", true)
 				if state:IsActiveAura(aura, endCast) then
 					stacks = stacks + aura.stacks
 					if stacks > MAX_COMBO_POINTS then
@@ -459,7 +480,7 @@ function OvaleComboPoints:ApplySpellAfterCast(state, spellId, targetGUID, startC
 				-- Add a new Anticipation buff with the updated start, ending, stacks information.
 				local start = endCast
 				local ending = start + ANTICIPATION_DURATION
-				aura = state:AddAuraToGUID(self_guid, ANTICIPATION, self_guid, "HELPFUL", nil, start, ending)
+				aura = state:AddAuraToGUID(self_playerGUID, ANTICIPATION, self_playerGUID, "HELPFUL", nil, start, ending)
 				aura.stacks = stacks
 			end
 			power = MAX_COMBO_POINTS
