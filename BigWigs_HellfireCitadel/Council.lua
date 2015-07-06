@@ -17,16 +17,6 @@ local horrorCount = 1
 local leapCount = 0
 
 --------------------------------------------------------------------------------
--- Localization
---
-
-local L = mod:NewLocale("enUS", true)
-if L then
-
-end
-L = mod:GetLocale()
-
---------------------------------------------------------------------------------
 -- Initialization
 --
 
@@ -59,7 +49,6 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_SUCCESS", "MarkOfTheNecromancer", 184449)
 	self:Log("SPELL_CAST_START", "Reap", 184476)
 	self:Log("SPELL_CAST_START", "NightmareVisage", 184657)
-	--self:Log("SPELL_CAST_SUCCESS", "WailingHorror", 184681)
 
 	self:Log("SPELL_AURA_APPLIED", "ReapDamage", 184652)
 	self:Log("SPELL_PERIODIC_DAMAGE", "ReapDamage", 184652)
@@ -74,7 +63,6 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_SUCCESS", "DemolishingLeapStart", 184366)
 	self:Log("SPELL_AURA_REMOVED", "DemolishingLeapStop", 184365)
 	-- Blademaster Jubei'thos
-	--self:Log("SPELL_CAST_SUCCESS", "FelBlade", 183210) -- XXX not sure if useful
 	self:Log("SPELL_CAST_SUCCESS", "MirrorImages", 183885)
 
 	self:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
@@ -87,7 +75,7 @@ function mod:OnEngage()
 	self:Bar(184681, 75, CL.count:format(self:SpellName(184681), horrorCount)) -- Wailing Horror
 	self:Bar(184358, 30) -- Gurtogg Bloodboil : Fel Rage
 	self:CDBar(184449, 6.3) -- Dia Darkwhisper : Mark of the Necromancer, 6.3-7.5
-	self:CDBar(184476, 54.6) -- Dia Darkwhisper : Reap
+	self:CDBar(184476, 67) -- Dia Darkwhisper : Reap, 66-69
 	self:CDBar(183885, 153.3) -- Blademaster Jubei'thos : Mirror Images
 	self:CDBar(184366, 225) -- Gurtogg Bloodboil : Demolishing Leap, 225-228
 end
@@ -108,11 +96,6 @@ function mod:DemolishingLeapStop(args)
 	leapCount = 0
 end
 
---function mod:FelBlade(args)
---	self:Message(args.spellId, "Attention")
---	self:Bar(args.spellId, 26)
---end
-
 function mod:MarkOfTheNecromancer(args)
 	self:Message(args.spellId, "Attention")
 	self:CDBar(args.spellId, 60) -- 60-63
@@ -121,7 +104,7 @@ end
 function mod:Reap(args)
 	self:Message(args.spellId, "Attention", "Info", CL.casting:format(args.spellName))
 	self:Bar(args.spellId, 4, CL.cast:format(args.spellName))
-	self:CDBar(args.spellId, 60) -- 60-65.5
+	self:CDBar(args.spellId, 65) -- 65-72 pretty inconsistent
 end
 
 function mod:FelRage(args)
@@ -141,10 +124,6 @@ function mod:NightmareVisage(args)
 	self:CDBar(args.spellId, 32) -- 32 - 35
 end
 
---function mod:WailingHorror(args)
---	horrorCount = horrorCount + 1
---	self:Message(args.spellId, "Urgent", "Alert", CL.count:format(args.spellName, horrorCount))
---end
 function mod:CHAT_MSG_RAID_BOSS_EMOTE(event, msg)
 	if msg:find("184681", nil, true) then
 		self:Message(184681, "Urgent", "Alert", CL.count:format(self:SpellName(184681), horrorCount))
@@ -158,7 +137,7 @@ do
 	function mod:Bloodboil(args)
 		list[#list+1] = args.destName
 		if #list == 1 then
-			self:ScheduleTimer("TargetMessage", 0.2, args.spellId, list, "Attention", "Alarm")
+			self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Attention", "Alarm")
 		end
 
 	end
@@ -166,7 +145,7 @@ end
 
 function mod:BloodboilDose(args)
 	if self:Mythic() and self:Me(args.destGUID) then
-		if args.amount >= 3 then -- XXX change 3 to something else?
+		if args.amount > 2 then -- XXX change 3 to something else?
 			self:Message(args.spellId, "Urgent", "Alert", CL.count:format(args.spellName, args.amount))
 		end
 	end
@@ -180,7 +159,7 @@ end
 
 function mod:MirrorImages(args)
 	self:Message(args.spellId, "Attention")
-	self:Bar(args.spellId, self:LFR() and 150 or 50) -- XXX 75.5 after 30% (LFR)?
+	self:Bar(args.spellId, 153)
 end
 
 do

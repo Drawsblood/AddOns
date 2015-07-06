@@ -17,18 +17,9 @@ local phase = 1
 local mobCollector = {}
 local annihilatingStrikeCount = 0
 local bulwarkCount = 0
+local mendingCount = 1
 local inverseFontTargets = {}
 local fontOnMe = nil
-
---------------------------------------------------------------------------------
--- Localization
---
-
-local L = mod:NewLocale("enUS", true)
-if L then
-	L.add_warnings = "Add Spawn Warnings"
-end
-L = mod:GetLocale()
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -55,6 +46,7 @@ function mod:GetOptions()
 		{180000, "TANK"}, -- Seal of Decay
 		{185237, "FLASH"}, -- Touch of Harm
 		{182459, "SAY", "PROXIMITY", "ICON"}, -- Edict of Condemnation
+		"stages",
 	}, {
 		[180004] = -11151, -- Stage One: Oppression
 		[180533] = -11158, -- Stage Two: Contempt
@@ -84,7 +76,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_APPLIED_DOSE", "SealOfDecay", 180000)
 	self:Log("SPELL_AURA_APPLIED", "TouchOfHarmOriginal", 185237, 180166) -- Caster: Boss; MythicID, HeroicID XXX add normal and lfr ids ::if:: they are different
 	self:Log("SPELL_AURA_APPLIED", "TouchOfHarmJumper", 185238, 180164) -- Dispelled version, caster: Environment; MythicID, HeroicID XXX add normal and lfr ids ::if:: they are different
-	self:Log("SPELL_AURA_APPLIED", "EdictOfCondemnation", 182459,185241)
+	self:Log("SPELL_AURA_APPLIED", "EdictOfCondemnation", 182459, 185241)
 	self:Log("SPELL_AURA_REMOVED", "EdictOfCondemnationRemoved", 182459, 185241)
 
 	self:Log("SPELL_CAST_SUCCESS", "AuraOfContempt", 179986) -- Phase 2
@@ -108,6 +100,8 @@ function mod:OnEngage()
 
 	annihilatingStrikeCount = 0
 	bulwarkCount = 0
+	mendingCount = 1
+	phase = 1
 
 	-- Adding all players to a list, since they are the "bad" players to Font targets (for proximity)
 	local _, _, _, mapId = UnitPosition("player")
@@ -122,12 +116,26 @@ end
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
-
-local function updateProximity()
-	if fontOnMe and #inverseFontTargets > 0 then -- stack near other font of corruptions
-		mod:OpenProximity(180526, 5, inverseFontTargets)
-	else -- stay away from all others
-		mod:OpenProximity(180526, 5)
+local proxprev, proxscheduled = 0, nil
+local function updateProximity(forceUpdate)
+	local t = GetTime()
+	if t-proxprev > 1 or forceUpdate then -- Throttle
+		proxprev = t
+		-- actual proximity code
+		if phase == 2 then
+			if fontOnMe and #inverseFontTargets > 0 then -- stack near other font of corruptions
+				mod:OpenProximity(180526, 5, inverseFontTargets)
+			else -- stay away from all others
+				mod:OpenProximity(180526, 5)
+			end
+		else
+			mod:CloseProximity(180526)
+		end
+		-- end proximity code
+	else -- we don't want to spam update, so we are doing it in 0.5s with the new data
+		if not proxscheduled then
+			proxscheduled = mod:ScheduleTimer(updateProximity, 0.5, true)
+		end
 	end
 end
 
@@ -190,9 +198,12 @@ end
 -- Stage 2
 
 function mod:AuraOfContempt()
+	phase = 2
+	self:Message("stages", "Neutral", nil, CL.phase:format(phase), false)
 	self:StopBar(180300) -- Infernal Tempest
 	self:StopBar(180260) -- Annihilating Strike
 	self:Bar(180526, 22) -- Font of Corruption, 2sec cast + 20sec timer
+	updateProximity()
 end
 
 do
@@ -205,8 +216,9 @@ do
 end
 
 function mod:HarbingersMending(args)
-	self:CDBar(180025, 11)
-	self:Message(180025, "Attention", "Info", CL.casting:format(args.spellName))
+	self:Message(180025, "Attention", "Info", CL.casting:format(CL.count:format(args.spellName, mendingCount)))
+	mendingCount = mendingCount + 1
+	self:CDBar(180025, 11, CL.count:format(args.spellName, mendingCount))
 end
 
 function mod:HarbingersMendingApplied(args)
@@ -244,10 +256,13 @@ end
 -- Stage 3
 
 function mod:AuraOfMalice()
+	phase = 3
+	self:Message("stages", "Neutral", nil, CL.phase:format(phase), false)
 	self:StopBar(180526) -- Font of Corruption
 	self:CloseProximity(180526)
 	self:Bar(180608, 40) -- Gavel of the Tyrant
 	self:Bar(180600, 10) -- Bulwark of the Tyrant
+	updateProximity()
 end
 
 function mod:GavelOfTheTyrant(args)
@@ -319,6 +334,7 @@ do
 		self:CloseProximity(182459)
 		self:PrimaryIcon(182459)
 		self:StopBar(args.spellName, args.destName)
+		updateProximity()
 	end
 end
 

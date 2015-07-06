@@ -27,7 +27,7 @@ if L then
 
 	L.gaze = "Gaze (%d)"
 
-	L.custom_off_gaze_marker = "Gaze marker"
+	L.custom_off_gaze_marker = "Mannoroth's Gaze marker"
 	L.custom_off_gaze_marker_desc = "Mark the targets of Mannoroth's Gaze with {rt1}{rt2}{rt3}, requires promoted or leader."
 	L.custom_off_gaze_marker_icon = 1
 end
@@ -64,7 +64,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_REMOVED", "MarkOfDoomRemoved", 181099)
 	self:Log("SPELL_CAST_START", "MannorothsGazeCast", 181597, 182006)
 	self:Log("SPELL_AURA_APPLIED", "MannorothsGaze", 181597, 182006)
-	self:Log("SPELL_AURA_APPLIED", "MannorothsGazeRemoved", 181597, 182006)
+	self:Log("SPELL_AURA_REMOVED", "MannorothsGazeRemoved", 181597, 182006)
 	self:Log("SPELL_CAST_START", "Shadowforce", 181799, 182084)
 	self:Log("SPELL_CAST_SUCCESS", "CurseOfTheLegionSuccess", 181275) --if _applied 'misses'
 	self:Log("SPELL_AURA_APPLIED", "CurseOfTheLegion", 181275)

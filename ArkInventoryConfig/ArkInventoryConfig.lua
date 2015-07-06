@@ -1238,7 +1238,7 @@ function ArkInventory.ConfigInternal( )
 								ArkInventory.db.profile.option.ui.search.background.colour.r = r
 								ArkInventory.db.profile.option.ui.search.background.colour.g = g
 								ArkInventory.db.profile.option.ui.search.background.colour.b = b
-								ArkInventory.db.profile.option.ui.search.background.colour.a = a
+								ArkInventory.db.profile.option.ui.search.background.colour.a = math.floor( a / 0.01 ) * 0.01
 								ArkInventory.Frame_Search_Paint( )
 							end,
 						},
@@ -1459,7 +1459,7 @@ function ArkInventory.ConfigInternal( )
 								ArkInventory.db.profile.option.ui.rules.background.colour.r = r
 								ArkInventory.db.profile.option.ui.rules.background.colour.g = g
 								ArkInventory.db.profile.option.ui.rules.background.colour.b = b
-								ArkInventory.db.profile.option.ui.rules.background.colour.a = a
+								ArkInventory.db.profile.option.ui.rules.background.colour.a = math.floor( a / 0.01 ) * 0.01
 								ArkInventoryRules.Frame_Rules_Paint( )
 							end,
 						},
@@ -2096,7 +2096,7 @@ function ArkInventory.ConfigInternalSettings( path )
 								ArkInventory.LocationOptionSetReal( loc_id, "window", "background", "colour", "r", r )
 								ArkInventory.LocationOptionSetReal( loc_id, "window", "background", "colour", "g", g )
 								ArkInventory.LocationOptionSetReal( loc_id, "window", "background", "colour", "b", b )
-								ArkInventory.LocationOptionSetReal( loc_id, "window", "background", "colour", "a", a )
+								ArkInventory.LocationOptionSetReal( loc_id, "window", "background", "colour", "a", math.floor( a / 0.01 ) * 0.01 )
 								ArkInventory.Frame_Main_Paint_All( )
 							end,
 						},
@@ -2526,8 +2526,8 @@ function ArkInventory.ConfigInternalSettings( path )
 												local loc_id = ConfigGetNodeArg( info, #info - 5 )
 												return not ArkInventory.LocationOptionGetReal( loc_id, "changer", "freespace", "show" )
 											end,
-												hasAlpha = false,
-												get = function( info )
+											hasAlpha = false,
+											get = function( info )
 												local loc_id = ConfigGetNodeArg( info, #info - 5 )
 												local r = ArkInventory.LocationOptionGetReal( loc_id, "changer", "freespace", "colour", "r" )
 												local g = ArkInventory.LocationOptionGetReal( loc_id, "changer", "freespace", "colour", "g" )
@@ -2841,7 +2841,7 @@ function ArkInventory.ConfigInternalSettings( path )
 								ArkInventory.LocationOptionSetReal( loc_id, "bar", "background", "colour", "r", r )
 								ArkInventory.LocationOptionSetReal( loc_id, "bar", "background", "colour", "g", g )
 								ArkInventory.LocationOptionSetReal( loc_id, "bar", "background", "colour", "b", b )
-								ArkInventory.LocationOptionSetReal( loc_id, "bar", "background", "colour", "a", a )
+								ArkInventory.LocationOptionSetReal( loc_id, "bar", "background", "colour", "a", math.floor( a / 0.01 ) * 0.01 )
 								ArkInventory.Frame_Bar_Paint_All( )
 							end,
 						},
@@ -3004,7 +3004,7 @@ function ArkInventory.ConfigInternalSettings( path )
 							desc = ArkInventory.Localise["CONFIG_SETTINGS_BARS_NAME_COLOUR_TEXT"],
 							type = "color",
 							hidden = function( info )
-							local loc_id = ConfigGetNodeArg( info, #info - 3 )
+								local loc_id = ConfigGetNodeArg( info, #info - 3 )
 								return not ArkInventory.LocationOptionGetReal( loc_id, "bar", "name", "show" )
 							end,
 							hasAlpha = false,
@@ -3546,6 +3546,31 @@ function ArkInventory.ConfigInternalSettings( path )
 							set = function( info, v )
 								local loc_id = ConfigGetNodeArg( info, #info - 3 )
 								ArkInventory.LocationOptionSetReal( loc_id, "slot", "empty", "border", v )
+								ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Refresh )
+							end,
+						},
+						alpha = {
+							order = 350,
+							name = ArkInventory.Localise["CONFIG_SETTINGS_EMPTY_ALPHA"],
+							desc = ArkInventory.Localise["CONFIG_SETTINGS_EMPTY_ALPHA_TEXT"],
+							type = "range",
+							min = 0,
+							max = 1,
+							step = 0.01,
+							hidden = function( info )
+								local loc_id = ConfigGetNodeArg( info, #info - 3 )
+								return ArkInventory.LocationOptionGetReal( loc_id, "slot", "empty", "icon" )
+							end,
+							get = function( info )
+								local loc_id = ConfigGetNodeArg( info, #info - 3 )
+								return ArkInventory.LocationOptionGetReal( loc_id, "slot", "empty", "alpha" ) or 1
+							end,
+							set = function( info, v )
+								local loc_id = ConfigGetNodeArg( info, #info - 3 )
+								local v = math.floor( v / 0.01 ) * 0.01
+								if v < 0 then v = 0 end
+								if v > 1 then v = 1 end
+								ArkInventory.LocationOptionSetReal( loc_id, "slot", "empty", "alpha", v )
 								ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Refresh )
 							end,
 						},

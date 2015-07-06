@@ -412,6 +412,8 @@ if not L then return end
 	L["CONFIG_SETTINGS_EMPTY_BORDER_TEXT"] = "colour empty slot borders according to their bag type"
 	L["CONFIG_SETTINGS_EMPTY_COLOUR"] = "Slot colours"
 	L["CONFIG_SETTINGS_EMPTY_COLOUR_TEXT"] = "set the border and background colour for empty %1$s slots" -- %1$s = slot name
+	L["CONFIG_SETTINGS_EMPTY_ALPHA"] = "Background alpha level"
+	L["CONFIG_SETTINGS_EMPTY_ALPHA_TEXT"] = "set the alpha level of the background for empty slots"
 	L["CONFIG_SETTINGS_EMPTY_STATUS"] = "Display Format"
 	L["CONFIG_SETTINGS_EMPTY_FIRST"] = "First Only"
 	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = "only show the first x amount of empty slots of each type (may require a refresh to update)\n\nset to zero to show all empty slots"

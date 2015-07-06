@@ -14,6 +14,21 @@
 
  need to fix: texture backgrounds
  
+*3.05.07 (05-JUL-2015)*
+ * fixed - empty item slot background issue
+ * added - option to set empty item slot (solid colour) background alpha level
+
+*3.05.06 (04-JUL-2015)*
+ * note - all item data has been erased (to cater for the new itemstring format).  please login to each character to update its data
+ * fixed - bar background colour should now apply correctly
+ * fixed - window background should now update properly when changing between a texture and a solid colour
+
+*3.05.05 (02-JUL-2015)*
+ * changed - code adjusted for new itemstring format (specialisation id), no actual impact
+ * changed - replaced LibItemUpgradeInfo-1.0 with internal code
+ * fixed - timewarped items should now show their correct item levels
+ * fixed - issue with clearing bars
+ 
 *3.05.04 (30-JUN-2015)*
  * fixed - issue with adding/removing/moving bars
 

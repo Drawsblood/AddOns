@@ -1,6 +1,6 @@
 ﻿-- (c) 2006-2015, all rights reserved.
--- $Revision: 1350 $
--- $Date: 2015-06-30 23:55:51 +1000 (Tue, 30 Jun 2015) $
+-- $Revision: 1353 $
+-- $Date: 2015-07-05 00:19:37 +1000 (Sun, 05 Jul 2015) $
 
 
 local _G = _G
@@ -2017,7 +2017,7 @@ ArkInventory.Const.DatabaseDefaults.profile = {
 				},
 				["slot"] = {
 					["empty"] = {
-						["alpha"] = 0.1,
+						["alpha"] = 1,
 						["first"] = 0,
 						["icon"] = true,
 						["border"] = true,
@@ -2327,7 +2327,6 @@ function ArkInventory.OnInitialize( )
 	--ArkInventory.Output( "OnInitialize: ", debugprofilestop( ) )
 	
 	-- pre acedb load, the database is just a table
-	ArkInventory.SV_WOD_Fixup( )
 	ArkInventory.DatabaseUpgradePreLoad( )
 	
 	
@@ -3049,7 +3048,7 @@ function ArkInventory.ItemSortKeyGenerate( i, bar_id )
 		if i.h and sorting.active.vendorprice then
 			t = v11 * ( i.count or 1 )
 		end
-		s["vendorprice"] = string.format( "%08i", t or 0 )
+		s["vendorprice"] = string.format( "%10i", t or 0 )
 		
 		
 		-- category
@@ -4770,7 +4769,6 @@ function ArkInventory.Frame_Main_Paint( frame )
 				if style == ArkInventory.Const.Texture.BackgroundDefault then
 					local colour = ArkInventory.LocationOptionGet( loc_id, "window", "background", "colour" )
 					ArkInventory.SetTexture( obj, true, colour.r, colour.g, colour.b, colour.a )
-					
 				else
 					local file = ArkInventory.Lib.SharedMedia:Fetch( ArkInventory.Lib.SharedMedia.MediaType.BACKGROUND, style )
 					ArkInventory.SetTexture( obj, file )
@@ -6370,8 +6368,9 @@ function ArkInventory.Frame_Bar_Paint( frame )
 		
 	else
 		
-		local colour = nil
+		local colour = ArkInventory.LocationOptionGet( loc_id, "bar", "background", "colour" )
 		
+--[[
 		if ArkInventory.LocationOptionGet( loc_id, "bar", "data", bar_id, "background", "use" ) == 2 then
 			-- use border
 			if ArkInventory.LocationOptionGet( loc_id, "bar", "data", bar_id, "border", "use" ) == 1 then
@@ -6382,10 +6381,8 @@ function ArkInventory.Frame_Bar_Paint( frame )
 		elseif ArkInventory.LocationOptionGet( loc_id, "bar", "data", bar_id, "background", "use" ) == 0 then
 			-- use custom
 			colour = ArkInventory.LocationOptionGet( loc_id, "bar", "data", bar_id, "background", "colour" )
-		else
-			-- use default
-			colour = ArkInventory.LocationOptionGet( loc_id, "bar", "background", "colour" )
 		end
+]]--
 		
 		ArkInventory.SetTexture( bg, true, colour.r, colour.g, colour.b, colour.a )
 		
@@ -6652,21 +6649,6 @@ end
 
 function ArkInventory.Frame_Bar_Insert( loc_id, bar_id )
 	
---[[
-	-- move bar data
-	local t = { [bar_id] = { }
-	
-	for k, v in pairs( ArkInventory.LocationOptionGet( loc_id, "bar", "data" ) ) do
-		if k >= bar_id then
-			t[k + 1] = v
-		end
-	end
-	
-	for k, v in pairs( t ) do
-		ArkInventory.LocationOptionSet( loc_id, "bar", "data", k, v )
-	end
-]]--
-	
 	local t = ArkInventory.LocationOptionGet( loc_id, "bar", "data" )
 	table.insert( t, ArkInventory.Table.Copy( t[0] ) )
 	
@@ -6694,27 +6676,6 @@ function ArkInventory.Frame_Bar_Insert( loc_id, bar_id )
 end
 
 function ArkInventory.Frame_Bar_Remove( loc_id, bar_id )
-	
---[[
-	-- move bar data
-	local t = { }
-	local maxbar = 0
-	
-	for k, v in pairs( ArkInventory.LocationOptionGet( loc_id, "bar", "data" ) ) do
-		if k > bar_id then
-			t[k - 1] = v
-			if k > maxbar then
-				maxbar = k
-			end
-		end
-	end
-	
-	t[maxbar] = { }
-	
-	for k, v in pairs( t ) do
-		ArkInventory.LocationOptionSet( loc_id, "bar", "data", k, v )
-	end
-]]--
 	
 	local t = ArkInventory.LocationOptionGet( loc_id, "bar", "data" )
 	table.remove( t, bar_id )
@@ -6782,23 +6743,6 @@ function ArkInventory.Frame_Bar_Move( loc_id, bar1, bar2 )
 		table.remove( t, bar1 )
 	end
 	
---[[
-	-- move bar data
-	local t = { }
-	
-	for k, v in pairs( ArkInventory.LocationOptionGet( loc_id, "bar", "data" ) ) do
-		if k == bar1 then
-			t[bar2] = v
-		elseif ( ( step == 1 ) and ( k > bar1 and k <= bar2 ) ) or ( ( step == -1 ) and ( k >= bar2 and k < bar1 ) ) then
-			t[k - step] = v
-		end
-	end
-	
-	for k, v in pairs( t ) do
-		ArkInventory.LocationOptionSet( loc_id, "bar", "data", k, v )
-	end
-]]--
-	
 	
 	-- move category data (bar numbers can be negative)
 	for cat, bar in pairs( ArkInventory.LocationOptionGet( loc_id, "category" ) ) do
@@ -6831,8 +6775,8 @@ end
 function ArkInventory.Frame_Bar_Clear( loc_id, bar_id )
 	
 	-- clear bar data
-	table.wipe( ArkInventory.LocationOptionGet( loc_id, "bar", "data", bar_id ) )
-	
+	local t = ArkInventory.LocationOptionGet( loc_id, "bar", "data" )
+	t[bar_id] = ArkInventory.Table.Copy( t[0] )
 	
 	-- clear category
 	for k, v in pairs( ArkInventory.LocationOptionGet( loc_id, "category" ) ) do
@@ -6847,7 +6791,9 @@ function ArkInventory.Frame_Bar_Clear( loc_id, bar_id )
 	
 	-- clear bag assignment
 	for bag_id in pairs( ArkInventory.Global.Location[loc_id].Bags ) do
-		ArkInventory.db.profile.option.location[loc_id].bag[bag_id].bar = nil
+		if ArkInventory.db.profile.option.location[loc_id].bag[bag_id].bar == bar_id then
+			ArkInventory.db.profile.option.location[loc_id].bag[bag_id].bar = nil
+		end
 	end
 	
 end
@@ -7003,7 +6949,7 @@ end
 
 function ArkInventory.SetTexture( obj, texture, r, g, b, a )
 	
-	if ( not obj ) then
+	if not obj then
 		return
 	end
 	
@@ -7015,32 +6961,29 @@ function ArkInventory.SetTexture( obj, texture, r, g, b, a )
 	end
 	
 	if texture == true then
-		obj:SetTexture( r, g, b, a )
-	elseif( tonumber( texture ) ) then -- string.match( texture, "^%d*$" )
+		-- solid colour
+		obj:SetTexture( r or 0, g or 0, b or 0, a or 1 )
+	elseif( tonumber( texture ) ) then
 		obj:SetToFileData( texture )
 	else
 		obj:SetTexture( texture or ArkInventory.Const.Texture.Missing )
 	end
 	
-	if r and g and b then
-		obj:SetVertexColor( r, g, b )
-	end
-	
 end
 
-function ArkInventory.SetItemButtonTexture( frame, texture, r, g, b )
+function ArkInventory.SetItemButtonTexture( frame, texture, r, g, b, a )
 	
-	if ( not frame ) then
+	if not frame then
 		return
 	end
 	
 	local obj = frame.icon
 	
-	if ( not obj ) then
+	if not obj then
 		return
 	end
 	
-	ArkInventory.SetTexture( obj, texture, r, g, b )
+	ArkInventory.SetTexture( obj, texture, r, g, b, a )
 	
 	obj:SetTexCoord( 0.075, 0.935, 0.075, 0.935 )
 	
@@ -7139,9 +7082,9 @@ function ArkInventory.Frame_Item_Update_Stock( frame )
 			
 			local class, ilnk, inam, itxt, irar, ilvl, imin, ityp, isub, icount, iloc = ArkInventory.ObjectInfo( i.h )
 			
-			if ( class == "item" ) then
+			if class == "item" then
 				
-				if ( iloc ~= "" ) and ( iloc ~= "INVTYPE_BAG" ) then
+				if iloc ~= "" and iloc ~= "INVTYPE_BAG" then
 					count = ilvl
 				end
 				
@@ -7152,9 +7095,9 @@ function ArkInventory.Frame_Item_Update_Stock( frame )
 	end
 	
 	
-	if ( count > 0 ) then
+	if count > 0 then
 		
-		if ( count > ( frame.maxDisplayCount or 9999 ) ) then
+		if count > ( frame.maxDisplayCount or 9999 ) then
 			count = "*"
 		end
 		
@@ -7419,13 +7362,14 @@ function ArkInventory.Frame_Item_Update_Empty( frame )
 				texture = b
 			end
 			
-			ArkInventory.SetItemButtonTexture( frame, texture, 1.0, 1.0, 1.0 )
+			ArkInventory.SetItemButtonTexture( frame, texture )
 			
 		else
 			
 			-- solid colour
 			local colour = ArkInventory.LocationOptionGet( loc_id, "slot", "data", bt, "colour" )
-			ArkInventory.SetItemButtonTexture( frame, [[Interface\Buttons\WHITE8X8]], colour.r, colour.g, colour.b )
+			colour.a = ArkInventory.LocationOptionGet( loc_id, "slot", "empty", "alpha" )
+			ArkInventory.SetItemButtonTexture( frame, true, colour.r, colour.g, colour.b, colour.a )
 			
 		end
 		

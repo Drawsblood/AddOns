@@ -1,46 +1,10 @@
-Ovale Spell Priority 6.2.6
+Ovale Spell Priority 6.2.7
 ==========================
 
-Changes from version 6.2.5:
+Changes from version 6.2.6:
 ---------------------------
 
--   Regenerate scripts based on SimulationCraft profiles from 2015-06-30.
+-   Mage: Avoid suggesting the "end of fight" burn phase altogether.
 
-    Add Shatterlance buff from the Archimonde trinket to the mage spell
-    database to support the latest frost mage profile.
-
--   Merge branch 'simulationcraft'.
-
-    Pull in changes from SimulationCraft git master from 2015-06-30.
-
--   Import Tier18M profiles from SimulationCraft git master from 2015-06-30.
-
--   Mage: Only do "end of fight" burn as arcane if there is one enemy.
-
--   Strictly filter for actions to or against friendly group members.
-
-    Add a function to determine whether a mob is a friendly group member and
-    use it to filter out CLEU actions.  This fixes situations where a
-    player-controlled unit that was outside the group was triggering enemies
-    being added or removed.
-
-    Also check for a proper GUID and name for the source and destination GUIDs
-    in the CLEU handler.  This filters out environmental damage as well as
-    damage from unattackable mobs.
-
-    Add checks for other CLEU events that are triggered by a unit dying so the
-    enemy count is reduced more quickly.
-
-    Only track events that cause tagging by either the enemy or your group,
-    but filter out ticking DoT damage from triggering enemy updates.  Ticking
-    DoT damage causes false positives after the casting mob has died.  Filter
-    out these events from triggering the update of the enemy count.
-
-    This is potentially wrong in the scenario where you join a raid group or
-    get in range of a friendly group member who has an existing DoT ticking on
-    them and the caster is no longer being attacked or casts any other
-    dangerous spells.  In this case, it's likely that the caster is no longer
-    a threat, so arguably not counting that caster makes sense.
-
-    These changes improve the accuracy of the count of the number of enemies
-    on the battlefield.
+    Let the player figure out when it's okay to keep casting Arcane Blast near
+    the end of a fight.  The DPS difference is minimal.

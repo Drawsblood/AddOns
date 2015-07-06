@@ -46,7 +46,7 @@ local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
 local INFINITY = math.huge
 local LE_PARTY_CATEGORY_INSTANCE = LE_PARTY_CATEGORY_INSTANCE
 
-local OVALE_VERSION = "6.2.6"
+local OVALE_VERSION = "6.2.7"
 local REPOSITORY_KEYWORD = "@" .. "project-version" .. "@"
 
 -- Table of strings to display once per session.

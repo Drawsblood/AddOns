@@ -412,6 +412,8 @@ if not L then return end
 	L["CONFIG_SETTINGS_EMPTY_BORDER_TEXT"] = "Freie Pl\195\164tze mit der Farbe ihrer Taschenart umrahmen."
 	L["CONFIG_SETTINGS_EMPTY_COLOUR"] = "Farben der Pl\195\164tze"
 	L["CONFIG_SETTINGS_EMPTY_COLOUR_TEXT"] = "Die Farbe, mit der die freien Pl\195\164tze f\195\188r %1$s markiert werden." -- slot name
+--	L["CONFIG_SETTINGS_EMPTY_ALPHA"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_ALPHA_TEXT"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_STATUS"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = ""

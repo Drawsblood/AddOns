@@ -15,7 +15,9 @@ mod.respawnTime = 30
 
 local dominanceCount = 0
 local apocalypseCount = 0
+local dominatorCount = 0
 local isHostile = true -- is Soulbound Construct hostile or friendly
+local inBarrier = false
 local addCount = 1
 local addFormat = CL.add.." #%d"
 local ghostGUIDS = {}
@@ -26,7 +28,14 @@ local ghostGUIDS = {}
 
 local L = mod:NewLocale("enUS", true)
 if L then
+	L.dominator = -11456
+	L.dominator_desc = "Warnings for when the Sargerei Dominator spawns."
+	L.dominator_icon = "achievement_boss_kiljaedan"
 
+	L.portals = "Portals Move"
+	L.portals_desc = "Timer for when the portals in phase 2 change positions."
+	L.portals_msg = "The portals have moved!"
+	L.portals_icon = 109400 -- spell_arcane_portalorgrimmar / Portals
 end
 L = mod:GetLocale()
 
@@ -36,7 +45,7 @@ L = mod:GetLocale()
 
 function mod:GetOptions()
 	return {
-		--[[ Soulbound Construct ]]--
+		--[[ Soulbound Construct (Phase 1) ]]--
 		180008, -- Reverberating Blow
 		182038, -- Shattered Defenses
 		{180221, "SAY"}, -- Volatile Fel Orb
@@ -46,13 +55,12 @@ function mod:GetOptions()
 		-- Voracious Soulstalker (Mythic)
 		-11778, -- Voracious Soulstalker
 		188692, -- Unstoppable Tenacity
-		--[[ Socrethar and friends ]]--
+		--[[ Socrethar and the Sargerei (Phase 2) ]]--
 		-- Socrethar
 		183331, -- Exert Dominance
 		183329, -- Apocalypse
 		-- Sargerei Dominator
-		-11456, -- Sargerei Dominator
-		184053, -- Fel Barrier
+		"dominator", -- Sargerei Dominator
 		{184124, "SAY", "PROXIMITY", "FLASH"}, -- Gift of the Man'ari
 		-- Sargerei Shadowcaller
 		182392, -- Shadow Bolt Volley
@@ -60,12 +68,13 @@ function mod:GetOptions()
 		-11462, -- Haunting Soul
 		{182769, "FLASH"}, -- Ghastly Fixation
 		--[[ General ]]--
+		"portals",
 		"stages",
 		"berserk",
 	}, {
 		[180008] = ("%s (%s)"):format(mod:SpellName(-11446), CL.phase:format(1)), -- Soulbound Construct (Phase 1)
 		[183331] = ("%s (%s)"):format(mod:SpellName(-11451), CL.phase:format(2)), -- Socrethar and the Sargerei (Phase 2)
-		["stages"] = "general",
+		["portals"] = "general",
 	}
 end
 
@@ -97,6 +106,8 @@ function mod:OnEngage()
 	addCount = 1
 	dominanceCount = 0
 	apocalypseCount = 0
+	isHostile = true
+	inBarrier = false
 	ghostGUIDS = {}
 	self:CDBar(181288, 48) -- Fel Prison
 	self:CDBar(180008, 7) -- Reverberating Blow
@@ -131,7 +142,7 @@ do
 		if isHostile then
 			list[#list+1] = args.destName
 			if #list == 1 then
-				self:ScheduleTimer("TargetMessage", 0.2, args.spellId, list, "Attention", "Alarm")
+				self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Attention", "Alarm")
 			end
 		end
 	end
@@ -183,6 +194,7 @@ end
 -- Phase 2
 
 function mod:EjectSoul() -- Phase 2 Start
+	dominatorCount, dominanceCount = 0, 0
 	-- Stop P1 bars
 	self:StopBar(180008) -- Reverberating Blow
 	self:StopBar(180221) -- Volatile Fel Orb
@@ -191,25 +203,30 @@ function mod:EjectSoul() -- Phase 2 Start
 	self:StopBar(addFormat:format(addCount)) -- Voracious Soulstalker
 	-- Start P2 bars
 	self:Bar("stages", 7, 180258, "achievement_boss_hellfire_socrethar") -- Construct is Good
-	self:Bar(-11456, 24, nil, "achievement_boss_kiljaedan") -- Sargerei Dominator
+	self:Bar("portals", 140, L.portals, L.portals_icon) -- Portals Move
+	self:DelayedMessage("portals", 140, "Neutral", L.portals_msg, L.portals_icon, "Info")
+	self:Bar("dominator", 24, L.dominator, L.dominator_icon) -- Sargerei Dominator
 	self:CDBar(-11462, 30, nil, "achievement_halloween_ghost_01") -- Haunting Soul
 	self:CDBar(183329, 52) -- Apocalypse
 	self:Message("stages", "Neutral", "Long", CL.phase:format(2), false)
 end
 
-function mod:FelBarrier(args)
-	self:CDBar(-11456, 140, nil, "achievement_boss_kiljaedan") -- Sargerei Dominator
-	self:CDBar(184124, 11) -- Gift Of The Manari
-	self:TargetMessage(args.spellId, args.destName, "Positive")
+function mod:FelBarrier()
+	inBarrier = true
+	dominatorCount = dominatorCount + 1
+	self:CDBar("dominator", self:Mythic() and 130 or (dominatorCount % 2 == 0 and 70 or 60), L.dominator, L.dominator_icon) -- Sargerei Dominator
+	self:Message("dominator", "Neutral", "Warning", L.dominator, L.dominator_icon)
+	self:CDBar(184124, 5) -- Gift of the Man'ari
 end
 
-function mod:FelBarrierRemoved(args)
-	self:StopBar(184124)
+function mod:FelBarrierRemoved()
+	inBarrier = false
+	self:StopBar(184124) -- Gift of the Man'ari
 end
 
 function mod:ExertDominance(args)
 	dominanceCount = dominanceCount + 1
-	self:Message(args.spellId, "Attention", self:Interrupter(args.sourceGUID) and "Alert", CL.count:format(args.spellName, dominanceCount))
+	self:Message(args.spellId, "Attention", self:Interrupter(args.sourceGUID) and not inBarrier and "Alert", CL.count:format(args.spellName, dominanceCount))
 end
 
 function mod:Apocalypse(args)
@@ -223,7 +240,7 @@ do
 	function mod:GiftOfTheManari(args)
 		list[#list+1] = args.destName
 		if #list == 1 then
-			self:ScheduleTimer("TargetMessage", 0.2, args.spellId, list, "Attention", "Alarm")
+			self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Attention", "Alarm")
 		end
 		if self:Me(args.destGUID) then
 			self:Say(args.spellId)
@@ -260,7 +277,9 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(unit, spellName, _, _, spellId)
 	elseif spellId == 180257 then -- Construct is Evil (back to phase 1)
 		isHostile = true
 		--Stop P2 bars
-		self:StopBar(-11456) -- Sargerei Dominator
+		self:StopBar(L.dominator) -- Sargerei Dominator
+		self:StopBar(L.portals) -- Portals Move
+		self:CancelDelayedMessage(L.portals_msg)
 		self:StopBar(-11462) -- Haunting Soul
 		self:StopBar(183329) -- Apocalypse
 		--Start P1 bars

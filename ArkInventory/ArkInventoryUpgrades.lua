@@ -882,6 +882,12 @@ function ArkInventory.DatabaseUpgradePostLoad( )
 		
 	end
 	
+	
+	upgrade_version = 30506
+	if ArkInventory.db.global.player.version < upgrade_version then
+		ArkInventory.EraseSavedData( nil, nil, true )
+	end
+
 
 	
 	
@@ -900,58 +906,5 @@ function ArkInventory.DatabaseUpgradePostLoad( )
 	ArkInventory.db.global.option.version = ArkInventory.Const.Program.Version
 	ArkInventory.db.global.player.version = ArkInventory.Const.Program.Version
 	ArkInventory.db.profile.option.version = ArkInventory.Const.Program.Version
-	
-end
-
-
-
-
-local function SV_WOD_Fixup_Recurse( t )
-	
-	if type( t ) ~= "table" then return end
-	
-	local s
-	local fix = { }
-	
-	for k, v in pairs( t ) do
-		
-		if type( v ) == "table" then
-			SV_WOD_Fixup_Recurse( v )
-		elseif type( v ) == "number" then
-			s = string.format( "%.8f", v )
-			if v ~= tonumber( s ) and string.match( s, "^%d+[.]0+$" ) then
-				t[k] = math.floor( v )
-			end
-		end
-		
-		if type( k ) == "number" then
-			s = string.format( "%.8f", k )
-			if k ~= tonumber( s ) and string.match( s, "^%d+[.]0+$" ) then
-				fix[k] = v
-			end
-		end
-		
-	end
-	
-	for k, v in pairs( fix ) do
-		t[k] = nil
-		t[math.floor(k)] = v
-	end
-	
-	table.wipe( fix )
-	
-end
-
-function ArkInventory.SV_WOD_Fixup( )
-	
-	if true then return end
-	
-	-- shouldnt be needed anymore
-	
-	ARKINVDB = ARKINVDB or { }
-	
-	for k, v in pairs( ARKINVDB ) do
-		SV_WOD_Fixup_Recurse( v )
-	end
 	
 end

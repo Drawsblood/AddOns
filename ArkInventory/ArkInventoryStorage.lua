@@ -3513,6 +3513,25 @@ function ArkInventory.ObjectInfo( h )
 	
 	if ( osd[1] == "item" ) then
 		
+--[[	osd
+		[01]class
+		[02]id
+		[03]enchant
+		[04]gem1
+		[05]gem2
+		[06]gem3
+		[07]gem4
+		[08]suffix
+		[09]unique
+		[10]linkLevel
+		[11]specialisationId
+		[12]upgradeId
+		[13]instanceId
+		[14]numBonusIds
+		[15]bonusId1
+		[15+x]bonusIdx:...
+]]--
+		
 		local info = { GetItemInfo( h ) }
 --[[
 			[01]itemName
@@ -3528,43 +3547,47 @@ function ArkInventory.ObjectInfo( h )
 			[11]itemSellPrice
 ]]--
 		
-		if info[10] == nil then
-			info[10] = GetItemIcon( h )
-		end
-		
 		if not info[1] then
 			info[1] = string.match( h, "|h%[(.+)%]|h" )
 		end
 		
-		info[4] = ( info[4] or 0 ) + ( ArkInventory.Lib.UpgradeInfo:GetItemLevelUpgrade( h ) or 0 )
-		
---[[	osd
-		[01]class
-		[02]id
-		[03]enchant
-		[04]gem1
-		[05]gem2
-		[06]gem3
-		[07]gem4
-		[08]suffix
-		[09]unique
-		[10]linkLevel
-		[11]upgrade
-		[12]instanceId
-		[13]numBonusIds
-		[14]bonusId1
-		[14+x]bonusIdx:...
-]]--
+		if info[10] == nil then
+			info[10] = GetItemIcon( h )
+		end
 		
 		local bid = false
-		if osd[13] > 0 then
+		if osd[14] > 0 then
 			bid = { }
-			for x = 14, 13 + osd[13] do
-				bid[15-x] = osd[x]
+			for x = 15, 14 + osd[14] do
+				bid[osd[x]] = true
+--[[
+				66 = upgraded to rare?
+				545 = upgraded to epic
+				615 = timewarped **
+				
+				** item level returned is not adjusted, requires tooltip scan
+]]--
 			end
 		end
 		
-		return osd[1], info[2], info[1], info[10], info[3] or 0, info[4] or 0, info[5] or 0, info[6] or "", info[7] or "", info[8] or 1, info[9] or "", info[11] or 0, osd[12], bid
+		
+--		info[4] = ( info[4] or 0 ) + ( ArkInventory.Lib.UpgradeInfo:GetItemLevelUpgrade( h ) or 0 )
+		
+		if osd[12] > 0 or bid then
+			
+			-- upgradable or has bonusId that doesnt adjust the itemlevel return value (eg 615/timewarped), so get item level from tooltip
+			
+			ArkInventory.TooltipSetHyperlink( ArkInventory.Global.Tooltip.Scan, h )
+			local _, _, level = ArkInventory.TooltipFind( ArkInventory.Global.Tooltip.Scan, ArkInventory.Localise["WOW_TOOLTIP_ITEM_LEVEL"], false, true, true )
+			
+--			ArkInventory.Output( h, " / ", info[4], " / ", level, " / ", osd[12], " / ", bid )
+			
+			info[4] = tonumber( level or 0 )
+			
+		end
+		
+		
+		return osd[1], info[2], info[1], info[10], info[3] or 0, info[4] or 0, info[5] or 0, info[6] or "", info[7] or "", info[8] or 1, info[9] or "", info[11] or 0, osd[13], bid
 --[[
 			[01]class
 			[02]itemLink
@@ -3658,8 +3681,8 @@ function ArkInventory.ObjectStringDecode( h )
 	end
 	
 	local c = #v
-	if c < 13 then
-		c = 13
+	if c < 14 then
+		c = 14
 	end
 	
 	for x = 2, c do

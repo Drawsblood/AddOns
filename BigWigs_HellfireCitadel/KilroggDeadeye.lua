@@ -13,7 +13,7 @@ mod.respawnTime = 14
 -- Locals
 --
 
-local deathThroesCount = 0
+local deathThroesCount = 1
 local visionCount = 1
 local mobCollector = {}
 
@@ -42,10 +42,10 @@ function mod:GetOptions()
 		--[[ Hulking Terror ]]--
 		183917, -- Rending Howl
 		180163, -- Savage Strikes
-		--[[ Hellblaze Imp ]]--
-		180618, -- Fel Blaze
-		--[[ Hellblaze Mistress ]]--
-		180033, -- Cinder Breath
+		--[[ Visions of Death ]]--
+		180618, -- Fel Blaze (Hellblaze Imp)
+		180033, -- Cinder Breath (Hellblaze Mistress)
+		180570, -- Fel Flames (Hellblaze Fiend)
 		--[[ Add Spawn Warnings ]]--
 		-11269, -- Hulking Terror
 		-11266, -- Salivating Bloodthirster
@@ -56,9 +56,8 @@ function mod:GetOptions()
 	}, {
 		[188929] = self.displayName, -- Kilrogg Deadeye
 		[183917] = -11269, -- Hulking Terror
-		[180618] = -11274, -- Hellblaze Imp
-		[180033] = -11278, -- Hellblaze Mistress
-		[-11266] = L.add_warnings,
+		[180618] = 182428, -- Visions of Death (adds)
+		[-11269] = L.add_warnings,
 		["altpower"] = "general",
 	}
 end
@@ -79,7 +78,7 @@ function mod:OnBossEnable()
 end
 
 function mod:OnEngage()
-	deathThroesCount = 0
+	deathThroesCount = 1
 	visionCount = 1
 	wipe(mobCollector)
 	self:CDBar(182428, 60, CL.count:format(self:SpellName(182428), visionCount)) -- Vision of Death
@@ -130,7 +129,7 @@ do
 
 		list[#list+1] = args.destName
 		if #list == 1 then
-			self:ScheduleTimer("TargetMessage", 0.2, args.spellId, list, "Important", "Alarm")
+			self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Important", "Alarm")
 			self:CDBar(args.spellId, 25.5) -- 25.5-32.9
 		end
 		if self:Me(args.destGUID) then
@@ -149,9 +148,10 @@ function mod:VisionOfDeath(args)
 end
 
 function mod:DeathThroes(args)
-	deathThroesCount = deathThroesCount + 1
 	self:Message(args.spellId, "Urgent", "Long", CL.count:format(args.spellName, deathThroesCount))
-	self:Bar(args.spellId, 9, CL.count:format(args.spellName, deathThroesCount))
+	self:Bar(args.spellId, 7, CL.cast:format(CL.count:format(args.spellName, deathThroesCount))) -- 1s Cast + 6s Channel
+	deathThroesCount = deathThroesCount + 1
+	self:CDBar(args.spellId, 40, CL.count:format(args.spellName, deathThroesCount))
 end
 
 function mod:ShredArmor(args)
@@ -168,7 +168,7 @@ end
 --[[ Hulking Terror ]]--
 
 function mod:RendingHowl(args)
-	self:Message(args.spellId, "Urgent", nil, CL.casting:format(args.spellName))
+	self:Message(args.spellId, "Urgent", self:Interrupter(args.sourceGUID) and "Alert", CL.casting:format(args.spellName))
 end
 
 function mod:SavageStrikes(args)

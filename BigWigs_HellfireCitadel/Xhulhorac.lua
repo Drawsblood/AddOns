@@ -16,16 +16,6 @@ local phase = 1
 local mobCollector = {}
 
 --------------------------------------------------------------------------------
--- Localization
---
-
-local L = mod:NewLocale("enUS", true)
-if L then
-
-end
-L = mod:GetLocale()
-
---------------------------------------------------------------------------------
 -- Initialization
 --
 
@@ -97,7 +87,7 @@ do
 	function mod:Surge(args)
 		list[#list+1] = args.destName
 		if #list == 1 then
-			self:ScheduleTimer("TargetMessage", 0.2, args.spellId, list, "Attention", "Alarm")
+			self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Attention", "Alarm")
 			self:CDBar(args.spellId, 30)
 		end
 		if self:Me(args.destGUID) then
@@ -118,7 +108,7 @@ do
 	function mod:ChainsOfFel(args)
 		list[#list+1] = args.destName
 		if #list == 1 then
-			self:ScheduleTimer("TargetMessage", 0.2, args.spellId, list, "Urgent", "Alarm")
+			self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Urgent", "Alarm")
 			self:CDBar(args.spellId, 23)
 		end
 	end

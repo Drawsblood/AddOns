@@ -14,7 +14,7 @@ local maxdiff = 23 -- max number of instance difficulties
 local maxcol = 4 -- max columns per player+instance
 
 addon.svnrev = {}
-addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 442 $"):match("%d+"))
+addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 445 $"):match("%d+"))
 
 -- local (optimal) references to provided functions
 local table, math, bit, string, pairs, ipairs, unpack, strsplit, time, type, wipe, tonumber, select, strsub = 
@@ -110,10 +110,10 @@ addon.LFRInstances = {
   [611] = { total=3, base=4,  parent=634, altid=836 }, -- ToT2: Forgotten Depths
   [612] = { total=3, base=7,  parent=634, altid=837 }, -- ToT3: Halls of Flesh-Shaping
   [613] = { total=3, base=10, parent=634, altid=838 }, -- ToT4: Pinnacle of Storms
-  [716] = { total=4, base=1,  parent=715, altid=839 }, -- SoO1: Vale of Eternal Sorrows
-  [717] = { total=4, base=5,  parent=715, altid=840 }, -- SoO2: Gates of Retribution
-  [724] = { total=3, base=9,  parent=715, altid=841 }, -- SoO3: The Underhold
-  [725] = { total=3, base=12, parent=715, altid=842 }, -- SoO4: Downfall
+  [716] = { total=4, base=1,  parent=766, altid=839 }, -- SoO1: Vale of Eternal Sorrows
+  [717] = { total=4, base=5,  parent=766, altid=840 }, -- SoO2: Gates of Retribution
+  [724] = { total=3, base=9,  parent=766, altid=841 }, -- SoO3: The Underhold
+  [725] = { total=3, base=12, parent=766, altid=842 }, -- SoO4: Downfall
 
   [849] = { total=3, base=1,  parent=897, altid=nil }, -- Highmaul1: Walled City
   [850] = { total=3, base=4,  parent=897, altid=nil }, -- Highmaul2: Arcane Sanctum
@@ -186,6 +186,11 @@ local _specialQuests = {
   [37639] = { zone=GARRISON_LOCATION_TOOLTIP, aid=9164 }, -- Silver Defender
   [37640] = { zone=GARRISON_LOCATION_TOOLTIP, aid=9165 }, -- Golden Defender
   [38482] = { zone=GARRISON_LOCATION_TOOLTIP, aid=9826 }, -- Platinum Defender
+  -- Tanaan Jungle
+  [39287] = { zid=945, daily=true }, -- Deathtalon
+  [39288] = { zid=945, daily=true }, -- Terrorfist
+  [39289] = { zid=945, daily=true }, -- Doomroller
+  [39290] = { zid=945, daily=true }, -- Vengeance
 }
 function addon:specialQuests()
   for qid, qinfo in pairs(_specialQuests) do
@@ -287,6 +292,16 @@ local function debug(msg)
   end
 end
 addon.debug = debug
+local function bugReport(msg)
+  addon.bugreport = addon.bugreport or {}
+  local now = GetTime()
+  if now < (addon.bugreport[msg] or 0)+60 then return end
+  addon.bugreport[msg] = now
+  chatMsg(msg)
+  if now < (addon.bugreport["url"] or 0)+5 then return end
+  chatMsg("Please report this bug at: http://www.wowace.com/addons/saved_instances/tickets/")
+  addon.bugreport["url"] = now
+end
 
 local GTToffset = time() - GetTime()
 local function GetTimeToTime(val)
@@ -803,8 +818,7 @@ function addon:LookupInstance(id, name, raid)
         local tlid,tlname = link:match(":(%d+):%d+:%d+\124h%[(.+)%]\124h")
 	if tlname == name then lid = tlid end
       end
-      print("SavedInstances: ERROR: Refresh() failed to find instance: "..name.." : "..GetLocale().." : "..(lid or "x"))
-      print(" Please report this bug at: http://www.wowace.com/addons/saved_instances/tickets/")
+      bugReport("SavedInstances: ERROR: Refresh() failed to find instance: "..name.." : "..GetLocale().." : "..(lid or "x"))
     end
     instance = {}
     --vars.db.Instances[name] = instance
@@ -2210,6 +2224,7 @@ end
 
 function core:OnEnable()
 	self:RegisterEvent("UPDATE_INSTANCE_INFO", function() core:Refresh(nil) end)
+	self:RegisterEvent("LOOT_CLOSED", function() core:QuestRefresh(nil) end)
 	self:RegisterEvent("LFG_UPDATE_RANDOM_INFO", function() addon:UpdateInstanceData(); addon:UpdateToonData() end)
 	self:RegisterEvent("RAID_INSTANCE_WELCOME", RequestRaidInfo)
 	self:RegisterEvent("CHAT_MSG_SYSTEM", "CheckSystemMessage")
@@ -2583,6 +2598,71 @@ function core:memcheck(context)
   end
 end
 
+-- Lightweight refresh of just quest flag information
+-- all may be nil if not instantiataed
+function core:QuestRefresh(recoverdaily, questcomplete, nextreset, weeklyreset)
+  local tiq = vars.db.Toons[thisToon]
+  tiq = tiq and tiq.Quests
+  if not tiq then return end
+  nextreset = nextreset or addon:GetNextDailyResetTime()
+  weeklyreset = weeklyreset or addon:GetNextWeeklyResetTime()
+  if not nextreset or not weeklyreset then return end
+
+  for _, qinfo in pairs(addon:specialQuests()) do
+    local qid = qinfo.quest
+    if IsQuestFlaggedCompleted(qid) or (questcomplete and questcomplete[qid]) then
+      local q = tiq[qid] or {}
+      tiq[qid] = q
+      q.Title = qinfo.name
+      q.Zone = qinfo.zone
+      if qinfo.daily then
+        q.Expires = nextreset
+	q.isDaily = true
+      else
+        q.Expires = weeklyreset
+	q.isDaily = nil
+      end
+    end
+  end
+
+  local now = time()
+  db.QuestDB.Weekly.expires = weeklyreset
+  db.QuestDB.AccountWeekly.expires = weeklyreset
+  db.QuestDB.Darkmoon.expires = addon:GetNextDarkmoonResetTime()
+  for scope, list in pairs(db.QuestDB) do
+    local questlist = tiq
+    if scope:find("Account") then
+      questlist = db.Quests
+    end
+    if recoverdaily or (scope ~= "Daily") then
+      for qid, mapid in pairs(list) do
+        if tonumber(qid) and (IsQuestFlaggedCompleted(qid) or
+           (questcomplete and questcomplete[qid])) and not questlist[qid] and -- recovering a lost quest
+	   (list.expires == nil or list.expires > now) then -- don't repop darkmoon quests from last faire
+           local title, link = addon:QuestInfo(qid)
+           if title then
+	     local found
+	      for _,info in pairs(questlist) do
+	        if title == info.Title then -- avoid faction duplicates, since both flags are set
+	          found = true
+	  	  break
+		end
+	      end
+	      if not found then
+	        debug("Recovering lost quest: "..title.." ("..scope..")")
+                questlist[qid] = { ["Title"] = title, ["Link"] = link, 
+                                   ["isDaily"] = (scope:find("Daily") and true) or nil, 
+	                           ["Expires"] = list.expires,
+	                           ["Zone"] = GetMapNameByID(mapid) }
+	      end
+           end
+         end
+      end
+    end
+  end
+  addon:QuestCount(thisToon)
+end
+
 function core:Refresh(recoverdaily)
 	-- update entire database from the current character's perspective
         addon:UpdateInstanceData()
@@ -2648,7 +2728,7 @@ function core:Refresh(recoverdaily)
 	  end
 	end
 
-        local quests = GetQuestsCompleted(localarr("QuestCompleteTemp"))
+        local questcomplete = GetQuestsCompleted(localarr("QuestCompleteTemp"))
 	local wbsave = localarr("wbsave")
 	if GetNumSavedWorldBosses and GetSavedWorldBossInfo then -- 5.4
 	  for i=1,GetNumSavedWorldBosses() do
@@ -2659,7 +2739,7 @@ function core:Refresh(recoverdaily)
         for _,einfo in pairs(addon.WorldBosses) do
            if weeklyreset and (
 	      (einfo.quest and IsQuestFlaggedCompleted(einfo.quest)) or 
-	      (quests and einfo.quest and quests[einfo.quest]) or
+	      (questcomplete and einfo.quest and questcomplete[einfo.quest]) or
 	      wbsave[einfo.savename or einfo.name]
 	      ) then
              local truename = einfo.name
@@ -2673,63 +2753,8 @@ function core:Refresh(recoverdaily)
              info[1] = true
            end
         end
-	local tiq = vars.db.Toons[thisToon]
-	tiq = tiq and tiq.Quests
-	if tiq then
-	  for _, qinfo in pairs(addon:specialQuests()) do
-	    local qid = qinfo.quest
-            if nextreset and weeklyreset and (IsQuestFlaggedCompleted(qid) or 
-	      (quests and quests[qid])) then
-              local q = tiq[qid] or {}
-	      tiq[qid] = q
-	      q.Title = qinfo.name
-	      q.Zone = qinfo.zone
-	      if qinfo.daily then
-	        q.Expires = nextreset
-		q.isDaily = true
-	      else
-	        q.Expires = weeklyreset
-		q.isDaily = nil
-	      end
-	    end
-	  end
-	  local now = time()
-	  db.QuestDB.Weekly.expires = weeklyreset
-	  db.QuestDB.AccountWeekly.expires = weeklyreset
-	  db.QuestDB.Darkmoon.expires = addon:GetNextDarkmoonResetTime()
-          for scope, list in pairs(db.QuestDB) do
-	    local questlist = tiq
-	    if scope:find("Account") then
-	      questlist = db.Quests
-	    end
-	    if recoverdaily or (scope ~= "Daily") then
-             for qid, mapid in pairs(list) do
-              if tonumber(qid) and (IsQuestFlaggedCompleted(qid) or
-	        (quests and quests[qid])) and not questlist[qid] and -- recovering a lost quest
-		(list.expires == nil or list.expires > now) then -- don't repop darkmoon quests from last faire
-                 local title, link = addon:QuestInfo(qid)
-                 if title then
-		    local found
-		    for _,info in pairs(questlist) do
-		      if title == info.Title then -- avoid faction duplicates, since both flags are set
-		        found = true
-			break
-		      end
-		    end
-		    if not found then
-		      debug("Recovering lost quest: "..title.." ("..scope..")")
-                      questlist[qid] = { ["Title"] = title, ["Link"] = link, 
-                                         ["isDaily"] = (scope:find("Daily") and true) or nil, 
-		                         ["Expires"] = list.expires,
-		                         ["Zone"] = GetMapNameByID(mapid) }
-		    end
-                 end
-              end
-	     end
-            end
-          end
-          addon:QuestCount(thisToon)
-	end
+
+	core:QuestRefresh(recoverdaily, questcomplete, nextreset, weeklyreset)
 
         local icnt, dcnt = 0,0
 	for name, _ in pairs(temp) do
@@ -3118,7 +3143,7 @@ function core:ShowTooltip(anchorframe)
 				    span = 1
 				  end
 				  if showcnt > maxcol then
-                                     chatMsg("Column overflow! Please report this bug! showcnt="..showcnt)
+                                     bugReport("Column overflow! showcnt="..showcnt)
 				  end
 				  for diff = 1, maxdiff do
 				    if showcol[diff] then
@@ -3145,6 +3170,12 @@ function core:ShowTooltip(anchorframe)
 
 	-- combined LFRs
 	if lfrcons then
+	  for boxname, line in pairs(lfrbox) do
+	    if type(boxname) == "number" then
+              bugReport("Unrecognized LFR instance parent id= "..boxname)
+	      lfrbox[boxname] = nil
+	    end
+	  end
 	  for boxname, line in pairs(lfrbox) do
 	    local boxtype, pinstance = boxname:match("^([^:]+): (.+)$")
 	    local pinst = vars.db.Instances[pinstance]
@@ -3826,8 +3857,7 @@ function core:record_skill(spellID, expires)
     addon.skillwarned = addon.skillwarned or {}
     if expires and expires > 0 and not addon.skillwarned[spellID] then
       addon.skillwarned[spellID] = true
-      chatMsg("Warning: Unrecognized trade skill cd "..(GetSpellInfo(spellID) or "??")..
-              " ("..spellID.."). Please report this bug!")
+      bugReport("Unrecognized trade skill cd "..(GetSpellInfo(spellID) or "??").." ("..spellID..")")
     end
     return 
   end

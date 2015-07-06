@@ -412,6 +412,8 @@ if not L then return end
 	L["CONFIG_SETTINGS_EMPTY_BORDER_TEXT"] = "Colorer la bordure des emplacements vides avec la couleur du type de sac"
 	L["CONFIG_SETTINGS_EMPTY_COLOUR"] = "Couleurs d'emplacement"
 	L["CONFIG_SETTINGS_EMPTY_COLOUR_TEXT"] = "Définir la couleur de bordure et de fond des emplacements %1$s"
+--	L["CONFIG_SETTINGS_EMPTY_ALPHA"] = ""
+--	L["CONFIG_SETTINGS_EMPTY_ALPHA_TEXT"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_STATUS"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST"] = ""
 --	L["CONFIG_SETTINGS_EMPTY_FIRST_TEXT"] = ""

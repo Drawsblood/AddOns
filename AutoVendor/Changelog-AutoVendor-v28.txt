@@ -1,0 +1,25 @@
+------------------------------------------------------------------------
+r89 | olafskii | 2015-06-21 18:57:26 +0000 (Sun, 21 Jun 2015) | 1 line
+Changed paths:
+   A /tags/v28 (from /trunk:88)
+
+Added Peon's Mining Pick and Gorepetal's Gentle Grasp to default "not junk" list.
+------------------------------------------------------------------------
+r88 | olafskii | 2015-06-21 18:57:12 +0000 (Sun, 21 Jun 2015) | 1 line
+Changed paths:
+   M /trunk/AutoVendor.toc
+
+Update toc number.
+------------------------------------------------------------------------
+r87 | olafskii | 2015-06-21 18:56:04 +0000 (Sun, 21 Jun 2015) | 1 line
+Changed paths:
+   M /trunk/AutoVendor.lua
+
+Added Peon's Mining Pick and Gorepetal's Gentle Grasp to default "not junk" list.
+------------------------------------------------------------------------
+r85 | egrimm | 2015-05-29 17:55:44 +0000 (Fri, 29 May 2015) | 1 line
+Changed paths:
+   M /trunk/AutoVendor.toc
+
+Up to date for WoW 6.1.
+------------------------------------------------------------------------

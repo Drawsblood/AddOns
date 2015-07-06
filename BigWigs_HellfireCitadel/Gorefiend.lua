@@ -39,7 +39,7 @@ local shadowOfDeathInfo = {
 local L = mod:NewLocale("enUS", true)
 if L then
 	L.fate_root_you = "Shared Fate - You are rooted!"
-	L.fate_you = "Shared Fate! - Rooted player is %s"
+	L.fate_you = "Shared Fate on YOU! - Root on %s"
 end
 L = mod:GetLocale()
 
@@ -90,6 +90,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_REMOVED", "DigestRemoved", 181295)
 	self:Log("SPELL_AURA_APPLIED", "ShadowOfDeath", 179864)
 	--self:Log("SPELL_CAST_START", "CrushingDarkness", 182788) -- 180016 hidden, but do we care about warning for it?
+
 	self:Log("SPELL_CAST_START", "BellowingShout", 181582)
 	self:Log("SPELL_AURA_APPLIED", "HungerForLife", 180148)
 	self:Log("SPELL_AURA_REMOVED", "HungerForLifeOver", 180148)
@@ -165,28 +166,27 @@ function mod:SharedFateRoot(args)
 	self:CDBar(args.spellId, 25) -- 25 - 29
 	fatePlayer = args.destName
 	if self:Me(args.destGUID) then
-		self:Say(179909, 135484) -- 135484 = "Rooted"
-		self:Message(179909, "Personal", "Alert", L.fate_root_you)
+		self:Say(args.spellId, 135484) -- 135484 = "Rooted"
+		self:Message(args.spellId, "Personal", "Alert", L.fate_root_you)
 	else
-		-- XXX show this to everyone?
-		self:TargetMessage(179909, fatePlayer, "Attention", nil, self:SpellName(135484)) -- 135484 = "Rooted"
+		self:TargetMessage(args.spellId, fatePlayer, "Attention", nil, self:SpellName(135484)) -- 135484 = "Rooted"
 	end
-	self:PrimaryIcon(179909, fatePlayer)
+	self:PrimaryIcon(args.spellId, fatePlayer)
 end
 
 function mod:SharedFateRootRemoved(args)
 	fatePlayer = nil
-	self:PrimaryIcon(179909)
+	self:PrimaryIcon(args.spellId)
 end
 
 function mod:SharedFateRun(args)
 	if self:Me(args.destGUID) then
-		if fatePlayer then -- XXX will the root always be first in the combat log?
-			self:Message(179909, "Urgent", "Alert", L.fate_you:format(self:ColorName(fatePlayer)))
+		self:Flash(179909)
+		if fatePlayer then -- Failsafe for whenever root doesn't end up first in the combat log
+			self:Message(179909, "Personal", "Warning", L.fate_you:format(self:ColorName(fatePlayer)))
 			self:OpenProximity(179909, 6, fatePlayer, true)
-			self:Flash(179909)
 		else
-			self:TargetMessage(179909, args.destName, "Personal", "Alert")
+			self:TargetMessage(179909, args.destName, "Personal", "Warning")
 		end
 	end
 end
@@ -291,13 +291,6 @@ do
 	end
 end
 
-function mod:BellowingShout(args)
-	self:CDBar(args.spellId, 13.5)
-	if UnitGUID("target") == args.sourceGUID or UnitGUID("focus") == args.sourceGUID then
-		self:Message(args.spellId, "Important", not self:Healer() and "Alert", CL.casting:format(args.spellName))
-	end
-end
-
 function mod:HungerForLife(args)
 	if self:Me(args.destGUID) and not fixateOnMe then -- Multiple debuffs, warn for the first.
 		fixateOnMe = true
@@ -313,6 +306,13 @@ function mod:HungerForLifeOver(args)
 	end
 end
 
+function mod:BellowingShout(args)
+	self:CDBar(args.spellId, 13.5)
+	if self:Interrupter(args.sourceGUID) then
+		self:Message(args.spellId, "Important", "Alert", CL.casting:format(args.spellName))
+	end
+end
+
 do
 	local function printTarget(self, name, guid)
 		self:TargetMessage(187814, name, "Important", "Alert", nil, nil, self:Tank() or self:Damager())
@@ -323,8 +323,8 @@ do
 end
 
 function mod:FelFlames(args)
-	if args.amount % 3 == 0 then
-		self:StackMessage(args.spellId, args.destName, args.amount, "Positive") -- XXX
+	if args.amount % 2 == 0 then
+		self:StackMessage(args.spellId, args.destName, args.amount, "Positive", args.amount > 5 and "Warning")
 	end
 end
 
