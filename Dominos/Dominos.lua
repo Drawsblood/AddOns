@@ -106,7 +106,7 @@ function Dominos:UpdateVersion()
 end
 
 function Dominos:PrintVersion()
-	self:Printf('Version %s', DominosVersion)
+	self:Print(DominosVersion)
 end
 
 

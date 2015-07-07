@@ -650,6 +650,14 @@ Amr:AddEventHandler("PLAYER_ENTERING_WORLD", onPlayerEnteringWorld)
 ----------------------------------------------------------------------------------------
 -- Debugging
 ----------------------------------------------------------------------------------------
+function Amr:Test()
+
+	local s = "|cff0070dd|Hitem:127224:5337:0:0:0:0:0:0:100:105:512:22:2:615:656:100|h[Staff of Polarities]|h|r"
+	Amr.GetItemInfo(s, function(obj, name, link, quality, iLevel)
+		print(iLevel)
+	end)
+end
+
 --[[
 function Amr:Test(val1, val2, val3)
 

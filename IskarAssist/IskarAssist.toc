@@ -1,0 +1,14 @@
+## Interface: 60200
+## Title: Iskar Assist
+## Notes: Helps with the Encounter agaist Iskar on Hellfire Citadel.
+## SavedVariables: IskarAssistDB
+## X-Curse-Packaged-Version: r13
+## X-Curse-Project-Name: Iskar Assist
+## X-Curse-Project-ID: iskar-assist
+## X-Curse-Repository-ID: wow/iskar-assist/mainline
+
+#@no-lib-strip@
+Libs\libs.xml
+#@end-no-lib-strip@
+
+IskarAssist.lua

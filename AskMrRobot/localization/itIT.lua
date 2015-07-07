@@ -200,6 +200,8 @@ L.ImportErrorRace = "Sembra che la tua razza sia cambiata.  Vai sul sito e riott
 L.ImportErrorFaction = "Sembra che la tua fazione sia cambiata.  Vai sul sito e riottimizza."
 L.ImportErrorLevel = "Sembra che il tuo livello sia cambiato.  Vai sul sito e riottimizza."
 
+L.ImportOverwolfWait = "Performing Best in Bags optimization.  Please do not press Escape or close the addon until it has completed!"
+
 
 --[[----------------------------------------------------------------------
 Shopping List

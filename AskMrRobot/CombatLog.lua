@@ -216,6 +216,32 @@ function Amr:ReleaseTabLog()
 	_autoChecks = nil
 end
 
+-- update the game's logging state
+local function updateGameLogging(enabled)
+	if enabled then
+		-- always enable advanced combat logging via our addon, gathers more detailed data for better analysis
+		SetCVar("advancedCombatLogging", 1)
+		LoggingCombat(true)
+	else
+		LoggingCombat(false)
+	end
+end
+
+local function isAnyAutoLoggingEnabled()
+	local anyChecked = false
+	for i, instanceId in ipairs(Amr.InstanceIdsOrdered) do
+		for k, difficultyId in pairs(Amr.Difficulties) do
+			if Amr.db.profile.Logging.Auto[instanceId][difficultyId] then
+				anyChecked = true
+				break
+			end
+		end
+		if anyChecked then break end
+	end
+	
+	return anyChecked
+end
+
 local function isAllAutoLoggingEnabled()
 	-- see if all auto-logging options are enabled
 	local allChecked = true
@@ -233,11 +259,26 @@ local function isAllAutoLoggingEnabled()
 end
 
 -- check current zone and auto-logging settings, and enable logging if appropriate
-local function updateAutoLogging(force)
+local function updateAutoLogging(force, noWait)
+	
+	local hasAuto = isAnyAutoLoggingEnabled()
+	
+	-- before doing anything, make sure logging matches the user's current setting, deals with any inconsistency due to a crash or disconnect
+	if hasAuto then
+		updateGameLogging(Amr:IsLogging())
+	end
 	
 	-- get the info about the instance
 	local zone, _, difficultyId, _, _, _, _, instanceId = GetInstanceInfo()
 
+	if Amr.IsSupportedInstanceId(instanceId) and difficultyId == 0 and not noWait then
+		-- the game is sometimes returning no difficulty id for raid zones... not sure why, wait 10 seconds and check again
+		Amr.Wait(10, function()
+			updateAutoLogging(false, false)
+		end)
+		return
+	end
+	
 	if not force and zone == Amr.db.char.Logging.LastZone and difficultyId == Amr.db.char.Logging.LastDiff then
 	  -- do nothing if the zone hasn't actually changed, otherwise we may override the user's manual enable/disable
 		return
@@ -248,11 +289,12 @@ local function updateAutoLogging(force)
 
 	if Amr.IsSupportedInstanceId(instanceId) and Amr.db.profile.Logging.Auto[tonumber(instanceId)][tonumber(difficultyId)] then
 		-- we are in a supported zone that we want to auto-log, turn logging on 
+		
 		-- (supported check is probably redundant, but just in case someone has old settings lying around)
 		if not Amr:IsLogging() then
 			Amr:StartLogging()
 		end
-	else
+	elseif hasAuto then
 		-- not in a zone that we want to auto-log, turn logging off
 		if Amr:IsLogging() then
 			Amr:StopLogging()
@@ -358,9 +400,8 @@ function Amr:StartLogging()
 		Amr.db.char.Logging.LastWipe = nil
 	end
 
-	-- always enable advanced combat logging via our addon, gathers more detailed data for better analysis
-	SetCVar("advancedCombatLogging", 1)
-	LoggingCombat(true)
+	-- enable game log file
+	updateGameLogging(true)
 	Amr.db.char.Logging.Enabled = true
 	
 	self:Print(L.LogChatStart)
@@ -371,7 +412,7 @@ end
 
 function Amr:StopLogging()
 	
-	LoggingCombat(false)
+	updateGameLogging(false)
 	Amr.db.char.Logging.Enabled = false
 	
 	self:Print(L.LogChatStop)

@@ -146,18 +146,25 @@ function Amr.CreateItemLink(itemObj)
         table.insert(parts, -math.abs(itemObj.suffixId))
     end
     
-    table.insert(parts, 0)
+    table.insert(parts, 0) -- some unique id, doesn't seem to matter
     table.insert(parts, UnitLevel("player"))
 	table.insert(parts, 0) -- unknown
-    table.insert(parts, itemObj.upgradeId)
-    table.insert(parts, 0)
+    table.insert(parts, 0) -- unknown
+    table.insert(parts, 0) -- difficulty id, doesn't matter
     
     if itemObj.bonusIds then
         table.insert(parts, #itemObj.bonusIds)
         for i,v in ipairs(itemObj.bonusIds) do
             table.insert(parts, v)
         end
+	else
+		table.insert(parts, 0) -- no bonus ids
     end
+	
+	-- upgrade id is tacked onto the end now it seems
+	if (not itemObj.bonusIds or #itemObj.bonusIds == 0) and itemObj.upgradeId and itemObj.upgradeId ~= 0 then
+		table.insert(parts, itemObj.upgradeId)
+	end
     
     return table.concat(parts, ":")
 end

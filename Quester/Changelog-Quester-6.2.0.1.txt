@@ -1,0 +1,13 @@
+tag 6.2.0.1
+bf98bcc7a6faa55c8c1062c60175227437934ee6
+Hendrik Leppkes <h.leppkes@gmail.com>
+2015-06-29 08:58:36 +0200
+
+Tag as 6.2.0.1
+
+
+--------------------
+
+Hendrik Leppkes:
+	- Properly track completion status of quests which track a common currency, like Garrion Resources.
+	This stops the "More Work?!" spam.

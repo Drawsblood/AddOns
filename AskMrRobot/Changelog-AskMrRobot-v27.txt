@@ -1,0 +1,8 @@
+2015-07-06  yellowfive  <yellowfive>
+
+[69db1c3025ac] [v27]
+* AskMrRobot-Serializer/AskMrRobot-Serializer.lua, AskMrRobot.toc, CombatLog.lua, Constants.lua, Core.lua, Export.lua, Gear.lua, Import.lua, Media/IconClose.tga, Media/IconCloseOver.tga, localization/enUS.lua, localization/frFR.lua, localization/itIT.lua, ui/AmrUiFrame.lua:
+
+fixed some bugs with 6.2 item link format changes, added bib overwolf support
+
+

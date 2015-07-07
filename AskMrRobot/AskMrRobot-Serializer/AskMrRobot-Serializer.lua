@@ -1,7 +1,7 @@
 -- AskMrRobot-Serializer will serialize and communicate character data between users.
 -- This is used primarily to associate character information to logs uploaded to askmrrobot.com.
 
-local MAJOR, MINOR = "AskMrRobot-Serializer", 26
+local MAJOR, MINOR = "AskMrRobot-Serializer", 27
 local Amr, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not Amr then return end -- already loaded by something else
@@ -579,7 +579,7 @@ Amr.SetTokenIds = {
 -- Public Utility Methods
 ----------------------------------------------------------------------------------------
 
--- item link format:  |cffa335ee|Hitem:itemID:enchant:gem1:gem2:gem3:gem4:suffixID:uniqueID:level:unknown:upgradeId:instanceDifficultyID:numBonusIDs:bonusID1:bonusID2...|h[item name]|h|r
+-- item link format:  |cffa335ee|Hitem:itemID:enchant:gem1:gem2:gem3:gem4:suffixID:uniqueID:level:unknown:unknown:instanceDifficultyID:numBonusIDs:bonusID1:bonusID2...|h[item name]|h|r
 -- get an object with all of the parts of the item link format that we care about
 function Amr.ParseItemLink(itemLink)
     if not itemLink then return nil end
@@ -597,7 +597,7 @@ function Amr.ParseItemLink(itemLink)
     --item.uniqueId = tonumber(parts[8])
     --item.level = tonumber(parts[9])
 	-- part 10 is unknown atm
-    item.upgradeId = tonumber(parts[11])
+	-- part 11 is unknown atm
     --item.difficultyId = tonumber(parts[12])
     
     local numBonuses = tonumber(parts[13])
@@ -608,6 +608,14 @@ function Amr.ParseItemLink(itemLink)
         end
 		table.sort(item.bonusIds)
     end
+	
+	-- if numBonuses is 0 and there is a number after it, that is the upgrade id for old items now I guess?
+	if numBonuses == 0 then
+		local upgradeId = tonumber(parts[14])
+		item.upgradeId = upgradeId and upgradeId or 0
+	else
+		item.upgradeId = 0
+	end
     
     return item
 end

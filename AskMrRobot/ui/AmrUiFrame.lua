@@ -162,18 +162,22 @@ local function Constructor()
 	bg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -_borderWidth, _borderWidth)
 
 	local btnClose = CreateFrame("Button", nil, frame)
-	btnClose:SetNormalFontObject(Amr.CreateFont("Bold", 16, Amr.Colors.White))
-	btnClose:SetText("x")
+	btnClose:SetNormalTexture("Interface\\AddOns\\" .. Amr.ADDON_NAME .. "\\Media\\IconClose")
+	btnClose:SetHighlightTexture("Interface\\AddOns\\" .. Amr.ADDON_NAME .. "\\Media\\IconCloseOver")
+	
+	--btnClose:SetNormalFontObject(Amr.CreateFont("Bold", 16, Amr.Colors.White))
+	--btnClose:SetText("x")
 	btnClose:SetWidth(22)
 	btnClose:SetHeight(22)
 	btnClose:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
 	btnClose:SetScript("OnClick", buttonOnClick)
 
-	local lbl = btnClose:GetFontString()
-	lbl:ClearAllPoints()
-	lbl:SetPoint("TOP", btnClose, "TOP", -1, -2)
+	--local lbl = btnClose:GetFontString()
+	--lbl:ClearAllPoints()
+	--lbl:SetPoint("TOP", btnClose, "TOP", -1, -2)
 	
 	-- style the button similar to AmrUiButton
+	--[[
 	Amr.DropShadow(btnClose)
 
 	local tex = Amr.CreateTexture(btnClose, Amr.Colors.Red)
@@ -188,6 +192,7 @@ local function Constructor()
 	tex = Amr.CreateTexture(btnClose, Amr.Colors.White, 0.1)
 	tex:SetAllPoints(true)
 	btnClose:SetHighlightTexture(tex)
+	]]
 	
 	-- title
 	local titleFrame = CreateFrame("Frame", nil, frame)

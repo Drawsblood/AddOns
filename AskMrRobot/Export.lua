@@ -19,6 +19,15 @@ local function onSplashClose()
 	Amr.db.char.FirstUse = false
 end
 
+local function onTextChanged(widget)
+	local val = _txt:GetText()
+	if val == "overwolf-bib" then
+		-- go to the gear tab, open import window, and show a cover
+		Amr:ShowTab("Gear")
+		Amr:ShowImportWindow(true)
+	end
+end
+
 -- render a splash screen with first-time help
 local function renderSplash(container)
 	local panel = Amr:RenderCoverChrome(container, 700, 450)
@@ -80,6 +89,7 @@ function Amr:RenderTabExport(container)
 	_txt:SetHeight(300)
 	_txt:SetPoint("TOP", lbl.frame, "BOTTOM", 0, -20)
 	_txt:SetFont(Amr.CreateFont("Regular", 12, Amr.Colors.Text))
+	_txt:SetCallback("OnTextChanged", onTextChanged)
 	container:AddChild(_txt)
 	
 	local data = self:ExportCharacter()	

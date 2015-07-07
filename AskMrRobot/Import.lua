@@ -4,6 +4,7 @@ local AceGUI = LibStub("AceGUI-3.0")
 
 local _txtImport
 local _lblError
+local _panelCover
 
 local function onImportOkClick(widget)
 	local txt = _txtImport:GetText()
@@ -21,7 +22,22 @@ local function onImportCancelClick(widget)
 	Amr:HideCover()
 end
 
-local function renderImportWindow(container)
+local function onTextEnterPressed(widget)
+	-- hide the overwolf cover when import data is received
+	if _panelCover then
+		_panelCover:SetVisible(false)
+	end
+	
+	-- do an import if the data starts and ends with a dollar sign
+	local txt = _txtImport:GetText()
+	local txtLen = string.len(txt)
+	if txtLen > 2 and string.sub(txt, 1, 1) == '$' then	
+		onImportOkClick()
+	end
+	
+end
+
+local function renderImportWindow(container, fromOverwolf)
 
 	local panelImport = Amr:RenderCoverChrome(container, 700, 450)
 	
@@ -36,6 +52,7 @@ local function renderImportWindow(container)
 	_txtImport:SetHeight(300)
 	_txtImport:SetPoint("TOP", lbl.frame, "BOTTOM", 0, -10)
 	_txtImport:SetFont(Amr.CreateFont("Regular", 12, Amr.Colors.Text))
+	_txtImport:SetCallback("OnEnterPressed", onTextEnterPressed)
 	panelImport:AddChild(_txtImport)
 	
 	local btnImportOk = AceGUI:Create("AmrUiButton")
@@ -65,11 +82,36 @@ local function renderImportWindow(container)
 	_lblError:SetPoint("TOPLEFT", btnImportOk.frame, "BOTTOMLEFT", 0, -20)
 	panelImport:AddChild(_lblError)
 	
+	if fromOverwolf then
+		-- show a cover preventing interaction until we receive data from overwolf
+		_panelCover = AceGUI:Create("AmrUiPanel")
+		_panelCover:SetLayout("None")
+		_panelCover:EnableMouse(true)
+		_panelCover:SetBackgroundColor(Amr.Colors.Black, 0.75)
+		_panelCover:SetPoint("TOPLEFT", panelImport.frame, "TOPLEFT")
+		_panelCover:SetPoint("BOTTOMRIGHT", panelImport.frame, "BOTTOMRIGHT")
+		panelImport:AddChild(_panelCover)
+
+		local coverMsg = AceGUI:Create("AmrUiLabel")
+		coverMsg:SetWidth(500)
+		coverMsg:SetFont(Amr.CreateFont("Regular", 16, Amr.Colors.TextTan))
+		coverMsg:SetJustifyH("MIDDLE")
+		coverMsg:SetJustifyV("MIDDLE")
+		coverMsg:SetText(L.ImportOverwolfWait)
+		coverMsg:SetPoint("CENTER", _panelCover.frame, "CENTER", 0, 20)
+		_panelCover:AddChild(coverMsg)
+		
+		-- after adding, set cover to sit on top of everything
+		_panelCover:SetStrata("FULLSCREEN_DIALOG")
+		_panelCover:SetLevel(Amr.FrameLevels.Highest)		
+	end
 end
 
-function Amr:ShowImportWindow()
+function Amr:ShowImportWindow(fromOverwolf)
 	-- this is shown as a modal dialog
-	Amr:ShowCover(renderImportWindow)
+	Amr:ShowCover(function(container)
+		renderImportWindow(container, fromOverwolf)
+	end)
 	
 	_txtImport:SetText("")
 	_txtImport:SetFocus(true)
