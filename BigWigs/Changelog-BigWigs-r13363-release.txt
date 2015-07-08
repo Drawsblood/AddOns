@@ -1,9 +1,58 @@
 ------------------------------------------------------------------------
-r13354 | funkydude | 2015-07-06 06:57:07 +0000 (Mon, 06 Jul 2015) | 1 line
+r13363 | funkydude | 2015-07-07 15:11:56 +0000 (Tue, 07 Jul 2015) | 1 line
 Changed paths:
-   A /tags/r13354-release (from /trunk:13353)
+   A /tags/r13363-release (from /trunk:13362)
 
-Tagging as r13354-release
+Tagging as r13363-release
+------------------------------------------------------------------------
+r13362 | funkydude | 2015-07-07 15:08:13 +0000 (Tue, 07 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/BigWigs.toc
+
+bump version
+------------------------------------------------------------------------
+r13361 | funkydude | 2015-07-06 22:15:43 +0000 (Mon, 06 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/BlackrockFoundry/Kromog.lua
+   M /trunk/HellfireCitadel/FelLordZakuun.lua
+
+FelLordZakuun: Add respawn time, make Disembodied a target bar on non-mythic, add tank proximity functionality to assist tank hugging.
+------------------------------------------------------------------------
+r13360 | avi90 | 2015-07-06 21:33:25 +0000 (Mon, 06 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Gorefiend.lua
+
+Gorefiend: adjusted shadow of death timers
+------------------------------------------------------------------------
+r13359 | nebula169 | 2015-07-06 21:02:51 +0000 (Mon, 06 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/FelLordZakuun.lua
+
+FelLordZakuun: use seed icon for "Explosion" and heavy handed for "Disarmed"
+------------------------------------------------------------------------
+r13358 | funkydude | 2015-07-06 20:41:32 +0000 (Mon, 06 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Loader.lua
+
+bump DBM version
+------------------------------------------------------------------------
+r13357 | nebula169 | 2015-07-06 09:14:13 +0000 (Mon, 06 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Xhulhorac.lua
+
+Xhulhorac: only show the next timer for Strike/Surge in p3/p4
+------------------------------------------------------------------------
+r13356 | nebula169 | 2015-07-06 08:15:31 +0000 (Mon, 06 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Xhulhorac.lua
+
+Xhulhorac: tweak Black Hole times, add initial times for Chains of Fel and Black Hole
+------------------------------------------------------------------------
+r13355 | nebula169 | 2015-07-06 07:50:15 +0000 (Mon, 06 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Xhulhorac.lua
+
+Xhulhorac: fix Fel Strike/Void Strike ids, add phase messages, update times
 ------------------------------------------------------------------------
 r13353 | funkydude | 2015-07-06 06:52:32 +0000 (Mon, 06 Jul 2015) | 1 line
 Changed paths:

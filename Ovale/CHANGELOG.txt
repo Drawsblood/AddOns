@@ -1,10 +1,22 @@
-Ovale Spell Priority 6.2.7
-==========================
+Ovale Spell Priority 6.2.10
+===========================
 
-Changes from version 6.2.6:
+Changes from version 6.2.9:
 ---------------------------
 
--   Mage: Avoid suggesting the "end of fight" burn phase altogether.
+-   Hunter: Focus Fire cannot be used if the Focus Fire buff is present.
 
-    Let the player figure out when it's okay to keep casting Arcane Blast near
-    the end of a fight.  The DPS difference is minimal.
+-   Extend "unusable" SpellInfo property to be zero/non-zero for false/true.
+
+-   Revert previous commit since Focus Fire uses the Frenzy stacks on the pet.
+
+    It's possible to get into a state where the player shows more stacks of
+    Frenzy than the pet does by dismissing and re-summoning the same pet.  In
+    this case, the status of the Frenzy buff between the player and the pet
+    is in an inconsistent state, but Focus Fire actually consumes the stacks
+    of Frenzy on the pet, regardless of how many stacks are displayed on the
+    player.
+
+    Also fix the name of the symbol used for the Frenzy buff in Ovale scripts.
+    This change makes the BM hunter script correctly suggest Focus Fire when
+    it reaches five stacks on the pet.

@@ -30,6 +30,10 @@ end
 
 L = BigWigs:NewBossLocale("Socrethar the Eternal", "frFR")
 if L then
+L["dominator_desc"] = "Alertes concernant l'apparition du Dominateur sargereï." -- Needs review
+L["portals"] = "Déplacement des portails" -- Needs review
+L["portals_desc"] = "Délai indiquant quand les portails changent de position en phase 2." -- Needs review
+L["portals_msg"] = "Les portails ont bougés !" -- Needs review
 
 end
 

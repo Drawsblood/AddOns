@@ -49,7 +49,7 @@ L["custom_off_hands_marker"] = "Marcador de tanque en Tierra enredadora" -- Need
 L["custom_off_hands_marker_desc"] = "Marca la Tierra enredadora que atrapa a los tanques con {rt7}{rt8}, requiere ayudante o líder." -- Needs review
 L["destroy_pillars"] = "Destruye pilares" -- Needs review
 L["prox"] = "Proximidad a tanque" -- Needs review
-L["prox_desc"] = "Abre una ventana de proximidad de 15 metros a otros tanques para ayudarte con el daño de la habilidad |cff66bbffPuños de piedra|r." -- Needs review
+L["prox_desc"] = "Abre una ventana de proximidad de 15 metros a otros tanques para ayudarte con el daño de la habilidad Puños de piedra." -- Needs review
 
 end
 

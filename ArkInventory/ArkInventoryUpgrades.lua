@@ -428,7 +428,7 @@ function ArkInventory.DatabaseUpgradePostLoad( )
 					ArkInventory.db.profile.option.ui.search.border.scale = 1
 					ArkInventory.db.profile.option.ui.search.border.file = nil
 				end
-
+				
 				if ArkInventory.db.profile.option.ui.search.colour then
 					
 					if ArkInventory.db.profile.option.ui.search.colour.border then

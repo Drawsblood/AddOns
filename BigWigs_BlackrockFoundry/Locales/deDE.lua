@@ -49,7 +49,7 @@ L["custom_off_hands_marker"] = "Klammernde Erde der Tanks markieren" -- Needs re
 L["custom_off_hands_marker_desc"] = "Markiere die klammernde Erde, die die Tanks greift mit {rt7}{rt8}, benötigt Leiter oder Assistent." -- Needs review
 L["destroy_pillars"] = "Säulen zerstören" -- Needs review
 L["prox"] = "Näheanzeige für Tanks" -- Needs review
-L["prox_desc"] = "Öffne eine Näheanzeige, die andere Tanks im Abstand von maximal 15 Metern anzeigt, die Anzeige hilft dir mit der |cff66bbffFäuste aus Stein|r Fähigkeit umzugehen." -- Needs review
+L["prox_desc"] = "Öffne eine Näheanzeige, die andere Tanks im Abstand von maximal 15 Metern anzeigt, die Anzeige hilft dir mit der Fäuste aus Stein Fähigkeit umzugehen." -- Needs review
 
 end
 

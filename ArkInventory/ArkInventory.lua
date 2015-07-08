@@ -1,6 +1,6 @@
 ﻿-- (c) 2006-2015, all rights reserved.
--- $Revision: 1353 $
--- $Date: 2015-07-05 00:19:37 +1000 (Sun, 05 Jul 2015) $
+-- $Revision: 1355 $
+-- $Date: 2015-07-08 12:35:09 +1000 (Wed, 08 Jul 2015) $
 
 
 local _G = _G
@@ -6650,7 +6650,7 @@ end
 function ArkInventory.Frame_Bar_Insert( loc_id, bar_id )
 	
 	local t = ArkInventory.LocationOptionGet( loc_id, "bar", "data" )
-	table.insert( t, ArkInventory.Table.Copy( t[0] ) )
+	table.insert( t, bar_id, ArkInventory.Table.Copy( t[0] ) )
 	
 	
 	-- move category data (bar numbers can be negative)
