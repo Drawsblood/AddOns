@@ -9,7 +9,7 @@ local table = _G.table
 
 
 function ArkInventory.MenuMainOpen( frame )
-
+	
 	assert( frame, "code error: frame argument is missing" )
 
 	if ArkInventory.Lib.Dewdrop:IsOpen( frame ) then
@@ -130,8 +130,7 @@ function ArkInventory.MenuMainOpen( frame )
 						"tooltipText", ArkInventory.Localise["CONFIG_SETTINGS_ITEMS_HIDDEN_TEXT"],
 						"checked", ArkInventory.LocationOptionGetReal( loc_id, "slot", "ignorehidden" ),
 						"func", function( )
-							ArkInventory.LocationOptionSetReal( loc_id, "slot", "ignorehidden", not ArkInventory.LocationOptionGetReal( loc_id, "slot", "ignorehidden" ) )
-							ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Recalculate )
+							ArkInventory.ToggleShowHiddenItems( loc_id )
 						end
 					)
 					
@@ -3875,9 +3874,7 @@ function ArkInventory.MenuRefreshOpen( frame )
 						"closeWhenClicked", true,
 						"checked", ArkInventory.LocationOptionGet( loc_id, "slot", "ignorehidden" ),
 						"func", function( )
-							local v = ArkInventory.LocationOptionGet( loc_id, "slot", "ignorehidden" )
-							ArkInventory.LocationOptionSet( loc_id, "slot", "ignorehidden", not v )
-							ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
+							ArkInventory.ToggleShowHiddenItems( loc_id )
 						end
 					)
 					

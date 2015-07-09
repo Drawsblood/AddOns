@@ -1,6 +1,6 @@
 ﻿-- (c) 2006-2015, all rights reserved.
--- $Revision: 1355 $
--- $Date: 2015-07-08 12:35:09 +1000 (Wed, 08 Jul 2015) $
+-- $Revision: 1356 $
+-- $Date: 2015-07-09 20:43:36 +1000 (Thu, 09 Jul 2015) $
 
 
 local _G = _G
@@ -24,7 +24,6 @@ ArkInventory.Lib = { -- libraries live here
 	
 	SharedMedia = LibStub( "LibSharedMedia-3.0" ),
 	DataBroker = LibStub( "LibDataBroker-1.1" ),
-	UpgradeInfo = LibStub( "LibItemUpgradeInfo-1.0" ),
 	
 	Dewdrop = LibStub( "ArkDewdrop-3.0" ),
 	

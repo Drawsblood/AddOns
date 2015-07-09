@@ -1,10 +1,28 @@
 ------------------------------------------------------------------------
-r503 | arkayenro | 2015-07-08 02:38:32 +0000 (Wed, 08 Jul 2015) | 3 lines
+r505 | arkayenro | 2015-07-09 11:30:44 +0000 (Thu, 09 Jul 2015) | 4 lines
 Changed paths:
-   A /tags/3.05.08 (from /trunk:502)
+   A /tags/3.05.09 (from /trunk:504)
 
-*3.05.08 (08-JUL-2015)*
- * fixed - issue with inserting bars
+*3.05.09 (09-JUL-2015)*
+ * fixed - issue with /ai track
+ * removed - references to LibItemUpgradeInfo-1.0
+
+------------------------------------------------------------------------
+r504 | arkayenro | 2015-07-09 11:27:41 +0000 (Thu, 09 Jul 2015) | 4 lines
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/ArkInventory.lua
+   M /trunk/ArkInventory.toc
+   M /trunk/ArkInventoryConfig.lua
+   M /trunk/ArkInventoryExternals.lua
+   M /trunk/ArkInventoryExternals.xml
+   M /trunk/ArkInventoryMenu.lua
+   M /trunk/Modules/ArkInventoryConfig/ArkInventoryConfig.lua
+   M /trunk/VersionHistory.txt
+
+*3.05.09 (xx-JUL-2015)*
+ * fixed - issue with /ai track
+ * removed - references to LibItemUpgradeInfo-1.0
 
 ------------------------------------------------------------------------
 r502 | arkayenro | 2015-07-08 02:36:57 +0000 (Wed, 08 Jul 2015) | 3 lines

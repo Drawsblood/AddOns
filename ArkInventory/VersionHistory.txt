@@ -12,6 +12,10 @@
  * faq - https://github.com/arkayenro/arkinventory/wiki/FAQ
  
 
+*3.05.09 (xx-JUL-2015)*
+ * fixed - issue with /ai track
+ * removed - references to LibItemUpgradeInfo-1.0
+
 *3.05.08 (08-JUL-2015)*
  * fixed - issue with inserting bars
 

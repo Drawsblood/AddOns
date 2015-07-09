@@ -3141,10 +3141,9 @@ function ArkInventory.ConfigInternalSettings( path )
 						local loc_id = ConfigGetNodeArg( info, #info - 2 )
 						return ArkInventory.LocationOptionGetReal( loc_id, "slot", "ignorehidden" )
 					end,
-					set = function( info, v )
+					set = function( info )
 						local loc_id = ConfigGetNodeArg( info, #info - 2 )
-						ArkInventory.LocationOptionSetReal( loc_id, "slot", "ignorehidden", v )
-						ArkInventory.Frame_Main_Generate( nil, ArkInventory.Const.Window.Draw.Recalculate )
+						ArkInventory.ToggleShowHiddenItems( loc_id )
 					end,
 				},
 				fade = {

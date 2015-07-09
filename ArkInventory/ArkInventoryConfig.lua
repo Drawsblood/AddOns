@@ -181,7 +181,7 @@ function ArkInventory.ConfigBlizzard( )
 				
 				local osd = ArkInventory.ObjectStringDecode( h )
 				
-				if ods[1] ~= "item" then
+				if osd[1] ~= "item" then
 					ArkInventory.OutputWarning( "not an item: ", v )
 					return
 				end
@@ -293,4 +293,11 @@ function ArkInventory.ConfigBlizzard( )
 		
 	}
 	
+end
+
+function ArkInventory.ToggleShowHiddenItems( loc_id )
+	if loc_id then
+		ArkInventory.LocationOptionSetReal( loc_id, "slot", "ignorehidden", not ArkInventory.LocationOptionGetReal( loc_id, "slot", "ignorehidden" ) )
+		ArkInventory.Frame_Main_Generate( loc_id, ArkInventory.Const.Window.Draw.Recalculate )
+	end
 end

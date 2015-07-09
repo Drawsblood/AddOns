@@ -5,8 +5,6 @@
 	
 	<Include file="Externals\curse\hg\LibDialog-1.0\lib.xml" />
 	
-	<Include file="Externals\curse\git\LibItemUpgradeInfo-1.0\LibItemUpgradeInfo-1.0.xml" />
-	
 	<Include file="Externals\curse\svn\Ace3-AceAddon\AceAddon-3.0.xml" />
 	<Include file="Externals\curse\svn\Ace3-AceConsole\AceConsole-3.0.xml" />
 	<Include file="Externals\curse\svn\Ace3-AceGUI\AceGUI-3.0.xml" />
