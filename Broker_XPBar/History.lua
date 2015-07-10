@@ -91,11 +91,13 @@ end
 
 function History:Reset()
 	for key in pairs(moduleData.historyXP) do
-		moduleData.historyXP[key]= nil
+		NS:ReleaseTable(moduleData.historyXP[key])
+		moduleData.historyXP[key] = nil
 	end
 	
-	for key in pairs(moduleData.historyMobs) do
-		moduleData.historyMobs[key]= nil
+	for index in ipairs(moduleData.historyMobs) do
+		NS:ReleaseTable(moduleData.historyMobs[index])
+		moduleData.historyMobs[index] = nil
 	end	
 end
 
@@ -105,11 +107,12 @@ function History:GetWriteBucket()
 	local bucket = moduleData.historyXP[#moduleData.historyXP]
 	
 	if not bucket or bucket.time ~= bucketTime then
-		bucket = {
-			time    = bucketTime,
-			totalXP = 0,
-			kills   = 0
-		}
+		bucket = NS:NewTable()
+		
+		bucket.time    = bucketTime		
+		bucket.totalXP = 0
+		bucket.kills   = 0
+
 		tinsert(moduleData.historyXP, bucket)
 	end
 	
@@ -127,59 +130,59 @@ function History:GetTimeToLevel()
 		return "~"
 	end
 
-	local duration_rest = 0
+	local durationRest = 0
 	
 	if moduleData.endRestTime then
-		duration_rest = moduleData.endRestTime - moduleData.startTime
+		durationRest = moduleData.endRestTime - moduleData.startTime
 	end
 	
-	local xp_togo = UnitXPMax("player") - UnitXP("player")
+	local xpToGo = UnitXPMax("player") - UnitXP("player")
 	
 	-- xp/s (current)
-	local xppersec_c = self:GetXPPerSecond()
+	local xpPerSecCurrent = self:GetXPPerSecond()
 	-- kills/s (current)
-	local killspersec_c = self:GetKillsPerSecond()
+	local killsPerSecCurrent = self:GetKillsPerSecond()
 	-- fraction of time with rested bonus
-	local rest_factor
+	local restFactor
 
 	if moduleData.timeframe == 0 or duration < moduleData.timeframe then
-		rest_factor   = duration_rest / duration
+		restFactor   = durationRest / duration
 	else
-		local duration_rest_activity = 0
+		local durationRestActivity = 0
 		
-		if duration_rest > 0 then
-			duration_rest_activity = duration_rest - (duration - moduleData.timeframe)
+		if durationRest > 0 then
+			durationRestActivity = durationRest - (duration - moduleData.timeframe)
 		end
 		
-		rest_factor = (duration_rest_activity / moduleData.timeframe) * moduleData.weight + (duration_rest / duration) * (1-moduleData.weight)		
+		restFactor = (durationRestActivity / moduleData.timeframe) * moduleData.weight + (durationRest / duration) * (1-moduleData.weight)		
 	end
 
-	if xppersec_c == 0 then
+	if xpPerSecCurrent == 0 then
 		return "~"
 	end
 	
 	-- xp/s (based on mob kills)
-	local xppersec_m = moduleData.xpPerKill * killspersec_c
+	local xpPerSecMobs = moduleData.xpPerKill * killsPerSecCurrent
 	
-	local xp_rested = GetXPExhaustion() or 0
+	local xpRested = GetXPExhaustion() or 0
 	
 	-- fraction of xp/s done by mobkills
-	local mob_fraction = xppersec_m / xppersec_c
+	local mobFraction = xpPerSecMobs / xpPerSecCurrent
 	
 	-- how far does the rested bonus extend 
 	-- based on our current fraction of mobkills of xp earned 
-	local xp_restrange = 0
+	local xpRestRange = 0
 
-	if mob_fraction > 0 then
-		xp_restrange = xp_rested / mob_fraction
+	if mobFraction > 0 then
+		xpRestRange = xpRested / mobFraction
 	end
 	
-	if xp_restrange > xp_togo then
-		xp_restrange = xp_togo
+	if xpRestRange > xpToGo then
+		xpRestRange = xpToGo
 	end
 
-	-- xppersec_c(urrent) = xppersec_nomobs + 2*(xppersec_m(obs))
-	local ttl = xp_restrange / xppersec_c + (xp_togo - xp_restrange) / (xppersec_c - (xppersec_m * rest_factor))
+	-- xpPerSecCurrent = xpPerSecNoMobs + 2*xpPerSecMobs
+	local ttl = xpRestRange / xpPerSecCurrent + (xpToGo - xpRestRange) / (xpPerSecCurrent - (xpPerSecMobs * restFactor))
 	
 	return NS:FormatTime(ttl)	
 end
@@ -190,7 +193,7 @@ function History:GetKillsToLevel()
 	end
 	
 	local rested = GetXPExhaustion() or 0
-	local xptogo = UnitXPMax("player") - UnitXP("player")
+	local xpToGo = UnitXPMax("player") - UnitXP("player")
 	
 	local bonus = 0
 	
@@ -205,11 +208,11 @@ function History:GetKillsToLevel()
 	-- NOTE: since there is no formula calculating the group bonus available 
 	-- we depend on the data we extracted from the combat log
 	-- so group bonus is incorrect if the number of players in party/raid changes
-	-- but it will adjust faily quick (and we cant take everything into account)
-	if rested >= xptogo then
-		return ceil(xptogo/(moduleData.xpPerKill * 2 + bonus))
+	-- but it will adjust fairly quick (and we cant take everything into account)
+	if rested >= xpToGo then
+		return ceil(xpToGo/(moduleData.xpPerKill * 2 + bonus))
 	else
-		return ceil((rested/(moduleData.xpPerKill * 2 + bonus)) + ((xptogo - rested)/(moduleData.xpPerKill + bonus)))
+		return ceil((rested/(moduleData.xpPerKill * 2 + bonus)) + ((xpToGo - rested)/(moduleData.xpPerKill + bonus)))
 	end
 end
 
@@ -266,6 +269,7 @@ function History:ProcessXPHistory()
 	local oldest = moduleData.activeBucket - MAX_TIME_MINUTES
 	
 	while #moduleData.historyXP ~= 0 and moduleData.historyXP[1].time <= oldest do
+		NS:ReleaseTable(moduleData.historyXP[1])
 		tremove(moduleData.historyXP, 1)
 	end
 
@@ -294,18 +298,22 @@ function History:ProcessMobHistory()
 	-- regular mean
 	local total = 0
 	local mean = 0
-	local size = tgetn(moduleData.historyMobs)
-	for _, xp in pairs(moduleData.historyMobs) do
+	local size = #moduleData.historyMobs
+	
+	for _, xp in ipairs(moduleData.historyMobs) do
 		total = total + xp.kxp
 	end
+	
 	mean = total/size
 
 	-- std deviation
 	total = 0
 	local stdev = 0
+	
 	for _, xp in pairs(moduleData.historyMobs) do
 		total = total + (xp.kxp - mean)^2
 	end
+	
 	if size > 1 then
 		stdev = sqrt(total/(size-1))
 	else
@@ -321,7 +329,7 @@ function History:ProcessMobHistory()
 	local low = mean - stdev
 	local high = mean + stdev
 	
-	for _, xp in pairs(moduleData.historyMobs) do
+	for _, xp in ipairs(moduleData.historyMobs) do
 		if xp.kxp >= low and xp.kxp <= high then
 			total = total + xp.kxp
 			group = group + xp.gxp
@@ -379,17 +387,18 @@ function History:AddKill(xp, bonus, penalty)
 	bucket.kills = bucket.kills + 1
 
 	-- track mob kills
-	local mobdata = {
-		kxp = xp,
-		gxp = bonus,
-		pxp = penalty
-	}
+	local mobdata = NS:NewTable()
 	
-	tinsert(moduleData.historyMobs, 1, mobdata)
+	mobdata.kxp = xp
+	mobdata.gxp = bonus
+	mobdata.pxp = penalty	
+	
+	tinsert(moduleData.historyMobs, mobdata)
 				
 	-- remove oldest entry if we exceed history size
-	if tgetn(moduleData.historyMobs) > MAX_HISTORY then
-		tremove(moduleData.historyMobs)
+	if #moduleData.historyMobs > MAX_HISTORY then
+		NS:ReleaseTable(moduleData.historyMobs[1])
+		tremove(moduleData.historyMobs, 1)
 	end
 		
 	moduleData.taintedMobs = true	

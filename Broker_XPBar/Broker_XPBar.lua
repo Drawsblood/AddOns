@@ -74,6 +74,9 @@ local Bar               = nil
 local Factions          = nil
 local History           = nil
 local ReputationHistory = nil
+local QuestInfo         = nil
+local Notifications     = nil
+local TextEngine        = nil
 
 -- aux variables
 local countInitial = 0
@@ -90,6 +93,9 @@ local XPGAIN_GROUP_PENALTY
 local XPGAIN_RAID
 local XPGAIN_RAID_RESTED
 local XPGAIN_RAID_PENALTY
+
+local REP_GAIN_SIMPLE
+local REP_LOSS_SIMPLE
 
 do
 -- NOTE: russian and korean clients use POSIX position indicators in COMBATLOG_XPGAIN_ patterns, 
@@ -151,63 +157,80 @@ do
 	temp                  = gsub(temp,                               "[()+-]", "[%0]")
 	temp                  = gsub(temp,                               "%%s",    "(.+)")
 	XPGAIN_RAID_PENALTY   = gsub(temp,                               "%%d",    "(%%d+)")
+	
+	-- "Reputation with %s increased by %d."
+	temp                  = gsub(FACTION_STANDING_INCREASED,        "(%%[0-9]$)([ds])", "%%%2") -- position indicators
+	temp                  = gsub(temp,                              "%%s",   "(.+)")   -- string pattern
+	REP_GAIN_SIMPLE       = gsub(temp,                              "%%d",   "(%%d+)") -- number pattern
+	
+	-- "Reputation with %s decreased by %d."
+	temp                  = gsub(FACTION_STANDING_DECREASED,        "(%%[0-9]$)([ds])", "%%%2") -- position indicators
+	temp                  = gsub(temp,                              "%%s",   "(.+)")   -- string pattern
+	REP_LOSS_SIMPLE       = gsub(temp,                              "%%d",   "(%%d+)") -- number pattern
 end
 
 local updateHandler = {
-	Spark              = "UpdateBarSetting",
-	Thickness          = "UpdateBarSetting",
-	ShowXP             = "UpdateXPBarSetting",
-	ShowRep            = "UpdateRepBarSetting",
-	Shadow             = "UpdateBarSetting",
-	Inverse            = "UpdateBarSetting",
-	ExternalTexture    = "UpdateTextureSetting",
-	Texture            = "UpdateTextureSetting",
-	Ticks              = "UpdateBarSetting",
-	ShowBarText        = "UpdateBarTextSetting",
-	BarToGo            = "UpdateBarTextSetting",
-	BarShowFactionName = "UpdateBarTextSetting",
-	BarShowValues      = "UpdateBarTextSetting",
-	BarShowPercentage  = "UpdateBarTextSetting",
-	BarShowRestedValue = "UpdateBarTextSetting",
-	BarShowRestedPerc  = "UpdateBarTextSetting",
-	BarAbbreviations   = "UpdateBarTextSetting",
-	MouseOver          = "UpdateBarSetting",
-	Font               = "UpdateBarSetting",
-	FontSize           = "UpdateBarSetting",
-	Frame              = "UpdateBarSetting",
-	Location           = "UpdateBarSetting",
-	xOffset            = "UpdateBarSetting",
-	yOffset            = "UpdateBarSetting",
-	Strata             = "UpdateBarSetting",
-	Inside             = "UpdateBarSetting",
-	Jostle             = "UpdateBarSetting",
-	BlizzRep           = "UpdateRepColorSetting",
-	ShowText           = "UpdateShowTextSetting",
-	ToGo               = "UpdateLabelSetting",
-	ShowFactionName    = "UpdateLabelSetting",
-	ShowValues         = "UpdateLabelSetting",
-	ShowPercentage     = "UpdateLabelSetting",
-	ShowRestedValue    = "UpdateLabelSetting",
-	ShowRestedPerc     = "UpdateLabelSetting",
-	ColoredText        = "UpdateLabelSetting",
-	Separators         = "UpdateLabelSetting",
-	Abbreviations      = "UpdateLabelSetting",
-	DecimalPlaces      = "UpdateLabelSetting",
-	AutoTrackOnGain    = "UpdateAutoTrackSetting",
-	AutoTrackOnLoss    = "UpdateAutoTrackSetting",
-	XP                 = "UpdateColorSetting",
-	Rest               = "UpdateColorSetting",
-	None               = "UpdateColorSetting",
-	Rep                = "UpdateColorSetting",
-	NoRep              = "UpdateColorSetting",
-	TimeFrame          = "UpdateHistorySetting",
-	Weight             = "UpdateHistorySetting",
-	MaxHideXPText      = "UpdateLabelSetting",
-	MaxHideXPBar       = "UpdateXPBarSetting",
-	MaxHideRepText     = "UpdateLabelSetting",
-	MaxHideRepBar      = "UpdateRepBarSetting",
-	ShowBlizzBars      = "UpdateBlizzardBarsSetting",
-	Minimap            = "UpdateMinimapSetting",
+	Spark                  = "UpdateBarSetting",
+	Thickness              = "UpdateBarSetting",
+	Length                 = "UpdateBarSetting",
+	ShowXP                 = "UpdateXPBarSetting",
+	ShowRep                = "UpdateRepBarSetting",
+	ShowQuestCompletedXP   = "UpdateBarSetting",
+	ShowQuestIncompleteXP  = "UpdateBarSetting",
+	ShowQuestCompletedRep  = "UpdateBarSetting",
+	ShowQuestIncompleteRep = "UpdateBarSetting",
+	Shadow                 = "UpdateBarSetting",
+	Inverse                = "UpdateBarSetting",
+	ExternalTexture        = "UpdateTextureSetting",
+	Texture                = "UpdateTextureSetting",
+	NoTexture              = "UpdateBarSetting",
+	Ticks                  = "UpdateBarSetting",
+	ShowBarText            = "UpdateBarTextSetting",
+	MouseOver              = "UpdateBarSetting",
+	SideBySideText         = "UpdateBarSetting",
+	SideBySideSeparator    = "UpdateBarSetting",
+	Font                   = "UpdateBarSetting",
+	FontSize               = "UpdateBarSetting",
+	BarXPText              = "UpdateBarTextSetting",
+	BarRepText             = "UpdateBarTextSetting",
+	Frame                  = "UpdateBarSetting",
+	Location               = "UpdateBarSetting",
+	xOffset                = "UpdateBarSetting",
+	yOffset                = "UpdateBarSetting",
+	Strata                 = "UpdateBarSetting",
+	Inside                 = "UpdateBarSetting",
+	Jostle                 = "UpdateBarSetting",
+	BlizzRep               = "UpdateRepColorSetting",
+	ShowText               = "UpdateShowTextSetting",
+	LabelXPText            = "UpdateLabelSetting",
+	LabelRepText           = "UpdateLabelSetting",
+	Separators             = "UpdateTextSetting",
+	DecimalPlaces          = "UpdateTextSetting",
+	AutoTrackOnGain        = "UpdateAutoTrackSetting",
+	AutoTrackOnLoss        = "UpdateAutoTrackSetting",
+	XP                     = "UpdateColorSetting",
+	Rest                   = "UpdateColorSetting",
+	QuestCompletedXP       = "UpdateColorSetting",
+	QuestIncompleteXP      = "UpdateColorSetting",
+	None                   = "UpdateColorSetting",
+	Rep                    = "UpdateColorSetting",
+	QuestCompletedRep      = "UpdateColorSetting",
+	QuestIncompleteRep     = "UpdateColorSetting",
+	NoRep                  = "UpdateColorSetting",
+	TimeFrame              = "UpdateHistorySetting",
+	Weight                 = "UpdateHistorySetting",
+	MaxHideXPText          = "UpdateLabelSetting",
+	MaxHideXPBar           = "UpdateXPBarSetting",
+	MaxHideRepText         = "UpdateLabelSetting",
+	MaxHideRepBar          = "UpdateRepBarSetting",
+	ShowBlizzBars          = "UpdateBlizzardBarsSetting",
+	Minimap                = "UpdateMinimapSetting",
+	Notification           = "UpdateNotification",
+	ToastNotification      = "UpdateNotification",
+	XPCustomLabel          = "UpdateCustomText",
+	XPCustomBar            = "UpdateCustomText",
+	RepCustomLabel         = "UpdateCustomText",
+	RepCustomBar           = "UpdateCustomText",
 }
 
 -- infrastructure
@@ -221,17 +244,22 @@ function Addon:OnInitialize()
 	Factions          = self:GetModule("Factions")
 	History           = self:GetModule("History")
 	ReputationHistory = self:GetModule("ReputationHistory")
+	QuestInfo         = self:GetModule("QuestInfo")
+	Notifications     = self:GetModule("Notifications")
+	TextEngine        = self:GetModule("TextEngine")
 
 	-- debug
 	self.debug = false
 
     self:RegisterChatCommand("brokerxpbar", "ChatCommand")
-	self:RegisterChatCommand("bxp",         "ChatCommand")
+	self:RegisterChatCommand("bxp",         "ChatCommand")	
 end
 
 function Addon:OnEnable()
 	-- init session vars
-	self.playerLvl = UnitLevel("player")
+	self.playerLvl      = UnitLevel("player")
+	self.notifyLevel    = self.playerLvl
+	self.notifyStanding = 0
 	
 	-- init xp history
 	History:SetTimeFrame(self:GetSetting("TimeFrame") * 60)
@@ -244,7 +272,6 @@ function Addon:OnEnable()
 	self:SetupEventHandlers()
 	
 	self:RegisterAutoTrack()
-	self:RegisterTTL()	
 	
 	self:UpdateIcon()	
 
@@ -258,6 +285,14 @@ function Addon:OnEnable()
 	
 	MinimapButton:SetShow(Options:GetSetting("Minimap"))
 
+	for id in TextEngine:IterateMutableTextIds() do
+		local code = self:GetSetting(id)
+		
+		if code then
+			TextEngine:SetCode(id, code)
+		end
+	end
+	
 	self:Update()
 end
 
@@ -272,9 +307,13 @@ function Addon:OnDisable()
 	end
 	
 	self:ResetEventHandlers()
-
+	
+	if self.timer then
+		self:CancelTimer(self.timer)
+		self.timer = nil
+	end
+	
 	self:RegisterAutoTrack(false)
-	self:RegisterTTL(false)	
 end
 
 function Addon:OnOptionsReloaded()
@@ -291,7 +330,6 @@ function Addon:OnOptionsReloaded()
 	ReputationHistory:ProcessFaction(self.faction)
 	
 	self:RegisterAutoTrack()
-	self:RegisterTTL()		
 
 	self:RefreshBarSettings()
 	
@@ -364,6 +402,14 @@ function Addon:TriggerAction(action, args)
 	elseif action == "update" then
 		self:Update()
 		self:Output("Update done.")
+	elseif action == "text" then
+		self:Output("TextEngine: id - " .. tostring(args[2]) .. ", mock - " .. tostring(args[2] and true or false) .. " : " .. TextEngine:GenerateText(args[2], args[3]))
+	elseif action == "questinfo" then
+		QuestInfo:Calculate()
+	
+		self:Output("QuestInfo: completed - " .. tostring(QuestInfo:GetValue("CompletedQuestXP")) .. ", incomplete - " .. tostring(QuestInfo:GetValue("IncompleteQuestXP")))
+	elseif action == "faction" then
+		Factions:GetFactionInfo(self.faction)
 	elseif action == "version" then
 		-- print version information
 		self:PrintVersionInfo()
@@ -388,23 +434,27 @@ function Addon:RemoveTooltip()
 end
 
 function Addon:SetupEventHandlers()
-	Options.RegisterCallback(self, ADDON .. "_SETTING_CHANGED", "UpdateSetting")	
+	Options.RegisterCallback(self, ADDON .. "_SETTING_CHANGED", "UpdateSetting")
+	QuestInfo.RegisterCallback(self, ADDON .. "_QUESTINFO_CHANGED", "UpdateQuestInfo")
 
 	self:RegisterBucketEvent("UPDATE_EXHAUSTION", 60, "Update")
 	
     self:RegisterEvent("PLAYER_UPDATE_RESTING", "UpdateIcon")
 	self:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
 	self:RegisterEvent("UPDATE_FACTION")
-	
+
 	if self.playerLvl < self.MAX_LEVEL then
 		self:RegisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
 		self:RegisterEvent("PLAYER_XP_UPDATE")
 		self:RegisterEvent("PLAYER_LEVEL_UP")
+	else
+		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	end
 end
 
 function Addon:ResetEventHandlers()
-	Options.UnregisterCallback(self, ADDON .. "_SETTING_CHANGED")	
+	Options.UnregisterCallback(self, ADDON .. "_SETTING_CHANGED")
+	QuestInfo.UnregisterCallback(self, ADDON .. "_QUESTINFO_CHANGED")
 
 	self:UnregisterAllBuckets()
 	
@@ -416,6 +466,8 @@ function Addon:ResetEventHandlers()
 		self:UnregisterEvent("PLAYER_XP_UPDATE")
 		self:UnregisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
 		self:UnregisterEvent("PLAYER_LEVEL_UP")
+	else
+		self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	end
 end
 
@@ -428,23 +480,6 @@ function Addon:RegisterAutoTrack(register)
 		self:RegisterEvent("COMBAT_TEXT_UPDATE")
 	else
 		self:UnregisterEvent("COMBAT_TEXT_UPDATE")
-	end
-end
-
-function Addon:RegisterTTL(register)
-	if register == nil then
-		register = self:GetSetting("ShowText") == "TTL" or self:GetSetting("ShowText") == "TTLRep"
-	end
-	
-	if register then
-		if not self.timer then
-			self.timer = self:ScheduleRepeatingTimer("UpdateLabel", 1)
-		end
-	else
-		if self.timer then
-			self:CancelTimer(self.timer)
-			self.timer = nil
-		end
 	end
 end
 
@@ -494,63 +529,66 @@ end
 
 -- update functions
 function Addon:Update()
+	Notifications:Process()
+
+	History:Process()
+	ReputationHistory:ProcessMobHistory()
+	ReputationHistory:ProcessFaction(self.faction)
+	
 	self:UpdateBar()
 	self:UpdateLabel()
 end
 
 function Addon:UpdateBar()
+	local temporal
+
 	if self:GetSetting("ShowXP") then
 		local currentXP = UnitXP("player")
 		local maxXP     = UnitXPMax("player")
 		local restXP    = GetXPExhaustion() or 0
 		
-		if maxXP == 0 then
-			return
-		end
+		Bar:SetProgress("XP", maxXP > 0 and (currentXP / maxXP) or 0)
+		Bar:SetProgress("Rested", maxXP > 0 and (restXP / maxXP) or 0)
+		Bar:SetProgress("CompletedQuestXP", maxXP > 0 and (QuestInfo:GetValue("CompletedQuestXP")  / maxXP) or 0)
+		Bar:SetProgress("IncompleteQuestXP", maxXP > 0 and (QuestInfo:GetValue("IncompleteQuestXP") / maxXP) or 0)
 		
-		local xp     = currentXP / maxXP
-		local rested = restXP / maxXP
-		
-		local oldValue = Bar:GetProgress("XP")
-		
-		Bar:SetProgress("XP", xp)
-		
-		oldValue = Bar:GetProgress("Rested")
-		
-		Bar:SetProgress("Rested", rested)
-		
-		local text = ""
+		local text, temporal = "", false
 		
 		if self:GetSetting("ShowBarText") then
-			text = self:GetInfoText("XP", "Bar")
+			text, temporal = TextEngine:GenerateText(Options:GetSetting("BarXPText"))
+			
+			if temporal then
+				self:ScheduleTextRefresh()
+			end
 		end
 		
-		Bar:SetText("XP", text)		
+		Bar:SetText("XP", text)	
 	end
 
 	if self:GetSetting("ShowRep") then
+		local total = 0
 		local reputation = 0
-		local text = ""
 		
 		if self.faction then
-			local name, standing, minRep, maxRep, currentRep = nil, 0, 0, 0, 0
+			local name, _, standing, minRep, maxRep, currentRep = Factions:GetFactionInfo(self.faction)			
 			
-			name, _, standing, minRep, maxRep, currentRep = Factions:GetFactionInfo(self.faction)
-			
-			if maxRep == minRep then
-				return
-			end
-			
-			reputation = (currentRep - minRep) / (maxRep - minRep)
-			
-			if self:GetSetting("ShowBarText") then
-				text = self:GetInfoText("Rep", "Bar")
-			end
+			total = maxRep - minRep
+			reputation = currentRep - minRep
 		end
 
-		local oldValue = Bar:GetProgress("Reputation")
-		
-		Bar:SetProgress("Reputation", reputation)
+		Bar:SetProgress("Reputation", total > 0 and (reputation / total) or 0)
+		Bar:SetProgress("CompletedQuestRep", total > 0 and (QuestInfo:GetValue("CompletedQuestRep") / total) or 0)
+		Bar:SetProgress("IncompleteQuestRep", total > 0 and (QuestInfo:GetValue("IncompleteQuestRep") / total) or 0)
+
+		local text, temporal = "", false
+
+		if self:GetSetting("ShowBarText") then
+			text, temporal = TextEngine:GenerateText(Options:GetSetting("BarRepText"))
+			
+			if temporal then
+				self:ScheduleTextRefresh()
+			end
+		end
 		
 		Bar:SetText("Reputation", text)
 	end
@@ -562,54 +600,28 @@ function Addon:UpdateLabel()
 	local show = self:GetSetting("ShowText")
 
 	if show == "XPFirst" then
-		if self.playerLvl == self.MAX_LEVEL then
-			show = "Rep"
-		else
-			show = "XP"
-		end
+		show = self.playerLvl == self.MAX_LEVEL and "Rep" or "XP"
 	elseif show == "RepFirst" then
-		if not self.faction or self.atMaxRep then
-			show = "XP"
-		else
-			show = "Rep"
-		end
+		show = not self.faction or self.atMaxRep and "XP" or "Rep"
 	end
 	
-    if show == "XP" or
-	   show == "TTL" or
-	   show == "KTL" then
-		if self.playerLvl == self.MAX_LEVEL then
-			if self:GetSetting("MaxHideXPText") then
-				DataBroker:SetText("")
-			else
-				DataBroker:SetText(L["Max Level"])
-			end
-			return
-		end
-	end
+	local text, temporal = "", false
 	
-	if show == "Rep" and self.atMaxRep and self:GetSetting("MaxHideRepText") then
-		DataBroker:SetText("")
-		return
-	end
-
-    if show == "Rep" or show == "XP"  then		
-		DataBroker:SetText(self:GetInfoText(show))
-    elseif show == "TTL" then		
-		History:Process()
-			
-		DataBroker:SetText(L["TTL"] .. ": " .. History:GetTimeToLevel())
-    elseif show == "KTL" then
-		History:Process()
-			
-		DataBroker:SetText(L["KTL"] .. ": " .. NS:Colorize("Red", History:GetKillsToLevel()))
-    elseif show == "TTLRep" then		
-		ReputationHistory:ProcessFaction(self.faction)
-			
-		DataBroker:SetText(L["TTLRep"] .. ": " .. ReputationHistory:GetTimeToLevel(self.faction))
-    else
-        DataBroker:SetText(self.FULLNAME)
+    if show == "XP"  then		
+		if self.playerLvl ~= self.MAX_LEVEL or not self:GetSetting("MaxHideXPText") then
+			text, temporal = TextEngine:GenerateText(Options:GetSetting("LabelXPText"))
+		end
+    elseif show == "Rep"  then		
+		if not self.atMaxRep or not self:GetSetting("MaxHideRepText") then
+			text, temporal = TextEngine:GenerateText(Options:GetSetting("LabelRepText"))
+		end
     end
+
+	if temporal then
+		self:ScheduleTextRefresh()
+	end
+	
+	DataBroker:SetText(text)
 end
 
 function Addon:UpdateIcon()
@@ -655,6 +667,13 @@ function Addon:UpdateStanding()
 	end
 
 	ReputationHistory:Update()
+	Notifications:Taint()
+	
+	self:Update()
+end
+
+function Addon:UpdateQuestInfo()
+	Notifications:Taint()
 	
 	self:Update()
 end
@@ -677,6 +696,8 @@ function Addon:UpdateSetting(event, setting, value, old)
 		Bar:SetSetting("Texture", Options:GetSetting("ExternalTexture") and Options:GetSetting("Texture") or nil)
 	elseif handler == "UpdateBarTextSetting" then
 		self:UpdateBar()
+	elseif handler == "UpdateTextSetting" then
+		self:Update()
 	elseif handler == "UpdateRepColorSetting" then
 		local r, g, b, a = Options:GetColor("Rep")
 
@@ -688,8 +709,6 @@ function Addon:UpdateSetting(event, setting, value, old)
 	elseif handler == "UpdateLabelSetting" then
 		self:UpdateLabel()
 	elseif handler == "UpdateShowTextSetting" then
-		self:RegisterTTL()
-		
 		self:UpdateLabel()
 	elseif handler == "UpdateHistorySetting" then
 		if setting == "TimeFrame" then
@@ -710,6 +729,14 @@ function Addon:UpdateSetting(event, setting, value, old)
 		end
 		
 		Bar:SetColor(setting, value.r, value.g, value.b, value.a)	
+	elseif handler == "UpdateNotification" then
+		if self:GetSetting(setting) then
+			Notifications:SettingChanged(setting)
+		end
+	elseif handler == "UpdateCustomText" then
+		if TextEngine:SetCode(setting, value) then
+			self:Update()
+		end
 	elseif handler == "UpdateBlizzardBarsSetting" then
 		self:ShowBlizzardBars(value) 
 	elseif handler == "UpdateMinimapSetting" then
@@ -751,24 +778,25 @@ function Addon:SetFaction(factionId)
 	if watchedName ~= requestedName then
 		SetWatchedFactionIndex(index)
 		
-		-- after using index we can restore the faction list ui
-		Factions:RestoreUI()
-
 		self.pendingWatchedFaction = requestedName
 	end
 	
 	-- after using index we can restore the faction list ui
 	Factions:RestoreUI()
 	
-	self.faction  = factionId
-	self.atMaxRep = false
-		
+	self.faction        = factionId
+	self.atMaxRep       = false
+	self.notifyStanding = 0
+	
 	if not self.faction then
 		self.watchedStanding = 0
 	end
+
+	Notifications:ResetType("Reputation")
+	QuestInfo:SetFaction(self.faction)
 	
 	self:UpdateStanding()
-	
+		
 	Bar:SetSetting("ShowRep", self:IsBarRequired("Rep"))	
 	
 	Options:Update()
@@ -791,6 +819,8 @@ function Addon:MaxLevelReached()
 		self:UnregisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
 		self:UnregisterEvent("PLAYER_LEVEL_UP")
 		
+		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+				
 		Bar:SetSetting("ShowXP", self:IsBarRequired("XP"))
 	end
 end
@@ -803,113 +833,21 @@ function Addon:MaxReputationReached()
 	end
 end
 
-function Addon:GetInfoText(source, prefix)
-	if source ~= "XP" and source ~= "Rep" then
-		return ""
+function Addon:ScheduleTextRefresh()
+	if not self.timer then
+		self.timer = self:ScheduleTimer("ScheduledTextRefresh", 1)
 	end
-	
-	if not prefix then
-		prefix = ""
-	end
-	
-	if type(prefix) ~= "string" then
-		return ""
-	end
+end
 
-	local current, min, max = 0, 0, 100
-	local name
-	local label, values, percentage  = "", "", ""
+function Addon:ScheduledTextRefresh()
+	self.timer = null
 	
-	if source == "XP" then
-		current, max = UnitXP("player"), UnitXPMax("player")
-	else
-		if not self.faction  then
-			return L["No watched faction"]
-		end
-		
-		name, _, _, min, max, current = Factions:GetFactionInfo(self.faction)
-					
-		current = current - min
-		max     = max - min
-		
-		if self:GetSetting(prefix .. "ShowFactionName") then
-			label  = name ..": "
-		end
-	end
-	
-	if self:GetSetting(prefix .. "ToGo") then
-		local toGo = max - current
-		
-		values     = self:FormatNumber(toGo, prefix)
-		percentage = floor((toGo / max * 100) + 0.5)
-			
-		if self:GetSetting(prefix .. "ColoredText") then
-			values, percentage = NS:ColorizeByValue(toGo, max, 0, values, percentage)
-		end			
-	else 
-		values     = self:FormatNumber(current, prefix)
-		percentage = floor(current/max * 100)
-		
-		if Crayon and self:GetSetting(prefix .. "ColoredText") then
-			values, percentage = NS:ColorizeByValue(current, 0, max, values, percentage)
-		end
-		
-		values = values .. "/" .. self:FormatNumber(max, prefix)
-	end
-	
-	if self:GetSetting(prefix .. "ShowValues") then
-		label = label .. values
-	end
-		
-	if self:GetSetting(prefix .. "ShowPercentage") then
-		if label == "" then
-			label = percentage .. "%"
-		else
-			label = label .. " (" .. percentage .. "%)"
-		end
-	end
-	
-	if source == "XP" then
-		local showRestValue = self:GetSetting(prefix .. "ShowRestedValue")
-		local showRestPerc  = self:GetSetting(prefix .. "ShowRestedPerc")
-		
-		local exhaustion = GetXPExhaustion()
-		
-		if exhaustion and (showRestValue or showRestPerc) then
-			if label ~= "" then
-				label = label .. " - "
-			end
-			
-			label = label .. L["R:"]
-			
-			values = self:FormatNumber(exhaustion, prefix)
-			percentage = floor(((exhaustion / max) * 100) + 0.5)
-			
-			if self:GetSetting(prefix .. "ColoredText") then
-				values, percentage = NS:ColorizeByValue(percentage, 0, 150, values, percentage)
-			end
-			
-			if showRestValue then
-				label = label .. " " .. values
-			end
-			
-			if showRestPerc then
-				if showRestValue then
-					percentage = " (" .. percentage .. "%)"
-				else
-					percentage = percentage .. "%"
-				end
-				
-				label = label .. " " .. percentage
-			end
-		end
-	end
-
-	return label
+	self:Update()
 end
 
 -- events
 function Addon:PLAYER_XP_UPDATE()
+	Notifications:Taint()
 	History:UpdateXP()
 
 	self:Update()
@@ -992,10 +930,9 @@ function Addon:CHAT_MSG_COMBAT_XP_GAIN(_, xpMsg)
 	end
 
 	History:AddKill(kxp, gxp, rpxp)
+	ReputationHistory:AddKill()
 	
-	if self:GetSetting("ShowText") == "KTL" then
-		self:UpdateLabel()
-	end
+	self:Update()
 end
 
 function Addon:PLAYER_LEVEL_UP(_, newLevel)
@@ -1008,6 +945,8 @@ function Addon:PLAYER_LEVEL_UP(_, newLevel)
 	end
 end
 
+-- TODO: bound to CombatTextSetActiveUnit("unit")
+--       could track incorrect unit
 function Addon:COMBAT_TEXT_UPDATE(_, msgType, factionName, amount)
     if msgType ~= "FACTION" then
 		return
@@ -1025,14 +964,24 @@ function Addon:COMBAT_TEXT_UPDATE(_, msgType, factionName, amount)
 				
 				factionName = guildName
 			end
-		
-			self:SetFaction(Factions:GetFactionByName(factionName))
+			
+			local faction = Factions:GetFactionByName(factionName)
+			
+			ReputationHistory:TryRegisterKillReputation(faction, amount)
+			self:SetFaction(faction)
 		end
 	end	
 end
 
 function Addon:CHAT_MSG_COMBAT_FACTION_CHANGE()
 	self:UpdateStanding()
+end
+
+function Addon:COMBAT_LOG_EVENT_UNFILTERED(event, param1, param2, param3, param4)
+	if param2 == "PARTY_KILL" then
+		History:AddKill(0, 0, 0)
+		ReputationHistory:AddKill()
+	end
 end
 
 function Addon:UPDATE_FACTION()
@@ -1094,7 +1043,7 @@ function Addon:UpdateWatchedFactionIndex()
 	return self.faction
 end
 
--- auxillary functions
+-- auxiliary functions
 function Addon:Output(msg)
 	if ( msg ~= nil and DEFAULT_CHAT_FRAME ) then
 		DEFAULT_CHAT_FRAME:AddMessage( self.MODNAME..": "..msg, 0.6, 1.0, 1.0 )
@@ -1105,18 +1054,6 @@ function Addon:Debug(msg)
 	if self.debug and DEFAULT_CHAT_FRAME then
 		DEFAULT_CHAT_FRAME:AddMessage(self.MODNAME .. " (dbg): " .. tostring(msg), 1.0, 0.37, 0.37)
 	end
-end
-
-function Addon:FormatNumber(number, prefix)
-	if not prefix then
-		prefix = ""
-	end
-	
-	if type(prefix) ~= "string" then
-		return number
-	end
-	
-	return NS:FormatNumber(number, self:GetSetting("Separators"), self:GetSetting(prefix .. "Abbreviations"), self:GetSetting("DecimalPlaces"))
 end
 
 function Addon:GetBlizzardReputationColor(standing, friendship)
@@ -1164,6 +1101,18 @@ function Addon:ShowBlizzardBars(show)
 		ExhaustionTick:SetScript("OnEvent", nil)
 		ExhaustionTick:Hide()
 	end
+end
+
+function Addon:FormatNumber(number, prefix)
+	if not prefix then
+		prefix = ""
+	end
+
+	if type(prefix) ~= "string" then
+		return number
+	end
+	
+	return NS:FormatNumber(number, self:GetSetting("Separators"), self:GetSetting(prefix .. "Abbreviations"), self:GetSetting("DecimalPlaces"))
 end
 
 -- user functions

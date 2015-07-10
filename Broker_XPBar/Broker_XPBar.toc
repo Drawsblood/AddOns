@@ -1,9 +1,9 @@
 ## Interface: 60200
 ## Title: Broker: |cffffffffXP|rBar
-## Notes: Lightweight XP Bar for Broker Bars
-## Version: 1.7 r047
+## Notes: Sparkly XP Bars that can be attached anywhere.
+## Version: 2.0 r049
 ## Author: tritium
-## X-Credits: Wobin (For the original Fubar - XPFu)
+## X-Credits: Wobin (For the original Fubar - XPFu), Pitbull 4 team for core logic of TextEngine module
 ## X-Category: Interface Enhancements
 ## Dependencies:
 ## OptionalDeps: Ace3, Jostle-3.0, Crayon-3.0
@@ -26,3 +26,7 @@ ReputationHistory.lua
 Bar.lua
 MinimapButton.lua
 DataBroker.lua
+QuestInfo.lua
+Notifications.lua
+TextEngine.lua
+ScriptEnv.lua

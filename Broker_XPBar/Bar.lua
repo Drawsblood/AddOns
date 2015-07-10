@@ -1,6 +1,6 @@
 local _G = _G
 
-local ADDON = ...
+local ADDON, NS = ...
 
 local Addon = LibStub("AceAddon-3.0"):GetAddon(ADDON)
 
@@ -18,6 +18,7 @@ local pairs  = pairs
 local unpack = unpack
 
 local _
+local EMPTY_TABLE = {}
 
 -- constants
 local SPARK_LEN_MIN  = 28
@@ -30,6 +31,7 @@ local TEX_BAR    = "Interface\\AddOns\\" .. ADDON .. "\\Textures\\texture.tga"
 local TEX_BORDER = "Interface\\AddOns\\" .. ADDON .. "\\Textures\\border.tga"
 local TEX_SPARK  = "Interface\\AddOns\\" .. ADDON .. "\\Textures\\glow.tga"
 local TEX_SPARK2 = "Interface\\AddOns\\" .. ADDON .. "\\Textures\\glow2.tga"
+local TEX_WHITE  = { 1, 1, 1, 1 }
 
 local BORDER_HEIGHT = 8
 
@@ -108,9 +110,13 @@ local moduleData = {
 	
 	-- data
 	progress = {
-		XP          = 0,
-		Rested      = 0,
-		Reputation  = 0,
+		XP                 = 0,
+		Rested             = 0,
+		CompletedQuestXP   = 0,
+		IncompleteQuestXP  = 0,
+		Reputation         = 0,
+		CompletedQuestRep  = 0,
+		IncompleteQuestRep = 0,
 	},
 
 	text = {
@@ -120,39 +126,57 @@ local moduleData = {
 	
 	-- settings
 	settings = {
-		Frame     = "dummy", 
-		Inside    = false, 
-		Inverse   = false, 
-		Location  = "Top", 
-		Jostle    = false, 
-		Shadow    = true, 
-		ShowXP    = true, 
-		ShowRep   = true, 
-		Spark     = 1, 
-		Strata    = "HIGH", 
-		Thickness = 2, 
-		xOffset   = 0, 
-		yOffset   = 0,
-		Texture   = TEX_BAR,
-		Ticks     = 0,
-		Font      = FONT_DEFAULT,
-		FontSize  = 6,
-		MouseOver = false,
+		Frame                  = "dummy", 
+		Inside                 = false, 
+		Inverse                = false, 
+		Location               = "Top", 
+		Jostle                 = false, 
+		Shadow                 = true, 
+		ShowXP                 = true, 
+		ShowRep                = true, 
+		ShowQuestCompletedXP   = true, 
+		ShowQuestIncompleteXP  = true, 
+		ShowQuestCompletedRep  = true, 
+		ShowQuestIncompleteRep = true, 
+		Spark                  = 1, 
+		Strata                 = "HIGH", 
+		Thickness              = 2, 
+		Length                 = 0, 
+		xOffset                = 0, 
+		yOffset                = 0,
+		Texture                = TEX_BAR,
+		NoTexture              = false,
+		Ticks                  = 0,
+		Font                   = FONT_DEFAULT,
+		FontSize               = 6,
+		MouseOver              = false,
+		SideBySideText         = false,
+		SideBySideSeparator    = " | ",
 	},
 	
 	-- colors
 	colors = {
-		XP        = {r=0.0, g=0.4, b=0.9, a=1},
-		Rest      = {r=1.0, g=0.2, b=1.0, a=1},
-		None      = {r=0.0, g=0.0, b=0.0, a=1},
-		Rep       = {r=1.0, g=0.2, b=1.0, a=1},
-		NoRep     = {r=0.0, g=0.0, b=0.0, a=1},
-		Border    = {r=0.0, g=0.0, b=0.0, a=1},
+		XP                 = {r=0.0, g=0.4, b=0.9, a=1},
+		Rest               = {r=1.0, g=0.2, b=1.0, a=1},
+		QuestCompletedXP   = {r=0.2, g=1.0, b=0.2, a=1},
+		QuestIncompleteXP  = {r=1.0, g=1.0, b=0.2, a=1},
+		None               = {r=0.0, g=0.0, b=0.0, a=1},
+		Rep                = {r=1.0, g=0.2, b=1.0, a=1},
+		QuestCompletedRep  = {r=0.2, g=1.0, b=0.2, a=1},
+		QuestIncompleteRep = {r=1.0, g=1.0, b=0.2, a=1},
+		NoRep              = {r=0.0, g=0.0, b=0.0, a=1},
+		Border             = {r=0.0, g=0.0, b=0.0, a=1},
 	},
 	
-	-- textures (aux list used in Reanchor)
-	barTextures = {
-	},
+	-- textures
+	barTextures    = {},
+	xpBarTextures  = {},
+	repBarTextures = {},
+	sparkTextures  = {},
+	
+	-- real texture fractions
+	fractionsXP  = {},
+	fractionsRep = {},
 }
 
 -- module handling
@@ -176,19 +200,25 @@ function Bar:Initialize()
 	mainFrame:SetScript('OnEnter', function(self) Bar:OnMouseEnter() end)
 	mainFrame:SetScript('OnLeave', function(self) Bar:OnMouseLeave() end)	
 
+	local sideBySideText = mainFrame:CreateFontString(ADDON.."_Text_SideBySide", "OVERLAY", FONT_TEMPLATE)
+	sideBySideText:SetJustifyH("CENTER")
+	sideBySideText:SetJustifyV("MIDDLE")
+
 	local xpBar = CreateFrame("Frame", ADDON.."_Bar_XP", mainFrame)
 
-	local tex     = xpBar:CreateTexture(ADDON.."_Tex_XP",       "BACKGROUND")	
-	local restTex = xpBar:CreateTexture(ADDON.."_Tex_RestedXP", "BACKGROUND")	
-	local noTex   = xpBar:CreateTexture(ADDON.."_Tex_NoXP",     "BACKGROUND")
+	local tex                  = xpBar:CreateTexture(ADDON.."_Tex_XP",                "BACKGROUND")	
+	local restTex              = xpBar:CreateTexture(ADDON.."_Tex_RestedXP",          "BACKGROUND")	
+	local questCompletedXPTex  = xpBar:CreateTexture(ADDON.."_Tex_QuestXPCompleted",  "BACKGROUND")	
+	local questIncompleteXPTex = xpBar:CreateTexture(ADDON.."_Tex_QuestXPIncomplete", "BACKGROUND")	
+	local noTex                = xpBar:CreateTexture(ADDON.."_Tex_NoXP",              "BACKGROUND")
 	
 	local spark = xpBar:CreateTexture(ADDON.."_Tex_XPSpark", "OVERLAY")
 	spark:SetTexture(TEX_SPARK)
 	spark:SetBlendMode("ADD")
 
-	local spark2 = xpBar:CreateTexture(ADDON.."_Tex_XPSparkMini", "OVERLAY")
-	spark2:SetTexture(TEX_SPARK2)
-	spark2:SetBlendMode("ADD")
+	local sparkMini = xpBar:CreateTexture(ADDON.."_Tex_XPSparkMini", "OVERLAY")
+	sparkMini:SetTexture(TEX_SPARK2)
+	sparkMini:SetBlendMode("ADD")
 
 	local xpText = xpBar:CreateFontString(ADDON.."_Text_XP", "OVERLAY", FONT_TEMPLATE)
 	xpText:SetJustifyH("CENTER")
@@ -197,16 +227,18 @@ function Bar:Initialize()
 	
 	local repBar = CreateFrame("Frame", ADDON.."_Bar_Reputation", mainFrame)
 
-	local repTex   = repBar:CreateTexture(ADDON.."_Tex_Rep",   "BACKGROUND")
-	local norepTex = repBar:CreateTexture(ADDON.."_Tex_NoRep", "BACKGROUND")
+	local repTex                = repBar:CreateTexture(ADDON.."_Tex_Rep",                "BACKGROUND")
+	local questCompletedRepTex  = repBar:CreateTexture(ADDON.."_Tex_QuestRepCompleted",  "BACKGROUND")	
+	local questIncompleteRepTex = repBar:CreateTexture(ADDON.."_Tex_QuestRepIncomplete", "BACKGROUND")	
+	local norepTex              = repBar:CreateTexture(ADDON.."_Tex_NoRep",              "BACKGROUND")
 
 	local rspark = repBar:CreateTexture(ADDON.."_Tex_RepSpark", "OVERLAY")
 	rspark:SetTexture(TEX_SPARK)
 	rspark:SetBlendMode("ADD")
 
-	local rspark2 = repBar:CreateTexture(ADDON.."_Tex_RepSparkMini", "OVERLAY")
-	rspark2:SetTexture(TEX_SPARK2)
-	rspark2:SetBlendMode("ADD")
+	local rsparkMini = repBar:CreateTexture(ADDON.."_Tex_RepSparkMini", "OVERLAY")
+	rsparkMini:SetTexture(TEX_SPARK2)
+	rsparkMini:SetBlendMode("ADD")
 
 	local repText = repBar:CreateFontString(ADDON.."_Text_Reputation", "OVERLAY", FONT_TEMPLATE)
 	repText:SetJustifyH("CENTER")
@@ -219,25 +251,50 @@ function Bar:Initialize()
 	borderTex:SetTexture(TEX_BORDER)
 	borderTex:SetAllPoints()
 	
-	moduleData.MainFrame   = mainFrame
-	moduleData.XPBar       = xpBar
-	moduleData.XPBarTex    = tex
-	moduleData.Spark       = spark
-	moduleData.Spark2      = spark2
-	moduleData.NoXPTex     = noTex
-	moduleData.RestedXPTex = restTex
-	moduleData.XPText      = xpText
-	moduleData.RepBar      = repBar
-	moduleData.RepBarTex   = repTex
-	moduleData.RepSpark    = rspark
-	moduleData.RepSpark2   = rspark2
-	moduleData.NoRepTex    = norepTex
-	moduleData.RepText     = repText
-	moduleData.Border      = border
-	moduleData.BorderTex   = borderTex	
+	moduleData.MainFrame      = mainFrame
+	moduleData.SideBySideText = sideBySideText
+	moduleData.XPBar          = xpBar
+	moduleData.Spark          = spark
+	moduleData.SparkMini      = sparkMini
+	moduleData.XPText         = xpText
+	moduleData.RepBar         = repBar
+	moduleData.RepSpark       = rspark
+	moduleData.RepSparkMini   = rsparkMini
+	moduleData.RepText        = repText
+	moduleData.Border         = border
 	
-	moduleData.barTextures = { tex, noTex, restTex, spark, spark2, repTex, norepTex, rspark, rspark2, }
+	moduleData.barTextures.XP                 = tex
+	moduleData.barTextures.QuestCompletedXP   = questCompletedXPTex
+	moduleData.barTextures.QuestIncompleteXP  = questIncompleteXPTex
+	moduleData.barTextures.Rest               = restTex
+	moduleData.barTextures.None               = noTex
+	moduleData.barTextures.Rep                = repTex
+	moduleData.barTextures.QuestCompletedRep  = questCompletedRepTex
+	moduleData.barTextures.QuestIncompleteRep = questIncompleteRepTex
+	moduleData.barTextures.NoRep              = norepTex
+	moduleData.barTextures.Border             = borderTex
 
+	moduleData.xpBarTextures[1] = tex
+	moduleData.xpBarTextures[2] = questCompletedXPTex
+	moduleData.xpBarTextures[3] = questIncompleteXPTex
+	moduleData.xpBarTextures[4] = restTex
+	moduleData.xpBarTextures[5] = noTex
+
+	moduleData.repBarTextures[1] = repTex
+	moduleData.repBarTextures[2] = questCompletedRepTex
+	moduleData.repBarTextures[3] = questIncompleteRepTex
+	moduleData.repBarTextures[4] = norepTex
+	
+	moduleData.sparkTextures.XP = {
+		Main = moduleData.Spark,
+		Mini = moduleData.SparkMini,
+	}
+	
+	moduleData.sparkTextures.Rep = {
+		Main = moduleData.RepSpark,
+		Mini = moduleData.RepSparkMini,
+	}
+	
 	-- aux vars to simplify tick handling
 	moduleData.bars.XP         = moduleData.XPBar
 	moduleData.bars.Reputation = moduleData.RepBar
@@ -287,10 +344,10 @@ function Bar:Reanchor()
 		if (location == "Top" and (not inside) ) or
 			(location ~= "Top" and inside) then
 			point = "BOTTOMLEFT"
-			moduleData.BorderTex:SetTexCoord(unpack(ORIENTATION_FLIP_HORIZONTAL))
+			moduleData.barTextures.Border:SetTexCoord(unpack(ORIENTATION_FLIP_HORIZONTAL))
 		else
 			point = "TOPLEFT"
-			moduleData.BorderTex:SetTexCoord(unpack(ORIENTATION_DEFAULT))
+			moduleData.barTextures.Border:SetTexCoord(unpack(ORIENTATION_DEFAULT))
 		end
 
 		self:SetTexPoints("LEFT", "RIGHT", "TOP", "BOTTOM")		
@@ -298,10 +355,10 @@ function Bar:Reanchor()
 		if (location == "Right" and (not inside) ) or
 			(location ~= "Right" and inside) then
 			point = "BOTTOMLEFT"
-			moduleData.BorderTex:SetTexCoord(unpack(ORIENTATION_ROTATE_LEFT_90))
+			moduleData.barTextures.Border:SetTexCoord(unpack(ORIENTATION_ROTATE_LEFT_90))
 		else
 			point = "BOTTOMRIGHT"
-			moduleData.BorderTex:SetTexCoord(unpack(ORIENTATION_ROTATE_RIGHT_90))
+			moduleData.barTextures.Border:SetTexCoord(unpack(ORIENTATION_ROTATE_RIGHT_90))
 		end
 		
 		self:SetTexPoints("BOTTOM", "TOP", "LEFT", "RIGHT")		
@@ -325,11 +382,16 @@ function Bar:Reanchor()
 	self:SetupTicks("Reputation")
 	
 	if self:GetSetting("MouseOver") then
+		moduleData.SideBySideText:Hide()
 		moduleData.XPText:Hide()
 		moduleData.RepText:Hide()
 	else
-		moduleData.XPText:Show()
-		moduleData.RepText:Show()
+		if self:GetSetting("SideBySideText") then
+			moduleData.SideBySideText:Show()
+		else
+			moduleData.XPText:Show()
+			moduleData.RepText:Show()
+		end
 	end	
 
 	-- refresh settings
@@ -435,34 +497,29 @@ end
 
 -- viewed in progress direction of bar: front and back are moving, left right are fixed
 function Bar:SetTexPoints(front, back, left, right)
-	moduleData.XPBarTex:ClearAllPoints()
-	moduleData.RestedXPTex:ClearAllPoints()
-	moduleData.NoXPTex:ClearAllPoints()
-	moduleData.RepBarTex:ClearAllPoints()
-	moduleData.NoRepTex:ClearAllPoints()
+	local barTextures = moduleData.barTextures
 
-	-- left and right points are fixed
-	moduleData.XPBarTex:SetPoint(left)
-	moduleData.RestedXPTex:SetPoint(left)
-	moduleData.NoXPTex:SetPoint(left)
-	moduleData.RepBarTex:SetPoint(left)
-	moduleData.NoRepTex:SetPoint(left)
-	
-	moduleData.XPBarTex:SetPoint(right)
-	moduleData.RestedXPTex:SetPoint(right)
-	moduleData.NoXPTex:SetPoint(right)
-	moduleData.RepBarTex:SetPoint(right)
-	moduleData.NoRepTex:SetPoint(right)
+	for id, tex in pairs(moduleData.barTextures) do
+		if id ~= "Border" then
+			tex:ClearAllPoints()
+			tex:SetPoint(left)
+			tex:SetPoint(right)
+		end
+	end
 	
 	-- textures are attached side by side
-	moduleData.XPBarTex:SetPoint(front)
-	moduleData.RestedXPTex:SetPoint(front, moduleData.XPBarTex, back)
-	moduleData.NoXPTex:SetPoint(front, moduleData.RestedXPTex, back)
-	moduleData.NoXPTex:SetPoint(back)
+	barTextures.XP:SetPoint(front)
+	barTextures.QuestCompletedXP:SetPoint(front, barTextures.XP, back)
+	barTextures.QuestIncompleteXP:SetPoint(front, barTextures.QuestCompletedXP, back)
+	barTextures.Rest:SetPoint(front, barTextures.QuestIncompleteXP, back)
+	barTextures.None:SetPoint(front, barTextures.Rest, back)
+	barTextures.None:SetPoint(back)
 	
-	moduleData.RepBarTex:SetPoint(front)
-	moduleData.NoRepTex:SetPoint(front, moduleData.RepBarTex, back)
-	moduleData.NoRepTex:SetPoint(back)	
+	barTextures.Rep:SetPoint(front)
+	barTextures.QuestCompletedRep:SetPoint(front, barTextures.Rep, back)
+	barTextures.QuestIncompleteRep:SetPoint(front, barTextures.QuestCompletedRep, back)
+	barTextures.NoRep:SetPoint(front, barTextures.QuestIncompleteRep, back)
+	barTextures.NoRep:SetPoint(back)	
 end
 
 function Bar:SetupSparks()	
@@ -482,22 +539,22 @@ function Bar:SetupSparks()
 	
 	-- set texture orientation
 	moduleData.Spark:SetTexCoord(unpack(orientation))
-	moduleData.Spark2:SetTexCoord(unpack(orientation))
+	moduleData.SparkMini:SetTexCoord(unpack(orientation))
 	moduleData.RepSpark:SetTexCoord(unpack(orientation))
-	moduleData.RepSpark2:SetTexCoord(unpack(orientation))
+	moduleData.RepSparkMini:SetTexCoord(unpack(orientation))
 	
-	-- attach sparks to the backside of XP/RepBarTex
+	-- attach sparks to the backside of XP/RepBar textures
 	moduleData.Spark:ClearAllPoints()
-	moduleData.Spark:SetPoint(back, moduleData.XPBarTex, back, xOffset*4, yOffset*4)
+	moduleData.Spark:SetPoint(back, moduleData.barTextures.XP, back, xOffset*4, yOffset*4)
 
-	moduleData.Spark2:ClearAllPoints()
-	moduleData.Spark2:SetPoint(back, moduleData.XPBarTex, back, xOffset*1, yOffset*1)
+	moduleData.SparkMini:ClearAllPoints()
+	moduleData.SparkMini:SetPoint(back, moduleData.barTextures.XP, back, xOffset*1, yOffset*1)
 	
 	moduleData.RepSpark:ClearAllPoints()
-	moduleData.RepSpark:SetPoint(back, moduleData.RepBarTex, back, xOffset*4, yOffset*4)
+	moduleData.RepSpark:SetPoint(back, moduleData.barTextures.Rep, back, xOffset*4, yOffset*4)
 
-	moduleData.RepSpark2:ClearAllPoints()
-	moduleData.RepSpark2:SetPoint(back, moduleData.RepBarTex, back, xOffset*1, yOffset*1)
+	moduleData.RepSparkMini:ClearAllPoints()
+	moduleData.RepSparkMini:SetPoint(back, moduleData.barTextures.Rep, back, xOffset*1, yOffset*1)
 end
 
 function Bar:UpdateTextureCoords(tex, from, to)
@@ -512,98 +569,144 @@ function Bar:UpdateTextureCoords(tex, from, to)
 	end
 end
 
-function Bar:Update()
-	local front, back, barlength
+function Bar:GetBarParameters()
+	local barlength = self:GetSetting("Length")		
+	
+	if moduleData.horizontal then
+		return "LEFT", "RIGHT", "SetWidth", barlength == 0 and moduleData.anchorFrame:GetWidth() or barlength
+	else
+		return "BOTTOM", "TOP", "SetHeight", barlength == 0 and moduleData.anchorFrame:GetHeight() or barlength
+	end
+end
 
+function Bar:GetFractions(id)
+	if id == "XP" then
+		local questCompleted = self:GetSetting("ShowQuestCompletedXP") and self:GetProgress("CompletedQuestXP") or 0
+		local questIncomplete = self:GetSetting("ShowQuestIncompleteXP") and self:GetProgress("IncompleteQuestXP") or 0
+		local rested = self:GetProgress("Rested") - questCompleted - questIncomplete
+		
+		local fractions = moduleData.fractionsXP
+		
+		fractions[1] = self:GetProgress("XP")
+		fractions[2] = questCompleted
+		fractions[3] = questIncomplete
+		fractions[4] = rested > 0 and rested or 0
+		fractions[5] = 1
+
+		return moduleData.xpBarTextures, fractions
+	elseif id == "Reputation" then
+		local questCompleted = self:GetSetting("ShowQuestCompletedRep") and self:GetProgress("CompletedQuestRep") or 0
+		local questIncomplete = self:GetSetting("ShowQuestIncompleteRep") and self:GetProgress("IncompleteQuestRep") or 0
+		
+		local fractions = moduleData.fractionsRep
+		
+		fractions[1] = self:GetProgress("Reputation")
+		fractions[2] = questCompleted
+		fractions[3] = questIncomplete
+		fractions[4] = 1
+
+		return moduleData.repBarTextures, fractions
+	end
+	
+	return EMPTY_TABLE, EMPTY_TABLE
+end
+
+function Bar:SetTextureFractions(textures, fractions, setLength, barLength)
+		if type(textures) ~= "table" or type(fractions) ~= "table" then
+			return
+		end
+
+		local fraction = 0
+		
+		-- bar sections
+		for i, tex in ipairs(textures) do
+			if fraction + fractions[i] > 1 then
+				fractions[i] = 1 - fraction
+			end
+			
+			local length = fractions[i] <= 0 and EPSILON or fractions[i] * barLength
+
+			tex[setLength](tex, length)
+			self:UpdateTextureCoords(tex, fraction, fractions[i])
+
+			fraction = fraction + fractions[i]
+		end
+end
+
+function Bar:Update()
 	if moduleData.anchorFrame == nil then
 		return
 	end
 	
-	local setLength
+	local front, back, setLength, barLength = self:GetBarParameters()
 	
-	if moduleData.horizontal then
-		front = "LEFT"
-		back  = "RIGHT"
-	
-		barlength = moduleData.anchorFrame:GetWidth()
-
-		setLength = "SetWidth"
-	else
-		front = "BOTTOM"
-		back  = "TOP"
-	
-		barlength = moduleData.anchorFrame:GetHeight()
-
-		setLength = "SetHeight"
-	end
+	local barTextures = moduleData.barTextures
 
 	-- adjust to possible changes in parent frame dimensions
-	moduleData.MainFrame[setLength](moduleData.MainFrame, barlength)
-	-- TODO: check if it can be skipped
-	moduleData.XPBar[setLength](moduleData.XPBar, barlength)
-	moduleData.RepBar[setLength](moduleData.RepBar, barlength)
-	moduleData.Border[setLength](moduleData.Border, barlength)
+	moduleData.MainFrame[setLength](moduleData.MainFrame, barLength)
+	
+	local sideBySideText = ""
 	
 	if self:GetSetting("ShowXP") then
-		local xp     = self:GetProgress("XP")
-		local rested = self:GetProgress("Rested")
-	
-		if xp + rested > 1 then
-			rested = 1 - xp
-		end
-	
-		local xpLength   = xp == 0 and EPSILON or xp * barlength
-		local restLength = rested == 0 and EPSILON or rested * barlength
-	
-		-- bar sections
-		moduleData.XPBarTex[setLength](moduleData.XPBarTex, xpLength)
-		moduleData.RestedXPTex[setLength](moduleData.RestedXPTex, restLength)
+		local textures, fractions = Bar:GetFractions("XP")
 		
-		self:UpdateTextureCoords(moduleData.XPBarTex, 0, xp)
-		self:UpdateTextureCoords(moduleData.RestedXPTex, xp, xp+rested)
-		self:UpdateTextureCoords(moduleData.NoXPTex, xp+rested, 1)
-	
+		Bar:SetTextureFractions(textures, fractions, setLength, barLength)
+		
 		-- spark
 		-- resize to avoid excessive overlapping
+		local xpLength = fractions[1] <= 0 and EPSILON or fractions[1] * barLength
+		
 		moduleData.Spark[setLength](moduleData.Spark, CalcSparkLength(SPARK_LEN_MIN, SPARK_LEN_MAX, xpLength))
-		moduleData.Spark2[setLength](moduleData.Spark2, CalcSparkLength(SPARK2_LEN_MIN, SPARK2_LEN_MAX, xpLength))	
+		moduleData.SparkMini[setLength](moduleData.SparkMini, CalcSparkLength(SPARK2_LEN_MIN, SPARK2_LEN_MAX, xpLength))	
 		
 		-- ticks
-		self:UpdateTicks("XP", barlength, front)
+		self:UpdateTicks("XP", barLength, front)		
+	end
+
+	if self:GetSetting("ShowRep") then
+		local textures, fractions = Bar:GetFractions("Reputation")
 		
+		Bar:SetTextureFractions(textures, fractions, setLength, barLength)
+
+		-- spark
+		-- resize to avoid excessive overlapping
+		local repLength = fractions[1] <= 0 and EPSILON or fractions[1] * barLength
+		
+		moduleData.RepSpark[setLength](moduleData.RepSpark, CalcSparkLength(SPARK_LEN_MIN, SPARK_LEN_MAX, repLength))
+		moduleData.RepSparkMini[setLength](moduleData.RepSparkMini, CalcSparkLength(SPARK2_LEN_MIN, SPARK2_LEN_MAX, repLength))	
+
+		-- ticks
+		self:UpdateTicks("Reputation", barLength, front)
+	end
+	
+	self:UpdateText()
+end
+
+function Bar:UpdateText()
+	local sideBySideText = ""
+	
+	if self:GetSetting("ShowXP") then
 		local text = self:GetText("XP")
 		
 		if not moduleData.horizontal then
 			text = vertical(text)
 		end
-	
-		-- text
+		
 		moduleData.XPText:SetText(text)
 			
 		if moduleData.XPText:IsShown() then
 			moduleData.XPText:Show()
 		end
-	end
-
-	if self:GetSetting("ShowRep") then
-		local reputation = self:GetProgress("Reputation")
-		local length = reputation == 0 and EPSILON or reputation * barlength
-	
-		-- bar sections
-		moduleData.RepBarTex[setLength](moduleData.RepBarTex, length)
-
-		self:UpdateTextureCoords(moduleData.RepBarTex, 0, reputation)
-		self:UpdateTextureCoords(moduleData.NoRepTex, reputation, 1)
-
-		-- spark
-		-- resize to avoid excessive overlapping
-		moduleData.RepSpark[setLength](moduleData.RepSpark, CalcSparkLength(SPARK_LEN_MIN, SPARK_LEN_MAX, length))
-		moduleData.RepSpark2[setLength](moduleData.RepSpark2, CalcSparkLength(SPARK2_LEN_MIN, SPARK2_LEN_MAX, length))	
-
-		-- ticks
-		self:UpdateTicks("Reputation", barlength, front)
 		
-		-- text
+		sideBySideText = sideBySideText .. text
+		
+		local offset = self:GetSetting("ShowRep") and self:GetSetting("Thickness") / 2 or 0
+
+		moduleData.SideBySideText:SetParent(moduleData.XPBar)		
+		moduleData.SideBySideText:SetPoint("CENTER", moduleData.XPBar, "CENTER", moduleData.horizontal and 0 or -offset, moduleData.horizontal and -offset or 0)		
+	end
+	
+	if self:GetSetting("ShowRep") then
 		local text = self:GetText("Reputation")
 		
 		if not moduleData.horizontal then
@@ -615,7 +718,22 @@ function Bar:Update()
 		if moduleData.RepText:IsShown() then
 			moduleData.RepText:Show()
 		end
+
+		if self:GetSetting("ShowXP") then
+			sideBySideText = sideBySideText .. (self:GetSetting("SideBySideSeparator") or "")
+		else
+			moduleData.SideBySideText:SetParent(moduleData.RepBar)		
+			moduleData.SideBySideText:SetPoint("CENTER", moduleData.RepBar, "CENTER")
+		end
+		
+		sideBySideText = sideBySideText .. text
 	end
+	
+	moduleData.SideBySideText:SetText(sideBySideText)
+	
+	if moduleData.SideBySideText:IsShown() then
+		moduleData.SideBySideText:Show()
+	end	
 end
 
 function Bar:Show()
@@ -677,22 +795,34 @@ end
 
 function Bar:OnMouseEnter()
 	if self:GetSetting("MouseOver") then
-		if not moduleData.XPText:IsShown() then
-			moduleData.XPText:Show()
-		end
-		if not moduleData.RepText:IsShown() then
-			moduleData.RepText:Show()
+		if self:GetSetting("SideBySideText") then
+			if not moduleData.SideBySideText:IsShown() then
+				moduleData.SideBySideText:Show()
+			end
+		else
+			if not moduleData.XPText:IsShown() then
+				moduleData.XPText:Show()
+			end
+			if not moduleData.RepText:IsShown() then
+				moduleData.RepText:Show()
+			end
 		end
 	end
 end
 
 function Bar:OnMouseLeave()
 	if self:GetSetting("MouseOver") then
-		if moduleData.XPText:IsShown() then
-			moduleData.XPText:Hide()
-		end
-		if moduleData.RepText:IsShown() then
-			moduleData.RepText:Hide()
+		if self:GetSetting("SideBySideText") then
+			if moduleData.SideBySideText:IsShown() then
+				moduleData.SideBySideText:Hide()
+			end
+		else
+			if moduleData.XPText:IsShown() then
+				moduleData.XPText:Hide()
+			end
+			if moduleData.RepText:IsShown() then
+				moduleData.RepText:Hide()
+			end
 		end
 	end
 end
@@ -810,11 +940,11 @@ function Bar:UpdateThickness()
 
 	moduleData.XPBar[setThickness](moduleData.XPBar, thickness)
 	moduleData.Spark[setThickness](moduleData.Spark, thickness * 2 + 12)
-	moduleData.Spark2[setThickness](moduleData.Spark2, thickness * 8)
+	moduleData.SparkMini[setThickness](moduleData.SparkMini, thickness * 8)
 
 	moduleData.RepBar[setThickness](moduleData.RepBar, thickness)
 	moduleData.RepSpark[setThickness](moduleData.RepSpark, thickness * 2 + 12)
-	moduleData.RepSpark2[setThickness](moduleData.RepSpark2, thickness * 8)
+	moduleData.RepSparkMini[setThickness](moduleData.RepSparkMini, thickness * 8)
 	
 	for _, ticks in pairs(moduleData.ticks) do
 		for _, tick in ipairs(ticks) do
@@ -823,30 +953,14 @@ function Bar:UpdateThickness()
 		end
 	end
 	
-	moduleData.Border[setThickness](moduleData.Border, BORDER_HEIGHT)	
+	moduleData.Border[setThickness](moduleData.Border, BORDER_HEIGHT)
 end
 
 function Bar:UpdateColor(id)
 	local r, g, b, a = self:GetColor(id)
 
-	local tex
-	local spark
-	
-	if id == "XP" then
-		tex   = moduleData.XPBarTex
-		spark = moduleData.Spark
-	elseif id == "Rest" then
-		tex = moduleData.RestedXPTex
-	elseif id == "None" then
-		tex = moduleData.NoXPTex
-	elseif id == "Rep" then
-		tex   = moduleData.RepBarTex
-		spark = moduleData.RepSpark
-	elseif id == "NoRep" then
-		tex = moduleData.NoRepTex
-	elseif id == "Border" then
-		tex = moduleData.BorderTex
-	end
+	local tex = moduleData.barTextures[id]
+	local spark = moduleData.sparkTextures[id] and moduleData.sparkTextures[id].Main or nil
 	
 	if tex ~= nil then
 		tex:SetVertexColor(r, g, b, a)
@@ -861,9 +975,9 @@ function Bar:UpdateSparkIntensity()
 	local intensity = self:GetSetting("Spark")
 	
 	moduleData.Spark:SetAlpha(intensity)
-	moduleData.Spark2:SetAlpha(intensity)
+	moduleData.SparkMini:SetAlpha(intensity)
 	moduleData.RepSpark:SetAlpha(intensity)
-	moduleData.RepSpark2:SetAlpha(intensity)
+	moduleData.RepSparkMini:SetAlpha(intensity)
 end
 
 function Bar:UpdateStrata()
@@ -881,19 +995,27 @@ function Bar:UpdateTexture()
 		return
 	end
 	
-	local texture = self:GetSetting("Texture")
+	local args = TEX_WHITE
 	
-	texture = LibSharedMedia:Fetch("statusbar", texture)
-
-	if not texture then
-		texture = TEX_BAR
+	if not self:GetSetting("NoTexture") then		
+		if not self:GetSetting("Texture") then
+			texture = TEX_BAR
+		else
+			texture = LibSharedMedia:Fetch("statusbar", self:GetSetting("Texture")) or TEX_BAR
+		end
+		
+		args = NS:NewTable(texture)
+	end	
+	
+	for id, tex in pairs(moduleData.barTextures) do
+		if id ~= "Border" then
+			tex:SetTexture(unpack(args))
+		end
 	end
-
-	moduleData.XPBarTex:SetTexture(texture)
-	moduleData.RestedXPTex:SetTexture(texture)
-	moduleData.NoXPTex:SetTexture(texture)
-	moduleData.RepBarTex:SetTexture(texture)
-	moduleData.NoRepTex:SetTexture(texture)
+	
+	if args ~= TEX_WHITE then
+		NS:ReleaseTable(args)
+	end
 end
 
 function Bar:UpdateFont()
@@ -908,6 +1030,7 @@ function Bar:UpdateFont()
 	local size = self:GetSetting("FontSize") or FONT_SIZE_DEFAULT
 
 	-- setup bar texts
+	moduleData.SideBySideText:SetFont(font, size, FONT_STYLE)
 	moduleData.XPText:SetFont(font, size, FONT_STYLE)
 	moduleData.RepText:SetFont(font, size, FONT_STYLE)
 end
@@ -918,7 +1041,7 @@ end
 
 -- set bar progress in fraction of 1
 function Bar:SetProgress(bar, fraction)
-	if not bar or not fraction then
+	if not bar or not moduleData.progress[bar] or type(fraction) ~= "number" then
 		return
 	end
 	

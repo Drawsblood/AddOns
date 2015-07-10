@@ -98,10 +98,14 @@ function Factions:GetFactionInfoByIdOrIndex(factionId, factionIndex)
 		return
 	end
 	
+	-- NOTE: GetFriendshipReputationRanks(factionId) apparently no longer returns the maxRank
+	--       since I haven't found any other way to query the max rank for a faction or a buddy via the API those values are now hard coded
 	local currentRank, maxRank = GetFriendshipReputationRanks(factionId)
 
 	local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionId)
+	
 	if friendID ~= nil then		
+		maxRank = 6
 		standingId = currentRank
 		
 		-- store localized standing text
@@ -110,6 +114,8 @@ function Factions:GetFactionInfoByIdOrIndex(factionId, factionIndex)
 		barMin   = friendThreshold
 		barMax   = nextFriendThreshold or barMin + 1000
 		barValue = friendRep
+	else
+		maxRank = 8
 	end
 	
 	local atMax = standingId == maxRank and barValue + 1 == barMax

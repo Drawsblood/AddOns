@@ -29,6 +29,8 @@ NS.HexColors = {
 }
 
 -- utilities
+local tablestack = setmetatable({}, {__mode = 'k'})
+
 local cmdLinePattern = "^ *([^%s]+) *"
 
 function NS:GetArgs(str)
@@ -68,7 +70,7 @@ function NS:Colorize(color, text)
 end
 
 function NS:ColorizeByValue(value, from, to, ...)
-	if value and Crayon then
+	if type(value) == "number" and Crayon then
 		from = from or 0
 		to   = to or 1
 		
@@ -89,11 +91,80 @@ function NS:ColorizeByValue(value, from, to, ...)
 	end
 end
 
+function NS:GetColorByValue(value, from, to)
+	if type(value) == "number" and Crayon then
+		from = from or 0
+		to   = to or 1
+		
+		return Crayon:GetThresholdHexColor(value, from, to)
+	end
+	
+	return "ffffff"
+end
+
+function NS:ConvertRGBToHexColor(r, g, b)
+	if type(r) ~= "number" or type(g) ~= "number" or type(b) ~= "number" then
+		return "ffffff"
+	end
+	
+	local factor = 255
+
+	if r > 1 or g > 1 or b > 1 then
+		factor = 1
+	end
+	
+	r = r >= 0 and r or 0
+	r = r < factor and r or factor
+	
+	g = g >= 0 and g or 0
+	g = g < factor and g or factor
+
+	b = b >= 0 and b or 0
+	b = b < factor and b or factor
+	
+	return string.format("%02x%02x%02x", r*factor, g*factor, b*factor)
+end
+
+function NS:IsValidHexColor(color, withAlpha)
+	if type(color) ~= "string" then
+		return false
+	end
+	
+	local requiredLength = withAlpha and 8 or 6
+	
+	if string.len(color) ~= requiredLength then
+		return false
+	end
+
+	return not string.match(color, "[^0-9a-f]") and true or false
+end
+
 function NS:ClearTable(tab)
 	if type(tab) == "table" then
 		for k in pairs(tab) do
 			tab[k] = nil
 		end
+	end
+end
+
+function NS:NewTable(...)
+	local tab = next(tablestack) or {...}
+	
+	if tablestack[tab] then
+		for i = 1, select("#", ...) do
+			tab[i] = select(i, ...)
+		end
+	end
+	
+	tablestack[tab] = nil
+	
+	return tab
+end
+
+function NS:ReleaseTable(tab)
+	if type(tab) == "table" then
+		self:ClearTable(tab)
+		tablestack[tab] = true	
 	end
 end
 
@@ -114,9 +185,9 @@ end
 
 local abbreviations = {
 		[0]  = "", 
-		[1]  = L["k"], 
-		[2]  = L["m"], 
-		[3]  = L["bn"], 
+		[1]  = L["Abbrev_kilo"], 
+		[2]  = L["Abbrev_million"], 
+		[3]  = L["Abbrev_billion"], 
 }
 
 function NS:FormatNumber(number, sep, abbrev, decimals)
@@ -142,7 +213,7 @@ function NS:FormatNumber(number, sep, abbrev, decimals)
 	local num, decimal = string.match(number,'^(%d*)(.-)$')
 	
 	if sep then
-		num = num:reverse():gsub('(%d%d%d)', "%1"..L[","]):reverse()
+		num = num:reverse():gsub('(%d%d%d)', "%1"..L["_S_thousand_separator"]):reverse()
 		-- remove leading separator if necessary
 		-- TODO: move into regexp pattern above
 		num = num:gsub('^([^%d])(.*)', "%2")
@@ -155,7 +226,7 @@ function NS:FormatNumber(number, sep, abbrev, decimals)
 		decimal = ""
 	else
 		-- localize decimal seperator
-		decimal = decimal:gsub('^(%p)(%d*)$', L["."].."%2")
+		decimal = decimal:gsub('^(%p)(%d*)$', L["_S_decimal_separator"].."%2")
 	end
 	
 	return num .. decimal .. abbreviations[lvl]

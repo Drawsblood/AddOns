@@ -36,7 +36,20 @@ local moduleData = {
 	-- data
 	startTime     = nil,
 	factions      = {},
-		
+	
+	-- mob data
+	historyMobs   = {
+		-- entries
+		-- { time, reputation = { faction = amount } }
+	},
+	
+	repPerKill    = {
+		-- entries
+		-- faction = value
+	},
+	
+	taintedMobs   = false,
+	
 	-- params
 	weight        = 0.5,
 	timeframe     = 3600,
@@ -67,8 +80,21 @@ end
 
 function ReputationHistory:Reset()
 	for faction in pairs(moduleData.factions) do
+		local data = moduleData.factions[faction]
+		
+		for index in ipairs(data.history) do
+			NS:ReleaseTable(data.history[index])
+		end
+		
+		NS:ReleaseTable(moduleData.factions[faction])
 		moduleData.factions[faction] = nil
 	end
+	
+	for index in pairs(moduleData.historyMobs) do
+		NS:ReleaseTable(moduleData.historyMobs[index].factions)
+		NS:ReleaseTable(moduleData.historyMobs[index])
+		moduleData.historyMobs[index] = nil
+	end		
 end
 
 function ReputationHistory:InitFactions()
@@ -91,14 +117,14 @@ function ReputationHistory:InitFaction(faction)
 		return nil
 	end
 
-	local data = {
-		startRep      = currentRep,
-		totalRep      = 0,
-		activityRep   = 0,
-		tainted       = false,
-		activeBucket  = floor(time() / 60) - 1,
-		history       = {},
-	}
+	local data = NS:NewTable()
+	
+	data.startRep      = currentRep
+	data.totalRep      = 0
+	data.activityRep   = 0
+	data.tainted       = false
+	data.activeBucket  = floor(time() / 60) - 1
+	data.history       = {}
 	
 	moduleData.factions[faction] = data
 	
@@ -116,10 +142,11 @@ function ReputationHistory:GetWriteBucket(faction)
 	local bucket = history[#history]
 	
 	if not bucket or bucket.time ~= bucketTime then
-		bucket = {
-			time       = bucketTime,
-			reputation = 0,
-		}
+		bucket = NS:NewTable()
+		
+		bucket.time       = bucketTime
+		bucket.reputation = 0
+
 		tinsert(history, bucket)
 	end
 	
@@ -184,6 +211,24 @@ function ReputationHistory:GetRepPerSecond(faction)
 	end
 end
 
+function ReputationHistory:GetKillsToLevel(faction)
+	if not moduleData.factions[faction] then 
+		return "~"
+	end
+	
+	local data = moduleData.factions[faction]
+	local repPerKill = moduleData.repPerKill[faction] or 0
+	
+	if data.totalRep == 0 or repPerKill == 0 then
+		return "~"
+	end
+	
+	local _, _, _, minRep, maxRep, currentRep = Factions:GetFactionInfo(faction)
+	local toLvlRep = maxRep - currentRep
+
+	return ceil(toLvlRep/repPerKill)
+end
+
 function ReputationHistory:GetTotalRep(faction)
 	if not moduleData.factions[faction] then 
 		return 0
@@ -196,6 +241,8 @@ function ReputationHistory:Process()
 	for faction in pairs(moduleData.factions) do
 		self:ProcessFaction(faction)
 	end
+	
+	self:ProcessMobHistory()
 end
 
 function ReputationHistory:ProcessFaction(faction)
@@ -216,6 +263,7 @@ function ReputationHistory:ProcessFaction(faction)
 	local oldest = data.activeBucket - MAX_TIME_MINUTES
 	
 	while #data.history ~= 0 and data.history[1].time <= oldest do
+		NS:ReleaseTable(data.history[1])
 		tremove(data.history, 1)
 	end
 
@@ -232,6 +280,32 @@ function ReputationHistory:ProcessFaction(faction)
 	data.activityRep = reputation
 	
 	data.tainted = false	
+end
+
+function ReputationHistory:ProcessMobHistory()
+	if not moduleData.taintedMobs then
+		return
+	end
+	
+	NS:ClearTable(moduleData.repPerKill)
+	
+	local count = #moduleData.historyMobs
+	
+	for i = 1, count do
+		local data = moduleData.historyMobs[i]
+		
+		for faction, amount in pairs(data.factions) do
+			local total = moduleData.repPerKill[faction] or 0
+		
+			moduleData.repPerKill[faction] = total + amount
+		end
+	end	
+
+	for faction, total in pairs(moduleData.repPerKill) do
+		moduleData.repPerKill[faction] = total / count
+	end	
+	
+	moduleData.taintedMobs = false
 end
 
 function ReputationHistory:Update()
@@ -263,6 +337,44 @@ function ReputationHistory:Update()
 	
 	-- restore folding state of factions in ui list
 	Factions:RestoreUI()
+end
+
+-- mob based rep
+function ReputationHistory:AddKill()
+	-- track mob kills
+	local mobdata = NS:NewTable()
+	
+	mobdata.time = time()
+	mobdata.factions = NS:NewTable()
+
+	tinsert(moduleData.historyMobs, mobdata)
+	
+	-- remove oldest entry if we exceed history size
+	if #moduleData.historyMobs > MAX_HISTORY then
+		NS:ReleaseTable(moduleData.historyMobs[1].factions)
+		NS:ReleaseTable(moduleData.historyMobs[1])
+		tremove(moduleData.historyMobs, 1)
+	end
+
+	moduleData.taintedMobs = true	
+end
+
+function ReputationHistory:TryRegisterKillReputation(faction, amount)
+	if not faction or type(amount) ~= "number" or amount < 0 or #moduleData.historyMobs == 0 then
+		return
+	end
+	
+	for i = 1, #moduleData.historyMobs do
+		local data = moduleData.historyMobs[i]
+		
+		if data.time == time() and not data.factions[faction] then
+			data.factions[faction] = amount
+			
+			moduleData.taintedMobs = true
+			
+			return
+		end
+	end	
 end
 
 -- params

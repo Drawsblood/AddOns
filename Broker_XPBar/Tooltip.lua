@@ -27,6 +27,11 @@ local _
 
 local tooltip = nil
 
+local Factions
+local History
+local ReputationHistory
+local QuestInfo
+
 -- constants
 local FORMAT_NUMBER_PREFIX = "TT"
 
@@ -47,7 +52,10 @@ end
 
 -- module handling
 function Tooltip:OnInitialize()
-	-- empty
+	Factions = Addon:GetModule("Factions")
+	History = Addon:GetModule("History")
+	ReputationHistory = Addon:GetModule("ReputationHistory")
+	QuestInfo = Addon:GetModule("QuestInfo")
 end
 
 function Tooltip:OnEnable()
@@ -106,11 +114,6 @@ function Tooltip:Draw()
 	
 	local colcount = tooltip:GetColumnCount()	
 	
-	local totalXP = UnitXPMax("player")
-	local currentXP = UnitXP("player")
-	local toLevelXP = totalXP - currentXP
-	local toLevelXPPercent = floor(((currentXP / totalXP) * 100) + 0.5)
-
 	-- add header
 	local lineNum = tooltip:AddHeader( " " )
 	tooltip:SetCell(lineNum, 1, NS:Colorize("White", Addon.FULLNAME), "CENTER", colcount)
@@ -121,13 +124,47 @@ function Tooltip:Draw()
 		tooltip:AddLine(" ")
 		
 		if Addon.playerLvl < Addon.MAX_LEVEL then
-			currentXP = Addon:FormatNumber(currentXP, FORMAT_NUMBER_PREFIX)
-			toLevelXP = Addon:FormatNumber(toLevelXP, FORMAT_NUMBER_PREFIX)
+			local totalXP = UnitXPMax("player")
+			local currentXP = UnitXP("player")
+			local currentXPPercent = floor(((currentXP / totalXP) * 100) + 0.5)
+			local toLevelXP = totalXP - currentXP
+			local toLevelXPPercent = floor(((toLevelXP / totalXP) * 100) + 0.5)
+						
+			local completedQuestXP = QuestInfo:GetValue("CompletedQuestXP")
+			local xpCQ, xpCQPercent
+
+			local incompleteQuestXP = QuestInfo:GetValue("IncompleteQuestXP")
+			local xpIQ, xpIQPercent
+
+			local toLvlWithoutCQPercent = 0
 			
-			currentXP, toLevelXP, toLevelXPPercent = NS:ColorizeByValue(toLevelXPPercent, 0, 100, currentXP, toLevelXP, toLevelXPPercent)
+			if completedQuestXP < toLevelXP then
+				toLvlWithoutCQPercent = floor((((toLevelXP - completedQuestXP) / totalXP) * 100) + 0.5)
+			end
+			
+			if completedQuestXP > 0 then
+				xpCQ = Addon:FormatNumber(completedQuestXP, FORMAT_NUMBER_PREFIX)
+				
+				xpCQPercent = floor(((completedQuestXP / totalXP) * 100) + 0.5)
+				
+				xpCQ, xpCQPercent = NS:ColorizeByValue(xpCQPercent, 0, toLevelXPPercent, xpCQ, xpCQPercent)
+			end
+			
+			if incompleteQuestXP > 0 then
+				xpIQ = Addon:FormatNumber(incompleteQuestXP, FORMAT_NUMBER_PREFIX)
+				
+				xpIQPercent = floor(((incompleteQuestXP / totalXP) * 100) + 0.5)
+				
+				xpIQ, xpIQPercent = NS:ColorizeByValue(xpIQPercent, 0, toLvlWithoutCQPercent, xpIQ, xpIQPercent)
+			end
+			
+			local lvlUpHint = ""
+			
+			if completedQuestXP > toLevelXP then
+				lvlUpHint = lvlUpHint .. " " .. NS:Colorize("Yellow", L["Level up!"])
+			end
 			
 			local exhaustion = GetXPExhaustion()
-
 			local xpEx, xpExPercent
 			
 			if exhaustion then
@@ -137,19 +174,36 @@ function Tooltip:Draw()
 				
 				xpEx, xpExPercent = NS:ColorizeByValue(xpExPercent, 0, 150, xpEx, xpExPercent)
 			end
-						
+			
+			currentXP = Addon:FormatNumber(currentXP, FORMAT_NUMBER_PREFIX)
+			toLevelXP = Addon:FormatNumber(toLevelXP, FORMAT_NUMBER_PREFIX)
+			
+			currentXP, toLevelXP, currentXPPercent = NS:ColorizeByValue(currentXPPercent, 0, 100, currentXP, toLevelXP, currentXPPercent)
+			
 			lineNum = tooltip:AddLine(" ")
 			tooltip:SetCell(lineNum, 1, NS:Colorize("Blueish", L["Level"]), "LEFT")
 			tooltip:SetCell(lineNum, 2, Addon.playerLvl, "LEFT")
 
 			lineNum = tooltip:AddLine(" ")
 			tooltip:SetCell(lineNum, 1, NS:Colorize("Blueish", L["Current XP"]), "LEFT")
-			tooltip:SetCell(lineNum, 2, string.format("%s/%s (%s%%)", currentXP, Addon:FormatNumber(totalXP, FORMAT_NUMBER_PREFIX), toLevelXPPercent), "LEFT")
+			tooltip:SetCell(lineNum, 2, string.format("%s/%s (%s%%)", currentXP, Addon:FormatNumber(totalXP, FORMAT_NUMBER_PREFIX), currentXPPercent), "LEFT")
 
 			if exhaustion then
 				lineNum = tooltip:AddLine(" ")
 				tooltip:SetCell(lineNum, 1, NS:Colorize("Blueish", L["Rested XP"]), "LEFT")
 				tooltip:SetCell(lineNum, 2, string.format("%s (%s%%)", xpEx, xpExPercent), "LEFT")
+			end
+			
+			if completedQuestXP > 0 then			
+				lineNum = tooltip:AddLine(" ")
+				tooltip:SetCell(lineNum, 1, NS:Colorize("Blueish", L["Completed quest XP"]), "LEFT")
+				tooltip:SetCell(lineNum, 2, string.format("%s (%s%%)%s", xpCQ, xpCQPercent, lvlUpHint), "LEFT")
+			end
+			
+			if incompleteQuestXP > 0 then
+				lineNum = tooltip:AddLine(" ")
+				tooltip:SetCell(lineNum, 1, NS:Colorize("Blueish", L["Incomplete quest XP"]), "LEFT")
+				tooltip:SetCell(lineNum, 2, string.format("%s (%s%%)", xpIQ, xpIQPercent), "LEFT")
 			end
 			
 			lineNum = tooltip:AddLine(" ")
@@ -166,9 +220,7 @@ function Tooltip:Draw()
 		end
 		
 		-- show history data
-		if not Addon:GetSetting("TTHideXPDetails") and Addon.playerLvl < Addon.MAX_LEVEL then
-			local History = Addon:GetModule("History")
-			
+		if not Addon:GetSetting("TTHideXPDetails") and Addon.playerLvl < Addon.MAX_LEVEL then			
 			History:Process()
 			
 			local kph  = floor(History:GetKillsPerHour())
@@ -207,12 +259,10 @@ function Tooltip:Draw()
 	-- add reputation data
 	local faction = Addon:GetFaction()
 	
-	if Addon:GetSetting("ShowRep") and faction then
-		local Factions = Addon:GetModule("Factions")
-	
+	if Addon:GetSetting("ShowRep") and faction then	
 		lineNum = tooltip:AddLine(" ")
 	
-		local name, desc, standing, minRep, maxRep, currentRep, _, _, _, _, _, _, _, _, friendID = Factions:GetFactionInfo(faction)
+		local name, desc, standing, minRep, maxRep, actualRep, _, _, _, _, _, _, _, _, friendID = Factions:GetFactionInfo(faction)
 		local r, g, b, a = Addon:GetBlizzardReputationColor(standing, friendID)
 		
 		lineNum = tooltip:AddLine(" ")
@@ -224,20 +274,67 @@ function Tooltip:Draw()
 		tooltip:SetCell(lineNum, 2, "|cff" .. string.format("%02x%02x%02x", r*255, g*255, b*255) .. Factions:GetStandingLabel(standing, friendID) .. "|r", "LEFT")		
 
 		if not Addon.atMaxRep then
-			local fullLevelRep = maxRep - minRep
-			local toLevelRep   = maxRep - currentRep
-			local atLevelRep   = fullLevelRep - toLevelRep
-			local percentRep   = floor((atLevelRep / fullLevelRep) * 100)
+			local totalRep = maxRep - minRep
+			local toLevelRep = maxRep - actualRep
+			local toLevelRepPercent = floor(((toLevelRep / totalRep) * 100) + 0.5)
+			local currentRep = totalRep - toLevelRep
+			local currentRepPercent = floor(((currentRep / totalRep) * 100) + 0.5)
 
-			atLevelRep = Addon:FormatNumber(atLevelRep, FORMAT_NUMBER_PREFIX)
+			local completedQuestRep = QuestInfo:GetValue("CompletedQuestRep")
+			local repCQ, repCQPercent
+
+			local incompleteQuestRep = QuestInfo:GetValue("IncompleteQuestRep")
+			local repIQ, repIQPercent
+
+			local toLvlWithoutCQPercent = 0
+			
+			if completedQuestRep < toLevelRep then
+				toLvlWithoutCQPercent = floor((((toLevelRep - completedQuestRep) / totalRep) * 100) + 0.5)
+			end
+			
+			if completedQuestRep > 0 then
+				repCQ = Addon:FormatNumber(completedQuestRep, FORMAT_NUMBER_PREFIX)
+				
+				repCQPercent = floor(((completedQuestRep / totalRep) * 100) + 0.5)
+				
+				repCQ, repCQPercent = NS:ColorizeByValue(repCQPercent, 0, toLevelRepPercent, repCQ, repCQPercent)
+			end
+			
+			if incompleteQuestRep > 0 then
+				repIQ = Addon:FormatNumber(incompleteQuestRep, FORMAT_NUMBER_PREFIX)
+				
+				repIQPercent = floor(((incompleteQuestRep / totalRep) * 100) + 0.5)
+				
+				repIQ, repIQPercent = NS:ColorizeByValue(repIQPercent, 0, toLvlWithoutCQPercent, repIQ, repIQPercent)
+			end
+			
+			local lvlUpHint = ""
+			
+			if completedQuestRep > toLevelRep then
+				lvlUpHint = lvlUpHint .. " " .. NS:Colorize("Yellow", L["Level up!"])
+			end			
+			
+			currentRep = Addon:FormatNumber(currentRep, FORMAT_NUMBER_PREFIX)
 			toLevelRep = Addon:FormatNumber(toLevelRep, FORMAT_NUMBER_PREFIX)
 				
-			atLevelRep, toLevelRep, percentRep = NS:ColorizeByValue(percentRep, 0, 100, atLevelRep, toLevelRep, percentRep)
+			currentRep, toLevelRep, currentRepPercent = NS:ColorizeByValue(currentRepPercent, 0, 100, currentRep, toLevelRep, currentRepPercent)
 
 			lineNum = tooltip:AddLine(" ")
 			tooltip:SetCell(lineNum, 1, NS:Colorize("Orange", L["Current reputation"]), "LEFT")
-			tooltip:SetCell(lineNum, 2, string.format("%s/%s (%s%%)", atLevelRep, Addon:FormatNumber(fullLevelRep, FORMAT_NUMBER_PREFIX), percentRep), "LEFT")
+			tooltip:SetCell(lineNum, 2, string.format("%s/%s (%s%%)", currentRep, Addon:FormatNumber(totalRep, FORMAT_NUMBER_PREFIX), currentRepPercent), "LEFT")
 
+			if completedQuestRep > 0 then			
+				lineNum = tooltip:AddLine(" ")
+				tooltip:SetCell(lineNum, 1, NS:Colorize("Orange", L["Completed quest Rep"]), "LEFT")
+				tooltip:SetCell(lineNum, 2, string.format("%s (%s%%)%s", repCQ, repCQPercent, lvlUpHint), "LEFT")
+			end
+			
+			if incompleteQuestRep > 0 then
+				lineNum = tooltip:AddLine(" ")
+				tooltip:SetCell(lineNum, 1, NS:Colorize("Orange", L["Incomplete quest Rep"]), "LEFT")
+				tooltip:SetCell(lineNum, 2, string.format("%s (%s%%)", repIQ, repIQPercent), "LEFT")
+			end
+			
 			lineNum = tooltip:AddLine(" ")
 			tooltip:SetCell(lineNum, 1, NS:Colorize("Orange", L["To next standing"]), "LEFT")
 			tooltip:SetCell(lineNum, 2, toLevelRep, "LEFT")
@@ -249,14 +346,20 @@ function Tooltip:Draw()
 		
 		-- show history data
 		if not Addon:GetSetting("TTHideRepDetails") and not Addon.atMaxRep then
-			local ReputationHistory = Addon:GetModule("ReputationHistory")
-			
 			ReputationHistory:ProcessFaction(faction)
+			ReputationHistory:ProcessMobHistory()
 			
 			local total = ReputationHistory:GetTotalRep(faction)
 			local repph = floor(ReputationHistory:GetRepPerHour(faction))
 			
 			tooltip:AddLine(" ")
+			
+			if Addon.playerLvl == Addon.MAX_LEVEL then
+				lineNum = tooltip:AddLine(" ")
+				tooltip:SetCell(lineNum, 1, NS:Colorize("Orange", L["Session kills"]), "LEFT")
+				tooltip:SetCell(lineNum, 2, History:GetTotalKills(), "LEFT")
+			end
+
 			lineNum = tooltip:AddLine(" ")
 			tooltip:SetCell(lineNum, 1, NS:Colorize("Orange", L["Session rep"]), "LEFT")
 			tooltip:SetCell(lineNum, 2, Addon:FormatNumber(total, FORMAT_NUMBER_PREFIX), "LEFT")
@@ -265,9 +368,19 @@ function Tooltip:Draw()
 			tooltip:SetCell(lineNum, 1, NS:Colorize("Orange", L["Rep per hour"]), "LEFT")
 			tooltip:SetCell(lineNum, 2, Addon:FormatNumber(repph, FORMAT_NUMBER_PREFIX), "LEFT")
 
+			if Addon.playerLvl == Addon.MAX_LEVEL then
+				lineNum = tooltip:AddLine(" ")
+				tooltip:SetCell(lineNum, 1, NS:Colorize("Orange", L["Kills per hour"]), "LEFT")
+				tooltip:SetCell(lineNum, 2, floor(History:GetKillsPerHour()), "LEFT")
+			end
+			
 			lineNum = tooltip:AddLine(" ")
 			tooltip:SetCell(lineNum, 1, NS:Colorize("Orange", L["Time to level"]), "LEFT")
 			tooltip:SetCell(lineNum, 2, ReputationHistory:GetTimeToLevel(faction), "LEFT")
+						
+			lineNum = tooltip:AddLine(" ")
+			tooltip:SetCell(lineNum, 1, NS:Colorize("Orange", L["Kills to level"]), "LEFT")
+			tooltip:SetCell(lineNum, 2, NS:Colorize("Red", ReputationHistory:GetKillsToLevel(faction) ), "LEFT")					
 		end
 		
 	end

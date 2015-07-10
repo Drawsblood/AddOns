@@ -31,67 +31,89 @@ local _
 
 local BLACK = {r = 0, g = 0, b = 0, a = 1}
 
+local dimension = 250
+
+local Notifications
+local TextEngine
+
+do
+	local index = GetCurrentResolution()
+	local resolution = select(index, GetScreenResolutions())
+	
+	local x, y = resolution:match("(%d+)x(%d+)")
+	
+	x = tonumber(x) or dimension
+	y = tonumber(y) or dimension
+	
+	dimension = x > y and x or y
+end
+
 -- options
 local defaults = {
 	profile = {
-		ShowText           = "XP",
-		ShowXP             = true,
-		ShowRep            = false,
-		Shadow             = true,
-		Thickness          = 2,
-		Spark              = 1,
-		Inverse            = false,
-		ExternalTexture    = false,
-		Texture            = nil,
-		ToGo               = true,
-		ShowValues         = true,
-		ShowPercentage     = true,
-		ShowFactionName    = true,
-		ShowRestedValue    = false,
-		ShowRestedPerc     = false,
-		ColoredText        = true,
-		Separators         = false,
-		Abbreviations      = false,
-		TTAbbreviations    = false,
-		DecimalPlaces      = 2,
-		ShowBlizzBars      = false,
-		HideHint           = false,
-		Location           = "Bottom",
-		xOffset            = 0,
-		yOffset            = 0,
-		Inside             = false,
-		Strata             = "HIGH",
-		Jostle             = false,
-		BlizzRep           = true,
-        Minimap	           = false,
-        MaxHideXPText      = false,
-        MaxHideXPBar       = false,
-        MaxHideRepText     = false,
-        MaxHideRepBar      = false,
-        AutoTrackOnGain    = false,
-        AutoTrackOnLoss    = false,
-		XP                 = {r = 0.0, g = 0.4, b = 0.9, a = 1},
-		Rest               = {r = 1.0, g = 0.2, b = 1.0, a = 1},
-		None               = {r = 0.0, g = 0.0, b = 0.0, a = 1},
-		Rep                = {r = 1.0, g = 0.2, b = 1.0, a = 1},
-		NoRep              = {r = 0.0, g = 0.0, b = 0.0, a = 1},
-		Weight             = 0.8,
-		TimeFrame          = 30,
-		TTHideXPDetails    = false,
-		TTHideRepDetails   = false,
-		Ticks              = 0,
-		ShowBarText        = false,
-		MouseOver          = false,
-		Font               = Addon.FONT_NAME_DEFAULT,
-		FontSize           = 10,
-		BarToGo            = false,
-		BarShowValues      = true,
-		BarShowPercentage  = false,
-		BarShowFactionName = false,
-		BarShowRestedValue = false,
-		BarShowRestedPerc  = false,
-		BarAbbreviations   = false,
-	}
+		ShowText               = "XP",
+		ShowXP                 = true,
+		ShowRep                = false,
+		ShowQuestCompletedXP   = true,
+		ShowQuestIncompleteXP  = true,
+		ShowQuestCompletedRep  = true,
+		ShowQuestIncompleteRep = true,
+		Shadow                 = true,
+		Thickness              = 2,
+		Length                 = 0,
+		Spark                  = 1,
+		Inverse                = false,
+		ExternalTexture        = false,
+		Texture                = nil,
+		NoTexture              = false,
+		LabelXPText            = "XPValueCompact",
+		LabelRepText           = "RepValueCompact",
+		BarXPText              = "XPFullNoColor",
+		BarRepText             = "RepFullNoColor",
+		Separators             = false,
+		TTAbbreviations        = false,
+		DecimalPlaces          = 2,
+		ShowBlizzBars          = false,
+		HideHint               = false,
+		Location               = "Bottom",
+		xOffset                = 0,
+		yOffset                = 0,
+		Inside                 = false,
+		Strata                 = "HIGH",
+		Jostle                 = false,
+		BlizzRep               = true,
+        Minimap	               = false,
+        MaxHideXPText          = false,
+        MaxHideXPBar           = false,
+        MaxHideRepText         = false,
+        MaxHideRepBar          = false,
+        AutoTrackOnGain        = false,
+        AutoTrackOnLoss        = false,
+		XP                     = {r = 0.0, g = 0.4, b = 0.9, a = 1},
+		QuestCompletedXP       = {r = 0.2, g = 1.0, b = 0.2, a = 1},
+		QuestIncompleteXP      = {r = 1.0, g = 0.6, b = 0.0, a = 1},
+		Rest                   = {r = 1.0, g = 0.2, b = 1.0, a = 1},
+		None                   = {r = 0.0, g = 0.0, b = 0.0, a = 1},
+		Rep                    = {r = 1.0, g = 0.2, b = 1.0, a = 1},
+		QuestCompletedRep      = {r = 0.2, g = 1.0, b = 0.2, a = 1},
+		QuestIncompleteRep     = {r = 1.0, g = 0.6, b = 0.0, a = 1},
+		NoRep                  = {r = 0.0, g = 0.0, b = 0.0, a = 1},
+		Weight                 = 0.8,
+		TimeFrame              = 30,
+		TTHideXPDetails        = false,
+		TTHideRepDetails       = false,
+		Ticks                  = 0,
+		ShowBarText            = false,
+		MouseOver              = false,
+		Font                   = Addon.FONT_NAME_DEFAULT,
+		FontSize               = 10,
+		SideBySideText         = false,
+		SideBySideSeparator    = " | ",
+		Notification           = false,
+		ToastNotification      = true,
+	},
+	char = {
+	},	
 }
 
 local strata = {
@@ -125,42 +147,30 @@ local showtext = {
 	val2txt = {
 		None     = L["None"], 
 		XP       = L["XP"], 
-		KTL      = L["Kills to Level"],
-		TTL      = L["Time to Level"], 
-		Rep      = L["Rep"], 
-		TTLRep   = L["Time to Level Rep"],
+		Rep      = L["Reputation"], 
 		XPFirst  = L["XP over Rep"], 
 		RepFirst = L["Rep over XP"], 
 	},
 	opt2txt = {
 		[1]  = L["None"], 
 		[2]  = L["XP"], 
-		[3]  = L["Kills to Level"],
-		[4]  = L["Time to Level"], 
-		[5]  = L["Rep"], 
-		[6]  = L["Time to Level Rep"], 
-		[7]  = L["XP over Rep"], 
-		[8]  = L["Rep over XP"], 
+		[3]  = L["Reputation"], 
+		[4]  = L["XP over Rep"], 
+		[5]  = L["Rep over XP"], 
 	},
 	opt2val = {
 		[1]  = "None", 
 		[2]  = "XP", 
-		[3]  = "KTL",
-		[4]  = "TTL", 
-		[5]  = "Rep", 
-		[6]  = "TTLRep", 
-		[7]  = "XPFirst", 
-		[8]  = "RepFirst", 
+		[3]  = "Rep", 
+		[4]  = "XPFirst", 
+		[5]  = "RepFirst", 
 	},
 	val2opt = {
 		None     = 1, 
 		XP       = 2, 
-		KTL      = 3,
-		TTL      = 4, 
-		Rep      = 5, 
-		TTLRep   = 6, 
-		XPFirst  = 7, 
-		RepFirst = 8, 
+		Rep      = 3, 
+		XPFirst  = 4, 
+		RepFirst = 5, 
 	}
 }
 
@@ -190,7 +200,7 @@ function mousehook:OnUpdate(elap)
     if IsMouseButtonDown("LeftButton") then
         self:Stop()
         if not type(frame.GetName) == 'function' or not frame:GetName() then
-            Addon:Output(L["This frame has no global name and cannot be used"])
+            Addon:Output(L["This frame has no global name and cannot be used!"])
         else
         	Options:SetSetting("Frame", name)
         	AceConfigReg:NotifyChange(Addon.FULLNAME)
@@ -221,14 +231,31 @@ do
 	end
 end
 
+local textsConfig = {
+	xpBarLabels = {},
+	xpBrokerLabels = {},
+	repBarLabels = {},
+	repBrokerLabels = {},
+	templateLabels = {},
+	customLabels = {},
+	textTemplate = nil,
+	textCustom = nil,
+	useMockUpValues = false,
+}
+
 -- module handling
 function Options:OnInitialize()
+	Notifications = Addon:GetModule("Notifications")
+	TextEngine    = Addon:GetModule("TextEngine")
+	
 	-- options
 	self.options = {}
 	
 	-- options
 	self.db = LibStub:GetLibrary("AceDB-3.0"):New(Addon.MODNAME.."_DB", defaults, "Default")
-		
+	
+	Notifications:SetSinkStorage(self.db.profile)
+	
 	self:Setup()
 		
 	-- profile support
@@ -262,40 +289,39 @@ function Options:Setup()
 			bars = {
 				type = 'group',
 				name = L["Bar Properties"],
-				desc = L["Set the Bar Properties"],
+				desc = L["Set the bar properties."],
 				order = 1,
 				args = {
-					spark = {
-						type = 'range',
-						name = L["Spark intensity"],
-						desc = L["Brightness level of Spark"],
-						get = function() return self:GetSetting("Spark") end,
-						set = function(info, value) 
-							self:SetSetting("Spark", value)
-						end,
-						min = 0,
-						max = 1,
-						step = 0.01,
-						bigStep = 0.05,
-						order = 1
-					},
 					thickness = {
 						type = 'range',
 						name = L["Thickness"],
-						desc = L["Set thickness of the Bars"],
+						desc = L["Set the thickness of the bars."],
 						get = function() return self:GetSetting("Thickness") end,
 						set = function(info, value)
 							self:SetSetting("Thickness", value)
 						end,
 						min = 1.5,
-						max = 32,
+						max = 64,
 						step = 0.1,
+						order = 1,
+					},
+					length = {
+						type = 'range',
+						name = L["Length"],
+						desc = L["Set the length of the bars. If zero bar will adjust to the dimension of the frame it attaches to."],
+						get = function() return self:GetSetting("Length") end,
+						set = function(info, value)
+							self:SetSetting("Length", value)
+						end,
+						min = 0,
+						max = dimension,
+						step = 1,
 						order = 2,
 					},
 					showxp = {
 						type = 'toggle',
 						name = L["Show XP Bar"],
-						desc = L["Show the XP Bar"],
+						desc = L["Show the XP bar."],
 						get = function() return self:GetSetting("ShowXP") end,
 						set = function()
 							self:ToggleSetting("ShowXP")
@@ -305,37 +331,105 @@ function Options:Setup()
 					showrep = {
 						type = 'toggle',
 						name = L["Show Reputation Bar"],
-						desc = L["Show the Reputation Bar"],
+						desc = L["Show the reputation bar."],
 						get = function() return self:GetSetting("ShowRep") end,
 						set = function()
 							self:ToggleSetting("ShowRep")
 						end,
 						order = 4,
 					},
+					showQuestCompleteXP = {
+						type = 'toggle',
+						name = L["Show Completed Quest XP"],
+						desc = L["Show XP of completed quests on the bar."],
+						get = function() return self:GetSetting("ShowQuestCompletedXP") end,
+						set = function()
+							self:ToggleSetting("ShowQuestCompletedXP")
+						end,
+						width = "full",
+						order = 5,
+					},
+					showQuestIncompleteXP = {
+						type = 'toggle',
+						name = L["Show Incomplete Quest XP"],
+						desc = L["Show XP of incomplete quests on the bar."],
+						get = function() return self:GetSetting("ShowQuestIncompleteXP") end,
+						set = function()
+							self:ToggleSetting("ShowQuestIncompleteXP")
+						end,
+						width = "full",
+						order = 6,
+					},
+					showQuestCompleteRep = {
+						type = 'toggle',
+						name = L["Show Completed Quest Reputation"],
+						desc = L["Show reputation of completed quests on the bar."],
+						get = function() return self:GetSetting("ShowQuestCompletedRep") end,
+						set = function()
+							self:ToggleSetting("ShowQuestCompletedRep")
+						end,
+						width = "full",
+						order = 7,
+					},
+					showQuestIncompleteRep = {
+						type = 'toggle',
+						name = L["Show Incomplete Quest Reputation"],
+						desc = L["Show reputation of incomplete quests the bar."],
+						get = function() return self:GetSetting("ShowQuestIncompleteRep") end,
+						set = function()
+							self:ToggleSetting("ShowQuestIncompleteRep")
+						end,
+						width = "full",
+						order = 8,
+					},
+					spark = {
+						type = 'range',
+						name = L["Spark Intensity"],
+						desc = L["Set the brightness level of the spark."],
+						get = function() return self:GetSetting("Spark") end,
+						set = function(info, value) 
+							self:SetSetting("Spark", value)
+						end,
+						min = 0,
+						max = 1,
+						step = 0.01,
+						bigStep = 0.05,
+						order = 9,
+					},
 					shadow = {
 						type = 'toggle',
 						name = L["Shadow"],
-						desc = L["Toggle Shadow"],
+						desc = L["Toggle shadow display for bars."],
 						get = function() return self:GetSetting("Shadow") end,
 						set = function()
 							self:ToggleSetting("Shadow")
 						end,
-						order = 5,
+						order = 10,
 					},
 					inverse = {
 						type = 'toggle',
 						name = L["Inverse Order"],
-						desc = L["Place reputation bar before XP bar"],
+						desc = L["Place the reputation bar before the XP bar."],
 						get = function() return self:GetSetting("Inverse") end,
 						set = function()
 							self:ToggleSetting("Inverse")
 						end,
-						order = 6,
+						order = 11,
+					},
+					noTex = {
+						type = 'toggle',
+						name = L["No Texture"],
+						desc = L["Don't use any texture but use opaque colors for bars."],
+						get = function() return self:GetSetting("NoTexture") end,
+						set = function()
+							self:ToggleSetting("NoTexture")
+						end,
+						order = 12,
 					},
 					external = {
 						type = 'toggle',
 						name = L["Other Texture"],
-						desc = L["Use external texture for bar instead of the one provided with the addon"],
+						desc = L["Use external texture for bar instead of the one provided with the addon."],
 						get = function() return self:GetSetting("ExternalTexture") end,
 						set = function()
 							self:ToggleSetting("ExternalTexture")
@@ -343,7 +437,10 @@ function Options:Setup()
 						hidden = function(info)
 							return not LibSharedMedia
 						end,
-						order = 7,
+						disabled = function(info)
+							return self:GetSetting("NoTexture")
+						end,
+						order = 13,
 					},
 					texture = {
 						type = 'select',
@@ -360,32 +457,32 @@ function Options:Setup()
 							return not LibSharedMedia
 						end,
 						disabled = function(info)
-							return not self:GetSetting("ExternalTexture")
+							return self:GetSetting("NoTexture") or not self:GetSetting("ExternalTexture")
 						end,
 						dialogControl = AceGUI.WidgetRegistry["LSM30_Statusbar"] and "LSM30_Statusbar" or nil,
-						order = 8,
+						order = 14,
 					},
 					ticks = {
 						type = 'select',
 						name = L["Ticks"],
-						desc = L["Set number of ticks shown on the bar."],
+						desc = L["Set the number of ticks shown on the bar."],
 						get = function() return self:GetSetting("Ticks") end,
 						set = function(info, key)
 							self:SetSetting("Ticks", key)
 						end,
 						values = tickConfig,
-						order = 9,
+						order = 15,
 					},
 					frame = {
 						type = 'group',
 						name = L["Frame"],
-						desc = L["Frame Connection Properties"],
+						desc = L["Set the frame attachment properties."],
 						order = 1,
 						args = {
 							attached = {
 								type = "input",
 								name = L["Frame to attach to"],
-								desc = L["The exact name of the frame to attach to"],
+								desc = L["The exact name of the frame to attach to."],
 								get = function()
 										return self:GetSetting("Frame")
 									end,
@@ -397,14 +494,14 @@ function Options:Setup()
 							attach = {
 								type = "execute",
 								name = L["Select by Mouse"],
-								desc = L["Click to activate the frame selector (Left-Click to select frame, Right-Click do deactivate selector)"],
+								desc = L["Click to activate the frame selector. (Left-Click to select frame, Right-Click do deactivate selector)"],
 								func = function() mousehook:Start() end,
 								order = 2,
 							},
 							location = {
 								type = "select", 
-								name = L["Attach to side"],
-								desc = L["Select side to attach the bars to"],
+								name = L["Attach to Side"],
+								desc = L["Select the side to attach the bars to."],
 								get = function()
 										return self:GetSetting("Location")
 									end,
@@ -417,7 +514,7 @@ function Options:Setup()
 							strata = {
 								type = "select", 
 								name = L["Strata"],
-								desc = L["Select the strata of the bars"],
+								desc = L["Select the strata of the bars."],
 								get = function() return strata.val2opt[self:GetSetting("Strata")] end,
 								set = function(info, value)
 									self:SetSetting("Strata", strata.opt2val[value] or "BACKGROUND")
@@ -425,36 +522,36 @@ function Options:Setup()
 								values = strata.opt2val,
 								order = 4,
 							},
-							xoffset = {
+							xOffset = {
 								type = 'range',
 								name = L["X-Offset"],
-								desc = L["Set x-Offset of the bars"],
+								desc = L["Set the x-Offset of the bars."],
 								get = function() return self:GetSetting("xOffset") end,
 								set = function(info, value)
 									self:SetSetting("xOffset", value)
 								end,
-								min = -250,
-								max =  250,
+								min = -dimension,
+								max =  dimension,
 								step = 1,
 								order = 5,
 							},
-							yoffset = {
+							yOffset = {
 								type = 'range',
 								name = L["Y-Offset"],
-								desc = L["Set y-Offset of the bars"],
+								desc = L["Set the y-Offset of the bars."],
 								get = function() return self:GetSetting("yOffset") end,
 								set = function(info, value)
 									self:SetSetting("yOffset", value)
 								end,
-								min = -250,
-								max =  250,
+								min = -dimension,
+								max =  dimension,
 								step = 1,
 								order = 6,
 							},
 							inside = {
 								type = 'toggle',
 								name = L["Inside"],
-								desc = L["Attach bars to the inside of the frame"],
+								desc = L["Attach bars to the inside of the frame."],
 								get = function() return self:GetSetting("Inside") end,
 								set = function()
 									self:ToggleSetting("Inside")
@@ -464,7 +561,7 @@ function Options:Setup()
 							jostle = {
 								type = 'toggle',
 								name = L["Jostle"],
-								desc = L["Jostle Blizzard Frames"],
+								desc = L["Move Blizzard-frames to avoid overlapping with the bars."],
 								get = function() return self:GetSetting("Jostle") end,
 								set = function()
 									self:ToggleSetting("Jostle")
@@ -474,7 +571,7 @@ function Options:Setup()
 							refresh = {
 								type = 'execute',
 								name = L["Refresh"],
-								desc = L["Refresh Bar Position"],
+								desc = L["Refresh bar position."],
 								func = function() 
 									local Bar = Addon:GetModule("Bar")
 									
@@ -489,13 +586,18 @@ function Options:Setup()
 					colors = {
 						type = 'group',
 						name = L["Colors"],
-						desc = L["Set the Bar Colors"],
+						desc = L["Set the bar colors."],
 						order = 2,
 						args = {
+							xpBarDesc = { 
+								type = "header",
+								name = L["XP Bar Colors"],
+								order = 1,
+							},
 							currentXP = {
 								type = "color",
 								name = L["Current XP"],
-								desc = L["Set the color of the XP Bar"],
+								desc = L["Set the color of the XP bar."],
 								hasAlpha = true,
 								get = function ()
 									return self:GetColor("XP")
@@ -503,12 +605,12 @@ function Options:Setup()
 								set = function (info, r, g, b, a)
 									self:SetColor("XP", r, g, b, a)
 								end,
-								order = 1,
+								order = 2,
 							},
 							restedXP = {
 								type = 'color',
 								name = L["Rested XP"],
-								desc = L["Set the color of the Rested Bar"],
+								desc = L["Set the color of the rested bar."],
 								hasAlpha = true,
 								get = function ()
 									return self:GetColor("Rest")
@@ -516,12 +618,38 @@ function Options:Setup()
 								set = function (info, r, g, b, a)
 									self:SetColor("Rest", r, g, b, a)
 								end,
-								order = 2,
+								order = 3,
 							},
-							noxp = {
+							completedQuestXP = {
+								type = 'color',
+								name = L["Completed Quest XP"],
+								desc = L["Set the color of the completed quest XP bar."],
+								hasAlpha = true,
+								get = function ()
+									return self:GetColor("QuestCompletedXP")
+								end,
+								set = function (info, r, g, b, a)
+									self:SetColor("QuestCompletedXP", r, g, b, a)
+								end,
+								order = 4,
+							},
+							incompleteQuestXP = {
+								type = 'color',
+								name = L["Incomplete Quest XP"],
+								desc = L["Set the color of the incomplete quest XP bar."],
+								hasAlpha = true,
+								get = function ()
+									return self:GetColor("QuestIncompleteXP")
+								end,
+								set = function (info, r, g, b, a)
+									self:SetColor("QuestIncompleteXP", r, g, b, a)
+								end,
+								order = 5,
+							},
+							noXP = {
 								type = 'color',
 								name = L["No XP"],
-								desc = L["Set the empty color of the XP Bar"],
+								desc = L["Set the empty color of the XP bar."],
 								hasAlpha = true,
 								get = function ()
 									return self:GetColor("None")
@@ -529,12 +657,17 @@ function Options:Setup()
 								set = function (info, r, g, b, a)
 									self:SetColor("None", r, g, b, a)
 								end,
-								order = 3,
+								order = 6,
+							},
+							repBarDesc = { 
+								type = "header",
+								name = L["Reputation Bar Colors"],
+								order = 7,
 							},
 							rep = {
 								type = 'color',
 								name = L["Reputation"],
-								desc = L["Set the color of the Rep Bar"],
+								desc = L["Set the color of the reputation bar."],
 								hasAlpha = true,
 								get = function ()
 									return self:GetColor("Rep")
@@ -542,12 +675,38 @@ function Options:Setup()
 								set = function (info, r, g, b, a)
 									self:SetColor("Rep", r, g, b, a)
 								end,
-								order = 4,
+								order = 8,
 							},
-							norep = {
+							completedQuestRep = {
 								type = 'color',
-								name = L["No Rep"],
-								desc = L["Set the empty color of the Reputation Bar"],
+								name = L["Completed Quest Reputation"],
+								desc = L["Set the color of the completed quest reputation bar."],
+								hasAlpha = true,
+								get = function ()
+									return self:GetColor("QuestCompletedRep")
+								end,
+								set = function (info, r, g, b, a)
+									self:SetColor("QuestCompletedRep", r, g, b, a)
+								end,
+								order = 9,
+							},
+							incompleteQuestRep = {
+								type = 'color',
+								name = L["Incomplete Quest Reputation"],
+								desc = L["Set the color of the incomplete quest reputation bar."],
+								hasAlpha = true,
+								get = function ()
+									return self:GetColor("QuestIncompleteRep")
+								end,
+								set = function (info, r, g, b, a)
+									self:SetColor("QuestIncompleteRep", r, g, b, a)
+								end,
+								order = 10,
+							},
+							noRep = {
+								type = 'color',
+								name = L["No Reputation"],
+								desc = L["Set the empty color of the reputation bar."],
 								hasAlpha = true,
 								get = function ()
 									return self:GetColor("NoRep")
@@ -555,35 +714,74 @@ function Options:Setup()
 								set = function (info, r, g, b, a)
 									self:SetColor("NoRep", r, g, b, a)
 								end,
-								order = 5,
+								order = 11,
 							},
-							blizzrep = {
+							blizzRep = {
 								type = 'toggle',
-								name = L["Blizzard Rep Colors"],
-								desc = L["Toggle Blizzard Reputation Colors"],
+								name = L["Blizzard Reputation Colors"],
+								desc = L["Toggle the use of Blizzard reputation colors."],
 								get = function() return self:GetSetting("BlizzRep") end,
 								set = function()
 									self:ToggleSetting("BlizzRep")
 								end,
-								order = 6,
+								width = "full",
+								order = 12,
 							},
 						},
 					},
 					bartext = {
 						type = 'group',
 						name = L["Bar Text"],
-						desc = L["Display settings for bar text."],
+						desc = L["Set the bar text properties."],
 						order = 3,
 						args = {
+							xpLabel = {
+								type = "select", 
+								name = L["Select XP Text"],
+								desc = L["Select the text for XP bar."],
+								get  = function() return self:GetSetting("BarXPText") end,
+								set  = function(info, value)
+									self:SetSetting("BarXPText", value)
+								end,
+								values = function(info, value)
+									NS:ClearTable(textsConfig.xpBrokerLabels)
+									
+									for id in TextEngine:IterateTextIdsForTag("XP") do
+										textsConfig.xpBrokerLabels[id] = TextEngine:GetLabel(id)
+									end
+
+									return textsConfig.xpBrokerLabels
+								end,
+								order = 1,
+							},
+							repLabel = {
+								type = "select", 
+								name = L["Select Reputation Text"],
+								desc = L["Select the text for reputation bar."],
+								get  = function() return self:GetSetting("BarRepText") end,
+								set  = function(info, value)
+									self:SetSetting("BarRepText", value)
+								end,
+								values = function(info, value)
+									NS:ClearTable(textsConfig.repBrokerLabels)
+									
+									for id in TextEngine:IterateTextIdsForTag("Reputation") do
+										textsConfig.repBrokerLabels[id] = TextEngine:GetLabel(id)
+									end
+
+									return textsConfig.repBrokerLabels
+								end,
+								order = 2,
+							},
 							text = {
 								type = 'toggle',
 								name = L["Show Bar Text"],
-								desc = L["Show current progress values on bar."],
+								desc = L["Show selected text on bar."],
 								get = function() return self:GetSetting("ShowBarText") end,
 								set = function()
 									self:ToggleSetting("ShowBarText")
 								end,
-								order = 1,
+								order = 3,
 							},
 							mouseover = {
 								type = 'toggle',
@@ -593,12 +791,32 @@ function Options:Setup()
 								set = function()
 									self:ToggleSetting("MouseOver")
 								end,
-								order = 2,
+								order = 4,
+							},
+							sideBySideText = {
+								type = 'toggle',
+								name = L["Side by Side Text"],
+								desc = L["Text for both bars is shown in single line centered over both bars."],
+								get = function() return self:GetSetting("SideBySideText") end,
+								set = function()
+									self:ToggleSetting("SideBySideText")
+								end,
+								order = 5,
+							},
+							sideBySideSeparator = {
+								type = 'input',
+								name = L["Side by Side Separator"],
+								desc = L["Separator used between XP and reputation texts."],
+								get = function() return self:GetSetting("SideBySideSeparator") end,
+								set = function(info, value)
+									self:SetSetting("SideBySideSeparator", value)
+								end,
+								order = 6,
 							},
 							font = {
 								type = 'select',
 								name = L["Font"],
-								desc = L["Font of the bar text."] .. "\n" .. L["If you want more fonts, you should install the addon 'SharedMedia'."],
+								desc = L["Select the font of the bar text."] .. "\n" .. L["If you want more fonts, you should install the addon 'SharedMedia'."],
 								get = function() return self:GetSetting("Font") end,
 								set = function(info, value)
 									self:SetSetting("Font", value)
@@ -610,12 +828,12 @@ function Options:Setup()
 									return not LibSharedMedia
 								end,
 								dialogControl = AceGUI.WidgetRegistry["LSM30_Font"] and "LSM30_Font" or nil,
-								order = 3,
+								order = 7,
 							},
-							fontsize = {
+							fontSize = {
 								type = 'range',
 								name = L["Font Size"],
-								desc = L["The font size of the text."],
+								desc = L["Select the font size of the text."],
 								get = function() return self:GetSetting("FontSize") end,
 								set = function(info, value)
 									self:SetSetting("FontSize", value)
@@ -623,77 +841,7 @@ function Options:Setup()
 								min = 2,
 								max = 32,
 								step = 1,
-								order = 4,
-							},
-							togo = {
-								type = 'toggle',
-								name = L["XP/Rep to go"],
-								desc = L["Show XP/Rep to go in bar text"],
-								get  = function() return self:GetSetting("BarToGo") end,
-								set  = function()
-									self:ToggleSetting("BarToGo") 
-								end,
-								order = 5,
-							},
-							faction = {
-								type = 'toggle',
-								name = L["Show faction name"],
-								desc = L["Show faction name in bar text."],
-								get  = function() return self:GetSetting("BarShowFactionName") end,
-								set  = function()
-									self:ToggleSetting("BarShowFactionName") 
-								end,
-								order = 6,
-							},
-							values = {
-								type = 'toggle',
-								name = L["Show Values"],
-								desc = L["Show values in bar text"],
-								get  = function() return self:GetSetting("BarShowValues") end,
-								set  = function()
-									self:ToggleSetting("BarShowValues") 
-								end,
-								order = 7,
-							},
-							perc = {
-								type = 'toggle',
-								name = L["Show Percentage"],
-								desc = L["Show percentage in bar text"],
-								get  = function() return self:GetSetting("BarShowPercentage") end,
-								set  = function()
-									self:ToggleSetting("BarShowPercentage") 
-								end,
 								order = 8,
-							},
-							rested = {
-								type = 'toggle',
-								name = L["Show Rested"],
-								desc = L["Show rested value in bar text"],
-								get  = function() return self:GetSetting("BarShowRestedValue") end,
-								set  = function()
-									self:ToggleSetting("BarShowRestedValue") 
-								end,
-								order = 9,
-							},
-							restperc = {
-								type = 'toggle',
-								name = L["Show Rested %"],
-								desc = L["Show rested percentage in bar text"],
-								get  = function() return self:GetSetting("BarShowRestedPerc") end,
-								set  = function()
-									self:ToggleSetting("BarShowRestedPerc") 
-								end,
-								order = 10,
-							},
-							abbreviations = {
-								type = 'toggle',
-								name = L["Abbreviations"],
-								desc = L["Use abbreviations to shorten numbers"],
-								get  = function() return self:GetSetting("BarAbbreviations") end,
-								set  = function()
-									self:ToggleSetting("BarAbbreviations") 
-								end,
-								order = 11,
 							},
 						},
 					},
@@ -702,13 +850,51 @@ function Options:Setup()
 			label = {
 				type = 'group',
 				name = L["Broker Label"],
-				desc = L["Broker Label Properties"],
+				desc = L["Set the Broker label properties."],
 				order = 2,
 				args = {
-					showtext = {
+					xpLabel = {
+						type = "select", 
+						name = L["Select XP Text"],
+						desc = L["Select the XP text for Broker display."],
+						get  = function() return self:GetSetting("LabelXPText") end,
+						set  = function(info, value)
+							self:SetSetting("LabelXPText", value)
+						end,
+						values = function(info, value)
+							NS:ClearTable(textsConfig.xpBarLabels)
+							
+							for id in TextEngine:IterateTextIdsForTag("XP") do
+								textsConfig.xpBarLabels[id] = TextEngine:GetLabel(id)
+							end
+
+							return textsConfig.xpBarLabels
+						end,
+						order = 1,
+					},
+					repLabel = {
+						type = "select", 
+						name = L["Select Reputation Text"],
+						desc = L["Select the reputation text for Broker display."],
+						get  = function() return self:GetSetting("LabelRepText") end,
+						set  = function(info, value)
+							self:SetSetting("LabelRepText", value)
+						end,
+						values = function(info, value)
+							NS:ClearTable(textsConfig.repBarLabels)
+							
+							for id in TextEngine:IterateTextIdsForTag("Reputation") do
+								textsConfig.repBarLabels[id] = TextEngine:GetLabel(id)
+							end
+
+							return textsConfig.repBarLabels
+						end,
+						order = 2,
+					},
+					showText = {
 						type = "select", 
 						name = L["Select Label Text"],
-						desc = L["Select label text for Broker display"],
+						desc = L["Select the label text for the Broker display."],
 						get  = function() 
 							return showtext.val2opt[self:GetSetting("ShowText")]
 						end,
@@ -716,100 +902,20 @@ function Options:Setup()
 							self:SetSetting("ShowText", showtext.opt2val[value])
 						end,
 						values = showtext.opt2txt,
-						order = 1,
-					},
-					togo = {
-						type = 'toggle',
-						name = L["XP/Rep to go"],
-						desc = L["Show XP/Rep to go in label"],
-						get  = function() return self:GetSetting("ToGo") end,
-						set  = function()
-							self:ToggleSetting("ToGo") 
-						end,
-						order = 2,
-					},
-					faction = {
-						type = 'toggle',
-						name = L["Show faction name"],
-						desc = L["Show faction name when reputation is selected as label text."],
-						get  = function() return self:GetSetting("ShowFactionName") end,
-						set  = function()
-							self:ToggleSetting("ShowFactionName") 
-						end,
 						order = 3,
-					},
-					values = {
-						type = 'toggle',
-						name = L["Show Values"],
-						desc = L["Show values in label text"],
-						get  = function() return self:GetSetting("ShowValues") end,
-						set  = function()
-							self:ToggleSetting("ShowValues") 
-						end,
-						order = 4,
-					},
-					perc = {
-						type = 'toggle',
-						name = L["Show Percentage"],
-						desc = L["Show percentage in label text"],
-						get  = function() return self:GetSetting("ShowPercentage") end,
-						set  = function()
-							self:ToggleSetting("ShowPercentage") 
-						end,
-						order = 5,
-					},
-					rested = {
-						type = 'toggle',
-						name = L["Show Rested"],
-						desc = L["Show rested value in label text"],
-						get  = function() return self:GetSetting("ShowRestedValue") end,
-						set  = function()
-							self:ToggleSetting("ShowRestedValue") 
-						end,
-						order = 6,
-					},
-					restperc = {
-						type = 'toggle',
-						name = L["Show Rested %"],
-						desc = L["Show rested percentage in label text"],
-						get  = function() return self:GetSetting("ShowRestedPerc") end,
-						set  = function()
-							self:ToggleSetting("ShowRestedPerc") 
-						end,
-						order = 7,
-					},
-					colored = {
-						type = 'toggle',
-						name = L["Colored Label"],
-						desc = L["Color label text based on percentages"],
-						get  = function() return self:GetSetting("ColoredText") end,
-						set  = function()
-							self:ToggleSetting("ColoredText") 
-						end,
-						order = 8,
-					},
-					abbreviations = {
-						type = 'toggle',
-						name = L["Abbreviations"],
-						desc = L["Use abbreviations to shorten numbers"],
-						get  = function() return self:GetSetting("Abbreviations") end,
-						set  = function()
-							self:ToggleSetting("Abbreviations") 
-						end,
-						order = 10,
 					},
 				},
 			},
 			tooltip = {
 				type = 'group',
 				name = L["Tooltip"],
-				desc = L["Tooltip Properties"],
+				desc = L["Set the tooltip properties."],
 				order = 3,
 				args = {
-					tooltipabbrev = {
+					tooltipAbbrev = {
 						type = 'toggle',
 						name = L["Abbreviations"],
-						desc = L["Use abbreviations to shorten numbers"],
+						desc = L["Use abbreviations to shorten numbers."],
 						get  = function() return self:GetSetting("TTAbbreviations") end,
 						set  = function()
 							self:ToggleSetting("TTAbbreviations")
@@ -821,23 +927,23 @@ function Options:Setup()
 			numbers = {
 				type = 'group',
 				name = L["Numbers"],
-				desc = L["General settings for number formatting"],
+				desc = L["General settings for number formatting."],
 				order = 4,
 				args = {
 					separators = {
 						type = 'toggle',
 						name = L["Separators"],
-						desc = L["Use separators for numbers to improve readability"],
+						desc = L["Use separators for numbers to improve readability."],
 						get  = function() return self:GetSetting("Separators") end,
 						set  = function()
 							self:ToggleSetting("Separators") 
 						end,
 						order = 1,
 					},
-					decimalplaces = {
+					decimalPlaces = {
 						type = 'select',
 						name = L["Decimal Places"],
-						desc = L["Number of decimal places when using abbreviations"],
+						desc = L["Set the number of decimal places when using abbreviations."],
 						get  = function() return self:GetSetting("DecimalPlaces") end,
 						set  = function(info, value)
 							self:SetSetting("DecimalPlaces", value) 
@@ -847,30 +953,206 @@ function Options:Setup()
 					},
 				},
 			},
+			texts = {
+				type = 'group',
+				name = L["Custom Texts"],
+				desc = L["Setup custom texts for bars and label."],
+				order = 5,
+				args = {
+					templates = {
+						type = "select", 
+						name = L["Template Text"],
+						desc = L["Texts to be used as templates for custom texts."],
+						get  = function() return textsConfig.textTemplate end,
+						set  = function(info, value)							
+							textsConfig.textTemplate = value
+							
+							self:Update()
+						end,
+						values = function(info, value)
+							NS:ClearTable(textsConfig.templateLabels)
+							
+							for id in TextEngine:IterateTextIds() do
+								if not TextEngine:IsMutable(id) then
+									textsConfig.templateLabels[id] = TextEngine:GetLabel(id)
+								end
+							end
+
+							return textsConfig.templateLabels
+						end,
+						order = 1,
+					},
+					copyTemplate = { 
+						type = 'execute',
+						name = L["Copy"],
+						desc = L["Copy fixed template to selected custom text."],
+						func = function()
+							if textsConfig.textTemplate and textsConfig.textCustom then
+								self:SetSetting(textsConfig.textCustom, TextEngine:GetCode(textsConfig.textTemplate))
+							end
+							
+							self:Update()
+						end,	
+						disabled = function(info)
+							return not textsConfig.textTemplate or not textsConfig.textCustom
+						end,
+						order = 2,
+					},
+					previewTemplateText = { 
+						type = "description",
+						name = function() 
+							return textsConfig.textTemplate and TextEngine:GenerateText(textsConfig.textTemplate, textsConfig.useMockUpValues) or L["No template selected."]
+						end,
+						order = 3,
+					},
+					customTexts = {
+						type = "select", 
+						name = L["Custom Text"],
+						desc = L["Custom text for configuration."],
+						get  = function() return textsConfig.textCustom end,
+						set  = function(info, value)
+							textsConfig.textCustom = value
+
+							self:Update()
+						end,
+						values = function(info, value)
+							NS:ClearTable(textsConfig.customLabels)
+							
+							for id in TextEngine:IterateMutableTextIds() do
+								textsConfig.customLabels[id] = TextEngine:GetLabel(id)
+							end
+
+							return textsConfig.customLabels
+						end,
+						order = 4,
+					},
+					previewCustom = { 
+						type = 'execute',
+						name = L["Preview"],
+						desc = L["Preview custom text using dummy data."],
+						func = function() 
+							self:Update()
+						end,	
+						disabled = function(info)
+							return not textsConfig.textCustom
+						end,
+						order = 5,
+					},
+					previewCustomText = { 
+						type = "description",
+						name = function() 
+							return textsConfig.textCustom and TextEngine:GenerateText(textsConfig.textCustom, textsConfig.useMockUpValues) or L["No custom text selected."]
+						end,
+						order = 6,
+					},
+					customCode = { 
+						type = 'input',
+						name = L["Code"],
+						desc = L["Custom code to modify."],
+						multiline = true,
+						width = "full",
+						get  = function()
+							if textsConfig.textCustom then
+								return self:GetSetting(textsConfig.textCustom) or TextEngine:GetCode(textsConfig.textCustom)
+							end
+
+							return ""
+						end,
+						set  = function(info, value)
+							if textsConfig.textCustom then
+								self:SetSetting(textsConfig.textCustom, value)
+							end
+						end,
+						disabled = function(info)
+							return not textsConfig.textCustom
+						end,
+						order = 7,
+					},
+					mockUpValues = {
+						type = 'toggle',
+						name = L["Mock Values"],
+						desc = L["Use mock values for preview."],
+						get  = function() return textsConfig.useMockUpValues end,
+						set  = function()
+							textsConfig.useMockUpValues = not textsConfig.useMockUpValues
+						end,
+						order = 8,
+					},
+					codeInstructions = { 
+						type = "description",
+						name = L["Custom code instructions"],
+						order = 9,
+					},
+				},
+			},
+			notifications = {
+				type = 'group',
+				name = L["Notifications"],
+				desc = L["Set the level up notifications when completed quests allow you to gain a level."],
+				order = 6,
+				args = {
+					notification = {
+						type = 'toggle',
+						name = L["Notification"],
+						desc = L["Show a notification with configurable output target."],
+						get  = function() return self:GetSetting("Notification") end,
+						set  = function()
+							self:ToggleSetting("Notification")
+						end,
+						order = 1,
+					},
+					testNotification = { 
+						type = 'execute',
+						name = L["Test Notification"],
+						desc = L["Show a test notification."],
+						order = 2,
+						func = function() Notifications:SendNotification("Notification", L["Hand in completed quests to level up!"]) end,	
+					},
+					toastNotification = {
+						type = 'toggle',
+						name = L["Toast Notification"],
+						desc = L["Show a Toast notification."],
+						get  = function() return self:GetSetting("ToastNotification") end,
+						set  = function()
+							self:ToggleSetting("ToastNotification") 
+						end,
+						order = 3,
+					},
+					testToast = { 
+						type = 'execute',
+						name = L["Test Toast"],
+						desc = L["Show a test Toast notification."],
+						order = 4,
+						func = function() Notifications:SendNotification("ToastNotification", L["Hand in completed quests to level up!"]) end,	
+					},
+				},
+			},
 			autotrack = {
 				type = 'group',
 				name = L["Faction Tracking"],
 				desc = L["Auto-switch watched faction on reputation gains/losses."],
-				order = 5,
+				order = 7,
 				args = {
 					gain = {
 						type = 'toggle',
-						name = L["Switch on rep gain"],
+						name = L["Switch on Reputation Gain"],
 						desc = L["Auto-switch watched faction on reputation gain."],
 						get  = function() return self:GetSetting("AutoTrackOnGain") end,
 						set  = function()
 							self:ToggleSetting("AutoTrackOnGain")
 						end,
+						width = "full",
 						order = 1,
 					},
 					loss = {
 						type = 'toggle',
-						name = L["Switch on rep loss"],
+						name = L["Switch on Reputation Loss"],
 						desc = L["Auto-switch watched faction on reputation loss."],
 						get  = function() return self:GetSetting("AutoTrackOnLoss") end,
 						set  = function()
 							self:ToggleSetting("AutoTrackOnLoss") 
 						end,
+						width = "full",
 						order = 2,
 					},
 				},
@@ -878,13 +1160,13 @@ function Options:Setup()
 			level = {
 				type = 'group',
 				name = L["Leveling"],
-				desc = L["Leveling Properties"],
-				order = 6,
+				desc = L["Set the leveling properties."],
+				order = 8,
 				args = {
-					timeframe = {
+					timeFrame = {
 						type = 'range',
 						name = L["Time Frame"],
-						desc = L["Time frame for dynamic TTL calculation."],
+						desc = L["Set time frame for dynamic TTL calculation."],
 						get = function() return self:GetSetting("TimeFrame") end,
 						set = function(info, value) 
 							self:SetSetting("TimeFrame", value)
@@ -897,7 +1179,7 @@ function Options:Setup()
 					weight = {
 						type = 'range',
 						name = L["Weight"],
-						desc = L["Weight time frame vs. session average for dynamic TTL calculation."],
+						desc = L["Set the weight of the time frame vs. the session average for dynamic TTL calculation."],
 						get = function() return self:GetSetting("Weight") end,
 						set = function(info, value) 
 							self:SetSetting("Weight", value)
@@ -909,46 +1191,46 @@ function Options:Setup()
 					},
 				},
 			},
-			maxlvl = {
+			maxLvl = {
 				type = 'group',
 				name = L["Max. XP/Rep"],
-				desc = L["Display settings at maximum level/reputation"],
-				order = 7,
+				desc = L["Set the display behaviour at maximum level/reputation."],
+				order = 9,
 				args = {
-					hidexptxt = {
+					hideXpTxt = {
 						type = 'toggle',
-						name = L["No XP label"],
-						desc = L["Don't show XP label text at maximum level. Affects XP, TTL and KTL option only."],
+						name = L["No XP Label"],
+						desc = L["Don't show the XP label text at maximum level."],
 						get  = function() return self:GetSetting("MaxHideXPText") end,
 						set  = function()
 							self:ToggleSetting("MaxHideXPText")
 						end,
 						order = 1,
 					},
-					hidexpbar = {
+					hideXpBar = {
 						type = 'toggle',
-						name = L["No XP bar"],
-						desc = L["Don't show XP bar at maximum level."],
+						name = L["No XP Bar"],
+						desc = L["Don't show the XP bar at maximum level."],
 						get  = function() return self:GetSetting("MaxHideXPBar") end,
 						set  = function()
 							self:ToggleSetting("MaxHideXPBar")
 						end,
 						order = 2,
 					},
-					hidereptxt = {
+					hideRepTxt = {
 						type = 'toggle',
-						name = L["No Rep label"],
-						desc = L["Don't show label text at maximum Reputation. Affects Rep option only."],
+						name = L["No Reputation Label"],
+						desc = L["Don't show the reputation label text at maximum reputation."],
 						get  = function() return self:GetSetting("MaxHideRepText") end,
 						set  = function()
 							self:ToggleSetting("MaxHideRepText")
 						end,
 						order = 3,
 					},
-					hiderepbar = {
+					hideRepBar = {
 						type = 'toggle',
-						name = L["No Rep bar"],
-						desc = L["Don't show Rep bar at maximum Reputation."],
+						name = L["No Reputation Bar"],
+						desc = L["Don't show the reputation bar at maximum reputation."],
 						get  = function() return self:GetSetting("MaxHideRepBar") end,
 						set  = function()
 							self:ToggleSetting("MaxHideRepBar")
@@ -960,7 +1242,7 @@ function Options:Setup()
 			faction = {
 				type = "select", 
 				name = L["Faction"],
-				desc = L["Select Faction"],
+				desc = L["Select the faction to track."],
 				get = function()
 					return lookupFactionToOptIndex[Addon:GetFaction()] or 1
 				end,
@@ -971,10 +1253,10 @@ function Options:Setup()
 				values = "QueryFactions", 
 				order = 1,
 			},
-			blizzbars = {
+			blizzBars = {
 				type = 'toggle',
 				name = L["Blizzard Bars"],
-				desc = L["Show default Blizzard Bars"],
+				desc = L["Show the default Blizzard bars."],
 				get  = function() return self:GetSetting("ShowBlizzBars") end,
 				set  = function()
 					self:ToggleSetting("ShowBlizzBars") 
@@ -984,7 +1266,7 @@ function Options:Setup()
 			minimap = {
 				type = 'toggle',
 				name = L["Minimap Button"],
-				desc = L["Show Minimap Button"],
+				desc = L["Show the minimap button."],
 				get  = function() return self:GetSetting("Minimap") end,
 				set  = function()
 					self:ToggleSetting("Minimap")
@@ -994,7 +1276,7 @@ function Options:Setup()
 			hint = {
 				type = 'toggle',
 				name = L["Hide Hint"],
-				desc = L["Hide usage hint in tooltip"],
+				desc = L["Hide the usage hint in the tooltip."],
 				get  = function() return self:GetSetting("HideHint") end,
 				set  = function()
 					self:ToggleSetting("HideHint")
@@ -1004,6 +1286,7 @@ function Options:Setup()
 		}
 	}
 
+	self.options.args.notifications.args.notificationTargets = Notifications:GetSinkAce3OptionsDataTable()	
 end
 
 function Options:Update()
@@ -1097,6 +1380,23 @@ function Options:SetColor(id, r, g, b, a)
 	
 	-- fire event when setting changed
 	self.callbacks:Fire(ADDON .. "_SETTING_CHANGED", id, value, current)
+end
+
+function Options:GetCharSetting(option)
+	return self.db.char[option]
+end
+
+function Options:SetCharSetting(option, value)
+	local current = self:GetCharSetting(option)
+
+	if current == value then
+		return
+	end
+	
+	self.db.char[option] = value
+
+	-- fire event when setting changed
+	self.callbacks:Fire(ADDON .. "_CHAR_SETTING_CHANGED", option, value, current)
 end
 
 -- test

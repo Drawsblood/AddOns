@@ -15,10 +15,10 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "7.3.3"
+TELLMEWHEN_VERSION = "7.3.5"
 
 TELLMEWHEN_VERSION_MINOR = ""
-local projectVersion = "7.3.3" -- comes out like "6.2.2-21-g4e91cee"
+local projectVersion = "7.3.5" -- comes out like "6.2.2-21-g4e91cee"
 if projectVersion:find("project%-version") then
 	TELLMEWHEN_VERSION_MINOR = "dev"
 elseif strmatch(projectVersion, "%-%d+%-") then
@@ -26,14 +26,18 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 73301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 73501 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 72008 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
 if TELLMEWHEN_VERSIONNUMBER > 74000 or TELLMEWHEN_VERSIONNUMBER < 73000 then
 	-- safety check because i accidentally made the version number 414069 once
-	return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS")
-end 
+	return error("TELLMEWHEN: THE VERSION NUMBER IS SCREWED UP OR MAYBE THE SAFETY LIMITS ARE WRONG")
+end
+
+if TELLMEWHEN_VERSION_MINOR == "dev" and not strfind(TELLMEWHEN_VERSIONNUMBER, GetAddOnMetadata("TellMeWhen", "Version"):gsub("%.", ""), nil) then
+	return error("TELLMEWHEN: TELLMEWHEN_VERSION DOESN'T AGREE WITH TELLMEWHEN_VERSIONNUMBER")
+end
 
 TELLMEWHEN_MAXROWS = 20
 
@@ -41,6 +45,9 @@ TELLMEWHEN_MAXROWS = 20
 local AceDB = LibStub("AceDB-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 local LibOO = LibStub("LibOO-1.0")
+local LSM = LibStub("LibSharedMedia-3.0")
+
+LSM:Register("font", "Open Sans Regular", [[Interface\Addons\TellMeWhen\Textures\OpenSans-Regular.ttf]])
 
 _G.TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TMW", UIParent), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
 _G.TellMeWhen = _G.TMW
@@ -3992,8 +3999,13 @@ TMW:MakeSingleArgFunctionCached(TMW, "SplitNamesCached")
 
 
 function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
+	local ret = ""
+
 	if abs(seconds) == math.huge then
 		return tostring(seconds)
+	elseif seconds < 0 then
+		ret = "-"
+		seconds = -seconds
 	end
 
 	local y =  seconds / 31556926
@@ -4016,15 +4028,20 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	end
 
 	if y >= 0x7FFFFFFE then
-		return format("OVERFLOW:%d:%02d:%02d:%s", d, h, m, ns)
+		ret = ret .. format("OVERFLOW:%d:%02d:%02d:%s", d, h, m, ns)
+	elseif y >= 1 then
+		ret = ret .. format("%d:%d:%02d:%02d:%s", y, d, h, m, ns)
+	elseif d >= 1 then
+		ret = ret .. format("%d:%02d:%02d:%s", d, h, m, ns)
+	elseif h >= 1 then
+		ret = ret .. format("%d:%02d:%s", h, m, ns)
+	elseif m >= 1 then
+		ret = ret .. format("%d:%s", m, ns)
+	else
+		ret = ret .. ns
 	end
 
-	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, ns) end
-	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, ns) end
-	if h >= 1 then return format("%d:%02d:%s", h, m, ns) end
-	if m >= 1 then return format("%d:%s", m, ns) end
-
-	return ns
+	return ret
 end
 
 
