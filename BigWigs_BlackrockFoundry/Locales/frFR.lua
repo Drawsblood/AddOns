@@ -81,7 +81,7 @@ L["random"] = "Trains aléatoires"
 L["train"] = "Train"
 L["trains"] = "Alertes Train"
 L["trains_desc"] = "Affiche des délais et des messages pour chaque voies indiquant quand le prochain train arrive. Les voies sont numérotées en comptant du boss jusqu'à l'entrée : Boss 1 2 3 4 Entrée."
-L["train_you"] = "Train sur votre voie ! (%d)" -- Needs review
+L["train_you"] = "Train sur votre voie ! (%d)"
 
 end
 

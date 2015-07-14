@@ -42,6 +42,13 @@ if L then
 L["custom_off_seed_marker"] = "Marcador de Semilla de destrucción" -- Needs review
 L["custom_off_seed_marker_desc"] = "Marca los objetivos de Semilla de destrucción con {rt1}{rt2}{rt3}{rt4}{rt5}, requiere ayudante o líder." -- Needs review
 L["seed"] = "Semilla (%d)" -- Needs review
+L["tank_proximity"] = "Proximidad de tanque" -- Needs review
+L["tank_proximity_desc"] = "Abre una proximidad a 5 metros mostrando los otros tanques para ayudarte a lidiar con las habilidades Mano dura y Muy armado." -- Needs review
+
+end
+
+L = BigWigs:NewBossLocale("Tyrant Velhari", "esES") or BigWigs:NewBossLocale("Tyrant Velhari", "esMX")
+if L then
 
 end
 
@@ -66,6 +73,11 @@ end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "esES") or BigWigs:NewBossLocale("Hellfire Citadel Trash", "esMX")
 if L then
+L["eloah"] = "Vinculador Eloah" -- Needs review
+L["enkindler"] = "Prendedora ígnea" -- Needs review
+L["graggra"] = "Graggra" -- Needs review
+L["orb"] = "Orbe de destrucción" -- Needs review
+L["peacekeeper"] = "Ensamblaje pacificador" -- Needs review
 
 end
 

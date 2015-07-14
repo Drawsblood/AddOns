@@ -96,7 +96,7 @@ local function GetValue(id)
 		return UnitXP("player")
 	elseif id == "MaxXP" then
 		return UnitXPMax("player")
-	elseif id == "CompletedQuestXP" then
+	elseif id == "QuestCompleteXP" then
 		return QuestInfo:GetValue("CompletedQuestXP")
 	elseif id == "QuestIncompleteXP" then
 		return QuestInfo:GetValue("IncompleteQuestXP")
@@ -120,7 +120,7 @@ local function GetValue(id)
 		local _, _, _, minRep, maxRep = Factions:GetFactionInfo(Addon:GetFaction())
 		
 		return maxRep - minRep
-	elseif id == "CompletedQuestRep" then
+	elseif id == "QuestCompleteRep" then
 		return QuestInfo:GetValue("CompletedQuestRep")
 	elseif id == "QuestIncompleteRep" then
 		return QuestInfo:GetValue("IncompleteQuestRep")

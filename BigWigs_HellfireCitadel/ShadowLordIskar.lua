@@ -13,7 +13,7 @@ mod.respawnTime = 20
 -- Locals
 --
 
-local shadowEscapeCount = 1
+local shadowEscapeCount = 0
 local nextPhase, nextPhaseSoon = 70, 75.5
 local windTargets = {}
 local eyeTarget = nil
@@ -40,7 +40,8 @@ function mod:GetOptions()
 		{182200, "SAY", "FLASH"}, -- Fel Chakram
 		181956, -- Phantasmal Winds
 		"custom_off_wind_marker",
-		182323, -- Phantasmal Wounds
+		{182323, "HEALER"}, -- Phantasmal Wounds
+		185345, -- Shadow Riposte
 		--[[ Phase 2 ]]--
 		{181912, "FLASH"}, -- Focused Blast
 		{181753, "SAY"}, -- Fel Bomb
@@ -49,7 +50,6 @@ function mod:GetOptions()
 		{185510, "SAY"}, -- Dark Bindings
 		--[[ General ]]--
 		{179202, "FLASH"}, -- Eye of Anzu
-		185345, -- Shadow Riposte
 		{182582, "SAY"}, -- Fel Incineration
 		"stages",
 		"berserk",
@@ -65,6 +65,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_SUCCESS", "PhantasmalWinds", 181956)
 	self:Log("SPELL_AURA_APPLIED", "PhantasmalWindsApplied", 185757, 181957)
 	self:Log("SPELL_AURA_REMOVED", "PhantasmalWindsRemoved", 185757, 181957)
+	self:Log("SPELL_AURA_APPLIED", "PhantasmalWounds", 182325)
 	self:Log("SPELL_AURA_APPLIED", "PhantasmalCorruption", 181824, 187990)
 	self:Log("SPELL_AURA_REMOVED", "PhantasmalCorruptionRemoved", 181824, 187990)
 	self:Log("SPELL_AURA_APPLIED", "FelBomb", 181753)
@@ -75,7 +76,6 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_APPLIED", "DarkBindings", 185510)
 	self:Log("SPELL_CAST_START", "Stage2", 181873) -- Shadow Escape
 	self:Log("SPELL_CAST_START", "ShadowRiposte", 185345)
-
 	self:Log("SPELL_AURA_APPLIED", "FelFireDamage", 182600)
 	self:Log("SPELL_PERIODIC_DAMAGE", "FelFireDamage", 182600)
 	self:Log("SPELL_PERIODIC_MISSED", "FelFireDamage", 182600)
@@ -86,16 +86,18 @@ function mod:OnBossEnable()
 end
 
 function mod:OnEngage()
-	shadowEscapeCount = 1
+	shadowEscapeCount = 0
 	nextPhase, nextPhaseSoon = 70, 75.5
 	eyeTarget = nil
 	wipe(windTargets)
 	if self:Mythic() then
 		self:CDBar(185345, 9.5) -- Shadow Riposte
 	end
-	self:CDBar(181956, 16) -- Phantasmal Winds
-	self:Bar(182200, 6) -- Fel Chakram
-	self:Berserk(540)
+	-- normal modifier 1.25 for all CDs?
+	self:Bar(182200, self:Normal() and 6.5 or 5.5) -- Fel Chakram
+	self:CDBar(181956, self:Normal() and 21 or 17) -- Phantasmal Winds
+	self:CDBar(182323, self:Normal() and 34 or 25) -- Phantasmal Wounds
+	self:Berserk(self:Heroic() and 540 or 480)
 	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
 end
 
@@ -117,15 +119,21 @@ end
 
 function mod:EyeOfAnzu(args)
 	eyeTarget = args.destGUID
-	self:TargetMessage(args.spellId, args.destName, "Positive")
+	--self:TargetMessage(args.spellId, args.destName, "Positive") -- XXX info display instead?
 	if self:Me(eyeTarget) then
-		self:PlaySound(args.spellId, #windTargets > 0 and "Warning" or "Info")
+		self:TargetMessage(args.spellId, args.destName, "Personal", #windTargets > 0 and "Warning" or "Info")
 		self:Flash(args.spellId)
 	end
 end
 
-function mod:ShadowRiposte(args)
-	self:CDBar(args.spellId, 27)
+do
+	local function printTarget(self, name, guid)
+		self:TargetMessage(185345, name, "Important", "Long") -- Warning is used in Eye+Winds events, so Long here to be distinct
+	end
+	function mod:ShadowRiposte(args)
+		self:GetBossTarget(printTarget, 0.3, args.sourceGUID)
+		self:CDBar(args.spellId, 27)
+	end
 end
 
 function mod:PhantasmalWinds(args)
@@ -138,7 +146,7 @@ do
 		if isOnMe then
 			self:Message(181956, "Personal" , "Alarm", CL.you:format(spellName))
 		else
-			self:Message(181956, "Attention", UnitBuff("player", self:SpellName(179202)) and "Warning")
+			self:Message(181956, "Attention", UnitBuff("player", self:SpellName(179202)) and "Warning") -- Warning if you have the Eye
 		end
 		isOnMe = nil
 	end
@@ -146,7 +154,7 @@ do
 		windTargets[#windTargets + 1] = args.destName
 		if #windTargets == 1 then
 			self:ScheduleTimer(warn, 0.3, self, args.spellName)
-			self:CDBar(181956, 36)
+			self:CDBar(181956, self:Normal() and 45 or 36)
 		end
 		if self:Me(args.destGUID) then
 			isOnMe = true
@@ -171,6 +179,7 @@ do
 		if t-prev > 2 then
 			prev = t
 			self:Message(182323, "Urgent")
+			self:CDBar(182323, self:Normal() and 40 or 28)
 		end
 	end
 end
@@ -184,7 +193,7 @@ function mod:PhantasmalCorruption(args)
 			self:OpenProximity(181824, 8) -- XXX verify range (spell says 5 yards)
 		end
 	end
-	self:CDBar(181824, 16)
+	self:CDBar(181824, self:Normal() and 19.5 or 16)
 end
 
 function mod:PhantasmalCorruptionRemoved(args)
@@ -199,7 +208,7 @@ function mod:FelBomb(args)
 	if self:Me(args.destGUID) then
 		self:Say(args.spellId)
 	end
-	self:Bar(args.spellId, 18.4)
+	self:Bar(args.spellId, self:Normal() and 23 or 18.4)
 end
 
 function mod:FocusedBlast(args)
@@ -211,7 +220,7 @@ end
 
 function mod:FelConduit(args)
 	self:Message(181827, "Urgent", "Alert")
-	self:Bar(181827, 15.9)
+	self:Bar(181827, self:Normal() and 19.3 or 15.9)
 end
 
 function mod:RAID_BOSS_WHISPER(event, msg)
@@ -238,6 +247,7 @@ end
 
 function mod:DarkBindingsCast(args)
 	self:Message(args.spellId, "Urgent", "Info", CL.casting:format(args.spellName))
+	self:Bar(args.spellId, 34)
 end
 
 do
@@ -245,7 +255,7 @@ do
 	function mod:DarkBindings(args)
 		list[#list+1] = args.destName
 		if #list == 1 then
-			self:ScheduleTimer("TargetMessage", 0.3, 185510, list, "Attention")
+			self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Attention")
 		end
 		if self:Me(args.destGUID) then
 			self:Say(args.spellId)
@@ -254,18 +264,37 @@ do
 end
 
 function mod:Stage2() -- Shadow Escape
-	self:Message("stages", "Neutral", "Info", ("%d%% - %s"):format(nextPhase, CL.phase:format(2)), false)
-	nextPhase = nextPhase - 25
-	shadowEscapeCount = shadowEscapeCount + 1 -- For different adds and their timers if needed
 	self:StopBar(185345) -- Shadow Riposte
 	self:StopBar(181956) -- Phantasmal Winds
 	self:StopBar(182200) -- Fel Chakram
-	self:Bar("stages", 40, CL.phase:format(1), "achievement_boss_hellfire_felarakkoa")
-	self:CDBar(181753, 15.5) -- Fel Bomb, 15.5-17.4
+	shadowEscapeCount = shadowEscapeCount + 1
 
-	-- event for when Iskar is attackable again?
-	self:DelayedMessage("stages", 40, "Neutral", CL.phase:format(1), false, "Info")
-	self:ScheduleTimer("CDBar", 40, 182200, 5.5) -- Fel Chakram (doesn't always happen?)
+	self:Message("stages", "Neutral", "Info", ("%d%% - %s"):format(nextPhase, CL.phase:format(2)), false)
+	nextPhase = nextPhase - 25
+	self:ScheduleTimer("Stage1", 40) -- event for when Iskar is attackable again?
+	self:Bar("stages", 40, CL.phase:format(1), "achievement_boss_hellfire_felarakkoa")
+	self:Bar(181912, 20) -- Focused Blast
+	self:CDBar(181753, self:Normal() and 21 or 15.5) -- Fel Bomb, 15.5-17.4
+	if shadowEscapeCount > 1 then -- Fel Warden
+		self:Bar(181827, self:Normal() and 7 or 6) -- Fel Conduit
+	end
+	if shadowEscapeCount > 2 then -- Fel Raven
+		self:Bar(181824, self:Normal() and 27 or 22) -- Phantasmal Corruption
+	end
+	if self:Mythic() then
+		self:Bar(185510, 21) -- Dark Bindings
+	end
+end
+
+function mod:Stage1() -- Shadow Escape over
+	self:StopBar(181912) -- Focused Blast
+	self:Message("stages", "Neutral", "Info", CL.phase:format(1), false)
+	if self:Mythic() then
+		self:CDBar(185345, 10.5) -- Shadow Riposte
+	end
+	self:CDBar(182200, self:Normal() and 10 or 5.5) -- Fel Chakram (doesn't always happen?)
+	--self:CDBar(181956, 20) -- Phantasmal Winds
+	--self:CDBar(182323, 22) -- Phantasmal Wounds
 end
 
 do

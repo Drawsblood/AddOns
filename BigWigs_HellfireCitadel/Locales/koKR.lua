@@ -29,6 +29,11 @@ if L then
 
 end
 
+L = BigWigs:NewBossLocale("Tyrant Velhari", "koKR")
+if L then
+
+end
+
 L = BigWigs:NewBossLocale("Mannoroth", "koKR")
 if L then
 

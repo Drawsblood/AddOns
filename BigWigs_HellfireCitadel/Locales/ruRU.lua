@@ -42,6 +42,14 @@ if L then
 L["custom_off_seed_marker"] = "Маркировка Семени разрушения"
 L["custom_off_seed_marker_desc"] = "Отмечать цели Семени разрушения метками {rt1}{rt2}{rt3}{rt4}{rt5}, требуется быть помощником или лидером рейда."
 L["seed"] = "Семя (%d)"
+L["tank_proximity"] = "Радар танков"
+L["tank_proximity_desc"] = "Открытие радара близости в 5 метров с отображением других танков поможет справляться со способностями Тяжелая рука и Тяжелое вооружение."
+
+end
+
+L = BigWigs:NewBossLocale("Tyrant Velhari", "ruRU")
+if L then
+L["font_removed_soon"] = "Купель скоро спадет с вас!"
 
 end
 
@@ -60,12 +68,17 @@ L = BigWigs:NewBossLocale("Archimonde", "ruRU")
 if L then
 L["custom_off_torment_marker"] = "Маркировка Скованного страдания"
 L["custom_off_torment_marker_desc"] = "Отмечать цели Скованного страдания метками {rt1}{rt2}{rt3}, требуется быть помощником или лидером рейда."
-L["torment_removed"] = "Скованное страдание снято (%d/%d)" -- Needs review
+L["torment_removed"] = "Скованное страдание снято (%d/%d)"
 
 end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "ruRU")
 if L then
+L["eloah"] = "Властитель Элоа"
+L["enkindler"] = "Огненная возжигательница"
+L["graggra"] = "Граггра"
+L["orb"] = "Сфера разрушения"
+L["peacekeeper"] = "Голем-миротворец"
 
 end
 

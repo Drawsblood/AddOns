@@ -23,7 +23,7 @@ do
 	--@end-alpha@]===]
 
 	-- This will (in ZIPs), be replaced by the highest revision number in the source tree.
-	myRevision = tonumber("13362")
+	myRevision = tonumber("13433")
 
 	-- If myRevision ends up NOT being a number, it means we're running a SVN copy.
 	if type(myRevision) ~= "number" then
@@ -550,7 +550,7 @@ do
 
 		if old[name] then
 			delayedMessages[#delayedMessages+1] = L.removeAddon:format(name, old[name])
-			--message(L.removeAddon:format(name, old[name]))
+			message(L.removeAddon:format(name, old[name]))
 		end
 	end
 
@@ -558,15 +558,11 @@ do
 	if L == "ptBR" then
 		delayedMessages[#delayedMessages+1] = "We *really* need help translating Big Wigs! Think you can help us? Please check out our translator website: goo.gl/nwR5cy"
 	elseif L == "zhTW" then
-	--	delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Traditional Chinese (zhTW)? Check out our easy translator tool: goo.gl/nwR5cy"
-	elseif L == "ruRU" then
-	--	delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Russian (ruRU)? Check out our easy translator tool: goo.gl/nwR5cy"
+		delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Traditional Chinese (zhTW)? Check out our easy translator tool: goo.gl/nwR5cy"
 	elseif L == "itIT" then
-	--	delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Italian (itIT)? Check out our easy translator tool: goo.gl/nwR5cy"
-	elseif L == "deDE" then
-	--	delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into German (deDE)? Check out our easy translator tool: goo.gl/nwR5cy"
+		delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Italian (itIT)? Check out our easy translator tool: goo.gl/nwR5cy"
 	elseif L == "koKR" then
-	--	delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Korean (koKR)? Check out our easy translator tool: goo.gl/nwR5cy"
+		delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Korean (koKR)? Check out our easy translator tool: goo.gl/nwR5cy"
 	end
 
 	CTimerAfter(11, function()

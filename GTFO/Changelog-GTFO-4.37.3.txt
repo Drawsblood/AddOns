@@ -1,10 +1,47 @@
 ------------------------------------------------------------------------
-r178 | zensunim | 2015-07-01 00:15:08 +0000 (Wed, 01 Jul 2015) | 2 lines
+r184 | zensunim | 2015-07-14 06:56:51 +0000 (Tue, 14 Jul 2015) | 3 lines
 Changed paths:
-   A /tags/4.37.2 (from /trunk:177)
+   A /tags/4.37.3 (from /trunk:183)
 
-4.37.2
+4.37.3
 * Added WoD spells for Hellfire Citadel
+* Added WoD spells for Draenor (world)		
+------------------------------------------------------------------------
+r183 | zensunim | 2015-07-14 06:56:11 +0000 (Tue, 14 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/GTFO.lua
+
+4.37.3 release prep
+------------------------------------------------------------------------
+r182 | zensunim | 2015-07-10 08:00:10 +0000 (Fri, 10 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/GTFO_Fail_WOD.lua
+   M /trunk/GTFO_Spells_WOD.lua
+
+Hellfile Citadel spells
+------------------------------------------------------------------------
+r181 | zensunim | 2015-07-09 07:27:26 +0000 (Thu, 09 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/GTFO_Fail_WOD.lua
+   M /trunk/GTFO_Spells_WOD.lua
+
+Hellfile Citadel spells
+------------------------------------------------------------------------
+r180 | zensunim | 2015-07-03 17:07:12 +0000 (Fri, 03 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/GTFO_Fail_WOD.lua
+   M /trunk/GTFO_Spells_WOD.lua
+
+Hellfile Citadel spells
+------------------------------------------------------------------------
+r179 | zensunim | 2015-07-01 07:11:07 +0000 (Wed, 01 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/GTFO.lua
+   M /trunk/GTFO.toc
+   M /trunk/GTFO_Fail_WOD.lua
+   M /trunk/GTFO_Spells_WOD.lua
+
+Hellfile Citadel spells
 ------------------------------------------------------------------------
 r177 | zensunim | 2015-07-01 00:14:48 +0000 (Wed, 01 Jul 2015) | 2 lines
 Changed paths:

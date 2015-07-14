@@ -1043,6 +1043,7 @@ GTFO.SpellID["135891"] = {
 GTFO.SpellID["184571"] = {
 	--desc = "Massive Siege Nova (Felfire Demolisher)";
 	sound = 3;
+	test = true;
 };
 
 GTFO.SpellID["178162"] = {
@@ -1084,10 +1085,47 @@ GTFO.SpellID["182005"] = {
 GTFO.SpellID["182362"] = {
 	--desc = "Falling Slam (Iron Reaver)";
 	sound = 3;
+	test = true;
+};
+
+GTFO.SpellID["188367"] = {
+	--desc = "Slag Trap (Keen-Eyed Gronnstalker)";
+	sound = 3;
+};
+
+GTFO.SpellID["188081"] = {
+	--desc = "Crush (Grasping Hand)";
+	sound = 3;
+	applicationOnly = true;
+};
+
+GTFO.SpellID["184815"] = {
+	--desc = "Agitate (Runic Pool)";
+	sound = 3;
 };
 
 GTFO.SpellID["181324"] = {
 	--desc = "Explosive Burst (Kormrok)";
 	sound = 3;
+	negatingDebuffSpellID = 181306; -- Explosive Burst
+	negatingIgnoreTime = 12;
+	tankSound = 0;
 };
+
+GTFO.SpellID["182525"] = {
+	--desc = "Bursting Ulcer (Gorefiend)";
+	sound = 3;
+};
+
+GTFO.SpellID["189546"] = {
+	--desc = "Soul Eruption (Sargerei Soul Cleaver)";
+	sound = 3;
+};
+
+GTFO.SpellID["188939"] = {
+	--desc = "Volatile Voidstep (Xhul'horac)";
+	sound = 3;
+	test = true;
+};
+
 

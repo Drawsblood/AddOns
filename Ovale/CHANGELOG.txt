@@ -1,22 +1,13 @@
-Ovale Spell Priority 6.2.10
+Ovale Spell Priority 6.2.11
 ===========================
 
-Changes from version 6.2.9:
----------------------------
+Changes from version 6.2.10:
+----------------------------
 
--   Hunter: Focus Fire cannot be used if the Focus Fire buff is present.
+-   Regenerate scripts based on SimulationCraft profiles from release-620-02.
 
--   Extend "unusable" SpellInfo property to be zero/non-zero for false/true.
+-   Merge branch 'simulationcraft'.
 
--   Revert previous commit since Focus Fire uses the Frenzy stacks on the pet.
+    Pull in changes from SimulationCraft release 620-02.
 
-    It's possible to get into a state where the player shows more stacks of
-    Frenzy than the pet does by dismissing and re-summoning the same pet.  In
-    this case, the status of the Frenzy buff between the player and the pet
-    is in an inconsistent state, but Focus Fire actually consumes the stacks
-    of Frenzy on the pet, regardless of how many stacks are displayed on the
-    player.
-
-    Also fix the name of the symbol used for the Frenzy buff in Ovale scripts.
-    This change makes the BM hunter script correctly suggest Focus Fire when
-    it reaches five stacks on the pet.
+-   Import Tier18M profiles from SimulationCraft release 620-02.

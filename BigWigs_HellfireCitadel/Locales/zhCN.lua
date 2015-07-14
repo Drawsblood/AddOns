@@ -33,6 +33,11 @@ if L then
 
 end
 
+L = BigWigs:NewBossLocale("Tyrant Velhari", "zhCN")
+if L then
+
+end
+
 L = BigWigs:NewBossLocale("Mannoroth", "zhCN")
 if L then
 
@@ -45,6 +50,8 @@ end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "zhCN")
 if L then
+L["graggra"] = "加拉戈"
+L["orb"] = "毁灭宝珠"
 
 end
 

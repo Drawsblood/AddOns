@@ -697,6 +697,10 @@ function boss:Normal()
 	return difficulty == 1 or difficulty == 3 or difficulty == 4 or difficulty == 14
 end
 
+function boss:Easy()
+	return difficulty == 14 or difficulty == 17 -- New normal mode or new LFR mode
+end
+
 function boss:Heroic()
 	return difficulty == 2 or difficulty == 5 or difficulty == 6 or difficulty == 15
 end
@@ -1037,7 +1041,7 @@ function boss:RangeMessage(key, color, sound, text, icon)
 	if not checkFlag(self, key, C.MESSAGE) then return end
 	local textType = type(text)
 	self:SendMessage("BigWigs_Message", self, key, format(L.near, textType == "string" and text or spells[text or key]), color == nil and "Personal" or color, icon ~= false and icons[icon or textType == "number" and text or key])
-	self:SendMessage("BigWigs_Sound", self, sound == nil and "Alarm" or sound)
+	self:SendMessage("BigWigs_Sound", self, key, sound == nil and "Alarm" or sound)
 end
 
 do

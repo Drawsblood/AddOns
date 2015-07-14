@@ -12,7 +12,11 @@
  * faq - https://github.com/arkayenro/arkinventory/wiki/FAQ
  
 
-*3.05.09 (xx-JUL-2015)*
+*3.05.10 (13-JUL-2015)*
+ * fixed - issue with tint unusable overlay
+ * fixed - issue with battlepet tooltips at the auction house
+ 
+*3.05.09 (09-JUL-2015)*
  * fixed - issue with /ai track
  * removed - references to LibItemUpgradeInfo-1.0
 

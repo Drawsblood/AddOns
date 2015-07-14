@@ -42,6 +42,13 @@ if L then
 L["custom_off_seed_marker"] = "Saat der Zerstörung markieren" -- Needs review
 L["custom_off_seed_marker_desc"] = "Markiere die Ziele von Saat der Zerstörung mit {rt1}{rt2}{rt3}{rt4}{rt5}, benötigt Leiter oder Assistent." -- Needs review
 L["seed"] = "Saat (%d)" -- Needs review
+L["tank_proximity"] = "Näheanzeige für Tanks" -- Needs review
+L["tank_proximity_desc"] = "Öffne eine Näheanzeige, die andere Tanks im Abstand von maximal 15 Metern anzeigt, die Anzeige hilft dir mit der Grobschlächtig und der Schwer bewaffnet Fähigkeit umzugehen." -- Needs review
+
+end
+
+L = BigWigs:NewBossLocale("Tyrant Velhari", "deDE")
+if L then
 
 end
 
@@ -66,6 +73,11 @@ end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "deDE")
 if L then
+L["eloah"] = "Binder Eloah" -- Needs review
+L["enkindler"] = "Feurige Zündlerin" -- Needs review
+L["graggra"] = "Graggra" -- Needs review
+L["orb"] = "Sphäre der Zerstörung" -- Needs review
+L["peacekeeper"] = "Friedensbewahrerkonstrukt" -- Needs review
 
 end
 

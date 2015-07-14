@@ -251,7 +251,20 @@ GTFO.SpellID["167687"] = {
 	tankSound = 0;
 };
 
+GTFO.SpellID["188520"] = {
+	--desc = "Fel Sludge";
+	soundFunction = function() 
+		local stacks = GTFO_DebuffStackCount("player", 188520) or 0;
+		if (stacks >= 8) then
+			return 1;
+		elseif (stacks >= 5) then
+			return 2;
+		end
+	end;
+};
+
 --TODO: Acid Breath (Drov the Ruiner) - avoidable?
+
 
 -- **************
 -- * Auchindoun *
@@ -1148,6 +1161,18 @@ GTFO.SpellID["182522"] = {
 	sound = 1;
 };
 
+GTFO.SpellID["188072"] = {
+	--desc = "Fel Destruction (Orb of Destruction)";
+	sound = 2;
+	alwaysAlert = true;
+	test = true;
+};
+
+GTFO.SpellID["187103"] = {
+	--desc = "Residual Shadows (Shadow Infuser)";
+	sound = 1;
+};
+
 GTFO.SpellID["185521"] = {
 	--desc = "Foul Globule (Kormrok)";
 	sound = 1;
@@ -1188,13 +1213,30 @@ GTFO.SpellID["180246"] = {
 		if (GTFO_FindEvent("PoundFail")) then
 			return 4;
 		end
-		GTFO_AddEvent("PoundFail", .5);
+		GTFO_AddEvent("PoundFail", .3);
 		return 0;
 	end
 };
 
+GTFO.SpellID["184652"] = {
+	--desc = "Reap (Hellfire Council)";
+	sound = 1;
+};
+
 GTFO.SpellID["188852"] = {
 	--desc = "Blood Splatter (Kilrogg)";
+	sound = 1;
+};
+
+GTFO.SpellID["184300"] = {
+	--desc = "Fel Blaze (Gorebound Berserker)";
+	applicationOnly = true;
+	sound = 1;
+};
+
+GTFO.SpellID["182601"] = {
+	--desc = "Fel Fury (Gorebound Brute)";
+	applicationOnly = true;
 	sound = 1;
 };
 
@@ -1207,3 +1249,22 @@ GTFO.SpellID["182600"] = {
 	--desc = "Fel Fire (Shadow-Lord Iskar)";
 	sound = 1;
 };
+
+GTFO.SpellID["182218"] = {
+	--desc = "Felblaze Residue (Socrethar)";
+	sound = 1;
+};
+
+GTFO.SpellID["186063"] = {
+	--desc = "Wasting Void (Xhul'horac)";
+	applicationOnly = true;
+	sound = 1;
+};
+
+GTFO.SpellID["186073"] = {
+	--desc = "Felsinged (Xhul'horac)";
+	applicationOnly = true;
+	sound = 1;
+};
+
+

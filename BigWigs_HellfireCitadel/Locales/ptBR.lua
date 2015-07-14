@@ -29,6 +29,11 @@ if L then
 
 end
 
+L = BigWigs:NewBossLocale("Tyrant Velhari", "ptBR")
+if L then
+
+end
+
 L = BigWigs:NewBossLocale("Mannoroth", "ptBR")
 if L then
 
@@ -41,6 +46,11 @@ end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "ptBR")
 if L then
+L["eloah"] = "Vinculador Eloah" -- Needs review
+L["enkindler"] = "Incandescente Fogosa" -- Needs review
+L["graggra"] = "Graggra" -- Needs review
+L["orb"] = "Orbe da Destruição" -- Needs review
+L["peacekeeper"] = "Constructo Pacificador" -- Needs review
 
 end
 

@@ -1,6 +1,6 @@
 ﻿-- (c) 2006-2015, all rights reserved.
--- $Revision: 1356 $
--- $Date: 2015-07-09 20:43:36 +1000 (Thu, 09 Jul 2015) $
+-- $Revision: 1358 $
+-- $Date: 2015-07-13 00:18:12 +1000 (Mon, 13 Jul 2015) $
 
 
 local _G = _G
@@ -7605,9 +7605,10 @@ function ArkInventory.Frame_Item_Update_Lock( frame )
 	
 	local i = ArkInventory.Frame_Item_GetDB( frame )
 	
+	local r, g, b = 1, 1, 1
+	local locked = false
+	
 	if i and i.h then
-		
-		local locked
 		
 		if loc_id == ArkInventory.Const.Location.Vault then
 			locked = select( 3, GetGuildBankItemInfo( i.bag_id, i.slot_id ) )
@@ -7615,9 +7616,6 @@ function ArkInventory.Frame_Item_Update_Lock( frame )
 			local blizzard_id = ArkInventory.BagID_Blizzard( loc_id, i.bag_id )
 			locked = select( 3, GetContainerItemInfo( blizzard_id, i.slot_id ) )
 		end
-		
-		
-		local r, g, b
 		
 		if ArkInventory.LocationOptionGet( loc_id, "slot", "unusable", "tint" ) then
 			
@@ -7658,16 +7656,12 @@ function ArkInventory.Frame_Item_Update_Lock( frame )
 			
 		end
 		
-		ArkInventory.SetItemButtonDesaturate( frame, locked, r, g, b )
-		
-		frame.locked = locked
-		
-	else
-		
-		frame.locked = false
-		
 	end
-
+	
+	ArkInventory.SetItemButtonDesaturate( frame, locked, r, g, b )
+	
+	frame.locked = locked
+	
 end
 
 function ArkInventory.Frame_Item_Update_PetJournal( frame )
@@ -9337,6 +9331,8 @@ function ArkInventory.HookBattlePetToolTip_Show( ... )
 	
 	BattlePetTooltip:Hide( )
 	
+	-- anchor gametooltip to whatever originally called it
+	ArkInventory.GameTooltipSetPosition( GetMouseFocus( ) )
 	ArkInventory.TooltipSetBattlepet( GameTooltip, h )
 	
 end
