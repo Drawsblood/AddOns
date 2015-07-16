@@ -59,6 +59,7 @@ WeakAuras.collisions = {};
 local collisions = WeakAuras.collisions;
 
 local paused = true;
+local importing = false;
 local squelch_actions = true;
 
 WeakAuras.regions = {};
@@ -915,6 +916,9 @@ do
       duration = duration or 0;
       local time = GetTime();
       local remaining = startTime + duration - time;
+      
+      local chargesChanged = spellCharges[id] ~= charges;
+      spellCharges[id] = charges;
 
       if(duration > 1.51) then
         -- On non-GCD cooldown
@@ -924,14 +928,13 @@ do
           -- New cooldown
           spellCdDurs[id] = duration;
           spellCdExps[id] = endTime;
-          spellCharges[id] = charges;
           spellCdHandles[id] = timer:ScheduleTimer(SpellCooldownFinished, endTime - time, id);
           if (spellsRune[id] and duration ~= 10) then
             spellCdDursRune[id] = duration;
             spellCdExpsRune[id] = endTime;
           end
           WeakAuras.ScanEvents("SPELL_COOLDOWN_STARTED", id);
-        elseif(spellCdExps[id] ~= endTime or spellCharges[id] ~= charges) then
+        elseif(spellCdExps[id] ~= endTime or chargesChanged) then
           -- Cooldown is now different
           if(spellCdHandles[id]) then
             timer:CancelTimer(spellCdHandles[id]);
@@ -939,7 +942,6 @@ do
 
           spellCdDurs[id] = duration;
           spellCdExps[id] = endTime;
-          spellCharges[id] = charges;
           if (maxCharges == nil or charges + 1 == maxCharges) then
             spellCdHandles[id] = timer:ScheduleTimer(SpellCooldownFinished, endTime - time, id);
           end
@@ -1678,11 +1680,11 @@ loadedFrame:SetScript("OnEvent", function(self, event, addon)
 
       local toAdd = {};
       for id, data in pairs(db.displays) do
-      if(id == data.id) then
-        tinsert(toAdd, data);
-      else
-        error("Corrupt entry in WeakAuras saved displays - '"..tostring(id).."' vs '"..tostring(data.id).."'" );
+      if(id ~= data.id) then
+        print("|cFF8800FFWeakAuras|r detected corrupt entry in WeakAuras saved displays - '"..tostring(id).."' vs '"..tostring(data.id).."'" );
+        data.id = id;
       end
+      tinsert(toAdd, data);
       end
       WeakAuras.AddMany(toAdd);
       WeakAuras.AddManyFromAddons(from_files);
@@ -1716,6 +1718,14 @@ loadedFrame:SetScript("OnEvent", function(self, event, addon)
     end
   end
 end);
+
+function WeakAuras.SetImporting(b)
+  importing = b;
+end
+
+function WeakAuras.IsImporting()
+  return importing;
+end
 
 function WeakAuras.Pause()
   paused = true;
@@ -5364,3 +5374,70 @@ function WeakAuras.EnsureString(input)
    end
    return tostring(input);
 end
+
+-- Handle coroutines
+local dynFrame = {};
+do
+  -- Internal data
+  dynFrame.frame = CreateFrame("frame");
+  dynFrame.update = {};
+  dynFrame.size = 0;
+
+  -- Add an action to be resumed via OnUpdate
+  function dynFrame.AddAction(self, name, func)
+    if not name then
+      name = fmt("NIL", dynFrame.size+1);
+    end
+
+    if not dynFrame.update[name] then
+      dynFrame.update[name] = func;
+      dynFrame.size = dynFrame.size + 1
+
+      dynFrame.frame:Show();
+    end
+  end
+
+  -- Remove an action from OnUpdate
+  function dynFrame.RemoveAction(self, name)
+    if dynFrame.update[name] then
+      dynFrame.update[name] = nil;
+      dynFrame.size = dynFrame.size - 1
+
+      if dynFrame.size == 0 then
+        dynFrame.frame:Hide();
+      end
+    end
+  end
+
+  -- Setup frame
+  dynFrame.frame:Hide();
+  dynFrame.frame:SetScript("OnUpdate", function(self, elapsed)
+    -- Start timing
+    local start = debugprofilestop();
+    local hasData = true;
+
+    -- Resume as often as possible (Limit to 16ms per frame -> 60 FPS)
+    while (debugprofilestop() - start < 16 and hasData) do
+      -- Stop loop without data
+      hasData = false;
+
+      -- Resume all coroutines
+      for name, func in pairs(dynFrame.update) do
+        -- Loop has data
+        hasData = true;
+
+        -- Resume or remove
+        if coroutine.status(func) ~= "dead" then
+          local err,ret1,ret2 = assert(coroutine.resume(func))
+          if err then
+            WeakAuras.debug(debugstack(func))
+          end
+        else
+          dynFrame:RemoveAction(name);
+        end
+      end
+    end
+  end);
+end
+
+WeakAuras.dynFrame = dynFrame;

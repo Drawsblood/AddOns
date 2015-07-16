@@ -98,9 +98,9 @@ L["New in 1.4 Finnished Text"] = [=[Selbstverständlich beinhaltet |cFF8800FFWea
 Hoffentlich hat diese Einführung dich wenigstens über die wichtigsten neuen Funktionen die dir zur Verfügung stehen aufgeklärt.
 
 Wir danken dir vielmals für die Nutzung von |cFF8800FFWeakAuras|r!]=]
-L["New in 1.4 Text1"] = [=[Version 1.4 von |cFF8800FFWeakAuras|r führt mehrere neu mächtige Funktionen ein.
+L["New in 1.4 Text1"] = [=[Version 1.4 von |cFF8800FFWeakAuras|r führt mehrere neue mächtige Funktionen ein.
 
-Diese Einführung bietet einen Überblick der wichtigsten neuen Funktionen und deren Nutzung.]=]
+Diese Einführung bietet einen Überblick der wichtigsten neuen Funktionen und deren Nutzung.]=] -- Needs review
 L["New in 1.4 Text2"] = "Lege zunächst eine neue Anzeige zu Demonstrationszwecken an."
 L["Previous"] = "Zurück"
 L["Trigger Options: 1/4"] = "Auslöser Einstellungen: 1/4"

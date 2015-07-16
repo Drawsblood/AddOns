@@ -34,11 +34,11 @@ L["At Least One Enemy"] = "Zumindest ein Feind"
 L["Attackable"] = "Angreifbar"
 L["Aura"] = "Aura (Buff/Debuff)"
 L["Aura:"] = "Aura:"
-L["Aura Applied"] = "Aura angewant (AURA_APPLIED)"
-L["Aura Applied Dose"] = "Aura angewant, Stack erhöht (AURA_APPLIED_DOSE)"
+L["Aura Applied"] = "Aura angewandt (AURA_APPLIED)" -- Needs review
+L["Aura Applied Dose"] = "Aura angewandt, Stack erhöht (AURA_APPLIED_DOSE)" -- Needs review
 L["Aura Broken"] = "Aura gebrochen, Nahkampf (AURA_BROKEN)"
 L["Aura Broken Spell"] = "Aura gebrochen, Zauber (AURA_BROKEN_SPELL)"
--- L["Aura Name"] = ""
+L["Aura Name"] = "Aura Name oder ID" -- Needs review
 L["Aura Name or ID"] = "Auraname oder ID"
 L["Aura Refresh"] = "Aura erneuert (AURA_REFRESH)"
 L["Aura Removed"] = "Aura entfernt (AURA_REMOVED)"
@@ -82,7 +82,7 @@ L["Channel"] = "Chatkanal"
 L["Channel (Spell)"] = "Kanalisieren (Zauber)"
 L["Character Type"] = "Charaktertyp"
 L["Charges"] = "Aufladungen"
-L["Chat Frame"] = "Chatframe"
+L["Chat Frame"] = "Chatrahmen" -- Needs review
 L["Chat Message"] = "Chatnachricht"
 L["Children:"] = "Kinder:"
 L["Chi Power"] = "Chi"
@@ -128,7 +128,7 @@ L["Dodge"] = "Ausweichen (DODGE)"
 L["Done"] = "Fertiggestellt"
 L["Down"] = "Runter"
 L["Drain"] = "Saugen (DRAIN)"
-L["Drowning"] = "Ertinken (DROWNING)"
+L["Drowning"] = "Ertrinken (DROWNING)" -- Needs review
 L["Druid"] = "Druide"
 L["Dungeon Difficulty"] = "Instanzschwierigkeit"
 L["Durability Damage"] = "Haltbarkeitsschaden (DURABILITY_DAMAGE)"
@@ -245,7 +245,7 @@ L["Instakill"] = "Sofortiger Tod (INSTAKILL)"
 L["Instance Type"] = "Instanztyp"
 L["Interrupt"] = "Unterbrechen (INTERRUPT)"
 L["Interruptible"] = "Unterbrechbar"
-L["In Vehicle"] = "In Fahrzeug"
+L["In Vehicle"] = "Im Fahrzeug" -- Needs review
 L["Inverse"] = "Invertieren"
 L["Is Exactly"] = "Strikter Vergleich"
 L["Item"] = "Gegenstand"
@@ -341,32 +341,28 @@ L["Remaining Time"] = "Verbleibende Zeit"
 L["Requested display does not exist"] = "Angeforderte Anzeige existiert nicht"
 L["Requested display not authorized"] = "Angeforderte Anzeige ist nicht autorisiert"
 L["Require Valid Target"] = "Erfordert gültiges Ziel"
-L["Resist"] = "Wiederstehen"
-L["Resisted"] = "Wiederstanden (RESISTED)"
-L["Resolve collisions dialog"] = [=[
-Ein externes Addon definiert |cFF8800FFWeakAuras|r Anzeigen die den selben Namen besitzten wie bereits existierende Anzeigen.
+L["Resist"] = "Widerstehen" -- Needs review
+L["Resisted"] = "Widerstanden (RESISTED)" -- Needs review
+L["Resolve collisions dialog"] = [=[Ein externes Addon definiert |cFF8800FFWeakAuras|r Anzeigen die den selben Namen besitzten wie bereits existierende Anzeigen.
 
 |cFF8800FFWeakAuras|r Anzeigen müssen umbenannt werden um Platz für die externen Anzeigen zu machen.
 
-Gelöst: |cFFFF0000]=]
-L["Resolve collisions dialog singular"] = [=[
-Ein externes Addon definiert eine |cFF8800FFWeakAuras|r Anzeige die den selben Namen besitzten wie eine bereits existierende Anzeige.
+Gelöst: |cFFFF0000]=] -- Needs review
+L["Resolve collisions dialog singular"] = [=[Ein externes Addon definiert eine |cFF8800FFWeakAuras|r Anzeige die den selben Namen besitzten wie eine bereits existierende Anzeige.
 
 |cFF8800FFWeakAuras|r Anzeige muss umbenannt werden um Platz für die externe Anzeige zu machen.
 
-Gelöst: |cFFFF0000]=]
-L["Resolve collisions dialog startup"] = [=[
-Ein externes Addon definiert |cFF8800FFWeakAuras|r Anzeigen die den selben Namen besitzten wie bereits existierende Anzeigen.
+Gelöst: |cFFFF0000]=] -- Needs review
+L["Resolve collisions dialog startup"] = [=[Ein externes Addon definiert |cFF8800FFWeakAuras|r Anzeigen die den selben Namen besitzten wie bereits existierende Anzeigen.
 
 |cFF8800FFWeakAuras|r Anzeigen müssen umbenannt werden um Platz für die externen Anzeigen zu machen.
 
-Gelöst: |cFFFF0000]=]
-L["Resolve collisions dialog startup singular"] = [=[
-Ein externes Addon definiert eine |cFF8800FFWeakAuras|r Anzeige die den selben Namen besitzten wie eine bereits existierende Anzeige.
+Gelöst: |cFFFF0000]=] -- Needs review
+L["Resolve collisions dialog startup singular"] = [=[Ein externes Addon definiert eine |cFF8800FFWeakAuras|r Anzeige die den selben Namen besitzten wie eine bereits existierende Anzeige.
 
 |cFF8800FFWeakAuras|r Anzeige muss umbenannt werden um Platz für die externe Anzeige zu machen.
 
-Gelöst: |cFFFF0000]=]
+Gelöst: |cFFFF0000]=] -- Needs review
 L["Resting"] = "Erholen"
 L["Resurrect"] = "Wiederbeleben"
 L["Right"] = "Rechts"
@@ -384,7 +380,7 @@ L["Shake"] = "Beben"
 L["Shaman"] = "Schamane"
 L["Shards"] = "Splitter"
 L["Shift-Click to pause"] = "|cFF8080FF(Shift-Klick)|r Pause"
-L["Shift-Click to resume"] = "|cFF8080FF(Shift-Klick)|r Fortsetzten"
+L["Shift-Click to resume"] = "|cFF8080FF(Shift-Klick)|r Fortsetzen" -- Needs review
 L["Show"] = "Zeigen"
 L["Shrink"] = "Schrumpfen"
 L["Slide from Bottom"] = "Von unten eingleiten"
@@ -462,8 +458,8 @@ L["WeakAurasModelPaths"] = "WeakAuras - 3D Modell Pfade"
 L["WeakAurasModelPaths .toc Notes"] = "Stellt eine Liste der meisten 3D Modelle für WA Displays zur Verfügung."
 L["WeakAurasOptions"] = "WeakAuras Optionen"
 L["WeakAurasOptions .toc Notes"] = "Optionen für WeakAuras"
-L["WeakAuras .toc Notes"] = "Eine leistungsfähiges, umfassendes Addon zur grafischen Darstellung von Informationen über Auren, Cooldowns, Timern und vielem mehr."
-L["WeakAurasTutorials"] = "WeakAuras - Tutorials"
+L["WeakAuras .toc Notes"] = "Ein leistungsfähiges, umfassendes Addon zur grafischen Darstellung von Informationen über Auren, Cooldowns, Timern und vielem mehr." -- Needs review
+L["WeakAurasTutorials"] = "WeakAuras - Anleitungen" -- Needs review
 L["WeakAurasTutorials .toc Notes"] = "3D-Model Pfade für WeakAuras"
 L["Weapon"] = "Waffen"
 L["Weapon Enchant"] = "Waffenverzauberung"

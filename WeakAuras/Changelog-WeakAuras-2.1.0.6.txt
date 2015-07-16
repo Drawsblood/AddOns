@@ -1,0 +1,42 @@
+tag 2.1.0.6
+99ce19505415e56d64b067fc990922d609f7bc81
+Benjamin Staneck <staneck@gmail.com>
+2015-07-16 00:10:03 +0200
+
+
+
+--------------------
+
+Benjamin Staneck:
+	- Move name arg for UnitAlternatePowerInfo() by one to the right (6.2 change) thanks to Lombra for the hint!
+Infus:
+	- Fix wrong spell charges fix
+	Make sure we set the charges before calling ScanEvents
+	- Fix incorrect spell charges after logging
+	Ticket-number: 345
+	- Model: Reset model on UNIT_MODEL_CHANGED and a few other events
+	We used to set the model everytime the trigger triggered, but
+	that lead to frequent stuttering of the model animation.
+	
+	This patch watches UNIT_MODEL_CHANGED and checks if the event
+	is for the unitId we are watching. It also wathces
+	PLAYER_TARGET_CHANGED and PLAYER_FOCUS_CHANGED if the unitId is
+	target or focus.
+	- Rewrite import to use a dynFrame
+	- Try to fix corrupted entries
+	Since I know the root cause now, I'm pretty sure that data.id is the
+	one that is to be not trusted.
+	- Prevent users from corrupting their settings
+	So I was always baffled on how users could end up with a corrupted entry,
+	where db.displays[id].id was different from id.
+	
+	What is happening is this:
+	- We decompress the data for a aura.
+	- This table gets added to db.displays: db.displays[data.id] = data;
+	- The script is interrupted, so the import window is never hidden
+	- The user clicks on import again
+	- This detects that data.id is already existing so it changes data.id
+	- This actually also changes the data.id of the table already added
+	  to db.displays
+	
+	- Prevent that by hiding the import window first
