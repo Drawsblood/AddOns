@@ -529,7 +529,7 @@ end
 
 -- update functions
 function Addon:Update()
-	Notifications:Process()
+	Notifications:Process(true)
 
 	History:Process()
 	ReputationHistory:ProcessMobHistory()

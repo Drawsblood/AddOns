@@ -41,6 +41,7 @@ local moduleData = {
 	},	
 	factions = {},	
 	faction = nil,
+	lastFinishedQuest = nil,
 }
 
 -- module handling
@@ -73,7 +74,8 @@ end
 function QuestInfo:SetupEvents()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "Calculate")
 	self:RegisterEvent("UNIT_INVENTORY_CHANGED", "Calculate")
-	self:RegisterEvent("QUEST_LOG_UPDATE", "Calculate")
+	self:RegisterEvent("QUEST_TURNED_IN")
+	self:RegisterEvent("QUEST_LOG_UPDATE")
 	self:RegisterEvent("PLAYER_LEVEL_UP", "Calculate")
 	
 	-- check for reputation buffs
@@ -83,11 +85,24 @@ end
 function QuestInfo:ShutdownEvents()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	self:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+	self:UnregisterEvent("QUEST_TURNED_IN")
 	self:UnregisterEvent("QUEST_LOG_UPDATE")
 	self:UnregisterEvent("PLAYER_LEVEL_UP")
 	
 	-- check for reputation buffs
     LibQFG.UnregisterCallback(self, "BonusChanged")
+end
+
+function QuestInfo:QUEST_LOG_UPDATE()
+	self:Calculate()
+	
+	moduleData.lastFinishedQuest = nil
+end
+
+function QuestInfo:QUEST_TURNED_IN(event, questID, experience, money)
+	moduleData.lastFinishedQuest = questID
+	
+	self:Calculate()
 end
 
 function QuestInfo:Reset()
@@ -131,9 +146,9 @@ function QuestInfo:Calculate()
 		local money = GetMoney()
 		
 		for index = 1, numQuestsEntries, 1 do
-			local title, _, _, isHeader  = GetQuestLogTitle(index)
+			local title, _, _, isHeader, _, _, _, questId = GetQuestLogTitle(index)
 
-			if title and not isHeader then
+			if questId ~= moduleData.lastFinishedQuest and title and not isHeader then
 				SelectQuestLogEntry(index)
 				
 				local isComplete = self:IsQuestComplete(index, money)								
@@ -185,6 +200,10 @@ function QuestInfo:CalculateReputationRewards(index, isComplete, baseBonus, fact
 	-- end
 	local _, _, _, _, _, _, _, questId = GetQuestLogTitle(index)
 
+	if questId == moduleData.lastFinishedQuest then
+		return
+	end
+	
 	baseBonus = baseBonus and baseBonus or LibQFG:GetBaseBonus()
 	
 	local lookupFactions = type(factionBonuses) == "table"
@@ -226,7 +245,7 @@ function QuestInfo:SetValue(id, value)
 	if current == value then
 		return
 	end
-	
+
 	moduleData.values[id] = value
 	
 	-- fire event when quest info changed

@@ -45,7 +45,7 @@ local function GetMockUpValue(id)
 		return 2700
 	elseif id == "MaxXP" then
 		return 10000
-	elseif id == "CompletedQuestXP" then
+	elseif id == "QuestCompleteXP" then
 		return 770
 	elseif id == "QuestIncompleteXP" then
 		return 1350
@@ -65,7 +65,7 @@ local function GetMockUpValue(id)
 		return 7230
 	elseif id == "MaxReputation" then
 		return 12000
-	elseif id == "CompletedQuestRep" then
+	elseif id == "QuestCompleteRep" then
 		return 1270
 	elseif id == "QuestIncompleteRep" then
 		return 1045

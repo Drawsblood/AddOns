@@ -6,7 +6,7 @@ local ADDON, NS = ...
 local Addon = LibStub("AceAddon-3.0"):GetAddon(ADDON)
 
 -- the Notifications module
-local Notifications = Addon:NewModule("Notifications", "LibSink-2.0")
+local Notifications = Addon:NewModule("Notifications", "AceTimer-3.0", "LibSink-2.0")
 
 -- get translations
 local L = LibStub:GetLibrary("AceLocale-3.0"):GetLocale(ADDON)
@@ -41,6 +41,7 @@ local moduleData = {
 	},	
 	
 	tainted = true,
+	timer = nil,
 }
 
 -- module handling
@@ -65,6 +66,12 @@ function Notifications:OnEnable()
 end
 
 function Notifications:OnDisable()
+	if moduleData.timer then
+		self:CancelTimer(moduleData.timer)
+		moduleData.timer = nil
+	end
+
+
 	self:Reset()
 end
 
@@ -110,16 +117,34 @@ function Notifications:Initialize()
 	moduleData.tainted = true
 end
 
-function Notifications:Process()
+function Notifications:Process(delayed)
 	if not moduleData.tainted then
 		return
 	end
 
+	if delayed then
+		self:ScheduleProcess()
+		
+		return
+	end
+	
 	for notificationType, settings in pairs(moduleData.types) do
 		self:SetNotificationLevel(notificationType, self[settings.getter](self))
 	end
 	
 	moduleData.tainted = false
+end
+
+function Notifications:ScheduleProcess()
+	if not moduleData.timer then
+		moduleData.timer = self:ScheduleTimer("ScheduledProcess", 1)
+	end
+end
+
+function Notifications:ScheduledProcess()
+	moduleData.timer = nil
+	
+	self:Process()
 end
 
 function Notifications:SettingChanged(notificationTarget)
