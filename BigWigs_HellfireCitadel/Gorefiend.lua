@@ -156,14 +156,14 @@ do
 	function mod:TouchOfDoom(args)
 		list[#list+1] = args.destName
 		if #list == 1 then
-			self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Important", "Alarm")
-			self:Bar(args.spellId, 25)
+			self:ScheduleTimer("TargetMessage", 0.3, 179977, list, "Important", "Alarm")
+			self:Bar(179977, 25)
 		end
 		if self:Me(args.destGUID) then
-			self:TargetBar(args.spellId, 8, args.destName)
-			self:OpenProximity(args.spellId, 20) -- XXX Range is up for debate
-			self:Flash(args.spellId)
-			self:Say(args.spellId)
+			self:TargetBar(179977, 8, args.destName)
+			self:OpenProximity(179977, 20) -- XXX Range is up for debate
+			self:Flash(179977)
+			self:Say(179977)
 		end
 	end
 end
@@ -249,7 +249,8 @@ function mod:FeastOfSoulsOver(args)
 	self:Bar(179864, self:Mythic() and 3 or 2, shadowOfDeathInfo.icon.dps.." "..self:SpellName(179864)) -- DPS Shadow of Death
 	self:Bar(179864, self:Mythic() and 9 or 13, shadowOfDeathInfo.icon.tank.." "..self:SpellName(179864)) -- Tank Shadow of Death
 	self:Bar(179864, self:Mythic() and 20 or 30, shadowOfDeathInfo.icon.healer.." "..self:SpellName(179864)) -- Healer Shadow of Death
-	self:CDBar(179909, 19) -- Shared Fate
+	self:Bar(179909, 19) -- Shared Fate
+	self:Bar(179977, 9) -- Touch of Doom
 
 	fateCount = 1
 	shadowOfDeathInfo.count.tank = 0

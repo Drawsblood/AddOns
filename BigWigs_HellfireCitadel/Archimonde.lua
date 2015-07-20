@@ -11,7 +11,7 @@
 
 local mod, CL = BigWigs:NewBoss("Archimonde", 1026, 1438)
 if not mod then return end
-mod:RegisterEnableMob(91331, 91557) -- 91331 on beta
+mod:RegisterEnableMob(91331)
 mod.engageId = 1799
 
 --------------------------------------------------------------------------------
@@ -29,6 +29,8 @@ local maxTorment = 0
 local L = mod:NewLocale("enUS", true)
 if L then
 	L.torment_removed = "Shackled Torment removed (%d/%d)"
+	L.chaos_bar = "%s -> %s"
+
 	L.custom_off_torment_marker = "Shackled Torment marker"
 	L.custom_off_torment_marker_desc = "Mark the Shackled Torment targets with {rt1}{rt2}{rt3}, requires promoted or leader."
 	L.custom_off_torment_marker_icon = 1
@@ -41,69 +43,163 @@ L = mod:GetLocale()
 
 function mod:GetOptions()
 	return {
+		-- P1
+		{182826, "SAY"}, -- Doomfire
+		183817, -- Shadowfel Burst
+		185590, -- Desecrate
+		-- P2
 		{184964, "SAY", "FLASH"}, -- Shackled Torment
 		"custom_off_torment_marker",
-		183828, -- Death Brand
-		{186961, "ICON", "SAY", "PROXIMITY"}, -- Nether Banish
-		183817, -- Shadowfel Burst
+		{186123, "SAY"}, -- Wrought Chaos
 		183865, -- Demonic Havoc
-		{182879, "SAY"}, -- Doomfire Fixate
-		{189895, "SAY", "PROXIMITY"}, -- Void Star Fixate
-		{186123, "SAY", "PROXIMITY"}, -- Wrought Chaos
-		{185014, "SAY", "PROXIMITY"}, -- Focused Chaos
-		183586, -- Doomfire
-		183254, -- Allure of Flames
-		185590, -- Desecrate
-		182225, -- Rain of Chaos
+		-- P3
 		{187180, "PROXIMITY"}, -- Demonic Feedback
-		186952, -- Nether Banish
-		182826, -- Doomfire
+		{186961, "ICON", "SAY", "PROXIMITY"}, -- Nether Banish
+		{189894, "SAY", "PROXIMITY"}, -- Void Star Fixate
+		182225, -- Rain of Chaos
+		-- General
+		183254, -- Allure of Flames
+		183828, -- Death Brand
+		{183864, "TANK"}, -- Shadow Blast
 		"stages",
+	}, {
+		[182826] = -11577,
+		[184964] = -11590,
+		[187180] = -11599,
+		[183254] = "general",
 	}
 end
 
 function mod:OnBossEnable()
-	self:Log("SPELL_AURA_APPLIED", "ShackledTorment", 184964)
-	self:Log("SPELL_AURA_REMOVED", "ShackledTormentRemoved", 184964)
-	self:Log("SPELL_CAST_START", "DeathBrand", 183828)
-	self:Log("SPELL_AURA_APPLIED", "TankNetherBanish", 186961)
-	self:Log("SPELL_AURA_REMOVED", "TankNetherBanishRemoved", 186961)
-	self:Log("SPELL_CAST_START", "ShadowfelBurst", 183817)
-	self:Log("SPELL_AURA_APPLIED", "ShadowfelBurstApplied", 183634)
-	self:Log("SPELL_AURA_APPLIED", "DemonicHavoc", 183865)
-	self:Log("SPELL_AURA_APPLIED", "DoomfireFixate", 182879)
-	self:Log("SPELL_AURA_APPLIED", "VoidStarFixate", 189895)
-	self:Log("SPELL_AURA_REMOVED", "VoidStarFixateRemoved", 189895)
-	self:Log("SPELL_AURA_APPLIED", "WroughtChaos", 186123)
-	self:Log("SPELL_AURA_REMOVED", "WroughtChaosRemoved", 186123)
-	self:Log("SPELL_AURA_APPLIED", "FocusedChaos", 185014)
-	self:Log("SPELL_AURA_REMOVED", "FocusedChaosRemoved", 185014)
+	-- P1
 	self:Log("SPELL_CAST_START", "AllureOfFlames", 183254)
-	self:Log("SPELL_CAST_START", "Desecrate", 185590)
-	self:Log("SPELL_CAST_SUCCESS", "RainOfChaos", 182225)
-	self:Log("SPELL_CAST_START", "DemonicFeedback", 187180)
-	self:Log("SPELL_AURA_APPLIED", "NetherBanishApplied", 186952) -- for Twisting Nether tracking
-	self:Log("SPELL_AURA_REMOVED", "NetherBanishRemoved", 186952) -- for Twisting Nether tracking
+	self:Log("SPELL_CAST_START", "DeathBrand", 183828)
+	self:Log("SPELL_AURA_APPLIED", "ShadowBlast", 183864)
+	self:Log("SPELL_AURA_APPLIED_DOSE", "ShadowBlast", 183864)
 	self:Log("SPELL_SUMMON", "Doomfire", 182826)
-
 	self:Log("SPELL_AURA_APPLIED", "DoomfireDamage", 183586)
 	self:Log("SPELL_AURA_APPLIED_DOSE", "DoomfireDamage", 183586)
-	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "boss1")
+	self:Log("SPELL_AURA_APPLIED", "DoomfireFixate", 182879)
+	self:Log("SPELL_CAST_START", "ShadowfelBurst", 183817)
+	self:Log("SPELL_AURA_APPLIED", "ShadowfelBurstApplied", 183634)
+	self:Log("SPELL_CAST_START", "Desecrate", 185590)
+	-- P2
+	self:Log("SPELL_AURA_APPLIED", "ShackledTorment", 184964)
+	self:Log("SPELL_AURA_REMOVED", "ShackledTormentRemoved", 184964)
+	self:Log("SPELL_CAST_SUCCESS", "WroughtChaosCast", 184265)
+	self:Log("SPELL_AURA_APPLIED", "WroughtChaos", 186123)
+	self:Log("SPELL_AURA_APPLIED", "FocusedChaos", 185014)
+	self:Log("SPELL_AURA_REMOVED", "WroughtChaosRemoved", 186123)
+	self:Log("SPELL_AURA_APPLIED", "DemonicHavoc", 183865)
+	-- P3
+	self:Log("SPELL_CAST_START", "DemonicFeedback", 187180)
+	self:Log("SPELL_AURA_APPLIED", "TankNetherBanish", 186961)
+	self:Log("SPELL_AURA_REMOVED", "TankNetherBanishRemoved", 186961)
+	self:Log("SPELL_AURA_APPLIED", "VoidStarFixate", 189895)
+	self:Log("SPELL_AURA_REMOVED", "VoidStarFixateRemoved", 189895)
+	self:Log("SPELL_AURA_APPLIED", "NetherBanishApplied", 186952) -- for Twisting Nether tracking
+	self:Log("SPELL_AURA_REMOVED", "NetherBanishRemoved", 186952) -- for Twisting Nether tracking
+	self:Log("SPELL_CAST_SUCCESS", "RainOfChaos", 182225)
+
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "Phases", "boss1")
 end
 
 function mod:OnEngage()
-	self:Bar(183817, 41) -- Shadowfel Burst
-	self:Bar(183254, 30) -- Allure of Flames
-	self:Bar(183828, 15.4) -- Death Brand
-	self:CDBar(185590, 45) -- Desecrate, Timers Min: 38.9/Avg: 60.0/Max: 74.6 (avg 45s on later pulls)
-
 	currentTorment = 0
 	maxTorment = 0
+
+	self:Bar(183828, 15.4) -- Death Brand
+	self:Bar(183254, 30) -- Allure of Flames
+	self:Bar(183817, 41) -- Shadowfel Burst
+	--self:CDBar(185590, 45) -- Desecrate XXX initial cast hp based
 end
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
+
+function mod:Phases(unit, spellName, _, _, spellId)
+	if spellId == 190117 then -- Allow Phase 2 Spells
+		self:Message("stages", "Neutral", "Long", CL.phase:format(2), false)
+		self:StopBar(182826) -- Doomfire
+		self:CDBar(186123, 7) -- Wrought Chaos
+		self:CDBar(184964, 27) -- Shackled Torment
+		self:CDBar(183828, 38) -- Death Brand
+		self:CDBar(183254, 44) -- Allure of Flames
+	elseif spellId == 190118 then -- Allow Phase 3 Spells
+		self:Message("stages", "Neutral", "Long", CL.phase:format(3), false)
+		self:StopBar(183254) -- Allure of Flames
+		self:StopBar(183828) -- Death Brand
+		self:CDBar(186961, 13) -- Nether Banish
+		self:CDBar(186123, 27) -- Wrought Chaos
+		self:CDBar(187180, 35) -- Demonic Feedback
+		self:CDBar(184964, 57.5) -- Shackled Torment
+		self:OpenProximity(187180, 7) -- Demonic Feedback XXX: Schedule it ~10sec before the timer
+	end
+end
+
+function mod:AllureOfFlames(args)
+	self:Message(args.spellId, "Urgent", "Alert")
+	self:CDBar(args.spellId, 48) -- Min: 47.5/Avg: 49.8/Max: 54.1
+end
+
+function mod:DeathBrand(args)
+	self:Message(args.spellId, "Attention", nil, CL.casting:format(args.spellName))
+	self:CDBar(args.spellId, 42)
+end
+
+function mod:ShadowBlast(args)
+	local amount = args.amount or 1
+	self:StackMessage(args.spellId, args.destName, amount, "Attention", amount > 2 and "Warning")
+end
+
+-- Phase 1
+
+function mod:Doomfire(args)
+	self:CDBar(args.spellId, 42)
+end
+
+function mod:DoomfireFixate(args)
+	self:TargetMessage(182826, args.destName, "Personal", "Alarm")
+	if self:Me(args.destGUID) then
+		self:TargetBar(182826, 10, args.destName)
+		self:Say(182826)
+	end
+end
+
+do
+	local prev = 0
+	function mod:DoomfireDamage(args)
+		local t = GetTime()
+		if t-prev > 2 and self:Me(args.destGUID) then
+			prev = t
+			self:Message(182826, "Personal", "Alarm", CL.underyou:format(args.spellName))
+		end
+	end
+end
+
+function mod:ShadowfelBurst(args)
+	self:Message(args.spellId, "Urgent", "Warning", CL.incoming:format(args.spellName))
+	self:Bar(args.spellId, 2, CL.cast:format(args.spellName))
+	self:ScheduleTimer("Bar", 2, args.spellId, 58.8)
+end
+
+do
+	local list = mod:NewTargetList()
+	function mod:ShadowfelBurstApplied(args)
+		list[#list+1] = args.destName
+		if #list == 1 then
+			self:ScheduleTimer("TargetMessage", 0.3, 183817, list, "Attention")
+		end
+	end
+end
+
+function mod:Desecrate(args)
+	self:Message(args.spellId, "Attention", "Alarm")
+	self:CDBar(args.spellId, 27) -- Min: 26.8/Avg: 29.2/Max: 33.4
+end
+
+-- Phase 2
 
 do
 	local list, isOnMe = {}, nil
@@ -153,51 +249,6 @@ do
 	end
 end
 
-function mod:UNIT_SPELLCAST_SUCCEEDED(unit, spellName, _, _, spellId)
-	if spellId == 190117 then -- Allow Phase 2 Spells
-		self:Message("stages", "Neutral", "Long", CL.phase:format(2), false)
-		self:StopBar(182826) -- Doomfire
-		self:CDBar(186123, 7) -- Wrought Chaos
-		self:CDBar(184964, 27) -- Shackled Torment
-		self:CDBar(183828, 38) -- Death Brand
-		self:CDBar(183254, 44) -- Allure of Flames
-	elseif spellId == 190118 then -- Allow Phase 3 Spells
-		self:Message("stages", "Neutral", "Long", CL.phase:format(3), false)
-		self:StopBar(183254) -- Allure of Flames
-		self:StopBar(183828) -- Death Brand
-		self:CDBar(186961, 13) -- Nether Banish
-		self:CDBar(186123, 27) -- Wrought Chaos
-		self:CDBar(187180, 35) -- Demonic Feedback
-		self:CDBar(184964, 57.5) -- Shackled Torment
-		self:OpenProximity(187180, 7) -- Demonic Feedback XXX: Schedule it ~10sec before the timer
-	end
-end
-
-function mod:Doomfire(args)
-	self:CDBar(args.spellId, 42)
-end
-
-function mod:DeathBrand(args)
-	self:Message(args.spellId, "Attention", nil, CL.casting:format(args.spellName))
-	self:CDBar(args.spellId, 42)
-end
-
-function mod:ShadowfelBurst(args)
-	self:Message(args.spellId, "Urgent", "Warning", CL.incoming:format(args.spellName))
-	self:Bar(args.spellId, 2, CL.cast:format(args.spellName))
-	self:ScheduleTimer("Bar", 2, args.spellId, 58.8)
-end
-
-do
-	local list = mod:NewTargetList()
-	function mod:ShadowfelBurstApplied(args)
-		list[#list+1] = args.destName
-		if #list == 1 then
-			self:ScheduleTimer("TargetMessage", 0.3, 183817, list, "Attention")
-		end
-	end
-end
-
 do
 	local list = mod:NewTargetList()
 	function mod:DemonicHavoc(args)
@@ -208,65 +259,44 @@ do
 	end
 end
 
-function mod:DoomfireFixate(args)
-	self:TargetMessage(args.spellId, args.destName, "Personal", "Alarm")
-	if self:Me(args.destGUID) then
-		self:TargetBar(args.spellId, 10, args.destName)
-		self:Say(args.spellId)
-	end
-end
-
-function mod:WroughtChaos(args)
-	self:TargetMessage(args.spellId, args.destName, "Important", "Info")
-	self:TargetBar(args.spellId, 5, args.destName)
-	if self:Me(args.destGUID) then
-		self:Say(args.spellId)
-		--self:OpenProximity(args.spellId, 10, FOCUSEDCHAOS, true)
-	end
-end
-
-function mod:WroughtChaosRemoved(args)
-	self:StopBar(args.spellName, args.destName)
-	if self:Me(args.destGUID) then
-		--self:CloseProximity(args.spellId)
-	end
-end
-
-function mod:FocusedChaos(args)
-	self:TargetMessage(args.spellId, args.destName, "Important", "Info")
-	self:TargetBar(args.spellId, 5, args.destName)
-	if self:Me(args.destGUID) then
-		self:Say(args.spellId)
-		--self:OpenProximity(args.spellId, 10, WROUGHTCHAOS, true)
-	end
-end
-
-function mod:FocusedChaosRemoved(args)
-	self:StopBar(args.spellName, args.destName)
-	if self:Me(args.destGUID) then
-		--self:CloseProximity(args.spellId)
-	end
-end
-
-function mod:AllureOfFlames(args)
-	self:Message(args.spellId, "Urgent", "Alert")
-	self:CDBar(args.spellId, 48) -- Min: 47.5/Avg: 49.8/Max: 54.1
-end
-
 do
-	local prev = 0
-	function mod:DoomfireDamage(args)
-		local t = GetTime()
-		if t-prev > 2 and self:Me(args.destGUID) then
-			prev = t
-			self:Message(args.spellId, "Personal", "Alarm", CL.underyou:format(args.spellName))
+	local chaosCount = 0
+	local chaosSource, chaosTarget = "", ""
+
+	function mod:WroughtChaosCast(args)
+		chaosCount = 0
+	end
+
+	function mod:WroughtChaos(args)
+		chaosSource = self:ColorName(args.destName)
+		if self:Me(args.destGUID) then
+			self:Message(args.spellId, "Personal", "Info", CL.you:format(args.spellName))
+			self:Say(args.spellId)
 		end
 	end
-end
 
-function mod:Desecrate(args)
-	self:Message(args.spellId, "Attention", "Alarm")
-	self:CDBar(args.spellId, 27) -- Min: 26.8/Avg: 29.2/Max: 33.4
+	function mod:FocusedChaos(args)
+		chaosTarget = self:ColorName(args.destName)
+		if self:Me(args.destGUID) then
+			self:Message(186123, "Positive", "Info", CL.you:format(args.spellName))
+			self:Say(186123, args.spellName)
+		end
+
+		chaosCount = chaosCount + 1
+		local spell = CL.count:format(self:SpellName(186123), chaosCount)
+		if not self:Mythic() then
+			local targets = L.chaos_bar:format(chaosSource, chaosTarget)
+			self:Message(186123, args.destName, "Important", nil, CL.other:format(spell, targets)) -- Wrought Chaos (1): Player -> Player
+			self:Bar(186123, 5, ("(%d) %s"):format(chaosCount, targets)) -- (1) Player -> Player
+		else
+			self:Message(186123, "Important", nil, spell) -- Wrought Chaos (1)
+			self:Bar(186123, 5, ("(%d) %s"):format(chaosCount, args.spellName)) -- (1) Focused Chaos
+		end
+	end
+
+	function mod:WroughtChaosRemoved(args)
+		self:StopBar(("(%d) %s"):format(chaosCount, L.chaos_bar:format(chaosSource, chaosTarget)))
+	end
 end
 
 -- Phase 3
@@ -308,16 +338,16 @@ function mod:NetherBanishRemoved(args)
 end
 
 function mod:VoidStarFixate(args)
-	self:TargetMessage(args.spellId, args.destName, "Personal", "Alarm")
+	self:TargetMessage(189894, args.destName, "Personal", "Alarm")
 	if self:Me(args.destGUID) then
-		self:Say(args.spellId)
-		self:OpenProximity(args.spellId, 15)
+		self:Say(189894)
+		self:OpenProximity(189894, 15)
 	end
 end
 
 function mod:VoidStarFixateRemoved(args)
 	if self:Me(args.destGUID) then
-		self:CloseProximity(args.spellId)
+		self:CloseProximity(189894)
 	end
 end
 
@@ -325,3 +355,4 @@ function mod:DemonicFeedback(args)
 	self:Message(args.spellId, "Attention", "Warning", CL.casting:format(args.spellName))
 	self:CDBar(args.spellId, 37)
 end
+

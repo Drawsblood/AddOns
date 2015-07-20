@@ -57,6 +57,7 @@ if L then
 L["custom_off_gaze_marker"] = "Marquage Regard de Mannoroth"
 L["custom_off_gaze_marker_desc"] = "Marque les cibles de Regard de Mannoroth avec {rt1}{rt2}{rt3}. Nécessite d'être assistant ou chef de raid."
 L["doomLord"] = "Portail des seigneurs funestes fermé !"
+L["felseeker_message"] = "%s (%d) %dm"
 L["gaze"] = "Regard (%d)"
 L["imp"] = "Portail des diablotins fermé !"
 L["infernal"] = "Portail des infernaux fermé !"
@@ -65,6 +66,7 @@ end
 
 L = BigWigs:NewBossLocale("Archimonde", "frFR")
 if L then
+L["chaos_bar"] = "%s -> %s"
 L["custom_off_torment_marker"] = "Marquage Tourment enchaîné"
 L["custom_off_torment_marker_desc"] = "Marque les cibles de Tourment enchaîné avec {rt1}{rt2}{rt3}. Nécessite d'être assistant ou chef de raid."
 L["torment_removed"] = "Tourment enchaîné enlevé (%d/%d)"
@@ -73,9 +75,13 @@ end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "frFR")
 if L then
+L["bloodthirster"] = "Carnassier salivant"
+L["daggorath"] = "Dag'gorath"
+L["darkcaster"] = "Invocateur noir sanguinolent" -- Needs review
 L["eloah"] = "Lieur Eloah"
 L["enkindler"] = "Inflammatrice embrasée"
-L["graggra"] = "Graggra" -- Needs review
+L["graggra"] = "Graggra"
+L["kuroh"] = "Subalterne Kuroh" -- Needs review
 L["orb"] = "Orbe de destruction"
 L["peacekeeper"] = "Assemblage garde-paix"
 

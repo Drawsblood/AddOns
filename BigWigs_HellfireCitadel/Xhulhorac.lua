@@ -23,6 +23,8 @@ local mobCollector = {}
 
 local L = mod:NewLocale("enUS", true)
 if L then
+	L.killed = "%d Killed!" -- title case to match "%s Spawned!" (grumble grumble)
+
 	L.imps, L.imps_desc, L.imps_icon = -11694, 186532, "spell_shadow_summonimp"
 	L.voidfiend, L.voidfiend_desc, L.voidfiend_icon = -11714, 188939, "spell_shadow_summonvoidwalker"
 end
@@ -35,12 +37,12 @@ L = mod:GetLocale()
 function mod:GetOptions()
 	return {
 		--[[ Phase 1 ]]--
-		{190223, "TANK_HEALER"}, -- Fel Strike
+		{190223, "TANK"}, -- Fel Strike
 		{186407, "SAY", "PROXIMITY", "FLASH"}, -- Fel Surge
 		{186448, "TANK"}, -- Felblaze Flurry
 		186500, -- Chains of Fel
 		--[[ Phase 2 ]]--
-		{190224, "TANK_HEALER"}, -- Void Strike
+		{190224, "TANK"}, -- Void Strike
 		{186333, "SAY", "PROXIMITY", "FLASH"}, -- Void Surge
 		{186785, "TANK"}, -- Withering Gaze
 		186546, -- Black Hole
@@ -75,6 +77,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_APPLIED_DOSE", "WitheringGaze", 186785)
 	self:Log("SPELL_CAST_START", "FelStrike", 190223)
 	self:Log("SPELL_CAST_START", "VoidStrike", 190224)
+	self:Log("SPELL_CAST_SUCCESS", "Striked", 186271, 186292) -- Fel, Void
 	self:Log("SPELL_AURA_APPLIED", "OverwhelmingChaos", 187204)
 	self:Log("SPELL_AURA_APPLIED_DOSE", "OverwhelmingChaos", 187204)
 	self:Log("SPELL_CAST_START", "BlackHole", 186546, 189779) -- Normal, Empowered
@@ -100,7 +103,7 @@ end
 
 function mod:UNIT_SPELLCAST_SUCCEEDED(unit, spellName, _, _, spellId)
 	if spellId == 190306 then -- Activate Fel Portal
-		self:Bar("imps", 14.5, L.imps, L.imps_icon)
+		self:Bar("imps", 12, L.imps, L.imps_icon)
 
 	elseif spellId == 187196 then -- Fel Feedback (Vanguard Akkelion Spawned)
 		self:Message("stages", "Neutral", "Info", "90% - ".. CL.spawned:format(self:SpellName(-11691)), false)
@@ -109,47 +112,62 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(unit, spellName, _, _, spellId)
 
 	elseif spellId == 190307 then -- Activate Void Portal
 		self:Bar("voidfiend", 14.5, L.voidfiend, L.voidfiend_icon)
+		if self:Mythic() then
+			self:Message("stages", "Neutral", "Info", "85% - ".. CL.phase:format(2), false)
+			phase = 3 -- both portals up
+		end
 
 	elseif spellId == 189806 then -- Void Feedback (Omnus Spawned)
-		self:Message("stages", "Neutral", "Info", "60% - ".. CL.spawned:format(self:SpellName(-11688)), false)
+		if not self:Mythic() then
+			self:Message("stages", "Neutral", "Info", "60% - ".. CL.spawned:format(self:SpellName(-11688)), false)
+		else
+			self:Message("stages", "Neutral", "Info", "80% - ".. CL.spawned:format(self:SpellName(-11688)), false)
+		end
 		self:CDBar(186546, 18) -- Black Hole
 		self:CDBar(186785, 6) -- Withering Gaze
 
 	elseif spellId == 187209 then -- Overwhelming Chaos (cast to gain the p4 buff, which just stacks on its own)
 		self:UnregisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", unit)
+		self:StopBar(L.imps)
+		self:StopBar(L.voidfiend)
 		self:StopBar(190223) -- Fel Strike
 		self:StopBar(186407) -- Fel Surge
 		self:StopBar(190224) -- Void Strike
 		self:StopBar(186333) -- Void Surge
-		self:Message("stages", "Neutral", "Info", "20% - ".. CL.phase:format(4), false)
+		phase = 4
+		self:Message("stages", "Neutral", "Info", "20% - ".. spellName, false)
 		self:Bar(187204, 10) -- Overwhelming Chaos
 	end
 end
 
-function mod:AkkelionDies()
-	self:StopBar(190223) -- Fel Strike
-	self:StopBar(186407) -- Fel Surge
+function mod:AkkelionDies(args)
 	self:StopBar(186448) -- Felblaze Flurry
 	self:StopBar(186500) -- Chains of Fel
-	phase = 2
-	self:Message("stages", "Neutral", "Info", "65% - ".. CL.phase:format(2), false)
-	self:CDBar(190224, 20) -- Void Strike
-	self:CDBar(186333, 28) -- Void Surge
-	if self:Mythic() then
+	if not self:Mythic() then
+		self:StopBar(190223) -- Fel Strike
+		self:StopBar(186407) -- Fel Surge
+		phase = 2
+		self:Message("stages", "Neutral", "Info", "65% - ".. CL.phase:format(2), false)
+		self:CDBar(190224, 20) -- Void Strike
+		self:CDBar(186333, 28) -- Void Surge
+	else
+		self:Message("stages", "Neutral", "Info", "50% - ".. L.killed:format(args.destName), false)
 		self:CDBar(186500, 30) -- Empowered Chains of Fel
 	end
 end
 
-function mod:OmnusDies()
-	self:StopBar(190224) -- Void Strike
-	self:StopBar(186333) -- Void Surge
+function mod:OmnusDies(args)
 	self:StopBar(186785) -- Withering Gaze
 	self:StopBar(186546) -- Black Hole
-	phase = 3
-	self:Message("stages", "Neutral", "Info", "35% - ".. CL.phase:format(3), false)
-	-- self:CDBar(190224, 4) -- Void Strike
-	-- self:CDBar(186333, 28) -- Void Surge
-	if self:Mythic() then
+	if not self:Mythic() then
+		self:StopBar(190224) -- Void Strike
+		self:StopBar(186333) -- Void Surge
+		phase = 3
+		self:Message("stages", "Neutral", "Info", "35% - ".. CL.phase:format(3), false)
+		-- self:CDBar(190224, 4) -- Void Strike
+		-- self:CDBar(186333, 28) -- Void Surge
+	else
+		self:Message("stages", "Neutral", "Info", "40% - ".. L.killed:format(args.destName), false)
 		self:CDBar(186546, 21) -- Empowered Black Hole
 	end
 end
@@ -162,7 +180,7 @@ do
 			local t = GetTime()
 			if t-prev > 1 then
 				prev = t
-				self:CDBar("imps", 24, L.imps, L.imps_icon)
+				self:CDBar("imps", 22, L.imps, L.imps_icon)
 			end
 		end
 	end
@@ -184,7 +202,7 @@ end
 
 function mod:Touched(args)
 	if self:Me(args.destGUID) then
-		self:Message(args.spellId, "Personal", "Long", CL.you:format(args.spellName))
+		self:Message(args.spellId, "Personal", not self:Tank() and "Long", CL.you:format(args.spellName))
 	end
 end
 
@@ -213,6 +231,7 @@ do
 		if self:Me(args.destGUID) then
 			self:Say(args.spellId)
 			self:OpenProximity(args.spellId, 10) -- Open to debate
+			self:Flash(args.spellId)
 		end
 	end
 end
@@ -224,26 +243,32 @@ function mod:SurgeRemoved(args)
 end
 
 function mod:FelStrike(args)
-	self:Message(args.spellId, "Urgent")
+	self:Message(args.spellId, "Urgent", nil, CL.casting:format(args.spellName))
 	if phase < 3 then
 		self:CDBar(args.spellId, 16) -- 15.8
 	else -- alternates
-		if self:Tank() then
-			self:PlaySound(args.spellId, "Warning")
-		end
+		self:PlaySound(args.spellId, "Warning")
 		self:CDBar(190224, 8) -- Void Strike
 	end
 end
 
 function mod:VoidStrike(args)
-	self:Message(args.spellId, "Urgent")
+	self:Message(args.spellId, "Urgent", nil, CL.casting:format(args.spellName))
 	if phase < 3 then
 		self:CDBar(args.spellId, 17) -- 17.1/18.2
 	else -- alternates
-		if self:Tank() then
-			self:PlaySound(args.spellId, "Warning")
-		end
+		self:PlaySound(args.spellId, "Warning")
 		self:CDBar(190223, 7) -- Fel Strike
+	end
+end
+
+function mod:Striked(args)
+	if phase > 2 then
+		local spellId = args.spellId == 186271 and 190223 or 190224 -- 186271 -> 190223 (Fel), 186292 -> 190224 (Void)
+		self:TargetMessage(spellId, args.destName, "Attention")
+		if self:Tank() and not self:Me(args.destGUID) then -- don't spam long for non-tanks that enable strike
+			self:PlaySound(spellId, "Long")
+		end
 	end
 end
 

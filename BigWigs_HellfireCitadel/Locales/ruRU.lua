@@ -58,6 +58,7 @@ if L then
 L["custom_off_gaze_marker"] = "Маркировка Взгляда Маннорота"
 L["custom_off_gaze_marker_desc"] = "Отмечать цели Взгляда Маннорота метками {rt1}{rt2}{rt3}, требуется быть помощником или лидером рейда."
 L["doomLord"] = "Портал Владыки судеб закрыт!"
+L["felseeker_message"] = "%s (%d) %dм"
 L["gaze"] = "Взгляд (%d)"
 L["imp"] = "Портал бесов скверны закрыт!"
 L["infernal"] = "Портал инферналов закрыт!"
@@ -66,6 +67,7 @@ end
 
 L = BigWigs:NewBossLocale("Archimonde", "ruRU")
 if L then
+L["chaos_bar"] = "%s -> %s"
 L["custom_off_torment_marker"] = "Маркировка Скованного страдания"
 L["custom_off_torment_marker_desc"] = "Отмечать цели Скованного страдания метками {rt1}{rt2}{rt3}, требуется быть помощником или лидером рейда."
 L["torment_removed"] = "Скованное страдание снято (%d/%d)"
@@ -74,9 +76,13 @@ end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "ruRU")
 if L then
+L["bloodthirster"] = "Истекающий слюной кровопийца"
+L["daggorath"] = "Даг'горат"
+L["darkcaster"] = "Темный маг из клана Кровавой Глазницы"
 L["eloah"] = "Властитель Элоа"
 L["enkindler"] = "Огненная возжигательница"
 L["graggra"] = "Граггра"
+L["kuroh"] = "Адъюнкт Куро"
 L["orb"] = "Сфера разрушения"
 L["peacekeeper"] = "Голем-миротворец"
 

@@ -49,6 +49,7 @@ end
 
 L = BigWigs:NewBossLocale("Tyrant Velhari", "esES") or BigWigs:NewBossLocale("Tyrant Velhari", "esMX")
 if L then
+L["font_removed_soon"] = "¡Tu Fuente acaba pronto!" -- Needs review
 
 end
 
@@ -57,6 +58,7 @@ if L then
 L["custom_off_gaze_marker"] = "Marcador de Mirada de Mannoroth" -- Needs review
 L["custom_off_gaze_marker_desc"] = "Marca los objetivos de Mirada de Mannoroth con {rt1}{rt2}{rt3}, requiere ayudante o líder." -- Needs review
 L["doomLord"] = "¡Portal del Señor de fatalidad cerrado!" -- Needs review
+L["felseeker_message"] = "%s (%d) %dm" -- Needs review
 L["gaze"] = "Mirada (%d)" -- Needs review
 L["imp"] = "¡Portal del Diablillo cerrado!" -- Needs review
 L["infernal"] = "¡Portal Infernal cerrado!" -- Needs review
@@ -65,6 +67,7 @@ end
 
 L = BigWigs:NewBossLocale("Archimonde", "esES") or BigWigs:NewBossLocale("Archimonde", "esMX")
 if L then
+L["chaos_bar"] = "%s -> %s" -- Needs review
 L["custom_off_torment_marker"] = "Marcador de Tormento encadenado" -- Needs review
 L["custom_off_torment_marker_desc"] = "Marca los objetivos de Tormento encadenado con {rt1}{rt2}{rt3}, requiere ayudante o líder." -- Needs review
 L["torment_removed"] = "Tormento encadenado eliminado (%d/%d)" -- Needs review
@@ -73,9 +76,13 @@ end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "esES") or BigWigs:NewBossLocale("Hellfire Citadel Trash", "esMX")
 if L then
+L["bloodthirster"] = "Sediente de sangre salivoso" -- Needs review
+L["daggorath"] = "Dag'gorath" -- Needs review
+L["darkcaster"] = "Taumaturgo oscuro sangrante" -- Needs review
 L["eloah"] = "Vinculador Eloah" -- Needs review
 L["enkindler"] = "Prendedora ígnea" -- Needs review
 L["graggra"] = "Graggra" -- Needs review
+L["kuroh"] = "Adjunta Kuroh" -- Needs review
 L["orb"] = "Orbe de destrucción" -- Needs review
 L["peacekeeper"] = "Ensamblaje pacificador" -- Needs review
 

@@ -546,7 +546,7 @@ local function tryEquipNextItem()
 		_pendingEquip = nil
 		return
 		
-	elseif bestItem and bestItem.bag and bestItem.bag >= NUM_BAG_SLOTS + 1 and bestItem.bag <= NUM_BAG_SLOTS + NUM_BANKBAGSLOTS then
+	elseif bestItem and bestItem.bag and (bestItem.bag == BANK_CONTAINER or bestItem.bag >= NUM_BAG_SLOTS + 1 and bestItem.bag <= NUM_BAG_SLOTS + NUM_BANKBAGSLOTS) then
 		-- find first empty bag slot
 		local invBag, invSlot = findFirstEmptyBagSlot()
 		if not invBag then

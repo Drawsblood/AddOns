@@ -103,6 +103,11 @@ function OiLvlPlayer_Update()
 							if sw then break end
 						end						
 					end
+					-- check item level
+					if OItemAnalysis_CheckILVLGear(ItemLink) ~= 0 then
+						totalilvl = OItemAnalysis_CheckILVLGear(ItemLink)
+					end
+					
 					Slot:SetText(totalilvl);
 					Slot:SetShadowColor(1,1,1,1);
 					Slot:Show();

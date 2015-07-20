@@ -1,0 +1,24 @@
+------------------------------------------------------------------------
+r292 | olzenkhaw | 2015-07-17 15:16:05 +0000 (Fri, 17 Jul 2015) | 1 line
+Changed paths:
+   A /tags/v4.8.1 WoD release (from /trunk:291)
+
+4.8.1 Fixed timewalking gear item level.
+------------------------------------------------------------------------
+r291 | olzenkhaw | 2015-07-17 15:15:38 +0000 (Fri, 17 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+   M /trunk/libs/CallbackHandler-1.0/CallbackHandler-1.0.lua
+
+4.8.1 Fixed timewalking gear item level.
+------------------------------------------------------------------------
+r289 | olzenkhaw | 2015-06-23 12:58:57 +0000 (Tue, 23 Jun 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/Oilvlconfig.lua
+
+4.8.0 - Added Hellfire Citadel Raid Progression Details
+------------------------------------------------------------------------

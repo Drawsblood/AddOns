@@ -231,6 +231,28 @@ function OItemAnalysis_CheckPvPGear(itemLink)
 	return 0;
 end
 
+local OILVLFrame = CreateFrame('GameTooltip', 'OILVLTooltip', UIParent, 'GameTooltipTemplate');
+function OItemAnalysis_CheckILVLGear(itemLink)
+	OILVLFrame:SetOwner(UIParent, 'ANCHOR_NONE');
+	OILVLFrame:ClearLines();
+	OILVLFrame:SetHyperlink(itemLink);
+	
+	for i = 1, 4 do
+		if _G["OILVLTooltipTextLeft"..i]:GetText() then
+			local xilvl = _G["OILVLTooltipTextLeft"..i]:GetText():match(ITEM_LEVEL:gsub("%%d","(%%d+)"));
+			if  xilvl then
+				OILVLFrame:Hide();
+				return tonumber(xilvl);
+			end
+		else
+			break
+		end
+	end
+	OILVLFrame:Hide();
+	return 0;
+end
+
+
 function oClassColor(unitid)
 	local _, _, cclass = UnitClass(unitid);
 	if classcolor[cclass] ~= nil then
@@ -3497,6 +3519,13 @@ function OTgathertil(guid, unitid)
 					-- check HeirLoom
 					local trueHilvl, isheirloom = ItemUpgradeInfo:GetHeirloomTrueLevel(item)
 					if isheirloom then itemLevel = trueHilvl; end
+					
+					-- check item level
+					if OItemAnalysis_CheckILVLGear(item) ~= 0 then
+						itemLevel = OItemAnalysis_CheckILVLGear(item)
+					end
+					
+					
 					if OPvPSet:IsVisible() then
 						if OItemAnalysis_CheckPvPGear(item) ~= 0 then
 							totalIlvl = totalIlvl + OItemAnalysis_CheckPvPGear(item)

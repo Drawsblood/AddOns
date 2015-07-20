@@ -1,0 +1,8 @@
+2015-07-18  yellowfive  <yellowfive>
+
+[6abc0858b45e] [v28]
+* AskMrRobot-Serializer/AskMrRobot-Serializer.lua, AskMrRobot.toc, Gear.lua:
+
+fixed minor bug with pulling bank items into your bags
+
+
