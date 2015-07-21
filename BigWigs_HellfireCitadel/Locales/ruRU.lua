@@ -70,7 +70,7 @@ if L then
 L["chaos_bar"] = "%s -> %s"
 L["custom_off_torment_marker"] = "Маркировка Скованного страдания"
 L["custom_off_torment_marker_desc"] = "Отмечать цели Скованного страдания метками {rt1}{rt2}{rt3}, требуется быть помощником или лидером рейда."
-L["torment_removed"] = "Скованное страдание снято (%d/%d)"
+L["torment_removed"] = "Скованное страдание снято (%d/%d)" -- Needs review
 
 end
 

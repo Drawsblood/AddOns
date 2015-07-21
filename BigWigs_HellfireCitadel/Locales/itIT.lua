@@ -36,25 +36,25 @@ end
 
 L = BigWigs:NewBossLocale("Mannoroth", "itIT")
 if L then
-L["felseeker_message"] = "%s (%d) %dm" -- Needs review
+L["felseeker_message"] = "%s (%d) %dm"
 
 end
 
 L = BigWigs:NewBossLocale("Archimonde", "itIT")
 if L then
-L["chaos_bar"] = "%s -> %s" -- Needs review
+L["chaos_bar"] = "%s -> %s"
 
 end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "itIT")
 if L then
-L["bloodthirster"] = "Bramasangue Sbavante" -- Needs review
-L["daggorath"] = "Dag'gorath" -- Needs review
-L["darkcaster"] = "Mago Oscuro dei Guerci Insanguinati" -- Needs review
+L["bloodthirster"] = "Bramasangue Sbavante"
+L["daggorath"] = "Dag'gorath"
+L["darkcaster"] = "Mago Oscuro dei Guerci Insanguinati"
 L["eloah"] = "Vincolatore Eloah"
 L["enkindler"] = "Infiammatrice Ardente"
-L["graggra"] = "Graggra" -- Needs review
-L["kuroh"] = "Luogotenente Kuroh" -- Needs review
+L["graggra"] = "Graggra"
+L["kuroh"] = "Luogotenente Kuroh"
 L["orb"] = "Globo della Distruzione"
 L["peacekeeper"] = "Costrutto Pacificatore"
 

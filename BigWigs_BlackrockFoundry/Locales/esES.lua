@@ -7,7 +7,7 @@ end
 
 L = BigWigs:NewBossLocale("Oregorger", "esES") or BigWigs:NewBossLocale("Oregorger", "esMX")
 if L then
-L["roll_message"] = "Rueda %d - %d cajas para acabar!" -- Needs review
+L["roll_message"] = "Rueda %d - %d cajas para acabar!"
 
 end
 
@@ -45,11 +45,11 @@ end
 
 L = BigWigs:NewBossLocale("Kromog", "esES") or BigWigs:NewBossLocale("Kromog", "esMX")
 if L then
-L["custom_off_hands_marker"] = "Marcador de tanque en Tierra enredadora" -- Needs review
-L["custom_off_hands_marker_desc"] = "Marca la Tierra enredadora que atrapa a los tanques con {rt7}{rt8}, requiere ayudante o líder." -- Needs review
-L["destroy_pillars"] = "Destruye pilares" -- Needs review
-L["prox"] = "Proximidad a tanque" -- Needs review
-L["prox_desc"] = "Abre una ventana de proximidad de 15 metros a otros tanques para ayudarte con el daño de la habilidad Puños de piedra." -- Needs review
+L["custom_off_hands_marker"] = "Marcador de tanque en Tierra enredadora"
+L["custom_off_hands_marker_desc"] = "Marca la Tierra enredadora que atrapa a los tanques con {rt7}{rt8}, requiere ayudante o líder."
+L["destroy_pillars"] = "Destruye pilares"
+L["prox"] = "Proximidad a tanque"
+L["prox_desc"] = "Abre una ventana de proximidad de 15 metros a otros tanques para ayudarte con el daño de la habilidad Puños de piedra."
 
 end
 
@@ -81,7 +81,7 @@ L["random"] = "Trenes aleatorios"
 L["train"] = "Tren"
 L["trains"] = "Avisos de tren"
 L["trains_desc"] = "Muestra contadores y mensajes para cada carril cuando el próximo tren esté llegando. Los carriles están numerados desde el jefe a la entrada, p.ej, Jefe 1 2 3 4 Entrada."
-L["train_you"] = "Tren por tu vía! (%d)" -- Needs review
+L["train_you"] = "Tren por tu vía! (%d)"
 
 end
 
@@ -115,7 +115,7 @@ L["furnace_msg1"] = "Hmm, no está un poco tostado?"
 L["furnace_msg2"] = "Hagamos una buena barbacoa!"
 L["furnace_msg3"] = "Esto no puede ser bueno..."
 L["gnasher"] = "Rechinador Esquirla Oscura"
-L["gronnling"] = "Gronnito obrero" -- Needs review
+L["gronnling"] = "Gronnito obrero"
 L["guardian"] = "Guardián del taller"
 L["hauler"] = "Transportista ogron"
 L["mistress"] = "Maestra de forja Palmafuego"

@@ -22,6 +22,10 @@ end
 
 L = BigWigs:NewBossLocale("Shadow-Lord Iskar", "frFR")
 if L then
+L["bindings_removed"] = "Liens enlevés (%d/3)"
+L["custom_off_binding_marker"] = "Marquage Liens sombres"
+L["custom_off_binding_marker_desc"] = [=[Marque les cibles de Liens sombres avec {rt1}{rt2}{rt3}{rt4}{rt5}{rt6}. Nécessite d'être assistant ou chef de raid.
+|cFFFF0000Seule 1 personne du raid doit activer ceci afin d'éviter les conflits de marquage.|r]=]
 L["custom_off_wind_marker"] = "Marquage Vents fantasmatiques"
 L["custom_off_wind_marker_desc"] = [=[Marque les cibles de Vents fantasmatiques avec {rt1}{rt2}{rt3}{rt4}{rt5}. Nécessite d'être assistant ou chef de raid.
 |cFFFF0000Seule 1 personne du raid doit activer ceci afin d'éviter les conflits de marquage.|r]=]
@@ -49,6 +53,7 @@ end
 
 L = BigWigs:NewBossLocale("Tyrant Velhari", "frFR")
 if L then
+L["font_removed_soon"] = "Votre Fontaine se termine bientôt !"
 
 end
 
@@ -77,11 +82,11 @@ L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "frFR")
 if L then
 L["bloodthirster"] = "Carnassier salivant"
 L["daggorath"] = "Dag'gorath"
-L["darkcaster"] = "Invocateur noir sanguinolent" -- Needs review
+L["darkcaster"] = "Invocateur noir sanguinolent"
 L["eloah"] = "Lieur Eloah"
 L["enkindler"] = "Inflammatrice embrasée"
 L["graggra"] = "Graggra"
-L["kuroh"] = "Subalterne Kuroh" -- Needs review
+L["kuroh"] = "Subalterne Kuroh"
 L["orb"] = "Orbe de destruction"
 L["peacekeeper"] = "Assemblage garde-paix"
 

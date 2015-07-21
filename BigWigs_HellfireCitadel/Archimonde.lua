@@ -1,10 +1,4 @@
 
--- Notes --
--- Nether Banish has conflicting descriptions
--- Phase Transitions
--- - P2 Start (70%): Yell "I grow tired of this pointless game. You face the immortal Legion, scourge of a thousand worlds."
--- - P3 Start (40%): Yell "Enough! Your meaningless struggle ends now!"
-
 --------------------------------------------------------------------------------
 -- Module Declaration
 --
@@ -13,6 +7,7 @@ local mod, CL = BigWigs:NewBoss("Archimonde", 1026, 1438)
 if not mod then return end
 mod:RegisterEnableMob(91331)
 mod.engageId = 1799
+mod.respawnTime = 30
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -21,6 +16,8 @@ mod.engageId = 1799
 local phase = 1
 local currentTorment = 0
 local maxTorment = 0
+local burstCount = 1
+local burstTimer = nil
 
 --------------------------------------------------------------------------------
 -- Localization
@@ -28,7 +25,7 @@ local maxTorment = 0
 
 local L = mod:NewLocale("enUS", true)
 if L then
-	L.torment_removed = "Shackled Torment removed (%d/%d)"
+	L.torment_removed = "Torment removed (%d/%d)"
 	L.chaos_bar = "%s -> %s"
 
 	L.custom_off_torment_marker = "Shackled Torment marker"
@@ -45,7 +42,7 @@ function mod:GetOptions()
 	return {
 		-- P1
 		{182826, "SAY"}, -- Doomfire
-		183817, -- Shadowfel Burst
+		{183817, "PROXIMITY"}, -- Shadowfel Burst
 		185590, -- Desecrate
 		-- P2
 		{184964, "SAY", "FLASH"}, -- Shackled Torment
@@ -89,7 +86,6 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_SUCCESS", "WroughtChaosCast", 184265)
 	self:Log("SPELL_AURA_APPLIED", "WroughtChaos", 186123)
 	self:Log("SPELL_AURA_APPLIED", "FocusedChaos", 185014)
-	self:Log("SPELL_AURA_REMOVED", "WroughtChaosRemoved", 186123)
 	self:Log("SPELL_AURA_APPLIED", "DemonicHavoc", 183865)
 	-- P3
 	self:Log("SPELL_CAST_START", "DemonicFeedback", 187180)
@@ -107,11 +103,14 @@ end
 function mod:OnEngage()
 	currentTorment = 0
 	maxTorment = 0
+	burstCount = 1
 
+	self:Bar(182826, 6) -- Doomfire
 	self:Bar(183828, 15.4) -- Death Brand
 	self:Bar(183254, 30) -- Allure of Flames
 	self:Bar(183817, 41) -- Shadowfel Burst
-	--self:CDBar(185590, 45) -- Desecrate XXX initial cast hp based
+	burstTimer = self:ScheduleTimer("OpenProximity", 36, 183817, 10)
+	-- Desecrate initial cast is at 85%
 end
 
 --------------------------------------------------------------------------------
@@ -120,8 +119,10 @@ end
 
 function mod:Phases(unit, spellName, _, _, spellId)
 	if spellId == 190117 then -- Allow Phase 2 Spells
-		self:Message("stages", "Neutral", "Long", CL.phase:format(2), false)
 		self:StopBar(182826) -- Doomfire
+		self:StopBar(183817) -- Shadowfel Burst
+		self:CancelTimer(burstTimer)
+		self:Message("stages", "Neutral", "Long", CL.phase:format(2), false)
 		self:CDBar(186123, 7) -- Wrought Chaos
 		self:CDBar(184964, 27) -- Shackled Torment
 		self:CDBar(183828, 38) -- Death Brand
@@ -181,7 +182,10 @@ end
 function mod:ShadowfelBurst(args)
 	self:Message(args.spellId, "Urgent", "Warning", CL.incoming:format(args.spellName))
 	self:Bar(args.spellId, 2, CL.cast:format(args.spellName))
-	self:ScheduleTimer("Bar", 2, args.spellId, 58.8)
+	burstCount = burstCount + 1
+	self:Bar(args.spellId, burstCount == 2 and 61 or 56)
+	-- just in case timer is off
+	self:OpenProximity(args.spellId, 10)
 end
 
 do
@@ -190,6 +194,9 @@ do
 		list[#list+1] = args.destName
 		if #list == 1 then
 			self:ScheduleTimer("TargetMessage", 0.3, 183817, list, "Attention")
+			self:CloseProximity(183817)
+			self:CancelTimer(burstTimer)
+			burstTimer = self:ScheduleTimer("OpenProximity", burstCount == 2 and 56 or 51, 183817, 10)
 		end
 	end
 end
@@ -204,21 +211,25 @@ end
 do
 	local list, isOnMe = {}, nil
 	local function tormentSay(self, spellName)
-		table.sort(list)
+		sort(list)
 		for i = 1, #list do
 			local target = list[i]
 			if target == isOnMe then
 				local torment = CL.count:format(self:SpellName(187553), i) -- 187553 = "Torment"
 				self:Say(184964, torment)
 				self:Flash(184964)
-				self:Message(184964, "Positive", nil, CL.you:format(torment))
+				self:Message(184964, "Personal", "Alarm", CL.you:format(torment))
 			end
 			if self:GetOption("custom_off_torment_marker") then
 				SetRaidTarget(target, i)
 			end
 			list[i] = self:ColorName(target)
 		end
-		self:TargetMessage(184964, list, "Attention", "Alarm")
+		if not isOnMe then
+			self:TargetMessage(184964, list, "Attention")
+		else
+			wipe(list)
+		end
 	end
 
 	function mod:ShackledTorment(args)
@@ -286,16 +297,12 @@ do
 		local spell = CL.count:format(self:SpellName(186123), chaosCount)
 		if not self:Mythic() then
 			local targets = L.chaos_bar:format(chaosSource, chaosTarget)
-			self:Message(186123, args.destName, "Important", nil, CL.other:format(spell, targets)) -- Wrought Chaos (1): Player -> Player
-			self:Bar(186123, 5, ("(%d) %s"):format(chaosCount, targets)) -- (1) Player -> Player
+			self:Message(186123, "Important", nil, CL.other:format(spell, targets)) -- Wrought Chaos (1): Player -> Player
+			self:Bar(186123, 5, ("(%d) %s"):format(chaosCount, targets), "spell_shadow_soulleech_1") -- (1) Player -> Player
 		else
 			self:Message(186123, "Important", nil, spell) -- Wrought Chaos (1)
-			self:Bar(186123, 5, ("(%d) %s"):format(chaosCount, args.spellName)) -- (1) Focused Chaos
+			self:Bar(186123, 5, ("(%d) %s"):format(chaosCount, args.spellName), "spell_shadow_soulleech_1") -- (1) Focused Chaos
 		end
-	end
-
-	function mod:WroughtChaosRemoved(args)
-		self:StopBar(("(%d) %s"):format(chaosCount, L.chaos_bar:format(chaosSource, chaosTarget)))
 	end
 end
 
@@ -333,7 +340,7 @@ end
 
 function mod:NetherBanishRemoved(args)
 	if self:Me(args.destGUID) then
-		self:OpenProximity(187180, 6) -- Demonic Feedback
+		self:OpenProximity(187180, 7) -- Demonic Feedback
 	end
 end
 

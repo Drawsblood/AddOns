@@ -1,9 +1,191 @@
 ------------------------------------------------------------------------
-r13460 | funkydude | 2015-07-17 09:04:09 +0000 (Fri, 17 Jul 2015) | 1 line
+r13491 | funkydude | 2015-07-21 11:13:13 +0000 (Tue, 21 Jul 2015) | 1 line
 Changed paths:
-   A /tags/r13460-release (from /trunk:13459)
+   A /tags/r13491-release (from /trunk:13490)
 
-Tagging as r13460-release
+Tagging as r13491-release
+------------------------------------------------------------------------
+r13490 | funkydude | 2015-07-21 11:09:19 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/BigWigs.toc
+   M /trunk/Loader.lua
+   M /trunk/Plugins/Emphasize.lua
+   M /trunk/Plugins/Sound.lua
+   M /trunk/Plugins/Victory.lua
+
+Remove some old temp code, bump DBM version.
+------------------------------------------------------------------------
+r13489 | funkydude | 2015-07-21 11:04:06 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Mannoroth.lua
+
+Mannoroth: Fix another error
+------------------------------------------------------------------------
+r13487 | funkydude | 2015-07-21 10:44:30 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+   M /trunk/HellfireCitadel/FelLordZakuun.lua
+   M /trunk/HellfireCitadel/Mannoroth.lua
+
+Tweak wipe calls
+------------------------------------------------------------------------
+r13486 | nebula169 | 2015-07-21 07:04:22 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+   M /trunk/HellfireCitadel/FelLordZakuun.lua
+   M /trunk/HellfireCitadel/Mannoroth.lua
+
+fix lists not getting wiped
+------------------------------------------------------------------------
+r13485 | funkydude | 2015-07-20 21:51:35 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+   M /trunk/HellfireCitadel/Mannoroth.lua
+
+Mannoroth: Add respawn time, add mark of doom cast warning, tweak gaze delay, fix initial p3 shadowforce.
+------------------------------------------------------------------------
+r13483 | funkydude | 2015-07-20 13:50:59 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/BigWigs.toc
+
+bump version
+------------------------------------------------------------------------
+r13482 | nebula169 | 2015-07-20 13:31:37 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/FelLordZakuun.lua
+   M /trunk/HellfireCitadel/Gorefiend.lua
+   M /trunk/HellfireCitadel/Mannoroth.lua
+   M /trunk/HellfireCitadel/TyrantVelhari.lua
+
+TyrantVelhari: show p1 message when she gains Aura of Oppression
+------------------------------------------------------------------------
+r13481 | funkydude | 2015-07-20 13:24:35 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Xhulhorac.lua
+
+Xhulhorac: Only show striked messages for others
+------------------------------------------------------------------------
+r13480 | nebula169 | 2015-07-20 13:08:26 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/FelLordZakuun.lua
+
+FelLordZakuun: only show one Seed of Destruction message when on you
+------------------------------------------------------------------------
+r13479 | avi90 | 2015-07-20 13:00:31 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Xhulhorac.lua
+
+Xhulhorac: replace stack message spam of Felblaze Flurry and Withering Gaze with single target message
+------------------------------------------------------------------------
+r13478 | nebula169 | 2015-07-20 12:57:49 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+
+Archimonde: use Focused Chaos icon for the transfer bar, tweaks
+------------------------------------------------------------------------
+r13477 | nebula169 | 2015-07-20 12:52:10 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Mannoroth.lua
+
+Mannoroth: change tank message colors, remove Fel Hellstorm damage warning
+------------------------------------------------------------------------
+r13476 | funkydude | 2015-07-20 12:50:17 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Xhulhorac.lua
+
+Xhulhorac: Fix killed message
+------------------------------------------------------------------------
+r13475 | funkydude | 2015-07-20 12:34:12 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+   M /trunk/HellfireCitadel/ShadowLordIskar.lua
+
+ShadowLordIskar: Assume the different timers apply to LFR also, cleanups.
+------------------------------------------------------------------------
+r13474 | nebula169 | 2015-07-20 10:33:01 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+
+Archimonde: tweak Shadowfel Burst times
+------------------------------------------------------------------------
+r13473 | nebula169 | 2015-07-20 10:20:34 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/ShadowLordIskar.lua
+
+ShadowLordIskar: add trash mob ids for stopping bars
+------------------------------------------------------------------------
+r13472 | nebula169 | 2015-07-20 08:32:52 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+   M /trunk/Plugins/BossBlock.lua
+
+Archimonde: add Shadowfel Burst proximity, stop Shadowfel Burst when p2 starts, add the Archimonde portal movie to the skip list
+------------------------------------------------------------------------
+r13471 | funkydude | 2015-07-20 02:08:07 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+
+Archimonde: Fix Focused Chaos message
+------------------------------------------------------------------------
+r13470 | funkydude | 2015-07-20 01:12:12 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/ShadowLordIskar.lua
+
+ShadowLordIskar: Tweaks
+------------------------------------------------------------------------
+r13469 | elvador | 2015-07-20 01:01:42 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/ShadowLordIskar.lua
+
+ShadowLordIskar: Improve Dark Bindings messages
+------------------------------------------------------------------------
+r13468 | elvador | 2015-07-20 00:08:30 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Socrethar.lua
+
+Socrethar: Fix Dominator count
+------------------------------------------------------------------------
+r13467 | elvador | 2015-07-20 00:00:15 +0000 (Mon, 20 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Socrethar.lua
+
+Socrethar: Fix Dominator and Apocalyptic Felburst
+------------------------------------------------------------------------
+r13466 | avi90 | 2015-07-19 22:54:13 +0000 (Sun, 19 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/ShadowLordIskar.lua
+
+ShadowLordIskar: save time remaining on p1 timers during p2
+------------------------------------------------------------------------
+r13465 | elvador | 2015-07-19 22:50:07 +0000 (Sun, 19 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Socrethar.lua
+
+Socrethar: Fix Dominator, add Apocalyptic Felburst stuff
+------------------------------------------------------------------------
+r13464 | Ironi88 | 2015-07-19 21:52:49 +0000 (Sun, 19 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Socrethar.lua
+
+Socrethar.lua: initial timer for Apocalyptic Felburst + announce
+------------------------------------------------------------------------
+r13463 | funkydude | 2015-07-19 21:32:52 +0000 (Sun, 19 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Mannoroth.lua
+
+Mannoroth: Fix curse count in target message.
+------------------------------------------------------------------------
+r13462 | avi90 | 2015-07-18 20:11:12 +0000 (Sat, 18 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Council.lua
+
+Council: adjust reap timers for hotfix
+------------------------------------------------------------------------
+r13461 | avi90 | 2015-07-17 13:48:31 +0000 (Fri, 17 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Gorefiend.lua
+
+Gorefiend: no Shared Fate for LFR
 ------------------------------------------------------------------------
 r13459 | funkydude | 2015-07-17 08:43:37 +0000 (Fri, 17 Jul 2015) | 1 line
 Changed paths:
@@ -1544,17 +1726,4 @@ Changed paths:
    M /trunk/HellfireCitadel/Kormrok.lua
 
 rewrote most abilities
-------------------------------------------------------------------------
-r13200 | funkydude | 2015-06-16 23:03:15 +0000 (Tue, 16 Jun 2015) | 1 line
-Changed paths:
-   M /trunk/BigWigs.toc
-   M /trunk/Loader.lua
-
-bump version
-------------------------------------------------------------------------
-r13199 | funkydude | 2015-06-13 01:42:01 +0000 (Sat, 13 Jun 2015) | 1 line
-Changed paths:
-   M /trunk/HellfireCitadel/Archimonde.lua
-
-Archimonde: Shadow Burst renamed to Shadowfel Burst.
 ------------------------------------------------------------------------

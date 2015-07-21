@@ -700,12 +700,14 @@ function ArkInventory.LDB.Mounts.IsFlyable( useMapZone )
 					
 				elseif zone == 7 then
 					
---					if not GetSpellInfo( ( GetSpellInfo( xxxxxx ) ) ) then
+					local _, _, _, completed = GetAchievementInfo( 10018 )
+					
+					if not completed then
 						
---						ArkInventory.Output( "draenor but you dont know xxxxxx )
+--						ArkInventory.Output( "draenor but you dont have the pathfinder achievement )
 						ArkInventory.IsFlyable = false
 						
---					end
+					end
 					
 				end
 				
@@ -729,6 +731,7 @@ function ArkInventory.LDB.Mounts.IsFlyable( useMapZone )
 				ArkInventory.IsFlyable = false
 				break
 			end
+			
 		end
 		
 	end
@@ -744,8 +747,9 @@ function ArkInventory.LDB.Mounts.BuildList( ignoreActive, mountType )
 	end
 	
 	local n = ArkInventory.MountJournal.GetCount( )
-	if n == 0 then return end
 	--ArkInventory.Output( n, " owned mounts to choose from" )
+	
+	if n == 0 then return end
 	
 	local selected = { }
 	for k, v in pairs( ArkInventory.Global.Me.ldb.mounts[mountType].selected ) do

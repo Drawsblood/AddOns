@@ -1,13 +1,19 @@
-Ovale Spell Priority 6.2.11
+Ovale Spell Priority 6.2.12
 ===========================
 
-Changes from version 6.2.10:
+Changes from version 6.2.11:
 ----------------------------
 
--   Regenerate scripts based on SimulationCraft profiles from release-620-02.
+-   Hunter: Move Level 90 talents into main attack icon.
 
--   Merge branch 'simulationcraft'.
+    After discussions with many hunters, they overwhelmingly prefer having the
+    level 90 talents -- Glaive Toss, Powershot, and Barrage -- in the main
+    attack icon instead of the short CD icon.  In the main attack icon, the
+    focus-pooling for those abilities will be less difficult to understand as
+    well.
 
-    Pull in changes from SimulationCraft release 620-02.
+-   SimC APL's allow "legendary_ring.{up|remains}" as buff conditionals.
 
--   Import Tier18M profiles from SimulationCraft release 620-02.
+-   Guard against nil returns.
+
+    This fixes a bug that can appear on classes with pets.

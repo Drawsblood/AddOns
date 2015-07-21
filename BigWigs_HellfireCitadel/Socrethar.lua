@@ -17,6 +17,7 @@ local dominanceCount = 0
 local apocalypseCount = 0
 local dominatorCount = 0
 local prisonCount = 0
+local felburstCount = 0
 local isHostile = true -- is Soulbound Construct hostile or friendly
 local inBarrier = false
 local addCount = 1
@@ -53,6 +54,7 @@ function mod:GetOptions()
 		{182051, "SAY"}, -- Felblaze Charge
 		182218, -- Felblaze Residue
 		181288, -- Fel Prison
+		188693, -- Apocalyptic Felburst
 		-- Voracious Soulstalker (Mythic)
 		-11778, -- Voracious Soulstalker
 		188692, -- Unstoppable Tenacity
@@ -87,6 +89,8 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_START", "Apocalypse", 183329)
 	self:Log("SPELL_AURA_APPLIED", "VolatileFelOrb", 189627)
 	self:Log("SPELL_CAST_START", "FelblazeCharge", 182051)
+	self:Log("SPELL_CAST_START", "ApocalypticFelburst", 188693) -- P1
+	self:Log("SPELL_CAST_SUCCESS", "ApocalypticFelburstConstruct", 190651) -- Construct Ability
 	self:Log("SPELL_AURA_APPLIED", "FelBarrier", 184053)
 	self:Log("SPELL_AURA_REMOVED", "FelBarrierRemoved", 184053)
 	self:Log("SPELL_AURA_APPLIED", "GiftOfTheManari", 184124)
@@ -106,6 +110,7 @@ end
 
 function mod:OnEngage()
 	addCount = 1
+	felburstCount = 1
 	isHostile = true
 	inBarrier = false
 	ghostGUIDS = {}
@@ -114,6 +119,7 @@ function mod:OnEngage()
 	self:CDBar(180221, 13) -- Volatile Fel Orb
 	self:CDBar(182051, 29) -- Felblaze Charge
 	if self:Mythic() then
+		self:Bar(188693, 34, CL.count:format(self:SpellName(188693), felburstCount)) -- Apocalyptic Felburst
 		self:Bar(-11778, 20, addFormat:format(addCount), "spell_shadow_summonfelhunter") -- Voracious Soulstalker
 	end
 	self:Berserk(641)
@@ -170,6 +176,18 @@ do
 	end
 end
 
+
+function mod:ApocalypticFelburst(args)
+	self:Message(args.spellId, "Important", "Alert", CL.count:format(args.spellName, felburstCount))
+	felburstCount = felburstCount + 1
+	self:CDBar(args.spellId, 30.5, CL.count:format(args.spellName, felburstCount))
+end
+
+
+function mod:ApocalypticFelburstConstruct()
+	self:Message(188693, "Important", "Alert")
+end
+
 function mod:FelPrison(args)
 	self:Message(args.spellId, "Urgent", "Alarm")
 	self:CDBar(args.spellId, 45)
@@ -207,7 +225,7 @@ end
 
 function mod:EjectSoul() -- Phase 2 Start
 	isHostile = false
-	dominatorCount, dominanceCount, apocalypseCount = 0, 0, 0
+	dominatorCount, dominanceCount, apocalypseCount = 1, 0, 0
 	prisonCount = 0
 	-- Stop P1 bars
 	self:StopBar(180008) -- Reverberating Blow
@@ -219,7 +237,7 @@ function mod:EjectSoul() -- Phase 2 Start
 	self:Bar("stages", 7, 180258, "achievement_boss_hellfire_socrethar") -- Construct is Good
 	self:Bar("portals", 140, L.portals, L.portals_icon) -- Portals Move
 	self:DelayedMessage("portals", 140, "Neutral", L.portals_msg, L.portals_icon, "Info")
-	self:Bar("dominator", 24, L.dominator, L.dominator_icon) -- Sargerei Dominator
+	self:Bar("dominator", 24, CL.count:format(self:SpellName(L.dominator), dominatorCount), L.dominator_icon) -- Sargerei Dominator
 	self:CDBar(-11462, 30, nil, "achievement_halloween_ghost_01") -- Haunting Soul
 	self:CDBar(183329, 52) -- Apocalypse
 	self:Message("stages", "Neutral", "Long", CL.phase:format(2), false)
@@ -227,9 +245,9 @@ end
 
 function mod:FelBarrier()
 	inBarrier = true
+	self:Message("dominator", "Neutral", "Warning", CL.count:format(self:SpellName(L.dominator), dominatorCount), L.dominator_icon)
 	dominatorCount = dominatorCount + 1
-	self:Message("dominator", "Neutral", "Warning", CL.count:format(L.dominator, dominatorCount), L.dominator_icon)
-	self:Bar("dominator", self:Mythic() and 130 or (dominatorCount % 2 == 0 and 70 or 60), CL.count:format(L.dominator, dominatorCount + 1), L.dominator_icon) -- Sargerei Dominator
+	self:Bar("dominator", self:Mythic() and 130 or (dominatorCount % 2 == 0 and 70 or 60), CL.count:format(self:SpellName(L.dominator), dominatorCount), L.dominator_icon) -- Sargerei Dominator
 	self:CDBar(184124, 5) -- Gift of the Man'ari
 end
 
@@ -298,6 +316,7 @@ function mod:IncompleteBindingRemoved(args) -- Phase 2 End
 	self:CDBar(181288, 46) -- Fel Prison
 	self:CDBar(180221, 8) -- Volatile Fel Orb
 	self:CDBar(182051, 26) -- Felblaze Charge
+	self:CDBar(188693, 30, CL.count:format(self:SpellName(188693), felburstCount)) -- Apocalyptic Felburst, no idea if the timer is correct
 	if self:Mythic() then
 		self:CDBar(-11778, 16, addFormat:format(addCount), "spell_shadow_summonfelhunter") -- Voracious Soulstalker
 	end

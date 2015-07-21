@@ -1,9 +1,16 @@
 ------------------------------------------------------------------------
-r292 | olzenkhaw | 2015-07-17 15:16:05 +0000 (Fri, 17 Jul 2015) | 1 line
+r294 | olzenkhaw | 2015-07-21 13:51:49 +0000 (Tue, 21 Jul 2015) | 1 line
 Changed paths:
-   A /tags/v4.8.1 WoD release (from /trunk:291)
+   A /tags/v4.8.2 WoD release (from /trunk:293)
 
-4.8.1 Fixed timewalking gear item level.
+4.8.2 Added Immaculate gems.
+------------------------------------------------------------------------
+r293 | olzenkhaw | 2015-07-21 13:51:18 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+4.8.2 Added Immaculate gems.
 ------------------------------------------------------------------------
 r291 | olzenkhaw | 2015-07-17 15:15:38 +0000 (Fri, 17 Jul 2015) | 1 line
 Changed paths:

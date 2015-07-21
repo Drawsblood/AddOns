@@ -45,6 +45,11 @@ end
 
 L = BigWigs:NewBossLocale("Kromog", "zhTW")
 if L then
+L["custom_off_hands_marker"] = "大地之握坦克標記"
+L["custom_off_hands_marker_desc"] = "使用 {rt7}{rt8} 標記被大地之握抓住的坦克，需要團隊權限或隊長。"
+L["destroy_pillars"] = "摧毀石柱"
+L["prox"] = "坦克雷達"
+L["prox_desc"] = "開啟一個15碼的距離雷達顯示其他坦克，有助於處理石拳連擊。"
 
 end
 
@@ -76,6 +81,7 @@ L["random"] = "隨機列車"
 L["train"] = "行駛中的列車"
 L["trains"] = "列車警告"
 L["trains_desc"] = "為下一班列車顯示計時條及訊息。軌道編號從王的位置排列至入口，例：王 1 2 3 4 入口。"
+L["train_you"] = "你在的軌道有火車！"
 
 end
 

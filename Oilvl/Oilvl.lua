@@ -3376,7 +3376,13 @@ local gemTexture = {
 	"Interface\\ICONS\\INV_jewelcrafting_51",
 	"Interface\\ICONS\\INV_jewelcrafting_52",
 	"Interface\\ICONS\\INV_jewelcrafting_53",
-	"Interface\\ICONS\\INV_jewelcrafting_54"
+	"Interface\\ICONS\\INV_jewelcrafting_54",
+	"Interface\\ICONS\\INV_jewelcrafting_ImmacTaladite_Purple",
+	"Interface\\ICONS\\INV_jewelcrafting_ImmacTaladite_Yellow",
+	"Interface\\ICONS\\INV_jewelcrafting_ImmacTaladite_Orange",
+	"Interface\\ICONS\\INV_jewelcrafting_ImmacTaladite_Blue",
+	"Interface\\ICONS\\INV_jewelcrafting_ImmacTaladite_Green",
+	"Interface\\ICONS\\INV_jewelcrafting_ImmacTaladite_Red"
 }
 
 function OItemAnalysisLowGem(itemLink)

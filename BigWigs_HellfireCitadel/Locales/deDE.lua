@@ -22,6 +22,10 @@ end
 
 L = BigWigs:NewBossLocale("Shadow-Lord Iskar", "deDE")
 if L then
+L["bindings_removed"] = "Bindungen entfernt (%d/3)" -- Needs review
+L["custom_off_binding_marker"] = "Dunkle Bindungen markieren"
+L["custom_off_binding_marker_desc"] = [=[Markiere die Dunklen Bindungen mit {rt1}{rt2}{rt3}{rt4}{rt5}{rt6}, benötigt Leiter oder Assistent.
+|cFFFF0000Nur eine Person im Raid sollte diese Option aktiviert haben, um Markierungskonflikte zu verhindern.|r]=]
 L["custom_off_wind_marker"] = "Imaginäre Winde markieren"
 L["custom_off_wind_marker_desc"] = [=[Markiere Imaginäre Winde mit {rt1}{rt2}{rt3}{rt4}{rt5}, benötigt Leiter oder Assistent.
 |cFFFF0000Nur eine Person im Raid sollte diese Option aktiviert haben, um Markierungskonflikte zu verhindern.|r]=]
@@ -70,7 +74,7 @@ if L then
 L["chaos_bar"] = "%s -> %s"
 L["custom_off_torment_marker"] = "Gefesselte Pein markieren"
 L["custom_off_torment_marker_desc"] = "Markiere die Ziele von Gefesselte Pein mit {rt1}{rt2}{rt3}, benötigt Leiter oder Assistent."
-L["torment_removed"] = "Gefesselte Pein entfernt (%d/%d)"
+L["torment_removed"] = "Pein entfernt (%d/%d)"
 
 end
 

@@ -12,6 +12,9 @@
  * faq - https://github.com/arkayenro/arkinventory/wiki/FAQ
  
 
+*3.05.11 (21-JUL-2015)*
+ * updated - draenor flying capability
+
 *3.05.10 (13-JUL-2015)*
  * fixed - issue with tint unusable overlay
  * fixed - issue with battlepet tooltips at the auction house

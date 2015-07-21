@@ -74,7 +74,6 @@ function mod:GetOptions()
 		181973, -- Feast of Souls
 		{181295, "COUNTDOWN"}, -- Digest
 		179864, -- Shadow of Death
-		--182788, -- Crushing Darkness
 		--[[ Enraged Spirit ]]--
 		182601, -- Fel Fury
 		181582, -- Bellowing Shout
@@ -107,7 +106,6 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_APPLIED", "Digest", 181295)
 	self:Log("SPELL_AURA_REMOVED", "DigestRemoved", 181295)
 	self:Log("SPELL_AURA_APPLIED", "ShadowOfDeath", 179864)
-	--self:Log("SPELL_CAST_START", "CrushingDarkness", 182788) -- 180016 hidden, but do we care about warning for it?
 
 	self:Log("SPELL_CAST_START", "BellowingShout", 181582)
 	self:Log("SPELL_AURA_APPLIED", "HungerForLife", 180148)
@@ -135,7 +133,9 @@ function mod:OnEngage()
 	fixateOnMe = nil
 	fateCount = 1
 	showProximity()
-	self:Bar(179909, 18) -- Shared Fate
+	if not self:LFR() then
+		self:Bar(179909, 18) -- Shared Fate
+	end
 	self:Bar(179864, self:Mythic() and 3 or 2, shadowOfDeathInfo.icon.dps.." "..self:SpellName(179864)) -- DPS Shadow of Death
 	self:Bar(179864, self:Mythic() and 9 or 13, shadowOfDeathInfo.icon.tank.." "..self:SpellName(179864)) -- Tank Shadow of Death
 	self:Bar(179864, self:Mythic() and 20 or 30, shadowOfDeathInfo.icon.healer.." "..self:SpellName(179864)) -- Healer Shadow of Death
@@ -249,8 +249,10 @@ function mod:FeastOfSoulsOver(args)
 	self:Bar(179864, self:Mythic() and 3 or 2, shadowOfDeathInfo.icon.dps.." "..self:SpellName(179864)) -- DPS Shadow of Death
 	self:Bar(179864, self:Mythic() and 9 or 13, shadowOfDeathInfo.icon.tank.." "..self:SpellName(179864)) -- Tank Shadow of Death
 	self:Bar(179864, self:Mythic() and 20 or 30, shadowOfDeathInfo.icon.healer.." "..self:SpellName(179864)) -- Healer Shadow of Death
-	self:Bar(179909, 19) -- Shared Fate
 	self:Bar(179977, 9) -- Touch of Doom
+	if not self:LFR() then
+		self:Bar(179909, 19) -- Shared Fate
+	end
 
 	fateCount = 1
 	shadowOfDeathInfo.count.tank = 0

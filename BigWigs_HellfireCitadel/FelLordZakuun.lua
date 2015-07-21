@@ -219,21 +219,25 @@ end
 do
 	local list, isOnMe = {}, nil
 	local function seedSay(self, spellName)
-		table.sort(list)
+		sort(list)
 		for i = 1, #list do
 			local target = list[i]
 			if target == isOnMe then
 				local seed = L.seed:format(i)
 				self:Say(181508, seed)
 				self:Flash(181508)
-				self:Message(181508, "Positive", nil, CL.you:format(seed))
+				self:Message(181508, "Positive", "Alarm", CL.you:format(seed))
 			end
 			if self:GetOption("custom_off_seed_marker") then
 				SetRaidTarget(target, i)
 			end
 			list[i] = self:ColorName(target)
 		end
-		self:TargetMessage(181508, list, "Attention", "Alarm")
+		if not isOnMe then
+			self:TargetMessage(181508, list, "Attention")
+		else
+			wipe(list)
+		end
 		isOnMe = nil
 	end
 

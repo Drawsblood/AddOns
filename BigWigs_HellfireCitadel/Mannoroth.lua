@@ -7,6 +7,7 @@ local mod, CL = BigWigs:NewBoss("Mannoroth", 1026, 1395)
 if not mod then return end
 mod:RegisterEnableMob(91305, 91241, 91349) -- Fel Iron Summoner, Doom Lord, Mannoroth
 mod.engageId = 1795
+mod.respawnTime = 30
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -76,12 +77,11 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_START", "GlaiveThrust", 183377, 185831)
 	self:Log("SPELL_AURA_APPLIED", "MassiveBlast", 181359, 185821)
 	self:Log("SPELL_CAST_SUCCESS", "FelHellstorm", 181557)
-	self:Log("SPELL_DAMAGE", "FelHellstormDamage", 181566)
-	self:Log("SPELL_MISSED", "FelHellstormDamage", 181566)
 	-- Adds
 	self:Log("SPELL_CAST_SUCCESS", "CurseOfTheLegionSuccess", 181275) -- APPLIED can miss
 	self:Log("SPELL_AURA_APPLIED", "CurseOfTheLegion", 181275)
 	self:Log("SPELL_AURA_REMOVED", "CurseOfTheLegionRemoved", 181275)
+	self:Log("SPELL_CAST_START", "MarkOfDoomCast", 181099)
 	self:Log("SPELL_AURA_APPLIED", "MarkOfDoom", 181099)
 	self:Log("SPELL_AURA_REMOVED", "MarkOfDoomRemoved", 181099)
 	self:Log("SPELL_AURA_APPLIED_DOSE", "DoomSpike", 181119)
@@ -115,12 +115,41 @@ end
 
 -- Adds
 
+function mod:CurseOfTheLegionSuccess(args)
+	curseCount = curseCount + 1
+	if self:Mythic() then
+		self:Bar(args.spellId, 65, CL.count:format(args.spellName, curseCount))
+	end
+end
+
+function mod:CurseOfTheLegion(args)
+	self:TargetMessage(args.spellId, args.destName, "Attention", "Alarm", CL.count:format(args.spellName, curseCount-1))
+	self:TargetBar(args.spellId, 20, args.destName)
+	self:PrimaryIcon(args.spellId, args.destName)
+	if self:Me(args.destGUID) then
+		self:Say(args.spellId)
+		self:Flash(args.spellId)
+	end
+end
+
+function mod:CurseOfTheLegionRemoved(args)
+	self:StopBar(args.spellName, args.destName)
+	self:PrimaryIcon(args.spellId)
+	self:Message(args.spellId, "Important", "Warning", CL.spawned:format(self:SpellName(-11813))) -- Doom Lord
+	self:Bar(181099, 12) -- Mark of Doom
+end
+
 do
 	local list = mod:NewTargetList()
+	function mod:MarkOfDoomCast(args)
+		wipe(list)
+		self:Message(args.spellId, "Attention", "Info", CL.casting:format(args.spellName))
+	end
+
 	function mod:MarkOfDoom(args)
 		list[#list+1] = args.destName
 		if #list == 1 then
-			self:ScheduleTimer("TargetMessage", 1, args.spellId, list, "Attention", "Alarm")
+			self:ScheduleTimer("TargetMessage", 2, args.spellId, list, "Attention", "Alarm")
 		end
 		if self:Me(args.destGUID) then
 			self:Say(args.spellId, CL.count:format(args.spellName, #list))
@@ -177,36 +206,40 @@ do
 end
 
 function mod:GlaiveThrust(args)
-	self:Message(181354, "Attention", "Warning", args.spellName)
+	self:Message(181354, "Urgent", "Warning", args.spellName)
 end
 
 function mod:MassiveBlast(args)
-	self:TargetMessage(181359, args.destName, "Attention", nil, args.spellName)
-end
-
-function mod:MannorothsGazeCast(args)
-	self:Message(181597, "Attention", "Info", CL.casting:format(args.spellName))
-	self:Bar(181597, 47, args.spellName)
+	self:TargetMessage(181359, args.destName, "Urgent", nil, args.spellName)
 end
 
 do
-	local list, isOnMe = {}, nil
+	local list, isOnMe, timer = {}, nil, nil
+	function mod:MannorothsGazeCast(args)
+		timer, isOnMe = nil, nil
+		wipe(list)
+		self:Message(181597, "Attention", "Info", CL.casting:format(args.spellName))
+		self:Bar(181597, 47, args.spellName)
+	end
+
 	local function gazeSay(self, spellName)
-		table.sort(list)
+		timer = nil
+		sort(list)
 		for i = 1, #list do
 			local target = list[i]
 			if target == isOnMe then
 				local gaze = L.gaze:format(i)
 				self:Say(181597, gaze)
-				self:Message(181597, "Positive", nil, CL.you:format(gaze))
+				self:Message(181597, "Personal", "Alarm", CL.you:format(gaze))
 			end
 			if self:GetOption("custom_off_gaze_marker") then
 				SetRaidTarget(target, i)
 			end
 			list[i] = self:ColorName(target)
 		end
-		self:TargetMessage(181597, list, "Attention", "Alarm")
-		isOnMe = nil
+		if not isOnMe then
+			self:TargetMessage(181597, list, "Attention")
+		end
 	end
 
 	function mod:MannorothsGaze(args)
@@ -216,7 +249,10 @@ do
 
 		list[#list+1] = args.destName
 		if #list == 1 then
-			self:ScheduleTimer(gazeSay, 0.3, self, args.spellName)
+			timer = self:ScheduleTimer(gazeSay, 0.5, self, args.spellName)
+		elseif timer and #list == 3 then
+			self:CancelTimer(timer)
+			gazeSay(self, args.spellName)
 		end
 	end
 
@@ -231,30 +267,6 @@ function mod:Shadowforce(args)
 	self:Message(181799, "Important", "Long", CL.casting:format(args.spellName))
 	self:Bar(181799, 8, CL.cast:format(args.spellName))
 	self:CDBar(181799, 52, args.spellName)
-end
-
-function mod:CurseOfTheLegionSuccess(args)
-	curseCount = curseCount + 1
-	if self:Mythic() then
-		self:Bar(args.spellId, 65, CL.count:format(args.spellName, curseCount))
-	end
-end
-
-function mod:CurseOfTheLegion(args)
-	self:TargetMessage(args.spellId, args.destName, "Attention", "Alarm", CL.count:format(args.spellName, curseCount))
-	self:TargetBar(args.spellId, 20, args.destName)
-	self:PrimaryIcon(args.spellId, args.destName)
-	if self:Me(args.destGUID) then
-		self:Say(args.spellId)
-		self:Flash(args.spellId)
-	end
-end
-
-function mod:CurseOfTheLegionRemoved(args)
-	self:StopBar(args.spellName, args.destName)
-	self:PrimaryIcon(args.spellId)
-	self:Message(args.spellId, "Important", "Warning", CL.spawned:format(self:SpellName(-11813))) -- Doom Lord
-	self:Bar(181099, 12) -- Mark of Doom
 end
 
 function mod:Felseeker(args)
@@ -279,17 +291,6 @@ end
 
 function mod:FelHellstorm(args)
 	self:CDBar(args.spellId, 36)
-end
-
-do
-	local prev = 0
-	function mod:FelHellstormDamage(args)
-		local t = GetTime()
-		if t-prev > 2 and self:Me(args.destGUID) then
-			prev = t
-			self:Message(181557, "Personal", "Alarm", CL.you:format(args.spellName))
-		end
-	end
 end
 
 -- Phases
@@ -338,7 +339,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(unit, spellName, _, _, spellId)
 		self:Message("stages", "Neutral", "Info", CL.stage:format(3), false)
 		phase = 3
 		self:CDBar(181557, 24) -- Fel Hellstorm
-		self:CDBar(181799, 30) -- Shadowforce
+		self:CDBar(181799, 26.5) -- Shadowforce, 26.5-31
 		self:CDBar(181354, 36) -- Glaive Combo
 		self:CDBar(181597, 40) -- Mannoroth's Gaze
 		self:CDBar(181735, 60) -- Felseeker
