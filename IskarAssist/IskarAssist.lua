@@ -36,7 +36,7 @@ local anzu_texture
 local player_class
 local block_backdrop_eye = {bgFile = [[Interface\RaidFrame\Raid-Bar-Hp-Fill]], tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0},
 edgeFile = "Interface\\AddOns\\IskarAssist\\border_2", edgeSize = 20}
-local iskar_version = "v0.9"
+local iskar_version = "v0.13"
 
 local iskar_encounter_id = 1788 --iskar
 local iskar_npcid = 90316 --iskar
@@ -75,6 +75,7 @@ local aura_fel_chakram, rank, fel_chakram_icon = GetSpellInfo (182178) --Fel Cha
 local aura_phantasmal_corruption, rank, phantasmal_corruption_icon = GetSpellInfo (181824) --Phantasmal Corruption
 local aura_fel_bomb, rank, fel_bomb_icon = GetSpellInfo (181753) --Fel Bomb
 local aura_phantasmal_bomb, rank, phantasmal_bomb_icon = GetSpellInfo (179219) --Phantasmal Fel Bomb
+local aura_dark_bindings, rank, dark_bindings_icon = GetSpellInfo (185510) --Dark Bindings
 
 local track_auras = {
 	[aura_phantasmal_wounds] = true,
@@ -83,6 +84,7 @@ local track_auras = {
 	[aura_phantasmal_corruption] = true,
 	[aura_fel_bomb] = true,
 	[aura_phantasmal_bomb] = true,
+	[aura_dark_bindings] = true,
 }
 
 local grid_aura_index = {
@@ -99,6 +101,7 @@ local dispel_purify = GetSpellInfo (527) --priest
 local dispel_cleanse = GetSpellInfo (4987) --pally
 local dispel_purify_spirit = GetSpellInfo (77130) --shaman
 local dispel_detox = GetSpellInfo (115450) --monk
+local dispel_sear_magic = GetSpellInfo (89808) --warlock
 
 local no_border = {5/64, 59/64, 5/64, 59/64}
 
@@ -108,6 +111,7 @@ local dispel_spells = {
 	[dispel_cleanse] = true,
 	[dispel_purify_spirit] = true,
 	[dispel_detox] = true,
+	[dispel_sear_magic] = true,
 }
 
 --> debug
@@ -157,6 +161,8 @@ function IKA:CreateFrames (show_after_cretion)
 	
 	--> create the main frame
 	f = DF:Create1PxPanel (_, 100, 20, "Iskar Ast", "IskarAssist", IKA.db.profile.MainPanel, "top", true)
+	f.FramesCreated = true
+	
 	f:SetFrameStrata ("DIALOG")
 	f.version = iskar_version
 	f.Title:ClearAllPoints()
@@ -180,7 +186,6 @@ function IKA:CreateFrames (show_after_cretion)
 	f:Hide()
 	
 	f.DontRightClickClose = true
-	f.FramesCreated = true
 	IKA.scheduled_frame_creation = nil
 	
 	for i = 1, 6 do
@@ -717,6 +722,18 @@ function IKA:CreateFrames (show_after_cretion)
 			block.button:SetAttribute ("spell2", dispel_naturescure)
 		elseif (player_class == "MONK") then
 			block.button:SetAttribute ("spell2", dispel_detox)
+		elseif (player_class == "WARLOCK") then
+			--check if the player has grimory of sacrifice
+			local ativo = GetActiveSpecGroup()
+			local talentID, name, texture, selected, available = GetTalentInfo (5, 3, ativo)
+			if (selected) then
+				--grimory of sacrifice
+				local command_demon = GetSpellInfo (119898)
+				block.button:SetAttribute ("spell2", command_demon)
+			else
+				--use the pet dispell
+				block.button:SetAttribute ("spell2", dispel_sear_magic)
+			end
 		end
 
 		block.name = playername
@@ -1120,10 +1137,29 @@ function IKA:CreateFrames (show_after_cretion)
 		debuff_block:Hide()
 	end
 	
+	function f:SetAuraDarkBindings (target_name, applied)
+		if (applied) then
+			local block = name_to_block [target_name]
+			if (block) then
+				block:SetBackdrop ({edgeFile = "Interface\\AddOns\\IskarAssist\\border_2", edgeSize = 50})
+				block:SetBackdropBorderColor (206/255, 184/255, 253/255)
+			end
+		else
+			local block = name_to_block [target_name]
+			if (block) then
+				block:SetBackdrop (nil)
+			end
+		end
+	end
+	
 	function f:SetAura (target_name, spellname, spellid)
 		local block = name_to_block [target_name]
 		
 		if (block) then
+		
+			if (spellname == aura_dark_bindings) then
+				return f:SetAuraDarkBindings (target_name, true)
+			end
 		
 			if (IKA.db.profile.group_sorting == 3) then
 				return f:SetGridAura (block, target_name, spellname, spellid)
@@ -1171,6 +1207,11 @@ function IKA:CreateFrames (show_after_cretion)
 	end
 
 	function f:RemoveAura (target_name, spellname, spellid)
+	
+		if (spellname == aura_dark_bindings) then
+			return f:SetAuraDarkBindings (target_name, false)
+		end
+	
 		local block = name_to_block [target_name]
 		if (block) then
 		
@@ -1628,12 +1669,14 @@ function IKA:ReloadAuraNames()
 	aura_phantasmal_corruption = GetSpellInfo (181824) --Phantasmal Corruption (checked on live)
 	aura_fel_bomb = GetSpellInfo (181753) --Fel Bomb (checked on live)
 	aura_phantasmal_bomb = GetSpellInfo (179219) --Phantasmal Fel Bomb (checked on live)
+	aura_dark_bindings = GetSpellInfo (185510) --Dark Bindings
 
 	dispel_naturescure = GetSpellInfo (88423) --druid
 	dispel_purify = GetSpellInfo (527) --priest
 	dispel_cleanse = GetSpellInfo (4987) --pally
 	dispel_purify_spirit = GetSpellInfo (77130) --shaman
 	dispel_detox = GetSpellInfo (115450) --monk
+	dispel_sear_magic = GetSpellInfo (89808) --warlock
 	
 	track_auras [aura_phantasmal_wounds] = true
 	track_auras [aura_phantasmal_winds] = true
@@ -1641,19 +1684,22 @@ function IKA:ReloadAuraNames()
 	track_auras [aura_phantasmal_corruption] = true
 	track_auras [aura_fel_bomb] = true
 	track_auras [aura_phantasmal_bomb] = true
+	track_auras [aura_dark_bindings] = true
 	
 	dispel_spells [dispel_naturescure] = true
 	dispel_spells [dispel_purify] = true
 	dispel_spells [dispel_cleanse] = true
 	dispel_spells [dispel_purify_spirit] = true
 	dispel_spells [dispel_detox] = true
+	dispel_spells [dispel_sear_magic] = true
 	
 	if (f) then
 		f:SetEnabledDebuffs()
 	end
 	
 	if (is_kargath_test) then
-		aura_phantasmal_winds = "Weakened Soul"
+		aura_dark_bindings = "Weakened Soul"
+		--aura_phantasmal_winds = "Weakened Soul"
 		aura_phantasmal_wounds = "Flame Jet"
 		aura_phantasmal_corruption = "Chain Hurl"
 		aura_fel_bomb = "Impale"
@@ -1663,10 +1709,11 @@ function IKA:ReloadAuraNames()
 		track_auras ["Chain Hurl"] = true
 		track_auras ["Impale"] = true
 		
-		grid_aura_index ["Weakened Soul"] = 1
+		grid_aura_index ["Impale"] = 1
 		grid_aura_index ["Flame Jet"] = 2
 		grid_aura_index ["Chain Hurl"] = 3
 		grid_aura_index ["Impale"] = 4
+		grid_aura_index ["Weakened Soul"] = 5
 	end
 	
 end
@@ -1691,17 +1738,7 @@ frame_event:SetScript ("OnEvent", function (self, event, ...)
 			f:debug ("Party Members Update")
 			f:SortGroups (event)
 		end
-		
-	elseif (event == "ZONE_CHANGED_NEW_AREA") then
-		local zoneName, zoneType, _, _, _, _, _, zoneMapID = GetInstanceInfo()
-		if (zoneType == "raid" and zoneMapID == hfc_map_id) then
-			IKA:ScheduleCreateFrames()
-		else
-			if (f) then
-				f:HideMe()
-			end
-		end
-		
+
 	elseif (event == "PLAYER_TARGET_CHANGED") then
 		local GUID = UnitGUID ("target")
 		if (GUID) then
@@ -1723,6 +1760,7 @@ frame_event:SetScript ("OnEvent", function (self, event, ...)
 		if (IskarAssistOptionsPanel and IskarAssistOptionsPanel:IsShown()) then
 			IskarAssistOptionsPanel:Hide()
 			IKA.schedule_open_options = true
+			IKA:Msg ("can't change options while in combat.")
 		end
 		
 	elseif (event == "INSTANCE_ENCOUNTER_ENGAGE_UNIT") then
@@ -1732,6 +1770,7 @@ frame_event:SetScript ("OnEvent", function (self, event, ...)
 	
 	elseif (event == "PLAYER_REGEN_ENABLED") then
 		if (IKA.scheduled_frame_creation) then
+			IKA.scheduled_frame_creation = nil
 			IKA:CreateFrames()
 			f:ShowMe()
 			if (IKA.scheduled_check_users) then
@@ -1742,16 +1781,17 @@ frame_event:SetScript ("OnEvent", function (self, event, ...)
 		
 		if (f) then
 			if (f.schedule_sort) then
+				f.schedule_sort = nil
 				f:SortGroups()
 				f:debug ("Regen Enabled with a schedule sort.")
 			end
 			if (f.schedule_hide) then
-				f:Hide()
 				f.schedule_hide = nil
+				f:Hide()
 			end
 			if (f.schedule_show) then
-				f:Show()
 				f.schedule_show = nil
+				f:Show()
 			end
 			if (IKA.schedule_open_options) then
 				IKA.schedule_open_options = nil
@@ -1774,8 +1814,12 @@ frame_event:SetScript ("OnEvent", function (self, event, ...)
 		frame_event:RegisterEvent ("PLAYER_REGEN_ENABLED")
 		frame_event:RegisterEvent ("PLAYER_REGEN_DISABLED")
 		frame_event:RegisterEvent ("PLAYER_TARGET_CHANGED")
-		frame_event:RegisterEvent ("ZONE_CHANGED_NEW_AREA")
 		frame_event:RegisterEvent ("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
+		
+		if (player_class == "WARLOCK") then
+			frame_event:RegisterEvent ("ACTIVE_TALENT_GROUP_CHANGED")
+			frame_event:RegisterEvent ("PLAYER_TALENT_UPDATE")
+		end
 
 		--> reload auras once again after the addon loaded
 		IKA:ScheduleTimer ("ReloadAuraNames", 5)
@@ -1812,6 +1856,13 @@ frame_event:SetScript ("OnEvent", function (self, event, ...)
 				end
 			end
 		end
+		
+	elseif (event == "ACTIVE_TALENT_GROUP_CHANGED" or event == "PLAYER_TALENT_UPDATE") then
+		if (f) then
+			if (f:IsShown()) then
+				f:SortGroups (event)
+			end
+		end
 	end
 end)
 
@@ -1822,6 +1873,7 @@ end)
 function IKA:ShowUsers()
 	local users_frame = IskarAssistUsersPanel
 	if (not users_frame) then
+	
 		users_frame = CreateFrame ("frame", "IskarAssistUsersPanel", UIParent)
 		users_frame:SetBackdrop ({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16, insets = {left = -1, right = -1, top = -1, bottom = -1},
 		edgeFile = "Interface\\AddOns\\IskarAssist\\border_2", edgeSize = 8})
@@ -1837,6 +1889,10 @@ function IKA:ShowUsers()
 		users_frame.title:SetText ("Iskar Assist: Users (press escape to close)")
 		users_frame.title:SetPoint ("center", users_frame, "center")
 		users_frame.title:SetPoint ("bottom", users_frame, "top", 0, 2)
+		
+		local close = CreateFrame ("button", "IskarAssistUsersPanelCloseButton", users_frame, "UIPanelCloseButton")
+		close:SetPoint ("topright", users_frame, "topright")
+		users_frame.close_button = close
 	end
 	
 	local s = ""

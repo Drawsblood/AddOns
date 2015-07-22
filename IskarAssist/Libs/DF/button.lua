@@ -988,11 +988,13 @@ function DF:NewButton (parent, container, name, member, w, h, func, param1, para
 end
 
 local pickcolor_callback = function (self, r, g, b, a, button)
+	a = abs (a-1)
 	button.MyObject.color_texture:SetVertexColor (r, g, b, a)
 	button.MyObject:color_callback (r, g, b, a)
 end
-local pickcolor = function (alpha, param2, self)
+local pickcolor = function (self, alpha, param2)
 	local r, g, b, a = self.MyObject.color_texture:GetVertexColor()
+	a = abs (a-1)
 	DF:ColorPick (self, r, g, b, a, pickcolor_callback)
 end
 
@@ -1000,6 +1002,7 @@ local color_button_height = 16
 local color_button_width = 16
 
 local set_colorpick_color = function (button, r, g, b, a)
+	a = a or 1
 	button.color_texture:SetVertexColor (r, g, b, a)
 end
 

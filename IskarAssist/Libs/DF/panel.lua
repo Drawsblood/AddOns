@@ -1330,6 +1330,8 @@ local Panel1PxReadConfig = function (self)
 		db.IsLocked = db.IsLocked or false
 		self.IsLocked = db.IsLocked
 		db.position = db.position or {x = 0, y = 0}
+		db.position.x = db.position.x or 0
+		db.position.y = db.position.y or 0
 		DF:RestoreFramePosition (self)
 	end
 end
@@ -1338,7 +1340,9 @@ function DF:SavePositionOnScreen (frame)
 	if (frame.db and frame.db.position) then
 		local x, y = DF:GetPositionOnScreen (frame)
 		--print ("saving...", x, y, frame:GetName())
-		frame.db.position.x, frame.db.position.y = x, y
+		if (x and y) then
+			frame.db.position.x, frame.db.position.y = x, y
+		end
 	end
 end
 
@@ -1358,6 +1362,8 @@ function DF:RestoreFramePosition (frame)
 	if (frame.db and frame.db.position) then
 		local scale, UIscale = frame:GetEffectiveScale(), UIParent:GetScale()
 		frame:ClearAllPoints()
+		frame.db.position.x = frame.db.position.x or 0
+		frame.db.position.y = frame.db.position.y or 0
 		frame:SetPoint ("center", UIParent, "center", frame.db.position.x * UIscale / scale, frame.db.position.y * UIscale / scale)
 	end
 end

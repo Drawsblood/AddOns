@@ -1,6 +1,46 @@
+2015-07-20  Tercio  <Tercio>
+
+[cb4fe43431fa] [tip]
+* IskarAssist.lua, Libs/DF/all_addons.psd, Libs/DF/icons.psd:
+
+- added a close button for users panel.
+- removed zone_changed event.
+- few improvements on show/hide rules.
+
+
+2015-07-18  Tercio  <Tercio>
+
+[3da7f901fe48]
+* IskarAssist.lua, Libs/DF/button.lua, Libs/DF/panel.lua:
+
+- update on lib details framework.
+
+
+2015-07-16  Tercio  <Tercio>
+
+[b6eec63212cc]
+* IskarAssist.lua:
+
+- Added Darkbindings aura.
+
+
+[3ca3b642916f]
+* IskarAssist.lua:
+
+- Added Darkbindings aura.
+
+
+2015-07-13  Tercio  <Tercio>
+
+[9b761c5ff6b4]
+* IskarAssist.lua:
+
+- Added warlock dispell.
+
+
 2015-06-30  Tercio  <Tercio>
 
-[f8fd38081fb2] [tip]
+[f8fd38081fb2]
 * IskarAssist.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-TreeGroup.lua, Libs/libs.xml:
 
 - middle click now select the player.
