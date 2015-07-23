@@ -1,9 +1,27 @@
 ------------------------------------------------------------------------
-r294 | olzenkhaw | 2015-07-21 13:51:49 +0000 (Tue, 21 Jul 2015) | 1 line
+r298 | olzenkhaw | 2015-07-23 14:30:15 +0000 (Thu, 23 Jul 2015) | 3 lines
 Changed paths:
-   A /tags/v4.8.2 WoD release (from /trunk:293)
+   A /tags/v4.8.4 WoD release (from /trunk:297)
 
-4.8.2 Added Immaculate gems.
+4.8.4
+- Optimized raid progression details
+- Replaced enchant to Not enchanted:
+------------------------------------------------------------------------
+r297 | olzenkhaw | 2015-07-23 14:29:49 +0000 (Thu, 23 Jul 2015) | 3 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+4.8.4
+- Optimized raid progression details
+- Replaced enchant to Not enchanted:
+------------------------------------------------------------------------
+r295 | olzenkhaw | 2015-07-23 00:56:05 +0000 (Thu, 23 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+4.8.3 - Add whitespace to OSendToX function.
 ------------------------------------------------------------------------
 r293 | olzenkhaw | 2015-07-21 13:51:18 +0000 (Tue, 21 Jul 2015) | 1 line
 Changed paths:

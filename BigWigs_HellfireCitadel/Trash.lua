@@ -14,9 +14,13 @@ mod:RegisterEnableMob(
 	92038, -- Salivating Bloodthirster
 	95630, -- Construct Peacekeeper
 	95614, -- Binder Eloah
-	91520, -- Adjunct Kuroh
-	92527 -- Dag'gorath
-	--94018 -- Shadow Burster
+	93156, -- Eredar Faithbreaker
+	91520, 91521, 91522, -- Adjunct Kuroh, Vindicator Bramu, Protector Bajunt
+	92527, -- Dag'gorath
+	94018, -- Shadow Burster
+	95282, -- Azgalor
+	95280, -- Kaz'rogal
+	95408 -- Anetheron
 )
 
 --------------------------------------------------------------------------------
@@ -32,9 +36,13 @@ if L then
 	L.bloodthirster = "Salivating Bloodthirster"
 	L.peacekeeper = "Construct Peacekeeper"
 	L.eloah = "Binder Eloah"
+	L.faithbreaker = "Eredar Faithbreaker"
 	L.kuroh = "Adjunct Kuroh"
 	L.daggorath = "Dag'gorath"
-	--L.burster = "Shadow Burster"
+	L.burster = "Shadow Burster"
+	L.azgalor = "Azgalor"
+	L.kazrogal = "Kaz'rogal"
+	L.anetheron = "Anetheron"
 end
 L = mod:GetLocale()
 
@@ -54,9 +62,18 @@ function mod:GetOptions()
 		189612, -- Rending Howl
 		{189595, "FLASH"}, -- Protocol: Crowd Control
 		{189533, "TANK"}, -- Sever Soul
+		184587, -- Touch of Mortality
+		184621, -- Hellfire Blast
 		{184986, "TANK"}, -- Seal of Decay
 		{186197, "SAY"}, -- Demonic Sacrifice
-		--{186130, "SAY", "FLASH"}, -- Void Burst (via Void Blast 186127)
+		{186130, "SAY", "FLASH"}, -- Void Burst (via Void Blast 186127)
+		{189538, "FLASH"}, -- Doom
+		189550, -- Rain of Fire
+		{189512, "SAY", "FLASH", "PROXIMITY"}, -- Mark of Kaz'rogal
+		189504, -- War Stomp
+		189470, -- Sleep
+		189491, -- Summon Towering Infernal
+		189464, -- Carrion Swarm
 	}, {
 		[188072] = L.orb,
 		[187110] = L.enkindler,
@@ -65,9 +82,13 @@ function mod:GetOptions()
 		[189612] = L.bloodthirster,
 		[189595] = L.peacekeeper,
 		[189533] = L.eloah,
+		[184587] = L.faithbreaker,
 		[184986] = L.kuroh,
 		[186197] = L.daggorath,
-		--[186130] = L.burster,
+		[186130] = L.burster,
+		[189538] = L.azgalor,
+		[189512] = L.kazrogal,
+		[189470] = L.anetheron,
 	}
 end
 
@@ -97,12 +118,31 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_APPLIED", "SeverSoul", 189533)
 	self:Log("SPELL_AURA_REMOVED", "SeverSoulRemoved", 189533)
 
-	self:Log("SPELL_AURA_APPLIED", "SealOfDecay", 184986)
+	self:Log("SPELL_AURA_APPLIED", "TouchOfMortality", 184587)
+	self:Log("SPELL_AURA_REMOVED", "TouchOfMortalityRemoved", 184587)
+	self:Log("SPELL_AURA_APPLIED", "HellfireBlast", 184621)
+	self:Log("SPELL_AURA_APPLIED_DOSE", "HellfireBlast", 184621)
+
 	self:Log("SPELL_AURA_APPLIED_DOSE", "SealOfDecay", 184986)
 
 	self:Log("SPELL_AURA_APPLIED", "DemonicSacrifice", 186197)
 
-	--self:Log("SPELL_CAST_SUCCESS", "VoidBlast", 186127)
+	self:Log("SPELL_CAST_SUCCESS", "VoidBlast", 186127)
+
+	self:Log("SPELL_CAST_START", "DoomStart", 189538)
+	self:Log("SPELL_AURA_APPLIED", "Doom", 189538)
+	self:Log("SPELL_AURA_REMOVED", "DoomRemoved", 189538)
+	self:Log("SPELL_AURA_APPLIED", "RainOfFire", 189550)
+	self:Log("SPELL_PERIODIC_DAMAGE", "RainOfFire", 189550)
+	self:Log("SPELL_PERIODIC_MISSED", "RainOfFire", 189550)
+
+	self:Log("SPELL_AURA_APPLIED", "MarkOfKazrogal", 189512)
+	self:Log("SPELL_AURA_REMOVED", "MarkOfKazrogalRemoved", 189512)
+	self:Log("SPELL_CAST_SUCCESS", "WarStomp", 189504)
+
+	self:Log("SPELL_CAST_START", "Sleep", 189470)
+	self:Log("SPELL_CAST_START", "SummonToweringInfernal", 189491)
+	self:Log("SPELL_CAST_SUCCESS", "CarrionSwarm", 189464)
 end
 
 --------------------------------------------------------------------------------
@@ -154,7 +194,7 @@ end
 function mod:BlazingFelTouch(args)
 	if self:Me(args.destGUID) then
 		self:TargetMessage(args.spellId, args.destName, "Personal", "Alarm")
-		self:OpenProximity(args.spellId, 6, nil, true)
+		self:OpenProximity(args.spellId, 6)
 	end
 end
 
@@ -217,10 +257,33 @@ function mod:SeverSoulRemoved(args)
 	self:StopBar(args.spellName, args.destName)
 end
 
---[[ Adjunct Kuroh ]]--
+--[[ Eredar Faithbreaker ]]--
+
+function mod:TouchOfMortality(args)
+	if self:Me(args.destGUID) then
+		self:TargetBar(args.spellId, 9, args.destName)
+		self:TargetMessage(args.spellId, args.destName, "Personal", "Alarm")
+	end
+end
+
+function mod:TouchOfMortalityRemoved(args)
+	if self:Me(args.destGUID) then
+		self:StopBar(args.spellName, args.destName)
+	end
+end
+
+function mod:HellfireBlast(args)
+	if self:Me(args.destGUID) then
+		self:StackMessage(args.spellId, args.destName, args.amount, "Personal", "Info")
+	end
+end
+
+--[[ Adjunct Kuroh, Vindicator Bramu, Protector Bajunt ]]--
 
 function mod:SealOfDecay(args)
-	self:StackMessage(args.spellId, args.destName, args.amount, "Attention")
+	if args.amount % 3 == 0 then
+		self:StackMessage(args.spellId, args.destName, args.amount, "Attention")
+	end
 end
 
 --[[ Dag'gorath ]]--
@@ -233,7 +296,7 @@ function mod:DemonicSacrifice(args)
 end
 
 --[[ Shadow Burster ]]--
---[[
+
 function mod:VoidBlast(args)
 	local warn = false
 	local npcUnit = self:GetUnitIdByGUID(args.sourceGUID)
@@ -254,4 +317,83 @@ function mod:VoidBlast(args)
 	end
 	self:Flash(186130)
 end
-]]
+
+--[[ Azgalor ]]--
+
+function mod:DoomStart(args)
+	self:CDBar(args.spellId, 18.3)
+end
+
+do
+	local list = mod:NewTargetList()
+	function mod:Doom(args)
+		list[#list+1] = args.destName
+		if self:Me(args.destGUID) then
+			self:Flash(args.spellId)
+			self:TargetBar(args.spellId, 20, args.destName)
+		end
+		if #list == 1 then
+			self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Attention", "Alarm")
+		end
+	end
+end
+
+function mod:DoomRemoved(args)
+	self:Message(args.spellId, "Urgent", "Long", self:SpellName(31350)) -- Summon Lesser Doomguard
+end
+
+do
+	local prev = 0
+	function mod:RainOfFire(args)
+		if self:Me(args.destGUID) and GetTime()-prev > 1.5 then
+			prev = GetTime()
+			self:Message(args.spellId, "Personal", "Alert", CL.you:format(args.spellName))
+		end
+	end
+end
+
+--[[ Kaz'rogal ]]--
+
+do
+	local list = mod:NewTargetList()
+	function mod:MarkOfKazrogal(args)
+		list[#list+1] = args.destName
+		if self:Me(args.destGUID) then
+			self:TargetBar(args.spellId, 30, args.destName)
+			self:Say(args.spellId)
+			self:Flash(args.spellId)
+			self:OpenProximity(args.spellId, 40)
+		end
+		if #list == 1 then
+			self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Important", "Alarm")
+		end
+	end
+end
+
+function mod:MarkOfKazrogalRemoved(args)
+	if self:Me(args.destGUID) then
+		self:CloseProximity(args.spellId)
+		self:StopBar(args.spellName, args.destName)
+	end
+end
+
+function mod:WarStomp(args)
+	self:CDBar(args.spellId, 24.3)
+end
+
+--[[ Anetheron ]]--
+
+function mod:Sleep(args)
+	if self:Interrupter(args.sourceGUID) then
+		self:Message(args.spellId, "Urgent", "Info", CL.casting:format(args.spellName))
+	end
+end
+
+function mod:SummonToweringInfernal(args)
+	self:Message(args.spellId, "Positive", "Long")
+end
+
+function mod:CarrionSwarm(args)
+	self:Message(args.spellId, "Attention", "Warning")
+end
+

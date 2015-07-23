@@ -384,7 +384,7 @@ function OilvlRunMouseoverTooltips(oframe)
 		end
 		if oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
 			OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
-			OilvlTooltip:AddLine(ENSCRIBE..":\n|cFF00FF00"..oilvlframedata.me[i][1]);
+			OilvlTooltip:AddLine(L["Not enchanted"]..":\n|cFF00FF00"..oilvlframedata.me[i][1]);
 		end
 		if oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
 			OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
@@ -392,7 +392,7 @@ function OilvlRunMouseoverTooltips(oframe)
 		end
 		if oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
 			OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
-			OilvlTooltip:AddLine(LOW.." "..ENSCRIBE..":\n|cFF00FF00"..oilvlframedata.me[i][2]);
+			OilvlTooltip:AddLine(LOW.." "..L["Not enchanted"]..":\n|cFF00FF00"..oilvlframedata.me[i][2]);
 		end
 		if oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 			OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
@@ -1153,6 +1153,14 @@ if not UnitAffectingCombat("player") and oilvlframesw then
 		ail = oilvlframedata.ilvl[1];
 		OilvlAIL_TANK:SetText(""); OilvlAIL_DPS:SetText(""); OilvlAIL_HEAL:SetText("");
 	end
+
+	-- Optimize Raid Progression Details
+	if otooltip2 then return -1 end
+	local oframe = GetMouseFocus();
+	if oframe == nil then return -1 end
+	if oframe:GetName() == nil then return -1 end
+	if oframe:GetName():gsub("%d","").."" ~= "OILVLRAIDFRAME" then return -1; end
+	OilvlRunMouseoverTooltips(oframe)	
 end
 end
 
@@ -1194,13 +1202,13 @@ function OSendToTarget(button)
 			msg = msg:sub(11);
 			msg = msg:gsub("\n|r|cFF00FF00",": ");
 			if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-				msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1224,9 +1232,9 @@ function OSendToTarget(button)
 			for _, info in ipairs(comp) do  SendChatMessage(info.mmsg, "WHISPER", nil, UnitName("target")) end
 		end
 		if button ~= "MiddleButton" then
-			SendChatMessage(L["Average Item Level"].."("..NumRole["TANK"].." "..TANK.."): "..ailtank, "WHISPER", nil, UnitName("target"));
-			SendChatMessage(L["Average Item Level"].."("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "WHISPER", nil, UnitName("target"));
-			SendChatMessage(L["Average Item Level"].."("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "WHISPER", nil, UnitName("target"));
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["TANK"].." "..TANK.."): "..ailtank, "WHISPER", nil, UnitName("target"));
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "WHISPER", nil, UnitName("target"));
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "WHISPER", nil, UnitName("target"));
 			SendChatMessage(L["Average Item Level"]..": "..ail, "WHISPER", nil, UnitName("target"));
 		end
 	else
@@ -1242,13 +1250,13 @@ function OSendToTarget(button)
 				msg = msg:sub(11);
 				msg = msg:gsub("\n|r|cFF00FF00",": ");
 				if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-					msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1275,13 +1283,13 @@ function OSendToParty(button)
 			msg = msg:sub(11);
 			msg = msg:gsub("\n|r|cFF00FF00",": ");
 			if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-				msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1305,9 +1313,9 @@ function OSendToParty(button)
 			for _, info in ipairs(comp) do  SendChatMessage(info.mmsg, "PARTY") end
 		end
 		if button ~= "MiddleButton" then
-			SendChatMessage(L["Average Item Level"].."("..NumRole["TANK"].." "..TANK.."): "..ailtank, "PARTY");
-			SendChatMessage(L["Average Item Level"].."("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "PARTY");
-			SendChatMessage(L["Average Item Level"].."("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "PARTY");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["TANK"].." "..TANK.."): "..ailtank, "PARTY");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "PARTY");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "PARTY");
 			SendChatMessage(L["Average Item Level"]..": "..ail, "PARTY");
 		end
 	else
@@ -1323,13 +1331,13 @@ function OSendToParty(button)
 				msg = msg:sub(11);
 				msg = msg:gsub("\n|r|cFF00FF00",": ");
 				if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-					msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1356,13 +1364,13 @@ function OSendToInstance(button)
 			msg = msg:sub(11);
 			msg = msg:gsub("\n|r|cFF00FF00",": ");
 			if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-				msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1386,9 +1394,9 @@ function OSendToInstance(button)
 			for _, info in ipairs(comp) do  SendChatMessage(info.mmsg, "INSTANCE_CHAT") end
 		end
 		if button ~= "MiddleButton" then
-			SendChatMessage(L["Average Item Level"].."("..NumRole["TANK"].." "..TANK.."): "..ailtank, "INSTANCE_CHAT");
-			SendChatMessage(L["Average Item Level"].."("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "INSTANCE_CHAT");
-			SendChatMessage(L["Average Item Level"].."("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "INSTANCE_CHAT");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["TANK"].." "..TANK.."): "..ailtank, "INSTANCE_CHAT");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "INSTANCE_CHAT");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "INSTANCE_CHAT");
 			SendChatMessage(L["Average Item Level"]..": "..ail, "INSTANCE_CHAT");
 		end
 	else
@@ -1404,13 +1412,13 @@ function OSendToInstance(button)
 				msg = msg:sub(11);
 				msg = msg:gsub("\n|r|cFF00FF00",": ");
 				if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-					msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1437,13 +1445,13 @@ function OSendToGuild(button)
 			msg = msg:sub(11);
 			msg = msg:gsub("\n|r|cFF00FF00",": ");
 			if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-				msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1467,9 +1475,9 @@ function OSendToGuild(button)
 			for _, info in ipairs(comp) do  SendChatMessage(info.mmsg, "GUILD") end
 		end
 		if button ~= "MiddleButton" then
-			SendChatMessage(L["Average Item Level"].."("..NumRole["TANK"].." "..TANK.."): "..ailtank, "GUILD");
-			SendChatMessage(L["Average Item Level"].."("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "GUILD");
-			SendChatMessage(L["Average Item Level"].."("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "GUILD");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["TANK"].." "..TANK.."): "..ailtank, "GUILD");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "GUILD");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "GUILD");
 			SendChatMessage(L["Average Item Level"]..": "..ail, "GUILD");
 		end
 	else
@@ -1485,13 +1493,13 @@ function OSendToGuild(button)
 				msg = msg:sub(11);
 				msg = msg:gsub("\n|r|cFF00FF00",": ");
 				if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-					msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1518,13 +1526,13 @@ function OSendToRaid(button)
 			msg = msg:sub(11);
 			msg = msg:gsub("\n|r|cFF00FF00",": ");
 			if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-				msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1548,9 +1556,9 @@ function OSendToRaid(button)
 			for _, info in ipairs(comp) do  SendChatMessage(info.mmsg, "RAID") end
 		end
 		if button ~= "MiddleButton" then
-			SendChatMessage(L["Average Item Level"].."("..NumRole["TANK"].." "..TANK.."): "..ailtank, "RAID");
-			SendChatMessage(L["Average Item Level"].."("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "RAID");
-			SendChatMessage(L["Average Item Level"].."("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "RAID");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["TANK"].." "..TANK.."): "..ailtank, "RAID");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "RAID");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "RAID");
 			SendChatMessage(L["Average Item Level"]..": "..ail, "RAID");
 		end
 	else
@@ -1566,13 +1574,13 @@ function OSendToRaid(button)
 				msg = msg:sub(11);
 				msg = msg:gsub("\n|r|cFF00FF00",": ");
 				if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-					msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1599,13 +1607,13 @@ function OSendToOfficer(button)
 			msg = msg:sub(11);
 			msg = msg:gsub("\n|r|cFF00FF00",": ");
 			if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-				msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1629,9 +1637,9 @@ function OSendToOfficer(button)
 			for _, info in ipairs(comp) do  SendChatMessage(info.mmsg, "OFFICER") end
 		end
 		if button ~= "MiddleButton" then
-			SendChatMessage(L["Average Item Level"].."("..NumRole["TANK"].." "..TANK.."): "..ailtank, "OFFICER");
-			SendChatMessage(L["Average Item Level"].."("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "OFFICER");
-			SendChatMessage(L["Average Item Level"].."("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "OFFICER");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["TANK"].." "..TANK.."): "..ailtank, "OFFICER");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["HEALER"].." "..HEALER.."): "..ailheal, "OFFICER");
+			SendChatMessage(L["Average Item Level"].." ("..NumRole["DAMAGER"].." "..DAMAGER.."): "..aildps, "OFFICER");
 			SendChatMessage(L["Average Item Level"]..": "..ail, "OFFICER");
 		end
 	else
@@ -1647,13 +1655,13 @@ function OSendToOfficer(button)
 				msg = msg:sub(11);
 				msg = msg:gsub("\n|r|cFF00FF00",": ");
 				if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-					msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -1820,13 +1828,13 @@ function OSendToCopy(button)
 		end
 		local msg = oilvlframedata.name[i]..":"..oilvlframedata.ilvl[i];
 		if cfg.oilvlme and oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
-			msg = msg.." ("..ENSCRIBE.." "..oilvlframedata.me[i][1]..")";
+			msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 		end
 		if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-			msg = msg.." ("..L["Gem"].." "..oilvlframedata.mg[i][1]..")";
+			msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
 		end
 		if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-			msg = msg.." ("..LOW.." "..ENSCRIBE..": "..oilvlframedata.me[i][2]..")";
+			msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
 		end
 		if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 			msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
@@ -2159,7 +2167,7 @@ OPvPButton(f)
 					end
 					if oilvlframedata.me[i][1] and oilvlframedata.me[i][1] ~= "" then
 						OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
-						OilvlTooltip:AddLine(ENSCRIBE..":\n|cFF00FF00"..oilvlframedata.me[i][1]);
+						OilvlTooltip:AddLine(L["Not enchanted"]..":\n|cFF00FF00"..oilvlframedata.me[i][1]);
 					end
 					if oilvlframedata.me[i][1] and oilvlframedata.mg[i][1] ~= "" then
 						OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
@@ -2167,7 +2175,7 @@ OPvPButton(f)
 					end
 					if oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
 						OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
-						OilvlTooltip:AddLine(LOW.." "..ENSCRIBE..":\n|cFF00FF00"..oilvlframedata.me[i][2]);
+						OilvlTooltip:AddLine(LOW.." "..L["Not enchanted"]..":\n|cFF00FF00"..oilvlframedata.me[i][2]);
 					end
 					if oilvlframedata.me[i][2] and oilvlframedata.mg[i][2] ~= "" then
 						OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
@@ -4297,7 +4305,7 @@ function OilvlConfigFrame()
 	if cfg.oilvlcharilvl then cfilvlcb:SetChecked(true) end	
 	
 	-- best enchant option
-	local eercb2 = createCheckbutton(cfg.frame, 16+25, -320, " "..BEST.." "..ENSCRIBE);
+	local eercb2 = createCheckbutton(cfg.frame, 16+25, -320, " "..BEST.." "..L["Not enchanted"]);
 	eercb2:SetSize(30,30);
 	eercb2:SetScript("PostClick", function() cfg.oilvlme2 = oicb8:GetChecked() end);
 	eercb2:SetChecked(cfg.oilvlme2);

@@ -48,12 +48,17 @@ end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "itIT")
 if L then
+L["anetheron"] = "Anetheron" -- Needs review
+L["azgalor"] = "Azgalor" -- Needs review
 L["bloodthirster"] = "Bramasangue Sbavante"
+L["burster"] = "Spaccaombre" -- Needs review
 L["daggorath"] = "Dag'gorath"
 L["darkcaster"] = "Mago Oscuro dei Guerci Insanguinati"
 L["eloah"] = "Vincolatore Eloah"
 L["enkindler"] = "Infiammatrice Ardente"
+L["faithbreaker"] = "Spezzafede Eredar" -- Needs review
 L["graggra"] = "Graggra"
+L["kazrogal"] = "Kaz'rogal" -- Needs review
 L["kuroh"] = "Luogotenente Kuroh"
 L["orb"] = "Globo della Distruzione"
 L["peacekeeper"] = "Costrutto Pacificatore"

@@ -23,7 +23,7 @@ do
 	--@end-alpha@]===]
 
 	-- This will (in ZIPs), be replaced by the highest revision number in the source tree.
-	myRevision = tonumber("13490")
+	myRevision = tonumber("13508")
 
 	-- If myRevision ends up NOT being a number, it means we're running a SVN copy.
 	if type(myRevision) ~= "number" then
@@ -548,7 +548,7 @@ do
 	if L == "ptBR" then
 		delayedMessages[#delayedMessages+1] = "We *really* need help translating Big Wigs! Think you can help us? Please check out our translator website: goo.gl/nwR5cy"
 	elseif L == "zhTW" then
-		delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Traditional Chinese (zhTW)? Check out our easy translator tool: goo.gl/nwR5cy"
+		--delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Traditional Chinese (zhTW)? Check out our easy translator tool: goo.gl/nwR5cy"
 	elseif L == "itIT" then
 		delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Italian (itIT)? Check out our easy translator tool: goo.gl/nwR5cy"
 	elseif L == "koKR" then
@@ -794,14 +794,14 @@ do
 					hasWarned = true
 					sysprint(isAlpha == 10 and L.alphaOutdated or L.newReleaseAvailable)
 				end
-				if ((v-isAlpha) - MY_BIGWIGS_REVISION) > 120 then
+				if ((v-isAlpha) - MY_BIGWIGS_REVISION) > 80 then
 					warnedReallyOutOfDate = warnedReallyOutOfDate + 1
 					if warnedReallyOutOfDate > 1 and not hasReallyWarned then
 						hasReallyWarned = true
 						sysprint(L.extremelyOutdated)
 						RaidNotice_AddMessage(RaidWarningFrame, (L.extremelyOutdated):gsub("|", "\124"), {r=1,g=1,b=1}) -- XXX wowace packager doesn't keep my escape codes and RW doesn't like pipes :(
 					end
-					if ((v-isAlpha) - MY_BIGWIGS_REVISION) > 300 then
+					if ((v-isAlpha) - MY_BIGWIGS_REVISION) > 150 then
 						warnedExtremelyOutOfDate = warnedExtremelyOutOfDate + 1
 						if warnedExtremelyOutOfDate > 1 and not hasExtremelyWarned then
 							hasExtremelyWarned = true

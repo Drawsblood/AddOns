@@ -9,7 +9,7 @@
 ## X-Curse-Project-Name: LibStub
 ## X-Curse-Project-ID: libstub
 ## X-Curse-Repository-ID: wow/libstub/mainline
-## X-Curse-Packaged-Version: v4.8.2 WoD release
+## X-Curse-Packaged-Version: v4.8.4 WoD release
 ## X-Curse-Project-Name: O Item Level (OiLvL)
 ## X-Curse-Project-ID: o-item-level
 ## X-Curse-Repository-ID: wow/o-item-level/mainline

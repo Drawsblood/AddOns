@@ -22,6 +22,10 @@ end
 
 L = BigWigs:NewBossLocale("Shadow-Lord Iskar", "ruRU")
 if L then
+L["bindings_removed"] = "Путы сняты (%d/3)"
+L["custom_off_binding_marker"] = "Маркировка Темных пут"
+L["custom_off_binding_marker_desc"] = [=[Отмечать метками {rt1}{rt2}{rt3}{rt4}{rt5}{rt6} цели Темных пут, требуется быть помощником или лидером рейда.
+|cFFFF0000Только 1 человек в рейде должен включить эту опцию, чтобы предотвратить конфликты.|r]=]
 L["custom_off_wind_marker"] = "Маркировка Ирреальных ветров"
 L["custom_off_wind_marker_desc"] = [=[Отмечать цели Ирреальных ветров метками {rt1}{rt2}{rt3}{rt4}{rt5}, требуется быть помощником или лидером рейда.
 |cFFFF0000Только 1 человек в рейде должен иметь данную опцию включенной, чтобы предотвратить конфликты.|r]=]
@@ -70,18 +74,23 @@ if L then
 L["chaos_bar"] = "%s -> %s"
 L["custom_off_torment_marker"] = "Маркировка Скованного страдания"
 L["custom_off_torment_marker_desc"] = "Отмечать цели Скованного страдания метками {rt1}{rt2}{rt3}, требуется быть помощником или лидером рейда."
-L["torment_removed"] = "Скованное страдание снято (%d/%d)" -- Needs review
+L["torment_removed"] = "Страдание снято (%d/%d)"
 
 end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "ruRU")
 if L then
+L["anetheron"] = "Анетерон" -- Needs review
+L["azgalor"] = "Азгалор" -- Needs review
 L["bloodthirster"] = "Истекающий слюной кровопийца"
+L["burster"] = "Темный преследователь" -- Needs review
 L["daggorath"] = "Даг'горат"
 L["darkcaster"] = "Темный маг из клана Кровавой Глазницы"
 L["eloah"] = "Властитель Элоа"
 L["enkindler"] = "Огненная возжигательница"
+L["faithbreaker"] = "Эредар – разрушитель веры" -- Needs review
 L["graggra"] = "Граггра"
+L["kazrogal"] = "Каз'рогал" -- Needs review
 L["kuroh"] = "Адъюнкт Куро"
 L["orb"] = "Сфера разрушения"
 L["peacekeeper"] = "Голем-миротворец"

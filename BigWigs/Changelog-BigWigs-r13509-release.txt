@@ -1,9 +1,116 @@
 ------------------------------------------------------------------------
-r13491 | funkydude | 2015-07-21 11:13:13 +0000 (Tue, 21 Jul 2015) | 1 line
+r13509 | funkydude | 2015-07-23 00:44:06 +0000 (Thu, 23 Jul 2015) | 1 line
 Changed paths:
-   A /tags/r13491-release (from /trunk:13490)
+   A /tags/r13509-release (from /trunk:13508)
 
-Tagging as r13491-release
+Tagging as r13509-release
+------------------------------------------------------------------------
+r13508 | funkydude | 2015-07-23 00:34:01 +0000 (Thu, 23 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Trash.lua
+
+HellfireCitadel/Trash: Add Doom, Rain of Fire, Mark of Kaz'rogal, War Stomp, Sleep, Carrion Swarm & Summon Towering Infernal.
+------------------------------------------------------------------------
+r13507 | funkydude | 2015-07-22 23:13:50 +0000 (Wed, 22 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Trash.lua
+
+HellfireCitadel/Trash: Add Touch of Mortality, Hellfire Blast & Void Burst.
+------------------------------------------------------------------------
+r13506 | funkydude | 2015-07-22 22:33:33 +0000 (Wed, 22 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/BigWigs.toc
+   M /trunk/Loader.lua
+   M /trunk/Locales/enUS.lua
+
+bump version, tweak revision warnings
+------------------------------------------------------------------------
+r13505 | avi90 | 2015-07-22 22:22:25 +0000 (Wed, 22 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Council.lua
+
+Council: fix 30% Mark of the Necromancer
+------------------------------------------------------------------------
+r13504 | funkydude | 2015-07-22 22:10:17 +0000 (Wed, 22 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Socrethar.lua
+
+Socrethar: Tweak
+------------------------------------------------------------------------
+r13503 | funkydude | 2015-07-22 22:08:29 +0000 (Wed, 22 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Socrethar.lua
+
+Socrethar: Fix incorrect dominator timer since last release (counter changes). Fix only showing the cooldown for the first Apocalypse.
+------------------------------------------------------------------------
+r13502 | funkydude | 2015-07-22 21:18:16 +0000 (Wed, 22 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Xhulhorac.lua
+
+Xhulhorac: Add _refresh to the touched events.
+------------------------------------------------------------------------
+r13501 | funkydude | 2015-07-22 20:02:56 +0000 (Wed, 22 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Kormrok.lua
+
+Kormrok: Remove stopbar calls now we properly count the abilities.
+------------------------------------------------------------------------
+r13500 | funkydude | 2015-07-22 15:35:07 +0000 (Wed, 22 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+
+Archimonde: Drop burst proximity down to 9yd.
+------------------------------------------------------------------------
+r13499 | funkydude | 2015-07-22 15:26:46 +0000 (Wed, 22 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Mannoroth.lua
+
+Mannoroth: Add message for Fel Hellstorm, add yards to empowered felseeker message.
+------------------------------------------------------------------------
+r13498 | nebula169 | 2015-07-22 00:10:19 +0000 (Wed, 22 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/TyrantVelhari.lua
+
+TyrantVelhari: few more tweaks
+------------------------------------------------------------------------
+r13497 | nebula169 | 2015-07-21 23:53:10 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/TyrantVelhari.lua
+
+TyrantVelhari: missed a bit
+------------------------------------------------------------------------
+r13496 | nebula169 | 2015-07-21 23:47:45 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Trash.lua
+   M /trunk/HellfireCitadel/TyrantVelhari.lua
+
+TyrantVelhari: revert trash stuff, add the extra mob ids to the Trash module
+------------------------------------------------------------------------
+r13495 | nebula169 | 2015-07-21 23:36:49 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/TyrantVelhari.lua
+
+TyrantVelhari: rework Font of Corruption proximity, handle trash Seal of Decay / Enforcer's Onslaught
+------------------------------------------------------------------------
+r13494 | nebula169 | 2015-07-21 22:26:42 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+
+Archimonde: change the Shadowfel Blast bar to end when the knockup happens, show a "soon" message when opening the proximity
+------------------------------------------------------------------------
+r13493 | nebula169 | 2015-07-21 21:18:16 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/IronReaver.lua
+   M /trunk/HellfireCitadel/ShadowLordIskar.lua
+   M /trunk/HellfireCitadel/Socrethar.lua
+
+IronReaver: remove the LFR berserk
+------------------------------------------------------------------------
+r13492 | nebula169 | 2015-07-21 19:08:16 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+
+Archimonde: cleanup
 ------------------------------------------------------------------------
 r13490 | funkydude | 2015-07-21 11:09:19 +0000 (Tue, 21 Jul 2015) | 1 line
 Changed paths:
@@ -1720,10 +1827,4 @@ Changed paths:
    M /trunk/HellfireCitadel/BigWigs_HellfireCitadel.toc
 
 -- zhTW Update.
-------------------------------------------------------------------------
-r13202 | Ironi88 | 2015-06-17 02:20:54 +0000 (Wed, 17 Jun 2015) | 1 line
-Changed paths:
-   M /trunk/HellfireCitadel/Kormrok.lua
-
-rewrote most abilities
 ------------------------------------------------------------------------
