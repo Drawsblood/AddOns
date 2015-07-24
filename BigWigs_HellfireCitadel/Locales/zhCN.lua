@@ -80,12 +80,17 @@ end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "zhCN")
 if L then
+L["anetheron"] = "安纳塞隆"
+L["azgalor"] = "阿兹加洛"
 L["bloodthirster"] = "流血的蛮兵"
+L["burster"] = "暗影爆破者"
 L["daggorath"] = "达戈拉斯"
 L["darkcaster"] = "流血的黑暗法师"
 L["eloah"] = "缚魂者艾罗瓦"
 L["enkindler"] = "邪能织焰者"
+L["faithbreaker"] = "艾瑞达灭信者"
 L["graggra"] = "加拉戈"
+L["kazrogal"] = "卡兹洛加"
 L["kuroh"] = "副官库罗尔"
 L["orb"] = "毁灭宝珠"
 L["peacekeeper"] = "构装维和者"

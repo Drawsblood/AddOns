@@ -372,6 +372,8 @@ function OilvlSetMouseoverTooltips(oframe, ounit)
 	oframe:SetAttribute("unit", ounit);
 end
 
+local LoadRPDTooltip = CreateFrame('GameTooltip', 'LOADRPDTooltip', UIParent, 'GameTooltipTemplate');
+
 function OilvlRunMouseoverTooltips(oframe)
 	local ounit = oframe:GetAttribute("unit") 
 	if not LibQTip:IsAcquired("Oraidprog") then
@@ -388,18 +390,18 @@ function OilvlRunMouseoverTooltips(oframe)
 		end
 		if oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
 			OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
-			OilvlTooltip:AddLine(L["Gem"]..":\n|cFF00FF00"..oilvlframedata.mg[i][1]);
+			OilvlTooltip:AddLine(L["Not socketed"]..":\n|cFF00FF00"..oilvlframedata.mg[i][1]);
 		end
 		if oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
 			OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
-			OilvlTooltip:AddLine(LOW.." "..L["Not enchanted"]..":\n|cFF00FF00"..oilvlframedata.me[i][2]);
+			OilvlTooltip:AddLine(L["Low level enchanted"]..":\n|cFF00FF00"..oilvlframedata.me[i][2]);
 		end
 		if oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
 			OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
-			OilvlTooltip:AddLine(LOW.." "..L["Gem"]..":\n|cFF00FF00"..oilvlframedata.mg[i][2]);
+			OilvlTooltip:AddLine(L["Low level socketed"]..":\n|cFF00FF00"..oilvlframedata.mg[i][2]);
 		end
 		OilvlTooltip:Show()
-		if not rpsw and CheckInteractDistance(ounit, 1) and UnitExists(ounit) then
+		if not rpsw and CheckInteractDistance(ounit, 1) and UnitExists(ounit) and cfg.oilvlms then
 			Omover2=1;
 			ClearAchievementComparisonUnit();
 			--print("OilvlRunMouseoverTooltips ClearAchievementComparisonUnit")
@@ -407,6 +409,11 @@ function OilvlRunMouseoverTooltips(oframe)
 			SetAchievementComparisonUnit(ounit);
 			rpsw=true;
 			rpunit=ounit;
+			if cfg.oilvlrpdetails then
+				LoadRPDTooltip:SetOwner(OilvlTooltip, "ANCHOR_BOTTOM",0,-20);
+				LoadRPDTooltip:AddLine(L["Raid Progression Details"]..": |cFFFFFFFF"..LFG_LIST_LOADING);
+				LoadRPDTooltip:Show();
+			end
 		end
 	end
 end
@@ -1205,13 +1212,13 @@ function OSendToTarget(button)
 				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+				msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 			end
 			if button == "MiddleButton" then
 				if (msg:sub(1,1) == "!") or (msg:sub(1,1) == "~") then
@@ -1253,13 +1260,13 @@ function OSendToTarget(button)
 					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+					msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 				end
 				SendChatMessage(msg, "WHISPER", nil, UnitName("target"));
 			end
@@ -1286,13 +1293,13 @@ function OSendToParty(button)
 				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+				msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 			end
 			if button == "MiddleButton" then
 				if (msg:sub(1,1) == "!") or (msg:sub(1,1) == "~") then
@@ -1334,13 +1341,13 @@ function OSendToParty(button)
 					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+					msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 				end
 				SendChatMessage(msg, "PARTY");
 			end
@@ -1367,13 +1374,13 @@ function OSendToInstance(button)
 				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+				msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 			end
 			if button == "MiddleButton" then
 				if (msg:sub(1,1) == "!") or (msg:sub(1,1) == "~") then
@@ -1415,13 +1422,13 @@ function OSendToInstance(button)
 					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+					msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 				end
 				SendChatMessage(msg, "INSTANCE_CHAT");
 			end
@@ -1448,13 +1455,13 @@ function OSendToGuild(button)
 				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+				msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 			end
 			if button == "MiddleButton" then
 				if (msg:sub(1,1) == "!") or (msg:sub(1,1) == "~") then
@@ -1496,13 +1503,13 @@ function OSendToGuild(button)
 					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+					msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 				end
 				SendChatMessage(msg, "GUILD");
 			end
@@ -1529,13 +1536,13 @@ function OSendToRaid(button)
 				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+				msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 			end
 			if button == "MiddleButton" then
 				if (msg:sub(1,1) == "!") or (msg:sub(1,1) == "~") then
@@ -1577,13 +1584,13 @@ function OSendToRaid(button)
 					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+					msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 				end
 				SendChatMessage(msg, "RAID");
 			end
@@ -1610,13 +1617,13 @@ function OSendToOfficer(button)
 				msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 			end
 			if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-				msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+				msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+				msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 			end
 			if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-				msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+				msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 			end
 			if button == "MiddleButton" then
 				if (msg:sub(1,1) == "!") or (msg:sub(1,1) == "~") then
@@ -1658,13 +1665,13 @@ function OSendToOfficer(button)
 					msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 				end
 				if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-					msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+					msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+					msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 				end
 				if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-					msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+					msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 				end
 				SendChatMessage(msg, "OFFICER");
 			end
@@ -1831,13 +1838,13 @@ function OSendToCopy(button)
 			msg = msg.." ("..L["Not enchanted"]..": "..oilvlframedata.me[i][1]..")";
 		end
 		if cfg.oilvlme and oilvlframedata.mg[i][1] and oilvlframedata.mg[i][1] ~= "" then
-			msg = msg.." ("..L["Gem"]..": "..oilvlframedata.mg[i][1]..")";
+			msg = msg.." ("..L["Not socketed"]..": "..oilvlframedata.mg[i][1]..")";
 		end
 		if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
-			msg = msg.." ("..LOW.." "..L["Not enchanted"]..": "..oilvlframedata.me[i][2]..")";
+			msg = msg.." ("..L["Low level enchanted"]..": "..oilvlframedata.me[i][2]..")";
 		end
 		if cfg.oilvlme and cfg.oilvlme2 and oilvlframedata.mg[i][2] and oilvlframedata.mg[i][2] ~= "" then
-			msg = msg.." ("..LOW.." "..L["Gem"]..": "..oilvlframedata.mg[i][2]..")";
+			msg = msg.." ("..L["Low level socketed"]..": "..oilvlframedata.mg[i][2]..")";
 		end
 		if button == "MiddleButton" then
 			if (msg:sub(1,1) == "!") or (msg:sub(1,1) == "~") then
@@ -2149,6 +2156,7 @@ OPvPButton(f)
 			-- hide tooltips
 			button4:SetScript("OnLeave", function(self) 
 				OilvlTooltip:Hide()
+				LoadRPDTooltip:Hide()
 				OILVL:UnregisterEvent("INSPECT_ACHIEVEMENT_READY");
 				rpsw=false;
 				rpunit="";
@@ -2171,15 +2179,15 @@ OPvPButton(f)
 					end
 					if oilvlframedata.me[i][1] and oilvlframedata.mg[i][1] ~= "" then
 						OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
-						OilvlTooltip:AddLine(L["Gem"]..":\n|cFF00FF00"..oilvlframedata.mg[i][1]);
+						OilvlTooltip:AddLine(L["Not socketed"]..":\n|cFF00FF00"..oilvlframedata.mg[i][1]);
 					end
 					if oilvlframedata.me[i][2] and oilvlframedata.me[i][2] ~= "" then
 						OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
-						OilvlTooltip:AddLine(LOW.." "..L["Not enchanted"]..":\n|cFF00FF00"..oilvlframedata.me[i][2]);
+						OilvlTooltip:AddLine(L["Low level enchanted"]..":\n|cFF00FF00"..oilvlframedata.me[i][2]);
 					end
 					if oilvlframedata.me[i][2] and oilvlframedata.mg[i][2] ~= "" then
 						OilvlTooltip:SetHeight(GameTooltip:GetHeight()+15);
-						OilvlTooltip:AddLine(LOW.." "..L["Gem"]..":\n|cFF00FF00"..oilvlframedata.mg[i][2]);
+						OilvlTooltip:AddLine(L["Low level socketed"]..":\n|cFF00FF00"..oilvlframedata.mg[i][2]);
 					end
 					OilvlTooltip:Show()					
 					if not rpsw and CheckInteractDistance(ounit, 1) and UnitExists(ounit) and cfg.oilvlms then
@@ -2190,6 +2198,11 @@ OPvPButton(f)
 						rpsw=true;
 						rpunit=ounit;
 						SetAchievementComparisonUnit(ounit);
+						if cfg.oilvlrpdetails then
+							LoadRPDTooltip:SetOwner(OilvlTooltip, "ANCHOR_BOTTOM",0,-20);
+							LoadRPDTooltip:AddLine(L["Raid Progression Details"]..": |cFFFFFFFF"..LFG_LIST_LOADING);
+							LoadRPDTooltip:Show();
+						end
 					end
 				end
 			end)
@@ -2738,6 +2751,7 @@ function OGetRaidProgression2(RaidName, OSTAT, NumRaidBosses)
 				end
 			end
 			OilvlTooltip:Hide();
+			LoadRPDTooltip:Hide();
 		end	
 		local line = otooltip2:AddLine(" ")
 		line = otooltip2:AddLine()

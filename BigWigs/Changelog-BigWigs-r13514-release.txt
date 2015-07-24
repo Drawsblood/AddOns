@@ -1,9 +1,34 @@
 ------------------------------------------------------------------------
-r13509 | funkydude | 2015-07-23 00:44:06 +0000 (Thu, 23 Jul 2015) | 1 line
+r13514 | funkydude | 2015-07-24 00:34:00 +0000 (Fri, 24 Jul 2015) | 1 line
 Changed paths:
-   A /tags/r13509-release (from /trunk:13508)
+   A /tags/r13514-release (from /trunk:13513)
 
-Tagging as r13509-release
+Tagging as r13514-release
+------------------------------------------------------------------------
+r13513 | funkydude | 2015-07-24 00:27:22 +0000 (Fri, 24 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Xhulhorac.lua
+
+Xhulhorac: Drop touch throttle down to 8s.
+------------------------------------------------------------------------
+r13512 | funkydude | 2015-07-23 22:30:54 +0000 (Thu, 23 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/BigWigs.toc
+   M /trunk/HellfireCitadel/Archimonde.lua
+
+Archimonde: Fix Shadowfel Burst id and prevent the proximity sometimes getting stuck open when transitioning to p2.
+------------------------------------------------------------------------
+r13511 | elvador | 2015-07-23 20:20:51 +0000 (Thu, 23 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Xhulhorac.lua
+
+Xhulhorac: Throttle Touched for mythic, display count for Black Hole
+------------------------------------------------------------------------
+r13510 | nebula169 | 2015-07-23 07:29:59 +0000 (Thu, 23 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/TyrantVelhari.lua
+
+TyrantVelhari: tweak
 ------------------------------------------------------------------------
 r13508 | funkydude | 2015-07-23 00:34:01 +0000 (Thu, 23 Jul 2015) | 1 line
 Changed paths:

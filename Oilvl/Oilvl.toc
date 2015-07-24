@@ -1,10 +1,10 @@
 ## Interface: 60200
 ## Title: O Item Level|cff00ccff(OiLvL)|r
 ## Author: Olzen
-## Version: 4.8.4
+## Version: 4.8.9
 ## Notes: It shows Item Level of raiders in party / raid. Show Item Level and raid progression on tooltips.
 ## SavedVariables: Oilvl_Settings
-## X-Curse-Packaged-Version: v4.8.4 WoD release
+## X-Curse-Packaged-Version: v4.8.9 WoD release
 ## X-Curse-Project-Name: O Item Level (OiLvL)
 ## X-Curse-Project-ID: o-item-level
 ## X-Curse-Repository-ID: wow/o-item-level/mainline

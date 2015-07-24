@@ -1,19 +1,42 @@
-Ovale Spell Priority 6.2.12
+Ovale Spell Priority 6.2.13
 ===========================
 
-Changes from version 6.2.11:
+Changes from version 6.2.12:
 ----------------------------
 
--   Hunter: Move Level 90 talents into main attack icon.
+-   Update localized strings from CurseForge app from 2015-07-23.
 
-    After discussions with many hunters, they overwhelmingly prefer having the
-    level 90 talents -- Glaive Toss, Powershot, and Barrage -- in the main
-    attack icon instead of the short CD icon.  In the main attack icon, the
-    focus-pooling for those abilities will be less difficult to understand as
-    well.
+-   Regenerate scripts based on SimulationCraft git master from 2015-07-23.
 
--   SimC APL's allow "legendary_ring.{up|remains}" as buff conditionals.
+-   Merge branch 'simulationcraft'.
 
--   Guard against nil returns.
+    Pull in changes from SimulationCraft git master from 2015-07-23.
 
-    This fixes a bug that can appear on classes with pets.
+-   Import Tier18M profiles from SimulationCraft git master from 2015-07-23.
+
+-   Put all scripts for each class into a single, per-class Lua file.
+
+    This makes it easier to update the addon without needing to restart the
+    client to detect new files.
+
+-   Ovale does not use AceLocale-3.0.
+
+-   Skip "wait" actions with a constant "sec" modifier in SimC APLs.
+
+    Ovale does not have the concept of "wait for N seconds before proceeding",
+    so just ignore those lines in SimC APLs.
+
+-   Don't use the same variable name back-to-back.
+
+-   Import latest release.sh from curseforge-packager project.
+
+-   Check for non-nil tables before referencing members.
+
+-   Teach OvaleSimulationCraft about "sim.target" expressions.
+
+    Ovale doesn't understand the concept of a priority target, so treat
+    "sim.target=target" expressions as always true.
+
+-   Update for patch 6.2 hotfixes up through 2015-07-20.
+
+-   The spell databases have been updated for patch 6.2.

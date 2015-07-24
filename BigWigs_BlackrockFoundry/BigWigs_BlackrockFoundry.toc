@@ -1,5 +1,5 @@
 ## Interface: 60200
-## X-Curse-Packaged-Version: r13509-release
+## X-Curse-Packaged-Version: r13514-release
 ## X-Curse-Project-Name: BigWigs Bossmods
 ## X-Curse-Project-ID: big-wigs
 ## X-Curse-Repository-ID: wow/big-wigs/mainline
