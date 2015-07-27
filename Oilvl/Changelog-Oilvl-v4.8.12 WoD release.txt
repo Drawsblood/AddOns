@@ -1,0 +1,97 @@
+------------------------------------------------------------------------
+r314 | olzenkhaw | 2015-07-26 00:49:04 +0000 (Sun, 26 Jul 2015) | 1 line
+Changed paths:
+   A /tags/v4.8.12 WoD release (from /trunk:313)
+
+4.8.12 - Add localization for Korean.
+------------------------------------------------------------------------
+r313 | olzenkhaw | 2015-07-26 00:48:43 +0000 (Sun, 26 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+   M /trunk/localization.lua
+
+4.8.12 - Add localization for Korean.
+------------------------------------------------------------------------
+r311 | olzenkhaw | 2015-07-25 16:01:18 +0000 (Sat, 25 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+   M /trunk/localization.lua
+
+4.8.11 - Add localization for ruRU
+------------------------------------------------------------------------
+r309 | olzenkhaw | 2015-07-25 09:08:07 +0000 (Sat, 25 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/localization.lua
+
+4.8.9 - Add localization for esMX and esES.
+------------------------------------------------------------------------
+r307 | olzenkhaw | 2015-07-24 07:52:07 +0000 (Fri, 24 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+   M /trunk/localization.lua
+
+4.8.9 - Add localization for zhCN.
+------------------------------------------------------------------------
+r305 | olzenkhaw | 2015-07-24 07:47:49 +0000 (Fri, 24 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/localization.lua
+
+4.8.8 - Add localization for zhTW.
+------------------------------------------------------------------------
+r303 | olzenkhaw | 2015-07-24 01:29:51 +0000 (Fri, 24 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+   M /trunk/localization.lua
+
+4.8.7 - Optimized localization. Pls help to translate "Not enchanted", "Not socketed", "Low level enchanted", and "Low level socketed"
+------------------------------------------------------------------------
+r301 | olzenkhaw | 2015-07-24 01:28:57 +0000 (Fri, 24 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+
+4.8.6 - Optimized localization. Pls help to translate "Not enchanted", "Not socketed", "Low level enchanted", and "Low level socketed"
+------------------------------------------------------------------------
+r299 | olzenkhaw | 2015-07-24 01:26:44 +0000 (Fri, 24 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/localization.lua
+
+4.8.5 - Optimized localization. Pls help to translate "Not enchanted", "Not socketed", "Low level enchanted", and "Low level socketed"
+------------------------------------------------------------------------
+r297 | olzenkhaw | 2015-07-23 14:29:49 +0000 (Thu, 23 Jul 2015) | 3 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+4.8.4
+- Optimized raid progression details
+- Replaced enchant to Not enchanted:
+------------------------------------------------------------------------
+r295 | olzenkhaw | 2015-07-23 00:56:05 +0000 (Thu, 23 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+4.8.3 - Add whitespace to OSendToX function.
+------------------------------------------------------------------------
+r293 | olzenkhaw | 2015-07-21 13:51:18 +0000 (Tue, 21 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+4.8.2 Added Immaculate gems.
+------------------------------------------------------------------------
+r291 | olzenkhaw | 2015-07-17 15:15:38 +0000 (Fri, 17 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+   M /trunk/libs/CallbackHandler-1.0/CallbackHandler-1.0.lua
+
+4.8.1 Fixed timewalking gear item level.
+------------------------------------------------------------------------

@@ -26,7 +26,12 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Enable Showing Gear Item Level on Character Frame"] = "Отображать уровень предметов при наведении на игрока",
 	["Item Level"] = "Уровень предметов",
 	["Average Item Level"] = "Средний уровень предметов",
-	["Export"] = "Закрыть",
+	["Export"] = "Экспорт",
+	-- Translated by Isceruth
+	["Not enchanted"] = "Не зачаровано",
+	["Not socketed"] = "Нет самоцвета",
+	["Low level enchanted"] = "Низкий уровень зачарования",
+	["Low level socketed"] = "Низкий уровень камня",
 	
 } or GetLocale() == "zhTW" and {
 	-- translated by olzenkhaw
@@ -57,6 +62,12 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Item Level"] = "아이템 레벨",
 	["Average Item Level"] = "평균 아이템 레벨",
 	["Export"] = "내보내기",
+	-- traslated by yuk6196
+	["Not enchanted"] = "마법부여 안됨",
+	["Not socketed"] = "보석장착 안됨",
+	["Low level enchanted"] = "낮은 등급 마법부여",
+	["Low level socketed"] = "낮은 등급 보석 장착",
+	
 } or GetLocale() == "frFR" and {
 	-- Translated by Protosama
 	["Enable Showing item level / raid progression on tooltips"] = "Voir le Niveau d'objet / Progression en raid dans l'infobulle",
@@ -112,6 +123,10 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Average Item Level"] = "Nivel de objeto promedio",
 	["Item Level"] = "Nivel de objeto",
 	["Export"] = "Exportar",
+	["Not enchanted"] = "No encantado",
+	["Not socketed"] = "Sin gema",
+	["Low level enchanted"] = "Encanto menor",
+	["Low level socketed"] = "Gema menor",
 
 	} or GetLocale() == "esES" and {
 	-- Translated by BakuraExel
@@ -125,6 +140,10 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Average Item Level"] = "Nivel de objeto promedio",
 	["Item Level"] = "Nivel de objeto",
 	["Export"] = "Exportar",
+	["Not enchanted"] = "No encantado",
+	["Not socketed"] = "Sin gema",
+	["Low level enchanted"] = "Encanto menor",
+	["Low level socketed"] = "Gema menor",
 
 	} or { }
 

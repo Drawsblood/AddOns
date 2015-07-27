@@ -412,6 +412,7 @@ function OilvlRunMouseoverTooltips(oframe)
 			if cfg.oilvlrpdetails then
 				LoadRPDTooltip:SetOwner(OilvlTooltip, "ANCHOR_BOTTOM",0,-20);
 				LoadRPDTooltip:AddLine(L["Raid Progression Details"]..": |cFFFFFFFF"..LFG_LIST_LOADING);
+				LoadRPDTooltip:SetBackdropColor(1, 0, 0,1)
 				LoadRPDTooltip:Show();
 			end
 		end
@@ -2201,6 +2202,7 @@ OPvPButton(f)
 						if cfg.oilvlrpdetails then
 							LoadRPDTooltip:SetOwner(OilvlTooltip, "ANCHOR_BOTTOM",0,-20);
 							LoadRPDTooltip:AddLine(L["Raid Progression Details"]..": |cFFFFFFFF"..LFG_LIST_LOADING);
+							LoadRPDTooltip:SetBackdropColor(1, 0, 0,1)
 							LoadRPDTooltip:Show();
 						end
 					end
