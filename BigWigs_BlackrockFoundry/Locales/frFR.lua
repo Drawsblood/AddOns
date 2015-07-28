@@ -91,7 +91,7 @@ L["custom_off_heartseeker_marker"] = "Marquage Crève-cœur imprégné de sang"
 L["custom_off_heartseeker_marker_desc"] = "Marque les cibles des crèves-cœurs avec {rt1}{rt2}{rt3}. Nécessite d'être assistant ou chef de raid."
 L["power_message"] = "%d Furie de fer !"
 L["ship"] = "Saut vers le navire"
-L["ship_trigger"] = "s'apprête à employer le canon principal du cuirassier !" -- Needs review
+L["ship_trigger"] = "s'apprête à employer le canon principal du cuirassier !"
 
 end
 

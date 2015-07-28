@@ -22,6 +22,10 @@ end
 
 L = BigWigs:NewBossLocale("Shadow-Lord Iskar", "zhTW")
 if L then
+L["bindings_removed"] = "黑暗束縛移除 (%d/3)"
+L["custom_off_binding_marker"] = "黑暗束縛標記"
+L["custom_off_binding_marker_desc"] = [=[標記黑暗束縛為{rt1}{rt2}{rt3}{rt4}{rt5}{rt6}，需要團隊權限或隊長。
+|cFFFF0000團隊中只需一人啟用，以免衝突。|r]=]
 L["custom_off_wind_marker"] = "幻魅之風標記"
 L["custom_off_wind_marker_desc"] = [=[標記幻魅之風為{rt1}{rt2}{rt3}{rt4}{rt5}，需要團隊權限或隊長。
 |cFFFF0000團隊中只需一人啟用，以免衝突。|r]=]
@@ -70,18 +74,23 @@ if L then
 L["chaos_bar"] = "%s -> %s"
 L["custom_off_torment_marker"] = "束縛折磨標記"
 L["custom_off_torment_marker_desc"] = "標記束縛折磨為{rt1}{rt2}{rt3}，需要團隊權限或隊長。"
-L["torment_removed"] = "束縛折磨移除 (%d/%d)" -- Needs review
+L["torment_removed"] = "束縛折磨移除 (%d/%d)"
 
 end
 
 L = BigWigs:NewBossLocale("Hellfire Citadel Trash", "zhTW")
 if L then
+L["anetheron"] = "安納塞隆"
+L["azgalor"] = "亞茲加洛"
 L["bloodthirster"] = "浴血蠻兵"
+L["burster"] = "暗影爆發魔"
 L["daggorath"] = "達苟拉斯"
 L["darkcaster"] = "浴血黑暗法師"
 L["eloah"] = "束縛者埃洛亞"
 L["enkindler"] = "熾焰焚火師"
+L["faithbreaker"] = "埃雷達爾毀信者"
 L["graggra"] = "葛拉格拉"
+L["kazrogal"] = "卡茲洛加"
 L["kuroh"] = "隨從庫洛"
 L["orb"] = "破滅之球"
 L["peacekeeper"] = "保安傀儡"

@@ -59,6 +59,7 @@ function mod:GetOptions()
 		183254, -- Allure of Flames
 		183828, -- Death Brand
 		{183864, "TANK"}, -- Shadow Blast
+		183963, -- Light of the Naaru
 		"stages",
 	}, {
 		[182826] = -11577,
@@ -70,7 +71,9 @@ end
 
 function mod:OnBossEnable()
 	-- P1
+	self:Log("SPELL_AURA_APPLIED", "LightOfTheNaaru", 183963)
 	self:Log("SPELL_CAST_START", "AllureOfFlames", 183254)
+	self:Log("SPELL_CAST_START", "DeathBrandCast", 183828)
 	self:Log("SPELL_AURA_APPLIED", "DeathBrand", 183828)
 	self:Log("SPELL_AURA_APPLIED", "ShadowBlast", 183864)
 	self:Log("SPELL_AURA_APPLIED_DOSE", "ShadowBlast", 183864)
@@ -128,7 +131,9 @@ function mod:Phases(unit, spellName, _, _, spellId)
 		self:StopBar(182826) -- Doomfire
 		self:StopBar(183817) -- Shadowfel Burst
 		self:CloseProximity(183817) -- Shadowfel Burst
-		self:CancelTimer(burstTimer)
+		if burstTimer then
+			self:CancelTimer(burstTimer)
+		end
 		self:Message("stages", "Neutral", "Long", CL.phase:format(2), false)
 		self:CDBar(186123, 7) -- Wrought Chaos
 		self:CDBar(184964, 27) -- Shackled Torment
@@ -147,13 +152,25 @@ function mod:Phases(unit, spellName, _, _, spellId)
 	end
 end
 
+function mod:LightOfTheNaaru(args)
+	if self:Me(args.destGUID) then
+		self:TargetMessage(args.spellId, args.destName, "Personal", self:Tank() and "Info")
+	end
+end
+
 function mod:AllureOfFlames(args)
 	self:Message(args.spellId, "Urgent", "Alert")
 	self:CDBar(args.spellId, 48) -- Min: 47.5/Avg: 49.8/Max: 54.1
 end
 
+function mod:DeathBrandCast(args)
+	if self:Tank() then
+		self:Message(args.spellId, "Attention", "Warning", CL.casting:format(args.spellName))
+	end
+end
+
 function mod:DeathBrand(args)
-	self:TargetMessage(args.spellId, args.destName, "Attention", self:Tank() and "Warning")
+	self:TargetMessage(args.spellId, args.destName, "Attention", "Warning", nil, nil, self:Tank())
 	self:CDBar(args.spellId, 43)
 end
 
@@ -193,6 +210,7 @@ do
 end
 
 function mod:ShadowfelBurstSoon()
+	burstTimer = nil
 	self:Message(183817, "Urgent", nil, CL.soon:format(self:SpellName(183817)))
 	self:OpenProximity(183817, 9) -- 8+1 safety
 end
@@ -201,8 +219,12 @@ function mod:ShadowfelBurst(args)
 	self:Message(args.spellId, "Urgent", "Warning")
 	-- just in case timer is off
 	self:Bar(args.spellId, 2)
-	self:CancelTimer(burstTimer)
 	self:OpenProximity(args.spellId, 9) -- 8+1 safety
+	burstCount = burstCount + 1
+	if burstTimer then
+		self:CancelTimer(burstTimer)
+	end
+	burstTimer = self:ScheduleTimer("ShadowfelBurstSoon", burstCount == 2 and 53 or 48)
 end
 
 do
@@ -211,10 +233,13 @@ do
 		list[#list+1] = args.destName
 		if #list == 1 then
 			self:ScheduleTimer("TargetMessage", 0.3, 183817, list, "Urgent")
-			burstCount = burstCount + 1
 			self:Bar(183817, burstCount == 2 and 61 or 56)
-			self:CloseProximity(183817)
-			burstTimer = self:ScheduleTimer("ShadowfelBurstSoon", burstCount == 2 and 51 or 46)
+			if self:Melee() then
+				self:CloseProximity(183817)
+			else
+				self:OpenProximity(183817, 8, args.destName)
+				self:ScheduleTimer("CloseProximity", 6, 183817)
+			end
 		end
 	end
 end
@@ -236,7 +261,7 @@ do
 				local torment = CL.count:format(self:SpellName(187553), i) -- 187553 = "Torment"
 				self:Say(spellId, torment)
 				self:Flash(spellId)
-				self:Message(spellId, "Personal", "Alarm", CL.you:format(torment))
+				self:TargetMessage(spellId, target, "Personal", "Alarm", torment)
 			end
 			if self:GetOption("custom_off_torment_marker") then
 				SetRaidTarget(target, i)
@@ -296,7 +321,7 @@ end
 
 do
 	local chaosCount, prev = 0, 0
-	local chaosSource, chaosTarget = "", ""
+	local chaosSource = ""
 
 	function mod:WroughtChaosCast(args)
 		chaosCount = 0
@@ -305,32 +330,32 @@ do
 
 	function mod:WroughtChaos(args)
 		if self:Me(args.destGUID) then
-			self:Message(args.spellId, "Personal", "Info", CL.you:format(args.spellName))
+			self:TargetMessage(args.spellId, args.destName, "Personal", "Info")
 			self:Say(args.spellId)
 		end
 
 		if not self:Mythic() then
-			chaosSource = self:ColorName(args.destName)
-			self:SecondaryIcon(args.spellId, args.destName)
+			chaosSource = args.destName
+			self:PrimaryIcon(args.spellId) -- Always clear before setting
+			self:SecondaryIcon(args.spellId)
+			self:ScheduleTimer("SecondaryIcon", 0.3, args.spellId, args.destName) -- Delay for potential latency with clearing the icons
 		end
 	end
 
 	function mod:FocusedChaos(args)
 		if self:Me(args.destGUID) then
-			self:Message(186123, "Positive", "Alarm", CL.you:format(args.spellName))
+			self:TargetMessage(186123, args.destName, "Positive", "Alarm", args.spellId)
 			self:Say(186123, args.spellName)
 			--self:Flash(186123, args.spellId)
 		end
 
 		if not self:Mythic() then
 			chaosCount = chaosCount + 1
-			chaosTarget = self:ColorName(args.destName)
-			self:PrimaryIcon(186123, args.destName)
+			self:ScheduleTimer("PrimaryIcon", 0.3, 186123, args.destName) -- Delay for potential latency with clearing the icons
 			if not banished then
 				local spell = CL.count:format(self:SpellName(186123), chaosCount)
-				local targets = L.chaos_bar:format(chaosSource, chaosTarget)
-				self:Message(186123, "Important", nil, CL.other:format(spell, targets)) -- Wrought Chaos (1): Player -> Player
-				self:Bar(186123, 5, ("(%d) %s"):format(chaosCount, targets), "spell_shadow_soulleech_1") -- (1) Player -> Player
+				self:Message(186123, "Important", nil, CL.other:format(spell, L.chaos_bar:format(self:ColorName(chaosSource), self:ColorName(args.destName)))) -- Wrought Chaos (1): Player -> Player
+				self:Bar(186123, 5, ("(%d) %s"):format(chaosCount, L.chaos_bar:format(chaosSource:gsub("%-.+", "*"), args.destName:gsub("%-.+", "*"))), "spell_shadow_soulleech_1") -- (1) Player -> Player
 			end
 		else -- Mythic
 			local t = GetTime()
@@ -384,14 +409,18 @@ end
 function mod:NetherBanishApplied(args)
 	if self:Me(args.destGUID) then
 		banished = true
-		self:CloseProximity(187180) -- Demonic Feedback
+		if self:Ranged() then
+			self:CloseProximity(187180) -- Demonic Feedback
+		end
 	end
 end
 
 function mod:NetherBanishRemoved(args)
 	if self:Me(args.destGUID) then
 		banished = nil
-		self:OpenProximity(187180, 7) -- Demonic Feedback
+		if self:Ranged() then
+			self:OpenProximity(187180, 7) -- Demonic Feedback
+		end
 	end
 end
 

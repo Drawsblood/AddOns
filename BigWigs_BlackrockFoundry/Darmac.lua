@@ -127,7 +127,7 @@ function mod:OnEngage(diff)
 	self:Bar(154960, 11) -- Pinned Down
 	self:Berserk(720)
 
-	if not self:LFR() and (self:Healer() or self:Damager() == "RANGED") then
+	if not self:LFR() and self:Ranged() then
 		self:OpenProximity("proximity", 8)
 	end
 
@@ -274,7 +274,7 @@ do
 			self:CDBar(155499, 25)
 		elseif spellId == 155385 or spellId == 155515 then -- Rend and Tear first jump casts (Cruelfang, Darmac)
 			self:CDBar(155061, 12) -- Rend and Tear, 12-16
-			if self:Tank() or self:Damager() == "MELEE" then
+			if self:Melee() then
 				self:Message(155061, "Urgent", nil, CL.incoming:format(self:SpellName(155061)))
 			end
 		end
@@ -316,7 +316,7 @@ do
 	end
 
 	function mod:PinDown(args)
-		local ranged = self:Healer() or self:Damager() == "RANGED"
+		local ranged = self:Ranged()
 		self:Message(154960, "Urgent", ranged and "Warning", CL.incoming:format(args.spellName))
 		self:CDBar(154960, 20)
 		if ranged then
