@@ -1,0 +1,41 @@
+------------------------------------------------------------------------
+r449 | oscarucb | 2015-07-29 04:06:30 +0000 (Wed, 29 Jul 2015) | 1 line
+Changed paths:
+   A /tags/6.2.2 (from /trunk:448)
+
+Tagging as 6.2.2
+------------------------------------------------------------------------
+r448 | oscarucb | 2015-07-28 20:37:32 +0000 (Tue, 28 Jul 2015) | 3 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+ticket 205: temporary workaround for a blizzard RaidInfoFrame bug
+to silence Blizzard's annoying lua errors
+
+------------------------------------------------------------------------
+r447 | oscarucb | 2015-07-19 07:07:11 +0000 (Sun, 19 Jul 2015) | 4 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+tweak currency display
+fix totalMax scaling for Honor
+fix earnedThisWeek scaling for Conquest
+
+------------------------------------------------------------------------
+r445 | oscarucb | 2015-07-04 03:15:51 +0000 (Sat, 04 Jul 2015) | 4 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+fix "boxname" lua error resulting from SoO LFR by updating LFDID
+add diagnostics to detect future such bugs in a more obvious manner
+factor bug reporting messages
+
+------------------------------------------------------------------------
+r444 | oscarucb | 2015-07-03 04:59:00 +0000 (Fri, 03 Jul 2015) | 3 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+add daily tanaan oil bosses (doomroller, etc). Mouse-over daily quest entry to see these.
+make quest detection more responsive
+
+------------------------------------------------------------------------

@@ -14,7 +14,7 @@ local maxdiff = 23 -- max number of instance difficulties
 local maxcol = 4 -- max columns per player+instance
 
 addon.svnrev = {}
-addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 445 $"):match("%d+"))
+addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 448 $"):match("%d+"))
 
 -- local (optimal) references to provided functions
 local table, math, bit, string, pairs, ipairs, unpack, strsplit, time, type, wipe, tonumber, select, strsub = 
@@ -452,8 +452,6 @@ vars.defaultDB = {
 		SelfAlways = false,
 		TrackLFG = true,
 		TrackDeserter = true,
-		Currency395 = false, -- Justice Points  -- XXX: temporary
-		Currency396 = false, -- Valor Points -- XXX: temporary
 		Currency776 = false, -- Warforged Seals
 		Currency738 = false, -- Lesser Charm of Good Fortune
 		Currency823 = true,  -- Apexis Crystal
@@ -526,6 +524,27 @@ function addon:SkinFrame(frame,name)
     end
   end
 end
+
+-- ticket 205: temporary workaround for a blizzard RaidInfoFrame bug, which is made more visible by the addon's polling
+if true then 
+  local gsii
+  local function gsii_wrapper(i)
+    local rets = { gsii(i) }
+    -- mask off the high-order bit on instance IDs, which causes the string.format lua error
+    rets[2] = rets[2] and bit.band(rets[2],0x7fffffff)
+    rets[7] = rets[7] and bit.band(rets[2],0x7fffffff)
+    return unpack(rets)
+  end
+  local rifu = _G.RaidInfoFrame_Update
+  _G.RaidInfoFrame_Update = function(...) -- wrapper
+    gsii = _G.GetSavedInstanceInfo
+    _G.GetSavedInstanceInfo = gsii_wrapper
+    rifu(...) -- call down
+    _G.GetSavedInstanceInfo = gsii
+  end
+  RaidInfoScrollFrame.update = _G.RaidInfoFrame_Update
+end
+
 
 -- general helper functions below
 
@@ -1515,8 +1534,11 @@ function addon:UpdateCurrency()
           if idx == 396 then -- VP has a weekly max scaled by 100
             ci.weeklyMax = ci.weeklyMax and math.floor(ci.weeklyMax/100)
           end
-	  if idx == 390 or idx == 392 or idx == 395 or idx == 396 then -- these have a total max scaled by 100
+	  if idx == 390 or idx == 395 or idx == 396 then -- these have a total max scaled by 100
             ci.totalMax = ci.totalMax and math.floor(ci.totalMax/100)
+	  end
+	  if idx == 390 then -- these have a weekly earned scaled by 100
+            ci.earnedThisWeek = ci.earnedThisWeek and math.floor(ci.earnedThisWeek/100)
 	  end
 	  if idx == 1129 then -- Seal of Tempered Fate returns zero for weekly quantities
 	    ci.weeklyMax = 3 -- the max via quests
@@ -2070,7 +2092,7 @@ local function ShowCurrencyTooltip(cell, arg, ...)
   local name,_,tex = GetCurrencyInfo(idx)
   tex = " \124T"..tex..":0\124t"
   openIndicator(2, "LEFT","RIGHT")
-  indicatortip:AddHeader(ClassColorise(vars.db.Toons[toon].Class, strsplit(' ', toon)), "("..(ci.amount or "0")..tex..")")
+  indicatortip:AddHeader(ClassColorise(vars.db.Toons[toon].Class, strsplit(' ', toon)), (ci.amount or "0")..tex)
 
   scantt:SetOwner(UIParent,"ANCHOR_NONE")
   scantt:SetCurrencyByID(idx)
@@ -3507,14 +3529,14 @@ function core:ShowTooltip(anchorframe)
 		     end
 		   end
 		   if vars.db.Tooltip.CurrencyEarned or showall then
-		     earned = "("..CurrencyColor(ci.amount,ci.totalMax)..totalmax..")"
+		     earned = CurrencyColor(ci.amount,ci.totalMax)..totalmax
 		   end
                    local str
 		   if (ci.amount or 0) > 0 or (ci.earnedThisWeek or 0) > 0 then
                      if (ci.weeklyMax or 0) > 0 then
-                       str = CurrencyColor(ci.earnedThisWeek,ci.weeklyMax)..weeklymax.." "..earned
+                       str = earned.." ("..CurrencyColor(ci.earnedThisWeek,ci.weeklyMax)..weeklymax..")"
 		     elseif (ci.amount or 0) > 0 then
-                       str = "("..CurrencyColor(ci.amount,ci.totalMax)..totalmax..")"
+                       str = CurrencyColor(ci.amount,ci.totalMax)..totalmax
 		     end
                    end
 		  if str then

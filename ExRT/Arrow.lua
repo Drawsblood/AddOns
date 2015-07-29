@@ -424,6 +424,11 @@ function arrowFrame:LoadPosition(...)
 	frame:SetPoint(...)
 end
 
+function arrowFrame:GetPosition()
+	return targetX, targetY
+end
+
+
 --- Other func
 
 local buffFilter = {"HARMFUL","HELPFUL"}
@@ -479,6 +484,7 @@ function module.main:ADDON_LOADED()
 	if VExRT.Arrow.Scale then frame:SetScale(VExRT.Arrow.Scale/100) end
 	
 	module:RegisterSlash()
+	module:RegisterAddonMessage()
 end
 
 function module:slash(arg)
@@ -561,11 +567,64 @@ function module:slash(arg)
 				return self:ShowToPlayer( UnitName('raid'..i), nil )
 			end
 		end
+	elseif arg:find("^arrowget") then
+		local x,y = arrowFrame:GetPosition()
+		print(x,y)
 	end
 end
 
+local playerName = UnitName'player'
+function module:addonMessage(sender, prefix, ...)
+	if prefix == "arrow" then
+		if IsInRaid() and not ExRT.F.IsPlayerRLorOfficer(sender) then
+			return
+		end
+	
+		local name, sub_prefix = ...
+		if name ~= "raid" and ExRT.F.delUnitNameServer(name) ~= playerName then
+			return
+		end
+		if sub_prefix == "g" then
+			local _, _, runAway, x, y, distance, time, world, hide = ...
+			runAway = (runAway == "true" or runAway == "1") and true or false
+			x = tonumber(x)
+			y = tonumber(y)
+			distance = tonumber(distance)
+			time = tonumber(time)
+			world = (world == "true" or world == "1") and true or false
+			hide = (hide == "true" or hide == "1") and true or false
+			show(runAway, x, y, distance, time, world, hide)
+		end
+	end 
+end
 
+function ExRT.F.ArrowText(angle)
+	local cell = floor(angle / pi2 * 108 + 0.5) % 108
+	local column = cell % 9
+	local row = floor(cell / 9)
+	local xStart = (column * 56) / 512
+	local yStart = (row * 42) / 512
+	local xEnd = ((column + 1) * 56) / 512
+	local yEnd = ((row + 1) * 42) / 512
+	xStart = floor(512 * xStart)
+	xEnd = floor(512 * xEnd)
+	yStart = floor(512 * yStart)
+	yEnd = floor(512 * yEnd)
+	
+	return "|TInterface\\AddOns\\ExRT\\media\\Arrow:16:16:0:0:512:512:"..xStart..":"..xEnd..":"..yStart..":"..yEnd.."|t"
+end
 
+function ExRT.F.ArrowTextPlayer(unit)
+	local pY,pX = UnitPosition('player')
+	local tY,tX = UnitPosition(unit)
+	if not tX or (tY == 0 and tX == 0) then
+		return ""
+	end
+	local angle = math.atan2(pX - tX, pY - tY)
+	local player = GetPlayerFacing()
+	
+	return ExRT.F.ArrowText( angle - player - PI )
+end
 
 function module.options:Load()
 	self:CreateTilte()

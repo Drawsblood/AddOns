@@ -1,8 +1,11 @@
---	20:35 06.07.2015
+--	23:37 27.07.2015
 
 --[[
-New bossmod: Kormrok
-Raid Check: added support for new food
+Bossmods: new bossmod: Archimonde Radar (to deal with "Wrought Chaos" ability)
+Bossmods: new bossmod: Archimonde Infernals (marks and shows bars with hp of infernals on p3)
+Raid cooldowns: fixed Legendary rings (dd)
+Arrow: new function (can be used in weakaura for ex.) "GExRT.F.ArrowTextPlayer(unit)", where "unit" - name of player in your raid. Shows arrow to this player in text
+Bossmods: new bossmod: Mannoroth (shows arrow to players with Mannoroth's Gaze debuffs)
 Minor fixes
 
 TODO:
@@ -11,7 +14,7 @@ TODO:
 
 local GlobalAddonName, ExRT = ...
 
-ExRT.V = 3465
+ExRT.V = 3481
 ExRT.T = "R"
 ExRT.BETA = false
 
@@ -35,19 +38,6 @@ ExRT.L = {}			--> локализация
 ExRT.locale = GetLocale()
 
 ExRT.clientUIinterface = select(4,GetBuildInfo())
-
---[[
-if ExRT.clientUIinterface > 60199 then	-- 6.2
-	ExRT.BETA = true
-	if IsTestBuild() then
-		ExRT.T = "PTR"
-	end
-	ExRT.EnableCyrillic = false	--"false" for public version, "true" for private
-end
-]]
-if ExRT.clientUIinterface < 60200 then	-- pre 6.2
-	ExRT.is61 = true
-end
 
 ExRT.ModulesOptions = {}
 

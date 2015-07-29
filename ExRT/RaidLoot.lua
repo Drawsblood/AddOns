@@ -499,9 +499,6 @@ function module.options:Load()
 					local upgradeStr1 = itemUpgrade[j] ~= 0 and 4 or 0
 					local link = format("|c%s|Hitem:%d:0:0:0:0:0:0:0:%d:0:%d:%d:%s%s|h%%s|h|r",itemColor_fix,itemIDnow,itemReqLevel or UnitLevel("player"),upgradeStr1,diffTypeTable[i],affixesString,upgradeStr2)
 					
-					if ExRT.is61 then
-						link = format("|c%s|Hitem:%d:0:0:0:0:0:0:0:%d:%d:%d:%s|h%%s|h|r",itemColor_fix,itemIDnow,itemReqLevel or UnitLevel("player"),itemUpgrade[j],diffTypeTable[i],affixesString)
-					end
 					self.Item[i][j].text:SetText(format(link,tostring(itemLevel)))
 					self.Item[i][j].link = format(link,"["..(itemName or "?").."]")
 					self.Item[i][j].url = "https://wowhead.com/item="..itemIDnow..urlAffixesString

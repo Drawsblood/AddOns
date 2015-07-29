@@ -1,6 +1,6 @@
 local GlobalAddonName, ExRT = ...
 
-local UnitAura, UnitIsDeadOrGhost, UnitIsConnected, UnitPower, UnitGUID, UnitName, UnitPosition, UnitInRange = UnitAura, UnitIsDeadOrGhost, UnitIsConnected, UnitPower, UnitGUID, UnitName, UnitPosition, UnitInRange
+local UnitAura, UnitIsDeadOrGhost, UnitIsConnected, UnitPower, UnitGUID, UnitName, UnitPosition, UnitInRange, UnitIsUnit = UnitAura, UnitIsDeadOrGhost, UnitIsConnected, UnitPower, UnitGUID, UnitName, UnitPosition, UnitInRange, UnitIsUnit
 local GetTime, tonumber, tostring, sort, wipe, PI, pairs = GetTime, tonumber, tostring, table.sort, table.wipe, PI, pairs
 local cos, sin, sqrt, acos, abs, floor, min, max, GGetPlayerMapPosition, GetPlayerFacing, GetNumGroupMembers = math.cos, math.sin, math.sqrt, acos, math.abs, math.floor, math.min, math.max, GetPlayerMapPosition, GetPlayerFacing, GetNumGroupMembers
 local ClassColorNum, SetMapToCurrentZone, GetCurrentMapAreaID, GetCurrentMapDungeonLevel, GetRaidRosterInfo = ExRT.mds.classColorNum, SetMapToCurrentZone, GetCurrentMapAreaID, GetCurrentMapDungeonLevel, GetRaidRosterInfo
@@ -3449,10 +3449,1122 @@ function Kormrok:addonMessage(sender, prefix, ...)
 	end
 end
 
+-----------------------------------------
+-- Mannoroth
+-----------------------------------------
+local Mannoroth = {}
+
+function Mannoroth:Load()
+	local mainFrame = Mannoroth.setupFrame
+	if mainFrame then
+		mainFrame:Show()
+		mainFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		mainFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+		if ExRT.Options.Frame:IsShown() then
+			ExRT.Options.Frame:Hide()
+		end
+		mainFrame.isEnabled = true
+		return
+	end
+	
+	mainFrame = ExRT.lib.CreatePopupFrame(600,400,"Mannoroth",true)
+	Mannoroth.setupFrame = mainFrame
+	mainFrame:SetFrameStrata("HIGH")
+	mainFrame:Show()
+	
+	VExRT.Bossmods.Mannoroth.Section = VExRT.Bossmods.Mannoroth.Section or {}
+	
+	local function removeButtonOnClick(self)
+		for i=self._i2,10 do
+			VExRT.Bossmods.Mannoroth.Section[ self._i1 ][i] = VExRT.Bossmods.Mannoroth.Section[ self._i1 ][i+1]
+		end
+		mainFrame:UpdateSections()
+	end
+	
+	mainFrame.markSection = {}
+	mainFrame.sectionSelected = 1
+	for i=1,3 do
+		local frame = CreateFrame("Button",nil,mainFrame)
+		mainFrame.markSection[i] = frame
+		
+		frame:SetSize(170,220)
+		frame:SetPoint("TOP",-195 + (i-1)*195,-30)
+		
+		frame.shadow = ExRT.lib.CreateShadow(frame,25)
+		frame.shadow:SetBackdropBorderColor(1,1,1,.45)
+		
+		if i==1 then
+			frame.shadow:SetBackdropBorderColor(0,1,0,.45)
+		end
+		
+		local icon = ExRT.lib.CreateIcon(frame,32,"TOP",0,-10,"Interface\\TargetingFrame\\UI-RaidTargetingIcon_"..(9-i))
+		
+		frame._i = i
+		frame:SetScript("OnClick",function(self)
+			mainFrame.sectionSelected = self._i
+			for j=1,3 do
+				if j ~= self._i then
+					mainFrame.markSection[j].shadow:SetBackdropBorderColor(1,1,1,.45)
+				else
+					mainFrame.markSection[j].shadow:SetBackdropBorderColor(0,1,0,.45)
+				end
+			end
+		end)
+		
+		frame.names = {}
+		for j=1,10 do
+			local line = CreateFrame("Frame",nil,frame)
+			frame.names[j] = line
+			line:SetPoint("TOP",0,-40-j*14)
+			line:SetSize(170,14)
+			
+			line.name = ExRT.lib.CreateText(line,145,12,"LEFT",20,0,"LEFT","MIDDLE",nil,12,UnitName'player',nil,1,1,1,true)
+			
+			local remove = CreateFrame("Button",nil,line)
+			line.remove = remove
+			remove:SetPoint("LEFT",2,0)
+			remove:SetSize(14,14)
+			
+			remove.texture = remove:CreateTexture(nil,"ARTWORK")
+			remove.texture:SetAllPoints()
+			remove.texture:SetTexture("Interface\\AddOns\\ExRT\\media\\DiesalGUIcons16x256x128")
+			remove.texture:SetTexCoord(0.5,0.5625,0.5,0.625)
+			remove.texture:SetVertexColor(1,1,1,.7)
+			remove.texture:Hide()
+			remove:SetNormalTexture(remove.texture)
+			
+			remove.hover = remove:CreateTexture(nil,"ARTWORK")
+			remove.hover:SetAllPoints()
+			remove.hover:SetTexture("Interface\\AddOns\\ExRT\\media\\DiesalGUIcons16x256x128")
+			remove.hover:SetTexCoord(0.5,0.5625,0.5,0.625)
+			remove.hover:SetVertexColor(0.7,0,0,1)
+			remove.hover:Hide()
+			remove:SetHighlightTexture(remove.hover)
+			
+			remove:SetScript("OnClick",removeButtonOnClick)
+			remove._i1 = i
+			remove._i2 = j
+		end
+		
+		
+		VExRT.Bossmods.Mannoroth.Section[i] = VExRT.Bossmods.Mannoroth.Section[i] or {}
+	end
+	
+	local function raidNamesOnEnter(self)
+		self.name:SetShadowColor(0.2, 0.2, 0.2, 1)
+	end
+	local function raidNamesOnLeave(self)
+		self.name:SetShadowColor(0, 0, 0, 1)
+	end
+	local function raidNamesOnClick(self)
+		local list = VExRT.Bossmods.Mannoroth.Section[ mainFrame.sectionSelected ]
+		if #list >= 10 then
+			return
+		end
+		list[#list + 1] = self._name
+		mainFrame:UpdateSections()
+	end
+	
+	mainFrame.raidRoster = {}
+	for i=1,6 do
+		for j=1,5 do
+			local line = CreateFrame("Button",nil,mainFrame)
+			mainFrame.raidRoster[(i-1)*5+j] = line
+			line:SetPoint("TOPLEFT",mainFrame.markSection[1],"BOTTOMLEFT",(i-1)*94,-5-j*14)
+			line:SetSize(90,14)
+			
+			line.name = ExRT.lib.CreateText(line,90,12,"LEFT",0,0,"LEFT","MIDDLE",nil,12,UnitName'player',nil,1,1,1,true)
+			line._name = (UnitName'player') .. ((i-1)*5+j)
+			
+			line:SetScript("OnClick", raidNamesOnClick)
+			line:SetScript("OnEnter", raidNamesOnEnter)
+			line:SetScript("OnLeave", raidNamesOnLeave)
+		end
+	end
+	
+	function mainFrame:UpdateRoster()
+		local raidData = {{},{},{},{},{},{}}
+		for i=1,40 do
+			local name,_,subgroup,_,_,class = GetRaidRosterInfo(i)
+			if name and subgroup <= 6 then
+				raidData[subgroup][ #raidData[subgroup]+1 ] = {name,class}
+			end
+		end
+		for i=1,6 do
+			for j=1,5 do
+				local pos = (i-1)*5+j
+				local data = raidData[i][j]
+				local line = mainFrame.raidRoster[pos]
+				if line and data then
+					line._name = data[1]
+					line.name:SetText("|c"..ExRT.F.classColor(data[2])..data[1])
+					line:Show()
+				elseif line then
+					line:Hide()
+				end
+			end
+		end
+	end
+	
+	function mainFrame:UpdateSections()
+		local selectedRoster = {}
+		for i=1,3 do
+			local list = VExRT.Bossmods.Mannoroth.Section[i]
+			for j=1,10 do
+				local line = mainFrame.markSection[i].names[j]
+				if list[j] then
+					line.name:SetText( list[j] )
+					line:Show()
+					
+					selectedRoster[ list[j] ] = true
+				else
+					line:Hide()
+				end
+			end
+		end
+		for i=1,6 do
+			for j=1,5 do
+				local line = mainFrame.raidRoster[(i-1)*5+j]
+				local name = line._name
+				if name then
+					if selectedRoster[ name ] then
+						line:SetAlpha(.2)
+					else
+						line:SetAlpha(1)
+					end
+				end
+			end
+		end
+	end
+	
+	mainFrame:UpdateRoster()
+	mainFrame:UpdateSections()
+	
+	mainFrame.lastUpdate = ExRT.lib.CreateText(mainFrame,430,20,"BOTTOMLEFT",10,10,"LEFT","BOTTOM",nil,12,"Last Update: me ololol",nil,1,1,1,nil,1)
+
+	if not VExRT.Bossmods.Mannoroth.name or not VExRT.Bossmods.Mannoroth.time then
+		mainFrame.lastUpdate:SetText("")
+	else
+		mainFrame.lastUpdate:SetText(ExRT.L.BossmodsKromogLastUpdate..": "..ExRT.F.delUnitNameServer(VExRT.Bossmods.Mannoroth.name).." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Mannoroth.time)..")")
+	end
+	
+	mainFrame.sendButton = ExRT.lib.CreateButton(mainFrame,120,20,"BOTTOMRIGHT",-10,10,ExRT.L.BossmodsKromogSend,nil,nil,"ExRTButtonModernTemplate")
+	mainFrame.sendButton:SetScript("OnClick",function (self)
+		local line = ""
+		local counter = 0
+		ExRT.F.SendExMsg("mannoroth","num\t"..(VExRT.Bossmods.Mannoroth.number or 3))
+		for i=1,3 do
+			for j=1,10 do
+				local name = VExRT.Bossmods.Mannoroth.Section[i][j] or "-"
+				line = line .. (i*10+j) .. "\t" .. name .. "\t"
+				counter = counter + 1
+				if counter > 2 then
+					ExRT.F.SendExMsg("mannoroth",line)
+					line = ""
+					counter = 0
+				end
+			end
+		end
+		if line ~= "" then
+			ExRT.F.SendExMsg("mannoroth",line)
+		end
+	end)
+	
+	local tableBuilder = {}
+	local myName = UnitName("player")
+	local markIDtoSelection = {
+		[8] = 1,
+		[7] = 2,
+		[6] = 3,
+	}
+
+	local function ShowArrow(isEmpowered)
+		ExRT.F.Arrow:Hide()
+		local blackList = {}
+		for i=8,6,-1 do
+			if tableBuilder[i] then
+				blackList[ ExRT.F.delUnitNameServer(tableBuilder[i]) ] = true
+			end
+		end
+		for i=8,6,-1 do
+			if tableBuilder[i] then
+				local counter = 1
+				for j=1,10 do
+					local name = VExRT.Bossmods.Mannoroth.Section[ markIDtoSelection[i] ][j]
+					if name and not blackList[ ExRT.F.delUnitNameServer(name) ] then
+						counter = counter + 1
+						if ExRT.F.delUnitNameServer(name) == myName then
+							ExRT.F.Arrow:ShowToPlayer(tableBuilder[i],nil,nil,4,nil,true)
+						end
+						--print( name,tableBuilder[i] )
+						if counter > (VExRT.Bossmods.Mannoroth.number or 3) and isEmpowered then
+							break
+						end
+					end
+				end
+			end
+		end
+	end
+	
+	local markNow = 8
+	
+	mainFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	mainFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+	mainFrame:SetScript("OnEvent",function(_,event,timestamp,cleu_event,hideCaster,sourceGUID,sourceName,sourceFlags,_,destGUID,destName,destFlags,_,spellID,spellName,school,auraType,amount)
+		if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+			if cleu_event == "SPELL_AURA_APPLIED" and (spellID == 182006 or spellID == 181597) then
+				if markNow == 8 then
+					wipe(tableBuilder)
+				end
+				SetRaidTarget(destName,markNow)
+				tableBuilder[markNow] = destName
+				ShowArrow(spellID == 182006)
+				markNow = markNow - 1
+				C_Timer.NewTimer(3,function() markNow = 8 end)
+			end
+		elseif event == "GROUP_ROSTER_UPDATE" then
+			mainFrame:UpdateRoster()
+			mainFrame:UpdateSections()
+		end
+	end)
+	
+	mainFrame.isEnabled = true
+end
+
+function Mannoroth:addonMessage(sender, prefix, ...)
+	if prefix == "mannoroth" then
+		if IsInRaid() and not ExRT.F.IsPlayerRLorOfficer(sender) then
+			return
+		end
+		
+		VExRT.Bossmods.Mannoroth = VExRT.Bossmods.Mannoroth or {}
+		VExRT.Bossmods.Mannoroth.Section = VExRT.Bossmods.Mannoroth.Section or {}
+		for i=1,3 do VExRT.Bossmods.Mannoroth.Section[i] = VExRT.Bossmods.Mannoroth.Section[i] or {} end
+	
+		local pos1,name1,pos2,name2,pos3,name3 = ...
+		VExRT.Bossmods.Mannoroth.time = time()
+		VExRT.Bossmods.Mannoroth.name = sender
+		VExRT.Bossmods.Mannoroth.sync = true
+		if pos1 == "num" then
+			VExRT.Bossmods.Mannoroth.number = tonumber(name1)
+			return
+		end
+		
+		if pos1 and name1 then
+			pos1 = tonumber(pos1)
+			if name1 == "-" then
+				name1 = nil
+			end
+			local col = floor((pos1 - 1) / 10)
+			local pos = pos1 % 10
+			if pos == 0 then pos = 10 end
+			VExRT.Bossmods.Mannoroth.Section[col][pos] = name1
+		end
+		if pos2 and name2 then
+			pos2 = tonumber(pos2)
+			if name2 == "-" then
+				name2 = nil
+			end
+			local col = floor((pos2 - 1) / 10)
+			local pos = pos2 % 10
+			if pos == 0 then pos = 10 end
+			VExRT.Bossmods.Mannoroth.Section[col][pos] = name2
+		end
+		if pos3 and name3 then
+			pos3 = tonumber(pos3)
+			if name3 == "-" then
+				name3 = nil
+			end
+			local col = floor((pos3 - 1) / 10)
+			local pos = pos3 % 10
+			if pos == 0 then pos = 10 end
+			VExRT.Bossmods.Mannoroth.Section[col][pos] = name3
+		end
+		
+		if Mannoroth.setupFrame then
+			Mannoroth.setupFrame.lastUpdate:SetText(ExRT.L.BossmodsKromogLastUpdate..": "..ExRT.F.delUnitNameServer(VExRT.Bossmods.Mannoroth.name).." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Mannoroth.time)..")")
+			Mannoroth.setupFrame:UpdateSections()
+
+			Mannoroth.setupFrame:UpdateRoster()
+			Mannoroth.setupFrame:UpdateSections()
+		end
+	end
+end
+
+-----------------------------------------
+-- Archimonde
+-----------------------------------------
+local Archimonde = {}
+
+--[[
+
+VExRT.Bossmods.ArchimondeRadius  - Radar Radius
+VExRT.Bossmods.ArchimondeLineSize  - Line Size (2,4,6,8,10,12)
+VExRT.Bossmods.ArchimondeDisableText  - Disable Text
+
+]]
+
+function Archimonde:Load()
+	local frame = Archimonde.mainframe
+	if frame then
+		frame:Show()
+		frame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+		frame.isEnabled = true
+		return
+	end
+
+	local FRAME_SIZE = 200
+	local VECTOR_LENGTH = 200
+	local VECTOR_DEPTH = 1.5
+	local VIEW_DISTANCE = VExRT.Bossmods.ArchimondeRadius or 20
+	local VIEW_DISTANCE2 = VIEW_DISTANCE * 2
+	local LINES_COLORS = {
+		[1] = {r = 0.6, g = 1, b = 0.6, a = 1},
+		[2] = {r = 1, g= .5, b = 0, a = 1},
+		[3] = {r = 1, g = 0.6, b = 0.6, a = 1},
+	}
+
+	frame = CreateFrame("Frame",nil,UIParent)
+	Archimonde.mainframe = frame
+	frame:SetSize(FRAME_SIZE,FRAME_SIZE)
+	frame:EnableMouse(true)
+	frame:SetMovable(true)
+	frame:RegisterForDrag("LeftButton")
+	frame:SetScript("OnDragStart", function(self)
+		if self:IsMovable() then
+			self:StartMoving()
+		end
+	end)
+	frame:SetScript("OnDragStop", function(self)
+		self:StopMovingOrSizing()
+		VExRT.Bossmods.ArchimondeLeft = self:GetLeft()
+		VExRT.Bossmods.ArchimondeTop = self:GetTop()
+	end)
+	if VExRT.Bossmods.ArchimondeLeft and VExRT.Bossmods.ArchimondeTop then
+		frame:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.ArchimondeLeft,VExRT.Bossmods.ArchimondeTop)
+	else
+		frame:SetPoint("CENTER",-200,0)
+	end
+	
+	if VExRT.Bossmods.Alpha then frame:SetAlpha(VExRT.Bossmods.Alpha/100) end
+	if VExRT.Bossmods.Scale then frame:SetScale(VExRT.Bossmods.Scale/100) end
+	
+	frame.isEnabled = true
+	
+	frame.back = frame:CreateTexture(nil, "BACKGROUND")
+	frame.back:SetTexture(.7,.7,.7,.4)
+	frame.back:SetAllPoints()
+	
+	frame.player = frame:CreateTexture(nil, "ARTWORK")
+	frame.player:SetSize(32,32)
+	frame.player:SetPoint("CENTER",0,0)
+	frame.player:SetTexture("Interface\\MINIMAP\\MinimapArrow")
+	
+	ExRT.lib.CreateShadow(frame,15,20)
+	
+	frame.close = ExRT.lib.CreateIcon(frame,16,"TOPRIGHT",2,18,[[Interface\AddOns\ExRT\media\DiesalGUIcons16x256x128.tga]],true)
+	frame.close.texture:SetTexCoord(0.5,0.5625,0.5,0.625)
+	frame.close:SetScript("OnClick",function(self)
+		self:GetParent():Hide()
+	end)
+	frame.close:SetScript("OnEnter",function(self)
+		self.texture:SetVertexColor(1,0,.7,1)
+	end)
+	frame.close:SetScript("OnLeave",function(self)
+		self.texture:SetVertexColor(1,1,1,1)
+	end)
+
+	frame.lines = {}
+	local SetLine,RotateTexture,RotateCoordPair
+	do
+		local cos, sin = math.cos, math.sin
+		function RotateCoordPair(x,y,ox,oy,a,asp)
+			y=y/asp
+			oy=oy/asp
+			return ox + (x-ox)*cos(a) - (y-oy)*sin(a),(oy + (y-oy)*cos(a) + (x-ox)*sin(a))*asp
+		end
+		function RotateTexture(self,angle,xT,yT,xB,yB,xC,yC,userAspect)
+			local aspect = userAspect or (xT-xB)/(yT-yB)
+			local g1,g2 = RotateCoordPair(xT,yT,xC,yC,angle,aspect)
+			local g3,g4 = RotateCoordPair(xT,yB,xC,yC,angle,aspect)
+			local g5,g6 = RotateCoordPair(xB,yT,xC,yC,angle,aspect)
+			local g7,g8 = RotateCoordPair(xB,yB,xC,yC,angle,aspect)
+		
+			self:SetTexCoord(g1,g2,g3,g4,g5,g6,g7,g8)
+		end
+		function SetLine(i,fX,fY,tX,tY,c)
+			local line = frame.lines[i]
+			if not line then
+				line = frame:CreateTexture(nil, "BACKGROUND")
+				frame.lines[i] = line
+				line:SetTexture("Interface\\AddOns\\ExRT\\media\\line"..(VExRT.Bossmods.ArchimondeLineSize or 12).."px")
+				line:SetSize(256,256)
+				line:SetVertexColor(0.6, 1, 0.6, 1)
+			end
+			local toDown = tY < fY
+			if toDown then
+				tY,fY = fY,tY
+			end
+			local size = max(tX-fX,tY-fY)
+			local changeSize = (1 - (size / 256)) / 2
+			local min,max = changeSize,1 - changeSize
+			local angle
+			if tX-fX == 0 then
+				angle = 90
+			else
+				angle = atan( (tY-fY)/(tX-fX) )
+			end
+			if toDown then
+				angle = -angle
+			end
+			line:SetSize(size,size)
+			RotateTexture(line,(PI/180)*angle,min,min,max,max,.5,.5)
+			
+			line:SetPoint("CENTER",frame,"BOTTOMLEFT",fX + (tX - fX)/2, fY + (tY - fY)/2)
+			c = c or 1
+			local color_list = LINES_COLORS[c]
+			line:SetVertexColor(color_list.r, color_list.g, color_list.b, color_list.a)
+			line:Show()
+		end
+	end
+	
+	frame.players = {}
+	local function SetPlayer(i,data,pX,pY)
+		if VExRT.Bossmods.ArchimondeDisableText then
+			return
+		end
+		local text = frame.players[i]
+		if not text then
+			text = frame:CreateFontString(nil,"ARTWORK")
+			frame.players[i] = text
+			text:SetFont(ExRT.mds.defFont, 12, "OUTLINE")
+		end
+		text:SetPoint("CENTER",frame,"BOTTOMLEFT",pX,pY)
+		text:SetText(data)
+		text:Show()
+	end
+	
+	local function GetContactPosition(x1,x2,x3,x4,y1,y2,y3,y4)
+		local d = (x1-x2)*(y4-y3) - (y1-y2)*(x4-x3)
+		local da= (x1-x3)*(y4-y3) - (y1-y3)*(x4-x3)
+		local db= (x1-x2)*(y1-y3) - (y1-y2)*(x1-x3)
+		
+		local ta,tb=da/d,db/d
+		
+		if ta >= 0 and ta <= 1 and tb >=0 and tb <= 1 then
+			local x=x1 + ta *(x2 - x1)
+			local y=y1 + ta *(y2 - y1)
+			
+			return x,y
+		end
+	end
+	
+	local function IsDotIn(pX,pY,point1x,point2x,point3x,point4x,point1y,point2y,point3y,point4y)
+		local D1 = (pX - point1x) * (point2y - point1y) - (pY - point1y) * (point2x - point1x)	--1,2
+		local D2 = (pX - point2x) * (point3y - point2y) - (pY - point2y) * (point3x - point2x)	--2,3
+		local D3 = (pX - point3x) * (point4y - point3y) - (pY - point3y) * (point4x - point3x)	--3,4
+		local D4 = (pX - point4x) * (point1y - point4y) - (pY - point4y) * (point1x - point4x)	--4,1
+
+		return (D1 < 0 and D2 < 0 and D3 < 0 and D4 < 0) or (D1 > 0 and D2 > 0 and D3 > 0 and D4 > 0)
+	end
+	
+	local function dist(x1,y1,x2,y2)
+		local dX = (x1 - x2)
+		local dY = (y1 - y2)
+		return sqrt(dX * dX + dY * dY)
+	end
+	local function dist_dot(x0,y0,x1,y1,x2,y2)
+		local r1 = dist(x0,y0,x1,y1)
+		local r2 = dist(x0,y0,x2,y2)
+		local r12 = dist(x1,y1,x2,y2)
+		
+  		local a = y2 - y1
+  		local b = x1 - x2
+  		local c = - x1 * (y2 - y1) + y1 * (x2 - x1)
+  		
+  		local t = dist(a,b,0,0)
+  		if c > 0 then
+  			a = -a
+  			b = -b
+  			c = -c
+  		end
+  		return (a*x0+b*y0+c)/t
+	end
+	
+	local chainsList,chainsWipe = {},0
+	local scheduleWipeChains = nil
+	local function scheduleWipeChains_Func()
+		scheduleWipeChains = nil
+		wipe(chainsList)
+		frame:Hide()
+	end
+	
+	frame:SetScript("OnEvent",function(self,mainEvent,timestamp,event,hideCaster,sourceGUID,sourceName,sourceFlags,sourceFlags2,destGUID,destName,destFlags,destFlags2,spellID,...)
+		if mainEvent == 'COMBAT_LOG_EVENT_UNFILTERED' then
+			if event == "SPELL_AURA_APPLIED" then
+				if spellID == 86273 and false then
+					local currTime = GetTime()
+					if (currTime - chainsWipe) > 20 then
+						wipe(chainsList)
+					end
+					chainsWipe = currTime
+					chainsList[sourceName] = destName
+					
+					frame:Show()
+					
+					print('Added chain',sourceName,'>',destName)
+				elseif spellID == 185014 then
+					if scheduleWipeChains then
+						scheduleWipeChains:Cancel()
+						scheduleWipeChains = nil
+					end
+					scheduleWipeChains = C_Timer.NewTimer(7,scheduleWipeChains_Func)
+				
+					local currTime = GetTime()
+					if (currTime - chainsWipe) > 4 then
+						wipe(chainsList)
+					end
+					chainsWipe = currTime
+					
+					chainsList[sourceName] = destName
+					
+					frame:Show()
+				end
+			elseif event == "SPELL_AURA_REMOVED" then
+				if spellID == 185014 then
+					chainsList[sourceName] = nil
+					
+					if ExRT.F.table_len(chainsList) == 0 then
+						frame:Hide()
+					end
+				end
+			end
+		end
+	end)
+	frame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+	
+	function ARCHI_ADD(s,t,w)
+		if w then
+			wipe(chainsList)
+		end
+		chainsList[s] = t
+	end
+	function ARCHI_WIPE()
+		wipe(chainsList)
+	end
+	function ARCHI_TEST()
+		wipe(chainsList)
+		local list = {}
+		
+		for i=1,GetNumGroupMembers() do
+			local name = GetRaidRosterInfo(i)
+			if name then
+				list[#list + 1] = name
+			end
+		end
+		
+		print('Archi TEST')
+		while #list > 1 do
+			local first = math.random(1,#list)
+			local name = list[first]
+			tremove(list,first)
+			
+			local second = math.random(1,#list)
+			local name2 = list[second]
+			tremove(list,second)
+			
+			chainsList[name] = name2
+			
+			print(name,'>',name2)
+		end
+	end
+
+	local DEBUG_POS = {
+		[1] = {y=5623.8002929688,x=4531.8999023438},
+		[2] = {y=5654,x=4520},
+		[3] = {y=5645.3002929688,x=4547.1000976563},
+		[4] = {y=5648.5,x=4513.5},
+		[5] = {y=5656.8999023438,x=4538.7001953125},
+	}
+	
+	local trottle = 0
+	frame:SetScript("OnUpdate",function(self,elapsed)
+		trottle = trottle + elapsed
+		if trottle > 0.02 then
+			trottle = 0
+			local playerY,playerX = UnitPosition('player')
+			
+			local tLx,tLy,tRx,tRy,bRx,bRy,bLx,bLy = playerX + VIEW_DISTANCE,playerY + VIEW_DISTANCE,playerX - VIEW_DISTANCE,playerY + VIEW_DISTANCE,playerX - VIEW_DISTANCE, playerY - VIEW_DISTANCE,playerX + VIEW_DISTANCE,playerY - VIEW_DISTANCE
+			
+			local angle = -GetPlayerFacing()
+			tLx,tLy = RotateCoordPair(tLx,tLy,playerX,playerY,angle,1)
+			tRx,tRy = RotateCoordPair(tRx,tRy,playerX,playerY,angle,1)
+			bRx,bRy = RotateCoordPair(bRx,bRy,playerX,playerY,angle,1)
+			bLx,bLy = RotateCoordPair(bLx,bLy,playerX,playerY,angle,1)
+			
+			
+			for i=1,#self.lines do
+				frame.lines[i]:Hide()
+			end
+			for i=1,#self.players do
+				frame.players[i]:Hide()
+			end
+			
+			local count = 0
+			local countText = 0
+			local isRed = false
+			local onLines = 0
+			self.back:SetTexture(.7,.7,.7,.4)
+
+			for chainFrom,chainTo in pairs(chainsList) do
+				local sourceY,sourceX = UnitPosition(chainFrom)
+				local targetY,targetX = UnitPosition(chainTo)
+				if type(chainFrom) == 'number' then
+					sourceY,sourceX = DEBUG_POS[chainFrom].y,DEBUG_POS[chainFrom].x
+				end
+				if type(chainTo) == 'number' then
+					targetY,targetX = DEBUG_POS[chainTo].y,DEBUG_POS[chainTo].x
+				end
+				if not (sourceX == targetX and sourceY == targetY) and sourceX and targetX then
+			
+					local dX = (sourceX - targetX)
+					local dY = (sourceY - targetY)
+					local dist = sqrt(dX * dX + dY * dY)
+					
+					local t_cos = (targetX-sourceX) / dist
+					local newX = VECTOR_LENGTH * t_cos  +  targetX
+					
+					local t_sin = (targetY-sourceY) / dist
+					local newY = VECTOR_LENGTH * t_sin  +  targetY
+					
+					local radiusX,radiusY = VECTOR_DEPTH * t_sin, VECTOR_DEPTH * t_cos
+					
+					local point1x = sourceX + radiusX
+					local point1y = sourceY - radiusY
+					
+					local point2x = sourceX - radiusX
+					local point2y = sourceY + radiusY
+					
+					local point3x = newX + radiusX
+					local point3y = newY - radiusY
+					
+					local point4x = newX - radiusX
+					local point4y = newY + radiusY
+	
+				
+					local xS,yS,xE,yE = sourceX,sourceY,newX,newY
+					
+					local x1,y1,x2,y2 = nil
+	
+					local cx1,cy1 = GetContactPosition(xS,xE,tLx,tRx,yS,yE,tLy,tRy)
+					local cx2,cy2 = GetContactPosition(xS,xE,tRx,bRx,yS,yE,tRy,bRy)
+					local cx3,cy3 = GetContactPosition(xS,xE,bLx,bRx,yS,yE,bLy,bRy)
+					local cx4,cy4 = GetContactPosition(xS,xE,tLx,bLx,yS,yE,tLy,bLy)
+					
+					if cx1 then
+						x1,y1 = cx1,cy1
+					end
+					if cx2 then
+						if x1 then
+							x2,y2 = cx2,cy2
+						else
+							x1,y1 = cx2,cy2
+						end
+					end
+					if cx3 then
+						if x1 then
+							x2,y2 = cx3,cy3
+						else
+							x1,y1 = cx3,cy3
+						end
+					end
+					if cx4 then
+						if x1 then
+							x2,y2 = cx4,cy4
+						else
+							x1,y1 = cx4,cy4
+						end
+					end			
+								
+					if IsDotIn(xS,yS,tLx,tRx,bRx,bLx,tLy,tRy,bRy,bLy) then
+						if not x1 then
+							x1,y1 = xS,yS
+						else
+							x2,y2 = xS,yS
+						end
+					end
+					
+					if IsDotIn(xE,yE,tLx,tRx,bRx,bLx,tLy,tRy,bRy,bLy) then
+						if not x1 then
+							x1,y1 = xE,yE
+						else
+							x2,y2 = xE,yE
+						end
+					end
+					
+					local isFromPlayer = UnitIsUnit('player',chainFrom)
+					local isToPlayer = UnitIsUnit('player',chainTo)
+					local isPlayer = isFromPlayer or isToPlayer
+					
+					local isOnLine = IsDotIn(playerX,playerY,point1x,point2x,point4x,point3x,point1y,point2y,point4y,point3y)			
+					if isOnLine and not isPlayer then
+						onLines = onLines + 1
+						if onLines > 0 then
+							isRed = true
+							self.back:SetTexture(1,.7,.7,.4)
+						end
+					end
+					
+					if x1 and x2 then
+						count = count + 1
+	
+						local aX = abs(dist_dot( x1,y1,tLx,tLy,bLx,bLy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+						local aY = abs(dist_dot( x1,y1,bLx,bLy,bRx,bRy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+						local bX = abs(dist_dot( x2,y2,tLx,tLy,bLx,bLy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+						local bY = abs(dist_dot( x2,y2,bLx,bLy,bRx,bRy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+					
+						if aX > bX then aX,bX=bX,aX aY,bY=bY,aY end
+	
+						SetLine(count,aX,aY,bX,bY,(isPlayer and 2) or (isOnLine and 3) or 1)
+					end
+					
+					if not isFromPlayer and IsDotIn(sourceX,sourceY,tLx,tRx,bRx,bLx,tLy,tRy,bRy,bLy) then
+						countText = countText + 1
+						
+						local aX = abs(dist_dot( sourceX,sourceY,tLx,tLy,bLx,bLy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+						local aY = abs(dist_dot( sourceX,sourceY,bLx,bLy,bRx,bRy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+						
+						local _,class = UnitClass(chainFrom)
+						local color = RAID_CLASS_COLORS[class] and "|c"..RAID_CLASS_COLORS[class].colorStr or ""
+						
+						SetPlayer(countText,color..chainFrom,aX,aY)
+					end
+					
+					if not isToPlayer and IsDotIn(targetX,targetY,tLx,tRx,bRx,bLx,tLy,tRy,bRy,bLy) then
+						countText = countText + 1
+						
+						local aX = abs(dist_dot( targetX,targetY,tLx,tLy,bLx,bLy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+						local aY = abs(dist_dot( targetX,targetY,bLx,bLy,bRx,bRy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+						
+						local _,class = UnitClass(chainTo)
+						local color = RAID_CLASS_COLORS[class] and "|c"..RAID_CLASS_COLORS[class].colorStr or ""
+						
+						SetPlayer(countText,color..chainTo,aX,aY)
+					end
+				end
+			end
+			
+		end
+	end)
+end
+
+-----------------------------------------
+-- Archimonde Infernals
+-----------------------------------------
+local ArchimondeInfernals = {}
+
+function ArchimondeInfernals:Load()
+	local frame = ArchimondeInfernals.mainframe
+	if frame then
+		frame:RegisterEvent('ENCOUNTER_START')
+		frame:RegisterEvent('ENCOUNTER_END')
+		if not frame.isEnabled then
+			frame:Test()
+		end
+		frame.isEnabled = true
+		return
+	end
+	
+	
+	local GetMobID = ExRT.F.GUIDtoID
+	
+	local infernalMaxHP = 2893432
+	
+	local infernalFrames = {}
+	local function HideAllFrames()
+		for i=1,#infernalFrames do
+			infernalFrames[i]:Hide()
+		end
+	end
+	
+	local function SetHP(self,hp)
+		if hp <= 0 then
+			self.hp:Hide()
+			self.hpText:SetText("DEAD")
+			
+			self.isAlive = false
+			
+			local isAllDead = true
+			for j=1,#infernalFrames do
+				if infernalFrames[j].isAlive then
+					isAllDead = false
+					break
+				end
+			end
+			if isAllDead then
+				HideAllFrames()
+			end
+		else
+			local hp_per = hp / infernalMaxHP
+			self.hp:SetWidth(250 * hp_per)
+			self.hp:Show()
+			self.hpText:SetFormattedText("%.1f%%",hp_per * 100)
+			
+			self.isAlive = true
+		end
+	end
+	
+	local function AddFrame(i)
+		local frame = infernalFrames[i]
+		if not frame then
+			frame = CreateFrame('Frame',nil,UIParent)
+			infernalFrames[i] = frame
+			frame:SetSize(250,40)
+			if i==1 then
+				if VExRT.Bossmods.ArchimondeInfernalPosX and VExRT.Bossmods.ArchimondeInfernalPosY then
+					frame:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.ArchimondeInfernalPosX,VExRT.Bossmods.ArchimondeInfernalPosY)
+				else
+					frame:SetPoint("TOP",UIParent,"CENTER",-350,200)
+				end
+				frame:EnableMouse(true)
+				frame:SetMovable(true)
+			else
+				frame:SetPoint("TOP",infernalFrames[i-1],"BOTTOM",0,-3)
+			end
+			frame:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = "Interface\\AddOns\\ARaidFrames\\media\\border.tga",tile = false,edgeSize = 4})
+			frame:SetBackdropBorderColor(0.2,0.2,0.2,0.8)
+			--frame:SetBackdropColor(.2,.2,.2,1)
+			frame:SetBackdropColor(.2,.2,.2,0)
+			
+			if VExRT.Bossmods.Scale then
+				frame:SetScale(VExRT.Bossmods.Scale / 100)
+			end		
+			if VExRT.Bossmods.Alpha then
+				frame:SetAlpha(VExRT.Bossmods.Alpha / 100)
+			end
+			
+			frame:RegisterForDrag("LeftButton")
+			frame:SetScript("OnDragStart", function(self)
+				if self:IsMovable() then
+					self:StartMoving()
+				end
+			end)
+			frame:SetScript("OnDragStop", function(self) 
+				self:StopMovingOrSizing() 
+				
+				VExRT.Bossmods.ArchimondeInfernalPosX = self:GetLeft()
+				VExRT.Bossmods.ArchimondeInfernalPosY = self:GetTop()
+			end)
+			
+			frame.hp = frame:CreateTexture(nil, "BACKGROUND")
+			frame.hp:SetTexture(ExRT.F.barImg)
+			frame.hp:SetPoint("LEFT",0,0)
+			frame.hp:SetHeight(40)
+			frame.hp:SetVertexColor(1,.5,.5,1)
+			
+			frame.back = frame:CreateTexture(nil, "BACKGROUND",nil,-7)
+			frame.back:SetTexture(ExRT.F.barImg)
+			frame.back:SetAllPoints()
+			frame.back:SetVertexColor(.2,.2,.2,.5)
+			
+			frame.hpText = frame:CreateFontString(nil,"ARTWORK")
+			frame.hpText:SetPoint("LEFT", 32, 0)
+			frame.hpText:SetFont(ExRT.F.defFont, 16)
+			frame.hpText:SetShadowOffset(1,-1)
+			
+			frame.icon = frame:CreateTexture(nil, "ARTWORK")
+			frame.icon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcon_"..i)
+			frame.icon:SetPoint("LEFT",5,0)
+			frame.icon:SetSize(24,24)
+			
+			frame.cdIcon = frame:CreateTexture(nil, "ARTWORK")
+			frame.cdIcon:SetTexture(GetSpellTexture(187078))
+			frame.cdIcon:SetPoint("RIGHT",frame,"LEFT",0,0)
+			frame.cdIcon:SetSize(40,40)
+
+			frame.cd = CreateFrame("Cooldown", nil, frame, "CooldownFrameTemplate")
+			frame.cd:SetDrawEdge(false)
+			frame.cd:SetAllPoints(frame.cdIcon)
+			
+			frame.SetHP = SetHP
+		end
+		
+		frame.isAlive = true
+		frame.cd:SetCooldown(GetTime(),15)
+		frame:SetHP(infernalMaxHP)
+		frame:Show()
+	end
+	
+	function ARCHI_INF_TEST()
+		AddFrame(1)
+		AddFrame(2)
+		AddFrame(3)
+		AddFrame(4)
+		AddFrame(5)
+		
+		infernalFrames[1]:SetHP(2893432*0.9)
+		infernalFrames[2]:SetHP(2893432*0.5)
+		infernalFrames[3]:SetHP(-1)
+		infernalFrames[4]:SetHP(2893432*0.1)
+		infernalFrames[5]:SetHP(1)
+	end
+	ARCHI_INF_TEST()
+	
+	local lastSummon = 0
+	local summonCount = 0
+	local infernalsHP = {}
+	local guidToFrame = {}
+
+	local frame = CreateFrame'Frame'
+	ArchimondeInfernals.mainframe = frame
+	frame:RegisterEvent('ENCOUNTER_START')
+	frame:RegisterEvent('ENCOUNTER_END')
+	local function Engage()
+		wipe(infernalsHP)
+		wipe(guidToFrame)
+		HideAllFrames()
+		for i=1,#infernalFrames do
+			infernalFrames[i].isAlive = false
+		end
+		frame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+		frame:RegisterEvent('UNIT_TARGET')
+		frame:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
+		
+		local _,instanceType,difficultyID,difficultyName,maxPlayers,dynamicDifficulty,isDynamic,instanceMapID,instanceGroupSize = GetInstanceInfo()
+		if difficultyID == 16 then
+			infernalMaxHP = 2893432
+		elseif difficultyID == 15 then
+			--[[
+				10: 904735
+				14: 1284759
+				15: 1379756
+				16: 1474762
+				30: 2804760
+				
+				95005
+			]]
+			
+			infernalMaxHP = 904735 + 95005 * (instanceGroupSize - 10)
+		elseif difficultyID == 14 then
+			--[[
+				10: 723811
+				30: 2243808
+				
+				76000
+			]]
+			
+			infernalMaxHP = 723811 + 76000 * (instanceGroupSize - 10)
+		end
+	end
+	frame.Engage = Engage
+	frame.Close = function(self)
+		self:UnregisterAllEvents()
+		self.isEnabled = false
+		HideAllFrames()
+	end
+	frame.SetAlpha = function(self,val)
+		for i=1,#infernalFrames do
+			infernalFrames[i]:SetAlpha(val)
+		end
+	end
+	frame.SetScale = function(self,val)
+		if infernalFrames[1] then
+			ExRT.mds.SetScaleFix(infernalFrames[1],val)
+		end
+		for i=2,#infernalFrames do
+			infernalFrames[i]:SetScale(val)
+		end
+	end
+	frame.ClearAllPoints = function(self)
+		if infernalFrames[1] then
+			infernalFrames[1]:SetPoint("TOP",UIParent,"CENTER",-350,200)
+		end
+	end
+	frame.Test = ARCHI_INF_TEST
+	
+	frame:SetScript("OnEvent",function(self,event,...)
+		if event == 'COMBAT_LOG_EVENT_UNFILTERED' then
+			local timestamp,event,hideCaster,sourceGUID,sourceName,sourceFlags,sourceFlags2,destGUID,destName,destFlags,destFlags2,spellID,swingOverkill,_,amount,overkill = ...
+			if event == "SPELL_SUMMON" then
+				if GetMobID(destGUID) == 94412 then
+					local currTime = GetTime()
+					if (currTime - lastSummon) > 10 then
+						HideAllFrames()
+						summonCount = 0
+						lastSummon = currTime
+					end
+					summonCount = summonCount + 1
+					infernalsHP[destGUID] = infernalMaxHP
+					guidToFrame[destGUID] = summonCount
+					AddFrame(summonCount)
+				end
+			elseif event == "SPELL_DAMAGE" or event == "RANGE_DAMAGE" or event == "SPELL_PERIODIC_DAMAGE" then
+				local target = destGUID and guidToFrame[destGUID]
+				if target then
+					local newHP = infernalsHP[destGUID] - amount - overkill
+					infernalsHP[destGUID] = newHP
+					infernalFrames[target]:SetHP(newHP)
+				end
+			elseif event == "SWING_DAMAGE" then
+				local target = destGUID and guidToFrame[destGUID]
+				if target then
+					local newHP = infernalsHP[destGUID] - spellID - swingOverkill
+					infernalsHP[destGUID] = newHP
+					infernalFrames[target]:SetHP(newHP)
+				end
+			elseif event == "UNIT_DIED" then
+				if GetMobID(destGUID) == 94412 then
+					local target = destGUID and guidToFrame[destGUID]
+					if target then
+						infernalsHP[destGUID] = -1
+						infernalFrames[target]:SetHP(-1)
+					end
+				end
+			elseif event == "SPELL_HEAL" or event == "SPELL_PERIODIC_HEAL" then
+				local target = destGUID and guidToFrame[destGUID]
+				if target then
+					local newHP = infernalsHP[destGUID] + amount - overkill
+					if newHP > infernalMaxHP then
+						newHP = infernalMaxHP
+					end
+					infernalsHP[destGUID] = newHP
+					infernalFrames[target]:SetHP(newHP)
+				end
+			end
+		elseif event == "UNIT_TARGET" or event == "UPDATE_MOUSEOVER_UNIT" then
+			local targetUnit = event == "UNIT_TARGET" and unit.."target" or "mouseover"
+			local targetGUID = UnitGUID(targetUnit)
+			if not targetGUID then return end
+			local targetMark = guidToFrame[ targetGUID ]
+			if targetMark and GetRaidTargetIndex(targetUnit) ~= targetMark then 
+				SetRaidTarget(targetUnit, targetMark) 
+			end
+		elseif event == 'ENCOUNTER_START' then
+			local eID = ...
+			if eID == 1799 then
+				Engage()
+			end
+		elseif event == 'ENCOUNTER_END' then
+			self:UnregisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+			self:UnregisterEvent('UNIT_TARGET')
+			self:UnregisterEvent('UPDATE_MOUSEOVER_UNIT')
+			HideAllFrames()
+		end
+	end)
+end
 
 -----------------------------------------
 -- Options
 -----------------------------------------
+
+local function GetSpellText(spellID)
+	local spellName,_,spellTexture = GetSpellInfo(spellID)
+	if not spellName then
+		return ""
+	end
+	
+	return "|T"..spellTexture..":0|t"..spellName
+end
 
 function module.options:Load()
 	self:CreateTilte()
@@ -3573,7 +4685,7 @@ function module.options:Load()
 	
 	AddTitle(ExRT.L.RaidLootT18HC)
 	
-	local Kormrok_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss3.." ["..ExRT.L.sencounterWODMythic.."]","/rt kormrok",Kormrok.Load,61990,true,not VExRT.Bossmods.KormrokAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	local Kormrok_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss3.." ["..ExRT.L.sencounterWODMythic.."]","/rt kormrok|n|n"..GetSpellText(181092),Kormrok.Load,61990,true,not VExRT.Bossmods.KormrokAutoload,ExRT.L.bossmodsAutoLoadTooltip)
 	Kormrok_loadbut.chk:SetScript("OnClick", function(self,event) 
 		if self:GetChecked() then
 			VExRT.Bossmods.KormrokAutoload = nil
@@ -3582,18 +4694,34 @@ function module.options:Load()
 		end
 	end)	
 	
-	local Iskar_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss7,"/rt iskar",Iskar.Load,61932)
+	local Iskar_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss7,"/rt iskar|n|n"..GetSpellText(179202),Iskar.Load,61932)
 	
-	if Mannoroth then
-		local Mannoroth_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss12,"/rt mannoroth",Mannoroth.Load,62410,true,not VExRT.Bossmods.MannorothAutoload,ExRT.L.bossmodsAutoLoadTooltip)
-		Mannoroth_loadbut.chk:SetScript("OnClick", function(self,event) 
-			if self:GetChecked() then
-				VExRT.Bossmods.MannorothAutoload = nil
-			else
-				VExRT.Bossmods.MannorothAutoload = true
-			end
-		end)	
-	end
+	local Mannoroth_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss12,"/rt mannoroth|n|n"..GetSpellText(181597),Mannoroth.Load,62410,true,not VExRT.Bossmods.MannorothAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	Mannoroth_loadbut.chk:SetScript("OnClick", function(self,event) 
+		if self:GetChecked() then
+			VExRT.Bossmods.MannorothAutoload = nil
+		else
+			VExRT.Bossmods.MannorothAutoload = true
+		end
+	end)	
+	
+	local Archimonde_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss13..": "..ExRT.L.BossmodsArchimondeRadar,"/rt archimonde|n|n"..GetSpellText(186123),Archimonde.Load,62423,true,not VExRT.Bossmods.ArchimondeAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	Archimonde_loadbut.chk:SetScript("OnClick", function(self,event) 
+		if self:GetChecked() then
+			VExRT.Bossmods.ArchimondeAutoload = nil
+		else
+			VExRT.Bossmods.ArchimondeAutoload = true
+		end
+	end)
+	
+	local ArchimondeInfernals_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss13..": "..ExRT.L.BossmodsArchimondeInfernals,"/rt archimondeinf|n|n"..ExRT.L.BossmodsArchimondeInfernalsTooltip,ArchimondeInfernals.Load,62423,true,not VExRT.Bossmods.ArchimondeInfernalsAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	ArchimondeInfernals_loadbut.chk:SetScript("OnClick", function(self,event) 
+		if self:GetChecked() then
+			VExRT.Bossmods.ArchimondeInfernalsAutoload = nil
+		else
+			VExRT.Bossmods.ArchimondeInfernalsAutoload = true
+		end
+	end)
 	
 	local BossmodsSlider1 = ExRT.lib.CreateSlider(self,640,15,0,-550,0,100,ExRT.L.bossmodsalpha,VExRT.Bossmods.Alpha,"TOP",nil,true)
 	BossmodsSlider1:SetScript("OnValueChanged", function(self,event) 
@@ -3619,6 +4747,12 @@ function module.options:Load()
 		end
 		if Iskar.mainframe then
 			Iskar.mainframe:SetAlpha(event/100)
+		end
+		if Archimonde.mainframe then
+			Archimonde.mainframe:SetAlpha(event/100)
+		end
+		if ArchimondeInfernals.mainframe then
+			ArchimondeInfernals.mainframe:SetAlpha(event/100)
 		end
 		
 		self.tooltipText = event
@@ -3649,6 +4783,12 @@ function module.options:Load()
 		end
 		if Iskar.mainframe then
 			ExRT.mds.SetScaleFix(Iskar.mainframe,event/100)
+		end
+		if Archimonde.mainframe then
+			ExRT.mds.SetScaleFix(Archimonde.mainframe,event/100)
+		end
+		if ArchimondeInfernals.mainframe then
+			ArchimondeInfernals.mainframe:SetScale(event/100)
 		end
 		self.tooltipText = event
 		self:tooltipReload(self)
@@ -3708,6 +4848,19 @@ function module.options:Load()
 		if Iskar.mainframe then
 			Iskar.mainframe:ClearAllPoints()
 			Iskar.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
+		end
+		
+		VExRT.Bossmods.ArchimondeLeft = nil
+		VExRT.Bossmods.ArchimondeTop = nil
+		if Archimonde.mainframe then
+			Archimonde.mainframe:ClearAllPoints()
+			Archimonde.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
+		end
+		
+		VExRT.Bossmods.ArchimondeInfernalPosX = nil
+		VExRT.Bossmods.ArchimondeInfernalPosY = nil
+		if ArchimondeInfernals.mainframe then
+			ArchimondeInfernals.mainframe:ClearAllPoints()
 		end
 	end) 
 end
@@ -3790,9 +4943,17 @@ function ExRT.mds:ExBossmodsCloseAll()
 		Kormrok.setupFrame:UnregisterAllEvents()
 		Kormrok.setupFrame.isEnabled = nil
 	end
-	if Mannoroth and Mannoroth.setupFrame then
+	if Mannoroth.setupFrame then
 		Mannoroth.setupFrame:UnregisterAllEvents()
 		Mannoroth.setupFrame.isEnabled = nil	
+	end
+	if Archimonde.mainframe then
+		Archimonde.mainframe:Hide()
+		Archimonde.mainframe:UnregisterAllEvents()
+		Archimonde.mainframe.isEnabled = nil	
+	end
+	if ArchimondeInfernals.mainframe then
+		ArchimondeInfernals.mainframe:Close()
 	end
 end
 
@@ -3867,19 +5028,26 @@ function module:miniMapMenu()
 		ExRT.mds.MinimapMenuRemove("Bossmods_Kormrok")
 	end
 	
-	if cmap==1026 and clvl==9 and Mannoroth then
+	if cmap==1026 and clvl==9 then
 		ExRT.mds.MinimapMenuAdd(ExRT.L.RaidLootT18HCBoss12, function() Mannoroth:Load() CloseDropDownMenus() end,3,"Bossmods_Mannoroth")
 	else
 		ExRT.mds.MinimapMenuRemove("Bossmods_Mannoroth")
 	end
+	
+	if cmap==1026 and clvl==10 then
+		ExRT.mds.MinimapMenuAdd(ExRT.L.RaidLootT18HCBoss13..": "..ExRT.L.BossmodsArchimondeRadar, function() Archimonde:Load() CloseDropDownMenus() end,3,"Bossmods_Archimonde")
+		ExRT.mds.MinimapMenuAdd(ExRT.L.RaidLootT18HCBoss13..": "..ExRT.L.BossmodsArchimondeInfernals, function() ArchimondeInfernals:Load() CloseDropDownMenus() end,3,"Bossmods_ArchimondeInf")
+	else
+		ExRT.mds.MinimapMenuRemove("Bossmods_Archimonde")
+		ExRT.mds.MinimapMenuRemove("Bossmods_ArchimondeInf")
+	end
 
-	if RaDen.mainframe or Malkorok.mainframe or ShaOfPride.mainframe or SpoilsOfPandaria.mainframe or Thogar.mainframe or Margok.mainframe or (Kromog.setupFrame and Kromog.setupFrame.isEnabled) or Koragh.mainframe or Iskar.mainframe then
+	if RaDen.mainframe or Malkorok.mainframe or ShaOfPride.mainframe or SpoilsOfPandaria.mainframe or Thogar.mainframe or Margok.mainframe or (Kromog.setupFrame and Kromog.setupFrame.isEnabled) or Koragh.mainframe or Iskar.mainframe or Archimonde.mainframe or (Mannoroth.setupFrame and Mannoroth.setupFrame.isEnabled) or (ArchimondeInfernals.mainframe and ArchimondeInfernals.mainframe.isEnabled) then
 		ExRT.mds.MinimapMenuAdd("|cffff9999"..ExRT.L.bossmodsclose, function() ExRT.mds:ExBossmodsCloseAll() CloseDropDownMenus() end,4,"Bossmods_Close")
 	else
 		ExRT.mds.MinimapMenuRemove("Bossmods_Close")
 	end
 end
-
 
 function module.main:ADDON_LOADED()
 	VExRT = _G.VExRT
@@ -3895,7 +5063,9 @@ function module.main:ADDON_LOADED()
 	--Kormrok
 	VExRT.Bossmods.Kormrok = VExRT.Bossmods.Kormrok or {}
 	--Mannoroth
-	VExRT.Bossmods.Mannoroth = VExRT.Bossmods.Mannoroth or {}	
+	VExRT.Bossmods.Mannoroth = VExRT.Bossmods.Mannoroth or {}
+	--Archimonde
+	VExRT.Bossmods.Archimonde = nil
 end
 
 
@@ -3903,9 +5073,7 @@ function module:addonMessage(sender, prefix, ...)
 	Malkorok:addonMessage(sender, prefix, ...)
 	Kromog:addonMessage(sender, prefix, ...)
 	Kormrok:addonMessage(sender, prefix, ...)
-	if Mannoroth then
-		Mannoroth:addonMessage(sender, prefix, ...)
-	end
+	Mannoroth:addonMessage(sender, prefix, ...)
 end
 
 function module.main:ENCOUNTER_START(encounterID,encounterName,difficultyID,groupSize,...)
@@ -3928,9 +5096,18 @@ function module.main:ENCOUNTER_START(encounterID,encounterName,difficultyID,grou
 	elseif encounterID == 1787 and (not Kormrok.setupFrame or not Kormrok.setupFrame.isEnabled) and not VExRT.Bossmods.KormrokAutoload then
 		Kormrok:Load()
 		Kormrok.setupFrame:Hide()
-	elseif encounterID == 1795 and Mannoroth and (not Mannoroth.setupFrame or not Mannoroth.setupFrame.isEnabled) and not VExRT.Bossmods.MannorothAutoload then
+	elseif encounterID == 1795 and (not Mannoroth.setupFrame or not Mannoroth.setupFrame.isEnabled) and not VExRT.Bossmods.MannorothAutoload then
 		Mannoroth:Load()
 		Mannoroth.setupFrame:Hide()
+	elseif encounterID == 1799 then
+		if (not Archimonde.mainframe or not Archimonde.mainframe.isEnabled) and not VExRT.Bossmods.ArchimondeAutoload then
+			Archimonde:Load()
+			Archimonde.mainframe:Hide()
+		end
+		if (not ArchimondeInfernals.mainframe or not ArchimondeInfernals.mainframe.isEnabled) and not VExRT.Bossmods.ArchimondeInfernalsAutoload then
+			ArchimondeInfernals:Load()
+			ArchimondeInfernals.mainframe:Engage()
+		end
 	end
 end
 
@@ -3948,10 +5125,12 @@ function module.main:ENCOUNTER_END(encounterID,_,_,_,success)
 	elseif encounterID == 1723 and Koragh.mainframe then
 		ExRT.mds:ExBossmodsCloseAll()
 	elseif encounterID == 1788 and Iskar.mainframe then
-		C_Timer.NewTimer(2.5, function() ExRT.mds:ExBossmodsCloseAll() end)
+		C_Timer.NewTimer(3, function() ExRT.mds:ExBossmodsCloseAll() end)
 	elseif encounterID == 1787 and Kormrok.setupFrame and Kormrok.setupFrame.isEnabled then
 		ExRT.mds:ExBossmodsCloseAll()
-	elseif encounterID == 1795 and Mannoroth and Mannoroth.setupFrame and Mannoroth.setupFrame.isEnabled then
+	elseif encounterID == 1795 and Mannoroth.setupFrame and Mannoroth.setupFrame.isEnabled then
+		ExRT.mds:ExBossmodsCloseAll()
+	elseif encounterID == 1799 and ((Archimonde.mainframe and Archimonde.mainframe.isEnabled) or (ArchimondeInfernals.mainframe and ArchimondeInfernals.mainframe.isEnabled)) then
 		ExRT.mds:ExBossmodsCloseAll()
 	end
 end
@@ -3977,5 +5156,9 @@ function module:slash(arg)
 		Kormrok:Load()
 	elseif arg == "mannoroth" then
 		Mannoroth:Load()
+	elseif arg == "archimonde" then
+		Archimonde:Load()
+	elseif arg == "archimondeinf" then
+		ArchimondeInfernals:Load()
 	end
 end

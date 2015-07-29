@@ -989,7 +989,7 @@ local function addHeal(_,timestamp,sourceGUID,sourceName,sourceFlags,_,destGUID,
 	deathLine.ti = timestamp
 	deathLine.sp = spellID
 	deathLine.a = amount
-	deathLine.o = 0
+	deathLine.o = overhealing
 	deathLine.sc = school
 	deathLine.b = nil
 	deathLine.ab = absorbed
@@ -1150,7 +1150,7 @@ local function addHeal_TyrantVelhari(_,timestamp,sourceGUID,sourceName,sourceFla
 	deathLine.ti = timestamp
 	deathLine.sp = spellID
 	deathLine.a = amount
-	deathLine.o = 0
+	deathLine.o = overhealing
 	deathLine.sc = school
 	deathLine.b = nil
 	deathLine.ab = absorbed

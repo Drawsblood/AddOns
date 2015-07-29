@@ -52,13 +52,6 @@ module.db.spellDB = {
 {80353,	"MAGE",		{80353,	300,	40},	nil,			nil,			nil,			},	--Искажение времени
 --{id,	class,		all specs,		spec1,			spec2={spellid,cd,duration},spec3,spec4		},	--name
 }
-if ExRT.is61 then
-	tinsert(module.db.spellDB,{159916,"MAGE",	{159916,120,	6},	nil,			nil,			nil,			})	--Amplify Magic
-	tinsert(module.db.spellDB,{172106,"HUNTER",	{172106,180,	6},	nil,			nil,			nil,			})	--Aspect of the Fox
-	tremove(module.db.spellDB,15)
-	tremove(module.db.spellDB,14)
-	tremove(module.db.spellDB,13)
-end
 
 module.db.Cmirror = module._C
 module.db.dbCountDef = #module.db.spellDB
@@ -95,7 +88,7 @@ module.db.findspecspells = {
 	[105174] = 266,[6353] = 266,[157695] = 266,[603] = 266,
 	[29722] = 267,[348] = 267,[157701] = 267,
 	[119582] = 268,[115308] = 268,[121253] = 268,[115295] = 268,
-	[117418] = 269,[107428] = 269,[152174] = 269,[116740] = 269,
+	[117418] = 269,[152174] = 269,[116740] = 269,
 	[115151] = 270,[115175] = 270,[116670] = 270,
 }
 module.db.classNames = {"WARRIOR","PALADIN","HUNTER","ROGUE","PRIEST","DEATHKNIGHT","SHAMAN","MAGE","WARLOCK","MONK","DRUID"}
@@ -737,9 +730,9 @@ module.db.spell_runningSameSpell = {	--Схожие заклинания
 	[106898]={77764,77761},
 	[77764]={106898,77761},
 	[77761]={77764,106898},
-	[124634] = {124636,124635},
-	[124636] = {124634,124635},
-	[124635] = {124634,124636},
+	[187611] = {187614,187615},
+	[187614] = {187611,187615},
+	[187615] = {187611,187614},
 }
 
 module.db.spell_reduceCdCast = {	--Заклинания, применение которых уменьшает время восстановления других заклинаний
@@ -3281,6 +3274,10 @@ do
 		end
 		
 		if spellID == 187614 or spellID == 187615 or spellID == 187611 or spellID == 187613 or spellID == 187612 then
+			--SendChatMessage(format("Frodo: %s",sourceName),"raid")
+			if not UnitName(sourceName) then	--Not in Raid or Party
+				return
+			end
 			sourceName = "*"
 		end
 	 
@@ -3641,6 +3638,9 @@ function module.options:Load()
 				if module.db.differentIcons[ SpellID ] then
 					SpellTexture = module.db.differentIcons[SpellID]
 				end
+				if SpellID == 187614 then SpellName = "Legendary DD" end
+				if SpellID == 187612 then SpellName = "Legendary Heal" end
+				if SpellID == 187613 then SpellName = "Legendary Tank" end
 				
 				line.sid = SpellID
 				line.tid = i

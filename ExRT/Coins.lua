@@ -148,9 +148,6 @@ function module.main:CHAT_MSG_LOOT(msg, ...)
 		local class = select(3,UnitClass("player"))
 		local affixes = ""
 		local affixesFind = msg:match("item:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+(:[^|]+)|")
-		if ExRT.is61 then
-			affixesFind = msg:match("item:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+(:[^|]+)|")
-		end
 		if affixesFind then
 			affixes = affixesFind
 		end
@@ -167,9 +164,6 @@ function module.main:CHAT_MSG_LOOT(msg, ...)
 			end
 			local affixes = ""
 			local affixesFind = msg:match("item:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+(:[^|]+)|")
-			if ExRT.is61 then
-				affixesFind = msg:match("item:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+:%d+(:[^|]+)|")
-			end
 			if affixesFind then
 				affixes = affixesFind
 			end
@@ -258,9 +252,6 @@ function module.options:Load()
 					local itemName,_,itemQuality,_,itemReqLevel,_,_,_,_,itemTexture = GetItemInfo(itemID)
 					local itemColor = select(4,GetItemQualityColor(itemQuality or 4))
 					local link = format("|c%s|Hitem:%d:0:0:0:0:0:0:0:%d:%d:0:%d%s|h[%s]|h|r",itemColor,itemID,itemReqLevel or UnitLevel("player"),0,0,affixes or ":0",itemName or "ItemID: "..itemID)
-					if ExRT.is61 then
-						link = format("|c%s|Hitem:%d:0:0:0:0:0:0:0:%d:%d:%d%s|h[%s]|h|r",itemColor,itemID,itemReqLevel or UnitLevel("player"),0,0,affixes or ":0",itemName or "ItemID: "..itemID)
-					end
 					local classColor = ExRT.mds.classColor( module.db.classNames[ tonumber(unitClass,16) ] or "?")
 					historyBoxUpdateTable [#historyBoxUpdateTable + 1] = date("%d/%m/%y %H:%M:%S ",timestamp).."|c"..classColor..unitName.."|r: "..link
 				end

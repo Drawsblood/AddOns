@@ -478,9 +478,6 @@ end
 function ExRT.mds.IsBonusOnItem(link,bonus)
 	if link then 
 		local bonuses = link:match("item:%d+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:([0-9:]+)")
-		if ExRT.is61 then
-			bonuses = link:match("item:%d+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:([0-9:]+)")
-		end
 		if bonuses then
 			local isTable = type(bonus) == "table"
 			for bonusID in string.gmatch(bonuses, "%d+") do
