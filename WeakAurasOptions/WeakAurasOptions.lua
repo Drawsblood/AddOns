@@ -6,27 +6,34 @@ local loadstring, assert, error = loadstring, assert, error
 local setmetatable, getmetatable, rawset, rawget = setmetatable, getmetatable, rawset, rawget
 local bit_band, bit_lshift, bit_rshift = bit.band, bit.lshift, bit.rshift
 local coroutine = coroutine
+local _G = _G
 
-local LDB = LibStub:GetLibrary("LibDataBroker-1.1");
-local AceGUI = LibStub("AceGUI-3.0");
-local AceConfig = LibStub("AceConfig-3.0");
-local AceConfigRegistry = LibStub("AceConfigRegistry-3.0");
-local AceConfigDialog = LibStub("AceConfigDialog-3.0");
+-- WoW APIs
+local GetSpellInfo = GetSpellInfo
+local GetItemInfo = GetItemInfo
+
+local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
+local AceGUI = LibStub("AceGUI-3.0")
+local AceConfig = LibStub("AceConfig-3.0")
+local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+local SharedMedia = LibStub("LibSharedMedia-3.0")
+local IndentationLib = IndentationLib
 
 local WeakAuras = WeakAuras
-local L = WeakAuras.L;
-
+local L = WeakAuras.L
 local ADDON_NAME = "WeakAurasOptions";
 
-local GetSpellInfo = GetSpellInfo;
-local GetItemInfo = GetItemInfo;
+-- GLOBALS: WeakAuras WeakAurasSaved WeakAurasOptionsSaved WeakAuras_DropDownMenu AceGUIWidgetLSMlists
+-- GLOBALS: GameTooltip UIParent FONT_COLOR_CODE_CLOSE RED_FONT_COLOR_CODE
+-- GLOBALS: STATICPOPUP_NUMDIALOGS StaticPopupDialogs StaticPopup_Show GameTooltip_Hide
 
 local font_close,yellow_font,red_font = FONT_COLOR_CODE_CLOSE,YELLOW_FONT_COLOR_CODE,RED_FONT_COLOR_CODE
 local ValidateNumeric = function(info,val)
   if not tonumber(val) then
     return print(fmt("|cff9900FF"..ADDON_NAME..font_close..":"..yellow_font.." %s"..red_font.." is not a number!",tostring(val)))
   end
-  return true 
+  return true
 end
 
 local dynFrame = WeakAuras.dynFrame;
@@ -79,7 +86,7 @@ function WeakAuras.MultipleDisplayTooltipMenu()
           new_id = "New "..num;
           num = num + 1;
         end
-        
+
         local data = {
           id = new_id,
           regionType = "group",
@@ -88,7 +95,7 @@ function WeakAuras.MultipleDisplayTooltipMenu()
         };
         WeakAuras.Add(data);
         WeakAuras.NewDisplayButton(data);
-        
+
         for index, childId in pairs(tempGroup.controlledChildren) do
           local childData = WeakAuras.GetData(childId);
           tinsert(data.controlledChildren, childId);
@@ -96,13 +103,13 @@ function WeakAuras.MultipleDisplayTooltipMenu()
           WeakAuras.Add(data);
           WeakAuras.Add(childData);
         end
-        
+
         for index, id in pairs(data.controlledChildren) do
           local childButton = WeakAuras.GetDisplayButton(id);
           childButton:SetGroup(data.id, data.regionType == "dynamicgroup");
           childButton:SetGroupOrder(index, #data.controlledChildren);
         end
-        
+
         local button = WeakAuras.GetDisplayButton(data.id);
         button.callbacks.UpdateExpandButton();
         WeakAuras.UpdateDisplayButton(data);
@@ -121,7 +128,7 @@ function WeakAuras.MultipleDisplayTooltipMenu()
           new_id = "New "..num;
           num = num + 1;
         end
-        
+
         local data = {
           id = new_id,
           regionType = "dynamicgroup",
@@ -130,7 +137,7 @@ function WeakAuras.MultipleDisplayTooltipMenu()
         };
         WeakAuras.Add(data);
         WeakAuras.NewDisplayButton(data);
-        
+
         for index, childId in pairs(tempGroup.controlledChildren) do
           local childData = WeakAuras.GetData(childId);
           tinsert(data.controlledChildren, childId);
@@ -138,19 +145,20 @@ function WeakAuras.MultipleDisplayTooltipMenu()
           WeakAuras.Add(data);
           WeakAuras.Add(childData);
         end
-        
+
         for index, id in pairs(data.controlledChildren) do
           local childButton = WeakAuras.GetDisplayButton(id);
           childButton:SetGroup(data.id, data.regionType == "dynamicgroup");
           childButton:SetGroupOrder(index, #data.controlledChildren);
         end
-        
+
         local button = WeakAuras.GetDisplayButton(data.id);
         button.callbacks.UpdateExpandButton();
         WeakAuras.UpdateDisplayButton(data);
         WeakAuras.ReloadGroupRegionOptions(data);
         WeakAuras.SortDisplayButtons();
         button:Expand();
+        WeakAuras.PickDisplay(new_id);
       end
     },
     {
@@ -223,11 +231,11 @@ local valueToPath = WeakAuras.ValueToPath;
 
 -- This function computes the Levenshtein distance between two strings
 -- It is based on the Wagner-Fisher algorithm
--- 
+--
 -- The Levenshtein distance between two strings is the minimum number of operations needed
 -- to transform one into the other, with allowable operations being addition of one letter,
 -- subtraction of one letter, or substitution of one letter for another
--- 
+--
 -- It is used in this program to match spell icon textures with "good" spell names; i.e.,
 -- spell names that are very similar to the name of the texture
 local function Lev(str1, str2)
@@ -247,7 +255,7 @@ local function Lev(str1, str2)
          end
       end
    end
-   
+
    return matrix[str1:len()][str2:len()];
 end
 
@@ -331,19 +339,19 @@ AceGUI:RegisterLayout("AbsoluteList", function(content, children)
   local yOffset = 0;
   for i = 1, #children do
     local child = children[i]
-    
+
     local frame = child.frame;
     frame:ClearAllPoints();
     frame:Show();
-    
+
     frame:SetPoint("LEFT", content);
     frame:SetPoint("RIGHT", content);
     frame:SetPoint("TOP", content, "TOP", 0, yOffset)
-    
+
     if child.DoLayout then
       child:DoLayout()
     end
-    
+
     yOffset = yOffset - ((frame.height or frame:GetHeight() or 0) + 2);
   end
   if(content.obj.LayoutFinished) then
@@ -353,18 +361,15 @@ end);
 
 AceGUI:RegisterLayout("ButtonsScrollLayout", function(content, children)
   local yOffset = 0;
-
   local scrollTop, scrollBottom = content.obj:GetScrollPos();
   for i = 1, #children do
     local child = children[i]
-
     local frame = child.frame;
     local frameHeight = (frame.height or frame:GetHeight() or 0);
 
     frame:ClearAllPoints();
     if (-yOffset + frameHeight > scrollTop and -yOffset - frameHeight < scrollBottom) then
         frame:Show();
-
         frame:SetPoint("LEFT", content);
         frame:SetPoint("RIGHT", content);
         frame:SetPoint("TOP", content, "TOP", 0, yOffset)
@@ -388,13 +393,13 @@ end);
 -- Why? Because if you call GetSpellInfo with a spell name, it only works if the spell is an actual castable ability,
 -- but if you call it with a spell id, you can get buffs, talents, etc. This is useful for displaying faux aura information
 -- for displays that are not actually connected to auras (for non-automatic icon displays with predefined icons)
--- 
+--
 -- This is a rather slow operation, so it's only done once, and the result is subsequently saved
 function WeakAuras.CreateIconCache(callback)
   local func = function()
     local id = 0;
     local misses = 0;
-    
+
     while (misses < 200) do
       id = id + 1;
       local name, _, icon = GetSpellInfo(id);
@@ -409,7 +414,7 @@ function WeakAuras.CreateIconCache(callback)
         misses = misses + 1;
       end
       coroutine.yield();
-    end  
+    end
     if(callback) then
       callback();
     end
@@ -506,7 +511,7 @@ function WeakAuras.ConstructOptions(prototype, data, startorder, subPrefix, subS
               return L["Multiselect ignored tooltip"];
             end
           end,
-          get = function() 
+          get = function()
             local value = trigger["use_"..realname];
             if(value == nil) then return false;
             elseif(value == false) then return "false";
@@ -927,7 +932,7 @@ function WeakAuras.ConstructOptions(prototype, data, startorder, subPrefix, subS
             WeakAuras.SortDisplayButtons();
           end
         end
-        
+
         options["multiselect_"..name] = {
           type = "multiselect",
           name = arg.display,
@@ -982,7 +987,7 @@ function WeakAuras.ConstructOptions(prototype, data, startorder, subPrefix, subS
             WeakAuras.SortDisplayButtons();
           end
         end
-        
+
         if(arg.required and triggertype == "untrigger") then
           options[name] = nil;
           options["multiselect_"..name] = nil;
@@ -992,7 +997,7 @@ function WeakAuras.ConstructOptions(prototype, data, startorder, subPrefix, subS
       end
     end
   end
-  
+
   if not(triggertype or prototype.automaticrequired) then
     options.unevent = {
       type = "select",
@@ -1022,7 +1027,7 @@ function WeakAuras.ConstructOptions(prototype, data, startorder, subPrefix, subS
       options.unevent.values = eventend_types;
     end
   end
-  
+
   WeakAuras.option = options;
   return options;
 end
@@ -1036,8 +1041,11 @@ local newOptions;
 local loadedOptions;
 local unloadedOptions;
 local pickonupdate;
+local reopenAfterCombat = false;
 local loadedFrame = CreateFrame("FRAME");
 loadedFrame:RegisterEvent("ADDON_LOADED");
+loadedFrame:RegisterEvent("PLAYER_REGEN_ENABLED");
+loadedFrame:RegisterEvent("PLAYER_REGEN_DISABLED");
 loadedFrame:SetScript("OnEvent", function(self, event, addon)
   if (event == "ADDON_LOADED") then
     if(addon == ADDON_NAME) then
@@ -1045,39 +1053,49 @@ loadedFrame:SetScript("OnEvent", function(self, event, addon)
       WeakAurasOptionsSaved = WeakAurasOptionsSaved or {};
 
       odb = WeakAurasOptionsSaved;
-      
+
       odb.iconCache = odb.iconCache or {};
       iconCache = odb.iconCache;
       odb.idCache = odb.idCache or {};
       idCache = odb.idCache;
       odb.talentCache = odb.talentCache or {};
-    
+
       local _, build = GetBuildInfo();
       local locale = GetLocale();
       local version = WeakAuras.versionString
-      
+
       local num = 0;
       for i,v in pairs(odb.iconCache) do
         num = num + 1;
       end
-      
+
       if(num < 39000 or odb.locale ~= locale or odb.build ~= build or odb.version ~= version) then
         WeakAuras.CreateIconCache();
-  
+
         odb.build = build;
         odb.locale = locale;
         odb.version = version;
       end
-  
+
       -- Updates the icon cache with whatever icons WeakAuras core has actually used.
       -- This helps keep name<->icon matches relevant.
       for name, icon in pairs(db.tempIconCache) do
         iconCache[name] = icon;
       end
-    
+
     --Saves the talent names and icons for the current class
     --Used for making the Talent Selected load option prettier
-    
+
+    end
+  elseif (event == "PLAYER_REGEN_DISABLED") then
+    if(frame and frame:IsVisible()) then
+      reopenAfterCombat = true;
+      WeakAuras.HideOptions();
+    end
+  elseif (event == "PLAYER_REGEN_ENABLED") then
+    if (reopenAfterCombat) then
+      reopenAfterCombat = nil;
+      WeakAuras.ShowOptions()
     end
   end
 end);
@@ -1088,7 +1106,7 @@ function WeakAuras.DeleteOption(data)
   if(data.parent) then
     parentData = db.displays[data.parent];
   end
-  
+
   if(data.controlledChildren) then
     for index, childId in pairs(data.controlledChildren) do
       local childButton = displayButtons[childId];
@@ -1101,16 +1119,16 @@ function WeakAuras.DeleteOption(data)
       end
     end
   end
-  
+
   WeakAuras.HideAllClones(id);
-  
+
   WeakAuras.Delete(data);
   frame:ClearPicks();
   frame.buttonsScroll:DeleteChild(displayButtons[id]);
   thumbnails[id].region:Hide();
   thumbnails[id] = nil;
   displayButtons[id] = nil;
-  
+
   if(parentData and parentData.controlledChildren) then
     for index, childId in pairs(parentData.controlledChildren) do
       local childButton = displayButtons[childId];
@@ -1135,6 +1153,9 @@ end
 function WeakAuras.ToggleOptions(msg)
   if(frame and frame:IsVisible()) then
     WeakAuras.HideOptions();
+  elseif (InCombatLockdown()) then
+    print("|cff9900FF".."WeakAuras Options"..FONT_COLOR_CODE_CLOSE.." will open after combat.")
+    reopenAfterCombat = true;
   else
     WeakAuras.ShowOptions(msg);
   end
@@ -1144,17 +1165,17 @@ function WeakAuras.UpdateCloneConfig(data)
   if(WeakAuras.CanHaveClones(data)) then
     local cloneRegion = WeakAuras.EnsureClone(data.id, 1);
     cloneRegion:Expand();
-    
+
     cloneRegion = WeakAuras.EnsureClone(data.id, 2);
     cloneRegion:Expand();
-    
+
     --if(data.parent and WeakAuras.regions[data.parent]) then
     if(data.parent and WeakAuras.regions[data.parent] and
-       WeakAuras.regions[data.parent].region and 
+       WeakAuras.regions[data.parent].region and
        WeakAuras.regions[data.parent].region.ControlChildren) then
       WeakAuras.regions[data.parent].region:ControlChildren();
     end
-    
+
     WeakAuras.SetIconNames(data);
   end
 end
@@ -1162,7 +1183,7 @@ end
 function WeakAuras.ShowOptions(msg)
   local firstLoad = not(frame);
   WeakAuras.Pause();
-  
+
   if (firstLoad) then
     frame = WeakAuras.CreateFrame();
     frame.buttonsScroll.frame:Show();
@@ -1171,7 +1192,7 @@ function WeakAuras.ShowOptions(msg)
   end
   frame.buttonsScroll.frame:Show();
   WeakAuras.LockUpdateInfo();
-  
+
   if (frame.needsSort) then
     WeakAuras.SortDisplayButtons();
     frame.needsSort = nil;
@@ -1191,7 +1212,7 @@ end
 function WeakAuras.HideOptions()
   -- dynFrame:SetScript("OnUpdate", nil);
   WeakAuras.UnlockUpdateInfo();
-  
+
   for id, data in pairs(db.displays) do
     local region = WeakAuras.regions[id] and WeakAuras.regions[id].region;
     if(region) then
@@ -1199,16 +1220,16 @@ function WeakAuras.HideOptions()
       region:SetScript("OnHide", nil);
     end
   end
-  
+
   if(frame) then
     frame:Hide();
   end
-  
+
   local tutFrame = WeakAuras.TutorialsFrame and WeakAuras.TutorialsFrame();
   if(tutFrame and tutFrame:IsVisible()) then
     tutFrame:Hide();
   end
-  
+
   for id, data in pairs(WeakAuras.regions) do
     data.region:Collapse();
   end
@@ -1251,12 +1272,12 @@ function WeakAuras.DoConfigUpdate()
       WeakAuras.duration_cache:SetDurationInfo(id, 0, math.huge, nil, nil, cloneNum);
     end
   end
-  
+
   for id, region in pairs(WeakAuras.regions) do
     local data = db.displays[id];
     if(data) then
       GiveDynamicInfo(id, region.region, data);
-      
+
       if(WeakAuras.clones[id]) then
         for cloneNum, cloneRegion in pairs(WeakAuras.clones[id]) do
           GiveDynamicInfo(id, cloneRegion, data, cloneNum);
@@ -1294,8 +1315,9 @@ function WeakAuras.SetIconNames(data)
 end
 
 function WeakAuras.SetIconName(data, region)
-  local name, icon;
-  if(data.trigger.type == "aura" and not (data.trigger.inverse or WeakAuras.CanGroupShowWithZero(data))) then
+  local name, icon = WeakAuras.GetNameAndIcon(data);
+  if(data.trigger.type == "aura" and not (data.trigger.inverse or WeakAuras.CanGroupShowWithZero(data))
+     and data.trigger.names) then
     -- Try to get an icon from the icon cache
     for index, checkname in pairs(data.trigger.names) do
       if(iconCache[checkname]) then
@@ -1303,17 +1325,10 @@ function WeakAuras.SetIconName(data, region)
         break;
       end
     end
-  elseif((data.trigger.type == "event" or data.trigger.type == "status") and data.trigger.event and WeakAuras.event_prototypes[data.trigger.event]) then
-    if(WeakAuras.event_prototypes[data.trigger.event].iconFunc) then
-      icon = WeakAuras.event_prototypes[data.trigger.event].iconFunc(data.trigger);
-    end
-    if(WeakAuras.event_prototypes[data.trigger.event].nameFunc) then
-      name = WeakAuras.event_prototypes[data.trigger.event].nameFunc(data.trigger);
-    end
   end
-  
+
   WeakAuras.transmitCache[data.id] = icon;
-  
+
   if(region.SetIcon) then
     region:SetIcon(icon);
   end
@@ -1343,7 +1358,7 @@ function WeakAuras.GetSortedOptionsLists()
       end
     end
   end
-  
+
   wipe(to_sort);
   for id, data in pairs(db.displays) do
     if(data.parent) then
@@ -1363,7 +1378,7 @@ function WeakAuras.GetSortedOptionsLists()
       end
     end
   end
-  
+
   return loadedSorted, unloadedSorted;
 end
 
@@ -1376,7 +1391,7 @@ function WeakAuras.BuildOptions(list, callback)
   for _,_ in pairs(list) do
     total = total + 1;
   end
-  
+
   local func = function()
     local num = 0;
     for id, data in pairs(list) do
@@ -1387,16 +1402,16 @@ function WeakAuras.BuildOptions(list, callback)
         end
       end
       frame.loadProgress:SetText(L["Creating options: "]..num.."/"..total);
-    
+
       coroutine.yield();
     end
-    
+
     callback();
     frame.loadProgress:Hide();
     frame.filterInput:Show();
     frame.filterInputClear:Show();
   end
-  
+
   local co = coroutine.create(func);
   dynFrame:AddAction("BuildOptions", co);
 end
@@ -1406,9 +1421,9 @@ function WeakAuras.LayoutDisplayButtons(msg)
   for _,_ in pairs(db.displays) do
     total = total + 1;
   end
-  
+
   local loadedSorted, unloadedSorted = WeakAuras.GetSortedOptionsLists();
-  
+
   frame.loadProgress:Show();
   frame.buttonsScroll:AddChild(frame.newButton);
   if(frame.addonsButton) then
@@ -1424,7 +1439,7 @@ function WeakAuras.LayoutDisplayButtons(msg)
       if(data) then
         WeakAuras.EnsureDisplayButton(data);
         WeakAuras.UpdateDisplayButton(data);
-    
+
         frame.buttonsScroll:AddChild(displayButtons[data.id]);
         WeakAuras.SetIconNames(data);
         if(WeakAuras.regions[data.id].region.SetStacks) then
@@ -1436,7 +1451,7 @@ function WeakAuras.LayoutDisplayButtons(msg)
           frame.buttonsScroll:PerformLayout()
           frame.buttonsScroll:PauseLayout()
         end
-    
+
         num = num + 1;
       end
       frame.loadProgress:SetText(L["Creating buttons: "]..num.."/"..total);
@@ -1447,18 +1462,20 @@ function WeakAuras.LayoutDisplayButtons(msg)
     frame.buttonsScroll:ResumeLayout()
     frame.buttonsScroll:PerformLayout()
     WeakAuras.SortDisplayButtons(msg);
-  
-    for id, button in pairs(displayButtons) do
-      if(loaded[id] ~= nil) then
-       button:PriorityShow(1);
+
+    if (WeakAuras.IsOptionsOpen()) then
+      for id, button in pairs(displayButtons) do
+        if(loaded[id] ~= nil) then
+         button:PriorityShow(1);
+        end
       end
     end
-  
+
     frame.loadProgress:Hide();
     frame.filterInput:Show();
     frame.filterInputClear:Show();
   end
-  
+
   local func1 = function()
     local num = frame.loadProgressNum or 0;
     frame.buttonsScroll:PauseLayout()
@@ -1467,14 +1484,14 @@ function WeakAuras.LayoutDisplayButtons(msg)
       if(data) then
         WeakAuras.EnsureDisplayButton(data);
         WeakAuras.UpdateDisplayButton(data);
-    
+
         local button = displayButtons[data.id]
         frame.buttonsScroll:AddChild(button);
         WeakAuras.SetIconNames(data);
         if(WeakAuras.regions[data.id].region.SetStacks) then
           WeakAuras.regions[data.id].region:SetStacks(1);
         end
-    
+
         num = num + 1;
       end
 
@@ -1483,12 +1500,12 @@ function WeakAuras.LayoutDisplayButtons(msg)
         frame.buttonsScroll:PerformLayout()
         frame.buttonsScroll:PauseLayout()
       end
-    
+
       frame.loadProgress:SetText(L["Creating buttons: "]..num.."/"..total);
       frame.loadProgressNum = num;
       coroutine.yield();
     end
-  
+
     local co2 = coroutine.create(func2);
     dynFrame:AddAction("LayoutDisplayButtons2", co2);
   end
@@ -1586,7 +1603,7 @@ local function getAll(data, info, ...)
       end
     end
   end
-  
+
   return unpack(combinedValues);
 end
 
@@ -1644,10 +1661,10 @@ local function hiddenAll(data, info)
       end
     end
   end
-  
+
   return false;
 end
-  
+
 local function disabledAll(data, info)
   for index, childId in ipairs(data.controlledChildren) do
     local childData = WeakAuras.GetData(childId);
@@ -1677,7 +1694,7 @@ local function disabledAll(data, info)
       end
     end
   end
-  
+
   return false;
 end
 
@@ -1730,10 +1747,10 @@ local function replaceNameDescFuncs(intable, data)
         end
       end
     end
-    
+
     return true;
   end
-    
+
   local function nameAll(info)
     local combinedName;
     local first = true;
@@ -1765,10 +1782,10 @@ local function replaceNameDescFuncs(intable, data)
         end
       end
     end
-    
+
     return combinedName;
   end
-  
+
   local function descAll(info)
     local combinedDesc;
     local first = true;
@@ -1800,10 +1817,10 @@ local function replaceNameDescFuncs(intable, data)
         end
       end
     end
-    
+
     return combinedDesc;
   end
-  
+
   local function recurse(intable)
     for i,v in pairs(intable) do
       if(i == "name" and type(v) ~= "table") then
@@ -1920,10 +1937,10 @@ local function replaceImageFuncs(intable, data)
         end
       end
     end
-    
+
     return unpack(combinedImage);
   end
-  
+
   local function recurse(intable)
     for i,v in pairs(intable) do
       if(i == "image" and type(v) == "function") then
@@ -1948,7 +1965,7 @@ function WeakAuras.AddOption(id, data)
       }
     };
   end
-  
+
   displayOptions[id] = {
     type = "group",
     childGroups = "tab",
@@ -2434,7 +2451,7 @@ function WeakAuras.AddOption(id, data)
           local split = info[#info]:find("_");
           if(split) then
             local field, value = info[#info]:sub(1, split-1), info[#info]:sub(split+1);
-            
+
             if(data.animation and data.animation[field]) then
               return data.animation[field][value];
             else
@@ -3736,7 +3753,7 @@ function WeakAuras.AddOption(id, data)
       }
     }
   };
-  
+
   WeakAuras.ReloadTriggerOptions(data);
 end
 
@@ -3771,7 +3788,7 @@ end
 function WeakAuras.ReloadTriggerOptions(data)
   local id = data.id;
   WeakAuras.EnsureOptions(id);
-  
+
   local trigger, untrigger, appendToTriggerPath, appendToUntriggerPath;
   if(data.controlledChildren) then
     optionTriggerChoices[id] = nil;
@@ -3788,9 +3805,9 @@ function WeakAuras.ReloadTriggerOptions(data)
         end
       end
     end
-    
+
     optionTriggerChoices[id] = optionTriggerChoices[id] or 0;
-    
+
     if(optionTriggerChoices[id] >= 0) then
       for index, childId in pairs(data.controlledChildren) do
         local childData = WeakAuras.GetData(childId);
@@ -3805,40 +3822,45 @@ function WeakAuras.ReloadTriggerOptions(data)
     if(optionTriggerChoices[id] == 0) then
       trigger = data.trigger;
       untrigger = data.untrigger;
-      
-      function appendToTriggerPath(...)
-        local ret = {...};
-        tinsert(ret, 1, "trigger");
-        return ret;
-      end
-      
-      function appendToUntriggerPath(...)
-        local ret = {...};
-        tinsert(ret, 1, "untrigger");
-        return ret;
-      end
     else
       trigger = data.additional_triggers and data.additional_triggers[optionTriggerChoices[id]].trigger or data.trigger;
       untrigger = data.additional_triggers and data.additional_triggers[optionTriggerChoices[id]].untrigger or data.untrigger;
-      
-      function appendToTriggerPath(...)
-        local ret = {...};
-        tinsert(ret, 1, "trigger");
-        tinsert(ret, 1, optionTriggerChoices[id]);
-        tinsert(ret, 1, "additional_triggers");
-        return ret;
-      end
-      
-      function appendToUntriggerPath(...)
-        local ret = {...};
-        tinsert(ret, 1, "untrigger");
-        tinsert(ret, 1, optionTriggerChoices[id]);
-        tinsert(ret, 1, "additional_triggers");
-        return ret;
-      end
     end
   end
-  
+
+  if(optionTriggerChoices[id] == 0) then
+    function appendToTriggerPath(...)
+      local ret = {...};
+      tinsert(ret, 1, "trigger");
+      return ret;
+    end
+
+    function appendToUntriggerPath(...)
+      local ret = {...};
+      tinsert(ret, 1, "untrigger");
+      return ret;
+    end
+  elseif (optionTriggerChoices[id] > 0) then
+    function appendToTriggerPath(...)
+      local ret = {...};
+      tinsert(ret, 1, "trigger");
+      tinsert(ret, 1, optionTriggerChoices[id]);
+      tinsert(ret, 1, "additional_triggers");
+      return ret;
+    end
+
+    function appendToUntriggerPath(...)
+      local ret = {...};
+      tinsert(ret, 1, "untrigger");
+      tinsert(ret, 1, optionTriggerChoices[id]);
+      tinsert(ret, 1, "additional_triggers");
+      return ret;
+    end
+  else
+    function appendToTriggerPath(...) end
+    function appendToUntriggerPath(...) end
+  end
+
   local function getAuraMatchesLabel(name)
     local ids = idCache[name]
     if(ids) then
@@ -3856,7 +3878,7 @@ function WeakAuras.ReloadTriggerOptions(data)
       return "";
     end
   end
-  
+
   -- the spell id table is sparse, so tremove doesn't work
   local function spellId_tremove(tbl, pos)
     for i = pos, 9, 1 do
@@ -3883,7 +3905,7 @@ function WeakAuras.ReloadTriggerOptions(data)
       return "";
     end
   end
-  
+
   local aura_options = {
     fullscan = {
       type = "toggle",
@@ -4693,7 +4715,7 @@ function WeakAuras.ReloadTriggerOptions(data)
       hidden = function() return not (trigger.type == "aura" and not(trigger.unit ~= "group" and trigger.autoclone) and trigger.unit ~= "multi" and not(trigger.unit == "group" and not trigger.groupclone)); end
     }
   };
-  
+
   local trigger_options = {
     disjunctive = {
       type = "select",
@@ -5333,9 +5355,9 @@ function WeakAuras.ReloadTriggerOptions(data)
       end
     }
   };
-  
+
   local order = 81;
-  
+
   if(data.controlledChildren) then
     local function options_set(info, ...)
       setAll(data, info, ...);
@@ -5345,9 +5367,9 @@ function WeakAuras.ReloadTriggerOptions(data)
       WeakAuras.UpdateDisplayButton(data);
       WeakAuras.ReloadTriggerOptions(data);
     end
-    
+
     removeFuncs(displayOptions[id]);
-    
+
     if(optionTriggerChoices[id] >= 0 and getAll(data, {"trigger", "type"}) == "aura") then
       displayOptions[id].args.trigger.args = union(trigger_options, aura_options);
       removeFuncs(displayOptions[id].args.trigger);
@@ -5365,7 +5387,7 @@ function WeakAuras.ReloadTriggerOptions(data)
             displayOptions[id].args.trigger.args = union(trigger_options, WeakAuras.ConstructOptions(WeakAuras.event_prototypes[event], data, 10, subeventPrefix, subeventSuffix, optionTriggerChoices[id], nil, unevent));
           end
         end
-        
+
         if not(trigger_options_created) then
           displayOptions[id].args.trigger.args = union(trigger_options, WeakAuras.ConstructOptions(WeakAuras.event_prototypes[event], data, 10, nil, nil, optionTriggerChoices[id], nil, unevent));
         end
@@ -5376,7 +5398,7 @@ function WeakAuras.ReloadTriggerOptions(data)
       removeFuncs(displayOptions[id].args.trigger);
       replaceNameDescFuncs(displayOptions[id].args.trigger, data);
       replaceImageFuncs(displayOptions[id].args.trigger, data);
-      
+
       if(displayOptions[id].args.trigger.args.unevent) then
         displayOptions[id].args.trigger.args.unevent.set = options_set;
       end
@@ -5391,7 +5413,7 @@ function WeakAuras.ReloadTriggerOptions(data)
       if(displayOptions[id].args.trigger.args.subeventSuffix) then
         displayOptions[id].args.trigger.args.subeventSuffix.set = options_set;
       end
-      
+
       if(displayOptions[id].args.trigger.args.type) then
         displayOptions[id].args.trigger.args.type.set = options_set;
       end
@@ -5402,7 +5424,7 @@ function WeakAuras.ReloadTriggerOptions(data)
       displayOptions[id].args.trigger.args = trigger_options;
       removeFuncs(displayOptions[id].args.trigger);
     end
-    
+
     displayOptions[id].get = function(info, ...) return getAll(data, info, ...); end;
     displayOptions[id].set = function(info, ...)
       setAll(data, info, ...);
@@ -5414,14 +5436,14 @@ function WeakAuras.ReloadTriggerOptions(data)
     end
     displayOptions[id].hidden = function(info, ...) return hiddenAll(data, info, ...); end;
     displayOptions[id].disabled = function(info, ...) return disabledAll(data, info, ...); end;
-    
+
     trigger_options.chooseTrigger.set = options_set;
     trigger_options.type.set = options_set;
     trigger_options.event.set = options_set;
-    
+
     replaceNameDescFuncs(displayOptions[id], data);
     replaceImageFuncs(displayOptions[id], data);
-    
+
     local regionOption = regionOptions[data.regionType].create(id, data);
     displayOptions[id].args.group = {
       type = "group",
@@ -5455,7 +5477,7 @@ function WeakAuras.ReloadTriggerOptions(data)
       disabled = function() return false end,
       args = regionOption
     };
-    
+
     data.load.use_class = getAll(data, {"load", "use_class"});
     local single_class = getAll(data, {"load", "class"});
     data.load.class = {}
@@ -5465,7 +5487,7 @@ function WeakAuras.ReloadTriggerOptions(data)
     removeFuncs(displayOptions[id].args.load);
     replaceNameDescFuncs(displayOptions[id].args.load, data);
     replaceImageFuncs(displayOptions[id].args.load, data);
-    
+
     WeakAuras.ReloadGroupRegionOptions(data);
   else
     local function options_set(info, v)
@@ -5506,9 +5528,9 @@ function WeakAuras.ReloadTriggerOptions(data)
     else
       displayOptions[id].args.trigger.args = union(trigger_options, {});
     end
-    
+
     displayOptions[id].args.load.args = WeakAuras.ConstructOptions(WeakAuras.load_prototype, data, 10, nil, nil, optionTriggerChoices[id], "load");
-    
+
     trigger_options.event.set = function(info, v, ...)
       local prototype = WeakAuras.event_prototypes[v];
       if(prototype) then
@@ -5523,7 +5545,7 @@ function WeakAuras.ReloadTriggerOptions(data)
     trigger.event = trigger.event or "Health";
     trigger.subeventPrefix = trigger.subeventPrefix or "SPELL"
     trigger.subeventSuffix = trigger.subeventSuffix or "_CAST_START";
-    
+
     displayOptions[id].args.trigger.get = function(info) return trigger[info[#info]] end;
     displayOptions[id].args.trigger.set = function(info, v)
       trigger[info[#info]] = (v ~= "" and v) or nil;
@@ -5554,7 +5576,7 @@ function WeakAuras.ReloadGroupRegionOptions(data)
       end
     end
   end
-  
+
   local id = data.id;
   WeakAuras.EnsureOptions(id);
   local options = displayOptions[id];
@@ -5778,7 +5800,7 @@ function WeakAuras.AddPositionOptions(input, id, data)
       values = WeakAuras.frame_strata_types
     }
   };
-  
+
   return union(input, positionOptions);
 end
 
@@ -5854,14 +5876,14 @@ function WeakAuras.AddBorderOptions(input, id, data)
     hidden = function() return not data.border end,
   },
   }
-  
+
   return union(input, borderOptions);
 end
 
 function WeakAuras.CreateFrame()
   local WeakAuras_DropDownMenu = CreateFrame("frame", "WeakAuras_DropDownMenu", nil, "UIDropDownMenuTemplate");
   local frame;
-  -------- Mostly Copied from AceGUIContainer-Frame-------- 
+  -------- Mostly Copied from AceGUIContainer-Frame--------
   frame = CreateFrame("FRAME", nil, UIParent);
   frame:SetBackdrop({
     bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
@@ -5878,7 +5900,7 @@ function WeakAuras.CreateFrame()
   frame:SetMinResize(610, 240);
   frame:SetFrameStrata("DIALOG");
   frame.window = "default";
-  
+
   local xOffset, yOffset;
   if(db.frame) then
     xOffset, yOffset = db.frame.xOffset, db.frame.yOffset;
@@ -5889,7 +5911,7 @@ function WeakAuras.CreateFrame()
   end
   frame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", xOffset, yOffset);
   frame:Hide();
-  
+
   local width, height;
   if(db.frame) then
     width, height = db.frame.width, db.frame.height;
@@ -5899,12 +5921,12 @@ function WeakAuras.CreateFrame()
   end
   frame:SetWidth(width);
   frame:SetHeight(height);
-  
+
   local close = CreateFrame("Frame", nil, frame);
   close:SetWidth(17)
   close:SetHeight(40)
   close:SetPoint("TOPRIGHT", -30, 12)
-  
+
   local closebg = close:CreateTexture(nil, "BACKGROUND")
   closebg:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
   closebg:SetTexCoord(0.31, 0.67, 0, 0.63)
@@ -5936,9 +5958,9 @@ function WeakAuras.CreateFrame()
   local import = CreateFrame("Frame", nil, frame);
   import:SetWidth(17)
   import:SetHeight(40)
-  import:SetPoint("TOPRIGHT", -100, 12)  
+  import:SetPoint("TOPRIGHT", -100, 12)
   --import:Hide()
-  
+
   local importbg = import:CreateTexture(nil, "BACKGROUND")
   importbg:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
   importbg:SetTexCoord(0.31, 0.67, 0, 0.63)
@@ -5951,14 +5973,14 @@ function WeakAuras.CreateFrame()
   importbutton:SetHitRectInsets(0,0,0,0)
   importbutton:SetChecked(db.import_disabled)
 
-  importbutton:SetScript("PostClick", function(self) 
-    if self:GetChecked() then 
+  importbutton:SetScript("PostClick", function(self)
+    if self:GetChecked() then
       PlaySound("igMainMenuOptionCheckBoxOn")
       db.import_disabled = true
-    else 
-      PlaySound("igMainMenuOptionCheckBoxOff") 
+    else
+      PlaySound("igMainMenuOptionCheckBoxOff")
       db.import_disabled = nil
-    end 
+    end
   end)
   importbutton:SetScript("OnEnter", function(self)
       GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
@@ -5967,7 +5989,7 @@ function WeakAuras.CreateFrame()
       GameTooltip:Show()
   end)
   importbutton:SetScript("OnLeave", GameTooltip_Hide)
-  
+
   local importbg_l = import:CreateTexture(nil, "BACKGROUND")
   importbg_l:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
   importbg_l:SetTexCoord(0.235, 0.275, 0, 0.63)
@@ -5981,7 +6003,7 @@ function WeakAuras.CreateFrame()
   importbg_r:SetPoint("LEFT", importbg, "RIGHT")
   importbg_r:SetWidth(10)
   importbg_r:SetHeight(40)
-  
+
   local titlebg = frame:CreateTexture(nil, "OVERLAY")
   titlebg:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
   titlebg:SetTexCoord(0.31, 0.67, 0, 0.63)
@@ -6002,9 +6024,9 @@ function WeakAuras.CreateFrame()
   titlebg_r:SetPoint("LEFT", titlebg, "RIGHT")
   titlebg_r:SetWidth(30)
   titlebg_r:SetHeight(40)
-  
+
   local title = CreateFrame("Frame", nil, frame)
-  
+
   local function commitWindowChanges()
     local xOffset = frame:GetRight() - GetScreenWidth();
     local yOffset = frame:GetTop() - GetScreenHeight();
@@ -6028,7 +6050,7 @@ function WeakAuras.CreateFrame()
     frame:ClearAllPoints();
     frame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", xOffset, yOffset);
   end
-  
+
   title:EnableMouse(true)
   title:SetScript("OnMouseDown", function() frame:StartMoving() end)
   title:SetScript("OnMouseUp", function()
@@ -6041,7 +6063,7 @@ function WeakAuras.CreateFrame()
   local titletext = title:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   titletext:SetPoint("TOP", titlebg, "TOP", 0, -14)
   titletext:SetText(L["WeakAurasOptions"]);
-  
+
   local sizer_sw = CreateFrame("button",nil,frame);
   sizer_sw:SetPoint("bottomleft",frame,"bottomleft",0,0);
   sizer_sw:SetWidth(25);
@@ -6053,28 +6075,28 @@ function WeakAuras.CreateFrame()
     commitWindowChanges();
   end);
   frame.sizer_sw = sizer_sw;
-  
+
   local sizer_sw_texture = sizer_sw:CreateTexture(nil, "OVERLAY");
   sizer_sw_texture:SetTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up");
   sizer_sw_texture:SetTexCoord(1, 0, 0, 1);
   sizer_sw_texture:SetPoint("bottomleft", sizer_sw, "bottomleft", 6, 6);
   sizer_sw_texture:SetPoint("topright", sizer_sw, "topright");
   sizer_sw:SetNormalTexture(sizer_sw_texture);
-  
+
   local sizer_sw_texture_pushed = sizer_sw:CreateTexture(nil, "OVERLAY");
   sizer_sw_texture_pushed:SetTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down");
   sizer_sw_texture_pushed:SetTexCoord(1, 0, 0, 1);
   sizer_sw_texture_pushed:SetPoint("bottomleft", sizer_sw, "bottomleft", 6, 6);
   sizer_sw_texture_pushed:SetPoint("topright", sizer_sw, "topright");
   sizer_sw:SetPushedTexture(sizer_sw_texture_pushed);
-  
+
   local sizer_sw_texture_highlight = sizer_sw:CreateTexture(nil, "OVERLAY");
   sizer_sw_texture_highlight:SetTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight");
   sizer_sw_texture_highlight:SetTexCoord(1, 0, 0, 1);
   sizer_sw_texture_highlight:SetPoint("bottomleft", sizer_sw, "bottomleft", 6, 6);
   sizer_sw_texture_highlight:SetPoint("topright", sizer_sw, "topright");
   sizer_sw:SetHighlightTexture(sizer_sw_texture_highlight);
-  
+
   -- local line1 = sizer_sw:CreateTexture(nil, "BACKGROUND")
   -- line1:SetWidth(14)
   -- line1:SetHeight(14)
@@ -6090,14 +6112,14 @@ function WeakAuras.CreateFrame()
   -- line2:SetTexture("Interface\\Tooltips\\UI-Tooltip-Border")
   -- local x = 0.1 * 8/17
   -- line2:SetTexCoord(0.05,0.5 - x, 0.5 + x,0.5, 0.05 - x,0.5, 0.05,0.5 + x)
-  -------------------------------------------------------- 
-  
+  --------------------------------------------------------
+
 
   local minimize = CreateFrame("Frame", nil, frame);
   minimize:SetWidth(17)
   minimize:SetHeight(40)
   minimize:SetPoint("TOPRIGHT", -65, 12)
-  
+
   local minimizebg = minimize:CreateTexture(nil, "BACKGROUND")
   minimizebg:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
   minimizebg:SetTexCoord(0.31, 0.67, 0, 0.63)
@@ -6136,7 +6158,7 @@ function WeakAuras.CreateFrame()
       minimizebutton:SetNormalTexture("Interface\\BUTTONS\\UI-Panel-CollapseButton-Up.blp");
       minimizebutton:SetPushedTexture("Interface\\BUTTONS\\UI-Panel-CollapseButton-Down.blp");
     else
-      frame.minimized = true;      
+      frame.minimized = true;
       frame:SetHeight(40);
       frame.buttonsContainer.frame:Hide();
       frame.texturePick.frame:Hide();
@@ -6149,7 +6171,7 @@ function WeakAuras.CreateFrame()
       minimizebutton:SetPushedTexture("Interface\\BUTTONS\\UI-Panel-ExpandButton-Down.blp");
     end
   end);
-  
+
   local minimizebg_l = minimize:CreateTexture(nil, "BACKGROUND")
   minimizebg_l:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
   minimizebg_l:SetTexCoord(0.235, 0.275, 0, 0.63)
@@ -6170,7 +6192,7 @@ function WeakAuras.CreateFrame()
     tutorial:SetWidth(17)
     tutorial:SetHeight(40)
     tutorial:SetPoint("TOPRIGHT", -140, 12)
-    
+
     local tutorialbg = tutorial:CreateTexture(nil, "BACKGROUND")
     tutorialbg:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
     tutorialbg:SetTexCoord(0.31, 0.67, 0, 0.63)
@@ -6199,7 +6221,7 @@ function WeakAuras.CreateFrame()
       end
       WeakAuras.ToggleTutorials();
     end);
-    
+
     local tutorialbg_l = tutorial:CreateTexture(nil, "BACKGROUND")
     tutorialbg_l:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
     tutorialbg_l:SetTexCoord(0.235, 0.275, 0, 0.63)
@@ -6214,7 +6236,7 @@ function WeakAuras.CreateFrame()
     tutorialbg_r:SetWidth(10)
     tutorialbg_r:SetHeight(40)
   end
-  
+
   local container = AceGUI:Create("InlineGroup");
   container.frame:SetParent(frame);
   container.frame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -17, 12);
@@ -6222,7 +6244,7 @@ function WeakAuras.CreateFrame()
   container.frame:Show();
   container.titletext:Hide();
   frame.container = container;
-  
+
   local texturePick = AceGUI:Create("InlineGroup");
   texturePick.frame:SetParent(frame);
   texturePick.frame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -17, 42);
@@ -6232,7 +6254,7 @@ function WeakAuras.CreateFrame()
   frame.texturePick = texturePick;
   texturePick.children = {};
   texturePick.categories = {};
-  
+
   local texturePickDropdown = AceGUI:Create("DropdownGroup");
   texturePickDropdown:SetLayout("fill");
   texturePickDropdown.width = "fill";
@@ -6241,12 +6263,12 @@ function WeakAuras.CreateFrame()
   texturePick:AddChild(texturePickDropdown);
   texturePickDropdown.list = {};
   texturePickDropdown:SetGroupList(texturePickDropdown.list);
-  
+
   local texturePickScroll = AceGUI:Create("ScrollFrame");
   texturePickScroll:SetWidth(540);
   texturePickScroll:SetLayout("flow");
   texturePickDropdown:AddChild(texturePickScroll);
-  
+
   local function texturePickGroupSelected(widget, event, uniquevalue)
     texturePickScroll:ReleaseChildren();
     for texturePath, textureName in pairs(texture_types[uniquevalue]) do
@@ -6271,9 +6293,9 @@ function WeakAuras.CreateFrame()
     end
     texturePick:Pick(texturePick.data[texturePick.field]);
   end
-  
+
   texturePickDropdown:SetCallback("OnGroupSelected", texturePickGroupSelected)
-  
+
   function texturePick.UpdateList(self)
     wipe(texturePickDropdown.list);
     for categoryName, category in pairs(texture_types) do
@@ -6288,7 +6310,7 @@ function WeakAuras.CreateFrame()
     end
     texturePickDropdown:SetGroupList(texturePickDropdown.list);
   end
-  
+
   function texturePick.Pick(self, texturePath)
     local pickedwidget;
     for index, widget in ipairs(texturePickScroll.children) do
@@ -6314,7 +6336,7 @@ function WeakAuras.CreateFrame()
     local status = texturePickDropdown.status or texturePickDropdown.localstatus
     texturePickDropdown.dropdown:SetText(texturePickDropdown.list[status.selected]);
   end
-  
+
   function texturePick.Open(self, data, field)
     self.data = data;
     self.field = field;
@@ -6384,7 +6406,7 @@ function WeakAuras.CreateFrame()
       end
     end
   end
-  
+
   function texturePick.Close()
     texturePick.frame:Hide();
     frame.buttonsContainer.frame:Show();
@@ -6392,7 +6414,7 @@ function WeakAuras.CreateFrame()
     frame.window = "default";
     AceConfigDialog:Open("WeakAuras", container);
   end
-  
+
   function texturePick.CancelClose()
     if(texturePick.data.controlledChildren) then
       for index, childId in pairs(texturePick.data.controlledChildren) do
@@ -6409,21 +6431,21 @@ function WeakAuras.CreateFrame()
     end
     texturePick.Close();
   end
-  
+
   local texturePickCancel = CreateFrame("Button", nil, texturePick.frame, "UIPanelButtonTemplate")
   texturePickCancel:SetScript("OnClick", texturePick.CancelClose)
   texturePickCancel:SetPoint("BOTTOMRIGHT", -27, -23)
   texturePickCancel:SetHeight(20)
   texturePickCancel:SetWidth(100)
   texturePickCancel:SetText(L["Cancel"])
-    
+
   local texturePickClose = CreateFrame("Button", nil, texturePick.frame, "UIPanelButtonTemplate")
   texturePickClose:SetScript("OnClick", texturePick.Close)
   texturePickClose:SetPoint("RIGHT", texturePickCancel, "LEFT", -10, 0)
   texturePickClose:SetHeight(20)
   texturePickClose:SetWidth(100)
   texturePickClose:SetText(L["Okay"])
-  
+
   local iconPick = AceGUI:Create("InlineGroup");
   iconPick.frame:SetParent(frame);
   iconPick.frame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -17, 30); -- 12
@@ -6431,23 +6453,23 @@ function WeakAuras.CreateFrame()
   iconPick.frame:Hide();
   iconPick:SetLayout("flow");
   frame.iconPick = iconPick;
-  
+
   local iconPickScroll = AceGUI:Create("InlineGroup");
   iconPickScroll:SetWidth(540);
   iconPickScroll:SetLayout("flow");
   iconPickScroll.frame:SetParent(iconPick.frame);
   iconPickScroll.frame:SetPoint("BOTTOMLEFT", iconPick.frame, "BOTTOMLEFT", 10, 22); -- 30
   iconPickScroll.frame:SetPoint("TOPRIGHT", iconPick.frame, "TOPRIGHT", -10, -70);
-  
+
   local function iconPickFill(subname, doSort)
     iconPickScroll:ReleaseChildren();
 
     local distances = {};
     local names = {};
-    
+
     subname = tonumber(subname) and GetSpellInfo(tonumber(subname)) or subname;
     subname = subname:lower();
-    
+
     local num = 0;
     if(subname ~= "") then
       for name, path in pairs(iconCache) do
@@ -6490,7 +6512,7 @@ function WeakAuras.CreateFrame()
       end
     end
   end
-  
+
   local iconPickInput = CreateFrame("EDITBOX", nil, iconPick.frame, "InputBoxTemplate");
   iconPickInput:SetScript("OnTextChanged", function(...) iconPickFill(iconPickInput:GetText(), false); end);
   iconPickInput:SetScript("OnEnterPressed", function(...) iconPickFill(iconPickInput:GetText(), true); end);
@@ -6499,23 +6521,23 @@ function WeakAuras.CreateFrame()
   iconPickInput:SetHeight(15);
   iconPickInput:SetPoint("TOPRIGHT", iconPick.frame, "TOPRIGHT", -12, -65);
   WeakAuras.iconPickInput = iconPickInput;
-  
+
   local iconPickInputLabel = iconPickInput:CreateFontString(nil, "OVERLAY", "GameFontNormal");
   iconPickInputLabel:SetText(L["Search"]);
   iconPickInputLabel:SetJustifyH("RIGHT");
   iconPickInputLabel:SetPoint("BOTTOMLEFT", iconPickInput, "TOPLEFT", 0, 5);
-  
+
   local iconPickIcon = AceGUI:Create("WeakAurasIconButton");
   iconPickIcon.frame:Disable();
   iconPickIcon.frame:SetParent(iconPick.frame);
   iconPickIcon.frame:SetPoint("TOPLEFT", iconPick.frame, "TOPLEFT", 15, -30);
-  
+
   local iconPickIconLabel = iconPickInput:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge");
   iconPickIconLabel:SetNonSpaceWrap("true");
   iconPickIconLabel:SetJustifyH("LEFT");
   iconPickIconLabel:SetPoint("LEFT", iconPickIcon.frame, "RIGHT", 5, 0);
   iconPickIconLabel:SetPoint("RIGHT", iconPickInput, "LEFT", -50, 0);
-  
+
   function iconPick.Pick(self, texturePath)
     if(self.data.controlledChildren) then
       for index, childId in pairs(self.data.controlledChildren) do
@@ -6540,7 +6562,7 @@ function WeakAuras.CreateFrame()
       iconPickIconLabel:SetText();
     end
   end
-  
+
   function iconPick.Open(self, data, field)
     self.data = data;
     self.field = field;
@@ -6562,7 +6584,7 @@ function WeakAuras.CreateFrame()
     frame.window = "icon";
     iconPickInput:SetText("");
   end
-  
+
   function iconPick.Close()
     iconPick.frame:Hide();
     frame.container.frame:Show();
@@ -6570,7 +6592,7 @@ function WeakAuras.CreateFrame()
     frame.window = "default";
     AceConfigDialog:Open("WeakAuras", container);
   end
-  
+
   function iconPick.CancelClose()
     if(iconPick.data.controlledChildren) then
       for index, childId in pairs(iconPick.data.controlledChildren) do
@@ -6587,23 +6609,23 @@ function WeakAuras.CreateFrame()
     end
     iconPick.Close();
   end
-  
+
   local iconPickCancel = CreateFrame("Button", nil, iconPick.frame, "UIPanelButtonTemplate");
   iconPickCancel:SetScript("OnClick", iconPick.CancelClose);
   iconPickCancel:SetPoint("bottomright", frame, "bottomright", -27, 11);
   iconPickCancel:SetHeight(20);
   iconPickCancel:SetWidth(100);
   iconPickCancel:SetText(L["Cancel"]);
-  
+
   local iconPickClose = CreateFrame("Button", nil, iconPick.frame, "UIPanelButtonTemplate");
   iconPickClose:SetScript("OnClick", iconPick.Close);
   iconPickClose:SetPoint("RIGHT", iconPickCancel, "LEFT", -10, 0);
   iconPickClose:SetHeight(20);
   iconPickClose:SetWidth(100);
   iconPickClose:SetText(L["Okay"]);
-  
+
   iconPickScroll.frame:SetPoint("BOTTOM", iconPickClose, "TOP", 0, 10);
-  
+
   local modelPick = AceGUI:Create("InlineGroup");
   modelPick.frame:SetParent(frame);
   modelPick.frame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -17, 87);
@@ -6611,7 +6633,7 @@ function WeakAuras.CreateFrame()
   modelPick.frame:Hide();
   modelPick:SetLayout("flow");
   frame.modelPick = modelPick;
-  
+
   local modelPickZ = AceGUI:Create("Slider");
   modelPickZ:SetSliderValues(-20, 20, 0.05);
   modelPickZ:SetLabel(L["Z Offset"]);
@@ -6619,7 +6641,7 @@ function WeakAuras.CreateFrame()
   modelPickZ:SetCallback("OnValueChanged", function()
     modelPick:Pick(nil, modelPickZ:GetValue());
   end);
-  
+
   local modelPickX = AceGUI:Create("Slider");
   modelPickX:SetSliderValues(-20, 20, 0.05);
   modelPickX:SetLabel(L["X Offset"]);
@@ -6627,7 +6649,7 @@ function WeakAuras.CreateFrame()
   modelPickX:SetCallback("OnValueChanged", function()
     modelPick:Pick(nil, nil, modelPickX:GetValue());
   end);
-  
+
   local modelPickY = AceGUI:Create("Slider");
   modelPickY:SetSliderValues(-20, 20, 0.05);
   modelPickY:SetLabel(L["Y Offset"]);
@@ -6635,21 +6657,21 @@ function WeakAuras.CreateFrame()
   modelPickY:SetCallback("OnValueChanged", function()
     modelPick:Pick(nil, nil, nil, modelPickY:GetValue());
   end);
-  
+
   local modelTree = AceGUI:Create("TreeGroup");
   modelPick.modelTree = modelTree;
   modelPick.frame:SetScript("OnUpdate", function()
     local frameWidth = frame:GetWidth();
     local sliderWidth = (frameWidth - 50) / 3;
-    
+
     modelTree:SetTreeWidth(frameWidth - 370);
-    
+
     modelPickZ.frame:SetPoint("bottomleft", frame, "bottomleft", 15, 43);
     modelPickZ.frame:SetPoint("bottomright", frame, "bottomleft", 15 + sliderWidth, 43);
-    
+
     modelPickX.frame:SetPoint("bottomleft", frame, "bottomleft", 25 + sliderWidth, 43);
     modelPickX.frame:SetPoint("bottomright", frame, "bottomleft", 25 + (2 * sliderWidth), 43);
-    
+
     modelPickY.frame:SetPoint("bottomleft", frame, "bottomleft", 35 + (2 * sliderWidth), 43);
     modelPickY.frame:SetPoint("bottomright", frame, "bottomleft", 35 + (3 * sliderWidth), 43);
   end);
@@ -6663,18 +6685,18 @@ function WeakAuras.CreateFrame()
     end
   end);
   modelPick:AddChild(modelTree);
-  
+
   local model = CreateFrame("PlayerModel", nil, modelPick.content);
   model:SetAllPoints(modelTree.content);
   model:SetFrameStrata("FULLSCREEN");
   modelPick.model = model;
-  
+
   function modelPick.Pick(self, model_path, model_z, model_x, model_y)
     model_path = model_path or self.data.model_path;
     model_z = model_z or self.data.model_z;
     model_x = model_x or self.data.model_x;
     model_y = model_y or self.data.model_y;
-    
+
   if tonumber(model_path) then
     self.model:SetDisplayInfo(tonumber(model_path))
   else
@@ -6705,7 +6727,7 @@ function WeakAuras.CreateFrame()
       WeakAuras.SetIconNames(self.data);
     end
   end
-  
+
   function modelPick.Open(self, data)
     self.data = data;
   if tonumber(data.model_path) then
@@ -6715,14 +6737,14 @@ function WeakAuras.CreateFrame()
   end
     self.model:SetPosition(data.model_z, data.model_x, data.model_y);
     self.model:SetFacing(rad(data.rotation));
-    
+
     modelPickZ:SetValue(data.model_z);
     modelPickZ.editbox:SetText(("%.2f"):format(data.model_z));
     modelPickX:SetValue(data.model_x);
     modelPickX.editbox:SetText(("%.2f"):format(data.model_x));
     modelPickY:SetValue(data.model_y);
     modelPickY.editbox:SetText(("%.2f"):format(data.model_y));
-    
+
     if(data.controlledChildren) then
       self.givenModel = {};
       self.givenZ = {};
@@ -6748,7 +6770,7 @@ function WeakAuras.CreateFrame()
     self.frame:Show();
     frame.window = "model";
   end
-  
+
   function modelPick.Close()
     modelPick.frame:Hide();
     frame.container.frame:Show();
@@ -6756,7 +6778,7 @@ function WeakAuras.CreateFrame()
     frame.window = "default";
     AceConfigDialog:Open("WeakAuras", container);
   end
-  
+
   function modelPick.CancelClose(self)
     if(modelPick.data.controlledChildren) then
       for index, childId in pairs(modelPick.data.controlledChildren) do
@@ -6776,21 +6798,21 @@ function WeakAuras.CreateFrame()
     end
     modelPick.Close();
   end
-  
+
   local modelPickCancel = CreateFrame("Button", nil, modelPick.frame, "UIPanelButtonTemplate");
   modelPickCancel:SetScript("OnClick", modelPick.CancelClose);
   modelPickCancel:SetPoint("bottomright", frame, "bottomright", -27, 16);
   modelPickCancel:SetHeight(20);
   modelPickCancel:SetWidth(100);
   modelPickCancel:SetText(L["Cancel"]);
-  
+
   local modelPickClose = CreateFrame("Button", nil, modelPick.frame, "UIPanelButtonTemplate");
   modelPickClose:SetScript("OnClick", modelPick.Close);
   modelPickClose:SetPoint("RIGHT", modelPickCancel, "LEFT", -10, 0);
   modelPickClose:SetHeight(20);
   modelPickClose:SetWidth(100);
   modelPickClose:SetText(L["Okay"]);
-  
+
   local importexport = AceGUI:Create("InlineGroup");
   importexport.frame:SetParent(frame);
   importexport.frame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -17, 12);
@@ -6798,19 +6820,19 @@ function WeakAuras.CreateFrame()
   importexport.frame:Hide();
   importexport:SetLayout("fill");
   frame.importexport = importexport;
-  
+
   local importexportbox = AceGUI:Create("MultiLineEditBox");
   importexportbox:SetWidth(400);
   importexportbox.button:Hide();
   importexport:AddChild(importexportbox);
-  
+
   local importexportClose = CreateFrame("Button", nil, importexport.frame, "UIPanelButtonTemplate");
   importexportClose:SetScript("OnClick", function() importexport:Close() end);
   importexportClose:SetPoint("BOTTOMRIGHT", -27, 13);
   importexportClose:SetHeight(20);
   importexportClose:SetWidth(100);
   importexportClose:SetText(L["Done"])
-  
+
   function importexport.Open(self, mode, id)
     if(frame.window == "texture") then
       frame.texturePick:CancelClose();
@@ -6858,7 +6880,7 @@ function WeakAuras.CreateFrame()
       importexportbox:SetFocus();
     end
   end
-  
+
   function importexport.Close(self)
     importexportbox:ClearFocus();
     self.frame:Hide();
@@ -6866,7 +6888,7 @@ function WeakAuras.CreateFrame()
     frame.buttonsContainer.frame:Show();
     frame.window = "default";
   end
-  
+
   local texteditor = AceGUI:Create("InlineGroup");
   texteditor.frame:SetParent(frame);
   texteditor.frame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -17, 12);
@@ -6874,18 +6896,16 @@ function WeakAuras.CreateFrame()
   texteditor.frame:Hide();
   texteditor:SetLayout("fill");
   frame.texteditor = texteditor;
-  
-  local SharedMedia = LibStub("LibSharedMedia-3.0");
-  
+
   local texteditorbox = AceGUI:Create("MultiLineEditBox");
   texteditorbox:SetWidth(400);
   texteditorbox.button:Hide();
-  local fontPath = SharedMedia:Fetch("font", "Jack Input");
+  local fontPath = SharedMedia:Fetch("font", "Fira Mono Medium");
   if(fontPath) then
     texteditorbox.editBox:SetFont(fontPath, 12);
   end
   texteditor:AddChild(texteditorbox);
-  
+
   local colorTable = {}
   colorTable[IndentationLib.tokens.TOKEN_SPECIAL] = "|c00ff3333"
   colorTable[IndentationLib.tokens.TOKEN_KEYWORD] = "|c004444ff"
@@ -6893,21 +6913,21 @@ function WeakAuras.CreateFrame()
   colorTable[IndentationLib.tokens.TOKEN_COMMENT_LONG] = "|c0000aa00"
   colorTable[IndentationLib.tokens.TOKEN_NUMBER] = "|c00ff9900"
   colorTable[IndentationLib.tokens.TOKEN_STRING] = "|c00999999"
-  
+
   local tableColor = "|c00ff3333"
   colorTable["..."] = tableColor
   colorTable["{"] = tableColor
   colorTable["}"] = tableColor
   colorTable["["] = tableColor
   colorTable["]"] = tableColor
-  
+
   local arithmeticColor = "|c00ff3333"
   colorTable["+"] = arithmeticColor
   colorTable["-"] = arithmeticColor
   colorTable["/"] = arithmeticColor
   colorTable["*"] = arithmeticColor
   colorTable[".."] = arithmeticColor
-  
+
   local logicColor1 = "|c00ff3333"
   colorTable["=="] = logicColor1
   colorTable["<"] = logicColor1
@@ -6915,30 +6935,30 @@ function WeakAuras.CreateFrame()
   colorTable[">"] = logicColor1
   colorTable[">="] = logicColor1
   colorTable["~="] = logicColor1
-  
+
   local logicColor2 = "|c004444ff"
   colorTable["and"] = logicColor2
   colorTable["or"] = logicColor2
   colorTable["not"] = logicColor2
-  
+
   colorTable[0] = "|r"
-  
+
   IndentationLib.enable(texteditorbox.editBox, colorTable, 4);
-  
+
   local texteditorCancel = CreateFrame("Button", nil, texteditor.frame, "UIPanelButtonTemplate");
   texteditorCancel:SetScript("OnClick", function() texteditor:CancelClose() end);
   texteditorCancel:SetPoint("BOTTOMRIGHT", -27, 13);
   texteditorCancel:SetHeight(20);
   texteditorCancel:SetWidth(100);
   texteditorCancel:SetText(L["Cancel"]);
-  
+
   local texteditorClose = CreateFrame("Button", nil, texteditor.frame, "UIPanelButtonTemplate");
   texteditorClose:SetScript("OnClick", function() texteditor:Close() end);
   texteditorClose:SetPoint("RIGHT", texteditorCancel, "LEFT", -10, 0)
   texteditorClose:SetHeight(20);
   texteditorClose:SetWidth(100);
   texteditorClose:SetText(L["Done"]);
-  
+
   local texteditorError = texteditor.frame:CreateFontString(nil, "OVERLAY");
   texteditorError:SetFont("Fonts\\FRIZQT__.TTF", 10)
   texteditorError:SetJustifyH("LEFT");
@@ -6946,7 +6966,7 @@ function WeakAuras.CreateFrame()
   texteditorError:SetTextColor(1, 0, 0);
   texteditorError:SetPoint("TOPLEFT", texteditorbox.frame, "BOTTOMLEFT", 5, 25);
   texteditorError:SetPoint("BOTTOMRIGHT", texteditorCancel, "TOPRIGHT");
-  
+
   function texteditor.Open(self, data, path, enclose, addReturn)
     self.data = data;
     self.path = path;
@@ -7023,7 +7043,7 @@ function WeakAuras.CreateFrame()
     end
     texteditorbox:SetFocus();
   end
-  
+
   function texteditor.CancelClose(self)
     texteditorbox.editBox:SetScript("OnTextChanged", self.oldOnTextChanged);
     texteditorbox:ClearFocus();
@@ -7032,7 +7052,7 @@ function WeakAuras.CreateFrame()
     frame.buttonsContainer.frame:Show();
     frame.window = "default";
   end
-  
+
   function texteditor.Close(self)
     if(self.data.controlledChildren) then
       for index, childId in pairs(self.data.controlledChildren) do
@@ -7052,17 +7072,17 @@ function WeakAuras.CreateFrame()
       end
       WeakAuras.Add(self.data);
     end
-    
+
     texteditorbox.editBox:SetScript("OnTextChanged", self.oldOnTextChanged);
     texteditorbox:ClearFocus();
     self.frame:Hide();
     frame.container.frame:Show();
     frame.buttonsContainer.frame:Show();
     frame.window = "default";
-    
+
     frame:RefreshPick();
   end
-  
+
   local buttonsContainer = AceGUI:Create("InlineGroup");
   buttonsContainer:SetWidth(170);
   buttonsContainer.frame:SetParent(frame);
@@ -7071,14 +7091,14 @@ function WeakAuras.CreateFrame()
   buttonsContainer.frame:SetPoint("right", container.frame, "left", -17);
   buttonsContainer.frame:Show();
   frame.buttonsContainer = buttonsContainer;
-  
+
   local loadProgress = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   loadProgress:SetPoint("TOP", buttonsContainer.frame, "TOP", 0, -4)
   loadProgress:SetText(L["Creating options: "].."0/0");
   frame.loadProgress = loadProgress;
-  
+
   local filterInput = CreateFrame("editbox", "WeakAurasFilterInput", buttonsContainer.frame, "InputBoxTemplate");
-  
+
   filterInput:SetAutoFocus(false);
   filterInput:SetScript("OnTextChanged", function(...) WeakAuras.SortDisplayButtons(filterInput:GetText()) end);
   filterInput:SetScript("OnEnterPressed", function(...) filterInput:ClearFocus() end);
@@ -7086,21 +7106,8 @@ function WeakAuras.CreateFrame()
   filterInput:SetWidth(150);
   filterInput:SetPoint("BOTTOMLEFT", buttonsContainer.frame, "TOPLEFT", 2, -18);
   filterInput:SetPoint("TOPLEFT", buttonsContainer.frame, "TOPLEFT", 2, -2);
-  -- Fix from page 181-182 of World of Warcraft Programming: A Guide and Reference for Creating WoW Addon by James Whitehead
-  -- @patch 6.0 compatibility quick fix
-  if MAX_NUM_TALENTS then
-  WeakAurasFilterInputMiddle:ClearAllPoints();
-  WeakAurasFilterInputMiddle:SetPoint("BOTTOMLEFT", WeakAurasFilterInputLeft, "BOTTOMRIGHT");
-  WeakAurasFilterInputMiddle:SetPoint("TOPRIGHT", WeakAurasFilterInputRight, "TOPLEFT");
-  -- 
-  WeakAurasFilterInputLeft:ClearAllPoints();
-  WeakAurasFilterInputLeft:SetPoint("bottomleft", filterInput, "bottomleft");
-  WeakAurasFilterInputLeft:SetPoint("topleft", filterInput, "topleft");
-  WeakAurasFilterInputRight:ClearAllPoints();
-  WeakAurasFilterInputRight:SetPoint("bottomright", filterInput, "bottomright");
-  WeakAurasFilterInputRight:SetPoint("topright", filterInput, "topright");
-  end
   filterInput:SetTextInsets(16, 0, 0, 0);
+
   local searchIcon = filterInput:CreateTexture(nil, "overlay");
   searchIcon:SetTexture("Interface\\Common\\UI-Searchbox-Icon");
   searchIcon:SetVertexColor(0.6, 0.6, 0.6);
@@ -7110,7 +7117,7 @@ function WeakAuras.CreateFrame()
   filterInput:SetFont("Fonts\\FRIZQT__.TTF", 10);
   frame.filterInput = filterInput;
   filterInput:Hide();
-  
+
   local filterInputClear = CreateFrame("BUTTON", nil, buttonsContainer.frame);
   frame.filterInputClear = filterInputClear;
   filterInputClear:SetWidth(12);
@@ -7120,7 +7127,7 @@ function WeakAuras.CreateFrame()
   filterInputClear:SetHighlightTexture("Interface\\BUTTONS\\UI-Panel-MinimizeButton-Highlight.blp");
   filterInputClear:SetScript("OnClick", function() filterInput:SetText(""); filterInput:ClearFocus() end);
   filterInputClear:Hide();
-  
+
   local buttonsScroll = AceGUI:Create("ScrollFrame");
   buttonsScroll:SetLayout("ButtonsScrollLayout");
   buttonsScroll.width = "fill";
@@ -7137,7 +7144,7 @@ function WeakAuras.CreateFrame()
     buttonsScroll:DoLayout();
   end
   frame.buttonsScroll = buttonsScroll;
-  
+
   function buttonsScroll:GetScrollPos()
     local status = self.status or self.localstatus;
     return status.offset, status.offset + self.scrollframe:GetHeight();
@@ -7157,7 +7164,7 @@ function WeakAuras.CreateFrame()
     local viewheight = self.scrollframe:GetHeight();
     local height = self.content:GetHeight();
     local move;
-    
+
     local viewtop = -1 * status.offset;
     local viewbottom = -1 * (status.offset + viewheight);
     if(top > viewtop) then
@@ -7167,18 +7174,18 @@ function WeakAuras.CreateFrame()
     else
       move = 0;
     end
-    
+
     status.offset = status.offset - move;
-    
+
     self.content:ClearAllPoints();
     self.content:SetPoint("TOPLEFT", 0, status.offset);
     self.content:SetPoint("TOPRIGHT", 0, status.offset);
-    
+
     status.scrollvalue = status.offset / ((height - viewheight) / 1000.0);
-    
+
     self:FixScroll();
   end
-  
+
   local moversizer = CreateFrame("FRAME", nil, frame);
   frame.moversizer = moversizer;
   moversizer:SetBackdrop({
@@ -7188,7 +7195,7 @@ function WeakAuras.CreateFrame()
   });
   moversizer:EnableMouse();
   moversizer:SetFrameStrata("HIGH");
-  
+
   moversizer.bl = CreateFrame("FRAME", nil, moversizer);
   moversizer.bl:EnableMouse();
   moversizer.bl:SetWidth(16);
@@ -7215,7 +7222,7 @@ function WeakAuras.CreateFrame()
     moversizer.bl.b:Hide();
   end
   moversizer.bl.Clear();
-  
+
   moversizer.br = CreateFrame("FRAME", nil, moversizer);
   moversizer.br:EnableMouse();
   moversizer.br:SetWidth(16);
@@ -7242,7 +7249,7 @@ function WeakAuras.CreateFrame()
     moversizer.br.b:Hide();
   end
   moversizer.br.Clear();
-  
+
   moversizer.tl = CreateFrame("FRAME", nil, moversizer);
   moversizer.tl:EnableMouse();
   moversizer.tl:SetWidth(16);
@@ -7269,7 +7276,7 @@ function WeakAuras.CreateFrame()
     moversizer.tl.t:Hide();
   end
   moversizer.tl.Clear();
-  
+
   moversizer.tr = CreateFrame("FRAME", nil, moversizer);
   moversizer.tr:EnableMouse();
   moversizer.tr:SetWidth(16);
@@ -7296,7 +7303,7 @@ function WeakAuras.CreateFrame()
     moversizer.tr.t:Hide();
   end
   moversizer.tr.Clear();
-  
+
   moversizer.l = CreateFrame("FRAME", nil, moversizer);
   moversizer.l:EnableMouse();
   moversizer.l:SetWidth(8);
@@ -7315,7 +7322,7 @@ function WeakAuras.CreateFrame()
     moversizer.l.l:Hide();
   end
   moversizer.l.Clear();
-  
+
   moversizer.b = CreateFrame("FRAME", nil, moversizer);
   moversizer.b:EnableMouse();
   moversizer.b:SetHeight(8);
@@ -7334,7 +7341,7 @@ function WeakAuras.CreateFrame()
     moversizer.b.b:Hide();
   end
   moversizer.b.Clear();
-  
+
   moversizer.r = CreateFrame("FRAME", nil, moversizer);
   moversizer.r:EnableMouse();
   moversizer.r:SetWidth(8);
@@ -7352,7 +7359,7 @@ function WeakAuras.CreateFrame()
     moversizer.r.r:Hide();
   end
   moversizer.r.Clear();
-  
+
   moversizer.t = CreateFrame("FRAME", nil, moversizer);
   moversizer.t:EnableMouse();
   moversizer.t:SetHeight(8);
@@ -7370,7 +7377,7 @@ function WeakAuras.CreateFrame()
     moversizer.t.t:Hide();
   end
   moversizer.t.Clear();
-  
+
   local mover = CreateFrame("FRAME", nil, moversizer);
   frame.mover = mover;
   mover:EnableMouse();
@@ -7386,15 +7393,15 @@ function WeakAuras.CreateFrame()
   mover.anchorPointIcon:SetWidth(16);
   mover.anchorPointIcon:SetHeight(16);
   mover.anchorPointIcon:SetTexCoord(0, 0.25, 0, 1);
-  
+
   local moverText = mover:CreateFontString(nil, "OVERLAY", "GameFontNormal");
   mover.text = moverText;
   moverText:Hide();
-  
+
   local sizerText = moversizer:CreateFontString(nil, "OVERLAY", "GameFontNormal");
   moversizer.text = sizerText;
   sizerText:Hide();
-  
+
   moversizer.ScaleCorners = function(self, width, height)
     local limit = math.min(width, height) + 16;
     local size = 16;
@@ -7410,13 +7417,13 @@ function WeakAuras.CreateFrame()
     moversizer.tl:SetWidth(size);
     moversizer.tl:SetHeight(size);
   end
-  
+
   moversizer.ReAnchor = function(self)
     if(mover.moving.region) then
       self:AnchorPoints(mover.moving.region, mover.moving.data);
     end
   end
-  
+
   moversizer.AnchorPoints = function(self, region, data)
     local xOff, yOff;
     mover.selfPoint, mover.anchor, mover.anchorPoint, xOff, yOff = region:GetPoint(1);
@@ -7435,7 +7442,7 @@ function WeakAuras.CreateFrame()
     moversizer:SetPoint("TOPRIGHT", mover, "TOPRIGHT", 8, 8);
     moversizer:ScaleCorners(region:GetWidth(), region:GetHeight());
   end
-  
+
   moversizer.SetToRegion = function(self, region, data)
     mover.moving.region = region;
     mover.moving.data = data;
@@ -7455,7 +7462,7 @@ function WeakAuras.CreateFrame()
     moversizer:SetPoint("BOTTOMLEFT", mover, "BOTTOMLEFT", -8, -8);
     moversizer:SetPoint("TOPRIGHT", mover, "TOPRIGHT", 8, 8);
     moversizer:ScaleCorners(region:GetWidth(), region:GetHeight());
-    
+
     mover.startMoving = function()
       WeakAuras.CancelAnimation("display", data.id, true, true, true, true, true);
       mover:ClearAllPoints();
@@ -7468,12 +7475,12 @@ function WeakAuras.CreateFrame()
       mover.isMoving = true;
       mover.text:Show();
     end
-    
+
     mover.doneMoving = function(self)
       region:StopMovingOrSizing();
       mover.isMoving = false;
       mover.text:Hide();
-      
+
       if(data.xOffset and data.yOffset) then
         local selfX, selfY = mover.selfPointIcon:GetCenter();
         local anchorX, anchorY = mover.anchorPointIcon:GetCenter();
@@ -7506,7 +7513,7 @@ function WeakAuras.CreateFrame()
       AceConfigDialog:Open("WeakAuras", container);
       WeakAuras.Animate("display", data.id, "main", data.animation.main, WeakAuras.regions[data.id].region, false, nil, true);
     end
-    
+
     if(data.parent and db.displays[data.parent] and db.displays[data.parent].regionType == "dynamicgroup") then
       mover:SetScript("OnMouseDown", nil);
       mover:SetScript("OnMouseUp", nil);
@@ -7514,7 +7521,7 @@ function WeakAuras.CreateFrame()
       mover:SetScript("OnMouseDown", mover.startMoving);
       mover:SetScript("OnMouseUp", mover.doneMoving);
     end
-    
+
     if(region:IsResizable()) then
       moversizer.startSizing = function(point)
         mover.isMoving = true;
@@ -7543,7 +7550,7 @@ function WeakAuras.CreateFrame()
           AceConfigDialog:Open("WeakAuras", container);
         end);
       end
-      
+
       moversizer.doneSizing = function()
         mover.isMoving = false;
         region:StopMovingOrSizing();
@@ -7562,7 +7569,7 @@ function WeakAuras.CreateFrame()
         mover:SetPoint(mover.selfPoint, mover.anchor, mover.anchorPoint, xOff, yOff);
         WeakAuras.Animate("display", data.id, "main", data.animation.main, WeakAuras.regions[data.id].region, false, nil, true);
       end
-      
+
       moversizer.bl:SetScript("OnMouseDown", function() moversizer.startSizing("BOTTOMLEFT") end);
       moversizer.bl:SetScript("OnMouseUp", moversizer.doneSizing);
       moversizer.bl:SetScript("OnEnter", moversizer.bl.Highlight);
@@ -7595,7 +7602,7 @@ function WeakAuras.CreateFrame()
       moversizer.l:SetScript("OnMouseUp", moversizer.doneSizing);
       moversizer.l:SetScript("OnEnter", moversizer.l.Highlight);
       moversizer.l:SetScript("OnLeave", moversizer.l.Clear);
-      
+
       moversizer.bl:Show();
       moversizer.b:Show();
       moversizer.br:Show();
@@ -7616,7 +7623,7 @@ function WeakAuras.CreateFrame()
     end
     moversizer:Show();
   end
-  
+
   local function EnsureTexture(self, texture)
     if(texture) then
       return texture;
@@ -7630,14 +7637,14 @@ function WeakAuras.CreateFrame()
       return ret;
     end
   end
-    
+
   mover:SetScript("OnUpdate", function(self, elaps)
     if(IsShiftKeyDown()) then
       self.goalAlpha = 0.1;
     else
       self.goalAlpha = 1;
     end
-    
+
     if(self.currentAlpha ~= self.goalAlpha) then
       self.currentAlpha = self.currentAlpha or self:GetAlpha();
       local newAlpha = (self.currentAlpha < self.goalAlpha) and self.currentAlpha + (elaps * 4) or self.currentAlpha - (elaps * 4);
@@ -7646,7 +7653,7 @@ function WeakAuras.CreateFrame()
       moversizer:SetAlpha(newAlpha);
       self.currentAlpha = newAlpha;
     end
-      
+
     local region = self.moving.region;
     local data = self.moving.data;
     if not(self.isMoving) then
@@ -7667,14 +7674,14 @@ function WeakAuras.CreateFrame()
       self.selfPointIcon:Show();
       self.anchorPointIcon:Show();
     end
-    
+
     local dX = selfX - anchorX;
     local dY = selfY - anchorY;
     local distance = sqrt(dX^2 + dY^2);
     local angle = atan2(dY, dX);
-    
+
     local numInterim = floor(distance/40);
-    
+
     for index, texture in pairs(self.interims) do
       texture:Hide();
     end
@@ -7686,7 +7693,7 @@ function WeakAuras.CreateFrame()
       self.interims[i]:SetPoint("CENTER", self.anchorPointIcon, "CENTER", x, y);
       self.interims[i]:Show();
     end
-    
+
     self.text:SetText(("(%.2f, %.2f)"):format(dX, dY));
     local midx = (distance / 2) * cos(angle);
     local midy = (distance / 2) * sin(angle);
@@ -7700,12 +7707,12 @@ function WeakAuras.CreateFrame()
     end
     self.text:SetPoint("CENTER", self.anchorPointIcon, "CENTER", midx, midy);
   end);
-  
+
   local newButton = AceGUI:Create("WeakAurasNewHeaderButton");
   newButton:SetText(L["New"]);
   newButton:SetClick(function() frame:PickOption("New") end);
   frame.newButton = newButton;
-  
+
   local numAddons = 0;
   for addon, addonData in pairs(WeakAuras.addons) do
     numAddons = numAddons + 1;
@@ -7717,7 +7724,7 @@ function WeakAuras.CreateFrame()
     addonsButton:SetClick(function() frame:PickOption("Addons") end);
     frame.addonsButton = addonsButton;
   end
-  
+
   local loadedButton = AceGUI:Create("WeakAurasLoadedHeaderButton");
   loadedButton:SetText(L["Loaded"]);
   loadedButton:Disable();
@@ -7774,7 +7781,7 @@ function WeakAuras.CreateFrame()
   end);
   loadedButton:SetViewDescription(L["Toggle the visibility of all loaded displays"]);
   frame.loadedButton = loadedButton;
-  
+
   local unloadedButton = AceGUI:Create("WeakAurasLoadedHeaderButton");
   unloadedButton:SetText(L["Not Loaded"]);
   unloadedButton:Disable();
@@ -7831,13 +7838,13 @@ function WeakAuras.CreateFrame()
   end);
   unloadedButton:SetViewDescription(L["Toggle the visibility of all non-loaded displays"]);
   frame.unloadedButton = unloadedButton;
-  
+
   frame.FillOptions = function(self, optionTable)
     AceConfig:RegisterOptionsTable("WeakAuras", optionTable);
     AceConfigDialog:Open("WeakAuras", container);
     container:SetTitle("");
   end
-  
+
   frame.ClearPicks = function(self, except)
     frame.pickedDisplay = nil;
     frame.pickedOption = nil;
@@ -7854,19 +7861,19 @@ function WeakAuras.CreateFrame()
     container:ReleaseChildren();
     self.moversizer:Hide();
   end
-  
+
   frame.PickOption = function(self, option)
     self:ClearPicks();
     self.moversizer:Hide();
     self.pickedOption = option;
     if(option == "New") then
       newButton:Pick();
-      
+
       local containerScroll = AceGUI:Create("ScrollFrame");
       containerScroll:SetLayout("flow");
       container:SetLayout("fill");
       container:AddChild(containerScroll);
-      
+
       for regionType, regionData in pairs(regionOptions) do
         local button = AceGUI:Create("WeakAurasNewButton");
         button:SetTitle(regionData.displayName);
@@ -7883,7 +7890,7 @@ function WeakAuras.CreateFrame()
             new_id = "New "..num;
             num = num + 1;
           end
-          
+
           local data = {
             id = new_id,
             regionType = regionType,
@@ -7896,12 +7903,13 @@ function WeakAuras.CreateFrame()
           };
           WeakAuras.Add(data);
           WeakAuras.NewDisplayButton(data);
+          WeakAuras.PickAndEditDisplay(new_id);
         end);
         containerScroll:AddChild(button);
       end
       local importButton = AceGUI:Create("WeakAurasNewButton");
       importButton:SetTitle(L["Import"]);
-      
+
       local data = {
         outline = false,
         color = {1, 1, 1, 1},
@@ -7920,35 +7928,35 @@ jNxtLgzEnLt
 LDNx051u25L
 tXmdmY4fDE5]];
       };
-      
+
       local thumbnail = regionOptions["text"].createThumbnail(UIParent);
       regionOptions["text"].modifyThumbnail(UIParent, thumbnail, data);
       thumbnail.mask:SetPoint("BOTTOMLEFT", thumbnail, "BOTTOMLEFT", 3, 3);
       thumbnail.mask:SetPoint("TOPRIGHT", thumbnail, "TOPRIGHT", -3, -3);
-      
+
       importButton:SetIcon(thumbnail);
       importButton:SetDescription(L["Import a display from an encoded string"]);
       importButton:SetClick(WeakAuras.ImportFromString);
       containerScroll:AddChild(importButton);
     elseif(option == "Addons") then
       frame.addonsButton:Pick();
-      
+
       local containerScroll = AceGUI:Create("ScrollFrame");
       containerScroll:SetLayout("AbsoluteList");
       container:SetLayout("fill");
       container:AddChild(containerScroll);
-      
+
       WeakAuras.CreateImportButtons();
       WeakAuras.SortImportButtons(containerScroll);
     else
       error("An options button other than New or Addons was selected... but there are no other options buttons!");
     end
   end
-  
+
   frame.PickDisplay = function(self, id)
     self:ClearPicks();
     local data = WeakAuras.GetData(id);
-    
+
     local function finishPicking()
       displayButtons[id]:Pick();
       self.pickedDisplay = id;
@@ -7971,7 +7979,7 @@ tXmdmY4fDE5]];
         end
       end
     end
-    
+
     local list = {};
     local num = 0;
     if(data.controlledChildren) then
@@ -7989,11 +7997,11 @@ tXmdmY4fDE5]];
       finishPicking();
     end
   end
-  
+
   frame.CenterOnPicked = function(self)
     if(self.pickedDisplay) then
       local centerId = type(self.pickedDisplay) == "string" and self.pickedDisplay or self.pickedDisplay.controlledChildren[1];
-      
+
       if(displayButtons[centerId]) then
         local _, _, _, _, yOffset = displayButtons[centerId].frame:GetPoint(1);
         if not yOffset then
@@ -8005,7 +8013,7 @@ tXmdmY4fDE5]];
       end
     end
   end
-  
+
   frame.PickDisplayMultiple = function(self, id)
     if not(self.pickedDisplay) then
       self:PickDisplay(id);
@@ -8030,7 +8038,7 @@ tXmdmY4fDE5]];
       end
     end
   end
-  
+
   frame.RefreshPick = function(self)
     if(type(self.pickedDisplay) == "string") then
       WeakAuras.EnsureOptions(self.pickedDisplay);
@@ -8040,12 +8048,12 @@ tXmdmY4fDE5]];
       self:FillOptions(displayOptions[tempGroup.id]);
     end
   end
-  
+
   frame:SetClampedToScreen(true);
   local w,h = frame:GetSize();
   local left,right,top,bottom = w/2,-w/2,0,h-25
   frame:SetClampRectInsets(left,right,top,bottom);
-  
+
   return frame;
 end
 
@@ -8074,7 +8082,7 @@ function WeakAuras.ConvertDisplay(data, newType)
   -- thumbnails[id].region:SetScript("OnUpdate", nil);
   thumbnails[id].region:Hide();
   thumbnails[id] = nil;
-  
+
   WeakAuras.Convert(data, newType);
   displayButtons[id]:SetViewRegion(WeakAuras.regions[id].region);
   displayButtons[id]:Initialize();
@@ -8098,10 +8106,6 @@ function WeakAuras.NewDisplayButton(data)
   WeakAuras.AddOption(id, data);
   WeakAuras.SetIconNames(data);
   WeakAuras.SortDisplayButtons();
-
-  frame:PickDisplay(id);
-
-  displayButtons[id].callbacks.OnRenameClick();
 end
 
 function WeakAuras.UpdateGroupOrders(data)
@@ -8126,7 +8130,7 @@ function WeakAuras.SortDisplayButtons(filter, overrideReset)
   end
   previousFilter = filter;
   filter = filter:lower();
-  
+
   wipe(frame.buttonsScroll.children);
   tinsert(frame.buttonsScroll.children, frame.newButton);
   if(frame.addonsButton) then
@@ -8197,7 +8201,7 @@ function WeakAuras.SortDisplayButtons(filter, overrideReset)
       end
     end
   end
-  
+
   tinsert(frame.buttonsScroll.children, frame.unloadedButton);
   local numUnloaded = 0;
   wipe(to_sort);
@@ -8253,7 +8257,7 @@ function WeakAuras.SortDisplayButtons(filter, overrideReset)
       end
     end
   end
-  
+
   frame.buttonsScroll:DoLayout();
   if(recenter) then
     frame:CenterOnPicked();
@@ -8294,6 +8298,11 @@ end
 
 function WeakAuras.PickDisplay(id)
   frame:PickDisplay(id);
+end
+
+function WeakAuras.PickAndEditDisplay(id)
+  frame:PickDisplay(id);
+  displayButtons[id].callbacks.OnRenameClick();
 end
 
 function WeakAuras.PickDisplayMultiple(id)
@@ -8353,7 +8362,7 @@ function WeakAuras.UpdateDisplayButton(data)
     else
       button:SetIcon("Interface\\Icons\\INV_Misc_QuestionMark");
     end
-    
+
   end
 end
 
@@ -8372,7 +8381,7 @@ function WeakAuras.SetThumbnail(data)
         local thumbnail, region;
         if(regionOptions[regionType].createThumbnail and regionOptions[regionType].modifyThumbnail) then
           if((not thumbnails[id]) or (not thumbnails[id].region) or thumbnails[id].regionType ~= regionType) then
-            thumbnail = regionOptions[regionType].createThumbnail(button.frame, regionTypes[regionType].create);        
+            thumbnail = regionOptions[regionType].createThumbnail(button.frame, regionTypes[regionType].create);
             thumbnails[id] = {
               regionType = regionType,
               region = thumbnail
@@ -8385,7 +8394,7 @@ function WeakAuras.SetThumbnail(data)
         else
           thumbnail = regionOptions[regionType].icon;
         end
-        
+
         return thumbnail;
       end
     else
@@ -8485,7 +8494,7 @@ function WeakAuras.ShowCloneDialog(data)
           new_id = "New "..num;
           num = num + 1;
         end
-        
+
         local parentData = {
           id = new_id,
           regionType = "dynamicgroup",
@@ -8494,23 +8503,23 @@ function WeakAuras.ShowCloneDialog(data)
         };
         WeakAuras.Add(parentData);
         WeakAuras.NewDisplayButton(parentData);
-        
+
         tinsert(parentData.controlledChildren, data.id);
         data.parent = parentData.id;
         WeakAuras.Add(parentData);
         WeakAuras.Add(data);
-        
+
         local button = WeakAuras.GetDisplayButton(data.id);
         button:SetGroup(parentData.id, true);
         button:SetGroupOrder(1, #parentData.controlledChildren);
-        
+
         local parentButton = WeakAuras.GetDisplayButton(parentData.id);
         parentButton.callbacks.UpdateExpandButton();
         WeakAuras.UpdateDisplayButton(parentData);
         WeakAuras.ReloadGroupRegionOptions(parentData);
         WeakAuras.SortDisplayButtons();
         parentButton:Expand();
-        
+
         pickonupdate = data.id;
       end,
       OnCancel = function()
@@ -8524,7 +8533,7 @@ function WeakAuras.ShowCloneDialog(data)
       timeout = 0,
       preferredindex = STATICPOPUP_NUMDIALOGS
     };
-    
+
     StaticPopup_Show("WEAKAURAS_CLONE_OPTION_ENABLED");
   end
 end
@@ -8540,7 +8549,7 @@ function WeakAuras.ShowSpellIDDialog(trigger, id)
         trigger.fullscan = true;
         trigger.use_spellId = true;
         trigger.spellId = id;
-        
+
         AceConfigDialog:Open("WeakAuras", frame.container);
       end,
       OnCancel = function()
@@ -8554,7 +8563,7 @@ function WeakAuras.ShowSpellIDDialog(trigger, id)
       timeout = 0,
       preferredindex = STATICPOPUP_NUMDIALOGS
     };
-    
+
     StaticPopup_Show("WEAKAURAS_SPELLID_CHECK");
   end
 end
@@ -8564,7 +8573,7 @@ do
   local frameChooserBox;
   local oldFocus;
   local oldFocusName;
-  
+
   function WeakAuras.StartFrameChooser(data, path)
     if not(frameChooserFrame) then
       frameChooserFrame = CreateFrame("frame");
@@ -8579,7 +8588,7 @@ do
       frameChooserBox:Hide();
     end
     local givenValue = valueFromPath(data, path);
-    
+
     frameChooserFrame:SetScript("OnUpdate", function()
       if(IsMouseButtonDown("RightButton")) then
         valueToPath(data, path, givenValue);
@@ -8589,10 +8598,10 @@ do
         WeakAuras.StopFrameChooser();
       else
         SetCursor("CAST_CURSOR");
-        
+
         local focus = GetMouseFocus();
         local focusName;
-        
+
         if(focus) then
           focusName = focus:GetName();
           if(focusName == "WorldFrame" or not focusName) then
@@ -8604,14 +8613,14 @@ do
               end
             end
           end
-          
+
           if(focus ~= oldFocus) then
             if(focusName) then
               frameChooserBox:SetPoint("bottomleft", focus, "bottomleft", -4, -4);
               frameChooserBox:SetPoint("topright", focus, "topright", 4, 4);
               frameChooserBox:Show();
             end
-            
+
             if(focusName ~= oldFocusName) then
               valueToPath(data, path, focusName);
               oldFocusName = focusName;
@@ -8620,14 +8629,14 @@ do
             oldFocus = focus;
           end
         end
-        
+
         if not(focusName) then
           frameChooserBox:Hide();
         end
       end
     end);
   end
-  
+
   function WeakAuras.StopFrameChooser()
     if(frameChooserFrame) then
       frameChooserFrame:SetScript("OnUpdate", nil);
@@ -8641,7 +8650,7 @@ do
   local importAddonButtons = {};
   local importDisplayButtons = {};
   WeakAuras.importDisplayButtons = importDisplayButtons;
-  
+
   local collisions = WeakAuras.collisions;
 
   function WeakAuras.CreateImportButtons()
@@ -8695,7 +8704,7 @@ do
                   childButton:SetGroup(groupId, data.regionType == "dynamicgroup");
                   childButton:SetGroupOrder(index, #data.controlledChildren);
                 end
-                
+
                 local button = WeakAuras.GetDisplayButton(groupId);
                 button.callbacks.UpdateExpandButton();
                 WeakAuras.UpdateDisplayButton(data);
@@ -8703,12 +8712,12 @@ do
               end
             end
           end
-          
+
           WeakAuras.ScanForLoads();
           WeakAuras.SortDisplayButtons();
         end);
       end);
-      
+
       local function UpdateAddonChecked()
         local shouldBeChecked = true;
         for id, data in pairs(addonData.displays) do
@@ -8719,19 +8728,19 @@ do
         end
         addonButton.checkbox:SetChecked(shouldBeChecked);
       end
-      
+
       local numAddonDisplays = 0;
       for id, data in pairs(addonData.displays) do
         if(data.controlledChildren) then
           numAddonDisplays = numAddonDisplays + 1;
           local groupButton = AceGUI:Create("WeakAurasImportButton");
           importDisplayButtons[id] = groupButton;
-          
+
           groupButton:SetTitle(id);
           groupButton:SetDescription(data.desc);
-          
+
           local numGroupDisplays = 0;
-          
+
           local function UpdateGroupChecked()
             local shouldBeChecked = true;
             for index, childId in pairs(data.controlledChildren) do
@@ -8743,20 +8752,20 @@ do
             groupButton.checkbox:SetChecked(shouldBeChecked);
             UpdateAddonChecked();
           end
-          
+
           for index, childId in pairs(data.controlledChildren) do
             numGroupDisplays = numGroupDisplays + 1;
             numAddonDisplays = numAddonDisplays + 1;
             local childButton = AceGUI:Create("WeakAurasImportButton");
             importDisplayButtons[childId] = childButton;
-            
+
             local data = WeakAuras.addons[addonName].displays[childId];
-            
+
             childButton:SetTitle(childId);
             childButton:SetDescription(data.desc);
             childButton:SetExpandVisible(false);
             childButton:SetLevel(3);
-            
+
             childButton:SetClick(function()
               if(childButton.checkbox:GetChecked()) then
                 WeakAuras.EnableAddonDisplay(childId);
@@ -8772,7 +8781,7 @@ do
             childButton.updateChecked = UpdateGroupChecked;
             childButton.checkbox:SetChecked(WeakAuras.IsDefinedByAddon(childId));
           end
-          
+
           groupButton:SetClick(function()
             if(groupButton.checkbox:GetChecked()) then
               WeakAuras.EnableAddonDisplay(id);
@@ -8797,13 +8806,13 @@ do
                   childButton:SetGroup(id, data.regionType == "dynamicgroup");
                   childButton:SetGroupOrder(index, #data.controlledChildren);
                 end
-                
+
                 local button = WeakAuras.GetDisplayButton(id);
                 button.callbacks.UpdateExpandButton();
                 WeakAuras.UpdateDisplayButton(data);
                 WeakAuras.ReloadGroupRegionOptions(data);
               end
-              
+
               WeakAuras.ScanForLoads();
               WeakAuras.SortDisplayButtons();
               UpdateAddonChecked();
@@ -8821,12 +8830,12 @@ do
           numAddonDisplays = numAddonDisplays + 1;
           local displayButton = AceGUI:Create("WeakAurasImportButton");
           importDisplayButtons[id] = displayButton;
-          
+
           displayButton:SetTitle(id);
           displayButton:SetDescription(data.desc);
           displayButton:SetExpandVisible(false);
           displayButton:SetLevel(2);
-          
+
           displayButton:SetClick(function()
             if(displayButton.checkbox:GetChecked()) then
               WeakAuras.EnableAddonDisplay(id);
@@ -8842,7 +8851,7 @@ do
           displayButton.checkbox:SetChecked(WeakAuras.IsDefinedByAddon(id));
         end
       end
-      
+
       addonButton:SetExpandVisible(true);
       if(numAddonDisplays > 0) then
         addonButton:EnableExpand();
@@ -8852,7 +8861,7 @@ do
       UpdateAddonChecked();
     end
   end
-  
+
   local container = nil;
   function WeakAuras.SortImportButtons(newContainer)
     container = newContainer or container;
@@ -8886,10 +8895,10 @@ do
         end
       end
     end
-    
+
     container:DoLayout();
   end
-  
+
   function WeakAuras.EnableAddonDisplay(id)
     if not(db.registered[id]) then
       local addon, data;
@@ -8901,7 +8910,7 @@ do
           break;
         end
       end
-      
+
       if(db.displays[id]) then
         -- ID collision
         collisions[id] = {addon, data};
@@ -8916,7 +8925,7 @@ do
       end
     end
   end
-  
+
   -- This function overrides the WeakAuras.CollisionResolved that is defined in WeakAuras.lua, ensuring that sidebar buttons are created properly after collision resolution
   function WeakAuras.CollisionResolved(addon, data, force)
     WeakAuras.EnableAddonDisplay(data.id);
@@ -8930,7 +8939,7 @@ do
       if(data.parent) then
         parentData = db.displays[data.parent];
       end
-      
+
       if(data.controlledChildren) then
         for index, childId in pairs(data.controlledChildren) do
           local childButton = displayButtons[childId];
@@ -8943,14 +8952,14 @@ do
           end
         end
       end
-      
+
       WeakAuras.Delete(data);
       WeakAuras.SyncParentChildRelationships(true);
       frame.buttonsScroll:DeleteChild(displayButtons[id]);
       thumbnails[id].region:Hide();
       thumbnails[id] = nil;
       displayButtons[id] = nil;
-      
+
       if(parentData and parentData.controlledChildren) then
         for index, childId in pairs(parentData.controlledChildren) do
           local childButton = displayButtons[childId];

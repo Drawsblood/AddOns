@@ -1,9 +1,10 @@
 
-
-
 local DF = _G ["DetailsFramework"]
-local _
+if (not DF or not DetailsFrameworkCanLoad) then
+	return 
+end
 
+local _
 local _rawset = rawset --> lua local
 local _rawget = rawget --> lua local
 local _setmetatable = setmetatable --> lua local
@@ -339,6 +340,10 @@ local NameLessSlider = 1
 
 		slider.thumb:SetAlpha (1)
 	
+		if (slider.MyObject.onenter_backdrop_border_color) then
+			slider:SetBackdropBorderColor (unpack (slider.MyObject.onenter_backdrop_border_color))
+		end
+	
 		if (slider.MyObject.have_tooltip and slider.MyObject.have_tooltip ~= "Right Click to Type the Value") then
 			GameCooltip2:Preset (2)
 			GameCooltip2:AddLine (slider.MyObject.have_tooltip)
@@ -349,14 +354,6 @@ local NameLessSlider = 1
 			GameCooltip2:AddIcon ([[Interface\TUTORIALFRAME\UI-TUTORIAL-FRAME]], 1, 1, 16, 16, 0.015625, 0.15671875, 0.640625, 0.798828125)
 			GameCooltip2:ShowCooltip (slider, "tooltip")
 		end
-		
-		local parent = slider:GetParent().MyObject
-		if (parent and parent.type == "panel") then
-			if (parent.GradientEnabled) then
-				parent:RunGradient()
-			end
-		end
-		
 	end
 	
 	local OnLeave = function (slider)
@@ -376,17 +373,12 @@ local NameLessSlider = 1
 		
 		slider.thumb:SetAlpha (.7)
 	
-		if (slider.MyObject.have_tooltip) then 
-			GameCooltip2:ShowMe (false)
+		if (slider.MyObject.onleave_backdrop_border_color) then
+			slider:SetBackdropBorderColor (unpack (slider.MyObject.onleave_backdrop_border_color))
 		end
-		
-		local parent = slider:GetParent().MyObject
-		if (parent and parent.type == "panel") then
-			if (parent.GradientEnabled) then
-				parent:RunGradient (false)
-			end
-		end
-		
+	
+		GameCooltip2:ShowMe (false)
+
 	end
 	
 
@@ -739,23 +731,35 @@ local SwitchOnClick = function (self, button, forced_value, value)
 	end
 
 	if (_rawget (slider, "value")) then --actived
-	
 		_rawset (slider, "value", false)
-		slider._text:SetText (slider._ltext)
-		slider._thumb:ClearAllPoints()
 		
-		slider:SetBackdropColor (1, 0, 0, 0.4)
-		slider._thumb:SetPoint ("left", slider.widget, "left")
-	
+		if (slider.backdrop_disabledcolor) then
+			slider:SetBackdropColor (unpack (slider.backdrop_disabledcolor))
+		else
+			slider:SetBackdropColor (1, 0, 0, 0.4)
+		end
+		
+		if (slider.is_checkbox) then
+			slider.checked_texture:Hide()
+		else
+			slider._text:SetText (slider._ltext)
+			slider._thumb:ClearAllPoints()
+			slider._thumb:SetPoint ("left", slider.widget, "left")
+		end
 	else
-	
 		_rawset (slider, "value", true)
-		slider._text:SetText (slider._rtext)
-		slider._thumb:ClearAllPoints()
-
-		slider:SetBackdropColor (0, 0, 1, 0.4)
-		slider._thumb:SetPoint ("right", slider.widget, "right")
-
+		if (slider.backdrop_enabledcolor) then
+			slider:SetBackdropColor (unpack (slider.backdrop_enabledcolor))
+		else
+			slider:SetBackdropColor (0, 0, 1, 0.4)
+		end
+		if (slider.is_checkbox) then
+			slider.checked_texture:Show()
+		else
+			slider._text:SetText (slider._rtext)
+			slider._thumb:ClearAllPoints()
+			slider._thumb:SetPoint ("right", slider.widget, "right")
+		end
 	end
 	
 	if (slider.OnSwitch and not forced_value) then
@@ -799,8 +803,13 @@ local switch_disable = function (self)
 		self.lock_texture:SetPoint ("center", self._thumb, "center")
 	end
 	
+	if (self.is_checkbox) then
+		self.checked_texture:Hide()
+	else
+		self._text:Hide()
+	end
+	
 	self.lock_texture:Show()
-	self._text:Hide()
 	self:SetAlpha (.4)
 	_rawset (self, "lockdown", true)
 end
@@ -811,21 +820,60 @@ local switch_enable = function (self)
 		self.lock_texture:SetPoint ("center", self._thumb, "center")
 	end
 	
+	if (self.is_checkbox) then
+		if (_rawget (self, "value")) then
+			self.checked_texture:Show()
+		else
+			self.checked_texture:Hide()
+		end
+	else
+		self._text:Show()
+	end
+	
 	self.lock_texture:Hide()
-	self._text:Show()
 	self:SetAlpha (1)
 	return _rawset (self, "lockdown", false)
 end
 
-function DF:CreateSwitch (parent, on_switch, default_value, w, h, ltext, rtext, member, name, color_inverted, switch_func, return_func, with_label)
-	local switch, label = DF:NewSwitch (parent, parent, name, member, w or 60, h or 20, ltext, rtext, default_value, color_inverted, switch_func, return_func, with_label)
+local set_as_checkbok = function (self)
+	local checked = self:CreateTexture (nil, "overlay")
+	checked:SetTexture ([[Interface\Buttons\UI-CheckBox-Check]])
+	checked:SetPoint ("center", self.button, "center", -1, -1)
+	local size_pct = self:GetWidth()/32
+	checked:SetSize (32*size_pct, 32*size_pct)
+	self.checked_texture = checked
+	
+	self._thumb:Hide()
+	self._text:Hide()
+	
+	self.is_checkbox = true
+	
+	if (_rawget (self, "value")) then
+		self.checked_texture:Show()
+		if (self.backdrop_enabledcolor) then
+			self:SetBackdropColor (unpack (self.backdrop_enabledcolor))
+		else
+			self:SetBackdropColor (0, 0, 1, 0.4)
+		end		
+	else
+		self.checked_texture:Hide()
+		if (self.backdrop_disabledcolor) then
+			self:SetBackdropColor (unpack (self.backdrop_disabledcolor))
+		else
+			self:SetBackdropColor (0, 0, 1, 0.4)
+		end
+	end
+end
+
+function DF:CreateSwitch (parent, on_switch, default_value, w, h, ltext, rtext, member, name, color_inverted, switch_func, return_func, with_label, switch_template, label_template)
+	local switch, label = DF:NewSwitch (parent, parent, name, member, w or 60, h or 20, ltext, rtext, default_value, color_inverted, switch_func, return_func, with_label, switch_template, label_template)
 	if (on_switch) then
 		switch.OnSwitch = on_switch
 	end
 	return switch, label
 end
 
-function DF:NewSwitch (parent, container, name, member, w, h, ltext, rtext, default_value, color_inverted, switch_func, return_func, with_label)
+function DF:NewSwitch (parent, container, name, member, w, h, ltext, rtext, default_value, color_inverted, switch_func, return_func, with_label, switch_template, label_template)
 
 --> early checks
 	if (not name) then
@@ -856,6 +904,8 @@ function DF:NewSwitch (parent, container, name, member, w, h, ltext, rtext, defa
 	slider.SetFixedParameter = switch_set_fixparameter
 	slider.Disable = switch_disable
 	slider.Enable = switch_enable
+	slider.SetAsCheckBox = set_as_checkbok
+	slider.SetTemplate = SliderMetaFunctions.SetTemplate
 	
 	if (member) then
 		parent [member] = slider
@@ -888,22 +938,96 @@ function DF:NewSwitch (parent, container, name, member, w, h, ltext, rtext, defa
 
 	slider.isSwitch = true
 	
+	if (switch_template) then
+		slider:SetTemplate (switch_template)
+	end
+	
 	if (with_label) then
 		local label = DF:CreateLabel (slider.widget, with_label, nil, nil, nil, "label", nil, "overlay")
 		label.text = with_label
 		slider.widget:SetPoint ("left", label.widget, "right", 2, 0)
 		with_label = label
+		
+		if (label_template) then
+			label:SetTemplate (label_template)
+		end
 	end
 
 	return slider, with_label
 end
 
-function DF:CreateSlider (parent, w, h, min, max, step, defaultv, isDecemal, member, name, with_label)
-	local slider, label = DF:NewSlider (parent, parent, name, member, w, h, min, max, step, defaultv, isDecemal, false, with_label)
+function SliderMetaFunctions:SetTemplate (template)
+
+	--slider e switch
+	if (template.width) then
+		self:SetWidth (template.width)
+	end
+	if (template.height) then
+		self:SetHeight (template.height)
+	end
+	
+	if (template.backdrop) then
+		self:SetBackdrop (template.backdrop)
+	end
+	if (template.backdropcolor) then
+		local r, g, b, a = DF:ParseColors (template.backdropcolor)
+		self:SetBackdropColor (r, g, b, a)
+	end
+	if (template.backdropbordercolor) then
+		local r, g, b, a = DF:ParseColors (template.backdropbordercolor)
+		self:SetBackdropBorderColor (r, g, b, a)
+		self.onleave_backdrop_border_color = {r, g, b, a}
+	end
+	
+	if (template.onenterbordercolor) then
+		local r, g, b, a = DF:ParseColors (template.onenterbordercolor)
+		self.onenter_backdrop_border_color = {r, g, b, a}
+	end
+	
+	if (template.onleavebordercolor) then
+		local r, g, b, a = DF:ParseColors (template.onleavebordercolor)
+		self.onleave_backdrop_border_color = {r, g, b, a}
+	end
+
+	if (template.thumbtexture) then
+		if (self.thumb) then
+			self.thumb:SetTexture (template.thumbtexture)
+		end
+	end
+	if (template.thumbwidth) then
+		if (self.thumb) then
+			self.thumb:SetWidth (template.thumbwidth)
+		end
+	end
+	if (template.thumbheight) then
+		if (self.thumb) then
+			self.thumb:SetHeight (template.thumbheight)
+		end
+	end
+	if (template.thumbcolor) then
+		if (self.thumb) then
+			local r, g, b, a = DF:ParseColors (template.thumbcolor)
+			self.thumb:SetVertexColor (r, g, b, a)
+		end
+	end
+	
+	--switch only
+	if (template.enabled_backdropcolor) then
+		local r, g, b, a = DF:ParseColors (template.enabled_backdropcolor)
+		self.backdrop_enabledcolor = {r, g, b, a}
+	end
+	if (template.disabled_backdropcolor) then
+		local r, g, b, a = DF:ParseColors (template.disabled_backdropcolor)
+		self.backdrop_disabledcolor = {r, g, b, a}
+	end
+end
+
+function DF:CreateSlider (parent, w, h, min, max, step, defaultv, isDecemal, member, name, with_label, slider_template, label_template)
+	local slider, label = DF:NewSlider (parent, parent, name, member, w, h, min, max, step, defaultv, isDecemal, false, with_label, slider_template, label_template)
 	return slider, label
 end
 
-function DF:NewSlider (parent, container, name, member, w, h, min, max, step, defaultv, isDecemal, isSwitch, with_label)
+function DF:NewSlider (parent, container, name, member, w, h, min, max, step, defaultv, isDecemal, isSwitch, with_label, slider_template, label_template)
 	
 --> early checks
 	if (not name) then
@@ -966,7 +1090,7 @@ function DF:NewSlider (parent, container, name, member, w, h, min, max, step, de
 		for funcName, funcAddress in pairs (idx) do 
 			if (not SliderMetaFunctions [funcName]) then
 				SliderMetaFunctions [funcName] = function (object, ...)
-					local x = loadstring ( "return _G."..object.slider:GetName()..":"..funcName.."(...)")
+					local x = loadstring ( "return _G['"..object.slider:GetName().."']:"..funcName.."(...)")
 					return x (...)
 				end
 			end
@@ -1032,6 +1156,14 @@ function DF:NewSlider (parent, container, name, member, w, h, min, max, step, de
 		label.text = with_label
 		SliderObject.slider:SetPoint ("left", label.widget, "right", 2, 0)
 		with_label = label
+		
+		if (label_template) then
+			label:SetTemplate (label_template)
+		end
+	end
+	
+	if (slider_template) then
+		SliderObject:SetTemplate (slider_template)
 	end
 	
 	return SliderObject, with_label

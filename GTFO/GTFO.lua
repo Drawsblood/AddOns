@@ -861,6 +861,12 @@ Change Log:
 	v4.37.3
 		- Added WoD spells for Hellfire Citadel
 		- Added WoD spells for Draenor (world)		
+	v4.37.4
+		- Added WoD spells for Hellfire Citadel
+		- Added WoD spells for Draenor (world)		
+	v4.37.5
+		- Added WoD spells for Hellfire Citadel
+		- Added WoD spells for Draenor (world)		
 		
 ]]--
 GTFO = {
@@ -878,8 +884,8 @@ GTFO = {
 		IgnoreOptions = { };
 		TrivialDamagePercent = 2; -- Minimum % of HP lost required for an alert to be trivial
 	};
-	Version = "4.37.3"; -- Version number (text format)
-	VersionNumber = 43703; -- Numeric version number for checking out-of-date clients
+	Version = "4.37.5"; -- Version number (text format)
+	VersionNumber = 43705; -- Numeric version number for checking out-of-date clients
 	DataLogging = nil; -- Indicate whether or not the addon needs to run the datalogging function (for hooking)
 	DataCode = "4"; -- Saved Variable versioning, change this value to force a reset to default
 	CanTank = nil; -- The active character is capable of tanking

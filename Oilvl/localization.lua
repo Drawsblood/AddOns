@@ -1,5 +1,10 @@
 OILVL_L = GetLocale() == "zhCN" and {
 	-- translated by olzenkhaw
+	["Set the amount of numbers past the decimal place to show"] = "设置小数点后显示几位数字",
+	["Show minimap button"]="显示小地图按钮",
+	["Vanquisher"]="胜利者",
+	["Protector"]="保卫者",
+	["Conqueror"]="征服者",
 	["Scale"] = "比例",
 	["Enable Sending Enchantment Reminder"] = "开启发送附魔提醒",
 	["Average"] = "平均",
@@ -16,6 +21,11 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Low level socketed"] = "低等级宝石",
 	
 } or GetLocale() == "ruRU" and {
+	["Set the amount of numbers past the decimal place to show"] = "Определяет количество отображаемых после запятой цифр",
+	["Show minimap button"]="Показывать кнопку у миникарты",
+	["Vanquisher"]="покорителя",
+	["Protector"]="защитника",
+	["Conqueror"]="завоевателя",
 	-- Translated by petpu
 	["Scale"] = "Масштаб",
 	["Enable Sending Enchantment Reminder"] = "Включить напоминание о недостающих зачарованиях",
@@ -34,6 +44,11 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Low level socketed"] = "Низкий уровень камня",
 	
 } or GetLocale() == "zhTW" and {
+	["Set the amount of numbers past the decimal place to show"] = "設置小數點後顯示幾位元數位",
+	["Show minimap button"]="顯示小地圖按鈕",
+	["Vanquisher"]="勝利者",
+	["Protector"]="保衛者",
+	["Conqueror"]="征服者",
 	-- translated by olzenkhaw
 	["Scale"] = "比例",
 	["Enable Sending Enchantment Reminder"] = "開啟發送附魔提醒",
@@ -51,6 +66,11 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Low level socketed"] = "低等級寶石",
 
 } or GetLocale() == "koKR" and {
+	["Set the amount of numbers past the decimal place to show"] = "좌표 표시의 소수점 자릿수를 선택합니다",
+	["Show minimap button"]="미니맵 버튼 표시",
+	["Vanquisher"]="제압자",
+	["Protector"]="수호자",
+	["Conqueror"]="정복자",
 	-- Translated by kisswow and yuk6196
 	["Scale"] = "크기",
 	["Enable Sending Enchantment Reminder"] = "누락 마법부여 알림 보내기 활성",
@@ -69,6 +89,11 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Low level socketed"] = "낮은 등급 보석 장착",
 	
 } or GetLocale() == "frFR" and {
+	["Set the amount of numbers past the decimal place to show"] = "Définit le nombre de chiffres à afficher après la virgule",
+	["Show minimap button"]="Bouton de la minicarte",
+	["Vanquisher"]="vainqueur",
+	["Protector"]="protecteur",
+	["Conqueror"]="conquérant",
 	-- Translated by Protosama
 	["Enable Showing item level / raid progression on tooltips"] = "Voir le Niveau d'objet / Progression en raid dans l'infobulle",
 	["Enable Showing Raid Progression Details on tooltips"] = "Voir les détails de la Progression en raid dans l'infobulle",
@@ -80,8 +105,18 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Average Item Level"] = "Niveau d'objet moyen",
 	["Item Level"] = "Niveau d'objet",
 	["Export"] = "Exporter",
+	-- Translated by loahn
+	["Not enchanted"] = "Non enchanté",
+	["Not socketed"] = "Non gemmé",
+	["Low level enchanted"] = "Enchantement de bas niveau",
+	["Low level socketed"] = "Gemme de bas niveau",
 	
 } or GetLocale() == "deDE" and {
+	["Set the amount of numbers past the decimal place to show"] = "Festlegen der Anzahl der Nachkommastellen",
+	["Show minimap button"]="Zeige Minimap-Button",
+	["Vanquisher"]="bezwingers",
+	["Protector"]="beschützers",
+	["Conqueror"]="roberers",
 	-- Translated by FireEmerald
 	["Enable Showing item level / raid progression on tooltips"] = "Item Level / Raidfortschritt im Tooltip anzeigen",
 	["Enable Showing Raid Progression Details on tooltips"] = "Detaillierte Informationen zum Raidfortschritt im Tooltip anzeigen",
@@ -99,6 +134,11 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Not socketed"] = "Nicht gesockelt",
 	
 } or GetLocale() == "ptBR" and {
+	["Set the amount of numbers past the decimal place to show"] = "Escolha o quanto de números além dos decimais serão mostrados",
+	["Show minimap button"]="Mostrar botão no mini-mapa",
+	["Vanquisher"]="Subjugador",
+	["Protector"]="Protetor",
+	["Conqueror"]="Conquistador",
 	-- Translated by Bombtrap
 	["Enable Showing item level / raid progression on tooltips"] = "Ativar mostrar item level / progressão de raide no painel",
 	["Enable Showing Raid Progression Details on tooltips"] = "Ativar mostrar detalhes da progressão de raide no painel",
@@ -110,8 +150,18 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Average Item Level"] = "Média de Item Level",
 	["Item Level"] = "Item Level",
 	["Export"] = "Exportar",
+	-- Translated by Gaxn
+	["Not enchanted"] = "Não encantado",
+	["Not socketed"] = "Não engastado",
+	["Low level enchanted"] = "Encantamento de level baixo",
+	["Low level socketed"] = "Engaste de level baixo",
 
-	} or GetLocale() == "esMX" and {
+} or GetLocale() == "esMX" and {
+	["Set the amount of numbers past the decimal place to show"] = "Establecer la cantidad de números más allá de la posición decimal para mostrar",
+	["Show minimap button"]="Mostrar botón minimapa",
+	["Vanquisher"]="vencedor",
+	["Protector"]="protector",
+	["Conqueror"]="conquistador",
 	-- Translated by BakuraExel
 	["Enable Showing item level / raid progression on tooltips"] = "Mostrar el nivel de objeto / Progreso en banda en la descripción emergente/tooltip",
 	["Enable Showing Raid Progression Details on tooltips"] = "Mostrar progreso en banda detallado en la descripción emergente/tooltip",
@@ -128,7 +178,12 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Low level enchanted"] = "Encanto menor",
 	["Low level socketed"] = "Gema menor",
 
-	} or GetLocale() == "esES" and {
+} or GetLocale() == "esES" and {
+	["Set the amount of numbers past the decimal place to show"] = "Establecer la cantidad de números más allá de la posición decimal para mostrar",
+	["Show minimap button"]="Mostrar botón minimapa",
+	["Vanquisher"]="vencedor",
+	["Protector"]="protector",
+	["Conqueror"]="conquistador",
 	-- Translated by BakuraExel
 	["Enable Showing item level / raid progression on tooltips"] = "Mostrar el nivel de objeto / Progreso en banda en la descripción emergente/tooltip",
 	["Enable Showing Raid Progression Details on tooltips"] = "Mostrar progreso en banda detallado en la descripción emergente/tooltip",
@@ -145,6 +200,29 @@ OILVL_L = GetLocale() == "zhCN" and {
 	["Low level enchanted"] = "Encanto menor",
 	["Low level socketed"] = "Gema menor",
 
-	} or { }
+} or GetLocale() == "itIT" and {
+	["Set the amount of numbers past the decimal place to show"] = "Mostra il numero di cifre decimali da mostrare",
+	["Show minimap button"]="Mostra il pulsante sulla minimappa",
+	["Vanquisher"]="dominatore",
+	["Protector"]="rotettore",
+	["Conqueror"]="conquistatore",
+	-- Translated by DocBerto65
+	["Enable Showing item level / raid progression on tooltips"] = "Visualizza livello oggetto / progressione incursioni nei tooltip",
+	["Enable Showing Raid Progression Details on tooltips"] = "Visualizza progresso incursioni dettagliato nei tooltip",
+	["Raid Progression Details"] = "Progresso Incursioni Dettagliato",
+	["Enable Sending Enchantment Reminder"] = "Abilita invio promemoria Incanto",
+	["Enable Showing Gear Item Level on Character Frame"] = "Visualizza livello equipaggiamento sul frame personaggio",
+	["Not enchanted"] = "Non incantato",
+	["Not socketed"] = "Gemma mancante",
+	["Low level enchanted"] = "Incantatatura di livello inferiore",
+	["Low level socketed"] = "Gemma di livello inferiore",
+	-- Translated by marcocio
+	["Average"] = "Medio",
+	["Scale"] = "Scala",
+	["Average Item Level"] = "Livello oggetto medio",
+	["Item Level"] = "Livello oggetto",
+	["Export"] = "Esporta",
+
+} or { }
 
 setmetatable(OILVL_L, {__index = function(self, key) rawset(self, key, key); return key; end})

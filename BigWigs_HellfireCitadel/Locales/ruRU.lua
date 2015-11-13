@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Hellfire Assault", "ruRU")
 if not L then return end
 if L then
@@ -45,7 +46,7 @@ L = BigWigs:NewBossLocale("Fel Lord Zakuun", "ruRU")
 if L then
 L["custom_off_seed_marker"] = "Маркировка Семени разрушения"
 L["custom_off_seed_marker_desc"] = "Отмечать цели Семени разрушения метками {rt1}{rt2}{rt3}{rt4}{rt5}, требуется быть помощником или лидером рейда."
-L["seed"] = "Семя (%d)"
+L["seed"] = "Семя"
 L["tank_proximity"] = "Радар танков"
 L["tank_proximity_desc"] = "Открытие радара близости в 5 метров с отображением других танков поможет справляться со способностями Тяжелая рука и Тяжелое вооружение."
 
@@ -59,21 +60,38 @@ end
 
 L = BigWigs:NewBossLocale("Mannoroth", "ruRU")
 if L then
+L["182212"] = "Портал инферналов закрыт!"
+L["185147"] = "Портал Владыки судеб закрыт!"
+L["185175"] = "Портал бесов скверны закрыт!"
+L["custom_off_doom_marker"] = "Маркировка Знака Рока"
+L["custom_off_doom_marker_desc"] = "На эпохальной сложности отмечает Знак Рока метками {rt1}{rt2}{rt3}, требуется быть помощником или лидером рейда."
 L["custom_off_gaze_marker"] = "Маркировка Взгляда Маннорота"
 L["custom_off_gaze_marker_desc"] = "Отмечать цели Взгляда Маннорота метками {rt1}{rt2}{rt3}, требуется быть помощником или лидером рейда."
-L["doomLord"] = "Портал Владыки судеб закрыт!"
+L["custom_off_wrath_marker"] = "Маркировка Гнева Гул'дана"
+L["custom_off_wrath_marker_desc"] = "Отмечать цели Гнева Гул'дана метками {rt8}{rt7}{rt6}{rt5}{rt4}, требуется быть помощником или лидером рейда."
 L["felseeker_message"] = "%s (%d) %dм"
 L["gaze"] = "Взгляд (%d)"
-L["imp"] = "Портал бесов скверны закрыт!"
-L["infernal"] = "Портал инферналов закрыт!"
 
 end
 
 L = BigWigs:NewBossLocale("Archimonde", "ruRU")
 if L then
 L["chaos_bar"] = "%s -> %s"
+L["chaos_from"] = "%s от %s"
+L["chaos_helper_message"] = "Ваша позиция во время Хаоса: %d"
+L["chaos_to"] = "%s к %s"
+L["custom_off_chaos_helper"] = "Помощник Устроенного Хаоса"
+L["custom_off_chaos_helper_desc"] = "Только для эпохальной сложности. Эта функция говорит какой номер хаоса вам присвоен, показывая вам обычное сообщение и отправляя номер в /сказать. В зависимости от тактики, которую вы используете, вы эта функция может быть, а может и не быть полезной."
+L["custom_off_infernal_marker"] = "Маркировка Инферналов"
+L["custom_off_infernal_marker_desc"] = "Отмечать Инферналов, появляющихся во время Ливня Хаоса, метками {rt1}{rt2}{rt3}{rt4}{rt5}, требуется быть помощником или лидером рейда."
+L["custom_off_legion_marker"] = "Маркировка Клейма Легиона"
+L["custom_off_legion_marker_desc"] = "Отмечать цели Клейма Легиона метками {rt1}{rt2}{rt3}{rt4}, требуется быть помощником или лидером рейда."
 L["custom_off_torment_marker"] = "Маркировка Скованного страдания"
 L["custom_off_torment_marker_desc"] = "Отмечать цели Скованного страдания метками {rt1}{rt2}{rt3}, требуется быть помощником или лидером рейда."
+L["infernal_count"] = "%s (%d/%d)"
+L["markofthelegion_self"] = "Клеймо Легиона на вас"
+L["markofthelegion_self_bar"] = "Вы взорветесь!"
+L["markofthelegion_self_desc"] = "Специальный отсчет когда Клеймо Легиона на вас."
 L["torment_removed"] = "Страдание снято (%d/%d)"
 
 end
@@ -94,6 +112,8 @@ L["kazrogal"] = "Каз'рогал"
 L["kuroh"] = "Адъюнкт Куро"
 L["orb"] = "Сфера разрушения"
 L["peacekeeper"] = "Голем-миротворец"
+L["talonpriest"] = "Оскверненный жрец Когтя"
+L["weaponlord"] = "Мастер оружия Мельхиор"
 
 end
 

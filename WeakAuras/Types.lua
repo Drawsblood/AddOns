@@ -140,6 +140,12 @@ WeakAuras.race_types = {
   Undead = LBR["Undead"]
 }
 
+WeakAuras.faction_group = {
+  Alliance = L["Alliance"],
+  Horde = L["Horde"],
+  Neutral = L["Neutral"],
+}
+
 WeakAuras.form_types = {};
 local function update_forms()
   wipe(WeakAuras.form_types);
@@ -390,8 +396,8 @@ local spec_frame = CreateFrame("frame");
 spec_frame:RegisterEvent("PLAYER_LOGIN")
 spec_frame:SetScript("OnEvent", update_specs);
 WeakAuras.talent_types = {}
-do  -- @patch 6.0 compatibility quick fix
-  local numTalents, numTiers, numColumns = _G.MAX_NUM_TALENTS or 21, _G.MAX_NUM_TALENT_TIERS or 7, _G.NUM_TALENT_COLUMNS or 3
+do
+  local numTalents, numTiers, numColumns = MAX_TALENT_TIERS * NUM_TALENT_COLUMNS, MAX_TALENT_TIERS, NUM_TALENT_COLUMNS
   local talentId,tier,column = 1,1,1
   while talentId <= numTalents do
     while tier <= numTiers do
@@ -1187,6 +1193,10 @@ for path, name in pairs(WeakAuras.sound_types) do
   end
 end
 ]=]
+
+-- register options font
+LSM:Register("font", "Fira Mono Medium", "Interface\\Addons\\WeakAuras\\Media\\Fonts\\FiraMono-Medium.ttf")
+
 local SharedMediaSounds = LSM:HashTable("sound");
 for name, path in pairs(SharedMediaSounds) do
   WeakAuras.sound_types[path] = name;

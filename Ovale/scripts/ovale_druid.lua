@@ -531,8 +531,8 @@ AddFunction FeralFinisherMainActions
 	if Energy() >= EnergyCost(ferocious_bite max=1) and target.HealthPercent() < 25 and target.DebuffPresent(rip_debuff) Spell(ferocious_bite)
 	#rip,cycle_targets=1,if=remains<7.2&persistent_multiplier>dot.rip.pmultiplier&target.time_to_die-remains>18
 	if target.DebuffRemaining(rip_debuff) < 7.2 and PersistentMultiplier(rip_debuff) > target.DebuffPersistentMultiplier(rip_debuff) and target.TimeToDie() - target.DebuffRemaining(rip_debuff) > 18 Spell(rip)
-	#rip,cycle_targets=1,if=remains<7.2&persistent_multiplier=dot.rip.pmultiplier&(energy.time_to_max<=1|!talent.bloodtalons.enabled)&target.time_to_die-remains>18
-	if target.DebuffRemaining(rip_debuff) < 7.2 and PersistentMultiplier(rip_debuff) == target.DebuffPersistentMultiplier(rip_debuff) and { TimeToMaxEnergy() <= 1 or not Talent(bloodtalons_talent) } and target.TimeToDie() - target.DebuffRemaining(rip_debuff) > 18 Spell(rip)
+	#rip,cycle_targets=1,if=remains<7.2&persistent_multiplier=dot.rip.pmultiplier&(energy.time_to_max<=1|(set_bonus.tier18_4pc&energy>50)|(set_bonus.tier18_2pc&buff.omen_of_clarity.react)|!talent.bloodtalons.enabled)&target.time_to_die-remains>18
+	if target.DebuffRemaining(rip_debuff) < 7.2 and PersistentMultiplier(rip_debuff) == target.DebuffPersistentMultiplier(rip_debuff) and { TimeToMaxEnergy() <= 1 or ArmorSetBonus(T18 4) and Energy() > 50 or ArmorSetBonus(T18 2) and BuffPresent(omen_of_clarity_melee_buff) or not Talent(bloodtalons_talent) } and target.TimeToDie() - target.DebuffRemaining(rip_debuff) > 18 Spell(rip)
 	#savage_roar,if=((set_bonus.tier18_4pc&energy>50)|(set_bonus.tier18_2pc&buff.omen_of_clarity.react)|energy.time_to_max<=1|buff.berserk.up|cooldown.tigers_fury.remains<3)&buff.savage_roar.remains<12.6
 	if { ArmorSetBonus(T18 4) and Energy() > 50 or ArmorSetBonus(T18 2) and BuffPresent(omen_of_clarity_melee_buff) or TimeToMaxEnergy() <= 1 or BuffPresent(berserk_cat_buff) or SpellCooldown(tigers_fury) < 3 } and BuffRemaining(savage_roar_buff) < 12.6 Spell(savage_roar)
 	#ferocious_bite,max_energy=1,if=(set_bonus.tier18_4pc&energy>50)|(set_bonus.tier18_2pc&buff.omen_of_clarity.react)|energy.time_to_max<=1|buff.berserk.up|cooldown.tigers_fury.remains<3
@@ -766,14 +766,14 @@ AddFunction GuardianDefaultMainActions
 	if BuffPresent(dream_of_cenarius_tank_buff) and HealthPercent() < 30 Spell(healing_touch)
 	#pulverize,if=buff.pulverize.remains<=3.6
 	if BuffRemaining(pulverize_buff) <= 3.6 and target.DebuffGain(lacerate_debuff) <= BaseDuration(lacerate_debuff) Spell(pulverize)
+	#mangle
+	Spell(mangle)
 	#lacerate,if=talent.pulverize.enabled&buff.pulverize.remains<=(3-dot.lacerate.stack)*gcd&buff.berserk.down
 	if Talent(pulverize_talent) and BuffRemaining(pulverize_buff) <= { 3 - target.DebuffStacks(lacerate_debuff) } * GCD() and BuffExpires(berserk_bear_buff) Spell(lacerate)
 	#lacerate,if=!ticking
 	if not target.DebuffPresent(lacerate_debuff) Spell(lacerate)
 	#thrash_bear,if=!ticking
 	if not target.DebuffPresent(thrash_bear_debuff) Spell(thrash_bear)
-	#mangle
-	Spell(mangle)
 	#thrash_bear,if=remains<=4.8
 	if target.DebuffRemaining(thrash_bear_debuff) <= 4.8 Spell(thrash_bear)
 	#lacerate
@@ -823,7 +823,7 @@ AddFunction GuardianDefaultCdActions
 			#natures_vigil
 			Spell(natures_vigil)
 
-			unless BuffPresent(dream_of_cenarius_tank_buff) and HealthPercent() < 30 and Spell(healing_touch) or BuffRemaining(pulverize_buff) <= 3.6 and target.DebuffGain(lacerate_debuff) <= BaseDuration(lacerate_debuff) and Spell(pulverize) or Talent(pulverize_talent) and BuffRemaining(pulverize_buff) <= { 3 - target.DebuffStacks(lacerate_debuff) } * GCD() and BuffExpires(berserk_bear_buff) and Spell(lacerate)
+			unless BuffPresent(dream_of_cenarius_tank_buff) and HealthPercent() < 30 and Spell(healing_touch) or BuffRemaining(pulverize_buff) <= 3.6 and target.DebuffGain(lacerate_debuff) <= BaseDuration(lacerate_debuff) and Spell(pulverize) or Spell(mangle) or Talent(pulverize_talent) and BuffRemaining(pulverize_buff) <= { 3 - target.DebuffStacks(lacerate_debuff) } * GCD() and BuffExpires(berserk_bear_buff) and Spell(lacerate)
 			{
 				#incarnation,if=buff.berserk.down
 				if BuffExpires(berserk_bear_buff) Spell(incarnation_son_of_ursoc)

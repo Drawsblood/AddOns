@@ -5,6 +5,8 @@ local GetTime, GetRaidTargetIndex, SetRaidTarget, UnitName, SetRaidTargetIcon = 
 local VExRT = nil
 
 local module = ExRT.mod:New("MarksBar",ExRT.L.marksbar,nil,true)
+local ELib,L = ExRT.lib,ExRT.L
+
 module.db.perma = {}
 module.db.clearnum = -1
 module.db.iconsList = {
@@ -73,7 +75,7 @@ module.frame:SetScript("OnDragStop", function(self)
 	VExRT.MarksBar.Left = self:GetLeft()
 	VExRT.MarksBar.Top = self:GetTop()
 end)
-module.frame:SetBackdrop({bgFile = ExRT.mds.barImg})
+module.frame:SetBackdrop({bgFile = ExRT.F.barImg})
 module.frame:SetBackdropColor(0,0,0,0.8)
 module.frame:Hide()
 module:RegisterHideOnPetBattle(module.frame)
@@ -82,7 +84,7 @@ module.frame.edge = CreateFrame("Frame",nil,module.frame)
 --module.frame.edge:SetSize(368,32)
 module.frame.edge:SetPoint("TOPLEFT", 1, -1)
 module.frame.edge:SetPoint("BOTTOMRIGHT", -1, 1)
-module.frame.edge:SetBackdrop({bgFile = ExRT.mds.barImg,edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 6})
+module.frame.edge:SetBackdrop({bgFile = ExRT.F.barImg,edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 6})
 module.frame.edge:SetBackdropColor(0,0,0,0)
 module.frame.edge:SetBackdropBorderColor(0.6,0.6,0.6,1)
 
@@ -133,7 +135,7 @@ module.frame.edges[1] = CreateEdge(1,4)
 
 module.frame.markbuts = {}
 do
-	local markbuts_backdrop = {bgFile = ExRT.mds.barImg,edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 8}
+	local markbuts_backdrop = {bgFile = ExRT.F.barImg,edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 8}
 	for i=1,8 do
 		local frame = CreateFrame("Frame",nil,module.frame)
 		module.frame.markbuts[i] = frame
@@ -165,7 +167,7 @@ module.frame.edges[2] = CreateEdge(2,228)
 module.frame.start = CreateFrame("Button",nil,module.frame)
 module.frame.start:SetSize(50,12)
 module.frame.start:SetPoint("TOPLEFT", module.frame.edges[2], 0, -4)
-module.frame.start:SetBackdrop({bgFile = ExRT.mds.barImg,edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 6})
+module.frame.start:SetBackdrop({bgFile = ExRT.F.barImg,edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 6})
 module.frame.start:SetBackdropColor(0,0,0,0)
 module.frame.start:SetBackdropBorderColor(0.4,0.4,0.4,1)
 module.frame.start:SetScript("OnEnter",function(self) 
@@ -182,16 +184,16 @@ module.frame.start:SetScript("OnClick", function(self)
 end)
 
 module.frame.start.html = module.frame.start:CreateFontString(nil,"ARTWORK")
-module.frame.start.html:SetFont(ExRT.mds.defFont, 10)
+module.frame.start.html:SetFont(ExRT.F.defFont, 10)
 module.frame.start.html:SetAllPoints()
 module.frame.start.html:SetJustifyH("CENTER")
-module.frame.start.html:SetText(ExRT.L.marksbarstart)
+module.frame.start.html:SetText(L.marksbarstart)
 module.frame.start.html:SetShadowOffset(1,-1)
 
 module.frame.del = CreateFrame("Button",nil,module.frame)
 module.frame.del:SetSize(50,12)
 module.frame.del:SetPoint("TOPLEFT", module.frame.edges[2], 0, -18)
-module.frame.del:SetBackdrop({bgFile = ExRT.mds.barImg,edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 6})
+module.frame.del:SetBackdrop({bgFile = ExRT.F.barImg,edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 6})
 module.frame.del:SetBackdropColor(0,0,0,0)
 module.frame.del:SetBackdropBorderColor(0.4,0.4,0.4,1)
 module.frame.del:SetScript("OnEnter",function(self) 
@@ -213,10 +215,10 @@ module.frame.del:SetScript("OnClick", function(self)
 end)
 
 module.frame.del.html = module.frame.del:CreateFontString(nil,"ARTWORK")
-module.frame.del.html:SetFont(ExRT.mds.defFont, 10)
+module.frame.del.html:SetFont(ExRT.F.defFont, 10)
 module.frame.del.html:SetAllPoints()
 module.frame.del.html:SetJustifyH("CENTER")
-module.frame.del.html:SetText(ExRT.L.marksbardel)
+module.frame.del.html:SetText(L.marksbardel)
 module.frame.del.html:SetShadowOffset(1,-1)
 
 module.frame.edges[3] = CreateEdge(3,383)
@@ -235,7 +237,7 @@ local function MainFrameWMOnEvent(self, event, ...)
 end
 
 do
-	local wmarksbuts_backdrop = {bgFile = "",edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 6}
+	local wmarksbuts_backdrop = {bgFile = "",edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 6}
 	for i=1,module.db.WMcount do
 		local frame = CreateFrame("Button","ExRT_MarksBar_WorldMarkers_Kind1_"..i,module.frame.wmarksbuts,"SecureActionButtonTemplate")	--FrameStack Fix
 		module.frame.wmarksbuts[i] = frame
@@ -268,12 +270,12 @@ module.frame.wmarksbuts.b = CreateFrame("Frame",nil,module.frame)
 module.frame.wmarksbuts.b:SetSize(123+19*(module.db.WMcount == 9 and 3 or 0),26)
 module.frame.wmarksbuts.b:SetPoint("TOPLEFT", module.frame,"BOTTOMLEFT",20, 3)
 module.frame.wmarksbuts.b:SetFrameLevel(0)
-module.frame.wmarksbuts.b:SetBackdrop({bgFile = ExRT.mds.barImg})
+module.frame.wmarksbuts.b:SetBackdrop({bgFile = ExRT.F.barImg})
 module.frame.wmarksbuts.b:SetBackdropColor(0,0,0,0.8)
 module.frame.wmarksbuts.b.t = CreateFrame("Frame",nil,module.frame.wmarksbuts.b)
 module.frame.wmarksbuts.b.t:SetPoint("BOTTOMRIGHT", -1, 1)
 module.frame.wmarksbuts.b.t:SetPoint("TOPLEFT", 1, -1)
-module.frame.wmarksbuts.b.t:SetBackdrop({bgFile = ExRT.mds.barImg,edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 6})
+module.frame.wmarksbuts.b.t:SetBackdrop({bgFile = ExRT.F.barImg,edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 6})
 module.frame.wmarksbuts.b.t:SetBackdropColor(0,0,0,0)
 module.frame.wmarksbuts.b.t:SetBackdropBorderColor(0.6,0.6,0.6,1)
 local function MainFrameWMKind2OnEnter(self)
@@ -318,7 +320,7 @@ module.frame.edges[4] = CreateEdge(4,325)
 module.frame.readyCheck = CreateFrame("Button",nil,module.frame)
 module.frame.readyCheck:SetSize(40,12)
 module.frame.readyCheck:SetPoint("TOPLEFT",module.frame.edges[4],0,-4)
-module.frame.readyCheck:SetBackdrop({bgFile = ExRT.mds.barImg,edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 6})
+module.frame.readyCheck:SetBackdrop({bgFile = ExRT.F.barImg,edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 6})
 module.frame.readyCheck:SetBackdropColor(0,0,0,0)
 module.frame.readyCheck:SetBackdropBorderColor(0.4,0.4,0.4,1)
 module.frame.readyCheck:SetScript("OnEnter",function(self) 
@@ -332,16 +334,16 @@ module.frame.readyCheck:SetScript("OnClick", function(self)
 end)
 
 module.frame.readyCheck.html = module.frame.readyCheck:CreateFontString(nil,"ARTWORK")
-module.frame.readyCheck.html:SetFont(ExRT.mds.defFont, 10)
+module.frame.readyCheck.html:SetFont(ExRT.F.defFont, 10)
 module.frame.readyCheck.html:SetAllPoints()
 module.frame.readyCheck.html:SetJustifyH("CENTER")
-module.frame.readyCheck.html:SetText(ExRT.L.marksbarrc)
+module.frame.readyCheck.html:SetText(L.marksbarrc)
 module.frame.readyCheck.html:SetShadowOffset(1,-1)
 
 module.frame.pull = CreateFrame("Button",nil,module.frame)
 module.frame.pull:SetSize(40,12)
 module.frame.pull:SetPoint("TOPLEFT",module.frame.edges[4],0, -18)
-module.frame.pull:SetBackdrop({bgFile = ExRT.mds.barImg,edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 6})
+module.frame.pull:SetBackdrop({bgFile = ExRT.F.barImg,edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 6})
 module.frame.pull:SetBackdropColor(0,0,0,0)
 module.frame.pull:SetBackdropBorderColor(0.4,0.4,0.4,1)
 module.frame.pull:SetScript("OnEnter",function(self) 
@@ -351,14 +353,14 @@ module.frame.pull:SetScript("OnLeave", function(self)
 	self:SetBackdropBorderColor(0.4,0.4,0.4,1)
 end)
 module.frame.pull:SetScript("OnClick", function(self)    
-	ExRT.mds:DoPull(VExRT.MarksBar.pulltimer)
+	ExRT.F:DoPull(VExRT.MarksBar.pulltimer)
 end)
 
 module.frame.pull.html = module.frame.pull:CreateFontString(nil,"ARTWORK")
-module.frame.pull.html:SetFont(ExRT.mds.defFont, 10)
+module.frame.pull.html:SetFont(ExRT.F.defFont, 10)
 module.frame.pull.html:SetAllPoints()
 module.frame.pull.html:SetJustifyH("CENTER")
-module.frame.pull.html:SetText(ExRT.L.marksbarpull)
+module.frame.pull.html:SetText(L.marksbarpull)
 module.frame.pull.html:SetShadowOffset(1,-1)
 
 local function modifymarkbars()
@@ -366,7 +368,7 @@ local function modifymarkbars()
 	if not VExRT.MarksBar.Vertical then
 		--Horizontal
 		for i=1,8 do
-			mainFrame.markbuts[i]:SetPoint("TOPLEFT", mainFrame.edges[1], (i-1)*28, -4)		
+			mainFrame.markbuts[i]:SetPoint("TOPLEFT", mainFrame.edges[1], VExRT.MarksBar.MarksReverse and (8-i)*28 or (i-1)*28, -4)		
 		end
 		
 		mainFrame.start:SetSize(50,12)
@@ -463,7 +465,7 @@ local function modifymarkbars()
 	else
 		--Vertical
 		for i=1,8 do
-			mainFrame.markbuts[i]:SetPoint("TOPLEFT", mainFrame.edges[1], 4, -(i-1)*28)		
+			mainFrame.markbuts[i]:SetPoint("TOPLEFT", mainFrame.edges[1], 4, -( VExRT.MarksBar.MarksReverse and (8-i)*28 or (i-1)*28 ))		
 		end
 		
 		mainFrame.start:SetSize(26,12)
@@ -581,23 +583,25 @@ end
 function module.options:Load()
 	self:CreateTilte()
 
-	self.chkEnable = ExRT.lib.CreateCheckBox(self,nil,5,-30,ExRT.L.senable,VExRT.MarksBar.enabled,"/rt mb\n/rt mm",nil,"ExRTCheckButtonModernTemplate")
-	self.chkEnable.On = EnableMarksBar
-	self.chkEnable.Off = DisableMarksBar
-	
-	self.chkFix = ExRT.lib.CreateCheckBox(self,nil,5,-55,ExRT.L.messagebutfix,VExRT.MarksBar.Fix,nil,nil,"ExRTCheckButtonModernTemplate")
-	self.chkFix:SetScript("OnClick", function(self,event) 
+	self.chkEnable = ELib:Check(self,L.senable,VExRT.MarksBar.enabled):Point(5,-30):Tooltip("/rt mb\n/rt mm"):OnClick(function(self)
 		if self:GetChecked() then
-			VExRT.MarksBar.Fix = true
-			ExRT.mds.LockMove(module.frame,nil,nil,1)
+			EnableMarksBar()
 		else
-			VExRT.MarksBar.Fix = nil
-			ExRT.mds.LockMove(module.frame,true,nil,1)
+			DisableMarksBar()
 		end
 	end)
 	
-	self.chkVertical = ExRT.lib.CreateCheckBox(self,nil,5,-80,ExRT.L.MarksBarVertical,VExRT.MarksBar.Vertical,nil,nil,"ExRTCheckButtonModernTemplate")
-	self.chkVertical:SetScript("OnClick", function(self,event) 
+	self.chkFix = ELib:Check(self,L.messagebutfix,VExRT.MarksBar.Fix):Point(5,-55):OnClick(function(self)
+		if self:GetChecked() then
+			VExRT.MarksBar.Fix = true
+			ExRT.F.LockMove(module.frame,nil,nil,1)
+		else
+			VExRT.MarksBar.Fix = nil
+			ExRT.F.LockMove(module.frame,true,nil,1)
+		end
+	end)
+	
+	self.chkVertical = ELib:Check(self,L.MarksBarVertical,VExRT.MarksBar.Vertical):Point(5,-80):OnClick(function(self)
 		if self:GetChecked() then
 			VExRT.MarksBar.Vertical = true
 		else
@@ -606,8 +610,7 @@ function module.options:Load()
 		modifymarkbars()
 	end)
 	
-	self.chkDisableInRaid = ExRT.lib.CreateCheckBox(self,nil,5,-105,ExRT.L.MarksBarDisableInRaid,VExRT.MarksBar.DisableOutsideRaid,nil,nil,"ExRTCheckButtonModernTemplate")
-	self.chkDisableInRaid:SetScript("OnClick", function(self,event) 
+	self.chkDisableInRaid = ELib:Check(self,L.MarksBarDisableInRaid,VExRT.MarksBar.DisableOutsideRaid):Point(5,-105):OnClick(function(self)
 		if self:GetChecked() then
 			VExRT.MarksBar.DisableOutsideRaid = true
 			if VExRT.MarksBar.enabled then
@@ -621,10 +624,9 @@ function module.options:Load()
 		end
 	end)
 	
-	self.TabViewOptions = ExRT.lib.CreateOneTab(self,650,115,"TOP",0,-130,nil,true)
+	self.TabViewOptions = ELib:OneTab(self):Size(650,115):Point("TOP",0,-130)
 	
-	self.chkEnable1 = ExRT.lib.CreateCheckBox(self.TabViewOptions,nil,10,-10,ExRT.L.marksbarshowmarks,VExRT.MarksBar.Show[1],nil,nil,"ExRTCheckButtonModernTemplate")
-	self.chkEnable1:SetScript("OnClick", function(self,event) 
+	self.chkEnable1 = ELib:Check(self.TabViewOptions,L.marksbarshowmarks,VExRT.MarksBar.Show[1]):Point(10,-10):OnClick(function(self)
 		if self:GetChecked() then
 			VExRT.MarksBar.Show[1]=true
 		else
@@ -633,8 +635,16 @@ function module.options:Load()
 		modifymarkbars()
 	end)
 	
-	self.chkEnable2 = ExRT.lib.CreateCheckBox(self.TabViewOptions,nil,10,-35,ExRT.L.marksbarshowpermarks,VExRT.MarksBar.Show[2],nil,nil,"ExRTCheckButtonModernTemplate")
-	self.chkEnable2:SetScript("OnClick", function(self,event) 
+	self.reverseMarksOrderChk = ELib:Check(self.TabViewOptions,L.MarksBarReverse,VExRT.MarksBar.MarksReverse):Point(300,-10):OnClick(function(self)
+		if self:GetChecked() then
+			VExRT.MarksBar.MarksReverse = true
+		else
+			VExRT.MarksBar.MarksReverse = nil
+		end
+		modifymarkbars()
+	end)
+	
+	self.chkEnable2 = ELib:Check(self.TabViewOptions,L.marksbarshowpermarks,VExRT.MarksBar.Show[2]):Point(10,-35):OnClick(function(self)
 		if self:GetChecked() then
 			VExRT.MarksBar.Show[2]=true
 		else
@@ -643,8 +653,7 @@ function module.options:Load()
 		modifymarkbars()
 	end)
 	
-	self.chkEnable3 = ExRT.lib.CreateCheckBox(self.TabViewOptions,nil,10,-60,ExRT.L.marksbarshowfloor,VExRT.MarksBar.Show[3],nil,nil,"ExRTCheckButtonModernTemplate")
-	self.chkEnable3:SetScript("OnClick", function(self,event) 
+	self.chkEnable3 = ELib:Check(self.TabViewOptions,L.marksbarshowfloor,VExRT.MarksBar.Show[3]):Point(10,-60):OnClick(function(self)
 		if self:GetChecked() then
 			VExRT.MarksBar.Show[3]=true
 		else
@@ -654,26 +663,23 @@ function module.options:Load()
 	end)
 	
 	
-	self.chkEnable3kindhtml = ExRT.lib.CreateText(self.TabViewOptions,100,20,nil,300,-60,nil,"MIDDLE",nil,11,ExRT.L.marksbarWMView)
+	self.chkEnable3kindhtml = ELib:Text(self.TabViewOptions,L.marksbarWMView,11):Size(100,20):Point(300,-60)
 	
-	self.chkEnable3kind1 = ExRT.lib.CreateRadioButton(self.TabViewOptions,"TOPLEFT", 380, -63,"1",VExRT.MarksBar.wmKind,true)
-	self.chkEnable3kind1:SetScript("OnClick", function(self,event) 
+	self.chkEnable3kind1 = ELib:Radio(self.TabViewOptions,"1",VExRT.MarksBar.wmKind):Point(380,-63):OnClick(function(self) 
 		self:SetChecked(true)
 		module.options.chkEnable3kind2:SetChecked(false)
 		VExRT.MarksBar.wmKind = true
 		modifymarkbars()
 	end)
 	
-	self.chkEnable3kind2 = ExRT.lib.CreateRadioButton(self.TabViewOptions,"TOPLEFT", 420, -63,"2",not VExRT.MarksBar.wmKind,true)
-	self.chkEnable3kind2:SetScript("OnClick", function(self,event) 
+	self.chkEnable3kind2 = ELib:Radio(self.TabViewOptions,"2",not VExRT.MarksBar.wmKind):Point(420,-63):OnClick(function(self) 
 		self:SetChecked(true)
 		module.options.chkEnable3kind1:SetChecked(false)
 		VExRT.MarksBar.wmKind = nil
 		modifymarkbars()
 	end)
 	
-	self.chkEnable4 = ExRT.lib.CreateCheckBox(self.TabViewOptions,nil,10,-85,ExRT.L.marksbarshowrcpull,VExRT.MarksBar.Show[4],nil,nil,"ExRTCheckButtonModernTemplate")
-	self.chkEnable4:SetScript("OnClick", function(self,event) 
+	self.chkEnable4 = ELib:Check(self.TabViewOptions,L.marksbarshowrcpull,VExRT.MarksBar.Show[4]):Point(10,-85):OnClick(function(self)
 		if self:GetChecked() then
 			VExRT.MarksBar.Show[4]=true
 		else
@@ -682,17 +688,15 @@ function module.options:Load()
 		modifymarkbars()
 	end)
 	
-	self.SliderScale = ExRT.lib.CreateSlider(self,640,15,0,-290,5,200,ExRT.L.marksbarscale,VExRT.MarksBar.Scale or 100,"TOP",nil,true)
-	self.SliderScale:SetScript("OnValueChanged", function(self,event) 
+	self.SliderScale = ELib:Slider(self,L.marksbarscale):Size(640):Point("TOP",0,-290):Range(5,200):SetTo(VExRT.MarksBar.Scale or 100):OnChange(function(self,event) 
 		event = event - event%1
 		VExRT.MarksBar.Scale = event
-		ExRT.mds.SetScaleFix(module.frame,event/100)
+		ExRT.F.SetScaleFix(module.frame,event/100)
 		self.tooltipText = event
 		self:tooltipReload(self)
 	end)
 	
-	self.SliderAlpha = ExRT.lib.CreateSlider(self,640,15,0,-320,0,100,ExRT.L.marksbaralpha,VExRT.MarksBar.Alpha,"TOP",nil,true)
-	self.SliderAlpha:SetScript("OnValueChanged", function(self,event) 
+	self.SliderAlpha = ELib:Slider(self,L.marksbaralpha):Size(640):Point("TOP",0,-320):Range(0,100):SetTo(VExRT.MarksBar.Alpha or 100):OnChange(function(self,event) 
 		event = event - event%1
 		VExRT.MarksBar.Alpha = event
 		module.frame:SetAlpha(event/100)
@@ -701,15 +705,13 @@ function module.options:Load()
 	end)
 	
 	
-	self.htmlTimer = ExRT.lib.CreateText(self,150,20,nil,5,-250,nil,"MIDDLE",nil,11,ExRT.L.marksbartmr)
+	self.htmlTimer = ELib:Text(self,L.marksbartmr,11):Size(150,20):Point(5,-250)
 
-	self.editBoxTimer = ExRT.lib.CreateEditBox(self,120,20,nil,145,-250,nil,6,true,"ExRTInputBoxModernTemplate",VExRT.MarksBar.pulltimer or "10")
-	self.editBoxTimer:SetScript("OnTextChanged",function(self)
+	self.editBoxTimer = ELib:Edit(self,6,true):Size(120,20):Point(145,-250):Text(VExRT.MarksBar.pulltimer or "10"):OnChange(function(self)
 		VExRT.MarksBar.pulltimer = tonumber(self:GetText()) or 10
 	end)  
 	
-	self.ButtonToCenter = ExRT.lib.CreateButton(self,261,22,nil,5,-350,ExRT.L.MarksBarResetPos,nil,ExRT.L.MarksBarResetPosTooltip,"ExRTButtonModernTemplate")
-	self.ButtonToCenter:SetScript("OnClick",function()
+	self.ButtonToCenter = ELib:Button(self,L.MarksBarResetPos):Size(261,22):Point(5,-350):Tooltip(L.MarksBarResetPosTooltip):OnClick(function()
 		VExRT.MarksBar.Left = nil
 		VExRT.MarksBar.Top = nil
 
@@ -717,7 +719,7 @@ function module.options:Load()
 		module.frame:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
 	end) 
 	
-	self.shtml1 = ExRT.lib.CreateText(self,650,200,nil,5,-380,nil,"TOP",nil,12,ExRT.L.MarksBarHelp)
+	self.shtml1 = ELib:Text(self,L.MarksBarHelp,12):Size(650,200):Point(5,-380):Top()
 end
 
 function module.main:ADDON_LOADED()
@@ -739,7 +741,7 @@ function module.main:ADDON_LOADED()
 
 	VExRT.MarksBar.pulltimer = VExRT.MarksBar.pulltimer or 10
 
-	if VExRT.MarksBar.Fix then ExRT.mds.LockMove(module.frame,nil,nil,1) end
+	if VExRT.MarksBar.Fix then ExRT.F.LockMove(module.frame,nil,nil,1) end
 
 	if VExRT.MarksBar.Alpha then module.frame:SetAlpha(VExRT.MarksBar.Alpha/100) end
 	if VExRT.MarksBar.Scale then module.frame:SetScale(VExRT.MarksBar.Scale/100) end
@@ -767,7 +769,7 @@ function module:GroupRosterUpdate()
 	end
 end
 function module.main:GROUP_ROSTER_UPDATE()
-	ExRT.mds.ScheduleTimer(module.GroupRosterUpdate,1)
+	ExRT.F.ScheduleTimer(module.GroupRosterUpdate,1)
 end
 
 function module:slash(arg)

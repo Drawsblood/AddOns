@@ -17,3 +17,5 @@ cfg.oilvlcharilvl = true; -- Char Frame item level
 cfg.oilvlrpdetails = true; -- raid progression details
 cfg.oilvlgears = {}; -- players equipments
 cfg.oilvlcache = {}; -- cache
+cfg.oilvlminimapicon = true;
+cfg.oilvldp = 1; -- decimal places for item level

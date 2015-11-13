@@ -39,51 +39,58 @@ L["Display Options: 2/4"] = "图示配置: 2/4"
 L["Display Options 2/4 Text"] = "这里的配置, 只在 你应用了基于 光环, 物品, 法术的触发器之后才 可用."
 L["Display Options: 4/4"] = "图示配置: 4/4"
 L["Display Options 4/4 Text"] = "最后, 一个新的显示,  |cFFFFFFFF模型l|r , 允许你使用任意一个游戏文件中包含的3D 模型."
--- L["Dynamic Group Options: 2/4"] = ""
+L["Dynamic Group Options: 2/4"] = "动态群组选项：2/4" -- Needs review
 L["Dynamic Group Options 2/4 Text"] = [=[动态群组最大的改进是提供了一个新的 延伸 选项.
 选择 \"圆形布局\" 来看看效果.]=]
--- L["Dynamic Group Options: 3/4"] = ""
--- L["Dynamic Group Options 3/4 Text"] = ""
--- L["Dynamic Group Options: 4/4"] = ""
--- L["Dynamic Group Options 4/4 Text"] = ""
--- L["Finished"] = ""
--- L["Full-scan Auras: 2/10"] = ""
+L["Dynamic Group Options: 3/4"] = "动态群组选项：3/4" -- Needs review
+L["Dynamic Group Options 3/4 Text"] = [=[常数因子选项允许你控制环形组的增长方式。
+一个环形组能以固定间隔的方式增加半径以显示更多内容，其中在固定半径增长方式下，更多内容将使元素靠得更近。]=] -- Needs review
+L["Dynamic Group Options: 4/4"] = "动态群组选项：4/4" -- Needs review
+L["Dynamic Group Options 4/4 Text"] = [=[动态群组先可以利用剩余时间为它们的子元素排序了。
+没有剩余时间的元素可以放置在最上或者最下，取决于你选择了\"升序\"或者\"降序\".]=] -- Needs review
+L["Finished"] = "结束" -- Needs review
+L["Full-scan Auras: 2/10"] = "全扫描光环：2/10" -- Needs review
 L["Full-scan Auras 2/10 Text"] = "首先，启用完全扫描功能"
--- L["Full-scan Auras: 3/10"] = ""
--- L["Full-scan Auras 3/10 Text"] = ""
--- L["Full-scan Auras: 4/10"] = ""
--- L["Full-scan Auras 4/10 Text"] = ""
--- L["Full-scan Auras: 5/10"] = ""
--- L["Full-scan Auras 5/10 Text"] = ""
--- L["Group Auras 6/10"] = ""
--- L["Group Auras 6/10 Text"] = ""
--- L["Group Auras: 7/10"] = ""
--- L["Group Auras 7/10 Text"] = ""
--- L["Group Auras: 8/10"] = ""
+L["Full-scan Auras: 3/10"] = "全扫描光环：3/10" -- Needs review
+L["Full-scan Auras 3/10 Text"] = [=[|cFFFF0000自动克隆|r能够使用 \"%s\"选项了。
+这导致每个光环需要匹配新显示元素的参数。]=] -- Needs review
+L["Full-scan Auras: 4/10"] = "全扫描光环：4/10" -- Needs review
+L["Full-scan Auras 4/10 Text"] = "一个弹窗会提示你|cFFFF0000自动|r一般在动态群组里使用。" -- Needs review
+L["Full-scan Auras: 5/10"] = "全扫描光环：5/10" -- Needs review
+L["Full-scan Auras 5/10 Text"] = "禁用完整扫描来重启其他单位设定选项。" -- Needs review
+L["Group Auras 6/10"] = "群组光环：6/10" -- Needs review
+L["Group Auras 6/10 Text"] = "现在，选择群组进行单位设定。" -- Needs review
+L["Group Auras: 7/10"] = "群组光环：7/10" -- Needs review
+L["Group Auras 7/10 Text"] = [=[再说一次，|cFFFF0000自动克隆|r能够使用 \"%s\"选项了。
+每一个受到特定光环影响的团队成员都会创建一个新的显示项目，]=] -- Needs review
+L["Group Auras: 8/10"] = "群组光环：8/10" -- Needs review
 -- L["Group Auras 8/10 Text"] = ""
--- L["Home"] = ""
--- L["Multi-target Auras: 10/10"] = ""
+L["Home"] = "首页" -- Needs review
+L["Multi-target Auras: 10/10"] = "多目标光环：10/10" -- Needs review
 -- L["Multi-target Auras 10/10 Text"] = ""
--- L["Multi-target Auras: 9/10"] = ""
--- L["Multi-target Auras 9/10 Text"] = ""
--- L["New in 1.4:"] = ""
--- L["New in 1.4 Desc:"] = ""
--- L["New in 1.4 Desc Text"] = ""
+L["Multi-target Auras: 9/10"] = "多目标光环9/10" -- Needs review
+L["Multi-target Auras 9/10 Text"] = "最后，为单位选项选择\\\"多个目标\\\"" -- Needs review
+L["New in 1.4:"] = "1.4版的新功能：" -- Needs review
+L["New in 1.4 Desc:"] = "1.4版的新功能" -- Needs review
+L["New in 1.4 Desc Text"] = "参见WeakAuras 1.4版的新功能" -- Needs review
 -- L["New in 1.4 Finnished Text"] = ""
--- L["New in 1.4 Text1"] = ""
--- L["New in 1.4 Text2"] = ""
--- L["Previous"] = ""
--- L["Trigger Options: 1/4"] = ""
+L["New in 1.4 Text1"] = [=[1.4 版的|cFF8800FFWeakAuras|r提供了一下强大的新功能。
+这个向导提供了新功能的预览，并指明如何设置它们。]=] -- Needs review
+L["New in 1.4 Text2"] = "首先，为了演示，我们创建了一个新的元素。" -- Needs review
+L["Previous"] = "前一个" -- Needs review
+L["Trigger Options: 1/4"] = "触发器选项：1/4" -- Needs review
 -- L["Trigger Options 1/4 Text"] = ""
--- L["Trigger Options: 2/4"] = ""
+L["Trigger Options: 2/4"] = "触发器选项：2/4" -- Needs review
 -- L["Trigger Options 2/4 Text"] = ""
--- L["Trigger Options: 3/4"] = ""
+L["Trigger Options: 3/4"] = "触发器选项：3/4" -- Needs review
 -- L["Trigger Options 3/4 Text"] = ""
--- L["Trigger Options: 4/4"] = ""
+L["Trigger Options: 4/4"] = "触发器选项：4/4" -- Needs review
 -- L["Trigger Options 4/4 Text"] = ""
--- L["WeakAuras Tutorials"] = ""
--- L["Welcome"] = ""
--- L["Welcome Text"] = ""
+L["WeakAuras Tutorials"] = "WeakAuras 教程" -- Needs review
+L["Welcome"] = "欢迎" -- Needs review
+L["Welcome Text"] = [=[欢迎来到 |cFF8800FFWeakAuras|r 初学者教程.
+
+本教程会教您如何使用WeakAuras，并阐述基本配置选项。]=] -- Needs review
 
 
 

@@ -2,7 +2,7 @@
 local DF = _G ["DetailsFramework"]
 local _
 
-if (not DF) then -- or not DetailsFrameWorkLoadValid
+if (not DF or not DetailsFrameworkCanLoad) then
 	return 
 end
 
@@ -30,7 +30,6 @@ function DF:CreateAddOn (name, global_saved, global_table, options_table, broker
 		end
 		
 		if (broker) then
-			
 			local broker_click_function = broker.OnClick
 			if (not broker_click_function and options_table) then
 				broker_click_function = function()
@@ -50,7 +49,10 @@ function DF:CreateAddOn (name, global_saved, global_table, options_table, broker
 			if (databroker and broker.Minimap and global_table.Minimap) then
 				LibStub ("LibDBIcon-1.0"):Register (name, databroker, addon.db.profile.Minimap)
 			end
-			
+		end
+		
+		if (addon.OnInit) then
+			xpcall (addon.OnInit, geterrorhandler(), addon)
 		end
 		
 	end

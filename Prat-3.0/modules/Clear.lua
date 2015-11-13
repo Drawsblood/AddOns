@@ -97,8 +97,8 @@ L:AddLocale("deDE",
 	["Adds clear text slash commands (/clear)(/cls)(/clearall)(/clsall)."] = "Fügt \"Slash\"-Befehle zum Löschen von Text hinzu (/clear)(/cls)(/clsall).",
 	Clear = "Löschen",
 	Clearall = "Alles löschen",
-	["Clears all chat frames."] = "Alle Chat-Rahmen löschen.",
-	["Clears the current chat frame."] = "Löscht den aktuellen Chat-Rahmen.",
+	["Clears all chat frames."] = "Alle Chatfenster leeren",
+	["Clears the current chat frame."] = "Das aktuelle Chatfenster leeren.",
 }
 
 )

@@ -25,6 +25,7 @@ local bossCore, pluginCore
 -- Try to grab unhooked copies of critical loading funcs (hooked by some crappy addons)
 local GetCurrentMapAreaID = loader.GetCurrentMapAreaID
 local SetMapToCurrentZone = loader.SetMapToCurrentZone
+local SetMapByID = loader.SetMapByID
 local SendAddonMessage = loader.SendAddonMessage
 local GetAreaMapInfo = loader.GetAreaMapInfo
 local GetInstanceInfo = loader.GetInstanceInfo
@@ -106,7 +107,7 @@ local enablezones, enablemobs, enableyells = {}, {}, {}
 local monitoring = nil
 
 local function enableBossModule(module, noSync)
-	if not module:IsEnabled() and (not module.lastKill or (GetTime() - module.lastKill) > 150) then
+	if not module:IsEnabled() and (not module.lastKill or (GetTime() - module.lastKill) > (module.worldBoss and 5 or 150)) then
 		module:Enable()
 		if not noSync and not module.worldBoss then
 			module:Sync("EnableModule", module:GetName())

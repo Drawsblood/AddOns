@@ -1,9 +1,10 @@
 
-
-
 local DF = _G ["DetailsFramework"]
-local _
+if (not DF or not DetailsFrameworkCanLoad) then
+	return 
+end
 
+local _
 local _rawset = rawset --> lua locals
 local _rawget = rawget --> lua locals
 local _setmetatable = setmetatable --> lua locals
@@ -195,6 +196,10 @@ local APIBarFunctions
 		
 		_object.statusbar:SetStatusBarColor (_value1, _value2, _value3, _value4)
 		_object._texture.original_colors = {_value1, _value2, _value3, _value4}
+		_object.timer_texture:SetVertexColor (_value1, _value2, _value3, _value4)
+		
+		_object.timer_textureR:SetVertexColor (_value1, _value2, _value3, _value4)
+
 		return _object._texture:SetVertexColor (_value1, _value2, _value3, _value4)
 	end
 	--> icon
@@ -215,8 +220,12 @@ local APIBarFunctions
 		if (type (_value) == "table") then
 			local _value1, _value2 = _unpack (_value)
 			_object._texture:SetTexture (_value1)
+			_object.timer_texture:SetTexture (_value1)
+			_object.timer_textureR:SetTexture (_value1)
 			if (_value2) then
 				_object._texture:SetTexCoord (_unpack (_value2))
+				_object.timer_texture:SetTexCoord (_unpack (_value2))
+				_object.timer_textureR:SetTexCoord (_unpack (_value2))
 			end
 		else
 			if (_value:find ("\\")) then
@@ -225,8 +234,12 @@ local APIBarFunctions
 				local file = SharedMedia:Fetch ("statusbar", _value)
 				if (file) then
 					_object._texture:SetTexture (file)
+					_object.timer_texture:SetTexture (file)
+					_object.timer_textureR:SetTexture (file)
 				else
 					_object._texture:SetTexture (_value)
+					_object.timer_texture:SetTexture (_value)
+					_object.timer_textureR:SetTexture (_value)
 				end
 			end
 		end
@@ -503,47 +516,113 @@ local APIBarFunctions
 	
 	function BarMetaFunctions:OnTimerEnd()
 		if (self.OnTimerEndHook) then
-			local interrupt = self.OnTimerEndHook()
+			local interrupt = self.OnTimerEndHook (self)
 			if (interrupt) then
 				return
 			end
 		end
 		self.timer_texture:Hide()
+		self.timer_textureR:Hide()
 		self.div_timer:Hide()
 		self:Hide()
 		self.timer = false
 	end
 
+	function BarMetaFunctions:CancelTimerBar (no_timer_end)
+		if (not self.HasTimer) then
+			return
+		end
+		if (self.TimerScheduled) then
+			DF:CancelTimer (self.TimerScheduled)
+			self.TimerScheduled = nil
+		else
+			if (self.statusbar:GetScript ("OnUpdate")) then
+				self.statusbar:SetScript ("OnUpdate", nil)
+			end
+		end
+		self.righttext = ""
+		if (not no_timer_end) then
+			self:OnTimerEnd()
+		end
+	end
+
 	local OnUpdate = function (self, elapsed)
-		local timepct = (elapsed / self.tempo) * 100
-		self.c = self.c - (timepct*self.width/100)
+		--> percent of elapsed
+		local pct = abs (self.end_timer - GetTime() - self.tempo) / self.tempo
+		if (self.inverse) then
+			self.t:SetWidth (self.total_size * pct)
+		else
+			self.t:SetWidth (self.total_size * abs (pct-1))
+		end
+		
+		--> right text
 		self.remaining = self.remaining - elapsed
-		self.righttext:SetText (_math_floor (self.remaining))
-		self.timertexture:SetWidth (self.c)
-		if (self.c < 1) then
+		if (self.MyObject.RightTextIsTimer) then
+			self.righttext:SetText (DF:IntegerToTimer (self.remaining))
+		else
+			self.righttext:SetText (_math_floor (self.remaining))
+		end
+
+		if (pct >= 1) then
+			self.righttext:SetText ("")
 			self:SetScript ("OnUpdate", nil)
+			self.MyObject.HasTimer = nil
 			self.MyObject:OnTimerEnd()
 		end
 	end
 	
-	function BarMetaFunctions:SetTimer (tempo)
+	function BarMetaFunctions:SetTimer (tempo, end_at)
 
-		self.statusbar.width = self.statusbar:GetWidth()
-		self.statusbar.tempo = tempo
-		self.statusbar.remaining = tempo
-		self.statusbar.c = self.statusbar.width
+		if (end_at) then
+			self.statusbar.tempo = end_at - tempo
+			self.statusbar.remaining = end_at - GetTime()
+			self.statusbar.end_timer = end_at
+		else
+			self.statusbar.tempo = tempo
+			self.statusbar.remaining = tempo
+			self.statusbar.end_timer = GetTime() + tempo
+		end
+
+		self.statusbar.total_size = self.statusbar:GetWidth()
+		self.statusbar.inverse = self.BarIsInverse
 		
-		self.timer_texture:Show()
-		self.timer_texture:SetWidth (self.statusbar.width)
-		self.statusbar.t = self.timer_texture
-		self (1)
+		self (0)
 		
 		self.div_timer:Show()
 		self.background:Show()
+		self:Show()
+		
+		if (self.LeftToRight) then
+			self.timer_texture:Hide()
+			self.timer_textureR:Show()
+			self.statusbar.t = self.timer_textureR
+			self.timer_textureR:ClearAllPoints()
+			self.timer_textureR:SetPoint ("right", self.statusbar, "right")
+			self.div_timer:SetPoint ("left", self.timer_textureR, "left", -14, -1)
+		else
+			self.timer_texture:Show()
+			self.timer_textureR:Hide()
+			self.statusbar.t = self.timer_texture
+			self.timer_texture:ClearAllPoints()
+			self.timer_texture:SetPoint ("left", self.statusbar, "left")
+			self.div_timer:SetPoint ("left", self.timer_texture, "right", -16, -1)
+		end
+		
+		if (self.BarIsInverse) then
+			self.statusbar.t:SetWidth (1)
+		else
+			self.statusbar.t:SetWidth (self.statusbar.total_size)
+		end
 		
 		self.timer = true
 		
-		self.statusbar:SetScript ("OnUpdate", OnUpdate)
+		self.HasTimer = true
+		self.TimerScheduled = DF:ScheduleTimer ("StartTimeBarAnimation", 0.1, self)
+	end
+	
+	function DF:StartTimeBarAnimation (timebar)
+		timebar.TimerScheduled = nil
+		timebar.statusbar:SetScript ("OnUpdate", OnUpdate)
 	end
 	
 ------------------------------------------------------------------------------------------------------------
@@ -619,7 +698,7 @@ function DF:NewBar (parent, container, name, member, w, h, value, texture_name)
 			for funcName, funcAddress in pairs (idx) do 
 				if (not BarMetaFunctions [funcName]) then
 					BarMetaFunctions [funcName] = function (object, ...)
-						local x = loadstring ( "return _G."..object.statusbar:GetName()..":"..funcName.."(...)")
+						local x = loadstring ( "return _G['"..object.statusbar:GetName().."']:"..funcName.."(...)")
 						return x (...)
 					end
 				end
@@ -636,6 +715,9 @@ function DF:NewBar (parent, container, name, member, w, h, value, texture_name)
 		BarObject.timer_texture = _G [name .. "_timerTexture"]
 		BarObject.timer_texture:SetWidth (w)
 		BarObject.timer_texture:SetHeight (h)
+		
+		BarObject.timer_textureR = _G [name .. "_timerTextureR"]
+		BarObject.timer_textureR:Hide()
 		
 		BarObject._texture = _G [name .. "_statusbarTexture"]
 		BarObject.background = _G [name .. "_background"]
@@ -662,4 +744,4 @@ function DF:NewBar (parent, container, name, member, w, h, value, texture_name)
 		end
 		
 	return BarObject
-end
+end --endd

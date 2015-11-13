@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Hellfire Assault", "deDE")
 if not L then return end
 if L then
@@ -22,12 +23,12 @@ end
 
 L = BigWigs:NewBossLocale("Shadow-Lord Iskar", "deDE")
 if L then
-L["bindings_removed"] = "Bindungen entfernt (%d/3)" -- Needs review
+L["bindings_removed"] = "Bindungen entfernt (%d/3)"
 L["custom_off_binding_marker"] = "Dunkle Bindungen markieren"
-L["custom_off_binding_marker_desc"] = [=[Markiere die Dunklen Bindungen mit {rt1}{rt2}{rt3}{rt4}{rt5}{rt6}, benötigt Leiter oder Assistent.
+L["custom_off_binding_marker_desc"] = [=[Markiert die Dunklen Bindungen mit {rt1}{rt2}{rt3}{rt4}{rt5}{rt6}, benötigt Leiter oder Assistent.
 |cFFFF0000Nur eine Person im Raid sollte diese Option aktiviert haben, um Markierungskonflikte zu verhindern.|r]=]
 L["custom_off_wind_marker"] = "Imaginäre Winde markieren"
-L["custom_off_wind_marker_desc"] = [=[Markiere Imaginäre Winde mit {rt1}{rt2}{rt3}{rt4}{rt5}, benötigt Leiter oder Assistent.
+L["custom_off_wind_marker_desc"] = [=[Markiert Imaginäre Winde mit {rt1}{rt2}{rt3}{rt4}{rt5}, benötigt Leiter oder Assistent.
 |cFFFF0000Nur eine Person im Raid sollte diese Option aktiviert haben, um Markierungskonflikte zu verhindern.|r]=]
 
 end
@@ -44,10 +45,10 @@ end
 L = BigWigs:NewBossLocale("Fel Lord Zakuun", "deDE")
 if L then
 L["custom_off_seed_marker"] = "Saat der Zerstörung markieren"
-L["custom_off_seed_marker_desc"] = "Markiere die Ziele von Saat der Zerstörung mit {rt1}{rt2}{rt3}{rt4}{rt5}, benötigt Leiter oder Assistent."
-L["seed"] = "Saat (%d)"
+L["custom_off_seed_marker_desc"] = "Markiert die Ziele von Saat der Zerstörung mit {rt1}{rt2}{rt3}{rt4}{rt5}, benötigt Leiter oder Assistent."
+L["seed"] = "Saat"
 L["tank_proximity"] = "Näheanzeige für Tanks"
-L["tank_proximity_desc"] = "Öffne eine Näheanzeige, die andere Tanks im Abstand von maximal 15 Metern anzeigt, die Anzeige hilft dir mit der Grobschlächtig und der Schwer bewaffnet Fähigkeit umzugehen."
+L["tank_proximity_desc"] = "Öffnet eine Näheanzeige, die andere Tanks im Abstand von maximal 5 Metern anzeigt, die Anzeige hilft dir mit den Fähigkeiten \"Grobschlächtig\" und \"Schwer bewaffnet\" umzugehen."
 
 end
 
@@ -59,21 +60,38 @@ end
 
 L = BigWigs:NewBossLocale("Mannoroth", "deDE")
 if L then
+L["182212"] = "Höllenbestienportal geschlossen!"
+L["185147"] = "Verdammnislordportal geschlossen!"
+L["185175"] = "Wichtelportal geschlossen!"
+L["custom_off_doom_marker"] = "Mal der Verdammnis markieren"
+L["custom_off_doom_marker_desc"] = "Auf dem Schwierigkeitsgrad Mythisch, markiert die Ziele von Mal der Verdammnis mit {rt1}{rt2}{rt3}, benötigt Leiter oder Assistent."
 L["custom_off_gaze_marker"] = "Mannoroths Blick markieren"
-L["custom_off_gaze_marker_desc"] = "Markiere die Ziele von Mannoroths Blick mit {rt1}{rt2}{rt3}, benötigt Leiter oder Assistent."
-L["doomLord"] = "Verdammnislord Portal geschlossen!"
+L["custom_off_gaze_marker_desc"] = "Markiert die Ziele von Mannoroths Blick mit {rt1}{rt2}{rt3}, benötigt Leiter oder Assistent."
+L["custom_off_wrath_marker"] = "Gul'dans Zorn markieren"
+L["custom_off_wrath_marker_desc"] = "Markiert die Ziele von Gul'dans Zorn mit {rt8}{rt7}{rt6}{rt5}{rt4}, benötigt Leiter oder Assistent."
 L["felseeker_message"] = "%s (%d) %dm"
 L["gaze"] = "Blick (%d)"
-L["imp"] = "Wichtel Portal geschlossen!"
-L["infernal"] = "Höllenbestien Portal geschlossen!"
 
 end
 
 L = BigWigs:NewBossLocale("Archimonde", "deDE")
 if L then
 L["chaos_bar"] = "%s -> %s"
+L["chaos_from"] = "%s von %s"
+L["chaos_helper_message"] = "Deine Chaos-Position: %d" -- Needs review
+L["chaos_to"] = "%s auf %s"
+L["custom_off_chaos_helper"] = "Gestiftetes-Chaos-Helfer"
+L["custom_off_chaos_helper_desc"] = "Nur für den Schwierigkeitsgrad \"Mythisch\". Diese Funktion sagt dir welche Chaos-Nummer du bist, in dem es eine normale Nachricht anzeigt und es im Sagen-Channel ausgibt. Je nachdem, welche Taktik ihr verwendet, kann diese Funktion hilfreich oder nicht hilfreich sein" -- Needs review
+L["custom_off_infernal_marker"] = "Höllische Verdammnisbringer markieren"
+L["custom_off_infernal_marker_desc"] = "Markiert die höllischen Verdammnisbringer, die vom Chaosregen erzeugt werden, mit {rt1}{rt2}{rt3}{rt4}{rt5}, benötigt Leiter oder Assistent."
+L["custom_off_legion_marker"] = "Mal der Legion markieren"
+L["custom_off_legion_marker_desc"] = "Markiert die Ziele von Mal der Legion mit {rt1}{rt2}{rt3}{rt4}, benötigt Leiter oder Assistent."
 L["custom_off_torment_marker"] = "Gefesselte Pein markieren"
-L["custom_off_torment_marker_desc"] = "Markiere die Ziele von Gefesselte Pein mit {rt1}{rt2}{rt3}, benötigt Leiter oder Assistent."
+L["custom_off_torment_marker_desc"] = "Markiert die Ziele von Gefesselte Pein mit {rt1}{rt2}{rt3}, benötigt Leiter oder Assistent."
+L["infernal_count"] = "%s (%d/%d)"
+L["markofthelegion_self"] = "Mal der Legion auf dir"
+L["markofthelegion_self_bar"] = "Du explodierst!"
+L["markofthelegion_self_desc"] = "Spezieller Countdown, wenn das Mal der Legion auf dir ist."
 L["torment_removed"] = "Pein entfernt (%d/%d)"
 
 end
@@ -94,6 +112,8 @@ L["kazrogal"] = "Kaz'rogal"
 L["kuroh"] = "Adjunkt Kuroh"
 L["orb"] = "Sphäre der Zerstörung"
 L["peacekeeper"] = "Friedensbewahrerkonstrukt"
+L["talonpriest"] = "Verderbter Krallenpriester"
+L["weaponlord"] = "Waffenlord Mehlkhior"
 
 end
 

@@ -9,13 +9,10 @@ local UnitExists = UnitExists
 local GetPlayerMapPosition = GetPlayerMapPosition
 local UnitHealth = UnitHealth
 local GetNumGroupMembers = GetNumGroupMembers
-local GetPlayerFacing = GetPlayerFacing
 local UnitIsConnected = UnitIsConnected
 local UnitInRange = UnitInRange
 local UnitClass = UnitClass
-local GetRaidRosterInfo = GetRaidRosterInfo
 local GetUnitName = GetUnitName
-local tinsert = tinsert
 local GetSpellInfo = GetSpellInfo
 local UnitAffectingCombat = UnitAffectingCombat
 local InCombatLockdown = InCombatLockdown
@@ -32,21 +29,31 @@ local player_index = {}
 local unitids = {}
 local group_labels = {}
 local name_to_block = {}
+local unitid_to_block = {}
 local anzu_texture
 local player_class
 local block_backdrop_eye = {bgFile = [[Interface\RaidFrame\Raid-Bar-Hp-Fill]], tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0},
 edgeFile = "Interface\\AddOns\\IskarAssist\\border_2", edgeSize = 20}
-local iskar_version = "v0.13"
+local iskar_version = "v0.16.2"
 
 local iskar_encounter_id = 1788 --iskar
 local iskar_npcid = 90316 --iskar
 local hfc_map_id = 1448 --hfc
 
+local archimonde_encounter_id = 1799 --archimonde
+local shadowfel_warden_npcid = 91541 --shadowfel warden
+
 local is_kargath_test = false
 local isdebug = false
 
+local fel_conduit_save_position = CreateFrame ("frame", "IskarAssistFelConduitPos", UIParent)
+fel_conduit_save_position:SetPoint ("center", UIParent, "center", 0, 350)
+fel_conduit_save_position:SetMovable (true)
+fel_conduit_save_position:SetSize (1, 1)
+
 if (is_kargath_test) then
 	iskar_encounter_id =  1721 --kargath (testing) 
+	archimonde_encounter_id = 1721
 	--iskar_encounter_id =  1706 --butcher (testing)
 	--iskar_encounter_id =  1720 --brackenspore (testing)
 	iskar_npcid = 78714 --kargath (testing)
@@ -62,6 +69,7 @@ local frame_event = CreateFrame ("frame", "IskarAssistEvents", UIParent)
 frame_event:RegisterEvent ("ADDON_LOADED")
 frame_event:SetFrameStrata ("TOOLTIP")
 
+
 local sort_alphabetical = function (a, b)
 	return a < b
 end
@@ -76,6 +84,11 @@ local aura_phantasmal_corruption, rank, phantasmal_corruption_icon = GetSpellInf
 local aura_fel_bomb, rank, fel_bomb_icon = GetSpellInfo (181753) --Fel Bomb
 local aura_phantasmal_bomb, rank, phantasmal_bomb_icon = GetSpellInfo (179219) --Phantasmal Fel Bomb
 local aura_dark_bindings, rank, dark_bindings_icon = GetSpellInfo (185510) --Dark Bindings
+local aura_focused_chaos, rank, aura_focused_chaos_icon = GetSpellInfo (185014) -- focused chaos
+local spell_fel_conduit, rank, spell_fel_conduit_icon = GetSpellInfo (181827) --fel conduit
+local spell_fel_bomb, rank, spell_fel_bomb_icon = GetSpellInfo (179218) --phantasmal obliteration 
+
+local aura_radiance_of_anzu = GetSpellInfo (185239) --Radiance of Anzu
 
 local track_auras = {
 	[aura_phantasmal_wounds] = true,
@@ -116,12 +129,10 @@ local dispel_spells = {
 
 --> debug
 
-local OBJECT_TYPE_PLAYER = 0x00000400
-local AFFILIATION_GROUP = 0x00000007
-
 local config_table = {
 	profile = {
 		MainPanel = {},
+		MainPanel_strata = "DIALOG",
 		bartexture = "Iskar Serenity",
 		barwidth = 100,
 		barheight = 20,
@@ -141,6 +152,9 @@ local config_table = {
 		dispel_ready = false,
 		group_sorting = 3,
 		cooldown = false,
+		show_cooldown_bars = false,
+		archimonde_radar = false,
+		stack_count_anchor = "top",
 	}
 }
 local IKA = DF:CreateAddOn ("ShadowLordIskarAssist", "IskarAssistDB", config_table)
@@ -170,6 +184,7 @@ function IKA:CreateFrames (show_after_cretion)
 	
 	f.dead_cache = {}
 	f.player_blocks = {}
+	f.track_player_health = {}
 
 	f:SetSize (104, 100)
 	f:SetBackdrop ({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16, insets = {left = -1, right = -1, top = -1, bottom = -1}})
@@ -294,7 +309,7 @@ function IKA:CreateFrames (show_after_cretion)
 	end
 	
 	--> unit frame stuff
-	local do_block_changes = function (block, bartexture, barwidth, barheight, textfont, textsize, textshadow, right_side_debuffs, dispel_ready, barwidth_grid, barheight_grid)
+	local do_block_changes = function (block, bartexture, barwidth, barheight, textfont, textsize, textshadow, right_side_debuffs, dispel_ready, barwidth_grid, barheight_grid, stack_anchor)
 		--bar texture
 		local texture_file = SharedMedia:Fetch ("statusbar", bartexture)
 		block.block_texture:SetTexture (texture_file)
@@ -317,7 +332,7 @@ function IKA:CreateFrames (show_after_cretion)
 			
 			
 		end
-
+		
 		--text font
 		local fontfile = SharedMedia:Fetch ("font", textfont)
 		IKA:SetFontFace (block.playername, fontfile)
@@ -325,6 +340,20 @@ function IKA:CreateFrames (show_after_cretion)
 		IKA:SetFontSize (block.playername, textsize)
 		--text shadow
 		IKA:SetFontOutline (block.playername, textshadow)
+
+		block.stack_count:ClearAllPoints()
+		
+		if (stack_anchor == "top") then
+			block.stack_count:SetPoint ("center", block.playername, "center")
+			block.stack_count:SetPoint ("bottom", block.playername, "top", 0, 1)
+		elseif (stack_anchor == "bottom") then
+			block.stack_count:SetPoint ("center", block.playername, "center")
+			block.stack_count:SetPoint ("top", block.playername, "bottom", 0, -1)
+		elseif (stack_anchor == "left") then
+			block.stack_count:SetPoint ("right", block.playername, "left", -2, 0)
+		elseif (stack_anchor == "right") then
+			block.stack_count:SetPoint ("left", block.playername, "right", 2, 0)
+		end
 		
 		--cooldown side
 		local debuffs_blocks = block.debuffs
@@ -351,7 +380,7 @@ function IKA:CreateFrames (show_after_cretion)
 		end
 	end
 	
-	function f:SetPlayerBlockConfig (block, bartexture, barwidth, barheight, textfont, textsize, textshadow, right_side_debuffs, dispel_ready, barwidth_grid, barheight_grid)
+	function f:SetPlayerBlockConfig (block, bartexture, barwidth, barheight, textfont, textsize, textshadow, right_side_debuffs, dispel_ready, barwidth_grid, barheight_grid, stack_anchor)
 		local profile = IKA.db.profile
 		
 		--get and set values
@@ -379,12 +408,15 @@ function IKA:CreateFrames (show_after_cretion)
 		dispel_ready = dispel_ready or profile.dispel_ready
 		profile.dispel_ready = dispel_ready
 		
+		stack_anchor = stack_anchor or profile.stack_count_anchor
+		profile.stack_count_anchor = stack_anchor
+		
 		--change the blocks
 		if (block) then
-			do_block_changes (block, bartexture, barwidth, barheight, textfont, textsize, textshadow, right_side_debuffs, dispel_ready, barwidth_grid, barheight_grid)
+			do_block_changes (block, bartexture, barwidth, barheight, textfont, textsize, textshadow, right_side_debuffs, dispel_ready, barwidth_grid, barheight_grid, stack_anchor)
 		else
 			for i = 1, #f.player_blocks do
-				do_block_changes (f.player_blocks [i], bartexture, barwidth, barheight, textfont, textsize, textshadow, right_side_debuffs, dispel_ready, barwidth_grid, barheight_grid)
+				do_block_changes (f.player_blocks [i], bartexture, barwidth, barheight, textfont, textsize, textshadow, right_side_debuffs, dispel_ready, barwidth_grid, barheight_grid, stack_anchor)
 			end
 		end
 		
@@ -435,7 +467,7 @@ function IKA:CreateFrames (show_after_cretion)
 			local button = CreateFrame ("button", "IskarAssistBlock" .. #f.player_blocks, f, "SecureActionButtonTemplate")
 			button:SetPoint ("topleft", b, "topleft")
 			button:SetPoint ("bottomright", b, "bottomright")
-			button:SetFrameStrata ("tooltip")
+			button:SetFrameLevel (b:GetFrameLevel() + 4)
 			
 			button:SetAttribute ("type1", "macro")
 			button:SetAttribute ("type2", "spell")
@@ -450,9 +482,11 @@ function IKA:CreateFrames (show_after_cretion)
 		--
 		
 		--lower frame
-		local background_frame = CreateFrame ("frame", "IskarAssistBlockBackground" .. #f.player_blocks, b)
+		local background_frame = CreateFrame ("statusbar", "IskarAssistBlockBackground" .. #f.player_blocks, b)
 		background_frame:SetFrameLevel (b:GetFrameLevel()-1)
 		background_frame:SetAllPoints()
+		background_frame:SetMinMaxValues (0, 100)
+		b.statusbar = background_frame
 		--overlay frame
 		local overlay_frame = CreateFrame ("frame", "IskarAssistBlockOverlay" .. #f.player_blocks, b)
 		overlay_frame:SetFrameLevel (b:GetFrameLevel()+2)
@@ -462,7 +496,8 @@ function IKA:CreateFrames (show_after_cretion)
 		local texture = background_frame:CreateTexture (nil, "background")
 		texture:SetAllPoints()
 		texture:SetDrawLayer ("background", 1)
-		b.block_texture = texture		
+		background_frame:SetStatusBarTexture (texture)
+		b.block_texture = texture
 		local texture2 = background_frame:CreateTexture (nil, "background")
 		texture2:SetAllPoints()
 		texture2:SetDrawLayer ("background", 2)
@@ -497,6 +532,12 @@ function IKA:CreateFrames (show_after_cretion)
 		dead_overlay:Hide()
 		b.dead_overlay = dead_overlay
 		dead_overlay:SetDrawLayer ("artwork", 5)
+		
+		local stack_count = overlay_frame:CreateFontString (nil, "overlay", "GameFontNormal")
+		stack_count:SetPoint ("center", name, "center")
+		stack_count:SetPoint ("bottom", name, "top", 0, 1)
+		IKA:SetFontSize (stack_count, 14)
+		b.stack_count = stack_count
 		
 		--> outside debuffs
 		b.debuffs = {}
@@ -575,14 +616,24 @@ function IKA:CreateFrames (show_after_cretion)
 				debuff.cooldown:SetCooldown (0, 0, 0, 0)
 				debuff:Hide()
 			end
-		end
-		
-		for _, block in ipairs (f.player_blocks) do
+
 			for _, debuff in ipairs (block.inside_debuffs) do
 				debuff.cooldown:SetCooldown (0, 0, 0, 0)
 				debuff:Hide()
 			end
+			
+			block.dead_icon:Hide()
+			block.dead_overlay:Hide()
+			block.stack_count:Hide()
+			
+			if (block.unitid) then
+				f.dead_cache [block.unitid] = nil
+			end
+			
+			block.statusbar:SetValue (100)
 		end
+		
+		wipe (f.track_player_health)
 		
 		anzu_texture:Hide()
 	end
@@ -737,6 +788,7 @@ function IKA:CreateFrames (show_after_cretion)
 		end
 
 		block.name = playername
+		block.unitid = unitid
 		block:Show()
 	end
 	
@@ -779,9 +831,12 @@ function IKA:CreateFrames (show_after_cretion)
 		f:debug ("Building the unit frame...")
 		
 		f.schedule_sort = false
+		f:SetFrameStrata (IKA.db.profile.MainPanel_strata)
 		
 		f:ClearFrames()
 		wipe (allplayers)
+		wipe (unitid_to_block)
+		wipe (name_to_block)
 		
 		for i = 1, #f.player_blocks do
 			f.player_blocks[i]:Hide()
@@ -824,6 +879,7 @@ function IKA:CreateFrames (show_after_cretion)
 				--> update it
 				f:UpdatePlayerBlock (block, playername, unitid, i)
 				name_to_block [playername] = block
+				unitid_to_block [unitid] = block
 				
 				block:Show()
 				block:ClearAllPoints()
@@ -890,6 +946,7 @@ function IKA:CreateFrames (show_after_cretion)
 					--> update it
 					f:UpdatePlayerBlock (block, playername, unitid, block_index)
 					name_to_block [playername] = block
+					unitid_to_block [unitid] = block
 					
 					block_index = block_index + 1 --get block 2
 					last_block = block --the last block is this
@@ -956,6 +1013,7 @@ function IKA:CreateFrames (show_after_cretion)
 					--> update it
 					f:UpdatePlayerBlock (block, playername, unitid, block_index)
 					name_to_block [playername] = block
+					unitid_to_block [unitid] = block
 					
 					block_index = block_index + 1
 					last_block = block
@@ -1082,6 +1140,18 @@ function IKA:CreateFrames (show_after_cretion)
 		animation:Play()
 	end
 	
+	function f:SetStackCount (target_name, stack_amt)
+		local block = name_to_block [target_name]
+		if (block and type (stack_amt) == "number") then
+			if (stack_amt > 0) then
+				block.stack_count:SetText (stack_amt)
+				block.stack_count:Show()
+			else
+				block.stack_count:Hide()
+			end
+		end
+	end
+	
 	--> combatlog stuff
 	function f:SetAnzu (target_name)
 		local block = name_to_block [target_name]
@@ -1120,7 +1190,13 @@ function IKA:CreateFrames (show_after_cretion)
 		local debuff_block = grid_aura_index [spellname]
 		debuff_block = block.inside_debuffs [debuff_block]
 		
-		debuff_block:Show()
+		if (not debuff_block) then
+			return 
+			--print ("|cFFFFAA00Iskar Assist|r:", "debuff not found", spellname, spellid)
+			--"debuff not found Phantasmal Fel Bomb 179219"
+		end
+		
+		debuff_block:Show() --stan bug
 		
 		if (IKA.db.profile.cooldown) then
 			local _, _, icon, count, _, duration, expirationTime = UnitDebuff (target_name, spellname)
@@ -1133,6 +1209,12 @@ function IKA:CreateFrames (show_after_cretion)
 	function f:RemoveGridAura (block, target_name, spellname, spellid)
 		local debuff_block = grid_aura_index [spellname]
 		debuff_block = block.inside_debuffs [debuff_block]
+		
+		if (not debuff_block) then
+			return 
+			--print ("|cFFFFAA00Iskar Assist|r:", "debuff not found", spellname, spellid)
+		end
+		
 		debuff_block.cooldown:SetCooldown (0, 0, 0, 0)
 		debuff_block:Hide()
 	end
@@ -1141,8 +1223,8 @@ function IKA:CreateFrames (show_after_cretion)
 		if (applied) then
 			local block = name_to_block [target_name]
 			if (block) then
-				block:SetBackdrop ({edgeFile = "Interface\\AddOns\\IskarAssist\\border_2", edgeSize = 50})
-				block:SetBackdropBorderColor (206/255, 184/255, 253/255)
+				block:SetBackdrop ({edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 3})
+				block:SetBackdropBorderColor (146/255, 114/255, 183/255)
 			end
 		else
 			local block = name_to_block [target_name]
@@ -1159,6 +1241,13 @@ function IKA:CreateFrames (show_after_cretion)
 		
 			if (spellname == aura_dark_bindings) then
 				return f:SetAuraDarkBindings (target_name, true)
+			end
+			
+			if (spellname == aura_phantasmal_wounds) then
+				if (block.unitid) then
+					f.track_player_health [block.unitid] = true
+					block.statusbar:SetValue (UnitHealth (block.unitid)/UnitHealthMax (block.unitid)*100)
+				end
 			end
 		
 			if (IKA.db.profile.group_sorting == 3) then
@@ -1208,12 +1297,19 @@ function IKA:CreateFrames (show_after_cretion)
 
 	function f:RemoveAura (target_name, spellname, spellid)
 	
-		if (spellname == aura_dark_bindings) then
-			return f:SetAuraDarkBindings (target_name, false)
-		end
-	
 		local block = name_to_block [target_name]
 		if (block) then
+
+			if (spellname == aura_dark_bindings) then
+				return f:SetAuraDarkBindings (target_name, false)
+			end
+			
+			if (spellname == aura_phantasmal_wounds) then
+				if (block.unitid) then
+					f.track_player_health [block.unitid] = nil
+					block.statusbar:SetValue (100)
+				end
+			end
 		
 			if (IKA.db.profile.group_sorting == 3) then
 				return f:RemoveGridAura (block, target_name, spellname, spellid)
@@ -1250,26 +1346,153 @@ function IKA:CreateFrames (show_after_cretion)
 			end
 		end
 	end
+
+	--on update func
+	local fel_cooldown_on_update = function (self, elapsed)
+		local now = GetTime()
+		if (now > self.end_time) then
+			self:SetScript ("OnUpdate", nil)
+			self:Hide()
+			return
+		end
+		
+		self:SetValue (now)
+		self.time_left:SetText (format ("%.1f", self.end_time - now))
+	end
+	
+	--on move func
+	local fel_cooldown_mouse_down = function (self, button)
+		if (self.isMoving) then
+			return
+		end
+		fel_conduit_save_position:StartMoving() 
+		self.isMoving = true
+	end
+	local fel_cooldown_mouse_up = function (self, button) 
+		if (self.isMoving) then
+			fel_conduit_save_position:StopMovingOrSizing()
+			fel_conduit_save_position:SetUserPlaced (true)
+			self.isMoving = nil
+		end
+	end
+	
+	--set cooldown func
+	local fel_set_cooldown = function (self, heroic, normal, cancel)
+		if (cancel) then
+			self:SetScript ("OnUpdate", nil)
+			self:Hide()
+			return
+		end
+	
+		local name, type, difficulty, difficultyName, maxPlayers, playerDifficulty, isDynamicInstance, mapID, instanceGroupSize = GetInstanceInfo()
+
+		--heroic and mythic has 18s cooldown.
+		-- normal has 23s cooldown.
+		local cooldowntimer = normal --normal raid finder
+		if (difficulty == 15 or difficulty == 16) then --heroic mythic
+			cooldowntimer = heroic
+		end
+		
+		--print ("difficulty:",  difficulty, "cd timer:", cooldowntimer)
+		
+		local now = GetTime()
+		local min_value, max_value = now, now + cooldowntimer
+		self.end_time = max_value
+		self:SetMinMaxValues (min_value, max_value)
+		self:SetScript ("OnUpdate", fel_cooldown_on_update)
+		self:Show()
+	end	
+	
+	-- fel conduit
+	local fel_conduit_cooldown = CreateFrame ("StatusBar", "IskarAssistFelConduitCastBar", UIParent)
+	fel_conduit_cooldown:SetPoint ("center", fel_conduit_save_position, "center")
+	fel_conduit_cooldown:SetSize (300, 30)
+	fel_conduit_cooldown:SetMovable (true)
+	fel_conduit_cooldown:EnableMouse (true)
+	fel_conduit_cooldown:SetUserPlaced (true)
+	fel_conduit_cooldown:Hide()
+	fel_conduit_cooldown.SetBarCooldown = fel_set_cooldown
+	f.fel_conduit_cooldown = fel_conduit_cooldown
+	
+	fel_conduit_cooldown:SetScript ("OnMouseDown", fel_cooldown_mouse_down)
+	fel_conduit_cooldown:SetScript ("OnMouseUp", fel_cooldown_mouse_up)
+	fel_conduit_cooldown:SetBackdrop ({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
+	fel_conduit_cooldown:SetBackdropColor (0, 0, 0, 0.5)
+	
+	fel_conduit_cooldown.texture = fel_conduit_cooldown:CreateTexture (nil, "artwork")
+	fel_conduit_cooldown.texture:SetTexture ([[Interface\AddOns\IskarAssist\bar_serenity]])
+	fel_conduit_cooldown.texture:SetVertexColor (.5, 1, .5)
+	fel_conduit_cooldown:SetStatusBarTexture (fel_conduit_cooldown.texture)
+	
+	fel_conduit_cooldown.icon = fel_conduit_cooldown:CreateTexture (nil, "overlay")
+	fel_conduit_cooldown.icon:SetTexture (spell_fel_conduit_icon)
+	fel_conduit_cooldown.icon:SetPoint ("topright", fel_conduit_cooldown, "topleft")
+	fel_conduit_cooldown.icon:SetSize (30, 30)
+	fel_conduit_cooldown.text = fel_conduit_cooldown:CreateFontString (nil, "overlay", "GameFontNormal")
+	fel_conduit_cooldown.text:SetText (spell_fel_conduit .. " cooldown")
+	fel_conduit_cooldown.text:SetPoint ("left", fel_conduit_cooldown, "left", 2, 0)
+	fel_conduit_cooldown.time_left = fel_conduit_cooldown:CreateFontString (nil, "overlay", "GameFontNormal")
+	fel_conduit_cooldown.time_left:SetText ("0s")
+	fel_conduit_cooldown.time_left:SetPoint ("right", fel_conduit_cooldown, "right", -2, 0)
+	fel_conduit_cooldown.time_left:SetJustifyH ("right")
+	
+	--fel bomb
+	local fel_bomb_cooldown = CreateFrame ("StatusBar", "IskarAssistFelBombCastBar", UIParent)
+	fel_bomb_cooldown:SetPoint ("topleft", fel_conduit_cooldown, "bottomleft", 0, -1)
+	fel_bomb_cooldown:SetSize (300, 30)
+	fel_bomb_cooldown:SetMovable (true)
+	fel_bomb_cooldown:EnableMouse (true)
+	fel_bomb_cooldown:SetUserPlaced (true)
+	fel_bomb_cooldown:Hide()
+	fel_bomb_cooldown.SetBarCooldown = fel_set_cooldown
+	f.fel_bomb_cooldown = fel_bomb_cooldown
+
+	fel_bomb_cooldown:SetScript ("OnMouseDown", fel_cooldown_mouse_down)
+	fel_bomb_cooldown:SetScript ("OnMouseUp", fel_cooldown_mouse_up)
+	fel_bomb_cooldown:SetBackdrop ({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
+	fel_bomb_cooldown:SetBackdropColor (0, 0, 0, 0.5)
+
+	fel_bomb_cooldown.texture = fel_bomb_cooldown:CreateTexture (nil, "artwork")
+	fel_bomb_cooldown.texture:SetTexture ([[Interface\AddOns\IskarAssist\bar_serenity]])
+	fel_bomb_cooldown.texture:SetVertexColor (1, .5, .5)
+	fel_bomb_cooldown:SetStatusBarTexture (fel_bomb_cooldown.texture)
+	
+	fel_bomb_cooldown.icon = fel_bomb_cooldown:CreateTexture (nil, "overlay")
+	fel_bomb_cooldown.icon:SetTexture (spell_fel_bomb_icon)
+	fel_bomb_cooldown.icon:SetPoint ("topright", fel_bomb_cooldown, "topleft")
+	fel_bomb_cooldown.icon:SetSize (30, 30)
+	fel_bomb_cooldown.text = fel_bomb_cooldown:CreateFontString (nil, "overlay", "GameFontNormal")
+	fel_bomb_cooldown.text:SetText (spell_fel_bomb .. " cooldown")
+	fel_bomb_cooldown.text:SetPoint ("left", fel_bomb_cooldown, "left", 2, 0)
+	fel_bomb_cooldown.time_left = fel_bomb_cooldown:CreateFontString (nil, "overlay", "GameFontNormal")
+	fel_bomb_cooldown.time_left:SetText ("0s")
+	fel_bomb_cooldown.time_left:SetPoint ("right", fel_bomb_cooldown, "right", -2, 0)
+	fel_bomb_cooldown.time_left:SetJustifyH ("right")
 	
 	--f:RegisterEvent ("COMBAT_LOG_EVENT_UNFILTERED")
 
-	f:SetScript ("OnEvent", function (self, event, time, token, _, who_serial, who_name, who_flags, _, target_serial, target_name, target_flags, _, spellid, spellname, spellschool, buff_type, buff_name)
-		if (token == "SPELL_AURA_APPLIED" or token == "SPELL_AURA_REFRESH" or token == "SPELL_AURA_APPLIED_DOSE") then
-			if (spellname == aura_eyeanzu) then
+	f:SetScript ("OnEvent", function (self, event, time, token, _, who_serial, who_name, who_flags, _, target_serial, target_name, target_flags, _, spellid, spellname, spellschool, buff_type, dose_stack_count)
+		if (token == "SPELL_AURA_APPLIED" or token == "SPELL_AURA_REFRESH" or token == "SPELL_AURA_APPLIED_DOSE" or token == "SPELL_AURA_REMOVED_DOSE") then
+			
+			if (spellname == aura_radiance_of_anzu) then
+				f:SetStackCount (target_name, dose_stack_count or 1)
+			elseif (spellname == aura_eyeanzu) then
 				f:SetAnzu (target_name)
 			elseif (track_auras [spellname]) then
 				f:SetAura (target_name, spellname, spellid)
 			end
 			
 		elseif (token == "SPELL_AURA_REMOVED") then
-			if (spellname == aura_eyeanzu) then
+			if (spellname == aura_radiance_of_anzu) then
+				f:SetStackCount (target_name, 0)
+			elseif (spellname == aura_eyeanzu) then
 				f:RemoveAnzu (target_name)
 			elseif (track_auras [spellname]) then
 				f:RemoveAura (target_name, spellname, spellid)
 			end
 			
 		elseif (token == "SPELL_RESURRECT") then
-			if (bit.band (who_flags, AFFILIATION_GROUP) ~= 0) then
+			if (bit.band (who_flags, 0x00000007) ~= 0) then
 				local unitid = unitids [target_name]
 				if (unitid) then
 					if (not UnitIsDeadOrGhost (unitid)) then
@@ -1277,7 +1500,14 @@ function IKA:CreateFrames (show_after_cretion)
 					end
 				end
 			end
-			
+		
+		elseif (token == "SPELL_CAST_START") then
+			--if (spellname == spell_fel_conduit) then
+			--	return fel_conduit_cooldown:SetBarCooldown (15, 20)
+			--elseif (spellname == spell_fel_bomb) then
+			--	return fel_bomb_cooldown:SetBarCooldown (18, 23)
+			--end
+		
 		elseif (token == "SPELL_CAST_SUCCESS") then
 			if (dispel_spells [spellname] and f.dispell_ready) then
 				if (f.dispell_ready [who_name]) then
@@ -1288,8 +1518,21 @@ function IKA:CreateFrames (show_after_cretion)
 			end
 			
 		elseif (token == "UNIT_DIED") then
+		
+			if (target_serial) then
+				local npcid = select (6, strsplit ("-", target_serial))
+				if (npcid) then
+					if (tonumber (npcid) == shadowfel_warden_npcid) then
+						if (f) then
+							fel_conduit_cooldown:SetBarCooldown (nil, nil, true)
+							fel_bomb_cooldown:SetBarCooldown (nil, nil, true)						
+						end
+					end
+				end
+			end
+			
 			if (not UnitIsFeignDeath (target_name)) then
-				if (bit.band (target_flags, AFFILIATION_GROUP) ~= 0 and bit.band (target_flags, OBJECT_TYPE_PLAYER) ~= 0) then
+				if (bit.band (target_flags, 0x00000007) ~= 0 and bit.band (target_flags, 0x00000400) ~= 0) then
 					f:UnitDiedOrRessed (target_name, true)
 				end
 			end
@@ -1332,7 +1575,8 @@ function IKA:CreateFrames (show_after_cretion)
 	
 	local build_options_panel = function()
 		local options_frame = DF:CreateOptionsFrame ("IskarAssistOptionsPanel", "Iskar Assist", 1)
-		options_frame:SetHeight (260)
+		options_frame:SetHeight (300)
+		options_frame:SetWidth (520)
 		
 		--> options table
 		local set_bar_texture = function (_, _, value) 
@@ -1380,7 +1624,28 @@ function IKA:CreateFrames (show_after_cretion)
 		groupTable [2] = {value = 2, label = "Vertical (by groups)", iconsize = texture_icon_size, statusbar = texturePath, onclick = set_group_sort, icon = texture_icon, texcoord = texture_texcoord}
 		groupTable [3] = {value = 3, label = "Grid (by groups)", iconsize = texture_icon_size, statusbar = texturePath, onclick = set_group_sort, icon = texture_icon, texcoord = texture_texcoord}
 		---
-
+		local set_frame_strata = function (_, _, strata)
+			IKA.db.profile.MainPanel_strata = strata
+			f:SortGroups()
+		end
+		local strataTable = {}
+		strataTable [1] = {value = "BACKGROUND", label = "BACKGROUND", iconsize = texture_icon_size, statusbar = texturePath, onclick = set_frame_strata, icon = texture_icon, texcoord = texture_texcoord}
+		strataTable [2] = {value = "LOW", label = "LOW", iconsize = texture_icon_size, statusbar = texturePath, onclick = set_frame_strata, icon = texture_icon, texcoord = texture_texcoord}
+		strataTable [3] = {value = "MEDIUM", label = "MEDIUM", iconsize = texture_icon_size, statusbar = texturePath, onclick = set_frame_strata, icon = texture_icon, texcoord = texture_texcoord}
+		strataTable [4] = {value = "HIGH", label = "HIGH", iconsize = texture_icon_size, statusbar = texturePath, onclick = set_frame_strata, icon = texture_icon, texcoord = texture_texcoord}
+		strataTable [5] = {value = "DIALOG", label = "DIALOG", iconsize = texture_icon_size, statusbar = texturePath, onclick = set_frame_strata, icon = texture_icon, texcoord = texture_texcoord}
+		-- endd
+		
+		local set_stack_anchor = function (_, _, value)
+			IKA.db.profile.stack_count_anchor = value
+			f:SetPlayerBlockConfig()
+		end
+		local stackTable = {}
+		stackTable [1] = {value = "top", label = "TOP", iconsize = texture_icon_size, statusbar = texturePath, onclick = set_stack_anchor, icon = texture_icon, texcoord = texture_texcoord}
+		stackTable [2] = {value = "bottom", label = "BOTTOM", iconsize = texture_icon_size, statusbar = texturePath, onclick = set_stack_anchor, icon = texture_icon, texcoord = texture_texcoord}
+		stackTable [3] = {value = "left", label = "LEFT", iconsize = texture_icon_size, statusbar = texturePath, onclick = set_stack_anchor, icon = texture_icon, texcoord = texture_texcoord}
+		stackTable [4] = {value = "right", label = "RIGHT", iconsize = texture_icon_size, statusbar = texturePath, onclick = set_stack_anchor, icon = texture_icon, texcoord = texture_texcoord}
+		--
 		--> options panel
 		local options_panel = {
 			{
@@ -1389,6 +1654,20 @@ function IKA:CreateFrames (show_after_cretion)
 				values = function() return groupTable end,
 				desc = "The way the player are sorted.",
 				name = "|cFFFF9900Frame Type|r"
+			},
+			{
+				type = "select",
+				get = function() return IKA.db.profile.MainPanel_strata end,
+				values = function() return strataTable end,
+				desc = "How high the frame is placed on your screen.\n\nLowering make the frame be behind backpack, talent frame, etc.",
+				name = "Frame Strata"
+			},
+			{
+				type = "select",
+				get = function() return IKA.db.profile.stack_count_anchor end,
+				values = function() return stackTable end,
+				desc = "Where the stack of ".. aura_radiance_of_anzu .. " is attached relative to player's name.",
+				name = "Stack Anchor"
 			},
 			{
 				type = "range",
@@ -1411,8 +1690,8 @@ function IKA:CreateFrames (show_after_cretion)
 				min = 20,
 				max = 200,
 				step = 1,
-				desc = "Size in pixels of width of player frames.",
-				name = "Block Width",
+				desc = "The width of each player frame.",
+				name = "Width",
 			},
 			{
 				type = "range",
@@ -1436,15 +1715,15 @@ function IKA:CreateFrames (show_after_cretion)
 				min = 8,
 				max = 60,
 				step = 1,
-				desc = "Size in pixels of height of player frames.",
-				name = "Block Height",
+				desc = "The height of each player frame.",
+				name = "Height",
 			},
 			{
 				type = "select",
 				get = function() return IKA.db.profile.bartexture end,
 				values = function() return texTable end,
 				desc = "Choose the texture used on tank blocks.",
-				name = "Block Texture"
+				name = "Texture"
 			},
 			{
 				type = "range",
@@ -1482,7 +1761,7 @@ function IKA:CreateFrames (show_after_cretion)
 					IKA.db.profile.eye_flash_anim = not IKA.db.profile.eye_flash_anim
 				end,
 				desc = "Play a flash animation on the player that just received the Eye of Anzu.",
-				name = "Flash Eye"
+				name = "Flash Enabled"
 			},
 			{
 				type = "toggle",
@@ -1573,7 +1852,17 @@ function IKA:CreateFrames (show_after_cretion)
 				desc = "Show " .. aura_phantasmal_bomb .. " aura.\n\n|cFFFFFF00Important|r: only works on vertical alignment.",
 				name = "|T" .. phantasmal_bomb_icon .. ":14:14:0:0:64:64:5:59:5:59|t" .. " " .. aura_phantasmal_bomb
 			},
-			
+			--[[
+			{
+				type = "toggle",
+				get = function() return IKA.db.profile.show_cooldown_bars end,
+				set = function (self, fixedparam, value) 
+					IKA.db.profile.show_cooldown_bars = not IKA.db.profile.show_cooldown_bars
+				end,
+				desc = "When enabled, two cooldown bars is shown for |T" .. spell_fel_conduit_icon .. ":14:14:0:0:64:64:5:59:5:59|t" .. spell_fel_conduit .. " and |T" .. phantasmal_bomb_icon .. ":14:14:0:0:64:64:5:59:5:59|t" .. spell_fel_bomb .. "",
+				name = "Show Cooldown Bars"
+			},
+			--]]
 			--feedback
 			{
 				type = "execute",
@@ -1583,11 +1872,22 @@ function IKA:CreateFrames (show_after_cretion)
 				desc = "Get the link for our MMO-Champion forum thread, post bugs or feature suggestions.",
 				name = "Report Bug",
 			},
+			
+			--archimonde radar
+			{
+				type = "toggle",
+				get = function() return IKA.db.profile.archimonde_radar end,
+				set = function (self, fixedparam, value) 
+					IKA.db.profile.archimonde_radar = not IKA.db.profile.archimonde_radar
+				end,
+				desc = "Show " .. aura_focused_chaos .. " radar for archimonde encounter.",
+				name = "|T" .. aura_focused_chaos_icon .. ":14:14:0:0:64:64:5:59:5:59|t" .. " " .. aura_focused_chaos .. " (Archimonde)"
+			},
 
 		}
 		--> end options table
 		
-		DF:BuildMenu (options_frame, options_panel, 15, -60, 260)
+		DF:BuildMenu (options_frame, options_panel, 15, -60, 300)
 		options_frame:SetBackdropColor (0, 0, 0, .9)
 	end
 
@@ -1671,6 +1971,8 @@ function IKA:ReloadAuraNames()
 	aura_phantasmal_bomb = GetSpellInfo (179219) --Phantasmal Fel Bomb (checked on live)
 	aura_dark_bindings = GetSpellInfo (185510) --Dark Bindings
 
+	aura_radiance_of_anzu = GetSpellInfo (185239) --Radiance of Anzu
+	
 	dispel_naturescure = GetSpellInfo (88423) --druid
 	dispel_purify = GetSpellInfo (527) --priest
 	dispel_cleanse = GetSpellInfo (4987) --pally
@@ -1704,6 +2006,9 @@ function IKA:ReloadAuraNames()
 		aura_phantasmal_corruption = "Chain Hurl"
 		aura_fel_bomb = "Impale"
 		
+		spell_fel_conduit = "Flash Heal"
+		spell_fel_bomb = "Cascade"
+		
 		track_auras ["Weakened Soul"] = true
 		track_auras ["Flame Jet"] = true
 		track_auras ["Chain Hurl"] = true
@@ -1729,6 +2034,12 @@ frame_event:SetScript ("OnEvent", function (self, event, ...)
 			else
 				--is death
 				f:UnitDiedOrRessed (GetUnitName (..., true), true)
+			end
+			
+		elseif (f.track_player_health [...]) then
+			local block = unitid_to_block [...]
+			if (block) then
+				block.statusbar:SetValue (UnitHealth (...) / UnitHealthMax (...) * 100)
 			end
 		end
 
@@ -1853,6 +2164,9 @@ frame_event:SetScript ("OnEvent", function (self, event, ...)
 					if (eendStatus == 1) then
 						f:HideMe()
 					end
+					
+					f.fel_conduit_cooldown:SetBarCooldown (nil, nil, true)
+					f.fel_bomb_cooldown:SetBarCooldown (nil, nil, true)	
 				end
 			end
 		end
@@ -1880,7 +2194,7 @@ function IKA:ShowUsers()
 		users_frame:SetBackdropColor (0, 0, 0, 1)
 		tinsert (UISpecialFrames, "IskarAssistUsersPanel")
 		users_frame:SetSize (200, 500)
-		users_frame:SetPoint ("right", f, "left", -15, 0)
+		users_frame:SetPoint ("center", UIParent, "center", 0, 0)
 		users_frame.text = users_frame:CreateFontString (nil, "overlay", "GameFontHighlight")
 		users_frame.text:SetPoint ("topleft", users_frame, "topleft", 10, -10)
 		users_frame.text:SetJustifyH ("left")
@@ -2014,7 +2328,179 @@ function IKA:DumpMembers()
 	end
 end
 
-------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- archimonde focused chaos radar
+local radar = CreateFrame ("frame", "IskarAssistArchimondeRadar", UIParent)
+radar:SetSize (140, 140)
+radar:SetPoint ("center", UIParent, "center", -200, 0)
+
+local g = LibStub:GetLibrary ("LibGraph-2.0")
+if (not g) then
+	radar:Hide()
+	print ("|cFFFFAA00Please restart your client to finish update some AddOns.|r")
+	return
+end
+
+local load_mod = CreateFrame ("frame", nil, UIParent)
+load_mod:RegisterEvent ("ENCOUNTER_START")
+load_mod:RegisterEvent ("ENCOUNTER_END")
+load_mod:SetScript ("OnEvent", function (self, event, ...)
+	if (event == "ENCOUNTER_START") then
+		if (IKA.db.profile.archimonde_radar) then
+			local encounterID, encounterName, difficultyID, raidSize = select (1, ...)
+			if (encounterID == archimonde_encounter_id) then
+				radar:RegisterEvent ("UNIT_AURA")
+			end
+		end
+	else
+		radar:UnregisterEvent ("UNIT_AURA")
+	end
+end)
+
+if (is_kargath_test) then
+	radar:RegisterEvent ("UNIT_AURA")
+end
+
+radar:SetMovable (true)
+radar:SetScript ("OnMouseDown", function (self, button)
+	if (self.isMoving) then
+		return
+	end
+	self:StartMoving() 
+	self.isMoving = true
+end)
+radar:SetScript ("OnMouseUp", function (self, button) 
+	if (self.isMoving) then
+		self:StopMovingOrSizing()
+		self.isMoving = nil
+	end
+end)
+--radar:SetBackdrop ({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
+--radar:SetBackdropColor (0, 0, 0, 0.5)
+radar:Hide()
+
+local background_image = radar:CreateTexture (nil, "background")
+background_image:SetTexture ([[Interface\CHARACTERFRAME\TempPortraitAlphaMask]])
+background_image:SetPoint ("center", radar, "center")
+background_image:SetAlpha (0.3)
+background_image:SetVertexColor (0, 0, 0)
+background_image:SetSize (160, 160)
+
+local center_point = radar:CreateTexture (nil, "overlay")
+center_point:SetPoint ("center", radar, "center", 0, 0)
+center_point:SetTexture (1, 1, 1, 0.5)
+center_point:SetSize (3, 3)
+
+local p1 = radar:CreateTexture (nil, "overlay")
+p1:SetTexture (1, 0, 0)
+p1:SetSize (6, 6)
+local p2 = radar:CreateTexture (nil, "overlay")
+p2:SetTexture (1, 0, 0)
+p2:SetSize (6, 6)
+local p3 = radar:CreateTexture (nil, "overlay")
+p3:SetTexture (1, 0, 0)
+p3:SetSize (6, 6)
+local pname1 = radar:CreateFontString (nil, "overlay", "GameFontNormal")
+pname1:SetPoint ("bottom", p1, "top", 0, 1)
+local pname2 = radar:CreateFontString (nil, "overlay", "GameFontNormal")
+pname2:SetPoint ("bottom", p2, "top", 0, 1)
+
+local spellname1, spellname2 = select (1, GetSpellInfo (185014)), select (1, GetSpellInfo (186123)) --focused-chaos, wrought-chaos
+if (is_kargath_test) then
+	spellname1, spellname2 = "Weakened Soul", "Weakened Soul"
+end
+local player1, player2
+local pi = math.pi
+local pi_doubled = pi*2
+local sin = math.sin
+local cos = math.cos
+
+local white = {1, 1, 1, 1}
+
+local on_update_radar = function (self)
+	if (UnitExists (player1) and UnitExists (player2)) then
+		local self_x, self_y = UnitPosition ("player")
+		local player1_x, player1_y = UnitPosition (player1)
+		local player2_x, player2_y = UnitPosition (player2)
+		
+		local pivot = pi_doubled - GetPlayerFacing()
+		local sine, cosine = -sin (pivot), -cos (pivot)
+		local player1_dx = player1_x - self_x
+		local player1_dy = player1_y - self_y
+		local player2_dx = player2_x - self_x
+		local player2_dy = player2_y - self_y
+		local player_1_pin_pointX = ((player1_dy*cosine) - (-player1_dx*sine)) * 2.8
+		local player_1_pin_pointY = ((player1_dy*sine) + (-player1_dx*cosine)) * 2.8
+		local player_2_pin_pointX = ((player2_dy*cosine) - (-player2_dx*sine)) * 2.8
+		local player_2_pin_pointY = ((player2_dy*sine) + (-player2_dx*cosine)) * 2.8
+		local line_dx = player_2_pin_pointX - player_1_pin_pointX
+		local line_dy = player_2_pin_pointY - player_1_pin_pointY
+		local vsize = ((line_dy^2) + (line_dx^2)) ^ 0.5
+		local vx = (line_dx/vsize) * (abs (vsize-150))
+		local vy = (line_dy/vsize) * (abs (vsize-150))
+		
+		p1:SetPoint ("center", radar, "center", player_1_pin_pointX, player_1_pin_pointY)
+		p2:SetPoint ("center", radar, "center", player_2_pin_pointX, player_2_pin_pointY)
+		p3:SetPoint ("center", radar, "center", player_2_pin_pointX+vx, player_2_pin_pointY+vy)
+		
+		if (radar.GraphLib_Lines_Used) then
+			for i = #radar.GraphLib_Lines_Used, 1, -1 do
+				local line = tremove (radar.GraphLib_Lines_Used)
+				tinsert (radar.GraphLib_Lines, line)
+				line:Hide()
+			end
+		end
+		
+		local x, y = radar:GetCenter()
+		local half = radar:GetWidth()/2
+		local x1, y1 = p1:GetCenter()
+		local x2, y2 = p2:GetCenter()
+		local x3, y3 = p3:GetCenter()
+		x1, y1, x2, y2, x3, y3 = x1-x, y1-y, x2-x, y2-y, x3-x, y3-y
+		g:DrawLine (radar, x1+half, y1+half, x2+half, y2+half, 80, white, "artwork")
+		g:DrawLine (radar, x2+half, y2+half, x3+half, y3+half, 80, white, "artwork")
+
+		radar:Show()
+	else
+		radar:SetScript ("OnUpdate", nil)
+		radar:Hide()
+	end
+end
+
+radar:SetScript ("OnEvent", function (self, event, unitid)
+
+	if (not UnitDebuff ("player", spellname1) and not UnitDebuff ("player", spellname2)) then
+
+		player1, player2 = nil, nil
+
+		for i = 1, GetNumGroupMembers() do
+			if (UnitDebuff ("raid" .. i, spellname1) or UnitDebuff ("raid" .. i, spellname2)) then
+				if (not player1) then
+					player1 = "raid" .. i
+				elseif (not player2) then
+					player2 = "raid" .. i
+					break
+				end
+			end
+		end
+		
+		if (player1 and player2) then
+			pname1:SetText (UnitName (player1))
+			pname2:SetText (UnitName (player2))
+			radar:Show()
+			radar:SetScript ("OnUpdate", on_update_radar)
+		else
+			radar:SetScript ("OnUpdate", nil)
+			radar:Hide()
+		end
+	else
+		radar:SetScript ("OnUpdate", nil)
+		radar:Hide()
+	end
+	
+end)
+
 
 --> GridLayoutHeader1UnitButton1
 --> Grid2LayoutHeader1UnitButton1

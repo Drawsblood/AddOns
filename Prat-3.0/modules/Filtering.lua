@@ -141,24 +141,24 @@ L:AddLocale("deDE",
 	notices_desc = "Die allgemein üblichen Benachrichtigungen in Kanälen verhindern, z.B. Moderatorenwechsel.",
 	notices_name = "Kanal-Meldungen filtern",
 	tradespam_desc = "Begrenze die Nachrichten um zu verhindern das gleiche Nachrichten ständig wiederholt werden",
-	tradespam_name = "Begrenze Spam",
+	tradespam_name = "Spam begrenzen",
 }
 
 )
 L:AddLocale("koKR",  
 {
-	-- afkdnd_desc = "",
-	-- afkdnd_name = "",
-	["A module to provide basic chat filtering."] = "대화내용 필터링 모듈",
-	bgjoin_desc = "전장채널 입장/퇴장 메시지를 숨깁니다.",
+	afkdnd_desc = "자리비움과 다른 용무중 메시지를 조절합니다.",
+	afkdnd_name = "자리비움과 다른 용무중 메시지를 조절합니다.",
+	["A module to provide basic chat filtering."] = "대화 내용 필터링 모듈",
+	bgjoin_desc = "전장 채널 입장/퇴장 메시지를 숨깁니다.",
 	bgjoin_name = "전장 입장/퇴장 필터링",
 	Filtering = "필터링",
 	leavejoin_desc = "채널 입장/퇴장 메시지를 숨깁니다.",
 	leavejoin_name = "채널 입장/퇴장 필터링",
-	notices_desc = "사용자 채널의 알림메시지를 숨깁니다, ex. 관리자 변경.",
+	notices_desc = "사설 채널의 알림메시지를 숨깁니다, ex. 관리자 변경.",
 	notices_name = "채널 알림메시지 필터링",
-	-- tradespam_desc = "",
-	-- tradespam_name = "",
+	tradespam_desc = "메시지를 조절하여 여러 번 같은 메시지가 반복되는 걸 방지합니다.",
+	tradespam_name = "스팸 조절",
 }
 
 )

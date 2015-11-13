@@ -166,6 +166,7 @@ L["resetAllCustomSound"] = [=[어떤 보스 설정에서 소리를 사용자 지
 ]=]
 L["resetAllDesc"] = "어떤 보스 설정에서 색상을 사용자 지정했다면, 이 버튼으로 모두 초기화 됩니다. 따라서 여기에 정의된 색상이 대신 사용됩니다."
 L["resetDesc"] = "위의 색상을 모두 기본으로 초기화 합니다."
+L["respawn"] = "재생성" -- Needs review
 L["restart"] = "재시작"
 L["restartDesc"] = "이전의 시간을 그대로 적용하지않고 새롭게 10초부터 특수강조바를 생성합니다."
 L["right"] = "우측"
@@ -177,6 +178,8 @@ L["sendBreak"] = "Big Wigs와 DBM 유저들에게 휴식 타이머를 보냅니�
 L["sendCustomBar"] = "Big Wigs과 DBM 사용자에게 '%s' 사용자 바를 보냅니다."
 L["sendPull"] = "Big Wigs과 DBM 사용자에게 풀링 타이머를 보냅니다."
 L["showHide"] = "표시/숨김"
+L["showRespawnBar"] = "재생성 바 표시" -- Needs review
+L["showRespawnBarDesc"] = "보스를 리셋한 후에 재생성 되기까지 걸리는 시간을 바에 표시합니다." -- Needs review
 L["sinkDescription"] = "Big Wigs 메세지 표시를 통해 이 애드온의 메세지를 출력합니다. 이것은 디스플레이와 색상, 아이콘을 지원하는 메시지가 화면에 한 번에 최대 4개까지 표시됩니다. 새로운 메시지는 사용자에게 알리기 위해 점점 커지다가 순식간에 사라집니다"
 L["sound"] = "효과음"
 L["soundButton"] = "소리 버튼"

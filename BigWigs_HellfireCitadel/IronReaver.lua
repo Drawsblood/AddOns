@@ -7,7 +7,7 @@ local mod, CL = BigWigs:NewBoss("Iron Reaver", 1026, 1425)
 if not mod then return end
 mod:RegisterEnableMob(90284)
 mod.engageId = 1785
-mod.respawnTime = 36 -- 30s respawn & 6s activation
+mod.respawnTime = 35.5 -- 30s respawn & 5.5s activation
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -54,7 +54,7 @@ end
 
 function mod:OnBossEnable()
 	self:Log("SPELL_AURA_APPLIED", "Artillery", 182280)
-	self:Log("SPELL_AURA_REFRESH", "Artillery", 182280) -- Very rarely casted on the same person
+	self:Log("SPELL_AURA_REFRESH", "Artillery", 182280) -- Very rarely casted on the same person, usually due to deaths
 	self:Log("SPELL_AURA_REMOVED", "ArtilleryRemoved", 182280)
 	self:Log("SPELL_AURA_APPLIED", "Pounding", 182020)
 	self:Log("SPELL_CAST_START", "Barrage", 185282)
@@ -88,7 +88,7 @@ function mod:OnEngage()
 	self:Bar(182020, 34.4, CL.count:format(self:SpellName(182020), poundingCount)) -- Pounding
 	self:Bar(179889, 64.3) -- Blitz
 	self:Bar(182055, 139) -- Full Charge
-	if self:Ranged() then
+	if self:Ranged() and not self:LFR() then
 		self:OpenProximity("proximity", 8)
 	end
 end
@@ -100,17 +100,51 @@ end
 do
 	-- local timers = {0, 9, 30, 15, 9, 24, 15} -- 15s during p2
 	-- local timersNormalLFR = {0, 39, 15, 33, 15} -- 15s during p2
-	local list = mod:NewTargetList()
+	local playerList, proxList, isOnMe = mod:NewTargetList(), {}, nil
 	function mod:Artillery(args)
+		if self:Me(args.destGUID) then
+			isOnMe = true
+			self:Flash(args.spellId)
+			self:Say(args.spellId)
+			if not self:LFR() then
+				self:ScheduleTimer("Say", 9, args.spellId, 4, true)
+				self:ScheduleTimer("Say", 10, args.spellId, 3, true)
+				self:ScheduleTimer("Say", 11, args.spellId, 2, true)
+				self:ScheduleTimer("Say", 12, args.spellId, 1, true)
+			end
+			self:TargetBar(args.spellId, 13, args.destName)
+			self:OpenProximity(args.spellId, 40)
+			if phase == 2 then
+				self:StopBar(args.spellName) -- Cancel non-personal bar if it's started, we start a personal one above
+			end
+		end
+
 		if phase == 2 then
-			list[#list+1] = args.destName
-			if #list == 1 then
-				self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Urgent", "Alarm")
-				self:Bar(args.spellId, 13)
+			proxList[#proxList+1] = args.destName
+			if not isOnMe then
+				self:OpenProximity(args.spellId, 40, proxList)
+			end
+
+			playerList[#playerList+1] = args.destName
+			if #playerList == 1 then
+				self:ScheduleTimer("TargetMessage", 0.3, args.spellId, playerList, "Urgent", "Warning")
+				if not isOnMe then -- Personal bar when on you
+					self:Bar(args.spellId, 13)
+				end
 			end
 		else
-			self:TargetMessage(args.spellId, args.destName, "Urgent", "Alarm")
-			self:TargetBar(args.spellId, 13, args.destName)
+			self:TargetMessage(args.spellId, args.destName, "Urgent", "Warning", nil, nil, self:Tank())
+			if not self:Me(args.destGUID) then -- Check again as isOnMe can be true when this lands on someone else
+				self:TargetBar(args.spellId, 13, args.destName)
+				if self:Melee() then
+					if not tContains(proxList, args.destName) then
+						proxList[#proxList+1] = args.destName
+					end
+					if not isOnMe then -- Don't change proximity if it's on you and was applied to someone else also
+						self:OpenProximity(args.spellId, 40, proxList)
+					end
+				end
+			end
 			-- Do we care about application timers?
 			-- Expiry is the real concern, are application timers important enough
 			-- to potentially distract/confuse from expiry timers?
@@ -121,20 +155,29 @@ do
 			--	self:Bar(args.spellId, timer)
 			--end
 		end
-		if self:Me(args.destGUID) then
-			self:OpenProximity(args.spellId, 40)
-			self:Flash(args.spellId)
-			self:Say(args.spellId)
-		end
 	end
-end
 
-function mod:ArtilleryRemoved(args)
-	self:StopBar(args.spellName, args.destName)
-	if self:Me(args.destGUID) then
-		self:CloseProximity(args.spellId)
-		if self:Ranged() then
-			self:OpenProximity("proximity", 8)
+	function mod:ArtilleryRemoved(args)
+		if self:Me(args.destGUID) then
+			isOnMe = nil
+			self:StopBar(args.spellName, args.destName)
+			self:CloseProximity(args.spellId)
+			if phase == 1 and self:Ranged() and not self:LFR() then
+				self:OpenProximity("proximity", 8)
+			end
+		elseif phase == 1 then
+			self:StopBar(args.spellName, args.destName)
+		end
+
+		if (phase == 1 and self:Melee()) or phase == 2 then
+			tDeleteItem(proxList, args.destName)
+			if not isOnMe then -- Don't change proximity if it's on you and expired on someone else
+				if #proxList == 0 then
+					self:CloseProximity(args.spellId)
+				else
+					self:OpenProximity(args.spellId, 40, proxList)
+				end
+			end
 		end
 	end
 end
@@ -210,6 +253,9 @@ function mod:FallingSlamSuccess(args)
 	self:Bar(182020, 35.8) -- Pounding
 	--self:Bar(182280, self:Easy() and 11.7 or 9.3) -- Artillery APPLICATION
 	self:Bar(182055, 140) -- Full Charge
+	if self:Ranged() and not self:LFR() then
+		self:OpenProximity("proximity", 8)
+	end
 end
 
 function mod:Blitz(args)
@@ -229,6 +275,9 @@ function mod:FullCharge(args)
 	--self:Bar(182280, 9) -- Artillery APPLICATION
 	self:Bar(181999, 11, CL.count:format(self:SpellName(181999), firebombCount)) -- Firebomb
 	self:Bar(182066, 54) -- Falling Slam
+	if self:Ranged() and not self:LFR() then
+		self:CloseProximity("proximity")
+	end
 end
 
 function mod:Firebomb(args)

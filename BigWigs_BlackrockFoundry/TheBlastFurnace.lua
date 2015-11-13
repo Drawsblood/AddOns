@@ -64,7 +64,6 @@ if L then
 	L.firecaller_desc = "During phase two, 2 Firecallers will repeatedly spawn, 1 on each side of the room."
 	L.firecaller_icon = 24826 -- spell_fire_incinerate / Infernal Fire
 end
-L = mod:GetLocale()
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -190,11 +189,6 @@ function mod:OnEngage()
 	if not self:LFR() then
 		self:Berserk(780) -- XXX not sure if 13min in Mythic aswell
 	end
-end
-
-function mod:OnBossDisable()
-	wipe(volatileFireTargets)
-	wipe(bombTargets)
 end
 
 --------------------------------------------------------------------------------

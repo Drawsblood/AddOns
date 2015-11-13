@@ -1,8 +1,11 @@
 
 
 local DF = _G ["DetailsFramework"]
-local _
+if (not DF or not DetailsFrameworkCanLoad) then
+	return 
+end
 
+local _
 local _rawset = rawset --> lua local
 local _rawget = rawget --> lua local
 

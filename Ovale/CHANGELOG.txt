@@ -1,42 +1,21 @@
-Ovale Spell Priority 6.2.13
+Ovale Spell Priority 6.2.15
 ===========================
 
-Changes from version 6.2.12:
+Changes from version 6.2.14:
 ----------------------------
 
--   Update localized strings from CurseForge app from 2015-07-23.
+-   Update zhTW localization data.
 
--   Regenerate scripts based on SimulationCraft git master from 2015-07-23.
+-   Mage: Properly translate "buff.shatterlance.up" from the class trinket.
+
+    Shatterlance is a hidden buff, so check for the conditions that proc it.
+
+-   Regenerate scripts based on SimulationCraft git master from 2015-09-17.
 
 -   Merge branch 'simulationcraft'.
 
-    Pull in changes from SimulationCraft git master from 2015-07-23.
+    Pull in changes from SimulationCraft git master from 2015-09-17.
 
--   Import Tier18M profiles from SimulationCraft git master from 2015-07-23.
+-   Import Tier18M profiles from SimulationCraft git master from 2015-09-17.
 
--   Put all scripts for each class into a single, per-class Lua file.
-
-    This makes it easier to update the addon without needing to restart the
-    client to detect new files.
-
--   Ovale does not use AceLocale-3.0.
-
--   Skip "wait" actions with a constant "sec" modifier in SimC APLs.
-
-    Ovale does not have the concept of "wait for N seconds before proceeding",
-    so just ignore those lines in SimC APLs.
-
--   Don't use the same variable name back-to-back.
-
--   Import latest release.sh from curseforge-packager project.
-
--   Check for non-nil tables before referencing members.
-
--   Teach OvaleSimulationCraft about "sim.target" expressions.
-
-    Ovale doesn't understand the concept of a priority target, so treat
-    "sim.target=target" expressions as always true.
-
--   Update for patch 6.2 hotfixes up through 2015-07-20.
-
--   The spell databases have been updated for patch 6.2.
+-   Translate SimC "legendary_ring.cooldown.{up|down}" correctly.

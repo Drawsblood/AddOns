@@ -4,7 +4,7 @@ if ExRT.locale ~= "zhTW" then
 	return
 end	
 
--- 15:30 23.06.2015
+-- 22:44 13.10.2015
 
 local L = ExRT.L	
 local PH = ExRT.L
@@ -32,7 +32,8 @@ L.Logging = "內建戰鬥記錄"
 L.LootLink = "首領掉落通報"					
 L.BattleRes = "戰鬥復活計時"					
 L.Skada = "Skada 模組"					
-L.Profiles = "設定檔"					
+L.Profiles = "設定檔"	
+L.LegendaryRing = "傳說戒指"				
 					
 L.raidtargeticon1 = "{星星}"					
 L.raidtargeticon2 = "{圈圈}"					
@@ -86,6 +87,8 @@ L.NoteFontOptionsBack = "<<< 返回"
 L.NoteFontSize = "字型大小"					
 L.NoteHideInCombat = "在戰鬥中隱藏"					
 L.NoteFrameStrata = "框架層級"					
+L.NoteShowOnlyPersonal = "只顯示個人筆記"
+L.NoteShowOnlyInRaid = "只在團隊中顯示筆記"
 					
 L.setminimap1 = "隱藏小地圖圖示"					
 L.setauthor = "作者"					
@@ -152,10 +155,18 @@ L.BossmodsKromogOnlyTrusted = "限定接收"
 L.BossmodsKromogOnlyTrustedTooltip = "只接收團隊隊長或團隊助手的分配"					
 L.BossmodsIskarDisableClassColor = "停用職業顏色"					
 L.BossmodsIskarHideStacks = "隱藏堆疊"					
-L.BossmodsIskarDisableRed = "停有紅色背景(若有安祖之眼增益)"					
+L.BossmodsIskarDisableRed = "停用紅色背景(若有安祖之眼增益)"				
 L.BossmodsIskarShowNames = "顯示玩家名稱"					
 L.BossmodsKormrokCopy = "複製"			
-L.BossmodsKormrokArrow = "總是顯示箭頭"		
+L.BossmodsKormrokArrow = "總是顯示箭頭"	
+L.BossmodsArchimondeRadar = "型塑混沌雷達"
+L.BossmodsArchimondeInfernals = "煉獄火"
+L.BossmodsArchimondeInfernalsTooltip = "煉獄火血量"	
+L.BossmodsArchimondeDisableShackled = "停用 \"束縛折磨\" 圓形"
+L.BossmodsArchimondeDistance = "顯示範圍半徑"
+L.BossmodsArchimondeDisableMarking = "停用標記"
+L.BossmodsArchimondeDisableText = "隱藏名稱"
+L.BossmodsGorefiendTargeting = "啟用點擊選取目標靈魂"
 					
 L.timerstxt1 = "/rt pull\n/rt pull X\n/rt afk X\n/rt afk 0\n/rt timer S X\n|cFFFFFFFF |r\n\n\n/rt mytimer X"					
 L.timerstxt2 = "- 開怪倒數, 10秒\n- 開怪倒數, X秒\n- 暫離（休息）計時器, X分鐘\n- 取消暫離計時器\n- 啟用名為\"S\"的 X 秒計時器\n\n\n\n- 倒數計時, X 秒"					
@@ -226,7 +237,8 @@ L.MarksBarResetPos = "重設位置"
 L.MarksBarResetPosTooltip = "移動框架至畫面中央"					
 L.MarksBarHelp = "於圖示上按右鍵以鎖定標記，需要為當前目標及團隊/小隊成員。"					
 L.MarksBarDisableInRaid = "非組隊時隱藏"					
-L.MarksBarVertical = "垂直排列"					
+L.MarksBarVertical = "垂直排列"		
+L.MarksBarReverse = "逆向排列"			
 					
 L.inviterank = "會階:"					
 L.inviteinv = "公會邀請"					
@@ -850,7 +862,8 @@ L.BossWatcherDropdownsHoldShiftSource = "按住Shift後點擊將選取所有同�
 L.BossWatcherDropdownsHoldShiftDest = "按住Shift後點擊將選取所有同名字的目標"					
 L.BossWatcherHealReductionChkTooltip = "顯示閃躲/招架/未擊中提供的減傷\n警告！此數據(閃躲/招架/未擊中)僅以同類型傷害基礎值計算，非100%準確。"					
 L.BossWatcherFromSpells = "被減傷法術"					
-L.BossWatcherHealingTabTyrantVelhari = "女暴君維哈里\n計算方式改變。此戰鬥中所有的吸收治療，除非目標為中了\"傷害之觸\"減益的玩家，都將計算為過量治療。"					
+L.BossWatcherHealingTabTyrantVelhari = "女暴君維哈里\n計算方式改變。此戰鬥中所有的吸收治療，除非目標為中了\"傷害之觸\"減益的玩家，都將計算為過量治療。"
+L.BossWatcherBrokeTooltip = "破除某些狀態，例如:控場"					
 					
 L.InspectViewerTalents = "天賦及雕紋"					
 L.InspectViewerInfo = "其他資訊"					
@@ -901,6 +914,8 @@ L.CoinsEmpty = "目前沒有資料"
 L.CoinsHelp = "團隊使用獎勵硬幣記錄"					
 L.CoinsClear = "清除所有資料"					
 L.CoinsClearPopUp = "所有資料都將被清空，你確定嗎？"					
+L.CoinsShowMessage = "當隊友使用獎勵硬幣顯示訊息"
+L.CoinsMessage = "%s 使用了獎勵硬幣"
 					
 L.ChatwindowName = "報告 - Exorsus Raid Tools"					
 L.ChatwindowChatSelf = "自己"					
@@ -923,7 +938,8 @@ L.ArrowSetPoint = "設定位置"
 L.ArrowResetPos = "重置位置"					
 L.ArrowFixate = "鎖定"					
 L.ArrowScale = "縮放"					
-L.ArrowAlpha = "透明度"					
+L.ArrowAlpha = "透明度"	
+L.ArrowTextBottom = "插件 function 支援:\nGExRT.F.ArrowTextPlayer(\"name\",size) |cffffffff- 自訂箭頭大小 \"size\" (預設為16) 指向自訂玩家目標 \"name\"|r\nGExRT.F.ArrowTextCoord(X,Y,size) |cffffffff- 自訂箭頭大小 \"size\" (16 as default) 指向 X,Y 座標|r|n|n範例:|n"				
 					
 L.MarksDisable = "停用"					
 L.MarksClear = "清空"					
@@ -945,7 +961,11 @@ L.BattleResHideTime = "隱藏冷卻時間"
 L.BattleResHideTimeTooltip = "隱藏圖示上的冷卻文字，如果你有使用如 omniCC 的插件"					
 L.BattleResHideCD = "隱藏冷卻特效"					
 					
-L.SkadaDamageToCurrentTarget = "對當前目標的傷害"					
+L.SkadaDamageToCurrentTarget = "對當前目標的傷害"	
+
+L.LegendaryRingEnable = "當有人使用|cffff7f00傳奇|r戒指顯示名字訊息"
+L.LegendaryRingFrodo = "佛羅多·巴金斯"
+L.LegendaryRingType = "顯示戒指類型 (坦 / 補 / 輸出)"				
 					
 L.ProfilesIntro = "你可以選擇一個活動的資料設定檔，這樣你的每個角色就可以擁有不同的設定值，可以給你的插件設定帶來極大的靈活性。"					
 L.ProfilesDefault = "預設"					

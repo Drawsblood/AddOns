@@ -978,6 +978,7 @@ L["GENERIC_NUMREQ_CHECK_DESC"] = "勾选以启用并配置%s"
 L["GENERICTOTEM"] = "图腾 %d"
 L["GLOBAL_GROUP_GENERIC_DESC"] = "|cff00c300共用分组|r是指在你这个魔兽世界帐号中的TellMeWhen配置文件的所有角色都可共同使用的分组。"
 L["GLYPHTOCHECK"] = "要检测的雕文"
+L["GROUP"] = "分组" -- Needs review
 L["GROUPADDONSETTINGS"] = "分组设置"
 L["GROUPADDONSETTINGS_DESC"] = "包含分组的设置以及插件的综合设置."
 L["GROUPCONDITIONS"] = "分组条件"
@@ -1122,9 +1123,9 @@ L["ICONMENU_CASTSHOWWHEN"] = "何时显示法术施放"
 L["ICONMENU_CHECKNEXT"] = "扩展子元"
 L["ICONMENU_CHECKNEXT_DESC"] = [=[选中此框该图标将检测添加在列表中的任意整合图标所包含的全部图标,它可能是任何级别的检测.
 
-此外,该图标不会显示已经在另一个整合图标显示的任何图标.在主选项或分组设置中可以更改更新排序.
+此外,该图标不会显示已经在另一个整合图标显示的任何图标.
 
-译者注:因为很多人不明白这个功能,举个例子,假设你有3个设置完全一样的整合图标(每个图标中都是图标1 图标2 图标3),全部都勾上了这个选项,如果在整合图标中图标1 图标2 图标3都可以显示,显示顺序为图标3>图标1>图标2,那么在整合图标1将会显示图标3,整合图标2则是显示图标1,整合图标3显示图标2(理论上就是这样的效果,一些细节请自行钻研).]=]
+译者注:因为很多人不明白这个功能,举个例子,假设你有3个设置完全一样的整合图标(每个图标中都是图标1 图标2 图标3),全部都勾上了这个选项,如果在整合图标中图标1 图标2 图标3都可以显示,显示顺序为图标3>图标1>图标2,那么在整合图标1将会显示图标3,整合图标2则是显示图标1,整合图标3显示图标2(理论上就是这样的效果,一些细节请自行钻研).]=] -- Needs review
 L["ICONMENU_CHECKREFRESH"] = "法术刷新侦测"
 L["ICONMENU_CHECKREFRESH_DESC"] = [=[暴雪的战斗记录在涉及法术刷新和恐惧（或者某些在造成一定伤害量后才会中断的法术）存在严重缺陷，战斗记录会认为法术在造成伤害时已经刷新，尽管事实上并非如此。
 
@@ -1745,6 +1746,7 @@ L["RaidWarningFrame"] = "团队警告框架"
 L["rare"] = "稀有"
 L["rareelite"] = "稀有精英"
 L["REACTIVECNDT_DESC"] = "此条件仅检测技能的触发/激活情况,并非它的冷却."
+L["REDO"] = "恢复" -- Needs review
 L["REDO_ICON"] = "恢复"
 L["REDO_ICON_DESC"] = "恢复最近一次图标设置的撤消动作."
 L["ReducedHealing"] = "治疗效果降低"
@@ -2182,8 +2184,8 @@ L["UIPANEL_GROUPS_DESC"] = "在此配置文件中的各个分组的相关设置.
 L["UIPANEL_GROUPS_GLOBAL"] = "|cff00c300共用|r分组"
 L["UIPANEL_GROUPS_GLOBAL_DESC"] = "分组的设置可用于你在这个魔兽世界帐号下所有的TellMeWhen角色。"
 L["UIPANEL_GROUPSORT"] = "图标排列"
-L["UIPANEL_GROUPSORT_alpha"] = "不透明度(无视%s)"
-L["UIPANEL_GROUPSORT_alpha_DESC"] = "分组将根据图标的不透明度来排列,无论图标是否被 %s 设置所隐藏."
+L["UIPANEL_GROUPSORT_alpha"] = "不透明度" -- Needs review
+L["UIPANEL_GROUPSORT_alpha_DESC"] = "分组将根据图标的不透明度来排列" -- Needs review
 L["UIPANEL_GROUPSORT_DESC"] = [=[基于分组所有图标的属性并对它们的位置进行排列的相关设置.
 
 译者注:因为是新功能,稍微讲解一下.
@@ -2199,8 +2201,8 @@ L["UIPANEL_GROUPSORT_id_DESC"] = "分组将根据图标ID数字来排列."
 L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "这个排列方法已经被停用,因为上面使用的是根据图标ID进行排列,所选方法永远不会被执行和排列."
 L["UIPANEL_GROUPSORT_METHODNAME"] = "图标排列优先级%d"
 L["UIPANEL_GROUPSORT_METHODNAME_DESC"] = "在一个分组的图标位置进行排列时,这个将作为优先级%d来使用."
-L["UIPANEL_GROUPSORT_shown"] = "显示(无视%s)"
-L["UIPANEL_GROUPSORT_shown_DESC"] = "分组将根据图标是否显示来排列,无论图标是否被 %s 设置所隐藏."
+L["UIPANEL_GROUPSORT_shown"] = "显示" -- Needs review
+L["UIPANEL_GROUPSORT_shown_DESC"] = "分组将根据图标是否显示来排列." -- Needs review
 L["UIPANEL_GROUPSORT_SORTASCENDING"] = "低"
 L["UIPANEL_GROUPSORT_SORTASCENDING_DESC"] = "勾选此项将根据所选属性的数值从低到高来排列."
 L["UIPANEL_GROUPSORT_SORTDESCENDING"] = "高"
@@ -2272,6 +2274,7 @@ L["UIPANEL_TREE"] = "天赋树"
 L["UIPANEL_TREE_DESC"] = "勾选来允许该组在某个天赋树激活时显示，或者不勾选让它在天赋树没激活时隐藏。"
 L["UIPANEL_UPDATEINTERVAL"] = "更新间隔"
 L["UIPANEL_WARNINVALIDS"] = "提示无效的图标"
+L["UNDO"] = "撤消" -- Needs review
 L["UNDO_ICON"] = "撤消"
 L["UNDO_ICON_DESC"] = "撤消最近一次图标设置的更改动作."
 L["UNITCONDITIONS"] = "单位条件"

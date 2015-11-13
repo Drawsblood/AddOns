@@ -87,10 +87,10 @@ Prat:AddModuleToLoad(function()
   L:AddLocale("koKR",
   {
 	duration_desc = "대화글이 사라질 때 까지의 대기시간을 설정합니다.",
-	duration_name = "사라짐 대기시간 설정(초)",
+	duration_name = "사라짐 대기시간 설정 (초)",
 	module_desc = "대화글의 사라짐 옵션을 설정합니다.",
 	module_name = "사라짐",
-	textfade_desc = "각 대화창에 대해 대화글의 사라짐을 끄고켭니다.",
+	textfade_desc = "각 대화창에 대해 대화글의 사라짐을 끄고 켭니다.",
 	textfade_name = "사라짐 켜기",
 }
 

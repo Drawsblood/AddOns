@@ -1,9 +1,10 @@
 
-
-
 local DF = _G ["DetailsFramework"]
-local _
+if (not DF or not DetailsFrameworkCanLoad) then
+	return 
+end
 
+local _
 local _rawset = rawset --> lua local
 local _rawget = rawget --> lua local
 local _setmetatable = setmetatable --> lua local
@@ -218,6 +219,23 @@ local LabelMetaFunctions = {}
 	end
 
 ------------------------------------------------------------------------------------------------------------
+
+	function LabelMetaFunctions:SetTemplate (template)
+		if (template.size) then
+			DF:SetFontSize (self.label, template.size)
+		end
+		if (template.color) then
+			local r, g, b, a = DF:ParseColors (template.color)
+			self:SetTextColor (r, g, b, a)
+		end
+		if (template.font) then
+			local SharedMedia = LibStub:GetLibrary ("LibSharedMedia-3.0")
+			local font = SharedMedia:Fetch ("font", template.font)
+			DF:SetFontFace (self.label, font)
+		end
+	end
+	
+------------------------------------------------------------------------------------------------------------
 --> object constructor
 function DF:CreateLabel (parent, text, size, color, font, member, name, layer)
 	return DF:NewLabel (parent, nil, name, member, text, font, size, color, layer)
@@ -270,7 +288,7 @@ function DF:NewLabel (parent, container, name, member, text, font, size, color, 
 		for funcName, funcAddress in pairs (idx) do 
 			if (not LabelMetaFunctions [funcName]) then
 				LabelMetaFunctions [funcName] = function (object, ...)
-					local x = loadstring ( "return _G."..object.label:GetName()..":"..funcName.."(...)")
+					local x = loadstring ( "return _G['"..object.label:GetName().."']:"..funcName.."(...)")
 					return x (...)
 				end
 			end
@@ -279,18 +297,24 @@ function DF:NewLabel (parent, container, name, member, text, font, size, color, 
 	
 	LabelObject.label:SetText (text)
 	
-	if (size) then
-		DF:SetFontSize (LabelObject.label, size)
-	end
-	
 	if (color) then
 		local r, g, b, a = DF:ParseColors (color)
 		LabelObject.label:SetTextColor (r, g, b, a)
+	end	
+	
+	if (size and type (size) == "number") then
+		DF:SetFontSize (LabelObject.label, size)
 	end
+	
+
 	
 	LabelObject.label:SetJustifyH ("LEFT")
 	
 	setmetatable (LabelObject, LabelMetaFunctions)
+
+	if (size and type (size) == "table") then
+		LabelObject:SetTemplate (size)
+	end
 	
 	return LabelObject
 end

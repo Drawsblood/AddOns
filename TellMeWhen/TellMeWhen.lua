@@ -15,10 +15,10 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "7.3.5"
+TELLMEWHEN_VERSION = "7.4.0"
 
 TELLMEWHEN_VERSION_MINOR = ""
-local projectVersion = "7.3.5" -- comes out like "6.2.2-21-g4e91cee"
+local projectVersion = "7.4.0" -- comes out like "6.2.2-21-g4e91cee"
 if projectVersion:find("project%-version") then
 	TELLMEWHEN_VERSION_MINOR = "dev"
 elseif strmatch(projectVersion, "%-%d+%-") then
@@ -26,16 +26,16 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 73501 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 74003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 72008 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
-if TELLMEWHEN_VERSIONNUMBER > 74000 or TELLMEWHEN_VERSIONNUMBER < 73000 then
+if TELLMEWHEN_VERSIONNUMBER > 75000 or TELLMEWHEN_VERSIONNUMBER < 74000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("TELLMEWHEN: THE VERSION NUMBER IS SCREWED UP OR MAYBE THE SAFETY LIMITS ARE WRONG")
 end
 
-if TELLMEWHEN_VERSION_MINOR == "dev" and not strfind(TELLMEWHEN_VERSIONNUMBER, GetAddOnMetadata("TellMeWhen", "Version"):gsub("%.", ""), nil) then
+if TELLMEWHEN_VERSION_MINOR == "dev" and not strfind(TELLMEWHEN_VERSIONNUMBER, TELLMEWHEN_VERSION:gsub("%.", ""), nil) then
 	return error("TELLMEWHEN: TELLMEWHEN_VERSION DOESN'T AGREE WITH TELLMEWHEN_VERSIONNUMBER")
 end
 

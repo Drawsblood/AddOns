@@ -1,10 +1,10 @@
-## Interface: 60000
+## Interface: 60200
 ## Title: ShortMacros
 ## Notes: Provides shorthand commands for commonly used tasks in macros
 ## SavedVariables: 
-## Version: 5
+## Version: 6
 ## Author: Olafski
-## X-Curse-Packaged-Version: v5
+## X-Curse-Packaged-Version: v6
 ## X-Curse-Project-Name: ShortMacros
 ## X-Curse-Project-ID: shortmacros
 ## X-Curse-Repository-ID: wow/shortmacros/mainline

@@ -558,6 +558,10 @@ ParseAction = function(action, nodeList, annotation)
 		stream = gsub(stream, "([a-z_%.]+%.ticks_remain)(<?=)([0-9]+)", TicksRemainTranslationHelper)
 	end
 	do
+		-- Convert "!foo.cooldown.up" into "foo.cooldown.down" to avoid emitting "not not ...".
+		stream = gsub(stream, "!([a-z_%.]+)%.cooldown%.up", "%1.cooldown.down")
+	end
+	do
 		--[[
 			Mage APLs have a custom "target_if=max:..." modifier to the "choose_target"
 			action which does not adhere to the language standard.
@@ -3404,6 +3408,15 @@ EmitOperandSpecial = function(operand, parseNode, nodeList, annotation, action, 
 		AddSymbol(annotation, spellName)
 	elseif class == "MAGE" and operand == "buff.rune_of_power.remains" then
 		code = "TotemRemaining(rune_of_power)"
+	elseif class == "MAGE" and operand == "buff.shatterlance.up" then
+		--[[
+			Shatterlance is a hidden buff applied by the T18 mage class trinket after a Frostbolt
+			is cast.  Implement as a check for the T18 class trinket and whether the previous spell
+			was Frostbolt.
+		--]]
+		code = "HasTrinket(t18_class_trinket) and PreviousGCDSpell(frostbolt)"
+		AddSymbol(annotation, "frostbolt")
+		AddSymbol(annotation, "t18_class_trinket")
 	elseif class == "MAGE" and (operand == "burn_phase" or operand == "pyro_chain") then
 		if parseNode.asType == "boolean" then
 			code = format("GetState(%s) > 0", operand)
@@ -3531,8 +3544,14 @@ EmitOperandSpecial = function(operand, parseNode, nodeList, annotation, action, 
 		local token = tokenIterator()
 		if token == "cooldown" then
 			token = tokenIterator()
-			if token == "remains" then
+			if token == "down" then
+				code = format("ItemCooldown(%s) > 0", name)
+				AddSymbol(annotation, name)
+			elseif token == "remains" then
 				code = format("ItemCooldown(%s)", name)
+				AddSymbol(annotation, name)
+			elseif token == "up" then
+				code = format("not ItemCooldown(%s) > 0", name)
 				AddSymbol(annotation, name)
 			end
 		elseif token == "has_cooldown" then

@@ -55,11 +55,11 @@ Usage:
     {
 	err_notfound = "Nicht gefunden",
 	err_tooshort = "Suchbegriff zu kurz",
-	find_results = "Gefundene Ergebnisse",
-	module_desc = [=[Aktiviert Suchfunktion in Chatfenstern
+	find_results = "Gefundene Ergebnisse:",
+	module_desc = [=[Aktiviert die Suchfunktion in Chatfenstern.
 
 Suche]=],
-	module_info = [=[Aktiviert die Textbefehle /find und /findall, um die Chathistory zu durchsuchen
+	module_info = [=[Aktiviert die Textbefehle /find und /findall, um die Chathistorie zu durchsuchen
 
 Benutzung:
 
@@ -74,12 +74,18 @@ Suche]=],
     )
     L:AddLocale("koKR",
     {
-	-- err_notfound = "",
-	-- err_tooshort = "",
-	-- find_results = "",
-	-- module_desc = "",
-	-- module_info = "",
-	-- module_name = "",
+	err_notfound = "찾을 수 없음",
+	err_tooshort = "검색 구문이 너무 짧습니다",
+	find_results = "검색 결과:",
+	module_desc = "대화창 검색 기능을 추가합니다.",
+	module_info = [=[이 모듈은 대화 기록을 검색하는 /find 와 /findall 명령어를 추가합니다
+
+사용법:
+
+/find <문자열>
+
+/findall <문자열>]=],
+	module_name = "검색",
 }
 
     )

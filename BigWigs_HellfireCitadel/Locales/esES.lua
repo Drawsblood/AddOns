@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Hellfire Assault", "esES") or BigWigs:NewBossLocale("Hellfire Assault", "esMX")
 if not L then return end
 if L then
@@ -45,7 +46,7 @@ L = BigWigs:NewBossLocale("Fel Lord Zakuun", "esES") or BigWigs:NewBossLocale("F
 if L then
 L["custom_off_seed_marker"] = "Marcador de Semilla de destrucción"
 L["custom_off_seed_marker_desc"] = "Marca los objetivos de Semilla de destrucción con {rt1}{rt2}{rt3}{rt4}{rt5}, requiere ayudante o líder."
-L["seed"] = "Semilla (%d)"
+L["seed"] = "Semilla" -- Needs review
 L["tank_proximity"] = "Proximidad de tanque"
 L["tank_proximity_desc"] = "Abre una proximidad a 5 metros mostrando los otros tanques para ayudarte a lidiar con las habilidades Mano dura y Muy armado."
 
@@ -59,21 +60,38 @@ end
 
 L = BigWigs:NewBossLocale("Mannoroth", "esES") or BigWigs:NewBossLocale("Mannoroth", "esMX")
 if L then
+L["182212"] = "¡Portal Infernal cerrado!" -- Needs review
+L["185147"] = "¡Portal del Señor de fatalidad cerrado!" -- Needs review
+L["185175"] = "¡Portal del Diablillo cerrado!" -- Needs review
+L["custom_off_doom_marker"] = "Marcador de Marca de fatalidad" -- Needs review
+L["custom_off_doom_marker_desc"] = "En dificultad Mítica, marca los objetivos de Marca de fatalidad con {rt1}{rt2}{rt3}, requiere ayudante o líder." -- Needs review
 L["custom_off_gaze_marker"] = "Marcador de Mirada de Mannoroth"
 L["custom_off_gaze_marker_desc"] = "Marca los objetivos de Mirada de Mannoroth con {rt1}{rt2}{rt3}, requiere ayudante o líder."
-L["doomLord"] = "¡Portal del Señor de fatalidad cerrado!"
+L["custom_off_wrath_marker"] = "Marcador de Cólera de Gul'dan" -- Needs review
+L["custom_off_wrath_marker_desc"] = "Marca los objetivos de Cólera de Gul'dan con {rt8}{rt7}{rt6}{rt5}{rt4}, requiere ayudante o líder." -- Needs review
 L["felseeker_message"] = "%s (%d) %dm"
 L["gaze"] = "Mirada (%d)"
-L["imp"] = "¡Portal del Diablillo cerrado!" -- Needs review
-L["infernal"] = "¡Portal Infernal cerrado!" -- Needs review
 
 end
 
 L = BigWigs:NewBossLocale("Archimonde", "esES") or BigWigs:NewBossLocale("Archimonde", "esMX")
 if L then
 L["chaos_bar"] = "%s -> %s"
+L["chaos_from"] = "%s de %s" -- Needs review
+L["chaos_helper_message"] = "Tu posición de caos: %d" -- Needs review
+L["chaos_to"] = "%s a %s" -- Needs review
+L["custom_off_chaos_helper"] = "Ayudante de Provocar caos" -- Needs review
+L["custom_off_chaos_helper_desc"] = "Sólo para dificultad Mítica. Esta característica te dirá que número de caos eres, mostrando un mensaje normal y diciendolo por el chat decir. Dependiendo de la táctica que uses, esta característica puede o no puede ser de utilidad." -- Needs review
+L["custom_off_infernal_marker"] = "Marcador de Infernales" -- Needs review
+L["custom_off_infernal_marker_desc"] = "Marca los Infernales que aparecen por Lluvia de caos con {rt1}{rt2}{rt3}{rt4}{rt5}, requiere ayudante o líder." -- Needs review
+L["custom_off_legion_marker"] = "Marcador de Marca de la Legión" -- Needs review
+L["custom_off_legion_marker_desc"] = "Marca los objetivos de Marca de la Legión con {rt1}{rt2}{rt3}{rt4}, requiere ayudante o líder." -- Needs review
 L["custom_off_torment_marker"] = "Marcador de Tormento encadenado"
 L["custom_off_torment_marker_desc"] = "Marca los objetivos de Tormento encadenado con {rt1}{rt2}{rt3}, requiere ayudante o líder."
+L["infernal_count"] = "%s (%d/%d)" -- Needs review
+L["markofthelegion_self"] = "Marca de la Legión en ti" -- Needs review
+L["markofthelegion_self_bar"] = "¡Explotas!" -- Needs review
+L["markofthelegion_self_desc"] = "Cuenta atrás especial cuando tienes Marca de la Legión." -- Needs review
 L["torment_removed"] = "Tormento encadenado eliminado (%d/%d)"
 
 end
@@ -94,6 +112,8 @@ L["kazrogal"] = "Kaz'rogal" -- Needs review
 L["kuroh"] = "Auxiliar Kuroh"
 L["orb"] = "Orbe de destrucción"
 L["peacekeeper"] = "Ensamblaje pacifista"
+L["talonpriest"] = "Sacerdote de la garra corrupto" -- Needs review
+L["weaponlord"] = "Señor de armas Mehlkhior" -- Needs review
 
 end
 

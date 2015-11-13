@@ -1,0 +1,19 @@
+------------------------------------------------------------------------
+r191 | zensunim | 2015-10-20 04:00:51 +0000 (Tue, 20 Oct 2015) | 3 lines
+Changed paths:
+   A /tags/4.37.5 (from /trunk:190)
+
+4.37.5
+* Added WoD spells for Hellfire Citadel
+* Added WoD spells for Draenor (world)		
+------------------------------------------------------------------------
+r190 | zensunim | 2015-10-20 04:00:33 +0000 (Tue, 20 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/GTFO.lua
+   M /trunk/GTFO.toc
+   M /trunk/GTFO_Fail_WOD.lua
+   M /trunk/GTFO_Spells_MP.lua
+   M /trunk/GTFO_Spells_WOD.lua
+
+4.37.5 prep
+------------------------------------------------------------------------

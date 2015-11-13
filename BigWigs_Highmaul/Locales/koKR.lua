@@ -1,4 +1,5 @@
-﻿local L = BigWigs:NewBossLocale("Kargath Bladefist", "koKR")
+﻿-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
+local L = BigWigs:NewBossLocale("Kargath Bladefist", "koKR")
 if not L then return end
 if L then
 L["arena_sweeper_desc"] = "사슬 던지기로 인하여 관중석으로 내동댕이쳐진 이후 관중들에 의하여 쫓겨나기까지의 시간을 표시"
@@ -9,6 +10,8 @@ end
 L = BigWigs:NewBossLocale("The Butcher", "koKR")
 if L then
 L["adds_multiple"] = "%d번째 쫄"
+L["tank_proximity"] = "방어 전담 근접 표시" -- Needs review
+L["tank_proximity_desc"] = "잔인무도 공격을 다른 방어 전담과 같이 맞기 위해 5미터 근접 표시창을 표시합니다." -- Needs review
 
 end
 

@@ -1,5 +1,8 @@
 
 local DF = _G ["DetailsFramework"]
+if (not DF or not DetailsFrameworkCanLoad) then
+	return 
+end
 
 function DF:CreateScrollBar (master, slave, x, y)
 	return DF:NewScrollBar (master, slave, x, y)

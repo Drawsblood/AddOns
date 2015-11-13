@@ -1,9 +1,10 @@
 
-
-
 local DF = _G ["DetailsFramework"]
-local _
+if (not DF or not DetailsFrameworkCanLoad) then
+	return 
+end
 
+local _
 local _rawset = rawset --> lua local
 local _rawget = rawget --> lua local
 local _setmetatable = setmetatable --> lua local
@@ -245,7 +246,7 @@ function DF:NewImage (parent, texture, w, h, layer, coords, member, name)
 		for funcName, funcAddress in pairs (idx) do 
 			if (not ImageMetaFunctions [funcName]) then
 				ImageMetaFunctions [funcName] = function (object, ...)
-					local x = loadstring ( "return _G."..object.image:GetName()..":"..funcName.."(...)")
+					local x = loadstring ( "return _G['"..object.image:GetName().."']:"..funcName.."(...)")
 					return x (...)
 				end
 			end

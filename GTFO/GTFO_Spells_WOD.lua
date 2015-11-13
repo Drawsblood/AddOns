@@ -257,10 +257,21 @@ GTFO.SpellID["188520"] = {
 		local stacks = GTFO_DebuffStackCount("player", 188520) or 0;
 		if (stacks >= 8) then
 			return 1;
-		elseif (stacks >= 5) then
+		else
 			return 2;
 		end
 	end;
+};
+
+GTFO.SpellID["183747"] = {
+	--desc = "Pollen Cloud";
+	sound = 2;
+};
+
+GTFO.SpellID["187671"] = {
+	--desc = "Mark of Kazzak (Supreme Lord Kazzak)";
+	sound = 4;
+	ignoreSelfInflicted = true;
 };
 
 --TODO: Acid Breath (Drov the Ruiner) - avoidable?
@@ -1163,9 +1174,15 @@ GTFO.SpellID["182522"] = {
 
 GTFO.SpellID["188072"] = {
 	--desc = "Fel Destruction (Orb of Destruction)";
-	sound = 2;
 	alwaysAlert = true;
-	test = true;
+	soundFunction = function() -- Slow down spam
+		if (GTFO_FindEvent("FelFail")) then
+			return 0;
+		end
+		GTFO_AddEvent("FelFail", 1.5);
+		return 1;
+	end	
+	
 };
 
 GTFO.SpellID["187103"] = {
@@ -1205,7 +1222,6 @@ GTFO.SpellID["181082"] = {
 
 GTFO.SpellID["180246"] = {
 	--desc = "Pound (Kormrok)";
-	test = true;
 	soundFunction = function() -- Warn only on multiple hits
 		if (GTFO_HasDebuff("player", 187819)) then -- Grasping Hand debuff
 			return 0;
@@ -1245,6 +1261,11 @@ GTFO.SpellID["179995"] = {
 	sound = 1;
 };
 
+GTFO.SpellID["186770"] = {
+	--desc = "Pool of Souls (Gorefiend)";
+	sound = 1;
+};
+
 GTFO.SpellID["182600"] = {
 	--desc = "Fel Fire (Shadow-Lord Iskar)";
 	sound = 1;
@@ -1252,6 +1273,12 @@ GTFO.SpellID["182600"] = {
 
 GTFO.SpellID["182218"] = {
 	--desc = "Felblaze Residue (Socrethar)";
+	sound = 1;
+	vehicle = true;
+};
+
+GTFO.SpellID["181653"] = {
+	--desc = "Fel Crystals (Fel Lord Zakuun)";
 	sound = 1;
 };
 
@@ -1267,4 +1294,50 @@ GTFO.SpellID["186073"] = {
 	sound = 1;
 };
 
+GTFO.SpellID["180252"] = {
+	--desc = "Roaring Flames (Ancient Enforcer)";
+	sound = 1;
+};
+
+GTFO.SpellID["180312"] = {
+	--desc = "Infernal Tempest (Tyrant Velhari)";
+	sound = 4;
+	ignoreSelfInflicted = true;
+};
+
+GTFO.SpellID["180604"] = {
+	--desc = "Despoiled Ground (Tyrant Velhari)";
+	sound = 1;
+};
+
+GTFO.SpellID["181192"] = {
+	--desc = "Fel Hellfire (Mannoroth)";
+	sound = 1;
+};
+
+GTFO.SpellID["182171"] = {
+	--desc = "Blood of Mannoroth (Mannoroth)";
+	sound = 1;
+};
+
+GTFO.SpellID["183586"] = {
+	--desc = "Doomfire (Archimonde)";
+	sound = 1;
+	applicationOnly = true;
+};
+
+GTFO.SpellID["187255"] = {
+	--desc = "Nether Storm (Archimonde)";
+	sound = 1;
+};
+
+GTFO.SpellID["188796"] = {
+	--desc = "Fel Corruption (Archimonde)";
+	sound = 1;
+};
+
+GTFO.SpellID["186510"] = {
+	--desc = "Smouldering";
+	sound = 1;
+};
 

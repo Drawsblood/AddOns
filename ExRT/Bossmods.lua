@@ -1,14 +1,18 @@
 local GlobalAddonName, ExRT = ...
 
-local UnitAura, UnitIsDeadOrGhost, UnitIsConnected, UnitPower, UnitGUID, UnitName, UnitPosition, UnitInRange, UnitIsUnit = UnitAura, UnitIsDeadOrGhost, UnitIsConnected, UnitPower, UnitGUID, UnitName, UnitPosition, UnitInRange, UnitIsUnit
-local GetTime, tonumber, tostring, sort, wipe, PI, pairs = GetTime, tonumber, tostring, table.sort, table.wipe, PI, pairs
+local UnitAura, UnitIsDeadOrGhost, UnitIsConnected, UnitPower, UnitGUID, UnitName, UnitPosition, UnitInRange, UnitIsUnit, UnitClass = UnitAura, UnitIsDeadOrGhost, UnitIsConnected, UnitPower, UnitGUID, UnitName, UnitPosition, UnitInRange, UnitIsUnit, UnitClass
+local GetTime, tonumber, tostring, sort, wipe, PI, pairs, type = GetTime, tonumber, tostring, table.sort, table.wipe, PI, pairs, type
 local cos, sin, sqrt, acos, abs, floor, min, max, GGetPlayerMapPosition, GetPlayerFacing, GetNumGroupMembers = math.cos, math.sin, math.sqrt, acos, math.abs, math.floor, math.min, math.max, GetPlayerMapPosition, GetPlayerFacing, GetNumGroupMembers
-local ClassColorNum, SetMapToCurrentZone, GetCurrentMapAreaID, GetCurrentMapDungeonLevel, GetRaidRosterInfo = ExRT.mds.classColorNum, SetMapToCurrentZone, GetCurrentMapAreaID, GetCurrentMapDungeonLevel, GetRaidRosterInfo
+local atan = atan
+local ClassColorNum, SetMapToCurrentZone, GetCurrentMapAreaID, GetCurrentMapDungeonLevel, GetRaidRosterInfo, GetMobID, RAID_CLASS_COLORS, table_len, GetUnitTypeByGUID, delUnitNameServer = ExRT.F.classColorNum, SetMapToCurrentZone, GetCurrentMapAreaID, GetCurrentMapDungeonLevel, GetRaidRosterInfo, ExRT.F.GUIDtoID, RAID_CLASS_COLORS, ExRT.F.table_len, ExRT.F.GetUnitTypeByGUID, ExRT.F.delUnitNameServer
 local YES, NO = YES, NO --prevent rangom changes
 
 local VExRT = nil
 
 local module = ExRT.mod:New("Bossmods",ExRT.L.bossmods,nil,true)
+local ELib,L = ExRT.lib,ExRT.L
+
+module.A = {}
 -----------------------------------------
 -- functions
 -----------------------------------------
@@ -42,6 +46,8 @@ end
 -- Ра-ден
 -----------------------------------------
 local RaDen = {}
+module.A.RaDen = RaDen
+
 RaDen.mainframe = nil
 RaDen.party = nil
 RaDen.unstableVita_id1 = 138308
@@ -133,9 +139,9 @@ function RaDen:Load()
 		if VExRT.Bossmods.RaDenLeft and VExRT.Bossmods.RaDenTop then
 			RaDen.mainframe:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.RaDenLeft,VExRT.Bossmods.RaDenTop)
 		else
-			RaDen.mainframe:SetPoint("TOP",UIParent, "TOP", 0, 0)
+			RaDen.mainframe:SetPoint("TOP",UIParent, "TOP", 0, -50)
 		end
-		RaDen.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 8})
+		RaDen.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 8})
 		RaDen.mainframe:SetBackdropColor(0.05,0.05,0.05,0.85)
 		RaDen.mainframe:SetBackdropBorderColor(0.2,0.2,0.2,0.4)
 		RaDen.mainframe:EnableMouse(true)
@@ -164,7 +170,7 @@ function RaDen:Load()
 			RaDen.mainframe.names[i]:SetPoint("TOPLEFT", (math.floor((i-1)/10))*80, -(((i-1)%10)*12)-5)
 			RaDen.mainframe.names[i].text = RaDen.mainframe.names[i]:CreateFontString(nil,"ARTWORK")
 			RaDen.mainframe.names[i].text:SetJustifyH("CENTER")
-			RaDen.mainframe.names[i].text:SetFont(ExRT.mds.defFont, 12,"OUTLINE")
+			RaDen.mainframe.names[i].text:SetFont(ExRT.F.defFont, 12,"OUTLINE")
 			local b = GetNumGuildMembers()
 			local a
 			if b == 0 then 
@@ -199,7 +205,7 @@ function RaDen:Load()
 		RaDen.mainframe:SetScript("OnUpdate", RaDen.timerfunc)
 		RaDen.mainframe:SetScript("OnEvent", RaDen.EventHandler)
 
-		print(ExRT.L.bossmodsradenhelp)
+		print(L.bossmodsradenhelp)
 	end
 end
 
@@ -207,6 +213,8 @@ end
 -- Sha of Pride
 -----------------------------------------
 local ShaOfPride = {}
+module.A.ShaOfPride = ShaOfPride
+
 ShaOfPride.mainframe = nil
 ShaOfPride.raid = {}
 ShaOfPride.norushen = nil
@@ -259,7 +267,7 @@ end
 
 function ShaOfPride:RefreshAll()
 	local n = GetNumGroupMembers() or 0
-	local gMax = ExRT.mds.GetRaidDiffMaxGroup()
+	local gMax = ExRT.F.GetRaidDiffMaxGroup()
 	if n > 0 then
 		wipe(ShaOfPride.raid)
 		for j=1,n do
@@ -305,7 +313,7 @@ function ShaOfPride:EventHandler(event, ...)
 		if not bossGUID then 
 			return 
 		end
-		local bossMobID = ExRT.mds.GUIDtoID(bossGUID)
+		local bossMobID = ExRT.F.GUIDtoID(bossGUID)
 		if bossMobID == 72276 then
 			ShaOfPride.norushen = 1
 		elseif bossMobID == 71734 then
@@ -321,14 +329,14 @@ function ShaOfPride:Load()
 		return 
 	end
 	ShaOfPride.mainframe = CreateFrame("Frame","ExRTBossmodsShaOfPride",UIParent)
-	local gMax = ExRT.mds.GetRaidDiffMaxGroup()
+	local gMax = ExRT.F.GetRaidDiffMaxGroup()
 	ShaOfPride.mainframe:SetSize(100,gMax*5*12+8)
 	if VExRT.Bossmods.ShaofprideLeft and VExRT.Bossmods.ShaofprideTop then
 		ShaOfPride.mainframe:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.ShaofprideLeft,VExRT.Bossmods.ShaofprideTop)
 	else
-		ShaOfPride.mainframe:SetPoint("TOP",UIParent, "TOP", 0, 0)	
+		ShaOfPride.mainframe:SetPoint("TOP",UIParent, "TOP", 0, -50)	
 	end
-	ShaOfPride.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 8})
+	ShaOfPride.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 8})
 	ShaOfPride.mainframe:SetBackdropColor(0.05,0.05,0.05,0.85)
 	ShaOfPride.mainframe:SetBackdropBorderColor(0.2,0.2,0.2,0.4)
 	ShaOfPride.mainframe:EnableMouse(true)
@@ -352,11 +360,13 @@ function ShaOfPride:Load()
 	ShaOfPride.mainframe.names = {}
 
 	for i=1,25 do
-		ShaOfPride.mainframe.names[i]=CreateFrame("Frame",nil,ShaOfPride.mainframe)
-		ShaOfPride.mainframe.names[i]:SetSize(100,12)
-		ShaOfPride.mainframe.names[i]:SetPoint("TOPLEFT", 0, -((i-1)*12)-4)
-		ShaOfPride.mainframe.names[i].text = ExRT.lib.CreateText(ShaOfPride.mainframe.names[i],71,12,nil,4,0,nil,"TOP",ExRT.mds.defFont,12,nil,nil,1,1,1,nil,1)
-		ShaOfPride.mainframe.names[i].textr = ExRT.lib.CreateText(ShaOfPride.mainframe.names[i],50,12,"TOPRIGHT",-4,0,"RIGHT","TOP",ExRT.mds.defFont,12,nil,nil,1,1,1,nil,1)
+		local name = CreateFrame("Frame",nil,ShaOfPride.mainframe)
+		ShaOfPride.mainframe.names[i] = name
+		name:SetSize(100,12)
+		name:SetPoint("TOPLEFT", 0, -((i-1)*12)-4)
+		
+		name.text = ELib:Text(name):Size(71,12):Point(4,0):Top():Font(ExRT.F.defFont,12):Outline():Color(1,1,1)
+		name.textr = ELib:Text(name):Size(50,12):Point("TOPRIGHT",-4,0):Top():Right():Font(ExRT.F.defFont,12):Outline():Color(1,1,1)
 	end
 
 	ShaOfPride:RefreshAll()
@@ -370,6 +380,8 @@ end
 -- Malkorok
 -----------------------------------------
 local Malkorok = {}
+module.A.Malkorok = Malkorok
+
 Malkorok.mainframe = nil
 Malkorok.tmr = 0
 Malkorok.main_coord_top_x = 0.36427
@@ -728,9 +740,9 @@ function Malkorok:Load()
 	if VExRT.Bossmods.MalkorokLeft and VExRT.Bossmods.MalkorokTop then
 		Malkorok.mainframe:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.MalkorokLeft,VExRT.Bossmods.MalkorokTop)
 	else
-		Malkorok.mainframe:SetPoint("TOP",UIParent, "TOP", 0, 0)
+		Malkorok.mainframe:SetPoint("TOP",UIParent, "TOP", 0, -50)
 	end
-	Malkorok.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 8})
+	Malkorok.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 8})
 	Malkorok.mainframe:SetBackdropColor(0,0,0,0.5)
 	Malkorok.mainframe:SetBackdropBorderColor(0.2,0.2,0.2,0.4)
 	Malkorok.mainframe:EnableMouse(true)
@@ -815,8 +827,8 @@ function Malkorok:Load()
 			local col = "R"
 			if button == "RightButton" then col = "G" end
 			if RaidRank()>0 then 
-				ExRT.mds.SendExMsg("malkorok",tostring(numpie).."\t"..col) 
-				ExRT.mds.SendExMsg("malkorok",tostring(numpie).."\t"..col,nil,nil,"MHADD")
+				ExRT.F.SendExMsg("malkorok",tostring(numpie).."\t"..col) 
+				ExRT.F.SendExMsg("malkorok",tostring(numpie).."\t"..col,nil,nil,"MHADD")
 			end
 		end
 	end)
@@ -830,16 +842,16 @@ function Malkorok:Load()
 	Malkorok.mainframe.Player.scale = 1
 	Malkorok.mainframe.Player:SetScale(Malkorok.mainframe.Player.scale)
 
-	Malkorok.mainframe.Danger = ExRT.lib.CreateText(Malkorok.mainframe,200,18,"TOP",0,15,"CENTER","TOP",ExRT.mds.defFont,18,ExRT.L.bossmodsmalkorokdanger,nil,1,0.2,0.2,nil,1)
+	Malkorok.mainframe.Danger = ELib:Text(Malkorok.mainframe,L.bossmodsmalkorokdanger,18):Size(200,18):Point("TOP",0,15):Center():Top():Color(1,.2,.2):Outline()
 	Malkorok.mainframe.Danger:Hide()
 
-	Malkorok.mainframe.Lock = ExRT.lib.CreateIcon(Malkorok.mainframe,14,nil,2,-1,"Interface\\AddOns\\ExRT\\media\\un_lock.tga")
+	Malkorok.mainframe.Lock = ELib:Icon(Malkorok.mainframe,"Interface\\AddOns\\ExRT\\media\\un_lock.tga",14):Point(2,-1)
 	if VExRT.Bossmods.MalkorokLock then 
 		Malkorok.mainframe.Lock.texture:SetTexture("Interface\\AddOns\\ExRT\\media\\lock.tga")
 		Malkorok.mainframe:SetMovable(false)
 	end
 
-	Malkorok.mainframe.Rotate = ExRT.lib.CreateIcon(Malkorok.mainframe,14,nil,18,-1,"Interface\\AddOns\\ExRT\\media\\icon-config.tga")
+	Malkorok.mainframe.Rotate = ELib:Icon(Malkorok.mainframe,"Interface\\AddOns\\ExRT\\media\\icon-config.tga",14):Point(18,-1)
 	Malkorok.mainframe.Rotate.texture:SetVertexColor(0.6,0.6,0.6,0.8)
 	if VExRT.Bossmods.MalkorokRotate then 
 		Malkorok.rotate = true
@@ -847,8 +859,7 @@ function Malkorok:Load()
 		if Malkorok.def_angle~=0 then Malkorok.def_angle_rotate() end
 	end
 
-	Malkorok.mainframe.aoecd = ExRT.lib.CreateIcon(Malkorok.mainframe,32,"BOTTOMLEFT",2,1,nil)
-	Malkorok.mainframe.aoecd.texture:SetTexture("Interface\\Icons\\Spell_Shadow_Shadesofdarkness")
+	Malkorok.mainframe.aoecd = ELib:Icon(Malkorok.mainframe,"Interface\\Icons\\Spell_Shadow_Shadesofdarkness",32):Point("BOTTOMLEFT",2,1)
 	Malkorok.mainframe.aoecd.cooldown = CreateFrame("Cooldown", nil, Malkorok.mainframe.aoecd)
 	Malkorok.mainframe.aoecd.cooldown:SetAllPoints()
 	if VExRT.Bossmods.MalkorokIconHide then
@@ -860,7 +871,7 @@ function Malkorok:Load()
 	Malkorok.mainframe:SetScript("OnUpdate", Malkorok.timerfunc)
 	Malkorok.mainframe:SetScript("OnEvent", Malkorok.EventHandler)
 
-	print(ExRT.L.bossmodsmalkorokhelp)
+	print(L.bossmodsmalkorokhelp)
 
 	SetMapToCurrentZone()
 	local currentAreaID = GetCurrentMapAreaID()
@@ -876,6 +887,8 @@ end
 -- Malkorok AI
 -----------------------------------------
 local MalkorokAI = {}
+module.A.MalkorokAI = MalkorokAI
+
 MalkorokAI.mainframe = nil
 MalkorokAI.pie = {0,0,0,0,0,0}
 MalkorokAI.pie_raid = {}
@@ -918,7 +931,7 @@ function MalkorokAI:timerfunc_do(elapsed)
 	if MalkorokAI.tmr_do > 4.5 then
 		local n = GetNumGroupMembers() or 0
 		if n > 0 then
-			local gMax = ExRT.mds.GetRaidDiffMaxGroup()
+			local gMax = ExRT.F.GetRaidDiffMaxGroup()
 			for i=1,6 do MalkorokAI.pie_raid[i]=0 end
 			for j=1,n do
 				local name, _,subgroup = GetRaidRosterInfo(j)
@@ -959,8 +972,8 @@ function MalkorokAI:timerfunc_do(elapsed)
 			for i=1,6 do 
 				if MalkorokAI.pie_raid[i]==minpieam then
 					if RaidRank()>0 then 
-						ExRT.mds.SendExMsg("malkorok",tostring(i).."\tR")
-						ExRT.mds.SendExMsg("malkorok",tostring(i).."\tR",nil,nil,"MHADD")
+						ExRT.F.SendExMsg("malkorok",tostring(i).."\tR")
+						ExRT.F.SendExMsg("malkorok",tostring(i).."\tR",nil,nil,"MHADD")
 					end
 					MalkorokAI.pie[i] = 1
 					Malkorok.pie_status[i]=1
@@ -993,19 +1006,21 @@ function MalkorokAI:Load()
 
 	MalkorokAI.mainframe.text = CreateFrame("SimpleHTML", nil,Malkorok.mainframe)
 	MalkorokAI.mainframe.text:SetText("AI")
-	MalkorokAI.mainframe.text:SetFont(ExRT.mds.defFont, 16,"OUTLINE")
+	MalkorokAI.mainframe.text:SetFont(ExRT.F.defFont, 16,"OUTLINE")
 	MalkorokAI.mainframe.text:SetHeight(12)
 	MalkorokAI.mainframe.text:SetWidth(12)
 	MalkorokAI.mainframe.text:SetPoint("CENTER", Malkorok.mainframe,"BOTTOMRIGHT", -12,12)
 	MalkorokAI.mainframe.text:SetTextColor(1, 1, 1, 1)
 
-	print(ExRT.L.bossmodsmalkorokaihelp)
+	print(L.bossmodsmalkorokaihelp)
 end
 
 -----------------------------------------
 -- Spoils of Pandaria
 -----------------------------------------
 local SpoilsOfPandaria = {}
+module.A.SpoilsOfPandaria = SpoilsOfPandaria
+
 SpoilsOfPandaria.mainframe = nil
 SpoilsOfPandaria.side1 = nil
 SpoilsOfPandaria.side2 = nil
@@ -1091,20 +1106,20 @@ function SpoilsOfPandaria:timerfunc(elapsed)
 end
 
 SpoilsOfPandaria.roomNames = {
-	ExRT.L.BossmodsSpoilsofPandariaMogu,
-	ExRT.L.BossmodsSpoilsofPandariaKlaxxi,
-	ExRT.L.BossmodsSpoilsofPandariaKlaxxi,
-	ExRT.L.BossmodsSpoilsofPandariaMogu,
+	L.BossmodsSpoilsofPandariaMogu,
+	L.BossmodsSpoilsofPandariaKlaxxi,
+	L.BossmodsSpoilsofPandariaKlaxxi,
+	L.BossmodsSpoilsofPandariaMogu,
 }
 function SpoilsOfPandaria:onEvent(event,unitID,_,_,_,spellID)
   	if unitID:find("^raid%d+$") and spellID == 144229 then
-		local name = ExRT.mds.UnitCombatlogname(unitID)	
+		local name = ExRT.F.UnitCombatlogname(unitID)	
 		if name then
 			local px, py = GetPlayerMapPosition(unitID)
 			local room = SpoilsOfPandaria.findroom2(px, py)
-			local color = ExRT.mds.classColorByGUID(UnitGUID(unitID))
-			local ctime_ = ExRT.mds.GetEncounterTime() or 0
-			print(format("%d:%02d",ctime_/60,ctime_%60).." |c"..color..name.."|r ".. ExRT.L.BossmodsSpoilsofPandariaOpensBox .." "..SpoilsOfPandaria.roomNames[room])
+			local color = ExRT.F.classColorByGUID(UnitGUID(unitID))
+			local ctime_ = ExRT.F.GetEncounterTime() or 0
+			print(format("%d:%02d",ctime_/60,ctime_%60).." |c"..color..name.."|r ".. L.BossmodsSpoilsofPandariaOpensBox .." "..SpoilsOfPandaria.roomNames[room])
 		end
 	end
 end
@@ -1116,9 +1131,9 @@ function SpoilsOfPandaria:Load()
 	if VExRT.Bossmods.SpoilsofPandariaLeft and VExRT.Bossmods.SpoilsofPandariaTop then
 		SpoilsOfPandaria.mainframe:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.SpoilsofPandariaLeft,VExRT.Bossmods.SpoilsofPandariaTop)
 	else
-		SpoilsOfPandaria.mainframe:SetPoint("TOP",UIParent, "TOP", 0, 0)
+		SpoilsOfPandaria.mainframe:SetPoint("TOP",UIParent, "TOP", 0, -50)
 	end
-	SpoilsOfPandaria.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 8})
+	SpoilsOfPandaria.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 8})
 	SpoilsOfPandaria.mainframe:SetBackdropColor(0.05,0.05,0.05,0.85)
 	SpoilsOfPandaria.mainframe:SetBackdropBorderColor(0.2,0.2,0.2,0.4)
 	SpoilsOfPandaria.mainframe:EnableMouse(true)
@@ -1144,7 +1159,7 @@ function SpoilsOfPandaria:Load()
 		SpoilsOfPandaria.mainframe.side[i]:SetSize(70,20)
 		SpoilsOfPandaria.mainframe.side[i].text = SpoilsOfPandaria.mainframe.side[i]:CreateFontString(nil,"ARTWORK")
 		SpoilsOfPandaria.mainframe.side[i].text:SetJustifyH("CENTER")	
-		SpoilsOfPandaria.mainframe.side[i].text:SetFont(ExRT.mds.defFont, 20,"OUTLINE")	
+		SpoilsOfPandaria.mainframe.side[i].text:SetFont(ExRT.F.defFont, 20,"OUTLINE")	
 		SpoilsOfPandaria.mainframe.side[i].text:SetText("100")
 		SpoilsOfPandaria.mainframe.side[i].text:SetTextColor(1, 1, 1, 1)
 		SpoilsOfPandaria.mainframe.side[i].text:SetAllPoints()
@@ -1162,6 +1177,8 @@ end
 -- Kromog
 -----------------------------------------
 local Kromog = {}
+module.A.Kromog = Kromog
+
 Kromog.runes = {
 	{3673.47,329.81},
 	{3669.83,320.84},
@@ -1236,7 +1253,7 @@ function Kromog:UpdateSelectRoster()
 				else
 					Kromog.raidRoster.buttons[pos]:SetAlpha(1)
 				end
-				Kromog.raidRoster.buttons[pos].name:SetText("|c"..ExRT.mds.classColor(data[2])..data[1])
+				Kromog.raidRoster.buttons[pos].name:SetText("|c"..ExRT.F.classColor(data[2])..data[1])
 				Kromog.raidRoster.buttons[pos]:Show()
 			elseif Kromog.raidRoster.buttons[pos] then
 				Kromog.raidRoster.buttons[pos]:Hide()
@@ -1250,10 +1267,10 @@ function Kromog:ReRoster()
 	for i=1,#Kromog.runes do
 		local name = VExRT.Bossmods.Kromog[i]
 		if name then
-			local shortName = ExRT.mds.delUnitNameServer(name)
+			local shortName = ExRT.F.delUnitNameServer(name)
 			local class = select(2,UnitClass(shortName))
 			if class then
-				class = "|c"..ExRT.mds.classColor(class)
+				class = "|c"..ExRT.F.classColor(class)
 			else
 				class = ""
 			end
@@ -1286,7 +1303,7 @@ function Kromog:Load()
 		Kromog.setupFrame.isEnabled = true
 		return
 	end
-	Kromog.setupFrame = ExRT.lib.CreatePopupFrame(Kromog.width + 8,Kromog.image_avg * Kromog.width + 35,"Kromog")
+	Kromog.setupFrame = ELib:Popup("Kromog",0):Size(Kromog.width + 8,Kromog.image_avg * Kromog.width + 35)
 	Kromog.setupFrame.map = Kromog.setupFrame:CreateTexture()
 	Kromog.setupFrame.map:SetTexture("Interface\\AddOns\\ExRT\\media\\KromogMap.tga")
 	Kromog.setupFrame.map:SetPoint("TOP",Kromog.setupFrame,"TOP",0,-30)
@@ -1299,7 +1316,7 @@ function Kromog:Load()
 	local function DisableSync()
 		VExRT.Bossmods.Kromog.sync = nil
 		if VExRT.Bossmods.Kromog.name and VExRT.Bossmods.Kromog.time then
-			Kromog.setupFrame.lastUpdate:SetText(ExRT.L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kromog.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kromog.time)..")"..(not VExRT.Bossmods.Kromog.sync and " *" or ""))
+			Kromog.setupFrame.lastUpdate:SetText(L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kromog.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kromog.time)..")"..(not VExRT.Bossmods.Kromog.sync and " *" or ""))
 		else
 			Kromog.setupFrame.lastUpdate:SetText("")
 		end
@@ -1311,8 +1328,8 @@ function Kromog:Load()
 			local playerName = UnitName('player')
 			for i=1,#Kromog.runes do
 				local name = VExRT.Bossmods.Kromog[i]
-				if name and ExRT.mds.delUnitNameServer(name) == playerName then
-					ExRT.mds.Arrow:ShowRunTo(Kromog.runes[i][1],Kromog.runes[i][2],2,10,true,true)
+				if name and ExRT.F.delUnitNameServer(name) == playerName then
+					ExRT.F.Arrow:ShowRunTo(Kromog.runes[i][1],Kromog.runes[i][2],2,10,true,true)
 					return
 				end
 			end
@@ -1338,7 +1355,7 @@ function Kromog:Load()
 			return
 		end
 		Kromog.raidRoster.pos = self._i
-		Kromog.raidRoster.title:SetText(ExRT.L.BossmodsKromogSelectPlayer..self._i)
+		Kromog.raidRoster.title:SetText(L.BossmodsKromogSelectPlayer..self._i)
 		Kromog.raidRoster:Show()
 	end
 	for i=1,#Kromog.runes do
@@ -1349,10 +1366,8 @@ function Kromog:Load()
 		Kromog.setupFrame.pings[i].icon = Kromog.setupFrame.pings[i]:CreateTexture(nil,"ARTWORK")
 		Kromog.setupFrame.pings[i].icon:SetAllPoints()
 		Kromog.setupFrame.pings[i].icon:SetTexture("Interface\\AddOns\\ExRT\\media\\KromogRune.tga")
-		Kromog.setupFrame.pings[i].num = ExRT.lib.CreateText(Kromog.setupFrame.pings[i],30,15,nil,0,0,"LEFT","TOP",nil,12,i,nil,1,1,1,nil,1)
-		ExRT.lib.SetPoint(Kromog.setupFrame.pings[i].num,"TOPLEFT",Kromog.setupFrame.pings[i],"TOPLEFT",0,0)
-		Kromog.setupFrame.pings[i].name = ExRT.lib.CreateText(Kromog.setupFrame.pings[i],75,15,nil,0,0,"LEFT","TOP",nil,11,"Player"..i,nil,1,1,1,nil,1)
-		ExRT.lib.SetPoint(Kromog.setupFrame.pings[i].name,"TOPLEFT",Kromog.setupFrame.pings[i],"TOPLEFT",0,-12)
+		Kromog.setupFrame.pings[i].num = ELib:Text(Kromog.setupFrame.pings[i],i,12):Size(30,15):Point(0,0):Top():Color(1,1,1):Outline()
+		Kromog.setupFrame.pings[i].name = ELib:Text(Kromog.setupFrame.pings[i],"Player"..i,11):Size(75,15):Point(0,-12):Top():Color(1,1,1):Outline()
 		
 		Kromog.setupFrame.pings[i]:SetScript("OnEnter",SetupFramePingsOnEnter)
 		Kromog.setupFrame.pings[i]:SetScript("OnLeave",SetupFramePingsOnLeave)
@@ -1374,11 +1389,9 @@ function Kromog:Load()
 		DisableSync()
 	end
 	
-	Kromog.setupFrame.clearButton = ExRT.lib.CreateButton(Kromog.setupFrame,120,22,nil,0,0,ExRT.L.BossmodsKromogClear)
-	ExRT.lib.SetPoint(Kromog.setupFrame.clearButton,"BOTTOMRIGHT",Kromog.setupFrame,"BOTTOMRIGHT",-15,10)
-	Kromog.setupFrame.clearButton:SetScript("OnClick",function (self)
+	Kromog.setupFrame.clearButton = ELib:Button(Kromog.setupFrame,L.BossmodsKromogClear,0):Size(120,22):Point("BOTTOMRIGHT",Kromog.setupFrame,-15,10):OnClick(function (self)
 		StaticPopupDialogs["EXRT_BOSSMODS_KROMOG_CLEAR"] = {
-			text = ExRT.L.BossmodsKromogClear,
+			text = L.BossmodsKromogClear,
 			button1 = YES,
 			button2 = NO,
 			OnAccept = KromogClearConfirm,
@@ -1390,9 +1403,7 @@ function Kromog:Load()
 		StaticPopup_Show("EXRT_BOSSMODS_KROMOG_CLEAR")
 	end)
 	
-	Kromog.setupFrame.byName = ExRT.lib.CreateButton(Kromog.setupFrame,120,22,nil,0,0,ExRT.L.BossmodsKromogSort)
-	ExRT.lib.SetPoint(Kromog.setupFrame.byName,"BOTTOMRIGHT",Kromog.setupFrame.clearButton,"TOPRIGHT",0,0)
-	Kromog.setupFrame.byName:SetScript("OnClick",function (self)
+	Kromog.setupFrame.byName = ELib:Button(Kromog.setupFrame,L.BossmodsKromogSort,0):Size(120,22):Point("BOTTOMRIGHT",Kromog.setupFrame.clearButton,"TOPRIGHT",0,0):OnClick(function (self)
 		local raid = {}
 		for i=1,30 do
 			local name = GetRaidRosterInfo(i)
@@ -1439,21 +1450,19 @@ function Kromog:Load()
 	end
 	
 	local setupsDropDown = CreateFrame("Frame", "ExRT_Kromog_SetupsDropDown", nil, "UIDropDownMenuTemplate")
-	Kromog.setupFrame.setupsButton = ExRT.lib.CreateButton(Kromog.setupFrame,120,22,nil,0,0,ExRT.L.BossmodsKromogSetups)
-	ExRT.lib.SetPoint(Kromog.setupFrame.setupsButton,"BOTTOMRIGHT",Kromog.setupFrame.byName,"TOPRIGHT",0,0)
-	Kromog.setupFrame.setupsButton:SetScript("OnClick",function (self)
+	Kromog.setupFrame.setupsButton = ELib:Button(Kromog.setupFrame,L.BossmodsKromogSetups,0):Size(120,22):Point("BOTTOMRIGHT",Kromog.setupFrame.byName,"TOPRIGHT",0,0):OnClick(function (self)
 		VExRT.Bossmods.KromogSetups = VExRT.Bossmods.KromogSetups or {}
 	
 		local dropDown = {
-			{ text = ExRT.L.BossmodsKromogSetups, isTitle = true, notCheckable = true, notClickable = true},
+			{ text = L.BossmodsKromogSetups, isTitle = true, notCheckable = true, notClickable = true},
 		}
 		for i=1,5 do
 			VExRT.Bossmods.KromogSetups[i] = VExRT.Bossmods.KromogSetups[i] or {}
 		
 			local subMenu = nil
-			local saveMenu = { text = ExRT.L.BossmodsKromogSetupsSave, func = SetupsDropDown_Save, arg1 = i, notCheckable = true }
-			local loadMenu = { text = ExRT.L.BossmodsKromogSetupsLoad, func = SetupsDropDown_Load, arg1 = i, notCheckable = true }
-			local clearMenu = { text = ExRT.L.BossmodsKromogSetupsClear, func = SetupsDropDown_Clear, arg1 = i, notCheckable = true }
+			local saveMenu = { text = L.BossmodsKromogSetupsSave, func = SetupsDropDown_Save, arg1 = i, notCheckable = true }
+			local loadMenu = { text = L.BossmodsKromogSetupsLoad, func = SetupsDropDown_Load, arg1 = i, notCheckable = true }
+			local clearMenu = { text = L.BossmodsKromogSetupsClear, func = SetupsDropDown_Clear, arg1 = i, notCheckable = true }
 			
 			local isExists = VExRT.Bossmods.KromogSetups[i].date
 			local dateText = ""
@@ -1468,36 +1477,29 @@ function Kromog:Load()
 				text = i..dateText, hasArrow = true, menuList = subMenu, notCheckable = true
 			}
 		end
-		dropDown[7] = { text = ExRT.L.BossmodsKromogSetupsClose, func = SetupsDropDown_Close, notCheckable = true }
+		dropDown[7] = { text = L.BossmodsKromogSetupsClose, func = SetupsDropDown_Close, notCheckable = true }
 		EasyMenu(dropDown, setupsDropDown, "cursor", 10 , -15, "MENU")
 	end)
 		
-	Kromog.setupFrame.sendButton = ExRT.lib.CreateButton(Kromog.setupFrame,120,22,nil,0,0,ExRT.L.BossmodsKromogSend)
-	ExRT.lib.SetPoint(Kromog.setupFrame.sendButton,"BOTTOMRIGHT",Kromog.setupFrame.setupsButton,"TOPRIGHT",0,0)
-	Kromog.setupFrame.sendButton:SetScript("OnClick",function (self)
+	Kromog.setupFrame.sendButton = ELib:Button(Kromog.setupFrame,L.BossmodsKromogSend,0):Size(120,22):Point("BOTTOMRIGHT",Kromog.setupFrame.setupsButton,"TOPRIGHT",0,0):OnClick(function (self)
 		local line = ""
 		for i=1,#Kromog.runes do
 			line = line .. i.."\t"..(VExRT.Bossmods.Kromog[i] or "-").."\t"
 			if i%3 == 0 then
-				ExRT.mds.SendExMsg("kromog",line)
+				ExRT.F.SendExMsg("kromog",line)
 				line = ""
 			end
 		end
 		if line ~= "" then
-			ExRT.mds.SendExMsg("kromog",line)
+			ExRT.F.SendExMsg("kromog",line)
 		end
 	end)
 	
-	Kromog.setupFrame.testButton = ExRT.lib.CreateButton(Kromog.setupFrame,120,22,nil,0,0,ExRT.L.BossmodsKromogTest)
-	ExRT.lib.SetPoint(Kromog.setupFrame.testButton,"RIGHT",Kromog.setupFrame.clearButton,"LEFT",0,0)
-	Kromog.setupFrame.testButton:SetScript("OnClick",function (self)
+	Kromog.setupFrame.testButton = ELib:Button(Kromog.setupFrame,L.BossmodsKromogTest,0):Size(120,22):Point("RIGHT",Kromog.setupFrame.clearButton,"LEFT",0,0):OnClick(function (self)
 		KromogFrameOnEvent(Kromog.setupFrame,"CHAT_MSG_RAID_BOSS_EMOTE","spell:157059")
 	end)
 	
-	Kromog.setupFrame.disableArrowChk = ExRT.lib.CreateCheckBox(Kromog.setupFrame,nil,0,0,ExRT.L.BossmodsKromogDisableArrow,VExRT.Bossmods.Kromog.DisableArrow)
-	ExRT.lib.SetPoint(Kromog.setupFrame.disableArrowChk,"BOTTOMLEFT",Kromog.setupFrame.sendButton,"TOPLEFT",-3,0)
-	Kromog.setupFrame.disableArrowChk:SetScale(0.9)
-	Kromog.setupFrame.disableArrowChk:SetScript("OnClick",function (self)
+	Kromog.setupFrame.disableArrowChk = ELib:Check(Kromog.setupFrame,L.BossmodsKromogDisableArrow,VExRT.Bossmods.Kromog.DisableArrow,0):Point("BOTTOMLEFT",Kromog.setupFrame.sendButton,"TOPLEFT",-3,0):Scale(.9):OnClick(function (self)
 		if self:GetChecked() then
 			VExRT.Bossmods.Kromog.DisableArrow = true
 			Kromog.setupFrame:UnregisterAllEvents()
@@ -1507,10 +1509,7 @@ function Kromog:Load()
 		end
 	end)
 	
-	Kromog.setupFrame.onlyTrustedChk = ExRT.lib.CreateCheckBox(Kromog.setupFrame,nil,0,0,ExRT.L.BossmodsKromogOnlyTrusted,not VExRT.Bossmods.Kromog.UpdatesFromAll,ExRT.L.BossmodsKromogOnlyTrustedTooltip)
-	ExRT.lib.SetPoint(Kromog.setupFrame.onlyTrustedChk,"BOTTOMLEFT",Kromog.setupFrame.disableArrowChk,"TOPLEFT",0,-7)
-	Kromog.setupFrame.onlyTrustedChk:SetScale(0.9)
-	Kromog.setupFrame.onlyTrustedChk:SetScript("OnClick",function (self)
+	Kromog.setupFrame.onlyTrustedChk = ELib:Check(Kromog.setupFrame,L.BossmodsKromogOnlyTrusted,not VExRT.Bossmods.Kromog.UpdatesFromAll,0):Point("BOTTOMLEFT",Kromog.setupFrame.disableArrowChk,"TOPLEFT",0,-7):Scale(.9):Tooltip(L.BossmodsKromogOnlyTrustedTooltip):OnClick(function (self)
 		if self:GetChecked() then
 			VExRT.Bossmods.Kromog.UpdatesFromAll = nil
 		else
@@ -1518,11 +1517,9 @@ function Kromog:Load()
 		end
 	end)
 	
-	Kromog.setupFrame.lastUpdate = ExRT.lib.CreateText(Kromog.setupFrame,500,20,nil,0,0,"LEFT","BOTTOM",nil,12,"",nil,1,1,1,nil,1)
-	ExRT.lib.SetPoint(Kromog.setupFrame.lastUpdate,"BOTTOMLEFT",Kromog.setupFrame,"BOTTOMLEFT",15,13)
+	Kromog.setupFrame.lastUpdate = ELib:Text(Kromog.setupFrame,"",12):Size(500,20):Point("BOTTOMLEFT",Kromog.setupFrame,"BOTTOMLEFT",15,13):Bottom():Color(1,1,1):Outline()
 
-
-	Kromog.raidRoster = ExRT.lib.CreatePopupFrame(80*6+25,113+14,ExRT.L.BossmodsKromogSelectPlayer)
+	Kromog.raidRoster = ELib:Popup(L.BossmodsKromogSelectPlayer,0):Size(80*6+25,113+14)
 	Kromog.raidRoster:SetScript("OnShow",function (self)
 		Kromog:UpdateSelectRoster()
 	end)
@@ -1554,7 +1551,7 @@ function Kromog:Load()
 			ExRT.lib.CreateHoverHighlight(Kromog.raidRoster.buttons[pos])
 			Kromog.raidRoster.buttons[pos]:SetScript("OnEnter",RaidRosterButtonOnEnter)
 			Kromog.raidRoster.buttons[pos]:SetScript("OnLeave",RaidRosterButtonOnLeave)
-			Kromog.raidRoster.buttons[pos].name = ExRT.lib.CreateText(Kromog.raidRoster.buttons[pos],80,14,nil,0,0,"LEFT","MIDDLE",nil,12,"",nil,1,1,1,1)
+			Kromog.raidRoster.buttons[pos].name = ELib:Text(Kromog.raidRoster.buttons[pos],"",12):Size(80,14):Point(0,0):Color(1,1,1):Shadow()
 			Kromog.raidRoster.buttons[pos]._name = nil
 			Kromog.raidRoster.buttons[pos]:SetScript("OnClick",RaidRosterButtonOnClick)
 		end
@@ -1569,7 +1566,7 @@ function Kromog:Load()
 	Kromog.raidRoster.clearButton:SetScript("OnLeave",function(self)
 		self.hl:Hide()
 	end)
-	Kromog.raidRoster.clearButton.name = ExRT.lib.CreateText(Kromog.raidRoster.clearButton,80,14,nil,0,0,"RIGHT","MIDDLE",nil,12,ExRT.L.BossmodsKromogClear,nil,1,1,1,1)
+	Kromog.raidRoster.clearButton.name = ELib:Text(Kromog.raidRoster.clearButton,L.BossmodsKromogClear,12):Size(80,14):Point(0,0):Right():Color(1,1,1):Shadow()
 	Kromog.raidRoster.clearButton:SetScript("OnClick",function(self)
 		VExRT.Bossmods.Kromog[Kromog.raidRoster.pos] = nil
 		Kromog:ReRoster()
@@ -1578,9 +1575,7 @@ function Kromog:Load()
 		DisableSync()
 	end)
 	
-	Kromog.raidRoster.hideChk = ExRT.lib.CreateCheckBox(Kromog.raidRoster,"BOTTOMLEFT",10,7,ExRT.L.BossmodsKromogHidePlayers,true)
-	Kromog.raidRoster.hideChk:SetScale(0.8)
-	Kromog.raidRoster.hideChk:SetScript("OnClick",function (self)
+	Kromog.raidRoster.hideChk = ELib:Check(Kromog.raidRoster,L.BossmodsKromogHidePlayers,true,0):Point("BOTTOMLEFT",10,7):Scale(.8):OnClick(function (self)
 	  	Kromog.hidePlayers = self:GetChecked()
 	  	Kromog:UpdateSelectRoster()
 	end)
@@ -1593,7 +1588,7 @@ function Kromog:Load()
 	Kromog.setupFrame:SetScript("OnShow",function (self)
 		local isAlpha = false
 		if IsInRaid() then
-			if ExRT.mds.IsPlayerRLorOfficer(UnitName('player')) then
+			if ExRT.F.IsPlayerRLorOfficer(UnitName('player')) then
 				isAlpha = false
 			else
 				isAlpha = true
@@ -1615,7 +1610,7 @@ function Kromog:Load()
 	if not VExRT.Bossmods.Kromog.name or not VExRT.Bossmods.Kromog.time then
 		Kromog.setupFrame.lastUpdate:SetText("")
 	else
-		Kromog.setupFrame.lastUpdate:SetText(ExRT.L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kromog.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kromog.time)..")"..(not VExRT.Bossmods.Kromog.sync and " *" or ""))
+		Kromog.setupFrame.lastUpdate:SetText(L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kromog.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kromog.time)..")"..(not VExRT.Bossmods.Kromog.sync and " *" or ""))
 	end
 	Kromog:ReRoster()
 	Kromog.setupFrame:Show()
@@ -1629,7 +1624,7 @@ end
 
 function Kromog:addonMessage(sender, prefix, ...)
 	if prefix == "kromog" then
-		if IsInRaid() and not VExRT.Bossmods.Kromog.UpdatesFromAll and not ExRT.mds.IsPlayerRLorOfficer(sender) then
+		if IsInRaid() and not VExRT.Bossmods.Kromog.UpdatesFromAll and not ExRT.F.IsPlayerRLorOfficer(sender) then
 			return
 		end
 	
@@ -1660,7 +1655,7 @@ function Kromog:addonMessage(sender, prefix, ...)
 		end
 		
 		if Kromog.setupFrame then
-			Kromog.setupFrame.lastUpdate:SetText(ExRT.L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kromog.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kromog.time)..")")
+			Kromog.setupFrame.lastUpdate:SetText(L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kromog.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kromog.time)..")")
 			Kromog:ReRoster()
 		end
 	end
@@ -1671,6 +1666,8 @@ end
 -----------------------------------------
 
 local Thogar = {}
+module.A.Thogar = Thogar
+
 Thogar.data = {
 	--{время с пула;колия;тип:1 - проезд,2-прибытие,3-отправка}	1 - самая дальняя от входа колия
 	{18,4,1},
@@ -1718,9 +1715,9 @@ Thogar.data = {
 	{428,4,2},
 }
 Thogar.statusText = {
-	ExRT.L.BossmodsThogarTransit,
-	ExRT.L.BossmodsThogarIn,
-	ExRT.L.BossmodsThogarOut,
+	L.BossmodsThogarTransit,
+	L.BossmodsThogarIn,
+	L.BossmodsThogarOut,
 }
 Thogar.marksIcons = {
 	"Interface\\TargetingFrame\\UI-RaidTargetingIcon_6",
@@ -1738,10 +1735,10 @@ function Thogar:Load()
 	if VExRT.Bossmods.ThogarLeft and VExRT.Bossmods.ThogarTop then
 		Thogar.mainframe:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.ThogarLeft,VExRT.Bossmods.ThogarTop)
 	else
-		Thogar.mainframe:SetPoint("TOP",UIParent, "TOP", 0, 0)
+		Thogar.mainframe:SetPoint("TOP",UIParent, "TOP", 0, -50)
 	end
-	--Thogar.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 8})
-	Thogar.mainframe:SetBackdrop({edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 8})
+	--Thogar.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 8})
+	Thogar.mainframe:SetBackdrop({edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 8})
 	--Thogar.mainframe:SetBackdropColor(0.05,0.05,0.05,0.85)
 	Thogar.mainframe:SetBackdropBorderColor(0.2,0.2,0.2,0.4)
 	Thogar.mainframe:EnableMouse(true)
@@ -1772,9 +1769,9 @@ function Thogar:Load()
 		Thogar.mainframe.lines[i] = CreateFrame("Frame",nil,Thogar.mainframe)
 		Thogar.mainframe.lines[i]:SetPoint("TOPLEFT",0,-5-(i-1)*20)
 		Thogar.mainframe.lines[i]:SetSize(180,20)
-		Thogar.mainframe.lines[i].col = ExRT.lib.CreateText(Thogar.mainframe.lines[i],30,20,nil,10,0,"LEFT","MIDDLE","Interface\\AddOns\\ExRT\\media\\Glametrix.otf",18,i,nil,1,1,1,1)
-		Thogar.mainframe.lines[i].status = ExRT.lib.CreateText(Thogar.mainframe.lines[i],100,20,nil,25,0,"LEFT","MIDDLE","Interface\\AddOns\\ExRT\\media\\Glametrix.otf",18,"",nil,1,1,1,1)
-		Thogar.mainframe.lines[i].time = ExRT.lib.CreateText(Thogar.mainframe.lines[i],50,20,nil,135,0,"LEFT","MIDDLE","Interface\\AddOns\\ExRT\\media\\Glametrix.otf",18,"",nil,1,1,1,1)
+		Thogar.mainframe.lines[i].col = ELib:Text(Thogar.mainframe.lines[i],i):Size(30,20):Point(10,0):Font("Interface\\AddOns\\ExRT\\media\\Glametrix.otf",18):Color(1,1,1):Shadow()
+		Thogar.mainframe.lines[i].status = ELib:Text(Thogar.mainframe.lines[i]):Size(100,20):Point(25,0):Font("Interface\\AddOns\\ExRT\\media\\Glametrix.otf",18):Color(1,1,1):Shadow()
+		Thogar.mainframe.lines[i].time = ELib:Text(Thogar.mainframe.lines[i]):Size(50,20):Point(135,0):Font("Interface\\AddOns\\ExRT\\media\\Glametrix.otf",18):Color(1,1,1):Shadow()
 
 		Thogar.mainframe.lines[i].g = Thogar.mainframe.lines[i]:CreateTexture(nil, "BACKGROUND")
 		Thogar.mainframe.lines[i].g:SetTexture(1,1,1,1)
@@ -1877,13 +1874,15 @@ function Thogar:Load()
 	
 end
 
---ExRT.mds.ScheduleTimer(Thogar.Load, 2)
+--ExRT.F.ScheduleTimer(Thogar.Load, 2)
 
 -----------------------------------------
 -- Imperator Mar'gok
 -----------------------------------------
 
 local Margok = {}
+module.A.Margok = Margok
+
 Margok.spellIDs = {
 	[156225]=true,	--Phase 1
 	[164004]=true,	--Phase 2
@@ -1938,7 +1937,7 @@ do
 			end
 			
 			if diffName and diff <= Margok.Range then
-				self.name:SetText("|c"..ExRT.mds.classColor(select(2,UnitClass(diffName)))..diffName)
+				self.name:SetText("|c"..ExRT.F.classColor(select(2,UnitClass(diffName)))..diffName)
 				if diffName ~= Margok.lastRange then
 					--[[
 					if GetRaidTargetIndex(diffName) ~= 7 then
@@ -1982,7 +1981,7 @@ do
 						SetRaidTargetIcon(destName, 8)
 					end
 					]]
-					--ExRT.mds.CancelTimer(resetRange)
+					--ExRT.F.CancelTimer(resetRange)
 				else
 					self.Debuff2 = destName
 					--[[
@@ -2011,7 +2010,7 @@ do
 				else
 					Margok.Range = Margok.Range * 0.5
 				end
-				resetRange = ExRT.mds.ScheduleTimer(ResetRange, 1.5)
+				resetRange = ExRT.F.ScheduleTimer(ResetRange, 1.5)
 				]]
 			end
 		end
@@ -2021,7 +2020,7 @@ function Margok:OnRosterUpdate()
 	wipe(Margok.Roster)
 	local n = GetNumGroupMembers() or 0
 	if n > 0 then
-		local gMax = ExRT.mds.GetRaidDiffMaxGroup()
+		local gMax = ExRT.F.GetRaidDiffMaxGroup()
 		for j=1,n do
 			local name, _,subgroup = GetRaidRosterInfo(j)
 			if name and subgroup <= gMax then
@@ -2041,10 +2040,10 @@ function Margok:Load()
 	if VExRT.Bossmods.MargokLeft and VExRT.Bossmods.MargokTop then
 		Margok.mainframe:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.MargokLeft,VExRT.Bossmods.MargokTop)
 	else
-		Margok.mainframe:SetPoint("TOP",UIParent, "TOP", 0, 0)
+		Margok.mainframe:SetPoint("TOP",UIParent, "TOP", 0, -50)
 	end
-	Margok.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 8})
-	--Margok.mainframe:SetBackdrop({edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 8})
+	Margok.mainframe:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 8})
+	--Margok.mainframe:SetBackdrop({edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 8})
 	Margok.mainframe:SetBackdropColor(0.05,0.05,0.05,0.85)
 	Margok.mainframe:SetBackdropBorderColor(0.2,0.2,0.2,0.4)
 	Margok.mainframe:EnableMouse(true)
@@ -2063,7 +2062,7 @@ function Margok:Load()
 	if VExRT.Bossmods.Alpha then Margok.mainframe:SetAlpha(VExRT.Bossmods.Alpha/100) end
 	if VExRT.Bossmods.Scale then Margok.mainframe:SetScale(VExRT.Bossmods.Scale/100) end
 
-	Margok.mainframe.name = ExRT.lib.CreateText(Margok.mainframe,75,30,"CENTER",0,0,"CENTER","MIDDLE",nil,nil,UnitName("player"),nil,1,1,1,1)
+	Margok.mainframe.name = ELib:Text(Margok.mainframe,UnitName("player"),nil):Size(75,30):Point("CENTER",0,0):Center():Color(1,1,1):Shadow()
 	
 	Margok.mainframe:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Margok.mainframe:SetScript("OnUpdate", Margok.OnTimer)
@@ -2080,11 +2079,12 @@ end
 -----------------------------------------
 
 local Koragh = {}
+module.A.Koragh = Koragh
 
 function Koragh:OnEvent(_,_,event,_,_,_,_,_,destGUID,destName,_,_,spellID)
 	if event == "SPELL_AURA_APPLIED" and spellID == 172895 and Koragh.playerGUID == destGUID then
 		local x,y = GetPlayerMapPosition("player")
-		ExRT.mds.Arrow:ShowRunTo(x,y,1,12,false,true)
+		ExRT.F.Arrow:ShowRunTo(x,y,1,12,false,true)
 	end
 end
 
@@ -2104,6 +2104,7 @@ end
 -----------------------------------------
 
 local Iskar = {}
+module.A.Iskar = Iskar
 
 function Iskar:Load()
 	if Iskar.mainframe then
@@ -2113,6 +2114,7 @@ function Iskar:Load()
 		print("Combat error")
 		return
 	end
+	ExRT.Options.Frame:Hide()
 	
 	local frame = CreateFrame('Frame',nil,UIParent)
 	Iskar.mainframe = frame
@@ -2121,7 +2123,7 @@ function Iskar:Load()
 	if VExRT.Bossmods.IskarLeft and VExRT.Bossmods.IskarTop then
 		frame:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.IskarLeft,VExRT.Bossmods.IskarTop)
 	else
-		frame:SetPoint("TOP",UIParent, "TOP", 0, 0)
+		frame:SetPoint("TOP",UIParent, "TOP", 0, -50)
 	end
 	frame.back = frame:CreateTexture(nil, "BACKGROUND",nil,-7)
 	frame.back:SetAllPoints()
@@ -2141,7 +2143,7 @@ function Iskar:Load()
 		VExRT.Bossmods.IskarTop = self:GetTop()
 	end)
 	if VExRT.Bossmods.Alpha then frame:SetAlpha(VExRT.Bossmods.Alpha/100) end
-	if VExRT.Bossmods.Scale then frame:SetScale(VExRT.Bossmods.Scale/100) end
+	--if VExRT.Bossmods.Scale then frame:SetScale(VExRT.Bossmods.Scale/100) end
 	
 	local RosterUpdate = nil
 	local IsFelBombActive = nil
@@ -2174,6 +2176,14 @@ function Iskar:Load()
 				if self.state ~= 20 then
 					self.back:SetTexture(.5,.1,.5,.9)
 					self.state = 20
+				end
+				return
+			end
+			local isWindDebuff = UnitAura(name,debuffName_wind,nil,"HARMFUL")
+			if isWindDebuff then
+				if self.state ~= 30 then
+					self.back:SetTexture(1,1,.5,.9)
+					self.state = 30
 				end
 				return
 			end
@@ -2302,6 +2312,8 @@ function Iskar:Load()
 		GameTooltip_Hide()
 	end
 	
+	local OnLoadMarkersData = {1,2,3,4,5,6,7,8}
+	
 	local classNames = {"WARRIOR","PALADIN","HUNTER","ROGUE","PRIEST","DEATHKNIGHT","SHAMAN","MAGE","WARLOCK","MONK","DRUID"}
 	frame.units = {}
 	for i=1,6 do
@@ -2339,7 +2351,7 @@ function Iskar:Load()
 			unitFrame.br:SetPoint("TOPRIGHT",0,-borderSize)
 			unitFrame.br:SetPoint("BOTTOMLEFT",unitFrame,"BOTTOMRIGHT",-borderSize,borderSize)
 			
-			local cR,cG,cB = ExRT.mds.classColorNum(classNames[fastrandom(1,11)])
+			local cR,cG,cB = ExRT.F.classColorNum(classNames[fastrandom(1,11)])
 			unitFrame.bt:SetTexture(cR,cG,cB,.3)
 			unitFrame.bl:SetTexture(cR,cG,cB,.3)
 			unitFrame.bb:SetTexture(cR,cG,cB,.3)
@@ -2350,9 +2362,18 @@ function Iskar:Load()
 			unitFrame.back:SetPoint("BOTTOMRIGHT",-borderSize,borderSize)
 			unitFrame.back:SetTexture(0,0,0,.5)
 			
-			unitFrame.name = ExRT.lib.CreateText(unitFrame,27,27,"CENTER",-1,-2,"CENTER","MIDDLE",nil,10,"Аф",nil,1,1,1)
+			unitFrame.marker = unitFrame:CreateTexture(nil, "ARTWORK")
+			unitFrame.marker:SetSize(12,12)
+			unitFrame.marker:SetPoint("CENTER",unitFrame,"TOP",0,-3)
+			if VExRT.Bossmods.IskarShowMarks and #OnLoadMarkersData > 0 and fastrandom(100) > 49 then
+				local m = fastrandom(1,#OnLoadMarkersData)
+				unitFrame.marker:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcon_"..OnLoadMarkersData[m])
+				tremove(OnLoadMarkersData,m)
+			end
 			
-			unitFrame.stacks = ExRT.lib.CreateText(unitFrame,27,27,"TOPRIGHT",-3,-3,"RIGHT","TOP",nil,10,fastrandom(1,5),nil,1,1,1)
+			unitFrame.name = ELib:Text(unitFrame,"Аф",10):Size(27,27):Point("CENTER",-1,-2):Center():Color(1,1,1)
+			
+			unitFrame.stacks = ELib:Text(unitFrame,fastrandom(1,5),10):Size(27,27):Point("TOPRIGHT",-3,-3):Right():Top():Color(1,1,1)
 			
 			if fastrandom(1,100) > 89 then
 				unitFrame.back:SetTexture(.5,1,.5,.9)
@@ -2386,22 +2407,18 @@ function Iskar:Load()
 		end
 	end
 	
-	frame.lock = ExRT.lib.CreateIcon(frame,14,nil,2,14,"Interface\\AddOns\\ExRT\\media\\un_lock.tga",true)
-	frame.lock:SetScript("OnClick",Lock)
+	frame.lock = ELib:Icon(frame,"Interface\\AddOns\\ExRT\\media\\un_lock.tga",14,true):Point(2,14):OnClick(Lock)
 	
 	frame.optionsDropDown = CreateFrame("Frame", "ExRTBossmodsIskarOptionsDropDown", nil, "UIDropDownMenuTemplate")
 	
-	frame.options = ExRT.lib.CreateIcon(frame,14,"TOPRIGHT",-2,14,[[Interface\AddOns\ExRT\media\DiesalGUIcons16x256x128.tga]],true)
-	--frame.options.texture:SetTexCoord(0.25,0.3125,0.5,0.625)
-	frame.options.texture:SetTexCoord(0.26,0.3025,0.51,0.615)
-	frame.options:SetScript("OnClick",function()
+	frame.options = ELib:Icon(frame,[[Interface\AddOns\ExRT\media\DiesalGUIcons16x256x128.tga]],14,true):Point("TOPRIGHT",-2,14):OnClick(function()
 		if InCombatLockdown() then
 			print("Error: Disabled in combat")
 			return
 		end
 		EasyMenu({
 			{
-				text = ExRT.L.BossmodsIskarDisableClassColor,
+				text = L.BossmodsIskarDisableClassColor,
 				checked = VExRT.Bossmods.IskarDisableClassColors,
 				func = function()
 					VExRT.Bossmods.IskarDisableClassColors = not VExRT.Bossmods.IskarDisableClassColors
@@ -2409,7 +2426,7 @@ function Iskar:Load()
 				end,
 			},
 			{
-				text = ExRT.L.BossmodsIskarHideStacks,
+				text = L.BossmodsIskarHideStacks,
 				checked = VExRT.Bossmods.IskarHideStacks,
 				func = function()
 					VExRT.Bossmods.IskarHideStacks = not VExRT.Bossmods.IskarHideStacks
@@ -2417,7 +2434,7 @@ function Iskar:Load()
 				end,
 			},
 			{
-				text = ExRT.L.BossmodsIskarDisableRed,
+				text = L.BossmodsIskarDisableRed,
 				checked = VExRT.Bossmods.IskarDisableRedBackground,
 				func = function()
 					VExRT.Bossmods.IskarDisableRedBackground = not VExRT.Bossmods.IskarDisableRedBackground
@@ -2436,7 +2453,7 @@ function Iskar:Load()
 			},
 			]]
 			{
-				text = ExRT.L.BossmodsIskarShowNames,
+				text = L.BossmodsIskarShowNames,
 				checked = VExRT.Bossmods.IskarShowNames,
 				func = function()
 					VExRT.Bossmods.IskarShowNames = not VExRT.Bossmods.IskarShowNames
@@ -2444,15 +2461,30 @@ function Iskar:Load()
 				end,
 			},
 			{
-				text = ExRT.L.bossmodsclose,
+				text = L.BossmodsArchimondeDisableMarking,
+				checked = not VExRT.Bossmods.IskarShowMarks,
+				func = function()
+					VExRT.Bossmods.IskarShowMarks = not VExRT.Bossmods.IskarShowMarks
+					RosterUpdate()
+				end,
+			},
+			{
+				text = L.bossmodsscale,
 				notCheckable = true,
 				func = function()
-					ExRT.mds:ExBossmodsCloseAll()
+					frame.scale:SetShown(not frame.scale:IsShown())
+				end,
+			},
+			{
+				text = L.bossmodsclose,
+				notCheckable = true,
+				func = function()
+					ExRT.F:ExBossmodsCloseAll()
 					CloseDropDownMenus()
 				end,
 			},						
 			{
-				text = ExRT.L.BossWatcherSelectFightClose,
+				text = L.BossWatcherSelectFightClose,
 				notCheckable = true,
 				func = function()
 					CloseDropDownMenus()
@@ -2460,7 +2492,27 @@ function Iskar:Load()
 			},
 		}, frame.optionsDropDown, "cursor", 10 , -15, "MENU")
 	end)
-	--ExRT.lib.CreateBackTextureForDebug(frame.options)
+	frame.options.texture:SetTexCoord(0.26,0.3025,0.51,0.615)
+	
+	if VExRT.Bossmods.IskarScale and tonumber(VExRT.Bossmods.IskarScale) then
+		frame:SetScale(VExRT.Bossmods.IskarScale)
+	end
+	frame.scale = ELib:Slider(frame):_Size(70,8):Point("BOTTOMRIGHT",frame,"TOPRIGHT",-25,2):Range(50,200,true):SetTo((VExRT.Bossmods.IskarScale or 1)*100):Scale(1 / (VExRT.Bossmods.IskarScale or 1)):OnChange(function(self,event) 
+		event = ExRT.F.Round(event)
+		VExRT.Bossmods.IskarScale = event / 100
+		ExRT.F.SetScaleFixTR(frame,VExRT.Bossmods.IskarScale)
+		self:SetScale(1 / VExRT.Bossmods.IskarScale)
+		self.tooltipText = event
+		self:tooltipReload(self)
+	end)
+	frame.scale:SetScript("OnMouseUp",function(self,button)
+		if button == "RightButton" then
+			self:SetValue(100)
+		end
+	end)
+	frame.scale:Hide()	
+	
+	
 	local function sortRoster(a,b) return a[1]<b[1]  end
 	
 	function RosterUpdate()
@@ -2471,11 +2523,12 @@ function Iskar:Load()
 	
 		local n = GetNumGroupMembers()
 		if n == 0 then
+			local OnLoadMarkersData = {1,2,3,4,5,6,7,8}
 			for i=1,6 do
 				for j=1,5 do
 					local unitFrame = frame.units[(i-1)*5+j]
 					
-					local cR,cG,cB = ExRT.mds.classColorNum(classNames[fastrandom(1,11)])
+					local cR,cG,cB = ExRT.F.classColorNum(classNames[fastrandom(1,11)])
 					if VExRT.Bossmods.IskarDisableClassColors then
 						cR,cG,cB = .1,.1,.1
 					end
@@ -2510,6 +2563,16 @@ function Iskar:Load()
 						unitFrame.name:SetText("")
 					end
 					
+					if VExRT.Bossmods.IskarShowMarks then
+						if #OnLoadMarkersData > 0 and fastrandom(100) > 49 then
+							local m = fastrandom(1,#OnLoadMarkersData)
+							unitFrame.marker:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcon_"..OnLoadMarkersData[m])
+							tremove(OnLoadMarkersData,m)
+						end
+					else
+						unitFrame.marker:SetTexture("")
+					end
+					
 					unitFrame.unitID = nil
 					unitFrame:UnregisterAllEvents()
 				end
@@ -2517,7 +2580,7 @@ function Iskar:Load()
 			frame.units[fastrandom(1,30)].back:SetTexture(.5,.1,.5,.9)
 			return
 		end
-		local gMax = ExRT.mds.GetRaidDiffMaxGroup()
+		local gMax = ExRT.F.GetRaidDiffMaxGroup()
 		local roster = {}
 		for i=1,n do
 			local name,_,subgroup,_,_,class,_,_,_,_,_,role = GetRaidRosterInfo(i)
@@ -2538,7 +2601,7 @@ function Iskar:Load()
 						unitFrame.unitID = name[1]
 						unitFrame:UnregisterAllEvents()
 						unitFrame:RegisterEvent("UNIT_AURA")
-						local cR,cG,cB = ExRT.mds.classColorNum(name[2])
+						local cR,cG,cB = ExRT.F.classColorNum(name[2])
 						if VExRT.Bossmods.IskarDisableClassColors then
 							cR,cG,cB = .1,.1,.1
 						end
@@ -2547,8 +2610,8 @@ function Iskar:Load()
 						unitFrame.bb:SetTexture(cR,cG,cB,.3)
 						unitFrame.br:SetTexture(cR,cG,cB,.3)
 						OnAuraEvent(unitFrame,nil,name[1])
-						unitFrame:SetAttribute("macrotext", "/target "..ExRT.mds.delUnitNameServer(name[1]).."\n/click ExtraActionButton1\n/targetlasttarget")
-						--unitFrame:SetAttribute("macrotext", "/target "..ExRT.mds.delUnitNameServer(name[1]).."\n/cast [@target] Восстановление\n/targetlasttarget")
+						unitFrame:SetAttribute("macrotext", "/target "..ExRT.F.delUnitNameServer(name[1]).."\n/click ExtraActionButton1\n/targetlasttarget")
+						--unitFrame:SetAttribute("macrotext", "/target "..ExRT.F.delUnitNameServer(name[1]).."\n/cast [@target] Восстановление\n/targetlasttarget")
 						
 						if VExRT.Bossmods.IskarHideStacks then
 							unitFrame.stacks:Hide()
@@ -2569,6 +2632,17 @@ function Iskar:Load()
 							unitFrame:SetAlpha(1)
 						else
 							unitFrame:SetAlpha(.2)
+						end
+						
+						if VExRT.Bossmods.IskarShowMarks then
+							local mark = GetRaidTargetIndex(name[1])
+							if mark then
+								unitFrame.marker:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcon_"..mark)
+							else
+								unitFrame.marker:SetTexture("")
+							end
+						else
+							unitFrame.marker:SetTexture("")
 						end
 
 						unitFrame:Show()
@@ -2614,9 +2688,12 @@ function Iskar:Load()
 		UpdateFrames()
 	end
 	
+	local IsFelBombCasting = nil
+	local function IsFelBombCasting_Reset() IsFelBombCasting = nil end
+	
 	frame:SetScript("OnEvent",function(self,event,...)
 		if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-			local _,cleu_event,_,_,_,_,_,_,_,_,_,spellID = ...
+			local _,cleu_event,_,_,_,_,_,destGUID,_,_,_,spellID = ...
 			if cleu_event == "SPELL_CAST_START" then
 				if spellID == 179218 then	--Fel Bomb
 					IsFelBombActive = true
@@ -2624,7 +2701,8 @@ function Iskar:Load()
 					if AutoRemoveFelBombTimer then
 						AutoRemoveFelBombTimer:Cancel()
 					end
-					AutoRemoveFelBombTimer = C_Timer.NewTimer(9, AutoRemoveFelBomb)
+					AutoRemoveFelBombTimer = C_Timer.NewTimer(3.5, AutoRemoveFelBomb)
+					IsFelBombCasting = C_Timer.NewTimer(3, IsFelBombCasting_Reset)
 				elseif spellID == 185345 then	--Shadow Riposte
 					local _,_,diff = GetInstanceInfo()
 					if diff == 16 then
@@ -2633,6 +2711,16 @@ function Iskar:Load()
 						C_Timer.NewTimer(2, AutoRemoveShadowRiposte)
 					end
 					
+				end
+			elseif cleu_event == "SPELL_CAST_SUCCESS" then
+				if spellID == 179218 then	--Fel Bomb
+					if AutoRemoveFelBombTimer then
+						AutoRemoveFelBombTimer:Cancel()
+					end
+					IsFelBombActive = true
+					UpdateFrames()
+					AutoRemoveFelBombTimer = C_Timer.NewTimer(6, AutoRemoveFelBomb)
+					IsFelBombCasting = nil
 				end
 			elseif cleu_event == "SPELL_AURA_APPLIED" then
 				if spellID == 181753 then
@@ -2658,6 +2746,35 @@ function Iskar:Load()
 					IsPhantasmalCorruption = nil
 					UpdateFrames()
 				end
+			elseif cleu_event == "UNIT_DIED" then
+				if GetMobID(destGUID) == 93985 and IsFelBombCasting then
+					IsFelBombActive = nil
+					UpdateFrames()
+					if AutoRemoveFelBombTimer then
+						AutoRemoveFelBombTimer:Cancel()
+						AutoRemoveFelBombTimer = nil
+					end
+				end
+			end
+		elseif event == "RAID_TARGET_UPDATE" then
+			if not VExRT.Bossmods.IskarShowMarks then
+				return
+			end
+			for i=1,6 do
+				for j=1,5 do
+					local unitFrame = frame.units[(i-1)*5+j]
+					if unitFrame then
+						local unit = unitFrame.unitID
+						if unit then
+							local mark = GetRaidTargetIndex(unit)
+							if mark then
+								unitFrame.marker:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcon_"..mark)
+							else
+								unitFrame.marker:SetTexture("")
+							end
+						end
+					end
+				end
 			end
 		elseif event == "GROUP_ROSTER_UPDATE" then
 			RosterUpdate()
@@ -2674,6 +2791,7 @@ function Iskar:Load()
 	end
 	frame:RegisterEvent('ENCOUNTER_START')
 	frame:RegisterEvent('ENCOUNTER_END')
+	frame:RegisterEvent('RAID_TARGET_UPDATE')
 	
 	local bossFrames = {"boss1","boss2","boss3","boss4","boss5"}
 	local frame_tmr = 0
@@ -2745,14 +2863,22 @@ function Iskar:Load()
 			self.units[i]:UnregisterAllEvents()
 		end
 	end
+	
+	return true
 end
 
---C_Timer.NewTimer(1,Iskar.Load)
+function Iskar:AutoLoad()
+	if Iskar.IsAutoloadedThisSession then
+		return
+	end
+	Iskar.IsAutoloadedThisSession = Iskar:Load()
+end
 
 -----------------------------------------
 -- Kormrok
 -----------------------------------------
 local Kormrok = {}
+module.A.Kormrok = Kormrok
 
 Kormrok.runes = {
 	{-388.10,4209.00}, --1
@@ -2889,6 +3015,9 @@ function Kormrok:ReRoster(phase)
 				class = ""
 				desaturated = true
 			end
+			if not desaturated and ExRT.F.GetPlayerParty(name) > 4 then
+				desaturated = true
+			end
 			if shortName == playerName then
 				Kormrok.setupFrame.pings[i].icon:SetVertexColor(1,0.3,0.3,1)
 			else
@@ -2923,13 +3052,14 @@ function Kormrok:Load()
 		Kormrok.setupFrame.isEnabled = true
 		return
 	end
-	Kormrok.setupFrame = ExRT.lib.CreatePopupFrame(Kormrok.width,Kormrok.image_avg * Kormrok.width,"Kormrok",true)
+	Kormrok.setupFrame = ELib:Popup("Kormrok"):Size(Kormrok.width,Kormrok.image_avg * Kormrok.width)
 	Kormrok.setupFrame.map = Kormrok.setupFrame:CreateTexture(nil,"BACKGROUND",nil,1)
 	Kormrok.setupFrame.map:SetTexture("Interface\\AddOns\\ExRT\\media\\KormrokMap.tga")
 	Kormrok.setupFrame.map:SetPoint("TOP",Kormrok.setupFrame,"TOP",0,0)
 	Kormrok.setupFrame.map:SetSize(Kormrok.width,Kormrok.image_avg * Kormrok.width)
 	Kormrok.setupFrame.map:SetTexCoord(0,1,0,401 / 512)
 	Kormrok.setupFrame:SetFrameStrata("HIGH")
+	Kormrok.setupFrame:SetClampedToScreen(false)
 	
 	if VExRT.Bossmods.KormrokScale and tonumber(VExRT.Bossmods.KormrokScale) then
 		Kormrok.setupFrame:SetScale(VExRT.Bossmods.KormrokScale)
@@ -2944,7 +3074,7 @@ function Kormrok:Load()
 	local function DisableSync()
 		VExRT.Bossmods.Kormrok.sync = nil
 		if VExRT.Bossmods.Kormrok.name and VExRT.Bossmods.Kormrok.time then
-			Kormrok.setupFrame.lastUpdate:SetText(ExRT.L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kormrok.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kormrok.time)..")"..(not VExRT.Bossmods.Kormrok.sync and " *" or ""))
+			Kormrok.setupFrame.lastUpdate:SetText(L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kormrok.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kormrok.time)..")"..(not VExRT.Bossmods.Kormrok.sync and " *" or ""))
 		else
 			Kormrok.setupFrame.lastUpdate:SetText("")
 		end
@@ -2971,8 +3101,21 @@ function Kormrok:Load()
 					end
 				end
 			end
+		elseif event == "GROUP_ROSTER_UPDATE" then
+			if Kormrok.setupFrame:IsShown() then
+				Kormrok:ReRoster(phaseNow)
+			end
 		end
 	end
+	
+	Kormrok.setupFrame.scale = ELib:Slider(Kormrok.setupFrame):_Size(70,8):Point("TOPRIGHT",-30,-5):Range(50,100,true):SetTo((VExRT.Bossmods.KormrokScale or 1)*100):Scale(1 / (VExRT.Bossmods.KormrokScale or 1)):OnChange(function(self,event) 
+		event = ExRT.F.Round(event)
+		VExRT.Bossmods.KormrokScale = event / 100
+		ExRT.F.SetScaleFixTR(Kormrok.setupFrame,VExRT.Bossmods.KormrokScale)
+		self:SetScale(1 / VExRT.Bossmods.KormrokScale)
+		self.tooltipText = event
+		self:tooltipReload(self)
+	end)
 
 	Kormrok.setupFrame.pings = {}
 	local function SetupFramePingsOnEnter(self)
@@ -2992,30 +3135,29 @@ function Kormrok:Load()
 			return
 		end
 		Kormrok.raidRoster.pos = self._i
-		Kormrok.raidRoster.title:SetText(ExRT.L.BossmodsKromogSelectPlayer..self._i)
+		Kormrok.raidRoster.title:SetText(L.BossmodsKromogSelectPlayer..self._i)
 		Kormrok.raidRoster:Show()
 	end
 	for i=1,#Kormrok.runes do
 		local x = (abs(Kormrok.runes[i][1]-Kormrok.map[1])) / (abs(Kormrok.map[3] - Kormrok.map[1]))
 		local y = (abs(Kormrok.runes[i][2]-Kormrok.map[2])) / (abs(Kormrok.map[4] - Kormrok.map[2]))
-		Kormrok.setupFrame.pings[i] = CreateFrame('Button',nil,Kormrok.setupFrame)
-		Kormrok.setupFrame.pings[i]:SetSize(32,32)
-		Kormrok.setupFrame.pings[i].icon = Kormrok.setupFrame.pings[i]:CreateTexture(nil,"ARTWORK")
-		Kormrok.setupFrame.pings[i].icon:SetAllPoints()
-		Kormrok.setupFrame.pings[i].icon:SetTexture("Interface\\AddOns\\ExRT\\media\\KormrokRune.tga")
-		Kormrok.setupFrame.pings[i].num = ExRT.lib.CreateText(Kormrok.setupFrame.pings[i],30,15,nil,0,0,"LEFT","TOP",nil,12,i,nil,1,1,1,nil,1)
-		ExRT.lib.SetPoint(Kormrok.setupFrame.pings[i].num,"TOPLEFT",Kormrok.setupFrame.pings[i],"TOPLEFT",0,0)
-		Kormrok.setupFrame.pings[i].name = ExRT.lib.CreateText(Kormrok.setupFrame.pings[i],75,15,nil,0,0,"LEFT","TOP",nil,11,"Player"..i,nil,1,1,1,nil,1)
-		ExRT.lib.SetPoint(Kormrok.setupFrame.pings[i].name,"TOPLEFT",Kormrok.setupFrame.pings[i],"TOPLEFT",0,-12)
+		local currPing = CreateFrame('Button',nil,Kormrok.setupFrame)
+		Kormrok.setupFrame.pings[i] = currPing
+		currPing:SetSize(32,32)
+		currPing.icon = currPing:CreateTexture(nil,"ARTWORK")
+		currPing.icon:SetAllPoints()
+		currPing.icon:SetTexture("Interface\\AddOns\\ExRT\\media\\KormrokRune.tga")
+		currPing.num = ELib:Text(currPing,i,12):Size(30,15):Point(0,0):Top():Color():Outline()
+		currPing.name = ELib:Text(currPing,"Player"..i,11):Size(75,15):Point(0,-12):Top():Color():Outline()
 		
-		Kormrok.setupFrame.pings[i]:SetScript("OnEnter",SetupFramePingsOnEnter)
-		Kormrok.setupFrame.pings[i]:SetScript("OnLeave",SetupFramePingsOnLeave)
-		Kormrok.setupFrame.pings[i]:RegisterForClicks("RightButtonDown","LeftButtonDown")
-		Kormrok.setupFrame.pings[i]._i = i
-		Kormrok.setupFrame.pings[i]:SetScript("OnClick",SetupFramePingsOnClick)
+		currPing:SetScript("OnEnter",SetupFramePingsOnEnter)
+		currPing:SetScript("OnLeave",SetupFramePingsOnLeave)
+		currPing:RegisterForClicks("RightButtonDown","LeftButtonDown")
+		currPing._i = i
+		currPing:SetScript("OnClick",SetupFramePingsOnClick)
 		
 		if x >= Kormrok.image[1] and x <= Kormrok.image[3] and y >= Kormrok.image[2] and y <= Kormrok.image[4] then
-			Kormrok.setupFrame.pings[i]:SetPoint("CENTER",Kormrok.setupFrame.map,"TOPLEFT", (x - Kormrok.image[1])/(Kormrok.image[3]-Kormrok.image[1])*Kormrok.width,-(y - Kormrok.image[2])/(Kormrok.image[4]-Kormrok.image[2])*(Kormrok.image_avg * Kormrok.width))
+			currPing:SetPoint("CENTER",Kormrok.setupFrame.map,"TOPLEFT", (x - Kormrok.image[1])/(Kormrok.image[3]-Kormrok.image[1])*Kormrok.width,-(y - Kormrok.image[2])/(Kormrok.image[4]-Kormrok.image[2])*(Kormrok.image_avg * Kormrok.width))
 		end
 	end
 	
@@ -3028,11 +3170,9 @@ function Kormrok:Load()
 		DisableSync()
 	end
 	
-	Kormrok.setupFrame.clearButton = ExRT.lib.CreateButton(Kormrok.setupFrame,120,20,nil,0,0,ExRT.L.BossmodsKromogClear,nil,nil,"ExRTButtonModernTemplate")
-	ExRT.lib.SetPoint(Kormrok.setupFrame.clearButton,"BOTTOMLEFT",Kormrok.setupFrame,7,22)
-	Kormrok.setupFrame.clearButton:SetScript("OnClick",function (self)
+	Kormrok.setupFrame.clearButton = ELib:Button(Kormrok.setupFrame,L.BossmodsKromogClear):Size(120,20):Point("BOTTOMLEFT",7,22):OnClick(function (self)
 		StaticPopupDialogs["EXRT_BOSSMODS_KORMROK_CLEAR"] = {
-			text = ExRT.L.BossmodsKromogClear,
+			text = L.BossmodsKromogClear,
 			button1 = YES,
 			button2 = NO,
 			OnAccept = KormrokClearConfirm,
@@ -3044,9 +3184,7 @@ function Kormrok:Load()
 		StaticPopup_Show("EXRT_BOSSMODS_KORMROK_CLEAR")
 	end)
 	
-	Kormrok.setupFrame.testButton = ExRT.lib.CreateButton(Kormrok.setupFrame,120,20,nil,0,0,ExRT.L.BossmodsKromogTest,nil,nil,"ExRTButtonModernTemplate")
-	ExRT.lib.SetPoint(Kormrok.setupFrame.testButton,"BOTTOMRIGHT",Kormrok.setupFrame.clearButton,"TOPRIGHT",0,2)
-	Kormrok.setupFrame.testButton:SetScript("OnClick",function (self)
+	Kormrok.setupFrame.testButton = ELib:Button(Kormrok.setupFrame,L.BossmodsKromogTest):Size(120,20):Point("BOTTOMRIGHT",Kormrok.setupFrame.clearButton,"TOPRIGHT",0,2):OnClick(function (self)
 		KormrokFrameOnEvent(Kormrok.setupFrame,"RAID_BOSS_EMOTE",
 			phaseNow == 1 and "INV_Bijou_Orange spell:181297" or
 			phaseNow == 1 and "INV_Bijou_Green spell:181300" or
@@ -3084,21 +3222,19 @@ function Kormrok:Load()
 	end
 	
 	local setupsDropDown = CreateFrame("Frame", "ExRT_Kormrok_SetupsDropDown", nil, "UIDropDownMenuTemplate")
-	Kormrok.setupFrame.setupsButton = ExRT.lib.CreateButton(Kormrok.setupFrame,120,20,nil,0,0,ExRT.L.BossmodsKromogSetups,nil,nil,"ExRTButtonModernTemplate")
-	ExRT.lib.SetPoint(Kormrok.setupFrame.setupsButton,"BOTTOMRIGHT",Kormrok.setupFrame.testButton,"TOPRIGHT",0,2)
-	Kormrok.setupFrame.setupsButton:SetScript("OnClick",function (self)
+	Kormrok.setupFrame.setupsButton = ELib:Button(Kormrok.setupFrame,L.BossmodsKromogSetups):Size(120,20):Point("BOTTOMRIGHT",Kormrok.setupFrame.testButton,"TOPRIGHT",0,2):OnClick(function (self)
 		VExRT.Bossmods.KormrokSetups = VExRT.Bossmods.KormrokSetups or {}
 	
 		local dropDown = {
-			{ text = ExRT.L.BossmodsKromogSetups, isTitle = true, notCheckable = true, notClickable = true},
+			{ text = L.BossmodsKromogSetups, isTitle = true, notCheckable = true, notClickable = true},
 		}
 		for i=1,5 do
 			VExRT.Bossmods.KormrokSetups[i] = VExRT.Bossmods.KormrokSetups[i] or {}
 		
 			local subMenu = nil
-			local saveMenu = { text = ExRT.L.BossmodsKromogSetupsSave, func = SetupsDropDown_Save, arg1 = i, notCheckable = true }
-			local loadMenu = { text = ExRT.L.BossmodsKromogSetupsLoad, func = SetupsDropDown_Load, arg1 = i, notCheckable = true }
-			local clearMenu = { text = ExRT.L.BossmodsKromogSetupsClear, func = SetupsDropDown_Clear, arg1 = i, notCheckable = true }
+			local saveMenu = { text = L.BossmodsKromogSetupsSave, func = SetupsDropDown_Save, arg1 = i, notCheckable = true }
+			local loadMenu = { text = L.BossmodsKromogSetupsLoad, func = SetupsDropDown_Load, arg1 = i, notCheckable = true }
+			local clearMenu = { text = L.BossmodsKromogSetupsClear, func = SetupsDropDown_Clear, arg1 = i, notCheckable = true }
 			
 			local isExists = VExRT.Bossmods.KormrokSetups[i].date
 			local dateText = ""
@@ -3113,13 +3249,11 @@ function Kormrok:Load()
 				text = i..dateText, hasArrow = true, menuList = subMenu, notCheckable = true
 			}
 		end
-		dropDown[7] = { text = ExRT.L.BossmodsKromogSetupsClose, func = SetupsDropDown_Close, notCheckable = true }
+		dropDown[7] = { text = L.BossmodsKromogSetupsClose, func = SetupsDropDown_Close, notCheckable = true }
 		EasyMenu(dropDown, setupsDropDown, "cursor", 10 , -15, "MENU")
 	end)
 		
-	Kormrok.setupFrame.sendButton = ExRT.lib.CreateButton(Kormrok.setupFrame,120,20,nil,0,0,ExRT.L.BossmodsKromogSend,nil,nil,"ExRTButtonModernTemplate")
-	ExRT.lib.SetPoint(Kormrok.setupFrame.sendButton,"BOTTOMRIGHT",Kormrok.setupFrame.setupsButton,"TOPRIGHT",0,2)
-	Kormrok.setupFrame.sendButton:SetScript("OnClick",function (self)
+	Kormrok.setupFrame.sendButton = ELib:Button(Kormrok.setupFrame,L.BossmodsKromogSend):Size(120,20):Point("BOTTOMRIGHT",Kormrok.setupFrame.setupsButton,"TOPRIGHT",0,2):OnClick(function (self)
 		local line = ""
 		local counter = 0
 		ExRT.F.SendExMsg("kormrok","clear")
@@ -3139,25 +3273,7 @@ function Kormrok:Load()
 		end
 	end)
 	
-	--[[
-	Kormrok.setupFrame.disableArrowChk = ExRT.lib.CreateCheckBox(Kormrok.setupFrame,nil,0,0,ExRT.L.BossmodsKormrokArrow,not VExRT.Bossmods.Kormrok.AlwaysArrow,nil,nil,"ExRTCheckButtonModernTemplate")
-	ExRT.lib.SetPoint(Kormrok.setupFrame.disableArrowChk,"BOTTOMLEFT",Kormrok.setupFrame.sendButton,"TOPLEFT",0,2)
-	Kormrok.setupFrame.disableArrowChk:SetScale(0.9)
-	Kormrok.setupFrame.disableArrowChk:SetScript("OnClick",function (self)
-		if self:GetChecked() then
-			VExRT.Bossmods.Kormrok.AlwaysArrow = nil
-		else
-			VExRT.Bossmods.Kormrok.AlwaysArrow = true
-		end
-		Kormrok:RegisterEvents()
-	end)
-	]]
-	
-	Kormrok.setupFrame.onlyTrustedChk = ExRT.lib.CreateCheckBox(Kormrok.setupFrame,nil,0,0,ExRT.L.BossmodsKromogOnlyTrusted,not VExRT.Bossmods.Kormrok.UpdatesFromAll,ExRT.L.BossmodsKromogOnlyTrustedTooltip,nil,"ExRTCheckButtonModernTemplate")
-	--ExRT.lib.SetPoint(Kormrok.setupFrame.onlyTrustedChk,"BOTTOMLEFT",Kormrok.setupFrame.disableArrowChk,"TOPLEFT",0,2)
-	ExRT.lib.SetPoint(Kormrok.setupFrame.onlyTrustedChk,"BOTTOMLEFT",Kormrok.setupFrame.sendButton,"TOPLEFT",0,2)
-	Kormrok.setupFrame.onlyTrustedChk:SetScale(0.9)
-	Kormrok.setupFrame.onlyTrustedChk:SetScript("OnClick",function (self)
+	Kormrok.setupFrame.onlyTrustedChk = ELib:Check(Kormrok.setupFrame,L.BossmodsKromogOnlyTrusted,not VExRT.Bossmods.Kormrok.UpdatesFromAll):Point("BOTTOMLEFT",Kormrok.setupFrame.sendButton,"TOPLEFT",0,2):Scale(.9):Tooltip(L.BossmodsKromogOnlyTrustedTooltip):OnClick(function (self)
 		if self:GetChecked() then
 			VExRT.Bossmods.Kormrok.UpdatesFromAll = nil
 		else
@@ -3165,51 +3281,41 @@ function Kormrok:Load()
 		end
 	end)
 	
-	Kormrok.setupFrame.lastUpdate = ExRT.lib.CreateText(Kormrok.setupFrame,500,20,nil,0,0,"LEFT","BOTTOM",nil,12,"",nil,1,1,1,nil,1)
-	ExRT.lib.SetPoint(Kormrok.setupFrame.lastUpdate,"BOTTOMLEFT",Kormrok.setupFrame,"BOTTOMLEFT",7,5)
+	Kormrok.setupFrame.lastUpdate = ELib:Text(Kormrok.setupFrame,"",12):Size(500,20):Point("BOTTOMLEFT",Kormrok.setupFrame,"BOTTOMLEFT",7,5):Bottom():Color(1,1,1):Outline()
 	
 	local phaseBackground = Kormrok.setupFrame:CreateTexture(nil, "BACKGROUND",nil,2)
 	phaseBackground:SetPoint("TOPLEFT",0,0)
 	phaseBackground:SetPoint("BOTTOMRIGHT",Kormrok.setupFrame,"TOPRIGHT",0,-50)
 	phaseBackground:SetTexture( 1, 1, 1, 1)
 	
-	local phaseOrange = ExRT.lib.CreateIcon(Kormrok.setupFrame,72,"BOTTOMLEFT",200,70,"Interface\\Icons\\INV_Bijou_Orange.blp",true)
-	ExRT.lib.SetPoint(phaseOrange,"CENTER",Kormrok.setupFrame,"BOTTOMLEFT",224,94)
+	local phaseOrange = ELib:Icon(Kormrok.setupFrame,"Interface\\Icons\\INV_Bijou_Orange.blp",72,true):Point("CENTER",Kormrok.setupFrame,"BOTTOMLEFT",224,94)
 	phaseOrange.phase = 1
 	
-	phaseOrange.copy = ExRT.lib.CreateButton(Kormrok.setupFrame,65,14,nil,0,0,ExRT.L.BossmodsKormrokCopy,nil,nil,"ExRTButtonModernTemplate")
-	phaseOrange.copy:SetNewPoint("CENTER",phaseOrange,0,-50)
+	phaseOrange.copy = ELib:Button(Kormrok.setupFrame,L.BossmodsKormrokCopy):Size(65,14):Point("CENTER",phaseOrange,0,-50)
 	phaseOrange.copy.phase = 1
 	phaseOrange.copy.icon = "Interface\\Icons\\INV_Bijou_Orange.blp"
 	
-	phaseOrange.clear = ExRT.lib.CreateButton(Kormrok.setupFrame,65,14,nil,0,0,ExRT.L.BossmodsKromogSetupsClear,nil,nil,"ExRTButtonModernTemplate")
-	phaseOrange.clear:SetNewPoint("CENTER",phaseOrange,0,-50)
+	phaseOrange.clear = ELib:Button(Kormrok.setupFrame,L.BossmodsKromogSetupsClear):Size(65,14):Point("CENTER",phaseOrange,0,-50)
 	phaseOrange.clear.phase = 1
 
-	local phaseGreen = ExRT.lib.CreateIcon(Kormrok.setupFrame,48,"BOTTOMLEFT",270,70,"Interface\\Icons\\INV_Bijou_Green.blp",true)
-	ExRT.lib.SetPoint(phaseGreen,"CENTER",Kormrok.setupFrame,"BOTTOMLEFT",294,94)
+	local phaseGreen = ELib:Icon(Kormrok.setupFrame,"Interface\\Icons\\INV_Bijou_Green.blp",48,true):Point("CENTER",Kormrok.setupFrame,"BOTTOMLEFT",294,94)
 	phaseGreen.phase = 2
 
-	phaseGreen.copy = ExRT.lib.CreateButton(Kormrok.setupFrame,65,14,nil,0,0,ExRT.L.BossmodsKormrokCopy,nil,nil,"ExRTButtonModernTemplate")
-	phaseGreen.copy:SetNewPoint("CENTER",phaseGreen,0,-50)
+	phaseGreen.copy = ELib:Button(Kormrok.setupFrame,L.BossmodsKormrokCopy):Size(65,14):Point("CENTER",phaseGreen,0,-50)
 	phaseGreen.copy.phase = 2
 	phaseGreen.copy.icon = "Interface\\Icons\\INV_Bijou_Green.blp"
 	
-	phaseGreen.clear = ExRT.lib.CreateButton(Kormrok.setupFrame,65,14,nil,0,0,ExRT.L.BossmodsKromogSetupsClear,nil,nil,"ExRTButtonModernTemplate")
-	phaseGreen.clear:SetNewPoint("CENTER",phaseGreen,0,-50)
+	phaseGreen.clear = ELib:Button(Kormrok.setupFrame,L.BossmodsKromogSetupsClear):Size(65,14):Point("CENTER",phaseGreen,0,-50)
 	phaseGreen.clear.phase = 2
 
-	local phasePurple = ExRT.lib.CreateIcon(Kormrok.setupFrame,48,"BOTTOMLEFT",340,70,"Interface\\Icons\\INV_Bijou_Purple.blp",true)
-	ExRT.lib.SetPoint(phasePurple,"CENTER",Kormrok.setupFrame,"BOTTOMLEFT",364,94)
+	local phasePurple = ELib:Icon(Kormrok.setupFrame,"Interface\\Icons\\INV_Bijou_Purple.blp",48,true):Point("CENTER",Kormrok.setupFrame,"BOTTOMLEFT",364,94)
 	phasePurple.phase = 3
 
-	phasePurple.copy = ExRT.lib.CreateButton(Kormrok.setupFrame,65,14,nil,0,0,ExRT.L.BossmodsKormrokCopy,nil,nil,"ExRTButtonModernTemplate")
-	phasePurple.copy:SetNewPoint("CENTER",phasePurple,0,-50)
+	phasePurple.copy = ELib:Button(Kormrok.setupFrame,L.BossmodsKormrokCopy):Size(65,14):Point("CENTER",phasePurple,0,-50)
 	phasePurple.copy.phase = 3
 	phasePurple.copy.icon = "Interface\\Icons\\INV_Bijou_Purple.blp"
 	
-	phasePurple.clear = ExRT.lib.CreateButton(Kormrok.setupFrame,65,14,nil,0,0,ExRT.L.BossmodsKromogSetupsClear,nil,nil,"ExRTButtonModernTemplate")
-	phasePurple.clear:SetNewPoint("CENTER",phasePurple,0,-50)
+	phasePurple.clear = ELib:Button(Kormrok.setupFrame,L.BossmodsKromogSetupsClear):Size(65,14):Point("CENTER",phasePurple,0,-50)
 	phasePurple.clear.phase = 1
 	
 	local phaseBackgroundColors = {
@@ -3241,7 +3347,7 @@ function Kormrok:Load()
 	end
 	local function SetPhaseCopyButton(self)
 		StaticPopupDialogs["EXRT_BOSSMODS_KORMROK_COPY"] = {
-			text = ExRT.L.BossmodsKormrokCopy .. " |T" ..self.icon..":24|t?",
+			text = L.BossmodsKormrokCopy .. " |T" ..self.icon..":24|t?",
 			button1 = YES,
 			button2 = NO,
 			OnAccept = function()
@@ -3260,7 +3366,7 @@ function Kormrok:Load()
 	
 	local function SetPhaseClearButton(self)
 		StaticPopupDialogs["EXRT_BOSSMODS_KORMROK_CLEAR"] = {
-			text = ExRT.L.BossmodsKromogClear,
+			text = L.BossmodsKromogClear,
 			button1 = YES,
 			button2 = NO,
 			OnAccept = function()
@@ -3293,7 +3399,7 @@ function Kormrok:Load()
 	phaseOrange:Click()
 	Kormrok.setupFrame.phaseOrange = phaseOrange
 
-	Kormrok.raidRoster = ExRT.lib.CreatePopupFrame(80*4+25,113+14,ExRT.L.BossmodsKromogSelectPlayer,true)
+	Kormrok.raidRoster = ELib:Popup(L.BossmodsKromogSelectPlayer):Size(80*4+25,113+14)
 	Kormrok.raidRoster:SetScript("OnShow",function (self)
 		Kormrok:UpdateSelectRoster(phaseNow)
 	end)
@@ -3326,7 +3432,7 @@ function Kormrok:Load()
 			ExRT.lib.CreateHoverHighlight(Kormrok.raidRoster.buttons[pos])
 			Kormrok.raidRoster.buttons[pos]:SetScript("OnEnter",RaidRosterButtonOnEnter)
 			Kormrok.raidRoster.buttons[pos]:SetScript("OnLeave",RaidRosterButtonOnLeave)
-			Kormrok.raidRoster.buttons[pos].name = ExRT.lib.CreateText(Kormrok.raidRoster.buttons[pos],80,14,nil,0,0,"LEFT","MIDDLE",nil,12,"",nil,1,1,1,1)
+			Kormrok.raidRoster.buttons[pos].name = ELib:Text(Kormrok.raidRoster.buttons[pos],"",12):Size(80,14):Point(0,0):Color(1,1,1):Shadow()
 			Kormrok.raidRoster.buttons[pos]._name = nil
 			Kormrok.raidRoster.buttons[pos]:SetScript("OnClick",RaidRosterButtonOnClick)
 		end
@@ -3341,7 +3447,8 @@ function Kormrok:Load()
 	Kormrok.raidRoster.clearButton:SetScript("OnLeave",function(self)
 		self.hl:Hide()
 	end)
-	Kormrok.raidRoster.clearButton.name = ExRT.lib.CreateText(Kormrok.raidRoster.clearButton,80,14,nil,0,0,"RIGHT","MIDDLE",nil,12,ExRT.L.BossmodsKromogClear,nil,1,1,1,1)
+	
+	Kormrok.raidRoster.clearButton.name = ELib:Text(Kormrok.raidRoster.clearButton,L.BossmodsKromogClear,12):Size(80,14):Point(0,0):Right():Middle():Color(1,1,1):Shadow()
 	Kormrok.raidRoster.clearButton:SetScript("OnClick",function(self)
 		VExRT.Bossmods.Kormrok[Kormrok.raidRoster.pos] = nil
 		Kormrok:ReRoster(phaseNow)
@@ -3350,9 +3457,7 @@ function Kormrok:Load()
 		DisableSync()
 	end)
 	
-	Kormrok.raidRoster.hideChk = ExRT.lib.CreateCheckBox(Kormrok.raidRoster,"BOTTOMLEFT",10,7,ExRT.L.BossmodsKromogHidePlayers,true,nil,nil,"ExRTCheckButtonModernTemplate")
-	Kormrok.raidRoster.hideChk:SetScale(0.8)
-	Kormrok.raidRoster.hideChk:SetScript("OnClick",function (self)
+	Kormrok.raidRoster.hideChk = ELib:Check(Kormrok.raidRoster,L.BossmodsKromogHidePlayers,true):Point("BOTTOMLEFT",10,7):Scale(.8):OnClick(function (self)
 	  	Kormrok.hidePlayers = self:GetChecked()
 	  	Kormrok:UpdateSelectRoster(phaseNow)
 	end)
@@ -3360,6 +3465,7 @@ function Kormrok:Load()
 	function Kormrok:RegisterEvents()
 		Kormrok.setupFrame:UnregisterAllEvents()
 		Kormrok.setupFrame:RegisterEvent("RAID_BOSS_EMOTE")
+		Kormrok.setupFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
 		if not VExRT.Bossmods.Kormrok.AlwaysArrow then
 			--Kormrok.setupFrame:RegisterEvent("ENCOUNTER_START")
 			--Kormrok.setupFrame:RegisterEvent("ENCOUNTER_END")
@@ -3391,7 +3497,7 @@ function Kormrok:Load()
 	if not VExRT.Bossmods.Kormrok.name or not VExRT.Bossmods.Kormrok.time then
 		Kormrok.setupFrame.lastUpdate:SetText("")
 	else
-		Kormrok.setupFrame.lastUpdate:SetText(ExRT.L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kormrok.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kormrok.time)..")"..(not VExRT.Bossmods.Kormrok.sync and " *" or ""))
+		Kormrok.setupFrame.lastUpdate:SetText(L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kormrok.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kormrok.time)..")"..(not VExRT.Bossmods.Kormrok.sync and " *" or ""))
 	end
 	Kormrok:ReRoster(1)
 	Kormrok.setupFrame:Show()
@@ -3443,7 +3549,7 @@ function Kormrok:addonMessage(sender, prefix, ...)
 		end
 		
 		if Kormrok.setupFrame then
-			Kormrok.setupFrame.lastUpdate:SetText(ExRT.L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kormrok.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kormrok.time)..")")
+			Kormrok.setupFrame.lastUpdate:SetText(L.BossmodsKromogLastUpdate..": "..VExRT.Bossmods.Kormrok.name.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Kormrok.time)..")")
 			Kormrok:ReRoster( Kormrok:GetCurrentPhase() )
 		end
 	end
@@ -3453,6 +3559,7 @@ end
 -- Mannoroth
 -----------------------------------------
 local Mannoroth = {}
+module.A.Mannoroth = Mannoroth
 
 function Mannoroth:Load()
 	local mainFrame = Mannoroth.setupFrame
@@ -3467,7 +3574,7 @@ function Mannoroth:Load()
 		return
 	end
 	
-	mainFrame = ExRT.lib.CreatePopupFrame(600,400,"Mannoroth",true)
+	mainFrame = ELib:Popup("Mannoroth"):Size(600,400)
 	Mannoroth.setupFrame = mainFrame
 	mainFrame:SetFrameStrata("HIGH")
 	mainFrame:Show()
@@ -3490,14 +3597,14 @@ function Mannoroth:Load()
 		frame:SetSize(170,220)
 		frame:SetPoint("TOP",-195 + (i-1)*195,-30)
 		
-		frame.shadow = ExRT.lib.CreateShadow(frame,25)
+		frame.shadow = ELib:Shadow(frame,25)
 		frame.shadow:SetBackdropBorderColor(1,1,1,.45)
 		
 		if i==1 then
 			frame.shadow:SetBackdropBorderColor(0,1,0,.45)
 		end
 		
-		local icon = ExRT.lib.CreateIcon(frame,32,"TOP",0,-10,"Interface\\TargetingFrame\\UI-RaidTargetingIcon_"..(9-i))
+		local icon = ELib:Icon(frame,"Interface\\TargetingFrame\\UI-RaidTargetingIcon_"..i,32):Point("TOP",0,-10)
 		
 		frame._i = i
 		frame:SetScript("OnClick",function(self)
@@ -3518,7 +3625,7 @@ function Mannoroth:Load()
 			line:SetPoint("TOP",0,-40-j*14)
 			line:SetSize(170,14)
 			
-			line.name = ExRT.lib.CreateText(line,145,12,"LEFT",20,0,"LEFT","MIDDLE",nil,12,UnitName'player',nil,1,1,1,true)
+			line.name = ELib:Text(line,UnitName'player',12):Size(145,12):Point("LEFT",20,0):Color(1,1,1):Shadow()
 			
 			local remove = CreateFrame("Button",nil,line)
 			line.remove = remove
@@ -3573,7 +3680,7 @@ function Mannoroth:Load()
 			line:SetPoint("TOPLEFT",mainFrame.markSection[1],"BOTTOMLEFT",(i-1)*94,-5-j*14)
 			line:SetSize(90,14)
 			
-			line.name = ExRT.lib.CreateText(line,90,12,"LEFT",0,0,"LEFT","MIDDLE",nil,12,UnitName'player',nil,1,1,1,true)
+			line.name = ELib:Text(line,UnitName'player',12):Size(90,12):Point("LEFT",0,0):Color(1,1,1):Shadow()
 			line._name = (UnitName'player') .. ((i-1)*5+j)
 			
 			line:SetScript("OnClick", raidNamesOnClick)
@@ -3640,16 +3747,15 @@ function Mannoroth:Load()
 	mainFrame:UpdateRoster()
 	mainFrame:UpdateSections()
 	
-	mainFrame.lastUpdate = ExRT.lib.CreateText(mainFrame,430,20,"BOTTOMLEFT",10,10,"LEFT","BOTTOM",nil,12,"Last Update: me ololol",nil,1,1,1,nil,1)
+	mainFrame.lastUpdate = ELib:Text(mainFrame,"",12):Size(430,20):Point("BOTTOMLEFT",10,10):Bottom():Color():Outline()
 
 	if not VExRT.Bossmods.Mannoroth.name or not VExRT.Bossmods.Mannoroth.time then
 		mainFrame.lastUpdate:SetText("")
 	else
-		mainFrame.lastUpdate:SetText(ExRT.L.BossmodsKromogLastUpdate..": "..ExRT.F.delUnitNameServer(VExRT.Bossmods.Mannoroth.name).." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Mannoroth.time)..")")
+		mainFrame.lastUpdate:SetText(L.BossmodsKromogLastUpdate..": "..ExRT.F.delUnitNameServer(VExRT.Bossmods.Mannoroth.name).." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Mannoroth.time)..")")
 	end
 	
-	mainFrame.sendButton = ExRT.lib.CreateButton(mainFrame,120,20,"BOTTOMRIGHT",-10,10,ExRT.L.BossmodsKromogSend,nil,nil,"ExRTButtonModernTemplate")
-	mainFrame.sendButton:SetScript("OnClick",function (self)
+	mainFrame.sendButton = ELib:Button(mainFrame,L.BossmodsKromogSend):Size(120,20):Point("BOTTOMRIGHT",-10,10):OnClick(function (self)
 		local line = ""
 		local counter = 0
 		ExRT.F.SendExMsg("mannoroth","num\t"..(VExRT.Bossmods.Mannoroth.number or 3))
@@ -3716,11 +3822,16 @@ function Mannoroth:Load()
 				if markNow == 8 then
 					wipe(tableBuilder)
 				end
-				SetRaidTarget(destName,markNow)
+				local markFixed = markIDtoSelection[markNow]
+				if markFixed and ExRT.F.table_len(VExRT.Bossmods.Mannoroth.Section[markFixed]) > 0 then
+					SetRaidTarget(destName, markFixed)
+				end
 				tableBuilder[markNow] = destName
 				ShowArrow(spellID == 182006)
 				markNow = markNow - 1
 				C_Timer.NewTimer(3,function() markNow = 8 end)
+			elseif cleu_event == "SPELL_AURA_REMOVED" and (spellID == 182006 or spellID == 181597) then
+				SetRaidTarget(destName, 0)
 			end
 		elseif event == "GROUP_ROSTER_UPDATE" then
 			mainFrame:UpdateRoster()
@@ -3782,7 +3893,7 @@ function Mannoroth:addonMessage(sender, prefix, ...)
 		end
 		
 		if Mannoroth.setupFrame then
-			Mannoroth.setupFrame.lastUpdate:SetText(ExRT.L.BossmodsKromogLastUpdate..": "..ExRT.F.delUnitNameServer(VExRT.Bossmods.Mannoroth.name).." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Mannoroth.time)..")")
+			Mannoroth.setupFrame.lastUpdate:SetText(L.BossmodsKromogLastUpdate..": "..ExRT.F.delUnitNameServer(VExRT.Bossmods.Mannoroth.name).." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Bossmods.Mannoroth.time)..")")
 			Mannoroth.setupFrame:UpdateSections()
 
 			Mannoroth.setupFrame:UpdateRoster()
@@ -3795,6 +3906,7 @@ end
 -- Archimonde
 -----------------------------------------
 local Archimonde = {}
+module.A.Archimonde = Archimonde
 
 --[[
 
@@ -3805,16 +3917,20 @@ VExRT.Bossmods.ArchimondeDisableText  - Disable Text
 ]]
 
 function Archimonde:Load()
+	ExRT.Options.Frame:Hide()
+
 	local frame = Archimonde.mainframe
 	if frame then
 		frame:Show()
 		frame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+		frame:RegisterEvent('ENCOUNTER_START')
+		frame:RegisterEvent('ENCOUNTER_END')
 		frame.isEnabled = true
 		return
 	end
 
 	local FRAME_SIZE = 200
-	local VECTOR_LENGTH = 200
+	local VECTOR_LENGTH = 300
 	local VECTOR_DEPTH = 1.5
 	local VIEW_DISTANCE = VExRT.Bossmods.ArchimondeRadius or 20
 	local VIEW_DISTANCE2 = VIEW_DISTANCE * 2
@@ -3822,6 +3938,7 @@ function Archimonde:Load()
 		[1] = {r = 0.6, g = 1, b = 0.6, a = 1},
 		[2] = {r = 1, g= .5, b = 0, a = 1},
 		[3] = {r = 1, g = 0.6, b = 0.6, a = 1},
+		[4] = {r = 0.2, g = 0.6, b = 0.85, a = 1},
 	}
 
 	frame = CreateFrame("Frame",nil,UIParent)
@@ -3847,7 +3964,7 @@ function Archimonde:Load()
 	end
 	
 	if VExRT.Bossmods.Alpha then frame:SetAlpha(VExRT.Bossmods.Alpha/100) end
-	if VExRT.Bossmods.Scale then frame:SetScale(VExRT.Bossmods.Scale/100) end
+	--if VExRT.Bossmods.Scale then frame:SetScale(VExRT.Bossmods.Scale/100) end
 	
 	frame.isEnabled = true
 	
@@ -3860,9 +3977,9 @@ function Archimonde:Load()
 	frame.player:SetPoint("CENTER",0,0)
 	frame.player:SetTexture("Interface\\MINIMAP\\MinimapArrow")
 	
-	ExRT.lib.CreateShadow(frame,15,20)
+	ELib:Shadow(frame,15,20)
 	
-	frame.close = ExRT.lib.CreateIcon(frame,16,"TOPRIGHT",2,18,[[Interface\AddOns\ExRT\media\DiesalGUIcons16x256x128.tga]],true)
+	frame.close = ELib:Icon(frame,[[Interface\AddOns\ExRT\media\DiesalGUIcons16x256x128.tga]],16,true):Point("TOPRIGHT",2,18)
 	frame.close.texture:SetTexCoord(0.5,0.5625,0.5,0.625)
 	frame.close:SetScript("OnClick",function(self)
 		self:GetParent():Hide()
@@ -3928,6 +4045,25 @@ function Archimonde:Load()
 		end
 	end
 	
+	local function UpdateLinesBold(size)
+		VExRT.Bossmods.ArchimondeLineSize = size
+		size = size or 12
+		for i=1,#frame.lines do
+			frame.lines[i]:SetTexture("Interface\\AddOns\\ExRT\\media\\line"..size.."px")
+		end
+		
+		local rad = VExRT.Bossmods.ArchimondeRadius or 20
+		if rad > 30 then
+			rad = 10
+		else
+			rad = 12
+		end
+		for i=1,#frame.players do
+			frame.players[i]:SetFont(ExRT.F.defFont, rad, "OUTLINE")
+		end
+	end
+
+	
 	frame.players = {}
 	local function SetPlayer(i,data,pX,pY)
 		if VExRT.Bossmods.ArchimondeDisableText then
@@ -3937,11 +4073,79 @@ function Archimonde:Load()
 		if not text then
 			text = frame:CreateFontString(nil,"ARTWORK")
 			frame.players[i] = text
-			text:SetFont(ExRT.mds.defFont, 12, "OUTLINE")
+			local rad = (VExRT.Bossmods.ArchimondeRadius or 20) > 30
+			text:SetFont(ExRT.F.defFont, rad and 10 or 12, "OUTLINE")
 		end
 		text:SetPoint("CENTER",frame,"BOTTOMLEFT",pX,pY)
 		text:SetText(data)
 		text:Show()
+	end
+	
+	frame.circles = {}
+	local function SetCircle(i,pX,pY,c,moreAlpha)
+		local circle = frame.circles[i]
+		if not circle then
+			circle = frame:CreateTexture(nil, "BACKGROUND")
+			frame.circles[i] = circle
+			circle:SetTexture("Interface\\AddOns\\ExRT\\media\\circle256")
+		end
+		local isPlayer = c == 4
+		local half_size = FRAME_SIZE / VIEW_DISTANCE2 * (isPlayer and 30 or 25)
+		local size = half_size * 2
+		
+		local width,height = size,size
+		
+		local npX,npY = pX - half_size,pY - half_size
+		
+		local L,R,T,B = 0,1,0,1
+		local left = pX - half_size
+		local right = pX + half_size
+		if left < 0 then
+			L = -left / size
+			width = width - L * size
+			
+			npX = 0
+		end
+		if right > FRAME_SIZE then
+			R = (right - FRAME_SIZE) / size
+			width = width - R * size
+			R = 1 - R
+		end
+		
+		local bottom = pY - half_size
+		local top = pY + half_size
+		if bottom < 0 then
+			B = -bottom / size
+			height = height - B * size
+			B = 1 - B
+			
+			npY = 0
+		end
+		if top > FRAME_SIZE then
+			T = (top - FRAME_SIZE) / size
+			height = height - T * size
+		end
+		if L == R or T == B then
+			return
+		end
+		
+		circle:SetTexCoord(L,R,T,B)
+		
+		circle:SetPoint("BOTTOMLEFT",frame,"BOTTOMLEFT",npX,npY)
+		circle:SetSize(width,height)
+		local color_list = LINES_COLORS[c or 1]
+		local alpha = .7
+		if isPlayer then
+			if moreAlpha then
+				alpha = 0
+			else
+				alpha = .25
+			end
+		elseif moreAlpha then
+			alpha = .25
+		end
+		circle:SetVertexColor(color_list.r, color_list.g, color_list.b, alpha)
+		circle:Show()
 	end
 	
 	local function GetContactPosition(x1,x2,x3,x4,y1,y2,y3,y4)
@@ -3991,29 +4195,54 @@ function Archimonde:Load()
   		return (a*x0+b*y0+c)/t
 	end
 	
+	local function IsCircleIn(xC,yC,R,x1,y1,x2,y2)
+		x1 = x1 - xC
+		y1 = y1 - yC
+		x2 = x2 - xC
+		y2 = y2 - yC
+		
+		local dx = x2 - x1
+		local dy = y2 - y1
+		
+		local a = dx*dx + dy*dy
+		local b = 2 * (x1 * dx + y1 * dy)
+		local c = x1 * x1 + y1*y1 - R*R
+		
+		if -b < 0 then
+			return c < 0
+		elseif -b < (2*a) then
+			return (4*a*c - b*b) < 0
+		else
+			return (a+b+c) < 0
+		end
+	end
+	
 	local chainsList,chainsWipe = {},0
 	local scheduleWipeChains = nil
 	local function scheduleWipeChains_Func()
 		scheduleWipeChains = nil
 		wipe(chainsList)
-		frame:Hide()
+		frame:Visibility()
+	end
+	
+	local shackledList,shackledLast = {},0
+	local function AddTestSchackled()
+		local y,x = UnitPosition('player')
+		shackledList[#shackledList + 1] = {x=x,y=y}
+	end
+	
+	frame.Visibility = function(self)
+		local chainsCount = table_len(chainsList)
+		local shackledCount = table_len(shackledList)
+		if chainsCount == 0 and shackledCount == 0 then
+			self:Hide()
+		end
 	end
 	
 	frame:SetScript("OnEvent",function(self,mainEvent,timestamp,event,hideCaster,sourceGUID,sourceName,sourceFlags,sourceFlags2,destGUID,destName,destFlags,destFlags2,spellID,...)
 		if mainEvent == 'COMBAT_LOG_EVENT_UNFILTERED' then
 			if event == "SPELL_AURA_APPLIED" then
-				if spellID == 86273 and false then
-					local currTime = GetTime()
-					if (currTime - chainsWipe) > 20 then
-						wipe(chainsList)
-					end
-					chainsWipe = currTime
-					chainsList[sourceName] = destName
-					
-					frame:Show()
-					
-					print('Added chain',sourceName,'>',destName)
-				elseif spellID == 185014 then
+				if spellID == 185014 then
 					if scheduleWipeChains then
 						scheduleWipeChains:Cancel()
 						scheduleWipeChains = nil
@@ -4029,41 +4258,116 @@ function Archimonde:Load()
 					chainsList[sourceName] = destName
 					
 					frame:Show()
+				elseif spellID == 184964 then
+					local _,_,difficulty = GetInstanceInfo()
+					if VExRT.Bossmods.ArchimondeDisableShackled or difficulty ~= 16 then
+						return
+					end
+					local currTime = GetTime()
+					if (currTime - shackledLast) > 25 then
+						wipe(shackledList)
+					end
+					shackledLast = currTime
+					local y,x = UnitPosition(destName)
+					if not x or y == 0 then
+						return
+					end
+					shackledList[destName] = {x=x,y=y}
+					
+					frame:Show()
 				end
 			elseif event == "SPELL_AURA_REMOVED" then
 				if spellID == 185014 then
 					chainsList[sourceName] = nil
 					
-					if ExRT.F.table_len(chainsList) == 0 then
-						frame:Hide()
-					end
+					--if ExRT.F.table_len(chainsList) == 0 then frame:Hide() end
+					frame:Visibility()
+				elseif spellID == 184964 then
+					shackledList[destName] = nil
+					
+					frame:Visibility()
 				end
 			end
+		elseif mainEvent == 'ENCOUNTER_START' or mainEvent == 'ENCOUNTER_END' then
+			wipe(shackledList)
+			wipe(chainsList)
+			
+			frame:Visibility()
 		end
 	end)
 	frame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+	frame:RegisterEvent('ENCOUNTER_START')
+	frame:RegisterEvent('ENCOUNTER_END')
 	
-	function ARCHI_ADD(s,t,w)
+	local DEBUG_POS = {
+		[1] = {y=5623.8002929688,x=4531.8999023438},
+		[2] = {y=5654,x=4520},
+		[3] = {y=5645.3002929688,x=4547.1000976563},
+		[4] = {y=5648.5,x=4513.5},
+		[5] = {y=5656.8999023438,x=4538.7001953125},
+	}
+	
+	local function ARCHI_ADD(s,t,w)
 		if w then
 			wipe(chainsList)
 		end
 		chainsList[s] = t
 	end
-	function ARCHI_WIPE()
+	local function ARCHI_WIPE()
 		wipe(chainsList)
+		wipe(shackledList)
 	end
-	function ARCHI_TEST()
+	local function ARCHI_TEST()
 		wipe(chainsList)
+		wipe(shackledList)
 		local list = {}
 		
-		for i=1,GetNumGroupMembers() do
+		local groupSize = GetNumGroupMembers()
+		
+		for i=1,groupSize do
 			local name = GetRaidRosterInfo(i)
 			if name then
 				list[#list + 1] = name
 			end
 		end
 		
-		print('Archi TEST')
+		if groupSize == 0 then
+			local y,x = UnitPosition'player'
+			wipe(DEBUG_POS)
+			DEBUG_POS[1] = {x = x + 15, y = y + 15}
+			DEBUG_POS[2] = {x = x - 15, y = y + 15}
+			DEBUG_POS[3] = {x = x - 15, y = y - 15}
+			DEBUG_POS[4] = {x = x + 15, y = y - 15}
+			DEBUG_POS[5] = {x = x, y = y + 25}
+			for i=1,5 do
+				list[#list + 1] = i
+			end
+			list[#list + 1] = UnitName'player'
+			
+			if not VExRT.Bossmods.ArchimondeDisableShackled then
+				shackledList[1] = {x = x, y = y - 20}
+				shackledList[UnitName'player'] = {x = x + 27, y = y + 27}
+			end
+		else
+			if not VExRT.Bossmods.ArchimondeDisableShackled then
+				local name1 = list[math.random(1,#list)]
+				local y,x = UnitPosition(name1)
+				if x then
+					shackledList[name1] = {x = x, y = y}
+				end
+				
+				local name2 = list[math.random(1,#list)]
+				if name2 ~= name1 then
+					y,x = UnitPosition(name2)
+					if x then
+						shackledList[name2] = {x = x, y = y}
+					end
+				end
+			end
+		end
+		
+
+		--print('Archi TEST')
 		while #list > 1 do
 			local first = math.random(1,#list)
 			local name = list[first]
@@ -4075,17 +4379,125 @@ function Archimonde:Load()
 			
 			chainsList[name] = name2
 			
-			print(name,'>',name2)
+			--print(name,'>',name2)
+		end
+		
+		if IsShiftKeyDown() then
+			wipe(chainsList)
 		end
 	end
-
-	local DEBUG_POS = {
-		[1] = {y=5623.8002929688,x=4531.8999023438},
-		[2] = {y=5654,x=4520},
-		[3] = {y=5645.3002929688,x=4547.1000976563},
-		[4] = {y=5648.5,x=4513.5},
-		[5] = {y=5656.8999023438,x=4538.7001953125},
-	}
+	
+	frame.optionsDropDown = CreateFrame("Frame", "ExRTBossmodsArchimondeOptionsDropDown", nil, "UIDropDownMenuTemplate")
+	
+	frame.options = ELib:Icon(frame,[[Interface\AddOns\ExRT\media\DiesalGUIcons16x256x128.tga]],14,true):Point("TOPLEFT",2,16)
+	frame.options.texture:SetTexCoord(0.26,0.3025,0.51,0.615)
+	frame.options:SetScript("OnClick",function()
+		EasyMenu({
+			{
+				text = L.BossmodsKromogTest,
+				notCheckable = true,
+				func = function()
+					if ExRT.F.table_len(chainsList) > 0 then
+						wipe(chainsList)
+						wipe(shackledList)
+					else
+						ARCHI_TEST()
+					end
+				end,
+			},
+			{
+				text = L.BossmodsArchimondeDisableShackled,
+				checked = VExRT.Bossmods.ArchimondeDisableShackled,
+				func = function()
+					VExRT.Bossmods.ArchimondeDisableShackled = not VExRT.Bossmods.ArchimondeDisableShackled
+					wipe(shackledList)
+				end,
+			},
+			{
+				text = L.BossmodsArchimondeDisableText,
+				checked = VExRT.Bossmods.ArchimondeDisableText,
+				func = function()
+					VExRT.Bossmods.ArchimondeDisableText = not VExRT.Bossmods.ArchimondeDisableText
+				end,
+			},
+			{
+				text = L.BossmodsArchimondeDistance,
+				hasArrow = true,
+				notCheckable = true,
+				menuList = {
+					{text = "20y",func = function() VExRT.Bossmods.ArchimondeRadius = nil VIEW_DISTANCE = 20 VIEW_DISTANCE2 = VIEW_DISTANCE * 2 UpdateLinesBold() CloseDropDownMenus() end,checked = VExRT.Bossmods.ArchimondeRadius == 20 or not VExRT.Bossmods.ArchimondeRadius,},
+					{text = "25y",func = function() VExRT.Bossmods.ArchimondeRadius = 25 VIEW_DISTANCE = VExRT.Bossmods.ArchimondeRadius VIEW_DISTANCE2 = VIEW_DISTANCE * 2 UpdateLinesBold() CloseDropDownMenus() end,checked = VExRT.Bossmods.ArchimondeRadius == 25,},
+					{text = "30y",func = function() VExRT.Bossmods.ArchimondeRadius = 30 VIEW_DISTANCE = VExRT.Bossmods.ArchimondeRadius VIEW_DISTANCE2 = VIEW_DISTANCE * 2 UpdateLinesBold(10) CloseDropDownMenus() end,checked = VExRT.Bossmods.ArchimondeRadius == 30,},
+					{text = "35y",func = function() VExRT.Bossmods.ArchimondeRadius = 35 VIEW_DISTANCE = VExRT.Bossmods.ArchimondeRadius VIEW_DISTANCE2 = VIEW_DISTANCE * 2 UpdateLinesBold(8) CloseDropDownMenus() end,checked = VExRT.Bossmods.ArchimondeRadius == 35,},
+					{text = "40y",func = function() VExRT.Bossmods.ArchimondeRadius = 40 VIEW_DISTANCE = VExRT.Bossmods.ArchimondeRadius VIEW_DISTANCE2 = VIEW_DISTANCE * 2 UpdateLinesBold(6) CloseDropDownMenus() end,checked = VExRT.Bossmods.ArchimondeRadius == 40,},
+					{text = "50y",func = function() VExRT.Bossmods.ArchimondeRadius = 50 VIEW_DISTANCE = VExRT.Bossmods.ArchimondeRadius VIEW_DISTANCE2 = VIEW_DISTANCE * 2 UpdateLinesBold(4) CloseDropDownMenus() end,checked = VExRT.Bossmods.ArchimondeRadius == 50,},
+					{text = "60y",func = function() VExRT.Bossmods.ArchimondeRadius = 60 VIEW_DISTANCE = VExRT.Bossmods.ArchimondeRadius VIEW_DISTANCE2 = VIEW_DISTANCE * 2 UpdateLinesBold(4) CloseDropDownMenus() end,checked = VExRT.Bossmods.ArchimondeRadius == 60,},
+				},
+			},
+			{
+				text = L.bossmodsscale,
+				notCheckable = true,
+				func = function()
+					frame.scale:SetShown(not frame.scale:IsShown())
+				end,
+			},
+			{
+				text = L.bossmodsclose,
+				notCheckable = true,
+				func = function()
+					ExRT.F:ExBossmodsCloseAll()
+					CloseDropDownMenus()
+				end,
+			},				
+			{
+				text = L.BossWatcherSelectFightClose,
+				notCheckable = true,
+				func = function()
+					CloseDropDownMenus()
+				end,
+			},
+		}, frame.optionsDropDown, "cursor", 10 , -15, "MENU")
+	end)
+	
+	local function Lock(self,isLoad)
+		local parent = self:GetParent()
+		local var = VExRT.Bossmods.ArchimondeLock
+		if isLoad == 1 then
+			var = not var
+		end
+		if var then
+			VExRT.Bossmods.ArchimondeLock = nil
+			self.texture:SetTexture("Interface\\AddOns\\ExRT\\media\\un_lock.tga")
+			frame:SetMovable(true)
+			frame:EnableMouse(true)
+		else
+			VExRT.Bossmods.ArchimondeLock = true
+			self.texture:SetTexture("Interface\\AddOns\\ExRT\\media\\lock.tga")
+			frame:SetMovable(false)
+			frame:EnableMouse(false)
+		end
+	end
+	
+	frame.lock = ELib:Icon(frame,"Interface\\AddOns\\ExRT\\media\\un_lock.tga",14,true):Point("TOPLEFT",18,16):OnClick(Lock)
+	Lock(frame.lock,1)
+	
+	if VExRT.Bossmods.ArchimondeScale and tonumber(VExRT.Bossmods.ArchimondeScale) then
+		frame:SetScale(VExRT.Bossmods.ArchimondeScale)
+	end
+	frame.scale = ELib:Slider(frame):_Size(70,8):Point("BOTTOMRIGHT",frame,"TOPRIGHT",-25,5):Range(50,200,true):SetTo((VExRT.Bossmods.ArchimondeScale or 1)*100):Scale(1 / (VExRT.Bossmods.ArchimondeScale or 1)):OnChange(function(self,event) 
+		event = ExRT.F.Round(event)
+		VExRT.Bossmods.ArchimondeScale = event / 100
+		ExRT.F.SetScaleFixTR(frame,VExRT.Bossmods.ArchimondeScale)
+		self:SetScale(1 / VExRT.Bossmods.ArchimondeScale)
+		self.tooltipText = event
+		self:tooltipReload(self)
+	end)
+	frame.scale:SetScript("OnMouseUp",function(self,button)
+		if button == "RightButton" then
+			self:SetValue(100)
+		end
+	end)
+	frame.scale:Hide()
 	
 	local trottle = 0
 	frame:SetScript("OnUpdate",function(self,elapsed)
@@ -4109,6 +4521,9 @@ function Archimonde:Load()
 			for i=1,#self.players do
 				frame.players[i]:Hide()
 			end
+			for i=1,#self.circles do
+				frame.circles[i]:Hide()
+			end
 			
 			local count = 0
 			local countText = 0
@@ -4116,15 +4531,15 @@ function Archimonde:Load()
 			local onLines = 0
 			self.back:SetTexture(.7,.7,.7,.4)
 
+			local isChains = false
+			
 			for chainFrom,chainTo in pairs(chainsList) do
+				isChains = true
+				
 				local sourceY,sourceX = UnitPosition(chainFrom)
 				local targetY,targetX = UnitPosition(chainTo)
-				if type(chainFrom) == 'number' then
-					sourceY,sourceX = DEBUG_POS[chainFrom].y,DEBUG_POS[chainFrom].x
-				end
-				if type(chainTo) == 'number' then
-					targetY,targetX = DEBUG_POS[chainTo].y,DEBUG_POS[chainTo].x
-				end
+				if type(chainFrom) == 'number' then sourceY,sourceX = DEBUG_POS[chainFrom].y,DEBUG_POS[chainFrom].x end
+				if type(chainTo) == 'number' then targetY,targetX = DEBUG_POS[chainTo].y,DEBUG_POS[chainTo].x end
 				if not (sourceX == targetX and sourceY == targetY) and sourceX and targetX then
 			
 					local dX = (sourceX - targetX)
@@ -4254,6 +4669,62 @@ function Archimonde:Load()
 				end
 			end
 			
+			local circles_count = 0
+			for shackledTarget,shackledData in pairs(shackledList) do
+				local x,y = shackledData.x,shackledData.y
+
+				local isPlayer = UnitIsUnit('player',shackledTarget)
+				if isPlayer and (
+				   IsCircleIn(x,y,30,tLx,tLy,tRx,tRy) or 
+				   IsCircleIn(x,y,30,tRx,tRy,bRx,bRy) or 
+				   IsCircleIn(x,y,30,bRx,bRy,bLx,bLy) or 
+				   IsCircleIn(x,y,30,bLx,bLy,tLx,tLy) or 
+				   IsDotIn(x,y,tLx,tRx,bRx,bLx,tLy,tRy,bRy,bLy)) then
+					circles_count = circles_count + 1
+					
+					local aX = abs(dist_dot( x,y,tLx,tLy,bLx,bLy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+					local aY = abs(dist_dot( x,y,bLx,bLy,bRx,bRy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+					
+					local side_x = (bLx - x) * (tLy - bLy) - (tLx - bLx) * (bLy - y)
+					if side_x < 0 then
+						aX = -aX
+					end
+					
+					local side_y = (bRx - x) * (bLy - bRy) - (bLx - bRx) * (bRy - y)
+					if side_y < 0 then
+						aY = -aY
+					end
+					
+					SetCircle(circles_count,aX,aY,4,isChains)
+				end
+				
+				if IsCircleIn(x,y,25,tLx,tLy,tRx,tRy) or 
+				   IsCircleIn(x,y,25,tRx,tRy,bRx,bRy) or 
+				   IsCircleIn(x,y,25,bRx,bRy,bLx,bLy) or 
+				   IsCircleIn(x,y,25,bLx,bLy,tLx,tLy) or 
+				   IsDotIn(x,y,tLx,tRx,bRx,bLx,tLy,tRy,bRy,bLy) then
+					circles_count = circles_count + 1
+					
+					local aX = abs(dist_dot( x,y,tLx,tLy,bLx,bLy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+					local aY = abs(dist_dot( x,y,bLx,bLy,bRx,bRy ) / VIEW_DISTANCE2 * FRAME_SIZE)
+					
+					local side_x = (bLx - x) * (tLy - bLy) - (tLx - bLx) * (bLy - y)
+					if side_x < 0 then
+						aX = -aX
+					end
+					
+					local side_y = (bRx - x) * (bLy - bRy) - (bLx - bRx) * (bRy - y)
+					if side_y < 0 then
+						aY = -aY
+					end
+					
+					local isInCircle = ((playerX - x) * (playerX - x) + (playerY - y) * (playerY - y)) <= (25 *25)
+					
+					SetCircle(circles_count,aX,aY,isInCircle and 3 or 1,isChains)
+				end
+				
+			end
+
 		end
 	end)
 end
@@ -4262,23 +4733,26 @@ end
 -- Archimonde Infernals
 -----------------------------------------
 local ArchimondeInfernals = {}
+module.A.ArchimondeInfernals = ArchimondeInfernals
 
 function ArchimondeInfernals:Load()
+	ExRT.Options.Frame:Hide()
+
 	local frame = ArchimondeInfernals.mainframe
 	if frame then
 		frame:RegisterEvent('ENCOUNTER_START')
 		frame:RegisterEvent('ENCOUNTER_END')
-		if not frame.isEnabled then
+		if not InCombatLockdown() then
 			frame:Test()
 		end
 		frame.isEnabled = true
 		return
 	end
 	
-	
-	local GetMobID = ExRT.F.GUIDtoID
-	
 	local infernalMaxHP = 2893432
+	local infernalHellfireCD = 15
+	
+	local SIZE_WIDTH,SIZE_HEIGHT = 220,36	--250,40
 	
 	local infernalFrames = {}
 	local function HideAllFrames()
@@ -4306,7 +4780,7 @@ function ArchimondeInfernals:Load()
 			end
 		else
 			local hp_per = hp / infernalMaxHP
-			self.hp:SetWidth(250 * hp_per)
+			self.hp:SetWidth(SIZE_WIDTH * hp_per)
 			self.hp:Show()
 			self.hpText:SetFormattedText("%.1f%%",hp_per * 100)
 			
@@ -4319,7 +4793,7 @@ function ArchimondeInfernals:Load()
 		if not frame then
 			frame = CreateFrame('Frame',nil,UIParent)
 			infernalFrames[i] = frame
-			frame:SetSize(250,40)
+			frame:SetSize(SIZE_WIDTH,SIZE_HEIGHT)
 			if i==1 then
 				if VExRT.Bossmods.ArchimondeInfernalPosX and VExRT.Bossmods.ArchimondeInfernalPosY then
 					frame:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.ArchimondeInfernalPosX,VExRT.Bossmods.ArchimondeInfernalPosY)
@@ -4331,16 +4805,71 @@ function ArchimondeInfernals:Load()
 			else
 				frame:SetPoint("TOP",infernalFrames[i-1],"BOTTOM",0,-3)
 			end
-			frame:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = "Interface\\AddOns\\ARaidFrames\\media\\border.tga",tile = false,edgeSize = 4})
+			frame:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 4})
 			frame:SetBackdropBorderColor(0.2,0.2,0.2,0.8)
 			--frame:SetBackdropColor(.2,.2,.2,1)
 			frame:SetBackdropColor(.2,.2,.2,0)
 			
-			if VExRT.Bossmods.Scale then
-				frame:SetScale(VExRT.Bossmods.Scale / 100)
-			end		
+			--if VExRT.Bossmods.Scale then
+			--	frame:SetScale(VExRT.Bossmods.Scale / 100)
+			--end
+			if VExRT.Bossmods.ArchimondeInfernalsScale then
+				frame:SetScale(VExRT.Bossmods.ArchimondeInfernalsScale)
+			end
 			if VExRT.Bossmods.Alpha then
 				frame:SetAlpha(VExRT.Bossmods.Alpha / 100)
+			end
+			
+			if i == 1 then
+				frame.close = ELib:Icon(frame,[[Interface\AddOns\ExRT\media\DiesalGUIcons16x256x128.tga]],16,true):Point("TOPRIGHT",2,18)
+				frame.close.texture:SetTexCoord(0.5,0.5625,0.5,0.625)
+				frame.close:SetScript("OnClick",function(self)
+					HideAllFrames()
+				end)
+				frame.close:SetScript("OnEnter",function(self)
+					self.texture:SetVertexColor(1,0,.7,1)
+				end)
+				frame.close:SetScript("OnLeave",function(self)
+					self.texture:SetVertexColor(1,1,1,1)
+				end)
+				
+				frame.optionsDropDown = CreateFrame("Frame", "ExRTBossmodsArchimondeInfernalsOptionsDropDown", nil, "UIDropDownMenuTemplate")
+				
+				frame.options = ELib:Icon(frame,[[Interface\AddOns\ExRT\media\DiesalGUIcons16x256x128.tga]],16,true):Point("TOPRIGHT",-14,18)
+				frame.options.texture:SetTexCoord(0.26,0.3025,0.51,0.615)
+				frame.options:SetScript("OnClick",function()
+					EasyMenu({
+						{
+							text = L.BossmodsArchimondeDisableMarking,
+							checked = VExRT.Bossmods.ArchimondeDisableMarking,
+							func = function()
+								VExRT.Bossmods.ArchimondeDisableMarking = not VExRT.Bossmods.ArchimondeDisableMarking
+							end,
+						},	
+						{
+							text = L.bossmodsscale,
+							notCheckable = true,
+							func = function()
+								frame.scale:SetShown(not frame.scale:IsShown())
+							end,
+						},
+						{
+							text = L.bossmodsclose,
+							notCheckable = true,
+							func = function()
+								ExRT.F:ExBossmodsCloseAll()
+								CloseDropDownMenus()
+							end,
+						},
+						{
+							text = L.BossWatcherSelectFightClose,
+							notCheckable = true,
+							func = function()
+								CloseDropDownMenus()
+							end,
+						},
+					}, frame.optionsDropDown, "cursor", 10 , -15, "MENU")
+				end)
 			end
 			
 			frame:RegisterForDrag("LeftButton")
@@ -4359,7 +4888,7 @@ function ArchimondeInfernals:Load()
 			frame.hp = frame:CreateTexture(nil, "BACKGROUND")
 			frame.hp:SetTexture(ExRT.F.barImg)
 			frame.hp:SetPoint("LEFT",0,0)
-			frame.hp:SetHeight(40)
+			frame.hp:SetHeight(SIZE_HEIGHT)
 			frame.hp:SetVertexColor(1,.5,.5,1)
 			
 			frame.back = frame:CreateTexture(nil, "BACKGROUND",nil,-7)
@@ -4380,7 +4909,7 @@ function ArchimondeInfernals:Load()
 			frame.cdIcon = frame:CreateTexture(nil, "ARTWORK")
 			frame.cdIcon:SetTexture(GetSpellTexture(187078))
 			frame.cdIcon:SetPoint("RIGHT",frame,"LEFT",0,0)
-			frame.cdIcon:SetSize(40,40)
+			frame.cdIcon:SetSize(SIZE_HEIGHT,SIZE_HEIGHT)
 
 			frame.cd = CreateFrame("Cooldown", nil, frame, "CooldownFrameTemplate")
 			frame.cd:SetDrawEdge(false)
@@ -4390,12 +4919,15 @@ function ArchimondeInfernals:Load()
 		end
 		
 		frame.isAlive = true
-		frame.cd:SetCooldown(GetTime(),15)
+		frame.cd:SetCooldown(GetTime(),infernalHellfireCD)
 		frame:SetHP(infernalMaxHP)
 		frame:Show()
+		for j=1,(i-1) do
+			infernalFrames[j]:Show()
+		end
 	end
 	
-	function ARCHI_INF_TEST()
+	local function ARCHI_INF_TEST()
 		AddFrame(1)
 		AddFrame(2)
 		AddFrame(3)
@@ -4419,6 +4951,7 @@ function ArchimondeInfernals:Load()
 	ArchimondeInfernals.mainframe = frame
 	frame:RegisterEvent('ENCOUNTER_START')
 	frame:RegisterEvent('ENCOUNTER_END')
+	frame.isEnabled = true
 	local function Engage()
 		wipe(infernalsHP)
 		wipe(guidToFrame)
@@ -4431,8 +4964,15 @@ function ArchimondeInfernals:Load()
 		frame:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
 		
 		local _,instanceType,difficultyID,difficultyName,maxPlayers,dynamicDifficulty,isDynamic,instanceMapID,instanceGroupSize = GetInstanceInfo()
+		if not instanceGroupSize or not tonumber(instanceGroupSize) then
+			instanceGroupSize = 10
+		else
+			instanceGroupSize = max(10,instanceGroupSize)
+		end
+		
 		if difficultyID == 16 then
 			infernalMaxHP = 2893432
+			infernalHellfireCD = 15
 		elseif difficultyID == 15 then
 			--[[
 				10: 904735
@@ -4445,6 +4985,7 @@ function ArchimondeInfernals:Load()
 			]]
 			
 			infernalMaxHP = 904735 + 95005 * (instanceGroupSize - 10)
+			infernalHellfireCD = 31
 		elseif difficultyID == 14 then
 			--[[
 				10: 723811
@@ -4454,6 +4995,11 @@ function ArchimondeInfernals:Load()
 			]]
 			
 			infernalMaxHP = 723811 + 76000 * (instanceGroupSize - 10)
+			infernalHellfireCD = 31
+		elseif difficultyID == 7 then
+			--LFR, 16:23 26.08.2015, too hard for idiots, nerfs inc?
+			infernalMaxHP = 1397855	
+			infernalHellfireCD = 46
 		end
 	end
 	frame.Engage = Engage
@@ -4469,7 +5015,7 @@ function ArchimondeInfernals:Load()
 	end
 	frame.SetScale = function(self,val)
 		if infernalFrames[1] then
-			ExRT.mds.SetScaleFix(infernalFrames[1],val)
+			ExRT.F.SetScaleFix(infernalFrames[1],val)
 		end
 		for i=2,#infernalFrames do
 			infernalFrames[i]:SetScale(val)
@@ -4482,13 +5028,35 @@ function ArchimondeInfernals:Load()
 	end
 	frame.Test = ARCHI_INF_TEST
 	
-	frame:SetScript("OnEvent",function(self,event,...)
+	if infernalFrames[1] then
+		infernalFrames[1].scale = ELib:Slider(infernalFrames[1]):_Size(70,8):Point("BOTTOMRIGHT",infernalFrames[1],"TOPRIGHT",-70,6):Range(50,200,true):SetTo((VExRT.Bossmods.ArchimondeInfernalsScale or 1)*100):Scale(1 / (VExRT.Bossmods.ArchimondeInfernalsScale or 1)):OnChange(function(self,event) 
+			event = ExRT.F.Round(event)
+			VExRT.Bossmods.ArchimondeInfernalsScale = event / 100
+			if infernalFrames[1] then
+				ExRT.F.SetScaleFixTR(infernalFrames[1],VExRT.Bossmods.ArchimondeInfernalsScale)
+			end
+			for i=2,#infernalFrames do
+				infernalFrames[i]:SetScale(VExRT.Bossmods.ArchimondeInfernalsScale)
+			end
+			self:SetScale(1 / VExRT.Bossmods.ArchimondeInfernalsScale)
+			self.tooltipText = event
+			self:tooltipReload(self)
+		end)
+		infernalFrames[1].scale:SetScript("OnMouseUp",function(self,button)
+			if button == "RightButton" then
+				self:SetValue(100)
+			end
+		end)
+		infernalFrames[1].scale:Hide()
+	end
+	
+	local function Infernals_OnEvent(self,event,...)
 		if event == 'COMBAT_LOG_EVENT_UNFILTERED' then
 			local timestamp,event,hideCaster,sourceGUID,sourceName,sourceFlags,sourceFlags2,destGUID,destName,destFlags,destFlags2,spellID,swingOverkill,_,amount,overkill = ...
 			if event == "SPELL_SUMMON" then
 				if GetMobID(destGUID) == 94412 then
 					local currTime = GetTime()
-					if (currTime - lastSummon) > 10 then
+					if (currTime - lastSummon) > 20 then
 						HideAllFrames()
 						summonCount = 0
 						lastSummon = currTime
@@ -4532,7 +5100,11 @@ function ArchimondeInfernals:Load()
 				end
 			end
 		elseif event == "UNIT_TARGET" or event == "UPDATE_MOUSEOVER_UNIT" then
-			local targetUnit = event == "UNIT_TARGET" and unit.."target" or "mouseover"
+			if VExRT.Bossmods.ArchimondeDisableMarking then
+				return
+			end
+			local unit = ...
+			local targetUnit = event == "UNIT_TARGET" and (unit or "").."target" or "mouseover"
 			local targetGUID = UnitGUID(targetUnit)
 			if not targetGUID then return end
 			local targetMark = guidToFrame[ targetGUID ]
@@ -4550,7 +5122,947 @@ function ArchimondeInfernals:Load()
 			self:UnregisterEvent('UPDATE_MOUSEOVER_UNIT')
 			HideAllFrames()
 		end
+	  
+	end
+	
+	frame:SetScript("OnEvent",Infernals_OnEvent)
+end
+
+-----------------------------------------
+-- Gorefiend
+-----------------------------------------
+local Gorefiend = {}
+module.A.Gorefiend = Gorefiend
+
+function Gorefiend:Load()
+	ExRT.Options.Frame:Hide()
+
+	local frame = Gorefiend.mainframe
+	if frame then
+		frame:RegisterEvent('ENCOUNTER_START')
+		frame:RegisterEvent('ENCOUNTER_END')
+		if not InCombatLockdown() then
+			frame:Test()
+		end
+		frame.isEnabled = true
+		return
+	end
+	
+	local SIZE_WIDTH,SIZE_HEIGHT = 170,24
+	
+	local soulMaxHP = 1047180
+	
+	local soulsFrames = {}
+	local function HideAllFrames()
+		for i=1,#soulsFrames do
+			soulsFrames[i]:Hide()
+		end
+	end
+	
+	local function UpdateFrame(self,name,hp,cd)
+		if name then
+			if hp < 0 then hp = 0 end
+			local hp_per = hp / soulMaxHP
+			self.hp:SetWidth(SIZE_WIDTH * hp_per)
+			self.hpText:SetFormattedText("%dk / %.1f%%",hp / 1000,hp_per * 100)
+			self.nameText:SetText(name)
+			local isOnCD = (GetTime() - cd) < 36
+			if isOnCD then
+				self.cd:SetCooldown(cd,36)
+				self.cd_settedToZero = nil
+			elseif not self.cd_settedToZero then
+				self.cd:SetCooldown(cd,36)
+				self.cd_settedToZero = true
+			end
+			self:Show()
+		else
+			self:Hide()
+		end
+	end
+	
+	local function AddFrame(i)
+		local frame = soulsFrames[i]
+		if not frame then
+			frame = CreateFrame('Frame',nil,UIParent)
+			soulsFrames[i] = frame
+			frame:SetSize(SIZE_WIDTH,SIZE_HEIGHT)
+			if i==1 then
+				if VExRT.Bossmods.GorefiendPosX and VExRT.Bossmods.GorefiendPosY then
+					frame:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.GorefiendPosX,VExRT.Bossmods.GorefiendPosY)
+				else
+					frame:SetPoint("TOP",UIParent,"CENTER",-350,200)
+				end
+				frame:EnableMouse(true)
+				frame:SetMovable(true)
+			else
+				frame:SetPoint("TOP",soulsFrames[i-1],"BOTTOM",0,-3)
+			end
+			frame:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 4})
+			frame:SetBackdropBorderColor(0.2,0.2,0.2,0.8)
+			frame:SetBackdropColor(.2,.2,.2,0)
+			
+			if VExRT.Bossmods.GorefiendScale then
+				frame:SetScale(VExRT.Bossmods.GorefiendScale)
+			end
+			if VExRT.Bossmods.Alpha then
+				frame:SetAlpha(VExRT.Bossmods.Alpha / 100)
+			end
+			
+			if i == 1 then
+				frame.close = ELib:Icon(frame,[[Interface\AddOns\ExRT\media\DiesalGUIcons16x256x128.tga]],16,true):Point("TOPRIGHT",2,18)
+				frame.close.texture:SetTexCoord(0.5,0.5625,0.5,0.625)
+				frame.close:SetScript("OnClick",function(self)
+					HideAllFrames()
+				end)
+				frame.close:SetScript("OnEnter",function(self)
+					self.texture:SetVertexColor(1,0,.7,1)
+				end)
+				frame.close:SetScript("OnLeave",function(self)
+					self.texture:SetVertexColor(1,1,1,1)
+				end)
+				
+				frame.optionsDropDown = CreateFrame("Frame", "ExRTBossmodsGorefiendOptionsDropDown", nil, "UIDropDownMenuTemplate")
+				
+				frame.options = ELib:Icon(frame,[[Interface\AddOns\ExRT\media\DiesalGUIcons16x256x128.tga]],16,true):Point("TOPRIGHT",-14,18)
+				frame.options.texture:SetTexCoord(0.26,0.3025,0.51,0.615)
+				frame.options:SetScript("OnClick",function()
+					EasyMenu({
+						{
+							text = L.bossmodsscale,
+							notCheckable = true,
+							func = function()
+								frame.scale:SetShown(not frame.scale:IsShown())
+							end,
+						},
+						{
+							text = L.BossmodsGorefiendTargeting,
+							notCheckable = true,
+							func = function()
+								CloseDropDownMenus()
+								if InCombatLockdown() then
+									print('Combat Error')
+									return
+								end
+								ExRT.F:ExBossmodsCloseAll()
+								module.A.Gorefiend2:Load()
+							end,
+						},
+						{
+							text = L.bossmodsclose,
+							notCheckable = true,
+							func = function()
+								ExRT.F:ExBossmodsCloseAll()
+								CloseDropDownMenus()
+							end,
+						},
+						{
+							text = L.BossWatcherSelectFightClose,
+							notCheckable = true,
+							func = function()
+								CloseDropDownMenus()
+							end,
+						},
+					}, frame.optionsDropDown, "cursor", 10 , -15, "MENU")
+				end)
+			end
+			
+			frame:RegisterForDrag("LeftButton")
+			frame:SetScript("OnDragStart", function(self)
+				if self:IsMovable() then
+					self:StartMoving()
+				end
+			end)
+			frame:SetScript("OnDragStop", function(self) 
+				self:StopMovingOrSizing() 
+				
+				VExRT.Bossmods.GorefiendPosX = self:GetLeft()
+				VExRT.Bossmods.GorefiendPosY = self:GetTop()
+			end)
+			
+			frame.hp = frame:CreateTexture(nil, "BACKGROUND")
+			frame.hp:SetTexture(ExRT.F.barImg)
+			frame.hp:SetPoint("LEFT",0,0)
+			frame.hp:SetHeight(SIZE_HEIGHT)
+			frame.hp:SetVertexColor(1,.5,.5,1)
+			
+			frame.back = frame:CreateTexture(nil, "BACKGROUND",nil,-7)
+			frame.back:SetTexture(ExRT.F.barImg)
+			frame.back:SetAllPoints()
+			frame.back:SetVertexColor(.2,.2,.2,.5)
+			
+			frame.hpText = frame:CreateFontString(nil,"ARTWORK")
+			frame.hpText:SetPoint("RIGHT", -3, 0)
+			frame.hpText:SetFont(ExRT.F.defFont, 12)
+			frame.hpText:SetShadowOffset(1,-1)
+			frame.hpText:SetJustifyH("RIGHT")
+			
+			frame.nameText = frame:CreateFontString(nil,"ARTWORK")
+			frame.nameText:SetPoint("LEFT", 4, 0)
+			frame.nameText:SetPoint("RIGHT", frame.hpText, "LEFT", -1, 0)
+			frame.nameText:SetFont(ExRT.F.defFont, 12)
+			frame.nameText:SetShadowOffset(1,-1)
+			frame.nameText:SetJustifyH("LEFT")
+			
+			frame.cdIcon = frame:CreateTexture(nil, "ARTWORK")
+			frame.cdIcon:SetTexture(GetSpellTexture(181295))
+			frame.cdIcon:SetPoint("RIGHT",frame,"LEFT",0,0)
+			frame.cdIcon:SetSize(SIZE_HEIGHT,SIZE_HEIGHT)
+
+			frame.cd = CreateFrame("Cooldown", nil, frame, "CooldownFrameTemplate")
+			frame.cd:SetDrawEdge(false)
+			frame.cd:SetAllPoints(frame.cdIcon)
+			
+			frame.UpdateFrame = UpdateFrame
+		end
+	end
+	
+	local targetToMark = {
+		[0x1] = 1,
+		[0x2] = 2,
+		[0x4] = 3,
+		[0x8] = 4,
+		[0x10] = 5,
+		[0x20] = 6,
+		[0x40] = 7,
+		[0x80] = 8,
+	}
+	
+	local data = IsEncounterInProgress() and {} or {
+		{name = UnitName'player',time = GetTime(),hp = soulMaxHP},
+		{name = UnitName'player',time = GetTime(),hp = soulMaxHP * 0.67},
+		{name = UnitName'player',time = GetTime(),hp = soulMaxHP * 0.33,mark = 0x4},
+	}
+	
+	local guidToFrame,unkSouls = {},{}
+
+	local function UpdateFrames()
+		local counter = 0
+		for i=1,#data do
+			local currData = data[i]
+			if currData.hp > 0 then
+				counter = counter + 1
+				if not soulsFrames[counter] then
+					AddFrame(counter)
+				end
+				local mark
+				if currData.mark then
+					local icon_id = targetToMark[ currData.mark ]
+					if icon_id then
+						mark = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_".. icon_id  ..":0|t "
+					end
+				end
+				soulsFrames[counter]:UpdateFrame((mark or "")..currData.name,currData.hp,currData.time)
+			else
+				currData.hp = nil
+			end
+		end
+		for i=counter+1,#soulsFrames do
+			soulsFrames[i]:UpdateFrame()
+		end
+		for i=#data,1,-1 do
+			if not data[i].hp then
+				local guid = data[i].guid
+				if guid then
+					guidToFrame[ guid ] = nil
+				end
+				tremove(data,i)
+			end
+		end
+	end
+	
+	local frame = CreateFrame'Frame'
+	Gorefiend.mainframe = frame
+	frame:RegisterEvent('ENCOUNTER_START')
+	frame:RegisterEvent('ENCOUNTER_END')
+	frame:RegisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')
+	frame.isEnabled = true
+	local function Engage()
+		wipe(guidToFrame)
+		wipe(data)
+		wipe(unkSouls)
+		HideAllFrames()
+		
+		local _,_,difficultyID = GetInstanceInfo()
+		if difficultyID ~= 16 then
+			return
+		end
+		
+		frame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+	end
+	frame.Engage = Engage
+	frame.Close = function(self)
+		self:UnregisterAllEvents()
+		self.isEnabled = false
+		HideAllFrames()
+	end
+	frame.SetAlpha = function(self,val)
+		for i=1,#soulsFrames do
+			soulsFrames[i]:SetAlpha(val)
+		end
+	end
+	frame.SetScale = function(self,val)
+		if soulsFrames[1] then
+			ExRT.F.SetScaleFix(soulsFrames[1],val)
+		end
+		for i=2,#soulsFrames do
+			soulsFrames[i]:SetScale(val)
+		end
+	end
+	frame.ClearAllPoints = function(self)
+		if soulsFrames[1] then
+			soulsFrames[1]:ClearAllPoints()
+			soulsFrames[1]:SetPoint("TOP",UIParent,"CENTER",-350,200)
+		end
+	end
+	frame.Test = function()
+		if GetNumGroupMembers() > 0 then
+			data = {
+				{name = UnitName'player',time = GetTime(),hp = soulMaxHP},
+				{name = UnitName('raid'..fastrandom(1,GetNumGroupMembers())) or UnitName'player',time = GetTime()-8,hp = soulMaxHP * fastrandom(50,90)/100},
+				{name = UnitName('raid'..fastrandom(1,GetNumGroupMembers())) or UnitName'player',time = GetTime()-15,hp = soulMaxHP * fastrandom(15,45)/100},
+			}
+		else
+			data = {
+				{name = UnitName'player',time = GetTime(),hp = soulMaxHP},
+				{name = UnitName'player',time = GetTime()-8,hp = soulMaxHP * fastrandom(50,90)/100},
+				{name = UnitName'player',time = GetTime()-15,hp = soulMaxHP * fastrandom(15,45)/100},
+			}
+		end
+		UpdateFrames()
+	end
+	frame.soulsFrames = soulsFrames
+	
+	UpdateFrames()
+	if soulsFrames[1] then
+		soulsFrames[1].scale = ELib:Slider(soulsFrames[1]):_Size(70,8):Point("BOTTOMRIGHT",soulsFrames[1],"TOPRIGHT",-70,6):Range(50,200,true):SetTo((VExRT.Bossmods.GorefiendScale or 1)*100):Scale(1 / (VExRT.Bossmods.GorefiendScale or 1)):OnChange(function(self,event) 
+			event = ExRT.F.Round(event)
+			VExRT.Bossmods.GorefiendScale = event / 100
+			if soulsFrames[1] then
+				ExRT.F.SetScaleFixTR(soulsFrames[1],VExRT.Bossmods.GorefiendScale)
+			end
+			for i=2,#soulsFrames do
+				soulsFrames[i]:SetScale(VExRT.Bossmods.GorefiendScale)
+			end
+			self:SetScale(1 / VExRT.Bossmods.GorefiendScale)
+			self.tooltipText = event
+			self:tooltipReload(self)
+		end)
+		soulsFrames[1].scale:SetScript("OnMouseUp",function(self,button)
+			if button == "RightButton" then
+				self:SetValue(100)
+			end
+		end)
+		soulsFrames[1].scale:Hide()
+	end
+	
+	local function Gorefiend_OnEvent(self,event,...)
+		if event == 'COMBAT_LOG_EVENT_UNFILTERED' then
+			local timestamp,event,hideCaster,sourceGUID,sourceName,sourceFlags,sourceFlags2,destGUID,destName,destFlags,destFlags2,spellID,swingOverkill,_,amount,overkill = ...
+			if event == "SPELL_AURA_APPLIED" then
+				if spellID == 179867 then
+					tinsert(data,{
+						name = delUnitNameServer(destName),
+						time = GetTime(),
+						hp = soulMaxHP,
+					})
+					UpdateFrames()
+				end
+			elseif event == "SPELL_DAMAGE" or event == "RANGE_DAMAGE" or event == "SPELL_PERIODIC_DAMAGE" or event == "SWING_DAMAGE" then
+				if not destGUID or GetMobID(destGUID) ~= 93288 then
+					return
+				end
+				if event == "SWING_DAMAGE" then
+					amount,overkill = spellID,swingOverkill
+				end
+				local target = guidToFrame[destGUID]
+				if target then
+					target.hp = target.hp - amount - overkill
+					target.mark = destFlags2
+					UpdateFrames()
+				else
+					if destName then
+						for i=1,#data do
+							local currData = data[i]
+							if destName:find(currData.name) then
+								guidToFrame[destGUID] = currData
+								currData.guid = destGUID
+								currData.mark = destFlags2
+								
+								currData.hp = currData.hp - amount - overkill
+								if unkSouls[destGUID] then
+									currData.hp = currData.hp - unkSouls[destGUID]
+									unkSouls[destGUID] = nil
+								end
+								UpdateFrames()
+								
+								return
+							end
+						end
+					end
+					unkSouls[destGUID] = (unkSouls[destGUID] or 0) + amount + overkill
+				end
+			elseif event == "UNIT_DIED" then
+				if GetMobID(destGUID) == 93288 then
+					for i=1,#data do
+						if data[i].guid == destGUID then
+							guidToFrame[destGUID] = nil
+							tremove(data,i)
+							UpdateFrames()
+							return
+						end
+					end
+				elseif GetUnitTypeByGUID(destGUID) == 0 and destName then
+					destName = delUnitNameServer(destName)
+					for i=1,#data do
+						if data[i].name == destName then
+							local guid = data[i].guid
+							if guid then
+								guidToFrame[ guid ] = nil
+							end
+							tremove(data,i)
+							UpdateFrames()
+							return
+						end
+					end
+				end
+			end
+		elseif event == 'ENCOUNTER_START' then
+			if ... == 1783 then
+				C_Timer.After(1,function()
+					local boss1guid = UnitGUID'boss1'
+					if boss1guid and GetMobID(boss1guid) == 90199 then
+						Engage()
+					else
+						self:RegisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')
+					end
+				end)
+			end
+		elseif event == 'ENCOUNTER_END' then
+			self:UnregisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+			self:UnregisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')
+			HideAllFrames()
+			wipe(guidToFrame)
+			wipe(data)
+			wipe(unkSouls)
+		elseif event == "INSTANCE_ENCOUNTER_ENGAGE_UNIT" then
+			local boss1guid = UnitGUID'boss1'
+			if boss1guid and GetMobID(boss1guid) == 90199 then
+				self:UnregisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')
+				Engage()
+			end
+		end
+	  
+	end
+	
+	frame:SetScript("OnEvent",Gorefiend_OnEvent)
+end
+
+-----------------------------------------
+-- Gorefiend 2
+-----------------------------------------
+
+local Gorefiend2 = {}
+module.A.Gorefiend2 = Gorefiend2
+
+function Gorefiend2:Load()
+	ExRT.Options.Frame:Hide()
+
+	local frame = Gorefiend2.mainframe
+	if frame then
+		frame:RegisterEvent('ENCOUNTER_START')
+		frame:RegisterEvent('ENCOUNTER_END')
+		frame:RegisterEvent('GROUP_ROSTER_UPDATE')
+		if not InCombatLockdown() then
+			frame:Test()
+		end
+		frame:Show()
+		frame.isEnabled = true
+		return
+	end
+	
+	if InCombatLockdown() then
+		print('Combat Error')
+		return
+	end
+	
+	local SIZE_WIDTH,SIZE_HEIGHT = 140,20
+	
+	local soulMaxHP = 1047180
+	
+	local soulsFrames = {}
+	
+	local function OnUpdateFrame(self)
+		local soul_data = self.soul_data
+		if soul_data then
+			local currTime = GetTime() - soul_data.time
+			if currTime > 0 then
+				local barTime = 36 - currTime
+				local width = barTime *2
+				if width > 0 then
+					self.backtimer:SetWidth(width)
+					if barTime > 10 then
+						self.backtimer:SetTexture(1,1,1,.8)
+					else
+						self.backtimer:SetTexture(1,.2,.2,.8)
+					end
+					self.backtimer:Show()
+				else
+					self.backtimer:Hide()
+				end
+			else
+				self.backtimer:Hide()
+			end
+			if currTime < 0 then currTime = 0 elseif currTime > 34 then currTime = 34 end
+			if currTime <= 17 then
+				currTime = currTime / 17 * 0.5
+				self.hp:SetVertexColor(0.5+currTime,1,0.5,1)
+			else
+				currTime = (currTime - 17) / 17 * 0.5
+				self.hp:SetVertexColor(1,1 - currTime,0.5,1)
+			end
+		else
+			self.hp:SetVertexColor(1,.5,.5,1)
+		end
+	end
+	local function UpdateFrame(self)
+		local name = self.name
+		if not name then
+			self:Hide()
+			return
+		end
+		self.nameText:SetText(name)
+		local soul_data = self.soul_data
+		if soul_data then
+			local hp = soul_data.hp
+			if hp < 0 then hp = 0 elseif hp > soulMaxHP then hp = soulMaxHP end
+			local hp_per = hp / soulMaxHP
+			self.hp:SetWidth(SIZE_WIDTH * hp_per)
+			self.hpText:SetFormattedText("%dk / %.1f%%",hp / 1000,hp_per * 100)
+			self.cd:Show()
+			self.cd:SetCooldown(soul_data.time,36)
+			self:SetAlpha(1)
+			if not self.OnUpdateSetted then
+				self:SetScript("OnUpdate",OnUpdateFrame)
+				self.OnUpdateSetted = true
+			end
+		else
+			self.hp:SetWidth(SIZE_WIDTH)
+			self.hpText:SetText("")
+			self.cd:Hide()
+			self.cd:SetCooldown(GetTime(),0)
+			self:SetAlpha(.1)
+			self.backtimer:Hide()
+			if self.OnUpdateSetted then
+				self:SetScript("OnUpdate",nil)
+				self.hp:SetVertexColor(1,.5,.5,1)
+				self.OnUpdateSetted = nil
+			end
+		end
+		self:Show()
+	end
+	
+	local frame = CreateFrame('Frame',nil,UIParent)
+	Gorefiend2.mainframe = frame
+	frame:SetSize(SIZE_WIDTH,16)
+	if VExRT.Bossmods.GorefiendPosX and VExRT.Bossmods.GorefiendPosY then
+		frame:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",VExRT.Bossmods.GorefiendPosX,VExRT.Bossmods.GorefiendPosY)
+	else
+		frame:SetPoint("TOP",UIParent,"CENTER",-350,200)
+	end
+	frame:EnableMouse(true)
+	frame:SetMovable(true)
+	frame.texture = frame:CreateTexture(nil, "BACKGROUND")
+	frame.texture:SetAllPoints()
+	frame.texture:SetTexture(0,0,0,.3)
+	
+	frame.optionsDropDown = CreateFrame("Frame", "ExRTBossmodsGorefiend2OptionsDropDown", nil, "UIDropDownMenuTemplate")
+	
+	frame.options = ELib:Icon(frame,[[Interface\AddOns\ExRT\media\DiesalGUIcons16x256x128.tga]],16,true):Point("RIGHT",-1,0)
+	frame.options.texture:SetTexCoord(0.26,0.3025,0.51,0.615)
+	frame.options:SetScript("OnClick",function()
+		EasyMenu({
+			{
+				text = L.bossmodsscale,
+				notCheckable = true,
+				func = function()
+					frame.scale:SetShown(not frame.scale:IsShown())
+				end,
+			},
+			{
+				text = L.bossmodsclose,
+				notCheckable = true,
+				func = function()
+					ExRT.F:ExBossmodsCloseAll()
+					CloseDropDownMenus()
+				end,
+			},
+			{
+				text = L.BossWatcherSelectFightClose,
+				notCheckable = true,
+				func = function()
+					CloseDropDownMenus()
+				end,
+			},
+		}, frame.optionsDropDown, "cursor", 10 , -15, "MENU")
 	end)
+	if VExRT.Bossmods.GorefiendScale then
+		frame:SetScale(VExRT.Bossmods.GorefiendScale)
+	end
+	if VExRT.Bossmods.Alpha then
+		frame:SetAlpha(VExRT.Bossmods.Alpha / 100)
+	end
+	frame:RegisterForDrag("LeftButton")
+	frame:SetScript("OnDragStart", function(self)
+		if self:IsMovable() and not InCombatLockdown() then
+			self:StartMoving()
+		end
+	end)
+	frame:SetScript("OnDragStop", function(self) 
+		self:StopMovingOrSizing() 
+		
+		VExRT.Bossmods.GorefiendPosX = self:GetLeft()
+		VExRT.Bossmods.GorefiendPosY = self:GetTop()
+	end)
+
+	
+	local function AddFrame(i)
+		local frame = soulsFrames[i]
+		if not frame then
+			frame = CreateFrame('Button',nil,Gorefiend2.mainframe,"SecureActionButtonTemplate")
+			soulsFrames[i] = frame
+			frame:SetSize(SIZE_WIDTH,SIZE_HEIGHT)
+			if i==1 then
+				frame:SetPoint("TOP",Gorefiend2.mainframe,"BOTTOM",0,-3)
+			else
+				frame:SetPoint("TOP",soulsFrames[i-1],"BOTTOM",0,-3)
+			end
+			frame:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 4})
+			frame:SetBackdropBorderColor(0.2,0.2,0.2,0.8)
+			frame:SetBackdropColor(.2,.2,.2,0)
+			
+			frame:RegisterForClicks("AnyDown")
+			frame:SetAttribute("type", "macro")
+			frame:SetAttribute("macrotext", "/tar "..UnitName'player')
+			
+			frame.hp = frame:CreateTexture(nil, "BACKGROUND")
+			frame.hp:SetTexture(ExRT.F.barImg)
+			frame.hp:SetPoint("LEFT",0,0)
+			frame.hp:SetHeight(SIZE_HEIGHT)
+			frame.hp:SetVertexColor(1,.5,.5,1)
+			
+			frame.back = frame:CreateTexture(nil, "BACKGROUND",nil,-7)
+			frame.back:SetTexture(ExRT.F.barImg)
+			frame.back:SetAllPoints()
+			frame.back:SetVertexColor(.2,.2,.2,.5)
+			
+			frame.backtimer = frame:CreateTexture(nil, "BACKGROUND",nil,-7)
+                        frame.backtimer:SetTexture(1, 228/255, 181/255,1)
+			frame.backtimer:SetPoint("RIGHT",frame,"LEFT", -SIZE_HEIGHT,0)
+			frame.backtimer:SetSize(70,SIZE_HEIGHT)
+			frame.backtimer:Hide()
+			
+			frame.hpText = frame:CreateFontString(nil,"ARTWORK")
+			frame.hpText:SetPoint("RIGHT", -3, 0)
+			frame.hpText:SetFont(ExRT.F.defFont, 12)
+			frame.hpText:SetShadowOffset(1,-1)
+			frame.hpText:SetJustifyH("RIGHT")
+			
+			frame.nameText = frame:CreateFontString(nil,"ARTWORK")
+			frame.nameText:SetPoint("LEFT", 4, 0)
+			frame.nameText:SetPoint("RIGHT", frame.hpText, "LEFT", -1, 0)
+			frame.nameText:SetFont(ExRT.F.defFont, 12)
+			frame.nameText:SetShadowOffset(1,-1)
+			frame.nameText:SetJustifyH("LEFT")
+			
+			frame.cdIcon = frame:CreateTexture(nil, "ARTWORK")
+			frame.cdIcon:SetTexture(GetSpellTexture(181295))
+			frame.cdIcon:SetPoint("RIGHT",frame,"LEFT",0,0)
+			frame.cdIcon:SetSize(SIZE_HEIGHT,SIZE_HEIGHT)
+
+			frame.cd = CreateFrame("Cooldown", nil, frame, "CooldownFrameTemplate")
+			frame.cd:SetDrawEdge(false)
+			frame.cd:SetAllPoints(frame.cdIcon)
+			
+			frame.UpdateFrame = UpdateFrame
+			--frame.Update = UpdateFrame
+			--frame:SetScript("OnUpdate",OnUpdateFrame)
+		end
+	end
+	
+	local targetToMark = {
+		[0x1] = 1,
+		[0x2] = 2,
+		[0x4] = 3,
+		[0x8] = 4,
+		[0x10] = 5,
+		[0x20] = 6,
+		[0x40] = 7,
+		[0x80] = 8,
+	}
+	
+	local data = {}
+	
+	for i=1,20 do AddFrame(i) end
+	
+	local function UpdateFrames()
+		for i=1,#soulsFrames do
+			soulsFrames[i]:UpdateFrame()
+		end
+	end
+	local function UpdateFrames_Roster()
+		if InCombatLockdown() then
+			C_Timer.NewTimer(5,UpdateFrames_Roster)
+			return
+		end
+		local n = GetNumGroupMembers()
+		if n == 0 then return end
+		local gMax = ExRT.F.GetRaidDiffMaxGroup()
+		local roster = {}
+		for i=1,n do
+			local name,_,subgroup = GetRaidRosterInfo(i)
+			if name and subgroup <= gMax then
+				roster[subgroup] = roster[subgroup] or {}
+				roster[subgroup][ #roster[subgroup] + 1 ] = name
+			end
+		end
+		local frameCounter = 0
+		for i=1,gMax do
+			roster[i] = roster[i] or {}
+			for j=1,5 do
+				local name = roster[i][j]
+				if name then
+					frameCounter = frameCounter + 1
+					local frame = soulsFrames[frameCounter]
+					if frame then
+						frame.name = delUnitNameServer(name)
+						--frame:SetAttribute("macrotext", "/target "..ExRT.F:utf8sub(delUnitNameServer(name), 1, 3))
+						--frame:SetAttribute("macrotext", "/target "..delUnitNameServer(name))
+						local _name = delUnitNameServer(name)
+						frame:SetAttribute("macrotext", "/target "..ExRT.F:utf8sub(_name, 1, ExRT.F:utf8len(_name)-1))
+						--[[
+						if i < 3 then
+							frame:SetAttribute("macrotext", "/target "..delUnitNameServer(name))
+						elseif i == 3 then
+							frame:SetAttribute("macrotext", "/target "..ExRT.F:utf8sub(delUnitNameServer(name), 1, 3))
+						else
+							frame:SetAttribute("macrotext", "/target "..ExRT.F:utf8sub(delUnitNameServer(name), 1, 3).."\n")
+						end
+						]]
+						frame.soul_data = nil
+						frame:UpdateFrame()
+					end
+				end
+			end
+		end
+		for i=frameCounter+1,20 do
+			local frame = soulsFrames[i]
+			frame.name = nil
+			frame.soul_data = nil
+			frame:UpdateFrame()
+		end
+	end
+	
+	local guidToFrame,unkSouls = {},{}
+
+	frame:RegisterEvent('ENCOUNTER_START')
+	frame:RegisterEvent('ENCOUNTER_END')
+	frame:RegisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')
+	frame:RegisterEvent('GROUP_ROSTER_UPDATE')
+	frame.isEnabled = true
+	local function Engage()
+		wipe(guidToFrame)
+		wipe(data)
+		wipe(unkSouls)
+		
+		local _,_,difficultyID = GetInstanceInfo()
+		if difficultyID ~= 16 then
+			return
+		end
+		
+		for i=1,20 do
+			local frame = soulsFrames[i]
+			frame.soul_data = nil
+		end
+		UpdateFrames()
+		
+		frame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+	end
+	frame.Engage = Engage
+	frame.Close = function(self)
+		self:UnregisterAllEvents()
+		self.isEnabled = false
+		self:Hide()
+	end
+	frame.Test = function()
+		if GetNumGroupMembers() > 0 then
+			UpdateFrames_Roster()
+		else
+			data = {
+				{name = UnitName'player',time = GetTime(),hp = soulMaxHP},
+				{name = UnitName'player',time = GetTime() - fastrandom(1,35),hp = soulMaxHP * fastrandom()},
+				{name = UnitName'player',time = GetTime() - fastrandom(1,35),hp = soulMaxHP * fastrandom(),mark = 0x4},
+			}
+			for i=1,20 do
+				soulsFrames[i].name = UnitName'player'
+				soulsFrames[i].soul_data = nil
+			end
+			local f1,f2,f3 = fastrandom(1,20),fastrandom(1,20),fastrandom(1,20)
+			soulsFrames[f1].soul_data = data[1]
+			soulsFrames[f2].soul_data = data[2]
+			soulsFrames[f3].soul_data = data[3]
+			C_Timer.After(-GetTime()+36+data[1].time,function()soulsFrames[f1].soul_data = nil UpdateFrames() end)
+			C_Timer.After(-GetTime()+36+data[2].time,function()soulsFrames[f2].soul_data = nil UpdateFrames() end)
+			C_Timer.After(-GetTime()+36+data[3].time,function()soulsFrames[f3].soul_data = nil UpdateFrames() end)
+		end
+		UpdateFrames()
+	end
+	frame.soulsFrames = soulsFrames
+	
+	frame:Test()
+	
+	frame.scale = ELib:Slider(frame):_Size(70,8):Point("RIGHT",frame,"RIGHT",-70,0):Range(50,200,true):SetTo((VExRT.Bossmods.GorefiendScale or 1)*100):Scale(1 / (VExRT.Bossmods.GorefiendScale or 1)):OnChange(function(self,event) 
+		event = ExRT.F.Round(event)
+		VExRT.Bossmods.GorefiendScale = event / 100
+		ExRT.F.SetScaleFixTR(frame,VExRT.Bossmods.GorefiendScale)
+		self:SetScale(1 / VExRT.Bossmods.GorefiendScale)
+		self.tooltipText = event
+		self:tooltipReload(self)
+	end)
+	frame.scale:SetScript("OnMouseUp",function(self,button)
+		if button == "RightButton" then
+			self:SetValue(100)
+		end
+	end)
+	frame.scale:Hide()
+	
+	local function Gorefiend2_OnEvent(self,event,...)
+		if event == 'COMBAT_LOG_EVENT_UNFILTERED' then
+			local timestamp,event,hideCaster,sourceGUID,sourceName,sourceFlags,sourceFlags2,destGUID,destName,destFlags,destFlags2,spellID,swingOverkill,_,amount,overkill = ...
+			if event == "SPELL_AURA_APPLIED" then
+				if spellID == 179867 then
+					local shortName = delUnitNameServer(destName)
+					tinsert(data,{
+						name = shortName,
+						time = GetTime(),
+						hp = soulMaxHP,
+					})
+					for i=1,#soulsFrames do
+						local frame = soulsFrames[i]
+						if frame.name == shortName then
+							frame.soul_data = data[#data]
+						end
+					end
+					UpdateFrames()
+				end
+			elseif event == "SPELL_DAMAGE" or event == "RANGE_DAMAGE" or event == "SPELL_PERIODIC_DAMAGE" or event == "SWING_DAMAGE" then
+				if not destGUID or GetMobID(destGUID) ~= 93288 then
+					return
+				end
+				if event == "SWING_DAMAGE" then
+					amount,overkill = spellID,swingOverkill
+				end
+				local target = guidToFrame[destGUID]
+				if target then
+					target.hp = target.hp - amount - overkill
+					target.mark = destFlags2
+					UpdateFrames()
+				else
+					if destName then
+						for i=1,#data do
+							local currData = data[i]
+							if destName:find(currData.name) then
+								guidToFrame[destGUID] = currData
+								currData.guid = destGUID
+								currData.mark = destFlags2
+								
+								currData.hp = currData.hp - amount - overkill
+								if unkSouls[destGUID] then
+									currData.hp = currData.hp - unkSouls[destGUID]
+									unkSouls[destGUID] = nil
+								end
+								UpdateFrames()
+								
+								return
+							end
+						end
+					end
+					unkSouls[destGUID] = (unkSouls[destGUID] or 0) + amount + overkill
+				end
+			elseif event == "UNIT_DIED" then
+				if GetMobID(destGUID) == 93288 then
+					for i=1,#data do
+						local currData = data[i]
+						if currData.guid == destGUID then
+							for j=1,#soulsFrames do
+								local frame = soulsFrames[j]
+								if frame.soul_data == currData then
+									frame.soul_data = nil
+									break
+								end
+							end
+							tremove(data,i)
+							guidToFrame[destGUID] = nil
+							UpdateFrames()
+							return
+						end
+					end
+				elseif GetUnitTypeByGUID(destGUID) == 0 and destName then
+					destName = delUnitNameServer(destName)
+					for i=1,#data do
+						local currData = data[i]
+						if currData.name == destName then
+							local guid = currData.guid
+							if guid then
+								guidToFrame[ guid ] = nil
+							end
+							for j=1,#soulsFrames do
+								local frame = soulsFrames[j]
+								if frame.soul_data == currData then
+									frame.soul_data = nil
+									break
+								end
+							end
+							tremove(data,i)
+							UpdateFrames()
+							return
+						end
+					end
+				end
+			end
+		elseif event == 'ENCOUNTER_START' then
+			if ... == 1783 then
+				C_Timer.After(1,function()
+					local boss1guid = UnitGUID'boss1'
+					if boss1guid and GetMobID(boss1guid) == 90199 then
+						Engage()
+					else
+						self:RegisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')
+					end
+				end)
+			end
+		elseif event == 'ENCOUNTER_END' then
+			self:UnregisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+			self:UnregisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')
+			wipe(guidToFrame)
+			wipe(data)
+			wipe(unkSouls)
+			for j=1,#soulsFrames do
+				soulsFrames[j].soul_data = nil
+			end
+			UpdateFrames()
+		elseif event == "INSTANCE_ENCOUNTER_ENGAGE_UNIT" then
+			local boss1guid = UnitGUID'boss1'
+			if boss1guid and GetMobID(boss1guid) == 90199 then
+				self:UnregisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')
+				Engage()
+			end
+		elseif event == 'GROUP_ROSTER_UPDATE' then
+			UpdateFrames_Roster()
+		end
+	end
+	
+	frame:SetScript("OnEvent",Gorefiend2_OnEvent)
+	UpdateFrames()
 end
 
 -----------------------------------------
@@ -4558,6 +6070,13 @@ end
 -----------------------------------------
 
 local function GetSpellText(spellID)
+	if spellID < 0 then
+		local name, _, _, abilityIcon = EJ_GetSectionInfo(-spellID)
+		if not name then
+			return ""
+		end
+		return "|T"..abilityIcon..":0|t"..name
+	end
 	local spellName,_,spellTexture = GetSpellInfo(spellID)
 	if not spellName then
 		return ""
@@ -4598,38 +6117,37 @@ function module.options:Load()
 			model:Show() 
 			model:SetDisplayInfo(self.modelID) 
 		end
-		ExRT.lib.OnEnterTooltip(self)
+		ELib.Tooltip.Std(self)
 	end
 	local function buttonOnLeave(self)
 		model:Hide() 
-		ExRT.lib.OnLeaveTooltip(self)
+		ELib.Tooltip:Hide()
 	end
 		
 	local positionNow = -25
 	local function AddTitle(title)
-		local this = ExRT.lib.CreateText(self,650,20,nil,5,positionNow,"CENTER",nil,nil,14,title,nil,1,1,1)
-		positionNow = positionNow - 20
+		local this = ELib:Text(self,title,14):Size(650,20):Point(5,positionNow):Center():Color()
+		positionNow = positionNow - 18
 		return this
 	end
 	local function AddButton(title,tooltip,clickFunction,modelID,isChk,chkEnabled,chkTooltip)
-		local this = ExRT.lib.CreateButton(self,isChk and 625 or 650,20,nil,5,positionNow,title,nil,tooltip,"ExRTButtonModernTemplate")
-		this:SetScript("OnClick",clickFunction) 
+		local this = ELib:Button(self,title):Size(isChk and 625 or 650,20):Point(5,positionNow):Tooltip(tooltip):OnClick(clickFunction)
 		this:SetScript("OnEnter",buttonOnEnter) 
 		this:SetScript("OnLeave",buttonOnLeave) 
 		this.modelID = modelID
 		if isChk then
-			this.chk = ExRT.lib.CreateCheckBox(self,nil,635,positionNow,"",chkEnabled,chkTooltip,nil,"ExRTCheckButtonModernTemplate")
+			this.chk = ELib:Check(self,"",chkEnabled):Point(635,positionNow):Tooltip(chkTooltip)
 		end
-		positionNow = positionNow - 25
+		positionNow = positionNow - 24
 		return this
 	end
 	
-	AddTitle(ExRT.L.bossmodstot)
-	AddButton(ExRT.L.bossmodsraden,'/rt raden',RaDen.Load,47739)
-	AddTitle(ExRT.L.bossmodssoo)
-	AddButton(ExRT.L.bossmodsshaofpride,'/rt shapride',ShaOfPride.Load,49098)
+	AddTitle(L.bossmodstot)
+	AddButton(L.bossmodsraden,'/rt raden',RaDen.Load,47739)
+	AddTitle(L.bossmodssoo)
+	AddButton(L.bossmodsshaofpride,'/rt shapride',ShaOfPride.Load,49098)
 	
-	local malkorok_loadbut = AddButton(ExRT.L.bossmodsmalkorok,'/rt malkorok\n/rt malkorok raid',Malkorok.Load,49070,true,not VExRT.Bossmods.MalkorokAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	local malkorok_loadbut = AddButton(L.bossmodsmalkorok,'/rt malkorok\n/rt malkorok raid',Malkorok.Load,49070,true,not VExRT.Bossmods.MalkorokAutoload,L.bossmodsAutoLoadTooltip)
 	malkorok_loadbut.chk:SetScript("OnClick", function(self,event) 
 		if self:GetChecked() then
 			VExRT.Bossmods.MalkorokAutoload = nil
@@ -4638,7 +6156,7 @@ function module.options:Load()
 		end
 	end)
 	
-	local malkorokAI_loadbut = AddButton(ExRT.L.bossmodsmalkorokai,'/rt malkorokai',MalkorokAI.Load,49070,true,VExRT.Bossmods.MalkorokAIAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	local malkorokAI_loadbut = AddButton(L.bossmodsmalkorokai,'/rt malkorokai',MalkorokAI.Load,49070,true,VExRT.Bossmods.MalkorokAIAutoload,L.bossmodsAutoLoadTooltip)
 	malkorokAI_loadbut.chk:SetScript("OnClick", function(self,event) 
 		if self:GetChecked() then
 			VExRT.Bossmods.MalkorokAIAutoload = true
@@ -4647,7 +6165,7 @@ function module.options:Load()
 		end
 	end)
 
-	local Spoils_of_Pandaria_loadbut = AddButton(ExRT.L.bossmodsSpoilsofPandaria,nil,SpoilsOfPandaria.Load,51173,true,VExRT.Bossmods.SpoilsOfPandariaAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	local Spoils_of_Pandaria_loadbut = AddButton(L.bossmodsSpoilsofPandaria,nil,SpoilsOfPandaria.Load,51173,true,VExRT.Bossmods.SpoilsOfPandariaAutoload,L.bossmodsAutoLoadTooltip)
 	Spoils_of_Pandaria_loadbut.chk:SetScript("OnClick", function(self,event) 
 		if self:GetChecked() then
 			VExRT.Bossmods.SpoilsOfPandariaAutoload = true
@@ -4657,9 +6175,9 @@ function module.options:Load()
 	end)
 	
 
-	AddTitle(ExRT.L.RaidLootT17Highmaul)
+	AddTitle(L.RaidLootT17Highmaul)
 
-	local Koragh_loadbut = AddButton(ExRT.L.BossmodsKoragh,ExRT.L.BossmodsKoraghHelp,Koragh.Load,54825,true,not VExRT.Bossmods.KoraghAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	local Koragh_loadbut = AddButton(L.BossmodsKoragh,L.BossmodsKoraghHelp,Koragh.Load,54825,true,not VExRT.Bossmods.KoraghAutoload,L.bossmodsAutoLoadTooltip)
 	Koragh_loadbut.chk:SetScript("OnClick", function(self,event) 
 		if self:GetChecked() then
 			VExRT.Bossmods.KoraghAutoload = nil
@@ -4668,11 +6186,11 @@ function module.options:Load()
 		end
 	end)
 
-	AddButton(ExRT.L.BossmodsMargok,nil,Margok.Load,54329)
+	AddButton(L.BossmodsMargok,nil,Margok.Load,54329)
 
-	AddTitle(ExRT.L.RaidLootT17BF)
+	AddTitle(L.RaidLootT17BF)
 
-	local Kromog_loadbut = AddButton(ExRT.L.BossmodsKromog,"/rt kromog",Kromog.Load,56214,true,not VExRT.Bossmods.KromogAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	local Kromog_loadbut = AddButton(L.BossmodsKromog,"/rt kromog",Kromog.Load,56214,true,not VExRT.Bossmods.KromogAutoload,L.bossmodsAutoLoadTooltip)
 	Kromog_loadbut.chk:SetScript("OnClick", function(self,event) 
 		if self:GetChecked() then
 			VExRT.Bossmods.KromogAutoload = nil
@@ -4681,31 +6199,49 @@ function module.options:Load()
 		end
 	end)
 	
-	AddButton(ExRT.L.BossmodsThogar,nil,Thogar.Load,53519)
+	AddButton(L.BossmodsThogar,nil,Thogar.Load,53519)
 	
-	AddTitle(ExRT.L.RaidLootT18HC)
+	AddTitle(L.RaidLootT18HC)
 	
-	local Kormrok_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss3.." ["..ExRT.L.sencounterWODMythic.."]","/rt kormrok|n|n"..GetSpellText(181092),Kormrok.Load,61990,true,not VExRT.Bossmods.KormrokAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	local Kormrok_loadbut = AddButton(L.RaidLootT18HCBoss3.." ["..L.sencounterWODMythic.."]","/rt kormrok|n|n"..GetSpellText(181092),Kormrok.Load,61990,true,not VExRT.Bossmods.KormrokAutoload,L.bossmodsAutoLoadTooltip)
 	Kormrok_loadbut.chk:SetScript("OnClick", function(self,event) 
 		if self:GetChecked() then
 			VExRT.Bossmods.KormrokAutoload = nil
 		else
 			VExRT.Bossmods.KormrokAutoload = true
 		end
-	end)	
+	end)
 	
-	local Iskar_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss7,"/rt iskar|n|n"..GetSpellText(179202),Iskar.Load,61932)
-	
-	local Mannoroth_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss12,"/rt mannoroth|n|n"..GetSpellText(181597),Mannoroth.Load,62410,true,not VExRT.Bossmods.MannorothAutoload,ExRT.L.bossmodsAutoLoadTooltip)
-	Mannoroth_loadbut.chk:SetScript("OnClick", function(self,event) 
+	local Gorefiend_loadbut = AddButton(L.RaidLootT18HCBoss6.." ["..L.sencounterWODMythic.."]","/rt gorefiend|n|n"..GetSpellText(-11547),Gorefiend.Load,61913,true,VExRT.Bossmods.GorefiendAutoload,L.bossmodsAutoLoadTooltip)
+	Gorefiend_loadbut.chk:SetScript("OnClick", function(self,event) 
 		if self:GetChecked() then
-			VExRT.Bossmods.MannorothAutoload = nil
+			VExRT.Bossmods.GorefiendAutoload = true
 		else
-			VExRT.Bossmods.MannorothAutoload = true
+			VExRT.Bossmods.GorefiendAutoload = nil
 		end
 	end)	
 	
-	local Archimonde_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss13..": "..ExRT.L.BossmodsArchimondeRadar,"/rt archimonde|n|n"..GetSpellText(186123),Archimonde.Load,62423,true,not VExRT.Bossmods.ArchimondeAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	AddButton(L.RaidLootT18HCBoss6.." ["..L.sencounterWODMythic.."] "..L.BossmodsGorefiendWithClicking,"/rt gorefiend2|n|n"..GetSpellText(-11547),Gorefiend2.Load,61913)
+	
+	local Iskar_loadbut = AddButton(L.RaidLootT18HCBoss7,"/rt iskar|n|n"..GetSpellText(179202),Iskar.Load,61932,true,not VExRT.Bossmods.IskarAutoload,L.bossmodsAutoLoadTooltip)
+	Iskar_loadbut.chk:SetScript("OnClick", function(self,event) 
+		if self:GetChecked() then
+			VExRT.Bossmods.IskarAutoload = nil
+		else
+			VExRT.Bossmods.IskarAutoload = true
+		end
+	end)	
+	
+	local Mannoroth_loadbut = AddButton(L.RaidLootT18HCBoss12,"/rt mannoroth|n|n"..GetSpellText(181597),Mannoroth.Load,62410,true,VExRT.Bossmods.MannorothAutoload,L.bossmodsAutoLoadTooltip)
+	Mannoroth_loadbut.chk:SetScript("OnClick", function(self,event) 
+		if self:GetChecked() then
+			VExRT.Bossmods.MannorothAutoload = true
+		else
+			VExRT.Bossmods.MannorothAutoload = nil
+		end
+	end)	
+	
+	local Archimonde_loadbut = AddButton(L.RaidLootT18HCBoss13..": "..L.BossmodsArchimondeRadar,"/rt archimonde|n|n"..GetSpellText(186123),Archimonde.Load,62423,true,not VExRT.Bossmods.ArchimondeAutoload,L.bossmodsAutoLoadTooltip)
 	Archimonde_loadbut.chk:SetScript("OnClick", function(self,event) 
 		if self:GetChecked() then
 			VExRT.Bossmods.ArchimondeAutoload = nil
@@ -4714,7 +6250,7 @@ function module.options:Load()
 		end
 	end)
 	
-	local ArchimondeInfernals_loadbut = AddButton(ExRT.L.RaidLootT18HCBoss13..": "..ExRT.L.BossmodsArchimondeInfernals,"/rt archimondeinf|n|n"..ExRT.L.BossmodsArchimondeInfernalsTooltip,ArchimondeInfernals.Load,62423,true,not VExRT.Bossmods.ArchimondeInfernalsAutoload,ExRT.L.bossmodsAutoLoadTooltip)
+	local ArchimondeInfernals_loadbut = AddButton(L.RaidLootT18HCBoss13..": "..L.BossmodsArchimondeInfernals,"/rt archimondeinf|n|n"..L.BossmodsArchimondeInfernalsTooltip,ArchimondeInfernals.Load,62423,true,not VExRT.Bossmods.ArchimondeInfernalsAutoload,L.bossmodsAutoLoadTooltip)
 	ArchimondeInfernals_loadbut.chk:SetScript("OnClick", function(self,event) 
 		if self:GetChecked() then
 			VExRT.Bossmods.ArchimondeInfernalsAutoload = nil
@@ -4723,8 +6259,7 @@ function module.options:Load()
 		end
 	end)
 	
-	local BossmodsSlider1 = ExRT.lib.CreateSlider(self,640,15,0,-550,0,100,ExRT.L.bossmodsalpha,VExRT.Bossmods.Alpha,"TOP",nil,true)
-	BossmodsSlider1:SetScript("OnValueChanged", function(self,event) 
+	local BossmodsSlider1 = ELib:Slider(self,L.bossmodsalpha):Size(640):Point("TOP",0,-550):Range(0,100):SetTo(VExRT.Bossmods.Alpha or 100):OnChange(function(self,event) 
 		event = event - event%1
 		VExRT.Bossmods.Alpha = event	
 		if RaDen.mainframe then
@@ -4748,6 +6283,12 @@ function module.options:Load()
 		if Iskar.mainframe then
 			Iskar.mainframe:SetAlpha(event/100)
 		end
+		if Gorefiend.mainframe then
+			Gorefiend.mainframe:SetAlpha(event/100)
+		end
+		if Gorefiend2.mainframe then
+			--Gorefiend2.mainframe:SetAlpha(event/100)
+		end
 		if Archimonde.mainframe then
 			Archimonde.mainframe:SetAlpha(event/100)
 		end
@@ -4759,113 +6300,133 @@ function module.options:Load()
 		self:tooltipReload(self)
 	end)
 	
-	local BossmodsSlider2 = ExRT.lib.CreateSlider(self,640,15,0,-580,5,200,ExRT.L.bossmodsscale,VExRT.Bossmods.Scale or 100,"TOP",nil,true)
-	BossmodsSlider2:SetScript("OnValueChanged", function(self,event) 
+	local BossmodsSlider2 = ELib:Slider(self,L.bossmodsscale):Size(640):Point("TOP",0,-580):Range(5,200):SetTo(VExRT.Bossmods.Scale or 100):OnChange(function(self,event) 
 		event = event - event%1
 		VExRT.Bossmods.Scale = event
 		if RaDen.mainframe then
-			ExRT.mds.SetScaleFix(RaDen.mainframe,event/100)
+			ExRT.F.SetScaleFix(RaDen.mainframe,event/100)
 		end
 		if Malkorok.mainframe then
-			ExRT.mds.SetScaleFix(Malkorok.mainframe,event/100)
+			ExRT.F.SetScaleFix(Malkorok.mainframe,event/100)
 		end
 		if ShaOfPride.mainframe then
-			ExRT.mds.SetScaleFix(ShaOfPride.mainframe,event/100)
+			ExRT.F.SetScaleFix(ShaOfPride.mainframe,event/100)
 		end
 		if SpoilsOfPandaria.mainframe then
-			ExRT.mds.SetScaleFix(SpoilsOfPandaria.mainframe,event/100)
+			ExRT.F.SetScaleFix(SpoilsOfPandaria.mainframe,event/100)
 		end
 		if Thogar.mainframe then
-			ExRT.mds.SetScaleFix(Thogar.mainframe,event/100)
+			ExRT.F.SetScaleFix(Thogar.mainframe,event/100)
 		end
 		if Margok.mainframe then
-			ExRT.mds.SetScaleFix(Margok.mainframe,event/100)
+			ExRT.F.SetScaleFix(Margok.mainframe,event/100)
 		end
 		if Iskar.mainframe then
-			ExRT.mds.SetScaleFix(Iskar.mainframe,event/100)
+			--ExRT.F.SetScaleFix(Iskar.mainframe,event/100)
 		end
 		if Archimonde.mainframe then
-			ExRT.mds.SetScaleFix(Archimonde.mainframe,event/100)
+			--ExRT.F.SetScaleFix(Archimonde.mainframe,event/100)
 		end
 		if ArchimondeInfernals.mainframe then
-			ArchimondeInfernals.mainframe:SetScale(event/100)
+			--ArchimondeInfernals.mainframe:SetScale(event/100)
 		end
 		self.tooltipText = event
 		self:tooltipReload(self)
 	end)
 	
-	local clearallbut = ExRT.lib.CreateButton(self,650,20,nil,5,-510,ExRT.L.bossmodsclose,nil,nil,"ExRTButtonModernTemplate")
-	clearallbut:SetScript("OnClick",function()
-		ExRT.mds:ExBossmodsCloseAll()
+	local clearallbut = ELib:Button(self,L.bossmodsclose):Size(320,20):Point("RIGHT",self,"TOP",-5,-515):OnClick(function()
+		ExRT.F:ExBossmodsCloseAll()
 	end) 
 	
-	local ButtonToCenter = ExRT.lib.CreateButton(self,650,20,nil,5,-485,ExRT.L.BossmodsResetPos,nil,ExRT.L.BossmodsResetPosTooltip,"ExRTButtonModernTemplate")
-	ButtonToCenter:SetScript("OnClick",function()
-		VExRT.Bossmods.RaDenLeft = nil
-		VExRT.Bossmods.RaDenTop = nil
-		if RaDen.mainframe then
-			RaDen.mainframe:ClearAllPoints()
-			RaDen.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
-		end
-		
-		VExRT.Bossmods.ShaofprideLeft = nil
-		VExRT.Bossmods.ShaofprideTop = nil
-		if ShaOfPride.mainframe then
-			ShaOfPride.mainframe:ClearAllPoints()
-			ShaOfPride.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
-		end
-		
-		VExRT.Bossmods.MalkorokLeft = nil
-		VExRT.Bossmods.MalkorokTop = nil
-		if Malkorok.mainframe then
-			Malkorok.mainframe:ClearAllPoints()
-			Malkorok.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
-		end	
-		
-		VExRT.Bossmods.SpoilsofPandariaLeft = nil
-		VExRT.Bossmods.SpoilsofPandariaTop = nil
-		if SpoilsOfPandaria.mainframe then
-			SpoilsOfPandaria.mainframe:ClearAllPoints()
-			SpoilsOfPandaria.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
-		end
-		
-		VExRT.Bossmods.ThogarLeft = nil
-		VExRT.Bossmods.ThogarTop = nil
-		if Thogar.mainframe then
-			Thogar.mainframe:ClearAllPoints()
-			Thogar.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
-		end		
-		
-		VExRT.Bossmods.MargokLeft = nil
-		VExRT.Bossmods.MargokTop = nil
-		if Margok.mainframe then
-			Margok.mainframe:ClearAllPoints()
-			Margok.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
-		end
-		
-		VExRT.Bossmods.IskarLeft = nil
-		VExRT.Bossmods.IskarTop = nil
-		if Iskar.mainframe then
-			Iskar.mainframe:ClearAllPoints()
-			Iskar.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
-		end
-		
-		VExRT.Bossmods.ArchimondeLeft = nil
-		VExRT.Bossmods.ArchimondeTop = nil
-		if Archimonde.mainframe then
-			Archimonde.mainframe:ClearAllPoints()
-			Archimonde.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
-		end
-		
-		VExRT.Bossmods.ArchimondeInfernalPosX = nil
-		VExRT.Bossmods.ArchimondeInfernalPosY = nil
-		if ArchimondeInfernals.mainframe then
-			ArchimondeInfernals.mainframe:ClearAllPoints()
-		end
+	local ButtonToCenter = ELib:Button(self,L.BossmodsResetPos):Size(320,20):Point("LEFT",self,"TOP",5,-515):Tooltip(L.BossmodsResetPosTooltip):OnClick(function()
+		StaticPopupDialogs["EXRT_BOSSMODS_CENTER"] = {
+			text = L.BossmodsResetPosTooltip,
+			button1 = L.YesText,
+			button2 = L.NoText,
+			OnAccept = function()
+				VExRT.Bossmods.RaDenLeft = nil
+				VExRT.Bossmods.RaDenTop = nil
+				if RaDen.mainframe then
+					RaDen.mainframe:ClearAllPoints()
+					RaDen.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
+				end
+				
+				VExRT.Bossmods.ShaofprideLeft = nil
+				VExRT.Bossmods.ShaofprideTop = nil
+				if ShaOfPride.mainframe then
+					ShaOfPride.mainframe:ClearAllPoints()
+					ShaOfPride.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
+				end
+				
+				VExRT.Bossmods.MalkorokLeft = nil
+				VExRT.Bossmods.MalkorokTop = nil
+				if Malkorok.mainframe then
+					Malkorok.mainframe:ClearAllPoints()
+					Malkorok.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
+				end	
+				
+				VExRT.Bossmods.SpoilsofPandariaLeft = nil
+				VExRT.Bossmods.SpoilsofPandariaTop = nil
+				if SpoilsOfPandaria.mainframe then
+					SpoilsOfPandaria.mainframe:ClearAllPoints()
+					SpoilsOfPandaria.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
+				end
+				
+				VExRT.Bossmods.ThogarLeft = nil
+				VExRT.Bossmods.ThogarTop = nil
+				if Thogar.mainframe then
+					Thogar.mainframe:ClearAllPoints()
+					Thogar.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
+				end		
+				
+				VExRT.Bossmods.MargokLeft = nil
+				VExRT.Bossmods.MargokTop = nil
+				if Margok.mainframe then
+					Margok.mainframe:ClearAllPoints()
+					Margok.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
+				end
+				
+				VExRT.Bossmods.IskarLeft = nil
+				VExRT.Bossmods.IskarTop = nil
+				if Iskar.mainframe then
+					Iskar.mainframe:ClearAllPoints()
+					Iskar.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
+				end
+				
+				VExRT.Bossmods.GorefiendPosX = nil
+				VExRT.Bossmods.GorefiendPosY = nil
+				if Gorefiend.mainframe then
+					Gorefiend.mainframe:ClearAllPoints()
+				end
+				if Gorefiend2.mainframe then
+					Gorefiend2.mainframe:ClearAllPoints()
+					Gorefiend2.mainframe:SetPoint("TOP",UIParent,"CENTER",-350,200)
+				end
+				
+				VExRT.Bossmods.ArchimondeLeft = nil
+				VExRT.Bossmods.ArchimondeTop = nil
+				if Archimonde.mainframe then
+					Archimonde.mainframe:ClearAllPoints()
+					Archimonde.mainframe:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
+				end
+				
+				VExRT.Bossmods.ArchimondeInfernalPosX = nil
+				VExRT.Bossmods.ArchimondeInfernalPosY = nil
+				if ArchimondeInfernals.mainframe then
+					ArchimondeInfernals.mainframe:ClearAllPoints()
+				end
+			end,
+			timeout = 0,
+			whileDead = true,
+			hideOnEscape = true,
+			preferredIndex = 3,
+		}
+		StaticPopup_Show("EXRT_BOSSMODS_CENTER")
+
 	end) 
 end
 
-function ExRT.mds:ExBossmodsCloseAll()
+function ExRT.F:ExBossmodsCloseAll()
 	if RaDen.mainframe then
 		RaDen.mainframe:Hide()
 		RaDen.mainframe:SetScript("OnUpdate", nil)
@@ -4947,6 +6508,12 @@ function ExRT.mds:ExBossmodsCloseAll()
 		Mannoroth.setupFrame:UnregisterAllEvents()
 		Mannoroth.setupFrame.isEnabled = nil	
 	end
+	if Gorefiend.mainframe then
+		Gorefiend.mainframe:Close()
+	end
+	if Gorefiend2.mainframe then
+		Gorefiend2.mainframe:Close()
+	end
 	if Archimonde.mainframe then
 		Archimonde.mainframe:Hide()
 		Archimonde.mainframe:UnregisterAllEvents()
@@ -4963,89 +6530,95 @@ function module:miniMapMenu()
 	local clvl = GetCurrentMapDungeonLevel()
 
 	if cmap==930 and clvl==8 then
-		ExRT.F.MinimapMenuAdd("|cff00ff00"..ExRT.L.bossmodsraden, function() RaDen:Load() CloseDropDownMenus() end,3,"Bossmods_Raden")
+		ExRT.F.MinimapMenuAdd("|cff00ff00"..L.bossmodsraden, function() RaDen:Load() CloseDropDownMenus() end,3,"Bossmods_Raden")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Raden")
+		ExRT.F.MinimapMenuRemove("Bossmods_Raden")
 	end
 
 	if cmap==953 and clvl==8 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.bossmodsmalkorok, function() Malkorok:Load() CloseDropDownMenus() end,3,"Bossmods_Malkorok")
+		ExRT.F.MinimapMenuAdd(L.bossmodsmalkorok, function() Malkorok:Load() CloseDropDownMenus() end,3,"Bossmods_Malkorok")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Malkorok")
+		ExRT.F.MinimapMenuRemove("Bossmods_Malkorok")
 	end
 
 	if cmap==953 and clvl==8 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.bossmodsmalkorokai, function() MalkorokAI:Load() CloseDropDownMenus() end,3,"Bossmods_MalkorokAI")
+		ExRT.F.MinimapMenuAdd(L.bossmodsmalkorokai, function() MalkorokAI:Load() CloseDropDownMenus() end,3,"Bossmods_MalkorokAI")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_MalkorokAI")
+		ExRT.F.MinimapMenuRemove("Bossmods_MalkorokAI")
 	end
 
 	if cmap==953 and clvl==3 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.bossmodsshaofpride, function() ShaOfPride:Load() CloseDropDownMenus() end,3,"Bossmods_Sha")
+		ExRT.F.MinimapMenuAdd(L.bossmodsshaofpride, function() ShaOfPride:Load() CloseDropDownMenus() end,3,"Bossmods_Sha")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Sha")
+		ExRT.F.MinimapMenuRemove("Bossmods_Sha")
 	end
 
 	if cmap==953 and clvl==9 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.bossmodsSpoilsofPandaria, function() SpoilsOfPandaria:Load() CloseDropDownMenus() end,3,"Bossmods_Spoils")
+		ExRT.F.MinimapMenuAdd(L.bossmodsSpoilsofPandaria, function() SpoilsOfPandaria:Load() CloseDropDownMenus() end,3,"Bossmods_Spoils")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Spoils")
+		ExRT.F.MinimapMenuRemove("Bossmods_Spoils")
 	end
 	
 	if cmap==994 and clvl==4 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.BossmodsKoragh, function() Koragh:Load() CloseDropDownMenus() end,3,"Bossmods_Koragh")
+		ExRT.F.MinimapMenuAdd(L.BossmodsKoragh, function() Koragh:Load() CloseDropDownMenus() end,3,"Bossmods_Koragh")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Koragh")
+		ExRT.F.MinimapMenuRemove("Bossmods_Koragh")
 	end
 	
 	if cmap==994 and clvl==6 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.BossmodsMargok, function() Margok:Load() CloseDropDownMenus() end,3,"Bossmods_Margok")
+		ExRT.F.MinimapMenuAdd(L.BossmodsMargok, function() Margok:Load() CloseDropDownMenus() end,3,"Bossmods_Margok")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Margok")
+		ExRT.F.MinimapMenuRemove("Bossmods_Margok")
 	end
 	
 	if cmap==988 and clvl==1 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.BossmodsKromog, function() Kromog:Load() CloseDropDownMenus() end,3,"Bossmods_Kromog")
+		ExRT.F.MinimapMenuAdd(L.BossmodsKromog, function() Kromog:Load() CloseDropDownMenus() end,3,"Bossmods_Kromog")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Kromog")
+		ExRT.F.MinimapMenuRemove("Bossmods_Kromog")
 	end
 
 	if cmap==988 and clvl==4 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.BossmodsThogar, function() Thogar:Load() CloseDropDownMenus() end,3,"Bossmods_Thogar")
+		ExRT.F.MinimapMenuAdd(L.BossmodsThogar, function() Thogar:Load() CloseDropDownMenus() end,3,"Bossmods_Thogar")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Thogar")
+		ExRT.F.MinimapMenuRemove("Bossmods_Thogar")
+	end
+	
+	if cmap==1026 and clvl==2 then
+		ExRT.F.MinimapMenuAdd(L.RaidLootT18HCBoss6, function() Gorefiend:Load() CloseDropDownMenus() end,3,"Bossmods_Gorefiend")
+	else
+		ExRT.F.MinimapMenuRemove("Bossmods_Gorefiend")
 	end
 	
 	if cmap==1026 and clvl==6 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.RaidLootT18HCBoss7, function() Iskar:Load() CloseDropDownMenus() end,3,"Bossmods_Iskar")
+		ExRT.F.MinimapMenuAdd(L.RaidLootT18HCBoss7, function() Iskar:Load() CloseDropDownMenus() end,3,"Bossmods_Iskar")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Iskar")
+		ExRT.F.MinimapMenuRemove("Bossmods_Iskar")
 	end
 	
 	if cmap==1026 and clvl==4 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.RaidLootT18HCBoss3, function() Kormrok:Load() CloseDropDownMenus() end,3,"Bossmods_Kormrok")
+		ExRT.F.MinimapMenuAdd(L.RaidLootT18HCBoss3, function() Kormrok:Load() CloseDropDownMenus() end,3,"Bossmods_Kormrok")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Kormrok")
+		ExRT.F.MinimapMenuRemove("Bossmods_Kormrok")
 	end
 	
 	if cmap==1026 and clvl==9 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.RaidLootT18HCBoss12, function() Mannoroth:Load() CloseDropDownMenus() end,3,"Bossmods_Mannoroth")
+		ExRT.F.MinimapMenuAdd(L.RaidLootT18HCBoss12, function() Mannoroth:Load() CloseDropDownMenus() end,3,"Bossmods_Mannoroth")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Mannoroth")
+		ExRT.F.MinimapMenuRemove("Bossmods_Mannoroth")
 	end
 	
 	if cmap==1026 and clvl==10 then
-		ExRT.mds.MinimapMenuAdd(ExRT.L.RaidLootT18HCBoss13..": "..ExRT.L.BossmodsArchimondeRadar, function() Archimonde:Load() CloseDropDownMenus() end,3,"Bossmods_Archimonde")
-		ExRT.mds.MinimapMenuAdd(ExRT.L.RaidLootT18HCBoss13..": "..ExRT.L.BossmodsArchimondeInfernals, function() ArchimondeInfernals:Load() CloseDropDownMenus() end,3,"Bossmods_ArchimondeInf")
+		ExRT.F.MinimapMenuAdd(L.RaidLootT18HCBoss13..": "..L.BossmodsArchimondeRadar, function() Archimonde:Load() CloseDropDownMenus() end,3,"Bossmods_Archimonde")
+		ExRT.F.MinimapMenuAdd(L.RaidLootT18HCBoss13..": "..L.BossmodsArchimondeInfernals, function() ArchimondeInfernals:Load() CloseDropDownMenus() end,3,"Bossmods_ArchimondeInf")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Archimonde")
-		ExRT.mds.MinimapMenuRemove("Bossmods_ArchimondeInf")
+		ExRT.F.MinimapMenuRemove("Bossmods_Archimonde")
+		ExRT.F.MinimapMenuRemove("Bossmods_ArchimondeInf")
 	end
 
-	if RaDen.mainframe or Malkorok.mainframe or ShaOfPride.mainframe or SpoilsOfPandaria.mainframe or Thogar.mainframe or Margok.mainframe or (Kromog.setupFrame and Kromog.setupFrame.isEnabled) or Koragh.mainframe or Iskar.mainframe or Archimonde.mainframe or (Mannoroth.setupFrame and Mannoroth.setupFrame.isEnabled) or (ArchimondeInfernals.mainframe and ArchimondeInfernals.mainframe.isEnabled) then
-		ExRT.mds.MinimapMenuAdd("|cffff9999"..ExRT.L.bossmodsclose, function() ExRT.mds:ExBossmodsCloseAll() CloseDropDownMenus() end,4,"Bossmods_Close")
+	if RaDen.mainframe or Malkorok.mainframe or ShaOfPride.mainframe or SpoilsOfPandaria.mainframe or Thogar.mainframe or Margok.mainframe or (Kromog.setupFrame and Kromog.setupFrame.isEnabled) or Koragh.mainframe or Iskar.mainframe or (Archimonde.mainframe and Archimonde.mainframe.isEnabled) or (Mannoroth.setupFrame and Mannoroth.setupFrame.isEnabled) or (ArchimondeInfernals.mainframe and ArchimondeInfernals.mainframe.isEnabled) or (Gorefiend.mainframe and Gorefiend.mainframe.isEnabled) or (Gorefiend2.mainframe and Gorefiend2.mainframe.isEnabled) then
+		ExRT.F.MinimapMenuAdd("|cffff9999"..L.bossmodsclose, function() ExRT.F:ExBossmodsCloseAll() CloseDropDownMenus() end,4,"Bossmods_Close")
 	else
-		ExRT.mds.MinimapMenuRemove("Bossmods_Close")
+		ExRT.F.MinimapMenuRemove("Bossmods_Close")
 	end
 end
 
@@ -5053,10 +6626,12 @@ function module.main:ADDON_LOADED()
 	VExRT = _G.VExRT
 	VExRT.Bossmods = VExRT.Bossmods or {}
 	
-	module:RegisterEvents('ENCOUNTER_START','ENCOUNTER_END')
+	module:RegisterEvents('ENCOUNTER_START','ENCOUNTER_END','ZONE_CHANGED')
 	module:RegisterAddonMessage()
 	module:RegisterMiniMapMenu()
 	module:RegisterSlash()
+	
+	module.main:ZONE_CHANGED()
 	
 	--Kromog
 	VExRT.Bossmods.Kromog = VExRT.Bossmods.Kromog or {}
@@ -5066,6 +6641,17 @@ function module.main:ADDON_LOADED()
 	VExRT.Bossmods.Mannoroth = VExRT.Bossmods.Mannoroth or {}
 	--Archimonde
 	VExRT.Bossmods.Archimonde = nil
+	
+	if VExRT.Addon.Version < 3505 then
+		VExRT.Bossmods.MannorothAutoload = nil
+	end
+	if VExRT.Addon.Version < 3525 then
+		if VExRT.Bossmods.Scale then
+			VExRT.Bossmods.ArchimondeScale = VExRT.Bossmods.Scale / 100
+			VExRT.Bossmods.IskarScale = VExRT.Bossmods.Scale / 100
+			VExRT.Bossmods.ArchimondeInfernalsScale = VExRT.Bossmods.Scale / 100
+		end
+	end
 end
 
 
@@ -5093,12 +6679,15 @@ function module.main:ENCOUNTER_START(encounterID,encounterName,difficultyID,grou
 	elseif encounterID == 1713 and not Kromog.setupFrame and not VExRT.Bossmods.KromogAutoload then
 		Kromog:Load()
 		Kromog.setupFrame:Hide()
-	elseif encounterID == 1787 and (not Kormrok.setupFrame or not Kormrok.setupFrame.isEnabled) and not VExRT.Bossmods.KormrokAutoload then
+	elseif encounterID == 1787 and (not Kormrok.setupFrame or not Kormrok.setupFrame.isEnabled) and not VExRT.Bossmods.KormrokAutoload and difficultyID == 16 then
 		Kormrok:Load()
 		Kormrok.setupFrame:Hide()
-	elseif encounterID == 1795 and (not Mannoroth.setupFrame or not Mannoroth.setupFrame.isEnabled) and not VExRT.Bossmods.MannorothAutoload then
+	elseif encounterID == 1795 and (not Mannoroth.setupFrame or not Mannoroth.setupFrame.isEnabled) and VExRT.Bossmods.MannorothAutoload then
 		Mannoroth:Load()
 		Mannoroth.setupFrame:Hide()
+	elseif encounterID == 1783 and (not Gorefiend.mainframe or Gorefiend.mainframe.isEnabled) and (not Gorefiend2.mainframe or Gorefiend2.mainframe.isEnabled) and VExRT.Bossmods.GorefiendAutoload and difficultyID == 16 then
+		Gorefiend:Load()
+		Gorefiend.mainframe:Engage()
 	elseif encounterID == 1799 then
 		if (not Archimonde.mainframe or not Archimonde.mainframe.isEnabled) and not VExRT.Bossmods.ArchimondeAutoload then
 			Archimonde:Load()
@@ -5115,24 +6704,60 @@ function module.main:ENCOUNTER_END(encounterID,_,_,_,success)
 	if not (success == 1) then
 		return
 	elseif encounterID == 1594 and SpoilsOfPandaria.mainframe then
-		ExRT.mds:ExBossmodsCloseAll()
+		ExRT.F:ExBossmodsCloseAll()
 	elseif encounterID == 1604 and ShaOfPride.mainframe then
-		ExRT.mds:ExBossmodsCloseAll()
+		ExRT.F:ExBossmodsCloseAll()
 	elseif encounterID == 1595 and Malkorok.mainframe then
-		ExRT.mds:ExBossmodsCloseAll()
+		ExRT.F:ExBossmodsCloseAll()
 	elseif encounterID == 1692 and Thogar.mainframe then
-		ExRT.mds:ExBossmodsCloseAll()
+		ExRT.F:ExBossmodsCloseAll()
 	elseif encounterID == 1723 and Koragh.mainframe then
-		ExRT.mds:ExBossmodsCloseAll()
+		ExRT.F:ExBossmodsCloseAll()
 	elseif encounterID == 1788 and Iskar.mainframe then
-		C_Timer.NewTimer(3, function() ExRT.mds:ExBossmodsCloseAll() end)
+		C_Timer.NewTimer(4, function() ExRT.F:ExBossmodsCloseAll() end)
+		C_Timer.NewTimer(10, function() ExRT.F:ExBossmodsCloseAll() end)
 	elseif encounterID == 1787 and Kormrok.setupFrame and Kormrok.setupFrame.isEnabled then
-		ExRT.mds:ExBossmodsCloseAll()
+		ExRT.F:ExBossmodsCloseAll()
 	elseif encounterID == 1795 and Mannoroth.setupFrame and Mannoroth.setupFrame.isEnabled then
-		ExRT.mds:ExBossmodsCloseAll()
+		ExRT.F:ExBossmodsCloseAll()
+	elseif encounterID == 1783 then
+		if Gorefiend.mainframe and Gorefiend.mainframe.isEnabled then
+			ExRT.F:ExBossmodsCloseAll()
+		end
+		if Gorefiend2.mainframe and Gorefiend2.mainframe.isEnabled  then
+			C_Timer.NewTimer(4, function() ExRT.F:ExBossmodsCloseAll() end)
+			C_Timer.NewTimer(10, function() ExRT.F:ExBossmodsCloseAll() end)
+			
+		end
 	elseif encounterID == 1799 and ((Archimonde.mainframe and Archimonde.mainframe.isEnabled) or (ArchimondeInfernals.mainframe and ArchimondeInfernals.mainframe.isEnabled)) then
-		ExRT.mds:ExBossmodsCloseAll()
+		ExRT.F:ExBossmodsCloseAll()
 	end
+end
+
+function module.main:ZONE_CHANGED()
+	local y,x,_,map = UnitPosition'player'
+	if map == 1448 then
+		if x > 2455 and x < 2620 and y < 4105 and y > 3980 then
+			module:RegisterEvents('PLAYER_TARGET_CHANGED')
+		else
+			module:UnregisterEvents('PLAYER_TARGET_CHANGED')
+		end
+	end
+end
+
+function module.main:PLAYER_TARGET_CHANGED()
+	local targetGUID = UnitGUID'target'
+	if not targetGUID then
+		return
+	elseif GetMobID(targetGUID) == 90316 then
+		if InCombatLockdown() then
+			return
+		end
+		if not VExRT.Bossmods.IskarAutoload then
+			Iskar:AutoLoad()
+		end
+	end
+
 end
 
 function module:slash(arg)
@@ -5156,6 +6781,10 @@ function module:slash(arg)
 		Kormrok:Load()
 	elseif arg == "mannoroth" then
 		Mannoroth:Load()
+	elseif arg == "gorefiend" then	
+		Gorefiend:Load()
+	elseif arg == "gorefiend2" then	
+		Gorefiend2:Load()
 	elseif arg == "archimonde" then
 		Archimonde:Load()
 	elseif arg == "archimondeinf" then

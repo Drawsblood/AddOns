@@ -27,7 +27,6 @@ local L = mod:NewLocale("enUS", true)
 if L then
 	L.font_removed_soon = "Your Font expires soon!"
 end
-L = mod:GetLocale()
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -41,7 +40,7 @@ function mod:GetOptions()
 		-11155, -- Ancient Enforcer
 		180004, -- Enforcer's Onslaught
 		--[[ Stage Two: Contempt ]]--
-		180533, -- Tainted Shadows
+		{180533, "PROXIMITY"}, -- Tainted Shadows
 		{180526, "SAY", "FLASH", "PROXIMITY"}, -- Font of Corruption
 		-11163, -- Ancient Harbinger
 		180025, -- Harbinger's Mending
@@ -126,6 +125,9 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(_, text, sender, _, _, target)
 		elseif sender == self:SpellName(-11163) then -- Ancient Harbinger
 			self:Message(-11163, "Neutral", nil, "60% - ".. CL.spawned:format(self:SpellName(-11163)), false)
 			self:Bar(180025, 16, CL.count:format(self:SpellName(180025), 1)) -- Harbinger's Mending
+			if self:LFR() then
+				self:RegisterUnitEvent("UNIT_SPELLCAST_START", "HarbingersMendingLFR", "boss2")
+			end
 		elseif sender == self:SpellName(-11170) then -- Ancient Sovereign
 			self:Message(-11170, "Neutral", nil, "30% - ".. CL.spawned:format(self:SpellName(-11170)), false)
 			self:Bar(180040, 14) -- Sovereign's Ward
@@ -138,6 +140,9 @@ function mod:Deaths(args)
 		self:StopBar(180004) -- Enforcer's Onslaught
 	elseif args.mobId == 90271 then -- Ancient Harbinger
 		self:StopBar(CL.count:format(self:SpellName(180025), mendingCount)) -- Harbinger's Mending
+		if self:LFR() then
+			self:UnregisterUnitEvent("UNIT_SPELLCAST_START", "boss2")
+		end
 	elseif args.mobId == 90272 then -- Ancient Sovereign
 		self:StopBar(180040) -- Sovereign's Ward
 	end
@@ -198,14 +203,25 @@ function mod:AuraOfContempt()
 	phase = 2
 	strikeCount = 0
 	self:Message("stages", "Neutral", nil, "70% - ".. CL.phase:format(phase), false)
-	self:Bar(180533, 5) -- Tainted Shadows
+	self:Bar(180533, 5, CL.count:format(self:SpellName(180533), 1)) -- Tainted Shadows
 	self:Bar(180526, 22) -- Font of Corruption, 20sec timer + 2sec cast
+	if self:Tank() and not self:LFR() then
+		self:OpenProximity(180533, 5) -- Tainted Shadows
+	end
 end
 
 function mod:HarbingersMending(args)
 	self:Message(180025, "Attention", self:Interrupter() and "Alert", CL.casting:format(CL.count:format(args.spellName, mendingCount)))
 	mendingCount = mendingCount + 1
 	self:Bar(180025, self:Normal() and 16 or 11, CL.count:format(args.spellName, mendingCount))
+end
+
+function mod:HarbingersMendingLFR(unit, spellName, _, _, spellId)
+	if spellId == 180025 then -- On LFR this event is hidden and lacking an icon, even though it's the same id :S
+		self:Message(spellId, "Attention", self:Interrupter() and "Alert", CL.casting:format(CL.count:format(spellName, mendingCount)), "spell_shadow_shadowmend")
+		mendingCount = mendingCount + 1
+		self:Bar(spellId, 25, CL.count:format(spellName, mendingCount), "spell_shadow_shadowmend")
+	end
 end
 
 function mod:HarbingersMendingApplied(args)
@@ -312,6 +328,9 @@ end
 -- Stage 3
 
 function mod:AuraOfMalice()
+	if self:Tank() and not self:LFR() then
+		self:CloseProximity(180533) -- Tainted Shadows
+	end
 	self:StopBar(CL.count:format(self:SpellName(180533), strikeCount)) -- Tainted Shadows
 	self:StopBar(180526) -- Font of Corruption
 	phase = 3

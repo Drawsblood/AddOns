@@ -23,7 +23,7 @@ do
 	--@end-alpha@]===]
 
 	-- This will (in ZIPs), be replaced by the highest revision number in the source tree.
-	myRevision = tonumber("13537")
+	myRevision = tonumber("13693")
 
 	-- If myRevision ends up NOT being a number, it means we're running a SVN copy.
 	if type(myRevision) ~= "number" then
@@ -54,13 +54,15 @@ local ldb = nil
 local tooltipFunctions = {}
 local next, tonumber = next, tonumber
 local SendAddonMessage, Ambiguate, CTimerAfter, CTimerNewTicker = SendAddonMessage, Ambiguate, C_Timer.After, C_Timer.NewTicker
-local IsInInstance, GetCurrentMapAreaID, SetMapToCurrentZone = IsInInstance, GetCurrentMapAreaID, SetMapToCurrentZone
+local IsInInstance, GetCurrentMapAreaID, SetMapToCurrentZone, SetMapByID = IsInInstance, GetCurrentMapAreaID, SetMapToCurrentZone, SetMapByID
 local GetAreaMapInfo, GetInstanceInfo = GetAreaMapInfo, GetInstanceInfo
 
 -- Try to grab unhooked copies of critical funcs (hooked by some crappy addons)
 public.GetCurrentMapAreaID = GetCurrentMapAreaID
 public.SetMapToCurrentZone = SetMapToCurrentZone
+public.SetMapByID = SetMapByID
 public.GetAreaMapInfo = GetAreaMapInfo
+public.GetCurrentMapDungeonLevel = GetCurrentMapDungeonLevel
 public.GetInstanceInfo = GetInstanceInfo
 public.SendAddonMessage = SendAddonMessage
 public.SendChatMessage = SendChatMessage
@@ -131,7 +133,7 @@ end
 -- GLOBALS: _G, ADDON_LOAD_FAILED, BigWigs, BigWigs3DB, BigWigs3IconDB, BigWigsLoader, BigWigsOptions, CreateFrame, CUSTOM_CLASS_COLORS, error, GetAddOnEnableState, GetAddOnInfo
 -- GLOBALS: GetAddOnMetadata, GetLocale, GetNumGroupMembers, GetRealmName, GetSpecialization, GetSpecializationRole, GetSpellInfo, GetTime, GRAY_FONT_COLOR, InCombatLockdown
 -- GLOBALS: InterfaceOptionsFrameOkay, IsAddOnLoaded, IsAltKeyDown, IsControlKeyDown, IsEncounterInProgress, IsInGroup, IsInRaid, IsLoggedIn, IsPartyLFG, IsSpellKnown, LFGDungeonReadyPopup
--- GLOBALS: LibStub, LoadAddOn, message, PlaySoundFile, print, RAID_CLASS_COLORS, RaidNotice_AddMessage, RaidWarningFrame, RegisterAddonMessagePrefix, RolePollPopup, select, SetMapByID, strsplit
+-- GLOBALS: LibStub, LoadAddOn, message, PlaySoundFile, print, RAID_CLASS_COLORS, RaidNotice_AddMessage, RaidWarningFrame, RegisterAddonMessagePrefix, RolePollPopup, select, strsplit
 -- GLOBALS: tostring, tremove, type, UnitAffectingCombat, UnitClass, UnitGroupRolesAssigned, UnitIsDeadOrGhost, UnitName, UnitSetRole, unpack, SLASH_BigWigs1, SLASH_BigWigs2
 -- GLOBALS: SLASH_BigWigsVersion1, UnitBuff, wipe, WorldMapFrame
 
@@ -421,8 +423,10 @@ function mod:ADDON_LOADED(addon)
 			local realm = GetRealmName()
 			if name and realm and BigWigs3DB.profileKeys[name.." - "..realm] then
 				local key = BigWigs3DB.profiles[BigWigs3DB.profileKeys[name.." - "..realm]]
-				self.isFakingDBM = key.fakeDBMVersion
-				self.isShowingZoneMessages = key.showZoneMessages
+				if key then
+					self.isFakingDBM = key.fakeDBMVersion
+					self.isShowingZoneMessages = key.showZoneMessages
+				end
 			end
 		end
 		-- Cleanup function.
@@ -552,7 +556,7 @@ do
 	elseif L == "itIT" then
 		delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Italian (itIT)? Check out our easy translator tool: goo.gl/nwR5cy"
 	elseif L == "koKR" then
-		delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Korean (koKR)? Check out our easy translator tool: goo.gl/nwR5cy"
+		--delayedMessages[#delayedMessages+1] = "Think you can translate Big Wigs into Korean (koKR)? Check out our easy translator tool: goo.gl/nwR5cy"
 	end
 
 	CTimerAfter(11, function()
@@ -573,8 +577,8 @@ end
 
 do
 	-- This is a crapfest mainly because DBM's actual handling of versions is a crapfest, I'll try explain how this works...
-	local DBMdotRevision = "14116" -- The changing version of the local client, changes with every alpha revision using an SVN keyword.
-	local DBMdotDisplayVersion = "6.2.5" -- Same as above but is changed between alpha and release cycles e.g. "N.N.N" for a release and "N.N.N alpha" for the alpha duration
+	local DBMdotRevision = "14565" -- The changing version of the local client, changes with every alpha revision using an SVN keyword.
+	local DBMdotDisplayVersion = "6.2.12" -- Same as above but is changed between alpha and release cycles e.g. "N.N.N" for a release and "N.N.N alpha" for the alpha duration
 	local DBMdotReleaseRevision = DBMdotRevision -- This is manually changed by them every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 
 	local timer, prevUpgradedUser = nil, nil
@@ -748,6 +752,13 @@ do
 					f.text:SetFormattedText("Big Wigs: %.1f", timeLeft)
 				end
 			end)
+
+			-- USE THIS CALLBACK TO SKIN THIS WINDOW! NO NEED FOR UGLY HAX! E.g.
+			-- local name, addon = ...
+			-- if BigWigsLoader then
+			-- 	BigWigsLoader.RegisterMessage(addon, "BigWigs_FrameCreated", function(event, frame, name) print(name.." frame created.") end)
+			-- end
+			public:SendMessage("BigWigs_FrameCreated", timerBar, "QueueTimer")
 		end
 	end
 end
@@ -799,7 +810,7 @@ do
 					if warnedReallyOutOfDate > 1 and not hasReallyWarned then
 						hasReallyWarned = true
 						sysprint(L.extremelyOutdated)
-						RaidNotice_AddMessage(RaidWarningFrame, (L.extremelyOutdated):gsub("|", "\124"), {r=1,g=1,b=1}) -- XXX wowace packager doesn't keep my escape codes and RW doesn't like pipes :(
+						RaidNotice_AddMessage(RaidWarningFrame, L.extremelyOutdated, {r=1,g=1,b=1})
 					end
 					if ((v-isAlpha) - MY_BIGWIGS_REVISION) > 150 then
 						warnedExtremelyOutOfDate = warnedExtremelyOutOfDate + 1
@@ -959,7 +970,7 @@ do
 			warnedThisZone[id] = true
 			local msg = L.missingAddOn:format(zoneAddon)
 			sysprint(msg)
-			RaidNotice_AddMessage(RaidWarningFrame, msg:gsub("|", "\124"), {r=1,g=1,b=1}) -- XXX wowace packager doesn't keep my escape codes and RW doesn't like pipes :(
+			RaidNotice_AddMessage(RaidWarningFrame, msg, {r=1,g=1,b=1})
 		end
 	end
 end
@@ -1082,7 +1093,6 @@ do
 
 		function ldb.OnTooltipShow(tt)
 			tt:AddLine("Big Wigs")
-			local h = nil
 			if BigWigs and BigWigs:IsEnabled() then
 				local added = nil
 				for name, module in BigWigs:IterateBossModules() do

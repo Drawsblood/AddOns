@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Kargath Bladefist", "esES") or BigWigs:NewBossLocale("Kargath Bladefist", "esMX")
 if not L then return end
 if L then
@@ -9,6 +10,8 @@ end
 L = BigWigs:NewBossLocale("The Butcher", "esES") or BigWigs:NewBossLocale("The Butcher", "esMX")
 if L then
 L["adds_multiple"] = "Adds x%d"
+L["tank_proximity"] = "Proximidad de tanque" -- Needs review
+L["tank_proximity_desc"] = "Abre una proximidad de 5 metros con otros tanques para ayudarte a lidiar con la habilidad Mano dura." -- Needs review
 
 end
 

@@ -32,7 +32,6 @@ if L then
 	L.custom_off_wolves_marker_desc = "Mark Cinder Wolves with {rt3}{rt4}{rt5}{rt6}, requires promoted or leader."
 	L.custom_off_wolves_marker_icon = 3
 end
-L = mod:GetLocale()
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -185,10 +184,10 @@ do
 		timeLeft = timeLeft - 1
 		if timeLeft < 5 then
 			self:Say("molten_torrent_self", timeLeft, true)
-		end
-		if timeLeft < 2 then
-			self:CancelTimer(timer)
-			timer = nil
+			if timeLeft < 2 then
+				self:CancelTimer(timer)
+				timer = nil
+			end
 		end
 	end
 	function mod:MoltenTorrentApplied(args)

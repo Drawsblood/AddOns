@@ -1,4 +1,5 @@
-﻿local L = BigWigs:NewBossLocale("Hellfire Assault", "zhCN")
+﻿-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
+local L = BigWigs:NewBossLocale("Hellfire Assault", "zhCN")
 if not L then return end
 if L then
 L["left"] = "左：%s"
@@ -45,7 +46,7 @@ L = BigWigs:NewBossLocale("Fel Lord Zakuun", "zhCN")
 if L then
 L["custom_off_seed_marker"] = "毁灭之种标记"
 L["custom_off_seed_marker_desc"] = "使用 {rt1}{rt2}{rt3}{rt4}{rt5} 标记毁灭之种目标，需要权限。"
-L["seed"] = "种子：（%d）"
+L["seed"] = "种子"
 L["tank_proximity"] = "坦克近距离"
 L["tank_proximity_desc"] = "开启5码近距离显示其他坦克，以便对应势大力沉与全副武装技能。"
 
@@ -59,21 +60,38 @@ end
 
 L = BigWigs:NewBossLocale("Mannoroth", "zhCN")
 if L then
+L["182212"] = "地狱火传送门已关闭！"
+L["185147"] = "末日领主传送门已关闭！"
+L["185175"] = "邪能小鬼传送门已关闭！"
+L["custom_off_doom_marker"] = "末日印记标记"
+L["custom_off_doom_marker_desc"] = "史诗难度中，使用 {rt1}{rt2}{rt3} 标记末日印记目标，需要权限。"
 L["custom_off_gaze_marker"] = "凝视标记"
 L["custom_off_gaze_marker_desc"] = "使用 {rt1}{rt2}{rt3} 标记玛诺洛斯凝视目标，需要权限。"
-L["doomLord"] = "末日领主传送门已关闭！"
+L["custom_off_wrath_marker"] = "古尔丹之怒标记"
+L["custom_off_wrath_marker_desc"] = "使用 {rt8}{rt7}{rt6}{rt5}{rt4} 标记古尔丹之怒目标，需要权限。"
 L["felseeker_message"] = "%s（%d）%d码"
 L["gaze"] = "凝视：（%d）"
-L["imp"] = "邪能小鬼传送门已关闭！"
-L["infernal"] = "地狱火传送门已关闭！"
 
 end
 
 L = BigWigs:NewBossLocale("Archimonde", "zhCN")
 if L then
 L["chaos_bar"] = "%s -> %s"
+L["chaos_from"] = "%s 从 %s"
+L["chaos_helper_message"] = "你精炼混乱位置：>%d<"
+L["chaos_to"] = "%s 到 %s"
+L["custom_off_chaos_helper"] = "精炼混乱助手"
+L["custom_off_chaos_helper_desc"] = "只在史诗难度可用。此功能将告诉你精炼混乱数字，显示普通信息和聊天频道说话。依赖于你们使用的战术，此功能可能或不能有帮助。"
+L["custom_off_infernal_marker"] = "地狱火标记"
+L["custom_off_infernal_marker_desc"] = "使用 {rt1}{rt2}{rt3}{rt4}{rt5} 标记混乱之雨出现的地狱火，需要权限。"
+L["custom_off_legion_marker"] = "军团标记标记"
+L["custom_off_legion_marker_desc"] = "使用 {rt1}{rt2}{rt3}{rt4} 标记军团标记目标，需要权限。"
 L["custom_off_torment_marker"] = "枷锁酷刑标记"
 L["custom_off_torment_marker_desc"] = "使用 {rt1}{rt2}{rt3} 标记枷锁酷刑目标，需要权限。"
+L["infernal_count"] = "%s（%d/%d）"
+L["markofthelegion_self"] = ">你< 军团标记"
+L["markofthelegion_self_bar"] = ">你< 爆炸！"
+L["markofthelegion_self_desc"] = "当你中了军团标记时显示特殊冷却。"
 L["torment_removed"] = "枷锁酷刑已移除（%d/%d）"
 
 end
@@ -94,6 +112,8 @@ L["kazrogal"] = "卡兹洛加"
 L["kuroh"] = "副官库罗尔"
 L["orb"] = "毁灭宝珠"
 L["peacekeeper"] = "构装维和者"
+L["talonpriest"] = "腐化的鸦爪祭司"
+L["weaponlord"] = "武器大师麦克奥"
 
 end
 

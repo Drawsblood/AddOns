@@ -1,6 +1,7 @@
 local GlobalAddonName, ExRT = ...
 
 local module = ExRT.mod:New("CSpells",ExRT.L.scspells)
+local ELib,L = ExRT.lib,ExRT.L
 module.db.spells = {}
 
 --Build 19802, 3:17 27.03.2015
@@ -169,19 +170,19 @@ function module.options:Load()
 	local scrollFrameValue = 0
 	local scrollFix = false
 		
-	self.scrollFrame = ExRT.lib.CreateScrollFrame(self,655,550,"TOP",0,-60,1070,true)
+	self.scrollFrame = ELib:ScrollFrame(self):Size(655,550):Point("TOP",0,-60):Height(1070)
 	
 	local spellLineHeight = 26
 	local spellLineWidth = 211
 	self.scrollFrame.C.spells = {}
 	local function SpellLineClick(self)
-		ExRT.mds.LinkSpell(self.spellID)
+		ExRT.F.LinkSpell(self.spellID)
 	end
 	local function SpellLineEnter(self)
-		ExRT.lib.OnEnterHyperLinkTooltip(self,self.link) 
+		ELib.Tooltip.Link(self,self.link) 
 	end
 	local function SpellLineLeave(self)
-		ExRT.lib.OnLeaveHyperLinkTooltip() 
+		ELib.Tooltip:Hide() 
 	end
 	for i=1,3 do
 		for j=1,23 do
@@ -199,7 +200,7 @@ function module.options:Load()
 			frame:RegisterForClicks("LeftButtonDown")
 			frame:SetScript("OnClick", SpellLineClick)
 	
-			frame.spellName = ExRT.lib.CreateText(frame,spellLineWidth-spellLineHeight-5,spellLineHeight,nil,spellLineHeight+5, 0,nil,nil,nil,10,(j-1)*3+i,nil,1,1,1)
+			frame.spellName = ELib:Text(frame,(j-1)*3+i,10):Size(spellLineWidth-spellLineHeight-5,spellLineHeight):Point(spellLineHeight+5, 0):Color()
 		
 			frame:SetScript("OnEnter", SpellLineEnter)
 			frame:SetScript("OnLeave", SpellLineLeave)
@@ -209,10 +210,10 @@ function module.options:Load()
 		if scrollFix then
 			return
 		end
-		local parent = self:GetParent()
-		value = ExRT.mds.Round(value)
+		local parent = self:GetParent():GetParent()
+		value = ExRT.F.Round(value)
 		parent:SetVerticalScroll(value % spellLineHeight) 
-		self:ReButtonsState()
+		self:UpdateButtons()
 		local nowVal = floor(value / spellLineHeight)
 		if nowVal ~= scrollFrameValue then
 			scrollFrameValue = nowVal
@@ -237,7 +238,7 @@ function module.options:Load()
 				local isUnique = true
 				for otherSpecID,otherSpecData in pairs(module.db.spells[classNow]) do
 					if otherSpecID ~= specID then
-						if ExRT.mds.table_find(otherSpecData,spellID) then
+						if ExRT.F.table_find(otherSpecData,spellID) then
 							isUnique = false
 						end
 					end
@@ -261,7 +262,7 @@ function module.options:Load()
 				if spellName then
 					tmp[#tmp+1] = {spellID,spellName}
 				else
-					ExRT.mds.dprint('Spell '..spellID..' not found')
+					ExRT.F.dprint('Spell '..spellID..' not found')
 				end
 			end
 			table.sort(tmp,function(a,b) if(a[2]~=b[2]) then return a[2] < b[2] else return a[1] < b[1] end end)
@@ -287,7 +288,7 @@ function module.options:Load()
 		ReloadPage()
 	end
 	
-	self.TMP_tab = ExRT.lib.CreateTabFrameTemplate(self,500,100,0,0,"ExRTTabButtonTransparentTemplate",4,1,"1","2","3","4")
+	self.TMP_tab = ELib:Tabs(self,0,"1","2","3","4"):Size(500,100):Point(0,0)
 	self.TMP_tab:SetBackdrop({})
 	
 	self.decorationLine = CreateFrame("Frame",nil,self)
@@ -313,14 +314,13 @@ function module.options:Load()
 		frame.additionalFunc = specButtonClick
 	end
 	
-	self.dropDown = ExRT.lib.CreateScrollDropDown(self,"TOPRIGHT",10,-30,220,205,#module.db.classNames,"",nil,"ExRTDropDownMenuModernTemplate")
-	self.dropDown:SetNewPoint("RIGHT",self.decorationLine,-15,0)
+	self.dropDown = ELib:DropDown(self,205,#module.db.classNames):Point("RIGHT",self.decorationLine,-15,0):Size(220)
 	self.dropDown:SetHeight(18)
 
 	function self.dropDown:SetValue(newValue)
 		classNow = module.db.classNames[newValue]
-		module.options.dropDown:SetText("|c"..ExRT.mds.classColor(classNow)..ExRT.L.classLocalizate[classNow])
-		ExRT.lib.ScrollDropDown.Close()
+		module.options.dropDown:SetText("|c"..ExRT.F.classColor(classNow)..L.classLocalizate[classNow])
+		ELib:DropDownClose()
 		
 		if not isSotred[classNow] then
 			sortSpells()
@@ -331,7 +331,7 @@ function module.options:Load()
 			if specs[i] then
 				local frame = module.options.specsButtons[i]
 				frame:Show()
-				frame:SetText(ExRT.L.specLocalizate[ module.db.specInLocalizate[ specs[i] ] ])		
+				frame:SetText(L.specLocalizate[ module.db.specInLocalizate[ specs[i] ] ])		
 				frame:SetIcon(module.db.specIcons[ specs[i] ])
 			else
 				module.options.specsButtons[i]:Hide()
@@ -354,7 +354,7 @@ function module.options:Load()
 	end
 	for i=1,#module.db.classNames do
 		local class = module.db.classNames[i]
-		self.dropDown.List[i] = {text = "|c"..ExRT.mds.classColor(class)..ExRT.L.classLocalizate[class],justifyH = "CENTER",arg1 = i,func = self.dropDown.SetValue}
+		self.dropDown.List[i] = {text = "|c"..ExRT.F.classColor(class)..L.classLocalizate[class],justifyH = "CENTER",arg1 = i,func = self.dropDown.SetValue}
 	end
 	
 	self.dropDown:SetValue(math.random(1,11))

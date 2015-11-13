@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Kargath Bladefist", "zhCN")
 if not L then return end
 if L then
@@ -9,6 +10,8 @@ end
 L = BigWigs:NewBossLocale("The Butcher", "zhCN")
 if L then
 L["adds_multiple"] = "增援 >%d<波"
+L["tank_proximity"] = "坦克近距离"
+L["tank_proximity_desc"] = "开启5码近距离显示其他坦克，以便对应势大力沉技能。"
 
 end
 

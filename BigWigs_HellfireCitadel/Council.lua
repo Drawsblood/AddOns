@@ -54,7 +54,7 @@ end
 
 function mod:OnBossEnable()
 	-- Dia Darkwhisper
-	self:Log("SPELL_CAST_SUCCESS", "MarkOfTheNecromancer", 184449)
+	self:Log("SPELL_AURA_APPLIED", "MarkOfTheNecromancer", 184449, 184676) -- 184676: 30% Mark of the Necromancer
 	self:Log("SPELL_CAST_START", "Reap", 184476)
 	self:Log("SPELL_CAST_SUCCESS", "ReapOver", 184476)
 	self:Log("SPELL_CAST_START", "NightmareVisage", 184657)
@@ -115,7 +115,7 @@ do
 		-- Start initial bar on buff gain (happens once) then every other bar on spell completion
 		self:Message(184366, "Important", nil, CL.incoming:format(args.spellName))
 		leapCount = leapCount + 1
-		self:Bar(184366, 5.8, CL.count:format(args.spellName, leapCount))
+		self:Bar(184366, leapCount == 1 and 4.8 or 5.8, CL.count:format(args.spellName, leapCount))
 		if args.spellId == 184365 then
 			startHorrorCD(self)
 		end
@@ -127,9 +127,35 @@ do
 	end
 end
 
-function mod:MarkOfTheNecromancer(args)
-	self:Message(args.spellId, "Attention")
-	self:CDBar(args.spellId, 60) -- 60-63
+do
+	local prev = 0
+	function mod:MarkOfTheNecromancer(args)
+		local t = GetTime()
+		if t-prev > 5 then
+			prev = t
+			self:Message(184449, "Attention")
+
+			if args.spellId == 184676 then -- 30% Mark of the Necromancer
+				self:StopBar(184476) -- Reap
+				self:StopBar(184449) -- Mark of the Necromancer
+			end
+		end
+	end
+end
+
+do
+	local prev = 0
+	function mod:MarkOfTheNecromancerApplied(args)
+		if self:Me(args.destGUID) then
+			local t = GetTime()
+			if t-prev > 5 then -- If many people die or are dispelled, multiple debuffs can apply to you at the same time
+				prev = t
+				self:Say(184476)
+				self:OpenProximity(184476, 5) -- 5 yard guess
+				self:Message(184476, "Personal", "Alarm", ("%s (%s)"):format(CL.you:format(self:SpellName(184476)), self:SpellName(135856))) -- 135856 = Dispel
+			end
+		end
+	end
 end
 
 function mod:Reap(args)
@@ -139,17 +165,20 @@ function mod:Reap(args)
 		self:Message(args.spellId, "Personal", "Alarm", CL.you:format(args.spellName))
 	else
 		self:Message(args.spellId, "Attention", "Info", CL.casting:format(args.spellName))
+		self:Log("SPELL_AURA_APPLIED", "MarkOfTheNecromancerApplied", 184450, 185065, 185066)
 	end
 	self:Bar(args.spellId, 4, CL.cast:format(args.spellName))
-	self:CDBar(args.spellId, 67) -- 67-68
+	self:Bar(184449, 14) -- Mark of the Necromancer
+	self:CDBar(args.spellId, 66) -- 66-67
 end
 
 function mod:ReapOver(args)
 	self:CloseProximity(args.spellId)
+	self:RemoveLog("SPELL_AURA_APPLIED", 184450, 185065, 185066)
 end
 
 do
-	local timers = {0, 65, 75, 83} -- approx. depends on something
+	local timers = {0, 67, 76, 82} -- pretty consistent now
 	function mod:FelRage(args)
 		self:TargetMessage(184358, args.destName, "Urgent", "Warning")
 		self:TargetBar(184358, 25, args.destName)
@@ -203,15 +232,12 @@ do
 		if #list == 1 then
 			self:ScheduleTimer("TargetMessage", 0.3, args.spellId, list, "Attention", "Alarm")
 		end
-
 	end
 end
 
 function mod:BloodboilDose(args)
-	if self:Mythic() and self:Me(args.destGUID) then
-		if args.amount > 2 then -- XXX change 3 to something else?
-			self:Message(args.spellId, "Urgent", "Alert", CL.count:format(args.spellName, args.amount))
-		end
+	if self:Me(args.destGUID) and args.amount > 2 and self:Mythic() then
+		self:Message(args.spellId, "Personal", "Alert", CL.you:format(CL.count:format(args.spellName, args.amount)))
 	end
 end
 
@@ -258,10 +284,6 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(unit, spellName, _, _, spellId)
 			startLeapCD(self, nextAbilityTime - GetTime())
 			self:StopBar(183885) -- Mirror Images
 		end
-	elseif spellId == 187183 then -- 30% Mark of the Necromancer
-		self:Message(184449, "Attention")
-		self:StopBar(184476) -- Reap
-		self:StopBar(184449) -- Mark of the Necromancer
 	end
 end
 

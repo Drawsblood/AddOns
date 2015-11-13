@@ -3,6 +3,8 @@ local GlobalAddonName, ExRT = ...
 local VExRT = nil
 
 local module = ExRT.mod:New("Note",ExRT.L.message,nil,true)
+local ELib,L = ExRT.lib,ExRT.L
+
 module.db.iconsList = {
 	"|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_1:0|t",
 	"|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_2:0|t",
@@ -14,17 +16,17 @@ module.db.iconsList = {
 	"|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_8:0|t",
 }
 module.db.otherIconsList = {
-	{"{"..ExRT.L.classLocalizate["WARRIOR"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:0:64:0:64|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0,0.25,0,0.25},
-	{"{"..ExRT.L.classLocalizate["PALADIN"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:0:64:128:192|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0,0.25,0.5,0.75},
-	{"{"..ExRT.L.classLocalizate["HUNTER"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:0:64:64:128|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0,0.25,0.25,0.5},
-	{"{"..ExRT.L.classLocalizate["ROGUE"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:127:190:0:64|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.49609375,0.7421875,0,0.25},
-	{"{"..ExRT.L.classLocalizate["PRIEST"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:127:190:64:128|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.49609375,0.7421875,0.25,0.5},
-	{"{"..ExRT.L.classLocalizate["DEATHKNIGHT"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:64:128:128:192|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.25,0.5,0.5,0.75},
-	{"{"..ExRT.L.classLocalizate["SHAMAN"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:64:127:64:128|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.25,0.49609375,0.25,0.5},
-	{"{"..ExRT.L.classLocalizate["MAGE"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:64:127:0:64|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.25,0.49609375,0,0.25},
-	{"{"..ExRT.L.classLocalizate["WARLOCK"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:190:253:64:128|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.7421875,0.98828125,0.25,0.5},
-	{"{"..ExRT.L.classLocalizate["MONK"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:128:189:128:192|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.5,0.73828125,0.5,0.75},
-	{"{"..ExRT.L.classLocalizate["DRUID"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:190:253:0:64|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.7421875,0.98828125,0,0.25},
+	{"{"..L.classLocalizate["WARRIOR"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:0:64:0:64|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0,0.25,0,0.25},
+	{"{"..L.classLocalizate["PALADIN"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:0:64:128:192|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0,0.25,0.5,0.75},
+	{"{"..L.classLocalizate["HUNTER"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:0:64:64:128|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0,0.25,0.25,0.5},
+	{"{"..L.classLocalizate["ROGUE"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:127:190:0:64|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.49609375,0.7421875,0,0.25},
+	{"{"..L.classLocalizate["PRIEST"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:127:190:64:128|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.49609375,0.7421875,0.25,0.5},
+	{"{"..L.classLocalizate["DEATHKNIGHT"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:64:128:128:192|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.25,0.5,0.5,0.75},
+	{"{"..L.classLocalizate["SHAMAN"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:64:127:64:128|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.25,0.49609375,0.25,0.5},
+	{"{"..L.classLocalizate["MAGE"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:64:127:0:64|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.25,0.49609375,0,0.25},
+	{"{"..L.classLocalizate["WARLOCK"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:190:253:64:128|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.7421875,0.98828125,0.25,0.5},
+	{"{"..L.classLocalizate["MONK"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:128:189:128:192|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.5,0.73828125,0.5,0.75},
+	{"{"..L.classLocalizate["DRUID"] .."}","|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:16:16:0:0:256:256:190:253:0:64|t","Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",0.7421875,0.98828125,0,0.25},
 	{"{wow}","|TInterface\\FriendsFrame\\Battlenet-WoWicon:16|t","Interface\\FriendsFrame\\Battlenet-WoWicon"},
 	{"{d3}","|TInterface\\FriendsFrame\\Battlenet-D3icon:16|t","Interface\\FriendsFrame\\Battlenet-D3icon"},
 	{"{sc2}","|TInterface\\FriendsFrame\\Battlenet-Sc2icon:16|t","Interface\\FriendsFrame\\Battlenet-Sc2icon"},
@@ -45,7 +47,7 @@ module.db.otherIconsList = {
 
 }
 module.db.iconsLocalizatedNames = {
-	ExRT.L.raidtargeticon1,ExRT.L.raidtargeticon2,ExRT.L.raidtargeticon3,ExRT.L.raidtargeticon4,ExRT.L.raidtargeticon5,ExRT.L.raidtargeticon6,ExRT.L.raidtargeticon7,ExRT.L.raidtargeticon8
+	L.raidtargeticon1,L.raidtargeticon2,L.raidtargeticon3,L.raidtargeticon4,L.raidtargeticon5,L.raidtargeticon6,L.raidtargeticon7,L.raidtargeticon8
 }
 local frameStrataList = {"BACKGROUND","LOW","MEDIUM","HIGH","DIALOG","FULLSCREEN","FULLSCREEN_DIALOG","TOOLTIP"}
 
@@ -103,6 +105,20 @@ function module.options:Load()
 		47788,33206,6940,102342,114030,1022,116849,0,
 		2825,32182,80353,0,
 		0,
+		183449,180080,181968,186737,185806,186016,0,
+		182280,182001,185978,182003,182094,185282,179889,182055,182022,0,
+		180246,181356,181297,181292,181092,181093,181300,181306,0,
+		184355,184450,185065,185066,184674,184366,184652,183226,184360,184476,183885,184357,0,
+		184067,184396,180718,180389,180199,180224,182428,0,
+		182049,180148,180093,182170,181085,181973,179867,179864,0,
+		182200,179219,181753,181956,181912,181827,181824,185345,185239,182325,179202,181873,0,
+		182769,184239,182392,183329,180221,180418,188693,183331,190161,184124,184053,189540,0,
+		180533,180600,180260,180300,180526,180608,181718,179986,179991,180040,185241,180000,185237,180604,0,
+		188900,188998,189032,189031,189030,179407,179582,179709,181508,189009,179681,181498,0,
+		190223,190224,186407,186333,189775,186453,186546,186532,186134,186135,185656,189781,0,
+		181841,183377,183376,181134,181557,181597,181738,181099,181275,190482,186362,182031,181255,0,
+		183864,190397,183828,183254,183598,188514,184931,184265,185590,190821,190686,189897,186662,190313,187244,186562,183963,190400,185014,190807,0,
+		0,
 		155078,155080,165298,155330,173192,0,
 		173471,156297,156203,155900,0,
 		155196,158246,155242,155240,155225,155192,176121,156934,0,
@@ -119,18 +135,18 @@ function module.options:Load()
 	local NoteIsSelfNow = nil
 	self.IsMainNoteNow = true
 
-	self.NotesList = ExRT.lib.CreateScrollList(self,nil,0,-150,180,20,true)
+	self.NotesList = ELib:ScrollList(self):Size(175,319):Point(5,-155)
 	self.NotesList.selected = 1
 	
 	local function NotesListUpdateNames()
 		self.NotesList.L = {}
 		
-		self.NotesList.L[1] = "|cff55ee55"..ExRT.L.messageTab1
-		self.NotesList.L[2] = ExRT.L.NoteSelf
+		self.NotesList.L[1] = "|cff55ee55"..L.messageTab1
+		self.NotesList.L[2] = L.NoteSelf
 		for i=1,#VExRT.Note.Black do
 			self.NotesList.L[i+2] = VExRT.Note.BlackNames[i] or i
 		end
-		self.NotesList.L[#self.NotesList.L + 1] = ExRT.L.NoteAdd
+		self.NotesList.L[#self.NotesList.L + 1] = L.NoteAdd
 		self.NotesList:Update()
 	end
 	NotesListUpdateNames()
@@ -154,12 +170,12 @@ function module.options:Load()
 		
 		if index == 1 then
 			module.options.NoteEditBox.EditBox:SetText(VExRT.Note.Text1 or "")
-			module.options.DraftName:SetText( ExRT.L.messageTab1 )
+			module.options.DraftName:SetText( L.messageTab1 )
 			
 			module.options.IsMainNoteNow = true
 		elseif index == 2 then
 			module.options.NoteEditBox.EditBox:SetText(VExRT.Note.SelfText or "")
-			module.options.DraftName:SetText( ExRT.L.NoteSelf )
+			module.options.DraftName:SetText( L.NoteSelf )
 			
 			NoteIsSelfNow = true
 		elseif index == #self.L then
@@ -191,32 +207,28 @@ function module.options:Load()
 			GameTooltip:SetOwner(self,"ANCHOR_CURSOR")
 			GameTooltip:AddLine(self.L[index])
 			if index == 2 then
-				GameTooltip:AddLine(ExRT.L.NoteSelfTooltip)
+				GameTooltip:AddLine(L.NoteSelfTooltip)
 			elseif index ~= #self.L and index > 2 then
-				GameTooltip:AddLine(ExRT.L.NoteTabCopyTooltip)
+				GameTooltip:AddLine(L.NoteTabCopyTooltip)
 			end
 			GameTooltip:Show()
 		end
 	end
 	
-	self.RightTab = ExRT.lib.CreateOneTab(self,480,10,nil,0,0,nil,true)
-	self.RightTab:SetNewPoint("TOPLEFT",self.NotesList,"TOPRIGHT",0,0)
-	self.RightTab:SetPoint("BOTTOMLEFT",self.NotesList,"BOTTOMRIGHT",0,0)
+	self.RightTab = ELib:OneTab(self):Size(482,0):Point("TOPLEFT",self.NotesList,"TOPRIGHT",3,7):Point("BOTTOMLEFT",self.NotesList,"BOTTOMRIGHT",3,-7)
+	self.RightTab:SetBackdropColor(0,0,0,0)
+	self.RightTab:SetBackdropBorderColor(0,0,0,0)
 	
-	self.DraftName = ExRT.lib.CreateEditBox(self,0,18,nil,0,0,ExRT.L.NoteDraftName,nil,nil,"ExRTInputBoxModernTemplate",ExRT.L.messageTab1)
-	self.DraftName:SetNewPoint("TOPLEFT",self.RightTab,8,-6)
-	self.DraftName:SetPoint("TOPRIGHT",self.RightTab,-160,-6)
-	self.DraftName:Disable()
-	self.DraftName:SetScript("OnTextChanged",function(self,isUser)
+	self.DraftName = ELib:Edit(self):Size(0,18):Tooltip(L.NoteDraftName):Text(L.messageTab1):Point("TOPLEFT",self.RightTab,8,-6):Point("TOPRIGHT",self.RightTab,-160,-6):OnChange(function(self,isUser)
 		if not isUser then return end
 		if BlackNoteNow then
 			VExRT.Note.BlackNames[ BlackNoteNow ] = self:GetText()
 			NotesListUpdateNames()
 		end
 	end)
+	self.DraftName:Disable()
 	
-	self.RemoveDraft = ExRT.lib.CreateButton(self.RightTab,150,20,"TOPRIGHT",-5,-5,ExRT.L.NoteRemove,true,nil,"ExRTButtonModernTemplate")
-	self.RemoveDraft:SetScript("OnClick",function (self)
+	self.RemoveDraft = ELib:Button(self.RightTab,L.NoteRemove):Size(150,20):Point("TOPRIGHT",-5,-5):Disable():OnClick(function (self)
 		if not BlackNoteNow then
 			return
 		end
@@ -237,7 +249,7 @@ function module.options:Load()
 		module.options.NotesList:SetListValue(2+BlackNoteNow)
 	end)
 	
-	self.NoteEditBox = ExRT.lib.CreateMultilineEditBox(self.RightTab,self.RightTab:GetWidth()-18,self.RightTab:GetHeight()-42,"TOP",0,-33,true)
+	self.NoteEditBox = ELib:MultiEdit(self.RightTab):Size(self.RightTab:GetWidth()-18,self.RightTab:GetHeight()-42):Point("TOP",0,-33)
 	
 	function self.NoteEditBox.EditBox:OnTextChanged()
 		if NoteIsSelfNow then
@@ -248,8 +260,7 @@ function module.options:Load()
 		end
 	end
 	
-	self.buttonsend = ExRT.lib.CreateButton(self,325,20,nil,5,-30,ExRT.L.messagebutsend,nil,ExRT.L.messagebutsendtooltip,"ExRTButtonModernTemplate")
-	self.buttonsend:SetScript("OnClick",function() 
+	self.buttonsend = ELib:Button(self,L.messagebutsend):Size(325,20):Point(5,-30):Tooltip(L.messagebutsendtooltip):OnClick(function (self)
 		module.frame:Save() 
 		
 		if IsShiftKeyDown() then
@@ -267,14 +278,12 @@ function module.options:Load()
 		end
 	end) 
 
-	self.buttonclear = ExRT.lib.CreateButton(self,325,20,"TOPRIGHT",0,-30,ExRT.L.messagebutclear,nil,nil,"ExRTButtonModernTemplate")
-	self.buttonclear:SetScript("OnClick",function() 
+	self.buttonclear = ELib:Button(self,L.messagebutclear):Size(325,20):Point("TOPRIGHT",0,-30):OnClick(function (self)
 		module.frame:Clear() 
 		module.options.NoteEditBox.EditBox:SetText("")
 	end) 
 
-	self.buttoncopy = ExRT.lib.CreateButton(self,655,20,"TOP",2,-30,ExRT.L.messageButCopy,nil,nil,"ExRTButtonModernTemplate")
-	self.buttoncopy:SetScript("OnClick",function() 
+	self.buttoncopy = ELib:Button(self,L.messageButCopy):Size(655,20):Point("TOP",2,-30):OnClick(function (self)
 		if not BlackNoteNow then
 			return
 		end
@@ -345,10 +354,10 @@ function module.options:Load()
 		self.Text:SetShadowColor(0, 0, 0, 1)
 	end)
 	
-	self.OtherIconsButton.Text = ExRT.lib.CreateText(self.OtherIconsButton,self.OtherIconsButton:GetWidth(),18,"TOPLEFT",0,0,"LEFT","MIDDLE",nil,11,ExRT.L.NoteOtherIcons,nil,1,1,1,1)
+	self.OtherIconsButton.Text = ELib:Text(self.OtherIconsButton,L.NoteOtherIcons,11):Size(self.OtherIconsButton:GetWidth(),18):Point(0,0):Color():Shadow()
 	
-	self.OtherIconsFrame = ExRT.lib.CreatePopupFrame(250,225,ExRT.L.NoteOtherIcons,true)
-	self.OtherIconsFrame.ScrollFrame = ExRT.lib.CreateScrollFrame(self.OtherIconsFrame,self.OtherIconsFrame:GetWidth()-10,self.OtherIconsFrame:GetHeight()-25,"TOP",0,-20,500,true)
+	self.OtherIconsFrame = ELib:Popup(L.NoteOtherIcons):Size(250,225)
+	self.OtherIconsFrame.ScrollFrame = ELib:ScrollFrame(self.OtherIconsFrame):Size(self.OtherIconsFrame:GetWidth()-10,self.OtherIconsFrame:GetHeight()-25):Point("TOP",0,-20):Height(500)
 	self.OtherIconsFrame.ScrollFrame.backdrop:Hide()
 	
 	local function CreateOtherIcon(pointX,pointY,texture,iconText)
@@ -396,35 +405,35 @@ function module.options:Load()
 		self.OtherIconsFrame:Hide()
 	end)
 	
-	self.dropDownColor = ExRT.lib.CreateScrollDropDown(self,"TOPLEFT",558,-55,100,170,10,ExRT.L.NoteColor,nil,"ExRTDropDownMenuModernTemplate")
+	self.dropDownColor = ELib:DropDown(self,170,10):Point(558,-55):Size(100):SetText(L.NoteColor)
 	self.dropDownColor.list = {
-		{ExRT.L.NoteColorRed,"|cffff0000"},
-		{ExRT.L.NoteColorGreen,"|cff00ff00"},
-		{ExRT.L.NoteColorBlue,"|cff0000ff"},
-		{ExRT.L.NoteColorYellow,"|cffffff00"},
-		{ExRT.L.NoteColorPurple,"|cffff00ff"},
-		{ExRT.L.NoteColorAzure,"|cff00ffff"},
-		{ExRT.L.NoteColorBlack,"|cff000000"},
-		{ExRT.L.NoteColorGrey,"|cff808080"},
-		{ExRT.L.NoteColorRedSoft,"|cffee5555"},
-		{ExRT.L.NoteColorGreenSoft,"|cff55ee55"},
-		{ExRT.L.NoteColorBlueSoft,"|cff5555ee"},
+		{L.NoteColorRed,"|cffff0000"},
+		{L.NoteColorGreen,"|cff00ff00"},
+		{L.NoteColorBlue,"|cff0000ff"},
+		{L.NoteColorYellow,"|cffffff00"},
+		{L.NoteColorPurple,"|cffff00ff"},
+		{L.NoteColorAzure,"|cff00ffff"},
+		{L.NoteColorBlack,"|cff000000"},
+		{L.NoteColorGrey,"|cff808080"},
+		{L.NoteColorRedSoft,"|cffee5555"},
+		{L.NoteColorGreenSoft,"|cff55ee55"},
+		{L.NoteColorBlueSoft,"|cff5555ee"},
 	}
 	local classNames = {"WARRIOR","PALADIN","HUNTER","ROGUE","PRIEST","DEATHKNIGHT","SHAMAN","MAGE","WARLOCK","MONK","DRUID"}
 	for i,class in ipairs(classNames) do
 		local colorTable = RAID_CLASS_COLORS[class]
 		if colorTable then
-			self.dropDownColor.list[#self.dropDownColor.list + 1] = {ExRT.L.classLocalizate[class],"|c"..colorTable.colorStr}
+			self.dropDownColor.list[#self.dropDownColor.list + 1] = {L.classLocalizate[class],"|c"..colorTable.colorStr}
 		end
 	end
 	self.dropDownColor:SetScript("OnEnter",function (self)
-		ExRT.lib.TooltipShow(self,"ANCHOR_LEFT",ExRT.L.NoteColor,{ExRT.L.NoteColorTooltip1,1,1,1,true},{ExRT.L.NoteColorTooltip2,1,1,1,true})
+		ELib.Tooltip.Show(self,"ANCHOR_LEFT",L.NoteColor,{L.NoteColorTooltip1,1,1,1,true},{L.NoteColorTooltip2,1,1,1,true})
 	end)
 	self.dropDownColor:SetScript("OnLeave",function ()
-		ExRT.lib.TooltipHide()
+		ELib.Tooltip:Hide()
 	end)
 	function self.dropDownColor:SetValue(colorCode)
-		ExRT.lib.ScrollDropDown.Close()
+		ELib:DropDownClose()
 
 		local selectedStart,selectedEnd = module.options.NoteEditBox.EditBox:GetTextHighlight()
 		colorCode = string.gsub(colorCode,"|","||")
@@ -458,9 +467,8 @@ function module.options:Load()
 		self.raidnames[i]:SetSize(105,14)
 		self.raidnames[i]:SetPoint("TOPLEFT", 5+math.floor((i-1)/5)*108,-80-14*((i-1)%5))
 
-		self.raidnames[i].html = ExRT.lib.CreateText(self.raidnames[i],99,14,nil,0,0,nil,nil,nil,11,"",nil,1,1,1)
-		self.raidnames[i].html:ClearAllPoints()
-		self.raidnames[i].html:SetAllPoints(self.raidnames[i])
+		self.raidnames[i].html = ELib:Text(self.raidnames[i],"",11):Color()
+		self.raidnames[i].html:SetAllPoints()
 		self.raidnames[i].txt = ""
 		self.raidnames[i]:RegisterForClicks("LeftButtonDown")
 		self.raidnames[i].iconText = ""
@@ -470,14 +478,12 @@ function module.options:Load()
 		self.raidnames[i]:SetScript("OnLeave", RaidNamesOnLeave)
 	end
 	
-	self.lastUpdate = ExRT.lib.CreateText(self,600,20,nil,0,0,"LEFT","TOP",nil,11,"",nil,1,1,1)
-	ExRT.lib.SetPoint(self.lastUpdate,"TOPLEFT",self.NotesList,"BOTTOMLEFT",10,-5)
+	self.lastUpdate = ELib:Text(self,"",11):Size(600,20):Point("TOPLEFT",self.NotesList,"BOTTOMLEFT",3,-6):Top():Color()
 	if VExRT.Note.LastUpdateName and VExRT.Note.LastUpdateTime then
-		self.lastUpdate:SetText( ExRT.L.NoteLastUpdate..": "..VExRT.Note.LastUpdateName.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Note.LastUpdateTime)..")" )
+		self.lastUpdate:SetText( L.NoteLastUpdate..": "..VExRT.Note.LastUpdateName.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Note.LastUpdateTime)..")" )
 	end
 
-	self.chkEnable = ExRT.lib.CreateCheckBox(self,nil,5,-504,ExRT.L.senable,VExRT.Note.enabled,'/rt note',nil,"ExRTCheckButtonModernTemplate")
-	self.chkEnable:SetScript("OnClick", function(self,event) 
+	self.chkEnable = ELib:Check(self,L.senable,VExRT.Note.enabled):Point(5,-504):Tooltip('/rt note'):OnClick(function(self) 
 		if self:GetChecked() then
 			module:Enable()
 		else
@@ -485,8 +491,7 @@ function module.options:Load()
 		end
 	end)  
 	
-	self.chkFix = ExRT.lib.CreateCheckBox(self,nil,225,-504,ExRT.L.messagebutfix,VExRT.Note.Fix,ExRT.L.messagebutfixtooltip,nil,"ExRTCheckButtonModernTemplate")  
-	self.chkFix:SetScript("OnClick", function(self,event) 
+	self.chkFix = ELib:Check(self,L.messagebutfix,VExRT.Note.Fix):Point(225,-504):Tooltip(L.messagebutfixtooltip):OnClick(function(self) 
 		if self:GetChecked() then
 			VExRT.Note.Fix = true
 			module.frame:SetMovable(false)
@@ -498,12 +503,11 @@ function module.options:Load()
 			module.frame:SetMovable(true)
 			module.frame:EnableMouse(true)
 			module.frame.buttonResize:Show()
-			ExRT.lib.AddShadowComment(module.frame,nil,ExRT.L.message)
+			ExRT.lib.AddShadowComment(module.frame,nil,L.message)
 		end
 	end) 
 	
-	self.ButtonToCenter = ExRT.lib.CreateButton(self,215,20,nil,445,-504,ExRT.L.MarksBarResetPos,nil,ExRT.L.MarksBarResetPosTooltip,"ExRTButtonModernTemplate")
-	self.ButtonToCenter:SetScript("OnClick",function()
+	self.ButtonToCenter = ELib:Button(self,L.MarksBarResetPos):Size(215,20):Point(445,-504):Tooltip(L.MarksBarResetPosTooltip):OnClick(function()
 		VExRT.Note.Left = nil
 		VExRT.Note.Top = nil
 
@@ -511,8 +515,7 @@ function module.options:Load()
 		module.frame:SetPoint("CENTER",UIParent, "CENTER", 0, 0)
 	end) 
 
-	self.chkOnlyPromoted = ExRT.lib.CreateCheckBox(self,nil,639,-480,ExRT.L.NoteOnlyPromoted,VExRT.Note.OnlyPromoted,ExRT.L.NoteOnlyPromotedTooltip,true,"ExRTCheckButtonModernTemplate")
-	self.chkOnlyPromoted:SetScript("OnClick", function(self,event) 
+	self.chkOnlyPromoted = ELib:Check(self,L.NoteOnlyPromoted,VExRT.Note.OnlyPromoted):Point(639,-480):Tooltip(L.NoteOnlyPromotedTooltip):Left():OnClick(function(self) 
 		if self:GetChecked() then
 			VExRT.Note.OnlyPromoted = true
 		else
@@ -520,8 +523,7 @@ function module.options:Load()
 		end
 	end)  
 		
-	self.chkOutline = ExRT.lib.CreateCheckBox(self,nil,445,-534,ExRT.L.messageOutline,VExRT.Note.Outline,nil,nil,"ExRTCheckButtonModernTemplate")  
-	self.chkOutline:SetScript("OnClick", function(self,event) 
+	self.chkOutline = ELib:Check(self,L.messageOutline,VExRT.Note.Outline):Point(445,-534):OnClick(function(self) 
 		if self:GetChecked() then
 			VExRT.Note.Outline = true
 		else
@@ -530,8 +532,7 @@ function module.options:Load()
 		module.frame:UpdateFont()
 	end) 
 	
-	self.sliderFontSize = ExRT.lib.CreateSlider(self,210,15,5,-539,6,72,ExRT.L.NoteFontSize,VExRT.Note.FontSize or 12,nil,nil,true)
-	self.sliderFontSize:SetScript("OnValueChanged", function(self,event) 
+	self.sliderFontSize = ELib:Slider(self,L.NoteFontSize):Size(210):Point(5,-539):Range(6,72):SetTo(VExRT.Note.FontSize or 12):OnChange(function(self,event) 
 		event = event - event%1
 		VExRT.Note.FontSize = event
 		module.frame:UpdateFont()
@@ -543,24 +544,24 @@ function module.options:Load()
 		VExRT.Note.FontName = arg
 		local FontNameForDropDown = arg:match("\\([^\\]*)$")
 		module.options.dropDownFont:SetText(FontNameForDropDown or arg)
-		ExRT.lib.ScrollDropDown.Close()
+		ELib:DropDownClose()
 		module.frame:UpdateFont()
 	end
 
-	self.dropDownFont = ExRT.lib.CreateScrollDropDown(self,nil,225,-534,210,350,10,nil,nil,"ExRTDropDownMenuModernTemplate")
-	for i=1,#ExRT.mds.fontList do
+	self.dropDownFont = ELib:DropDown(self,350,10):Point(225,-534):Size(210)
+	for i=1,#ExRT.F.fontList do
 		self.dropDownFont.List[i] = {}
 		local info = self.dropDownFont.List[i]
-		info.text = ExRT.mds.fontList[i]
-		info.arg1 = ExRT.mds.fontList[i]
+		info.text = ExRT.F.fontList[i]
+		info.arg1 = ExRT.F.fontList[i]
 		info.arg2 = i
 		info.func = DropDownFont_Click
-		info.font = ExRT.mds.fontList[i]
+		info.font = ExRT.F.fontList[i]
 		info.justifyH = "CENTER" 
 	end
 	if LibStub then
-		local media = LibStub("LibSharedMedia-3.0")
-		if media then
+		local loaded,media = pcall(LibStub,"LibSharedMedia-3.0")
+		if loaded and media then
 			local fontList = media:HashTable("font")
 			if fontList then
 				local count = #self.dropDownFont.List
@@ -580,13 +581,12 @@ function module.options:Load()
 		end
 	end
 	do
-		local arg = VExRT.Note.FontName or ExRT.mds.defFont
+		local arg = VExRT.Note.FontName or ExRT.F.defFont
 		local FontNameForDropDown = arg:match("\\([^\\]*)$")
 		self.dropDownFont:SetText(FontNameForDropDown or arg)
 	end
 	
-	self.slideralpha = ExRT.lib.CreateSlider(self,210,15,5,-570,0,100,ExRT.L.messagebutalpha,VExRT.Note.Alpha or 100,nil,nil,true)
-	self.slideralpha:SetScript("OnValueChanged", function(self,event) 
+	self.slideralpha = ELib:Slider(self,L.messagebutalpha):Size(210):Point(5,-570):Range(0,100):SetTo(VExRT.Note.Alpha or 100):OnChange(function(self,event) 
 		event = event - event%1
 		VExRT.Note.Alpha = event
 		module.frame:SetAlpha(event/100)
@@ -594,17 +594,15 @@ function module.options:Load()
 		self:tooltipReload(self)
 	end)
 	
-	self.sliderscale = ExRT.lib.CreateSlider(self,210,15,225,-570,5,200,ExRT.L.messagebutscale,VExRT.Note.Scale or 100,nil,nil,true)
-	self.sliderscale:SetScript("OnValueChanged", function(self,event) 
+	self.sliderscale = ELib:Slider(self,L.messagebutscale):Size(210):Point(225,-570):Range(5,200):SetTo(VExRT.Note.Scale or 100):OnChange(function(self,event) 
 		event = event - event%1
 		VExRT.Note.Scale = event
-		ExRT.mds.SetScaleFix(module.frame,event/100)
+		ExRT.F.SetScaleFix(module.frame,event/100)
 		self.tooltipText = event
 		self:tooltipReload(self)
 	end)
 
-	self.slideralphaback = ExRT.lib.CreateSlider(self,210,15,445,-570,0,100,ExRT.L.messageBackAlpha,VExRT.Note.ScaleBack or 100,nil,nil,true)
-	self.slideralphaback:SetScript("OnValueChanged", function(self,event) 
+	self.slideralphaback = ELib:Slider(self,L.messageBackAlpha):Size(210):Point(445,-570):Range(0,100):SetTo(VExRT.Note.ScaleBack or 100):OnChange(function(self,event) 
 		event = event - event%1
 		VExRT.Note.ScaleBack = event
 		module.frame.background:SetTexture(0, 0, 0, event/100)
@@ -612,46 +610,38 @@ function module.options:Load()
 		self:tooltipReload(self)
 	end)
 	
-	self.chkOnlyInRaid = ExRT.lib.CreateCheckBox(self,nil,5,-595,ExRT.L.MarksBarDisableInRaid,VExRT.Note.HideOutsideRaid,nil,nil,"ExRTCheckButtonModernTemplate")  
-	self.chkOnlyInRaid:SetScript("OnClick", function(self,event) 
+	self.chkOnlyInRaid = ELib:Check(self,L.MarksBarDisableInRaid,VExRT.Note.HideOutsideRaid):Point(5,-595):OnClick(function(self) 
 		if self:GetChecked() then
 			VExRT.Note.HideOutsideRaid = true
-			module.main:GROUP_ROSTER_UPDATE()
 		else
 			VExRT.Note.HideOutsideRaid = nil
-			if VExRT.Note.enabled and not module.frame:IsShown() then
-				module.frame:Show()
-			end
 		end
+		module:Visibility()
 	end) 
 	
-	self.chkHideInCombat = ExRT.lib.CreateCheckBox(self,nil,225,-595,ExRT.L.NoteHideInCombat,VExRT.Note.HideInCombat,nil,nil,"ExRTCheckButtonModernTemplate")  
-	self.chkHideInCombat:SetScript("OnClick", function(self,event) 
+	self.chkHideInCombat = ELib:Check(self,L.NoteHideInCombat,VExRT.Note.HideInCombat):Point(225,-595):OnClick(function(self) 
 		if self:GetChecked() then
 			VExRT.Note.HideInCombat = true
 			module:RegisterEvents('PLAYER_REGEN_DISABLED','PLAYER_REGEN_ENABLED')
 		else
 			VExRT.Note.HideInCombat = nil
-			if VExRT.Note.enabled and not module.frame:IsShown() then
-				module.frame:Show()
-				module.main:GROUP_ROSTER_UPDATE()
-			end
 			module:UnregisterEvents('PLAYER_REGEN_DISABLED','PLAYER_REGEN_ENABLED')
 		end
+		module:Visibility()
 	end) 
 	
-	self.moreOptionsDropDown = ExRT.lib.CreateScrollDropDown(self,nil,445,-595,215,215,2,LFG_LIST_MORE,nil,"ExRTDropDownMenuModernTemplate")
+	self.moreOptionsDropDown = ELib:DropDown(self,275,4):Point(445,-595):Size(215):SetText(LFG_LIST_MORE)
 	
 	local function moreOptionsDropDown_SetVaule(_,arg)
 		VExRT.Note.Strata = arg
-		ExRT.lib.ScrollDropDown.Close()
+		ELib:DropDownClose()
 		for i=1,#self.moreOptionsDropDown.List[1].subMenu do
 			self.moreOptionsDropDown.List[1].subMenu[i].checkState = VExRT.Note.Strata == self.moreOptionsDropDown.List[1].subMenu[i].arg1
 		end
 		module.frame:SetFrameStrata(arg)
 	end
 	
-	self.moreOptionsDropDown.List[1] = {text = ExRT.L.NoteFrameStrata, subMenu = {}}
+	self.moreOptionsDropDown.List[1] = {text = L.NoteFrameStrata, subMenu = {}}
 	for i=1,#frameStrataList do
 		self.moreOptionsDropDown.List[1].subMenu[i] = {
 			text = frameStrataList[i],
@@ -661,8 +651,35 @@ function module.options:Load()
 			func = moreOptionsDropDown_SetVaule,
 		}
 	end
-	self.moreOptionsDropDown.List[2] = {text = ExRT.L.minimapmenuclose, func = function()
-		ExRT.lib.ScrollDropDown.Close()
+	self.moreOptionsDropDown.List[2] = {
+		text = L.NoteShowOnlyPersonal, 
+		radio = true, 
+		func = function()
+			VExRT.Note.ShowOnlyPersonal = not VExRT.Note.ShowOnlyPersonal
+			self.moreOptionsDropDown.List[2].checkState = VExRT.Note.ShowOnlyPersonal
+			ELib:DropDownClose()
+			module.frame:UpdateText()
+		end,
+		checkState = VExRT.Note.ShowOnlyPersonal,
+	}
+	self.moreOptionsDropDown.List[3] = {
+		text = L.NoteShowOnlyInRaid, 
+		radio = true, 
+		func = function()
+			VExRT.Note.ShowOnlyInRaid = not VExRT.Note.ShowOnlyInRaid
+			self.moreOptionsDropDown.List[3].checkState = VExRT.Note.ShowOnlyInRaid
+			ELib:DropDownClose()
+			if VExRT.Note.ShowOnlyInRaid then
+				module:RegisterEvents('ZONE_CHANGED_NEW_AREA')
+			else
+				module:UnregisterEvents('ZONE_CHANGED_NEW_AREA')
+			end
+			module:Visibility()
+		end,
+		checkState = VExRT.Note.ShowOnlyInRaid,
+	}
+	self.moreOptionsDropDown.List[4] = {text = L.minimapmenuclose, func = function()
+		ELib:DropDownClose()
 	end}
 	
 	if VExRT.Note.Text1 then 
@@ -702,7 +719,7 @@ end)
 module.frame:Hide() 
 
 function module.frame:UpdateFont()
-	local font = VExRT and VExRT.Note and VExRT.Note.FontName or ExRT.mds.defFont
+	local font = VExRT and VExRT.Note and VExRT.Note.FontName or ExRT.F.defFont
 	local size = VExRT and VExRT.Note and VExRT.Note.FontSize or 12
 	local outline = VExRT and VExRT.Note and VExRT.Note.Outline and "OUTLINE"
 	self.text:SetFont(font,size,outline)
@@ -710,10 +727,15 @@ end
 
 function module.frame:UpdateText()
 	local selfText = VExRT.Note.SelfText or ""
-	if selfText ~= "" then
-		selfText = "\n"..selfText
+	if VExRT.Note.ShowOnlyPersonal then
+		self.text:SetText(txtWithIcons(selfText))
+	else
+		local text = VExRT.Note.Text1 or ""
+		if text ~= "" and selfText ~= "" then 
+			text = text .. "\n" 
+		end
+		self.text:SetText(txtWithIcons(text..selfText)) 
 	end
-	self.text:SetText(txtWithIcons((VExRT.Note.Text1 or "")..selfText)) 
 end
 
 module.frame.background = module.frame:CreateTexture(nil, "BACKGROUND")
@@ -721,7 +743,7 @@ module.frame.background:SetTexture(0, 0, 0, 1)
 module.frame.background:SetAllPoints()
 
 module.frame.text = module.frame:CreateFontString(nil,"ARTWORK")
-module.frame.text:SetFont(ExRT.mds.defFont, 12)
+module.frame.text:SetFont(ExRT.F.defFont, 12)
 module.frame.text:SetPoint("TOPLEFT",5,-5)
 module.frame.text:SetPoint("BOTTOMRIGHT",-5,5)
 module.frame.text:SetJustifyH("LEFT")
@@ -761,7 +783,7 @@ function module.frame:Save()
 		end
 	end
 	for i=1,#arrtosand do
-		ExRT.mds.SendExMsg("multiline",indextosnd.."\t"..arrtosand[i])
+		ExRT.F.SendExMsg("multiline",indextosnd.."\t"..arrtosand[i])
 	end
 end 
 
@@ -771,7 +793,7 @@ end
 
 function module:addonMessage(sender, prefix, ...)
 	if prefix == "multiline" then
-		if VExRT.Note.OnlyPromoted and IsInRaid() and not ExRT.mds.IsPlayerRLorOfficer(sender) then
+		if VExRT.Note.OnlyPromoted and IsInRaid() and not ExRT.F.IsPlayerRLorOfficer(sender) then
 			return
 		end
 	
@@ -792,7 +814,7 @@ function module:addonMessage(sender, prefix, ...)
 				module.options.NoteEditBox.EditBox:SetText(VExRT.Note.Text1)
 			end
 			
-			module.options.lastUpdate:SetText( ExRT.L.NoteLastUpdate..": "..VExRT.Note.LastUpdateName.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Note.LastUpdateTime)..")" )
+			module.options.lastUpdate:SetText( L.NoteLastUpdate..": "..VExRT.Note.LastUpdateName.." ("..date("%H:%M:%S %d.%m.%Y",VExRT.Note.LastUpdateTime)..")" )
 		end
 	end 
 end 
@@ -835,14 +857,14 @@ function module.main:ADDON_LOADED()
 		module.frame.background:SetTexture(0, 0, 0, VExRT.Note.ScaleBack/100)
 	end
 	if VExRT.Note.Outline then
-		module.frame.text:SetFont(ExRT.mds.defFont, 12,"OUTLINE")
+		module.frame.text:SetFont(ExRT.F.defFont, 12,"OUTLINE")
 	end
 	if VExRT.Note.Fix then
 		module.frame:SetMovable(false)
 		module.frame:EnableMouse(false)
 		module.frame.buttonResize:Hide()
 	else
-		ExRT.lib.AddShadowComment(module.frame,nil,ExRT.L.message)
+		ExRT.lib.AddShadowComment(module.frame,nil,L.message)
 	end
 	
 	if VExRT.Addon.Version < 3225 then
@@ -872,54 +894,87 @@ end
 
 function module:Enable()
 	VExRT.Note.enabled = true
-	module.frame:Show() 
 	if module.options.chkEnable then
 		module.options.chkEnable:SetChecked(true)
 	end
 	if VExRT.Note.HideOutsideRaid then
 		module:RegisterEvents("GROUP_ROSTER_UPDATE")
-		module.main:GROUP_ROSTER_UPDATE()
 	end
 	if VExRT.Note.HideInCombat then
 		module:RegisterEvents('PLAYER_REGEN_DISABLED','PLAYER_REGEN_ENABLED')
 	end
+	if VExRT.Note.ShowOnlyInRaid then
+		module:RegisterEvents('ZONE_CHANGED_NEW_AREA')
+	end
+	module:Visibility()
 end
 
 function module:Disable()
 	VExRT.Note.enabled = nil
-	module.frame:Hide() 
 	if module.options.chkEnable then
 		module.options.chkEnable:SetChecked(false)
 	end
-	module:UnregisterEvents('PLAYER_REGEN_DISABLED','PLAYER_REGEN_ENABLED')
+	module:UnregisterEvents('PLAYER_REGEN_DISABLED','PLAYER_REGEN_ENABLED','ZONE_CHANGED_NEW_AREA')
+	module:Visibility()
+end
+
+local Note_CombatState = false
+
+function module:Visibility()
+	local bool = true
+	if not VExRT.Note.enabled then
+		bool = bool and false
+	end
+	if bool and VExRT.Note.HideOutsideRaid then
+		if GetNumGroupMembers() > 0 then
+			bool = bool and true
+		else
+			bool = bool and false
+		end
+	end
+	if bool and VExRT.Note.HideInCombat then
+		if Note_CombatState then
+			bool = bool and false
+		else
+			bool = bool and true
+		end
+	end
+	if bool and VExRT.Note.ShowOnlyInRaid then
+		local _,zoneType = IsInInstance()
+		if zoneType == "raid" then
+			bool = bool and true
+		else
+			bool = bool and false
+		end
+	end
+
+	if bool then
+		module.frame:Show()
+	else
+		module.frame:Hide()
+	end
 end
 
 function module.main:GROUP_ROSTER_UPDATE()
-	local n = GetNumGroupMembers() or 0
-	if VExRT.Note.HideOutsideRaid and VExRT.Note.enabled then
-		if n > 0 then
-			module.frame:Show()
-		else
-			module.frame:Hide()
-		end
-	end
+	C_Timer.After(1, module.Visibility)
 	if not module.options.raidnames then
 		return
 	end	
-	local gMax = ExRT.mds.GetRaidDiffMaxGroup()
+	local n = GetNumGroupMembers() or 0
+	local gMax = ExRT.F.GetRaidDiffMaxGroup()
 	for i=1,8 do gruevent[i] = 0 end
 	for i=1,n do
 		local name,_,subgroup,_,_,class = GetRaidRosterInfo(i)
 		if name and subgroup <= gMax and gruevent[subgroup] then
 			gruevent[subgroup] = gruevent[subgroup] + 1
-			local cR,cG,cB = ExRT.mds.classColorNum(class)
+			local cR,cG,cB = ExRT.F.classColorNum(class)
 
 			local POS = gruevent[subgroup] + (subgroup - 1) * 5
 			local obj = module.options.raidnames[POS]
 			
 			if obj then
-				name = ExRT.mds.delUnitNameServer(name)
-				local colorCode = ExRT.mds.classColor(class)
+				name = ExRT.F.delUnitNameServer(name)
+				local colorCode = ExRT.F.classColor(class)
 				obj.iconText = "||c"..colorCode..name.."||r "
 				obj.iconTextShift = name
 				obj.html:SetText(name)
@@ -937,17 +992,17 @@ function module.main:GROUP_ROSTER_UPDATE()
 	end
 end 
 function module.main:PLAYER_REGEN_DISABLED()
-	if VExRT.Note.HideInCombat then
-		module.frame:Hide() 
-	end
+	Note_CombatState = true
+	module:Visibility()
 end
 function module.main:PLAYER_REGEN_ENABLED()
-	if VExRT.Note.HideInCombat then
-		module.frame:Show()
-		module.main:GROUP_ROSTER_UPDATE()
-	end
+	Note_CombatState = false
+	module:Visibility()
 end
 
+function module.main:ZONE_CHANGED_NEW_AREA()
+	C_Timer.After(5, module.Visibility)
+end
 
 function module:slash(arg)
 	if arg == "note" then

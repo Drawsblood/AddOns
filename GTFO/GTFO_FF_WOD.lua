@@ -29,3 +29,19 @@ GTFO.FFSpellID["175585"] = {
 	sound = 1;
 	ignoreSelfInflicted = true;	
 };
+
+-- ***********
+-- * Draenor *
+-- ***********
+
+GTFO.FFSpellID["187671"] = {
+	--desc = "Mark of Kazzak (Supreme Lord Kazzak)";
+	sound = 1;
+	ignoreSelfInflicted = true;
+};
+
+GTFO.SpellID["187632"] = {
+	--desc = "Explosive Doom (Supreme Lord Kazzak)";
+	sound = 3;
+	ignoreSelfInflicted = true;
+};

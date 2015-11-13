@@ -1,7 +1,10 @@
 
 local DF = _G ["DetailsFramework"]
-local _
+if (not DF or not DetailsFrameworkCanLoad) then
+	return 
+end
 
+local _
 local _rawset = rawset --> lua local
 local _rawget = rawget --> lua local
 local _setmetatable = setmetatable --> lua local
@@ -326,7 +329,11 @@ function DropDownMetaFunctions:Refresh()
 end
 
 function DropDownMetaFunctions:NoOptionSelected()
+	if (self.no_options) then
+		return
+	end
 	self.label:SetText (self.empty_text or "no option selected")
+	self.label:SetPoint ("left", self.icon, "right", 2, 0)
 	self.label:SetTextColor (1, 1, 1, 0.4)
 	if (self.empty_icon) then
 		self.icon:SetTexture (self.empty_icon)
@@ -345,6 +352,7 @@ function DropDownMetaFunctions:NoOption (state)
 		self:SetAlpha (0.5)
 		self.no_options = true
 		self.label:SetText ("no options")
+		self.label:SetPoint ("left", self.icon, "right", 2, 0)
 		self.label:SetTextColor (1, 1, 1, 0.4)
 		self.icon:SetTexture ([[Interface\CHARACTERFRAME\UI-Player-PlayTimeUnhealthy]])
 		self.icon:SetTexCoord (0, 1, 0, 1)
@@ -441,6 +449,7 @@ function DropDownMetaFunctions:Selected (_table)
 			self.icon:SetVertexColor (1, 1, 1, 1)
 		end
 		
+		self.icon:SetSize (self:GetHeight()-2, self:GetHeight()-2)
 	else
 		self.label:SetPoint ("left", self.label:GetParent(), "left", 4, 0)
 	end
@@ -479,6 +488,7 @@ function DetailsFrameworkDropDownOptionClick (button)
 		
 	--> set the value of selected option in main object
 		button.object.myvalue = button.table.value
+		button.object.myvaluelabel = button.table.label
 end
 
 function DropDownMetaFunctions:Open()
@@ -560,6 +570,7 @@ function DetailsFrameworkDropDownOnMouseDown (button)
 			local i = 1
 			local showing = 0
 			local currentText = button.text:GetText() or ""
+			local currentIndex
 			
 			if (object.OnMouseDownHook) then
 				local interrupt = object.OnMouseDownHook (button, buttontype, menu, scrollFrame, scrollChild, selectedTexture)
@@ -568,7 +579,7 @@ function DetailsFrameworkDropDownOnMouseDown (button)
 				end
 			end
 			
-			for _, _table in ipairs (menu) do 
+			for tindex, _table in ipairs (menu) do 
 				
 				local show = isOptionVisible (_table)
 
@@ -636,7 +647,10 @@ function DetailsFrameworkDropDownOnMouseDown (button)
 						end
 						
 						selectedTexture:Show()
-						selectedTexture:SetVertexColor (1, 1, 1, .3);
+						selectedTexture:SetVertexColor (1, 1, 1, .3)
+						selectedTexture:SetTexCoord (0, 29/32, 5/32, 27/32)
+						
+						currentIndex = tindex
 						currentText = nil
 					end
 					
@@ -716,7 +730,12 @@ function DetailsFrameworkDropDownOnMouseDown (button)
 				end
 			end
 
-			object.scroll:SetValue (0)
+			if (object.myvaluelabel and currentIndex and scrollFrame.slider:IsShown()) then
+				object.scroll:SetValue (max ((currentIndex*20) - 80, 0))
+			else
+				object.scroll:SetValue (0)
+			end
+			
 			object:Open()
 			
 		else
@@ -746,6 +765,10 @@ function DetailsFrameworkDropDownOnEnter (self)
 		self:SetBackdropColor (.2, .2, .2, .2)
 	end
 	
+	if (self.MyObject.onenter_backdrop_border_color) then
+		self:SetBackdropBorderColor (unpack (self.MyObject.onenter_backdrop_border_color))
+	end
+	
 	self.arrowTexture2:Show()
 	
 	if (self.MyObject.have_tooltip) then 
@@ -760,14 +783,7 @@ function DetailsFrameworkDropDownOnEnter (self)
 		GameCooltip2:SetOwner (self)
 		GameCooltip2:ShowCooltip()
 	end
-	
-	local parent = self:GetParent().MyObject
-	if (parent and parent.type == "panel") then
-		if (parent.GradientEnabled) then
-			parent:RunGradient()
-		end
-	end
-	
+
 end
 
 function DetailsFrameworkDropDownOnLeave (self)
@@ -784,17 +800,14 @@ function DetailsFrameworkDropDownOnLeave (self)
 		self:SetBackdropColor (1, 1, 1, .5)
 	end
 	
+	if (self.MyObject.onleave_backdrop_border_color) then
+		self:SetBackdropBorderColor (unpack (self.MyObject.onleave_backdrop_border_color))
+	end
+	
 	self.arrowTexture2:Hide()
 	
 	if (self.MyObject.have_tooltip) then 
 		GameCooltip2:ShowMe (false)
-	end
-	
-	local parent = self:GetParent().MyObject
-	if (parent and parent.type == "panel") then
-		if (parent.GradientEnabled) then
-			parent:RunGradient (false)
-		end
 	end
 end
 
@@ -822,16 +835,70 @@ function DetailsFrameworkDropDownOnHide (self)
 	self.MyObject:Close()
 end
 
+function DF:BuildDropDownFontList (on_click, icon, icon_texcoord, icon_size)
+	local t = {}
+	local SharedMedia = LibStub:GetLibrary ("LibSharedMedia-3.0")
+	for name, fontPath in pairs (SharedMedia:HashTable ("font")) do 
+		t[#t+1] = {value = name, label = name, onclick = on_click, icon = icon, iconsize = icon_size, texcoord = icon_texcoord, font = fontPath, descfont = "abcdefg ABCDEFG"}
+	end
+	table.sort (t, function (t1, t2) return t1.label < t2.label end)
+	return t
+end
 
+------------------------------------------------------------------------------------------------------------
+function DropDownMetaFunctions:SetTemplate (template)
+
+	if (template.width) then
+		self:SetWidth (template.width)
+	end
+	if (template.height) then
+		self:SetHeight (template.height)
+	end
+	
+	if (template.backdrop) then
+		self:SetBackdrop (template.backdrop)
+	end
+	if (template.backdropcolor) then
+		local r, g, b, a = DF:ParseColors (template.backdropcolor)
+		self:SetBackdropColor (r, g, b, a)
+		self.onleave_backdrop = {r, g, b, a}
+	end
+	if (template.backdropbordercolor) then
+		local r, g, b, a = DF:ParseColors (template.backdropbordercolor)
+		self:SetBackdropBorderColor (r, g, b, a)
+		self.onleave_backdrop_border_color = {r, g, b, a}
+	end
+
+	if (template.onentercolor) then
+		local r, g, b, a = DF:ParseColors (template.onentercolor)
+		self.onenter_backdrop = {r, g, b, a}
+	end
+	
+	if (template.onleavecolor) then
+		local r, g, b, a = DF:ParseColors (template.onleavecolor)
+		self.onleave_backdrop = {r, g, b, a}
+	end
+	
+	if (template.onenterbordercolor) then
+		local r, g, b, a = DF:ParseColors (template.onenterbordercolor)
+		self.onenter_backdrop_border_color = {r, g, b, a}
+	end
+
+	if (template.onleavebordercolor) then
+		local r, g, b, a = DF:ParseColors (template.onleavebordercolor)
+		self.onleave_backdrop_border_color = {r, g, b, a}
+	end
+	
+end
 
 ------------------------------------------------------------------------------------------------------------
 --> object constructor
 
-function DF:CreateDropDown (parent, func, default, w, h, member, name)
-	return DF:NewDropDown (parent, parent, name, member, w, h, func, default)
+function DF:CreateDropDown (parent, func, default, w, h, member, name, template)
+	return DF:NewDropDown (parent, parent, name, member, w, h, func, default, template)
 end
 
-function DF:NewDropDown (parent, container, name, member, w, h, func, default)
+function DF:NewDropDown (parent, container, name, member, w, h, func, default, template)
 
 	if (not name) then
 		name = "DetailsFrameworkDropDownNumber" .. DF.DropDownCounter
@@ -888,7 +955,7 @@ function DF:NewDropDown (parent, container, name, member, w, h, func, default)
 		for funcName, funcAddress in pairs (idx) do 
 			if (not DropDownMetaFunctions [funcName]) then
 				DropDownMetaFunctions [funcName] = function (object, ...)
-					local x = loadstring ( "return _G."..object.dropdown:GetName()..":"..funcName.."(...)")
+					local x = loadstring ( "return _G['"..object.dropdown:GetName().."']:"..funcName.."(...)")
 					return x (...)
 				end
 			end
@@ -948,6 +1015,10 @@ function DF:NewDropDown (parent, container, name, member, w, h, func, default)
 		end
 	end
 
+	if (template) then
+		DropDownObject:SetTemplate (template)
+	end
+	
 	return DropDownObject	
 
 end

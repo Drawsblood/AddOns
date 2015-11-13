@@ -1,6 +1,10 @@
 
 local DF = _G ["DetailsFramework"]
 
+if (not DF or not DetailsFrameworkCanLoad) then
+	return 
+end
+
 local _
 local _rawset = rawset --> lua local
 local _rawget = rawget --> lua local
@@ -612,6 +616,14 @@ local ButtonMetaFunctions = {}
 			end
 		end
 
+		if (button.MyObject.onenter_backdrop_border_color) then
+			button:SetBackdropBorderColor (unpack (button.MyObject.onenter_backdrop_border_color))
+		end
+		
+		if (button.MyObject.onenter_backdrop) then
+			button:SetBackdropColor (unpack (button.MyObject.onenter_backdrop))
+		end
+		
 		if (button.MyObject.have_tooltip) then 
 			GameCooltip2:Preset (2)
 			if (type (button.MyObject.have_tooltip) == "function") then
@@ -620,13 +632,6 @@ local ButtonMetaFunctions = {}
 				GameCooltip2:AddLine (button.MyObject.have_tooltip)
 			end
 			GameCooltip2:ShowCooltip (button, "tooltip")
-		end
-		
-		local parent = button:GetParent().MyObject
-		if (parent and parent.type == "panel") then
-			if (parent.GradientEnabled) then
-				parent:RunGradient()
-			end
 		end
 	end
 	
@@ -661,16 +666,17 @@ local ButtonMetaFunctions = {}
 			end
 		end
 
+		if (button.MyObject.onleave_backdrop_border_color) then
+			button:SetBackdropBorderColor (unpack (button.MyObject.onleave_backdrop_border_color))
+		end
+		
+		if (button.MyObject.onleave_backdrop) then
+			button:SetBackdropColor (unpack (button.MyObject.onleave_backdrop))
+		end
+		
 		if (button.MyObject.have_tooltip) then
 			if (GameCooltip2:GetText (1) == button.MyObject.have_tooltip or type (button.MyObject.have_tooltip) == "function") then
 				GameCooltip2:Hide()
-			end
-		end
-		
-		local parent = button:GetParent().MyObject
-		if (parent and parent.type == "panel") then
-			if (parent.GradientEnabled) then
-				parent:RunGradient (false)
 			end
 		end
 	end
@@ -858,13 +864,65 @@ local ButtonMetaFunctions = {}
 	end
 
 ------------------------------------------------------------------------------------------------------------
---> object constructor
 
-function DF:CreateButton (parent, func, w, h, text, param1, param2, texture, member, name, short_method)
-	return DF:NewButton (parent, parent, name, member, w, h, func, param1, param2, texture, text, short_method)
+function ButtonMetaFunctions:SetTemplate (template)
+	
+	if (template.width) then
+		self:SetWidth (template.width)
+	end
+	if (template.height) then
+		self:SetHeight (template.height)
+	end
+	
+	if (template.backdrop) then
+		self:SetBackdrop (template.backdrop)
+	end
+	if (template.backdropcolor) then
+		local r, g, b, a = DF:ParseColors (template.backdropcolor)
+		self:SetBackdropColor (r, g, b, a)
+		self.onleave_backdrop = {r, g, b, a}
+	end
+	if (template.backdropbordercolor) then
+		local r, g, b, a = DF:ParseColors (template.backdropbordercolor)
+		self:SetBackdropBorderColor (r, g, b, a)
+		self.onleave_backdrop_border_color = {r, g, b, a}
+	end
+	
+	if (template.onentercolor) then
+		local r, g, b, a = DF:ParseColors (template.onentercolor)
+		self.onenter_backdrop = {r, g, b, a}
+	end
+	
+	if (template.onleavecolor) then
+		local r, g, b, a = DF:ParseColors (template.onleavecolor)
+		self.onleave_backdrop = {r, g, b, a}
+	end
+	
+	if (template.onenterbordercolor) then
+		local r, g, b, a = DF:ParseColors (template.onenterbordercolor)
+		self.onenter_backdrop_border_color = {r, g, b, a}
+	end
+	
+	if (template.onleavebordercolor) then
+		local r, g, b, a = DF:ParseColors (template.onleavebordercolor)
+		self.onleave_backdrop_border_color = {r, g, b, a}
+	end
+	
+	if (template.icon) then
+		local i = template.icon
+		self:SetIcon (i.texture, i.width, i.height, i.layout, i.texcoord, i.color, i.textdistance, i.leftpadding)
+	end
+	
 end
 
-function DF:NewButton (parent, container, name, member, w, h, func, param1, param2, texture, text, short_method)
+------------------------------------------------------------------------------------------------------------
+--> object constructor
+
+function DF:CreateButton (parent, func, w, h, text, param1, param2, texture, member, name, short_method, button_template, text_template)
+	return DF:NewButton (parent, parent, name, member, w, h, func, param1, param2, texture, text, short_method, button_template, text_template)
+end
+
+function DF:NewButton (parent, container, name, member, w, h, func, param1, param2, texture, text, short_method, button_template, text_template)
 	
 	if (not name) then
 		name = "DetailsFrameworkButtonNumber" .. DF.ButtonCounter
@@ -880,8 +938,7 @@ function DF:NewButton (parent, container, name, member, w, h, func, param1, para
 	if (name:find ("$parent")) then
 		name = name:gsub ("$parent", parent:GetName())
 	end
-	
-	
+
 	local ButtonObject = {type = "button", dframework = true}
 	
 	if (member) then
@@ -913,7 +970,7 @@ function DF:NewButton (parent, container, name, member, w, h, func, param1, para
 	ButtonObject.button = CreateFrame ("button", name, parent, "DetailsFrameworkButtonTemplate")
 	ButtonObject.widget = ButtonObject.button
 
-	ButtonObject.button:SetBackdrop ({bgFile = DF.folder .. "background", tileSize = 64, edgeFile = DF.folder .. "border_2", edgeSize = 10, insets = {left = 1, right = 1, top = 1, bottom = 1}})
+	--ButtonObject.button:SetBackdrop ({bgFile = DF.folder .. "background", tileSize = 64, edgeFile = DF.folder .. "border_2", edgeSize = 10, insets = {left = 1, right = 1, top = 1, bottom = 1}})
 	ButtonObject.button:SetBackdropColor (0, 0, 0, 0.4)
 	ButtonObject.button:SetBackdropBorderColor (1, 1, 1, 1)
 	
@@ -923,13 +980,14 @@ function DF:NewButton (parent, container, name, member, w, h, func, param1, para
 		for funcName, funcAddress in pairs (idx) do 
 			if (not ButtonMetaFunctions [funcName]) then
 				ButtonMetaFunctions [funcName] = function (object, ...)
-					local x = loadstring ( "return _G."..object.button:GetName()..":"..funcName.."(...)")
+					local x = loadstring ( "return _G['"..object.button:GetName().."']:"..funcName.."(...)")
 					return x (...)
 				end
 			end
 		end
 	end
 
+	
 	ButtonObject.button:SetWidth (w or 100)
 	ButtonObject.button:SetHeight (h or 20)
 	ButtonObject.button.MyObject = ButtonObject
@@ -973,6 +1031,21 @@ function DF:NewButton (parent, container, name, member, w, h, func, param1, para
 	
 	ButtonObject.short_method = short_method
 	
+	if (text_template) then
+		if (text_template.size) then
+			DF:SetFontSize (ButtonObject.button.text, text_template.size)
+		end
+		if (text_template.color) then
+			local r, g, b, a = DF:ParseColors (text_template.color)
+			ButtonObject.button.text:SetTextColor (r, g, b, a)
+		end
+		if (text_template.font) then
+			local SharedMedia = LibStub:GetLibrary ("LibSharedMedia-3.0")
+			local font = SharedMedia:Fetch ("font", text_template.font)
+			DF:SetFontFace (ButtonObject.button.text, font)
+		end
+	end
+	
 	--> hooks
 		ButtonObject.button:SetScript ("OnEnter", OnEnter)
 		ButtonObject.button:SetScript ("OnLeave", OnLeave)
@@ -982,6 +1055,10 @@ function DF:NewButton (parent, container, name, member, w, h, func, param1, para
 		ButtonObject.button:SetScript ("OnMouseUp", OnMouseUp)
 		
 	_setmetatable (ButtonObject, ButtonMetaFunctions)
+	
+	if (button_template) then
+		ButtonObject:SetTemplate (button_template)
+	end
 	
 	return ButtonObject
 	
@@ -1010,21 +1087,23 @@ local colorpick_cancel = function (self)
 	ColorPickerFrame:Hide()
 end
 
-function DF:CreateColorPickButton (parent, name, member, callback, alpha)
-	return DF:NewColorPickButton (parent, name, member, callback, alpha)
+function DF:CreateColorPickButton (parent, name, member, callback, alpha, button_template)
+	return DF:NewColorPickButton (parent, name, member, callback, alpha, button_template)
 end
 
-function DF:NewColorPickButton (parent, name, member, callback, alpha)
+function DF:NewColorPickButton (parent, name, member, callback, alpha, button_template)
 
 	--button
-	local button = DF:NewButton (parent, _, name, member, color_button_width, color_button_height, pickcolor, alpha, "param2")
-	button:InstallCustomTexture()
+	local button = DF:NewButton (parent, _, name, member, color_button_width, color_button_height, pickcolor, alpha, "param2", nil, nil, nil, button_template)
 	button.color_callback = callback
 	button.Cancel = colorpick_cancel
 	button.SetColor = set_colorpick_color
 	
-	button:SetBackdrop ({edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]], edgeSize = 6,
-	bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]], insets = {left = 0, right = 0, top = 0, bottom = 0}})
+	if (not button_template) then
+		button:InstallCustomTexture()
+		button:SetBackdrop ({edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]], edgeSize = 6,
+		bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]], insets = {left = 0, right = 0, top = 0, bottom = 0}})
+	end
 	
 	--textura do fundo
 	local background = DF:NewImage (button, nil, color_button_width, color_button_height, nil, nil, nil, "$parentBck")

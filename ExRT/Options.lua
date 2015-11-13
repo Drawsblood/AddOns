@@ -2,6 +2,8 @@ local GlobalAddonName, ExRT = ...
 
 ExRT.Options = {}
 
+local ELib,L = ExRT.lib,ExRT.L
+
 ------------------------------------------------------------
 --------------- New Options --------------------------------
 ------------------------------------------------------------
@@ -29,10 +31,7 @@ Options.backToInterface:SetScript("OnClick",function ()
 end)
 
 
-Options.modulesList = ExRT.lib.CreateScrollList(Options,"TOPLEFT",10,-25,180,38,true)
-for i=1,#Options.modulesList.List do
-	Options.modulesList.List[i].text:SetFont(Options.modulesList.List[i].text:GetFont(),11)
-end
+Options.modulesList = ELib:ScrollList(Options):Size(180-10,616-10):Point(10+5,-25-5):FontSize(11)
 Options.Frames = {}
 
 Options:SetScript("OnShow",function(self)
@@ -53,18 +52,12 @@ function Options.modulesList:SetListValue(index)
 	Options.CurrentFrame:Show()
 end
 function Options.modulesList:UpdateAdditional()
-	if #self.L < #self.List then
-		self.ScrollBar:Hide()
-		for i=1,#self.List do
-			self.List[i]:SetWidth(self.Width - 6)
-			self.List[i].text:SetWidth(self.Width - 14)
-		end
+	if (self:GetHeight() / 16 - #self.L) > 0 then
+		self.Frame.ScrollBar:Hide()
+		self.Frame.C:SetWidth( self.Frame:GetWidth() )
 	else
-		self.ScrollBar:Show()
-		for i=1,#self.List do
-			self.List[i]:SetWidth(self.Width - 22)
-			self.List[i].text:SetWidth(self.Width - 30)
-		end
+		self.Frame.ScrollBar:Show()
+		self.Frame.C:SetWidth( self.Frame:GetWidth() - 16 )
 	end
 end
 
@@ -106,8 +99,7 @@ ExRT.Options.InBlizzardInterface:SetScript("OnShow",function (self)
 	self:SetScript("OnShow",nil)
 end)
 
-ExRT.Options.InBlizzardInterface.button = ExRT.lib.CreateButton(ExRT.Options.InBlizzardInterface,400,25,"TOP",0,-100,"Exrsus Raid Tools")
-ExRT.Options.InBlizzardInterface.button:SetScript("OnClick",function ()
+ExRT.Options.InBlizzardInterface.button = ELib:Button(ExRT.Options.InBlizzardInterface,"Exrsus Raid Tools",0):Size(400,25):Point("TOP",0,-100):OnClick(function ()
 	if InterfaceOptionsFrame:IsShown() then
 		InterfaceOptionsFrame:Hide()
 	end
@@ -137,8 +129,8 @@ MiniMapIcon:RegisterForClicks("anyUp")
 MiniMapIcon:SetScript("OnEnter",function(self) 
 	GameTooltip:SetOwner(self, "ANCHOR_LEFT") 
 	GameTooltip:AddLine("Exorsus Raid Tools") 
-	GameTooltip:AddLine(ExRT.L.minimaptooltiplmp,1,1,1) 
-	GameTooltip:AddLine(ExRT.L.minimaptooltiprmp,1,1,1) 
+	GameTooltip:AddLine(L.minimaptooltiplmp,1,1,1) 
+	GameTooltip:AddLine(L.minimaptooltiprmp,1,1,1) 
 	GameTooltip:Show() 
 end)
 MiniMapIcon:SetScript("OnLeave", function(self)    
@@ -289,11 +281,11 @@ function ExRT.Options:Open(PANEL)
 end
 
 ExRT.F.menuTable = {
-{ text = ExRT.L.minimapmenu, isTitle = true, notCheckable = true, notClickable = true },
-{ text = ExRT.L.minimapmenuset, func = ExRT.Options.Open, notCheckable = true, keepShownOnClick = true, },
+{ text = L.minimapmenu, isTitle = true, notCheckable = true, notClickable = true },
+{ text = L.minimapmenuset, func = ExRT.Options.Open, notCheckable = true, keepShownOnClick = true, },
 { text = " ", isTitle = true, notCheckable = true, notClickable = true },
 { text = " ", isTitle = true, notCheckable = true, notClickable = true },
-{ text = ExRT.L.minimapmenuclose, func = function() CloseDropDownMenus() end, notCheckable = true },
+{ text = L.minimapmenuclose, func = function() CloseDropDownMenus() end, notCheckable = true },
 }
 
 local modulesActive = {}
@@ -307,7 +299,7 @@ end
 
 ----> Options
 
-OptionsFrame.title = ExRT.lib.CreateText(OptionsFrame,500,22,nil,160,-35,nil,nil,nil,22,"Exorsus Raid Tools",nil,1,1,1)
+OptionsFrame.title = ELib:Text(OptionsFrame,"Exorsus Raid Tools",22):Size(500,22):Point(160,-35):Color()
 
 OptionsFrame.image = CreateFrame("FRAME",nil,OptionsFrame)
 OptionsFrame.image:SetSize(256,256)
@@ -315,8 +307,7 @@ OptionsFrame.image:SetBackdrop({bgFile = "Interface\\AddOns\\ExRT\\media\\Option
 OptionsFrame.image:SetPoint("TOPLEFT",-45,25)	
 OptionsFrame.image:SetFrameLevel(5)
 
-OptionsFrame.chkIconMiniMap = ExRT.lib.CreateCheckBox(OptionsFrame,nil,25,-140,ExRT.L.setminimap1,nil,nil,nil,"ExRTCheckButtonModernTemplate")
-OptionsFrame.chkIconMiniMap:SetScript("OnClick", function(self,event) 
+OptionsFrame.chkIconMiniMap = ELib:Check(OptionsFrame,L.setminimap1):Point(25,-140):OnClick(function(self) 
 	if self:GetChecked() then
 		VExRT.Addon.IconMiniMapHide = true
 		ExRT.MiniMapIcon:Hide()
@@ -329,18 +320,17 @@ OptionsFrame.chkIconMiniMap:SetScript("OnShow", function(self,event)
 	self:SetChecked(VExRT.Addon.IconMiniMapHide) 
 end)
 
-OptionsFrame.timerSlider = ExRT.lib.CreateSlider(OptionsFrame,550,15,0,-125,10,1000,ExRT.L.setEggTimerSlider,100,"TOP")
-OptionsFrame.timerSlider:Hide()
-OptionsFrame.timerSlider:SetScript("OnValueChanged", function(self,event) 
+OptionsFrame.timerSlider = ELib:Slider(OptionsFrame,L.setEggTimerSlider):Size(550):Point("TOP",0,-125):Range(10,1000):SetTo(100):OnChange(function(self,event) 
 	event = event - event%1
 	self.tooltipText = event
 	self:tooltipReload(self)	
 	event = event / 1000	
 	VExRT.Addon.Timer = event
 end)
+OptionsFrame.timerSlider:Hide()
 
-OptionsFrame.eventsCountTextLeft = ExRT.lib.CreateText(OptionsFrame,590,300,"TOPLEFT",15,-300,"LEFT","TOP",nil,12,nil,nil,1,1,1,1)
-OptionsFrame.eventsCountTextRight = ExRT.lib.CreateText(OptionsFrame,590,300,"TOPLEFT",85,-300,"LEFT","TOP",nil,12,nil,nil,1,1,1,1)
+OptionsFrame.eventsCountTextLeft = ELib:Text(OptionsFrame,"",12):Size(590,300):Point(15,-300):Color():Shadow()
+OptionsFrame.eventsCountTextRight = ELib:Text(OptionsFrame,"",12):Size(590,300):Point(85,-300):Color():Shadow()
 OptionsFrame.eventsCountTextFrame = CreateFrame("Frame",nil,OptionsFrame)
 OptionsFrame.eventsCountTextFrame:SetSize(1,1)
 OptionsFrame.eventsCountTextFrame:SetPoint("TOPLEFT")
@@ -391,28 +381,24 @@ OptionsFrame.eggBut:SetScript("OnClick",function(s)
 	if IsAltKeyDown() then
 		superMode = true
 	end
-	for i, val in pairs(ExRT.Eggs) do
-		val:egg(superMode)
-	end
 end)
 
-OptionsFrame.authorLeft = ExRT.lib.CreateText(OptionsFrame,150,25,nil,15,-195,"LEFT","TOP",nil,12,ExRT.L.setauthor,nil,nil,nil,nil,1)
-OptionsFrame.authorRight = ExRT.lib.CreateText(OptionsFrame,520,25,nil,135,-195,"LEFT","TOP",nil,12,"Afiya (Афиа) @ EU-Howling Fjord",nil,1,1,1,1)
+OptionsFrame.authorLeft = ELib:Text(OptionsFrame,L.setauthor,12):Size(150,25):Point(15,-195):Shadow():Top()
+OptionsFrame.authorRight = ELib:Text(OptionsFrame,"Afiya (Афиа) @ EU-Howling Fjord",12):Size(520,25):Point(135,-195):Color():Shadow():Top()
 
-OptionsFrame.versionLeft = ExRT.lib.CreateText(OptionsFrame,150,25,nil,15,-215,"LEFT","TOP",nil,12,ExRT.L.setver,nil,nil,nil,nil,1)
-OptionsFrame.versionRight = ExRT.lib.CreateText(OptionsFrame,520,25,nil,135,-215,"LEFT","TOP",nil,12,ExRT.V..(ExRT.T == "R" and "" or " "..ExRT.T),nil,1,1,1,1)
+OptionsFrame.versionLeft = ELib:Text(OptionsFrame,L.setver,12):Size(150,25):Point(15,-215):Shadow():Top()
+OptionsFrame.versionRight = ELib:Text(OptionsFrame,ExRT.V..(ExRT.T == "R" and "" or " "..ExRT.T),12):Size(520,25):Point(135,-215):Color():Shadow():Top()
 
-OptionsFrame.contactLeft = ExRT.lib.CreateText(OptionsFrame,150,25,nil,15,-235,"LEFT","TOP",nil,12,ExRT.L.setcontact,nil,nil,nil,nil,1)
-OptionsFrame.contactRight = ExRT.lib.CreateText(OptionsFrame,520,25,nil,135,-235,"LEFT","TOP",nil,12,"e-mail: ykiigor@gmail.com",nil,1,1,1,1)
+OptionsFrame.contactLeft = ELib:Text(OptionsFrame,L.setcontact,12):Size(150,25):Point(15,-235):Shadow():Top()
+OptionsFrame.contactRight = ELib:Text(OptionsFrame,"e-mail: ykiigor@gmail.com",12):Size(520,25):Point(135,-235):Color():Shadow():Top()
 
-OptionsFrame.thanksLeft = ExRT.lib.CreateText(OptionsFrame,150,25,nil,15,-255,"LEFT","TOP",nil,12,ExRT.L.SetThanks,nil,nil,nil,nil,1)
-OptionsFrame.thanksRight = ExRT.lib.CreateText(OptionsFrame,520,0,nil,135,-255,"LEFT","TOP",nil,12,"Phanx, funkydude, Shurshik, Kemayo, Guillotine, Rabbit, fookah, diesal2010",nil,1,1,1,1)
+OptionsFrame.thanksLeft = ELib:Text(OptionsFrame,L.SetThanks,12):Size(150,25):Point(15,-255):Shadow():Top()
+OptionsFrame.thanksRight = ELib:Text(OptionsFrame,"Phanx, funkydude, Shurshik, Kemayo, Guillotine, Rabbit, fookah, diesal2010",12):Size(520,25):Point(135,-255):Color():Shadow():Top()
 
-if ExRT.L.TranslateBy ~= "" then
-	OptionsFrame.translateLeft = ExRT.lib.CreateText(OptionsFrame,150,25,nil,15,-255,"LEFT","TOP",nil,12,ExRT.L.SetTranslate,nil,nil,nil,nil,1)
-	OptionsFrame.translateRight = ExRT.lib.CreateText(OptionsFrame,520,25,nil,135,-255,"LEFT","TOP",nil,12,ExRT.L.TranslateBy,nil,1,1,1,1)
-	ExRT.lib.SetPoint(OptionsFrame.translateRight,"TOPLEFT",OptionsFrame.thanksRight,"BOTTOMLEFT",0,-10)
-	ExRT.lib.SetPoint(OptionsFrame.translateLeft,"TOPLEFT",OptionsFrame.translateRight,"TOPLEFT",-120,0)
+if L.TranslateBy ~= "" then
+	OptionsFrame.translateLeft = ELib:Text(OptionsFrame,L.SetTranslate,12):Size(150,25):Point("TOPLEFT",OptionsFrame.thanksRight,"BOTTOMLEFT",0,-10):Shadow():Top()
+	OptionsFrame.translateRight = ELib:Text(OptionsFrame,L.TranslateBy,12):Size(520,25):Point("TOPLEFT",OptionsFrame.translateRight,"TOPLEFT",-120,0):Color():Shadow():Top()
+
 end
 
 local function CreateDataBrokerPlugin()

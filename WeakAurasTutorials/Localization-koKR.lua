@@ -123,8 +123,7 @@ L["WeakAuras Tutorials"] = "WeakAuras 설명서"
 L["Welcome"] = "환영합니다"
 L["Welcome Text"] = [=[|cFF8800FFWeakAuras|r 초보자 가이드에 오신 것을 환영합니다.
 
-이 가이드는 WeakAuras를 어떻게 사용하는지 보여주며. 
-옵션을 설정하는 기본적인 방법에 대해 알려줍니다.]=]
+이 가이드는 WeakAuras를 어떻게 사용하는지 보여주며. 옵션을 설정하는 기본적인 방법에 대해 알려줍니다.]=]
 
 
 

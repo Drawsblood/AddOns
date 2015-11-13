@@ -5,12 +5,12 @@ local VExRT = nil
 local GetSpellCharges, GetTime, floor = GetSpellCharges, GetTime, floor
 
 local module = ExRT.mod:New("BattleRes",ExRT.L.BattleRes,nil,true)
+local ELib,L = ExRT.lib,ExRT.L
 
 function module.options:Load()
 	self:CreateTilte()
 
-	self.enableChk = ExRT.lib.CreateCheckBox(self,nil,5,-30,ExRT.L.senable,VExRT.BattleRes.enabled,nil,nil,"ExRTCheckButtonModernTemplate")
-	self.enableChk:SetScript("OnClick", function(self,event) 
+	self.enableChk = ELib:Check(self,L.senable,VExRT.BattleRes.enabled):Point(5,-30):OnClick(function(self) 
 		if self:GetChecked() then
 			VExRT.BattleRes.enabled = true
 			module:Enable()
@@ -20,30 +20,29 @@ function module.options:Load()
 		end
 	end)
 	
-	self.fixChk = ExRT.lib.CreateCheckBox(self,nil,5,-55,ExRT.L.BattleResFix,VExRT.BattleRes.fix,nil,nil,"ExRTCheckButtonModernTemplate")
-	self.fixChk:SetScript("OnClick", function(self,event) 
+	self.fixChk = ELib:Check(self,L.BattleResFix,VExRT.BattleRes.fix):Point(5,-55):OnClick(function(self) 
 		if self:GetChecked() then
 			VExRT.BattleRes.fix = true
 			module.frame:Hide()
 			module.frame:SetMovable(false)
 		else
 			VExRT.BattleRes.fix = nil
-			module.frame:Show()
+			if VExRT.BattleRes.enabled then
+				module.frame:Show()
+			end
 			module.frame:SetMovable(true)
 		end
 	end)
 	
-	self.SliderScale = ExRT.lib.CreateSlider(self,640,15,0,-95,5,200,ExRT.L.BattleResScale,100,"TOP",nil,true)
-	self.SliderScale:SetScript("OnValueChanged", function(self,event) 
+	self.SliderScale = ELib:Slider(self,L.BattleResScale):Size(640):Point("TOP",0,-95):Range(5,200):SetTo(VExRT.BattleRes.Scale or 100):OnChange(function(self,event) 
 		event = event - event%1
 		VExRT.BattleRes.Scale = event
-		ExRT.mds.SetScaleFix(module.frame,event/100)
+		ExRT.F.SetScaleFix(module.frame,event/100)
 		self.tooltipText = event
 		self:tooltipReload(self)
 	end)
 	
-	self.SliderAlpha = ExRT.lib.CreateSlider(self,640,15,0,-130,0,100,ExRT.L.BattleResAlpha,nil,"TOP",nil,true)
-	self.SliderAlpha:SetScript("OnValueChanged", function(self,event) 
+	self.SliderAlpha = ELib:Slider(self,L.BattleResAlpha):Size(640):Point("TOP",0,-130):Range(0,100):SetTo(VExRT.BattleRes.Alpha or 100):OnChange(function(self,event) 
 		event = event - event%1
 		VExRT.BattleRes.Alpha = event
 		module.frame:SetAlpha(event/100)
@@ -51,13 +50,9 @@ function module.options:Load()
 		self:tooltipReload(self)
 	end)
 	
-	if VExRT.BattleRes.Alpha then self.SliderAlpha:SetValue(VExRT.BattleRes.Alpha) end
-	if VExRT.BattleRes.Scale then self.SliderScale:SetValue(VExRT.BattleRes.Scale) end
+	self.shtml1 = ELib:Text(self,L.BattleResHelp,12):Size(650,0):Point("TOP",0,-165):Top()
 	
-	self.shtml1 = ExRT.lib.CreateText(self,650,0,"TOP",0,-165,nil,"TOP",nil,12,ExRT.L.BattleResHelp)
-	
-	self.hideTimerChk = ExRT.lib.CreateCheckBox(self,nil,5,-185,ExRT.L.BattleResHideTime,VExRT.BattleRes.HideTimer,ExRT.L.BattleResHideTimeTooltip,nil,"ExRTCheckButtonModernTemplate")
-	self.hideTimerChk:SetScript("OnClick", function(self,event) 
+	self.hideTimerChk = ELib:Check(self,L.BattleResHideTime,VExRT.BattleRes.HideTimer):Point(5,-185):Tooltip(L.BattleResHideTimeTooltip):OnClick(function(self) 
 		if self:GetChecked() then
 			VExRT.BattleRes.HideTimer = true
 			module.frame.time:Hide()

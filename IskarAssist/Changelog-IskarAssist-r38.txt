@@ -1,0 +1,248 @@
+2015-10-29  Tercio  <Tercio>
+
+[6a190dcba085] [tip]
+* IskarAssist.lua:
+
+- Text changes to make more clear how to rezise the panel.
+
+
+2015-10-16  Tercio  <Tercio>
+
+[741f7e28dcef]
+* IskarAssist.lua:
+
+- version bump.
+
+
+[2f38729d6c4b]
+* Libs/DF/cooltip.lua, Libs/DF/fw.lua, Libs/DF/panel.lua:
+
+- framework update.
+
+
+2015-09-27  Tercio  <Tercio>
+
+[45913e330f8c]
+* IskarAssist.lua:
+
+- users panel now show in the center of the screen.
+- framework update.
+
+
+[64944f08541d]
+* IskarAssist.lua:
+
+- users panel now show in the center of the screen.
+- framework update.
+
+
+2015-09-24  Tercio  <Tercio>
+
+[1005ebe25940]
+* IskarAssist.lua, Libs/DF/fw.lua, Libs/DF/normal_bar.lua, Libs/DF/slider.lua:
+
+- users panel now show in the center of the screen.
+- framework update.
+
+
+2015-09-14  Tercio  <Tercio>
+
+[bd2875382027]
+* IskarAssist.lua, Libs/DF/colors.lua, Libs/DF/fw.lua, Libs/DF/normal_bar.lua, Libs/DF/normal_bar.xml:
+
+- details framework update.
+
+
+2015-09-11  Tercio  <Tercio>
+
+[739881134aa3]
+* IskarAssist.lua:
+
+- v0.16c release
+- framework updated.
+
+
+2015-09-08  Tercio  <Tercio>
+
+[fdaf34162750]
+* IskarAssist.lua, Libs/DF/button.lua, Libs/DF/dropdown.lua, Libs/DF/dropdown.xml, Libs/DF/fw.lua, Libs/DF/label.lua, Libs/DF/normal_bar.lua, Libs/DF/panel.lua, Libs/DF/pictureedit.lua, Libs/DF/slider.lua, Libs/DF/split_bar.lua, Libs/DF/textentry.lua:
+
+- framework update.
+
+
+2015-08-23  Tercio  <Tercio>
+
+[82fcd5cfd973]
+* IskarAssist.lua:
+
+- added option for change the position of the stack counter.
+
+
+2015-08-21  Tercio  <Tercio>
+
+[406c74531421]
+* IskarAssist.lua:
+
+- added option for change the position of the stack counter.
+
+
+2015-08-06  Tercio  <Tercio>
+
+[5dfc58a3c82b]
+* IskarAssist.lua:
+
+- stack number was a bit to high.
+
+
+2015-08-05  Tercio  <Tercio>
+
+[bbadc16c3831]
+* IskarAssist.lua:
+
+- increased the stack font size.
+- removed some debug lines.
+
+
+2015-08-04  Tercio  <Tercio>
+
+[0a41e62d6f85]
+* IskarAssist.lua:
+
+v0.15 release
+
+
+2015-07-30  Tercio  <Tercio>
+
+[c7925503470d]
+* IskarAssist.lua:
+
+- Fixed the purple border for the chains debuff.
+- Health bars now works when the player is affected by phantasmal wounds.
+- Added options for change the strata level.
+- Added stack count for the radiance of anzu debuff.
+
+
+2015-07-26  Tercio  <Tercio>
+
+[0995ebcc10c8]
+* IskarAssist.lua:
+
+- improved the archimonde radar.
+- removed the cooldown bars for fel bomb and conduit.
+- details framework update.
+
+
+[61082dfeb984]
+* IskarAssist.lua, Libs/DF/addon.lua, Libs/DF/button.lua, Libs/DF/colors.lua, Libs/DF/cooltip.lua, Libs/DF/dropdown.lua, Libs/DF/fw.lua, Libs/DF/help.lua, Libs/DF/label.lua, Libs/DF/normal_bar.lua, Libs/DF/panel.lua, Libs/DF/picture.lua, Libs/DF/pictureedit.lua, Libs/DF/scrollbar.lua, Libs/DF/slider.lua, Libs/DF/split_bar.lua, Libs/DF/textentry.lua, gl/gl2.lua:
+
+- improved the archimonde radar.
+- removed the cooldown bars for fel bomb and conduit.
+- details framework update.
+
+
+2015-07-22  Tercio  <Tercio>
+
+[80968bedc123]
+* IskarAssist.lua:
+
+- fixed an error with the new cooldown timers.
+
+
+[e56d339c06d8]
+* IskarAssist.lua:
+
+- fixed fel condiut timer when the encounter is gone.
+
+
+2015-07-21  Tercio  <Tercio>
+
+[c492fa7a797c]
+* IskarAssist.lua, IskarAssist.toc, gl/1-1.tga, gl/1-128.tga, gl/1-16.tga, gl/1-2.tga, gl/1-32.tga, gl/1-4.tga, gl/1-64.tga, gl/1-8.tga, gl/balls.tga, gl/gl2.lua, gl/line.tga, gl/sline.tga, gl/smallline.tga, gl/thinline.tga, gl/triangle.tga:
+
+- added a radar for archimonde encounter.
+- added cooldown bars for fel conduit and bomb drop.
+
+
+2015-07-20  Tercio  <Tercio>
+
+[cb4fe43431fa]
+* IskarAssist.lua, Libs/DF/all_addons.psd, Libs/DF/icons.psd:
+
+- added a close button for users panel.
+- removed zone_changed event.
+- few improvements on show/hide rules.
+
+
+2015-07-18  Tercio  <Tercio>
+
+[3da7f901fe48]
+* IskarAssist.lua, Libs/DF/button.lua, Libs/DF/panel.lua:
+
+- update on lib details framework.
+
+
+2015-07-16  Tercio  <Tercio>
+
+[b6eec63212cc]
+* IskarAssist.lua:
+
+- Added Darkbindings aura.
+
+
+[3ca3b642916f]
+* IskarAssist.lua:
+
+- Added Darkbindings aura.
+
+
+2015-07-13  Tercio  <Tercio>
+
+[9b761c5ff6b4]
+* IskarAssist.lua:
+
+- Added warlock dispell.
+
+
+2015-06-30  Tercio  <Tercio>
+
+[f8fd38081fb2]
+* IskarAssist.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-TreeGroup.lua, Libs/libs.xml:
+
+- middle click now select the player.
+- added options to select which debuff want to show.
+- several bug fixes.
+
+
+2015-06-26  Tercio  <Tercio>
+
+[ef7381b3d334]
+* IskarAssist.lua, Libs/AceAddon-3.0/AceAddon-3.0.lua, Libs/AceAddon-3.0/AceAddon-3.0.xml, Libs/AceConfig-3.0/AceConfig-3.0.lua, Libs/AceConfig-3.0/AceConfig-3.0.xml, Libs/AceConfig-3.0/AceConfigCmd-3.0/AceConfigCmd-3.0.lua, Libs/AceConfig-3.0/AceConfigCmd-3.0/AceConfigCmd-3.0.xml, Libs/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.lua, Libs/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.xml, Libs/AceConfig-3.0/AceConfigRegistry-3.0/AceConfigRegistry-3.0.lua, Libs/AceConfig-3.0/AceConfigRegistry-3.0/AceConfigRegistry-3.0.xml, Libs/AceDB-3.0/AceDB-3.0.lua, Libs/AceDB-3.0/AceDB-3.0.xml, Libs/AceDBOptions-3.0/AceDBOptions-3.0.lua, Libs/AceDBOptions-3.0/AceDBOptions-3.0.xml, Libs/AceGUI-3.0/AceGUI-3.0.lua, Libs/AceGUI-3.0/AceGUI-3.0.xml, Libs/AceGUI-3.0/widgets/AceGUIContainer-BlizOptionsGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-DropDownGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-Frame.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-InlineGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-ScrollFrame.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-SimpleGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-TabGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-TreeGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-Window.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Button.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-CheckBox.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-ColorPicker.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-DropDown-Items.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-DropDown.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-EditBox.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Heading.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Icon.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-InteractiveLabel.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Keybinding.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Label.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-MultiLineEditBox.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Slider.lua, Libs/AceLocale-3.0/AceLocale-3.0.lua, Libs/AceLocale-3.0/AceLocale-3.0.xml, Libs/LibDBIcon-1.0/LibDBIcon-1.0.lua, Libs/LibDataBroker-1.1/LibDataBroker-1.1.lua, Libs/libs.xml:
+
+- added missing libraries.
+- added sort like grid unit frames.
+
+
+[a08d72b025aa]
+* IskarAssist.lua, Libs/DF/addon.lua, Libs/DF/fw.lua, Libs/DF/panel.lua:
+
+- added sort like grid unit frames.
+
+
+2015-06-24  Tercio  <Tercio>
+
+[53b219b984a0]
+* IskarAssist.lua:
+
+- Fixed a bug where cound't pass the eye and debuffs wans't show when the frames are sorted alphabetically.
+- Options panel can't be opened during combat any more.
+- Added dispel ready icon on healers.
+
+
+[dfeff7163ed7]
+* IskarAssist.lua:
+
+- Fixed a bug where cound't pass the eye and debuffs wans't show when the frames are sorted alphabetically.
+- Options panel can't be opened during combat any more.
+- Added dispel ready icon on healers.
+
+

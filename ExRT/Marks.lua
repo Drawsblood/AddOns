@@ -5,7 +5,7 @@ local UnitName, GetRaidTargetIndex, SetRaidTargetIcon = UnitName, GetRaidTargetI
 local VExRT = nil
 
 local module = ExRT.mod:New("Marks",ExRT.L.Marks,nil,true)
-
+local ELib,L = ExRT.lib,ExRT.L
 
 function module.main:ADDON_LOADED()
 	VExRT = _G.VExRT
@@ -73,37 +73,32 @@ function module.options:Load()
 
 	self.namesEditBox = {}
 	for i=1,8 do
-		self.namesEditBox[i] = ExRT.lib.CreateEditBox(self,600,20,nil,45,-65-(i-1)*24,nil,nil,nil,"ExRTInputBoxModernTemplate",VExRT.Marks.list[i])
+		self.namesEditBox[i] = ELib:Edit(self):Size(600,20):Point(45,-65-(i-1)*24):Text(VExRT.Marks.list[i]):OnChange(MarksEditBoxTextChanged)
 		self.namesEditBox[i]._i = i
-		self.namesEditBox[i]:SetScript("OnTextChanged",MarksEditBoxTextChanged)
-		
-		self.namesEditBox[i].icon = ExRT.lib.CreateIcon(self.namesEditBox[i],22,nil,0,0,"Interface\\TargetingFrame\\UI-RaidTargetingIcon_"..i)
-		ExRT.lib.SetPoint(self.namesEditBox[i].icon,"RIGHT",self.namesEditBox[i],"LEFT",-5,0)
+		self.namesEditBox[i].icon = ELib:Icon(self.namesEditBox[i],"Interface\\TargetingFrame\\UI-RaidTargetingIcon_"..i,22):Point("RIGHT",self.namesEditBox[i],"LEFT",-5,0)
 	end
 
-	self.showButton = ExRT.lib.CreateButton(self,632,20,"TOP",0,-35,ExRT.L.senable,nil,ExRT.L.MarksTooltip,"ExRTButtonModernTemplate")
-	self.showButton:SetScript("OnClick",function (self)
+	self.showButton = ELib:Button(self,L.senable):Size(632,20):Point("TOP",0,-35):Tooltip(L.MarksTooltip):OnClick(function (self)
 		if not module.Enabled then
-			self:SetText(ExRT.L.MarksDisable)
+			self:SetText(L.MarksDisable)
 			module:Enable()
 		else
-			self:SetText(ExRT.L.senable)
+			self:SetText(L.senable)
 			module:Disable()
 		end
 	end)
 	if module.Enabled then
-		self.showButton:SetText(ExRT.L.MarksDisable)
+		self.showButton:SetText(L.MarksDisable)
 	end
 	self.showButton:SetScript("OnShow",function (self)
 		if module.Enabled then
-			self:SetText(ExRT.L.MarksDisable)
+			self:SetText(L.MarksDisable)
 		else
-			self:SetText(ExRT.L.senable)
+			self:SetText(L.senable)
 		end
 	end)
 	
-	self.clearButton = ExRT.lib.CreateButton(self,632,20,"TOP",0,-265,ExRT.L.MarksClear,nil,nil,"ExRTButtonModernTemplate")
-	self.clearButton:SetScript("OnClick",function ()
+	self.clearButton = ELib:Button(self,L.MarksClear):Size(632,20):Point("TOP",0,-265):OnClick(function ()
 		module:ClearNames()
 		for i=1,8 do
 			self.namesEditBox[i]:SetText("")

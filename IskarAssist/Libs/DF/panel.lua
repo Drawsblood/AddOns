@@ -1,11 +1,10 @@
 
 local DF = _G ["DetailsFramework"]
-local _
-
-if (not DF) then -- or not DetailsFrameWorkLoadValid
+if (not DF or not DetailsFrameworkCanLoad) then
 	return 
 end
 
+local _
 --> lua locals
 local _rawset = rawset --> lua local
 local _rawget = rawget --> lua local
@@ -260,11 +259,9 @@ local simple_panel_counter = 1
 	function PanelMetaFunctions:SetBackdropColor (color, arg2, arg3, arg4)
 		if (arg2) then
 			self.frame:SetBackdropColor (color, arg2, arg3, arg4 or 1)
-			self.frame.Gradient.OnLeave = {color, arg2, arg3, arg4 or 1}
 		else
 			local _value1, _value2, _value3, _value4 = DF:ParseColors (color)
 			self.frame:SetBackdropColor (_value1, _value2, _value3, _value4)
-			self.frame.Gradient.OnLeave = {_value1, _value2, _value3, _value4}
 		end
 	end
 	
@@ -275,16 +272,6 @@ local simple_panel_counter = 1
 		end
 		local _value1, _value2, _value3, _value4 = DF:ParseColors (color)
 		self.frame:SetBackdropBorderColor (_value1, _value2, _value3, _value4)
-	end
-	
--- gradient colors
-	function PanelMetaFunctions:SetGradient (FadeType, color)
-		local _value1, _value2, _value3, _value4 = DF:ParseColors (color)
-		if (FadeType == "OnEnter") then
-			self.frame.Gradient.OnEnter = {_value1, _value2, _value3, _value4}
-		elseif (FadeType == "OnLeave") then
-			self.frame.Gradient.OnLeave = {_value1, _value2, _value3, _value4}
-		end
 	end
 	
 -- tooltip
@@ -322,14 +309,6 @@ local simple_panel_counter = 1
 		else
 			self.widget:SetFrameStrata (strata)
 		end
-	end
-	
--- enable and disable gradients
-	function PanelMetaFunctions:DisableGradient()
-		self.GradientEnabled = false
-	end
-	function PanelMetaFunctions:EnableGradient()
-		self.GradientEnabled = true
 	end
 
 --> hooks
@@ -490,7 +469,6 @@ function DF:NewPanel (parent, container, name, member, w, h, backdrop, backdropc
 		PanelObject.OnMouseUpHook = nil
 		--> misc
 		PanelObject.is_locked = true
-		PanelObject.GradientEnabled = true
 		PanelObject.container = container
 		PanelObject.rightButtonClose = false
 	
@@ -503,7 +481,7 @@ function DF:NewPanel (parent, container, name, member, w, h, backdrop, backdropc
 		for funcName, funcAddress in pairs (idx) do 
 			if (not PanelMetaFunctions [funcName]) then
 				PanelMetaFunctions [funcName] = function (object, ...)
-					local x = loadstring ( "return _G."..object.frame:GetName()..":"..funcName.."(...)")
+					local x = loadstring ( "return _G['"..object.frame:GetName().."']:"..funcName.."(...)")
 					return x (...)
 				end
 			end
@@ -551,10 +529,330 @@ local button_on_leave = function (self)
 	self.MyObject._icon:SetBlendMode ("BLEND")
 end
 
-function DF:CreateFillPanel (parent, rows, name, member, w, h, total_lines, fill_row, autowidth, options)
-	return DF:NewFillPanel (parent, rows, name, member, w, h, total_lines, fill_row, autowidth, options)
+local add_row = function (self, t, need_update)
+	local index = #self.rows+1
+	
+	local thisrow = DF:NewPanel (self, self, "$parentHeader_" .. self._name .. index, nil, 1, 20)
+	thisrow.backdrop = {bgFile = [[Interface\DialogFrame\UI-DialogBox-Gold-Background]]}
+	thisrow.color = "silver"
+	thisrow.type = t.type
+	thisrow.func = t.func
+	thisrow.name = t.name
+	thisrow.notext = t.notext
+	thisrow.icon = t.icon
+	thisrow.iconalign = t.iconalign
+	
+	thisrow.hidden = t.hidden or false
+	
+	local text = DF:NewLabel (thisrow, nil, self._name .. "$parentLabel" .. index, "text")
+	text:SetPoint ("left", thisrow, "left", 2, 0)
+	text:SetText (t.name)
+
+	tinsert (self._raw_rows, t)
+	tinsert (self.rows, thisrow)
+	
+	if (need_update) then
+		self:AlignRows()
+	end
 end
 
+local align_rows = function (self)
+
+	local rows_shown = 0
+	for index, row in ipairs (self.rows) do
+		if (not row.hidden) then
+			rows_shown = rows_shown + 1
+		end
+	end
+
+	local cur_width = 0
+	local row_width = self._width / rows_shown
+
+	local sindex = 1
+	
+	wipe (self._anchors)
+	
+	for index, row in ipairs (self.rows) do
+		if (not row.hidden) then
+			if (self._autowidth) then
+				if (self._raw_rows [index].width) then
+					row.width = self._raw_rows [index].width
+				else
+					row.width = row_width
+				end
+				row:SetPoint ("topleft", self, "topleft", cur_width, 0)
+				tinsert (self._anchors, cur_width)
+				cur_width = cur_width + row_width + 1
+			else
+				row:SetPoint ("topleft", self, "topleft", cur_width, 0)
+				row.width = self._raw_rows [index].width
+				tinsert (self._anchors, cur_width)
+				cur_width = cur_width + self._raw_rows [index].width + 1
+			end
+			row:Show()
+
+			local type = row.type
+
+			if (type == "text") then
+				for i = 1, #self.scrollframe.lines do
+					local line = self.scrollframe.lines [i]
+					local text = tremove (line.text_available)
+					if (not text) then
+						self:CreateRowText (line)
+						text = tremove (line.text_available)
+					end
+					tinsert (line.text_inuse, text)
+					text:SetPoint ("left", line, "left", self._anchors [#self._anchors], 0)
+					text:SetWidth (row.width)
+				end
+			elseif (type == "entry") then
+				for i = 1, #self.scrollframe.lines do
+					local line = self.scrollframe.lines [i]
+					local entry = tremove (line.entry_available)
+					if (not entry) then
+						self:CreateRowEntry (line)
+						entry = tremove (line.entry_available)
+					end
+					tinsert (line.entry_inuse, entry)
+					entry:SetPoint ("left", line, "left", self._anchors [#self._anchors], 0)
+					if (sindex == rows_shown) then
+						entry:SetWidth (row.width - 25)
+					else
+						entry:SetWidth (row.width)
+					end
+					entry.func = row.func
+				end
+			elseif (type == "button") then
+				for i = 1, #self.scrollframe.lines do
+					local line = self.scrollframe.lines [i]
+					local button = tremove (line.button_available)
+					if (not button) then
+						self:CreateRowButton (line)
+						button = tremove (line.button_available)
+					end
+					tinsert (line.button_inuse, button)
+					button:SetPoint ("left", line, "left", self._anchors [#self._anchors], 0)
+					if (sindex == rows_shown) then
+						button:SetWidth (row.width - 25)
+					else
+						button:SetWidth (row.width)
+					end
+					
+					if (row.icon) then
+						button._icon.texture = row.icon
+						button._icon:ClearAllPoints()
+						if (row.iconalign) then
+							if (row.iconalign == "center") then
+								button._icon:SetPoint ("center", button, "center")
+							elseif (row.iconalign == "right") then
+								button._icon:SetPoint ("right", button, "right")
+							end
+						else
+							button._icon:SetPoint ("left", button, "left")
+						end
+					end
+					
+					if (row.name and not row.notext) then
+						button._text:SetPoint ("left", button._icon, "right", 2, 0)
+						button._text.text = row.name
+					end					
+					
+				end
+			elseif (type == "icon") then
+				for i = 1, #self.scrollframe.lines do
+					local line = self.scrollframe.lines [i]
+					local icon = tremove (line.icon_available)
+					if (not icon) then
+						self:CreateRowIcon (line)
+						icon = tremove (line.icon_available)
+					end
+					tinsert (line.icon_inuse, icon)
+					icon:SetPoint ("left", line, "left", self._anchors [#self._anchors] + ( ((row.width or 22) - 22) / 2), 0)
+					icon.func = row.func
+				end
+			end
+			
+			sindex = sindex + 1
+		else
+			row:Hide()
+		end
+	end
+	
+	if (#self.rows > 0) then
+		if (self._autowidth) then
+			self.rows [#self.rows]:SetWidth (row_width - rows_shown + 1)
+		else
+			self.rows [#self.rows]:SetWidth (self._raw_rows [rows_shown].width - rows_shown + 1)
+		end
+	end
+	
+	self.showing_amt = rows_shown
+end
+
+local update_rows = function (self, updated_rows)
+	for i = 1, #updated_rows do
+		local t = updated_rows [i]
+		local raw = self._raw_rows [i]
+		
+		if (not raw) then
+			self:AddRow (t)
+		else
+			raw.name = t.name
+			raw.hidden = t.hidden or false
+			
+			local widget = self.rows [i]
+			widget.name = t.name
+			widget.hidden = t.hidden or false
+			
+			widget.text:SetText (t.name)
+		end
+	end
+	
+	for i = #updated_rows+1, #self._raw_rows do
+		local raw = self._raw_rows [i]
+		local widget = self.rows [i]
+		raw.hidden = true
+		widget.hidden = true
+	end
+	
+	for index, row in ipairs (self.scrollframe.lines) do
+		for i = #row.text_inuse, 1, -1 do
+			tinsert (row.text_available, tremove (row.text_inuse, i))
+		end
+		for i = 1, #row.text_available do
+			row.text_available[i]:Hide()
+		end
+		
+		for i = #row.entry_inuse, 1, -1 do
+			tinsert (row.entry_available, tremove (row.entry_inuse, i))
+		end
+		for i = 1, #row.entry_available do
+			row.entry_available[i]:Hide()
+		end
+		
+		for i = #row.button_inuse, 1, -1 do
+			tinsert (row.button_available, tremove (row.button_inuse, i))
+		end
+		for i = 1, #row.button_available do
+			row.button_available[i]:Hide()
+		end
+		
+		for i = #row.icon_inuse, 1, -1 do
+			tinsert (row.icon_available, tremove (row.icon_inuse, i))
+		end
+		for i = 1, #row.icon_available do
+			row.icon_available[i]:Hide()
+		end
+	end
+	
+	self.current_header = updated_rows
+	
+	self:AlignRows()
+
+end
+
+local create_panel_text = function (self, row)
+	row.text_total = row.text_total + 1
+	local text = DF:NewLabel (row, nil, self._name .. "$parentLabel" .. row.text_total, "text" .. row.text_total)
+	tinsert (row.text_available, text)
+end
+
+local create_panel_entry = function (self, row)
+	row.entry_total = row.entry_total + 1
+	local editbox = DF:NewTextEntry (row, nil, "$parentEntry" .. row.entry_total, "entry", 120, 20)
+	editbox.align = "left"
+	
+	editbox:SetHook ("OnEnterPressed", function()
+		editbox.widget.focuslost = true
+		editbox:ClearFocus()
+		editbox.func (editbox.index, editbox.text)
+		return true
+	end) 
+	
+	editbox:SetBackdrop ({bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]], edgeFile = "Interface\\ChatFrame\\ChatFrameBackground", edgeSize = 1})
+	editbox:SetBackdropColor (1, 1, 1, 0.1)
+	editbox:SetBackdropBorderColor (1, 1, 1, 0.1)
+	editbox.editbox.current_bordercolor = {1, 1, 1, 0.1}
+	
+	tinsert (row.entry_available, editbox)
+end
+
+local create_panel_button = function (self, row)
+	row.button_total = row.button_total + 1
+	local button = DF:NewButton (row, nil, "$parentButton" .. row.button_total, "button" .. row.button_total, 120, 20)
+	--, nil, nil, nil, nil, nil, nil, DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE")
+	--button:InstallCustomTexture()
+
+	--> create icon and the text
+	local icon = DF:NewImage (button, nil, 20, 20)
+	local text = DF:NewLabel (button)
+	
+	button._icon = icon
+	button._text = text
+
+	button:SetHook ("OnEnter", button_on_enter)
+	button:SetHook ("OnLeave", button_on_leave)
+	
+	tinsert (row.button_available, button)
+end
+
+local icon_onclick = function (texture, iconbutton)
+	iconbutton._icon.texture = texture
+	iconbutton.func (iconbutton.index, texture)
+end
+
+local create_panel_icon = function (self, row)
+	row.icon_total = row.icon_total + 1
+	local iconbutton = DF:NewButton (row, nil, "$parentIconButton" .. row.icon_total, "iconbutton", 22, 20)
+	iconbutton:InstallCustomTexture()
+	
+	iconbutton:SetHook ("OnEnter", button_on_enter)
+	iconbutton:SetHook ("OnLeave", button_on_leave)
+	
+	iconbutton:SetHook ("OnMouseUp", function()
+		DF:IconPick (icon_onclick, true, iconbutton)
+		return true
+	end)
+	
+	local icon = DF:NewImage (iconbutton, nil, 20, 20, "artwork", nil, "_icon", "$parentIcon" .. row.icon_total)
+	iconbutton._icon = icon
+
+	icon:SetPoint ("center", iconbutton, "center", 0, 0)
+
+	tinsert (row.icon_available, iconbutton)
+end
+
+local set_fill_function = function (self, func)
+	self._fillfunc = func
+end
+local set_total_function = function (self, func)
+	self._totalfunc = func
+end
+local drop_header_function = function (self)
+	wipe (self.rows)
+end
+
+local fillpanel_update_size = function (self, elapsed)
+	local panel = self.MyObject
+	
+	panel._width = panel:GetWidth()
+	panel._height = panel:GetHeight()
+		
+	panel:UpdateRowAmount()
+	if (panel.current_header) then
+		update_rows (panel, panel.current_header)
+	end
+	panel:Refresh()
+	
+	self:SetScript ("OnUpdate", nil)
+end
+
+ -- ~fillpanel
+  --alias
+function DF:CreateFillPanel (parent, rows, w, h, total_lines, fill_row, autowidth, options, member, name)
+	return DF:NewFillPanel (parent, rows, name, member, w, h, total_lines, fill_row, autowidth, options)
+end
+ 
 function DF:NewFillPanel (parent, rows, name, member, w, h, total_lines, fill_row, autowidth, options)
 	
 	local panel = DF:NewPanel (parent, parent, name, member, w, h)
@@ -562,134 +860,143 @@ function DF:NewFillPanel (parent, rows, name, member, w, h, total_lines, fill_ro
 	
 	options = options or {rowheight = 20}
 	panel.rows = {}
-
+	
+	panel.AddRow = add_row
+	panel.AlignRows = align_rows
+	panel.UpdateRows = update_rows
+	panel.CreateRowText = create_panel_text
+	panel.CreateRowEntry = create_panel_entry
+	panel.CreateRowButton = create_panel_button
+	panel.CreateRowIcon = create_panel_icon
+	panel.SetFillFunction = set_fill_function
+	panel.SetTotalFunction = set_total_function
+	panel.DropHeader = drop_header_function
+	
+	panel._name = name
+	panel._width = w
+	panel._height = h
+	panel._raw_rows = {}
+	panel._anchors = {}
+	panel._fillfunc = fill_row
+	panel._totalfunc = total_lines
+	panel._autowidth = autowidth
+	
+	panel:SetScript ("OnSizeChanged", function() 
+		panel:SetScript ("OnUpdate", fillpanel_update_size)
+	end)
+	
 	for index, t in ipairs (rows) do 
-		local thisrow = DF:NewPanel (panel, panel, "$parentHeader_" .. name .. index, nil, 1, 20)
-		thisrow.backdrop = {bgFile = [[Interface\DialogFrame\UI-DialogBox-Gold-Background]]}
-		thisrow.color = "silver"
-		thisrow.type = t.type
-		thisrow.func = t.func
-		thisrow.name = t.name
-		thisrow.notext = t.notext
-		thisrow.icon = t.icon
-		thisrow.iconalign = t.iconalign
-		
-		local text = DF:NewLabel (thisrow, nil, name .. "$parentLabel", "text")
-		text:SetPoint ("left", thisrow, "left", 2, 0)
-		text:SetText (t.name)
-
-		tinsert (panel.rows, thisrow)
-	end
-
-	local cur_width = 0
-	local row_width = w / #rows
-	
-	local anchors = {}
-	
-	for index, row in ipairs (panel.rows) do
-		if (autowidth) then
-			row:SetWidth (row_width)
-			row:SetPoint ("topleft", panel, "topleft", cur_width, 0)
-			tinsert (anchors, cur_width)
-			cur_width = cur_width + row_width + 1
-		else
-			row:SetPoint ("topleft", panel, "topleft", cur_width, 0)
-			row.width = rows [index].width
-			tinsert (anchors, cur_width)
-			cur_width = cur_width + rows [index].width + 1
-		end
-	end
-	
-	if (autowidth) then
-		panel.rows [#panel.rows]:SetWidth (row_width - #rows + 1)
-	else
-		panel.rows [#panel.rows]:SetWidth (rows [#rows].width - #rows + 1)
+		panel.AddRow (panel, t)
 	end
 	
 	local refresh_fillbox = function (self)
+	
 		local offset = FauxScrollFrame_GetOffset (self)
-		local filled_lines = total_lines()
-		
+		local filled_lines = panel._totalfunc (panel)		
+	
 		for index = 1, #self.lines do
-		
+	
 			local row = self.lines [index]
 			if (index <= filled_lines) then
-			
+
 				local real_index = index + offset
-			
-				local results = fill_row (real_index)
+				local results = panel._fillfunc (real_index, panel)
 				
 				if (results [1]) then
-				
 					row:Show()
-					
-					for i = 1, #row.row_widgets do
-					
-						row.row_widgets [i].index = real_index
-						
-						if (panel.rows [i].type == "icon") then
 
-							local result = results [i]:gsub (".-%\\", "")
-							row.row_widgets [i]._icon.texture = results [i]
-						
-						elseif (panel.rows [i].type == "button") then
-						
-							if (type (results [i]) == "table") then
+					local text, entry, button, icon = 1, 1, 1, 1
+					
+					for index, t in ipairs (panel.rows) do
+						if (not t.hidden) then
+							if (t.type == "text") then
+								local fontstring = row.text_inuse [text]
+								text = text + 1
+								fontstring:SetText (results [index])
+								fontstring.index = real_index
+								fontstring:Show()
+
+							elseif (t.type == "entry") then
+								local entrywidget = row.entry_inuse [entry]
+								entry = entry + 1
+								entrywidget:SetText (results [index])
+								entrywidget.index = real_index
+								entrywidget:Show()
+								
+							elseif (t.type == "button") then
+								local buttonwidget = row.button_inuse [button]
+								button = button + 1
+								buttonwidget.index = real_index
 							
-								if (results [i].text) then
-									row.row_widgets [i]:SetText (results [i].text)
+
+							
+								if (type (results [index]) == "table") then
+									if (results [index].text) then
+										buttonwidget:SetText (results [index].text)
+									end
+									
+									if (results [index].icon) then
+										buttonwidget._icon:SetTexture (results [index].icon)
+									end
+									
+									if (results [index].func) then
+										local func = function()
+											t.func (real_index, results [index].value)
+											panel:Refresh()
+										end
+										buttonwidget:SetClickFunction (func)
+									else
+										local func = function()
+											t.func (real_index, index)
+											panel:Refresh()
+										end
+										buttonwidget:SetClickFunction (func)
+									end
+								else
+									local func = function()
+										t.func (real_index, index)
+										panel:Refresh()
+									end
+									buttonwidget:SetClickFunction (func)
+									buttonwidget:SetText (results [index])
 								end
 								
-								if (results [i].icon) then
-									row.row_widgets [i]._icon:SetTexture (results [i].icon)
-								end
+								buttonwidget:Show()
 								
-								if (results [i].func) then
-									row.row_widgets [i]:SetClickFunction (results [i].func, real_index, results [i].value)
-								end
-
-							else
-								row.row_widgets [i]:SetText (results [i])
+							elseif (t.type == "icon") then
+								local iconwidget = row.icon_inuse [icon]
+								icon = icon + 1
+								
+								iconwidget.line = index
+								iconwidget.index = real_index
+								
+								local result = results [index]:gsub (".-%\\", "")
+								iconwidget._icon.texture = results [index]
+								
+								iconwidget:Show()
 							end
-							
-						else
-							--> text
-							row.row_widgets [i]:SetText (results [i])
-							if (panel.rows [i].type == "entry") then
-								row.row_widgets [i]:SetCursorPosition (0)
-							end
-							
 						end
 					end
-					
+
 				else
 					row:Hide()
-					for i = 1, #row.row_widgets do
-						row.row_widgets [i]:SetText ("")
-						if (panel.rows [i].type == "icon") then
-							row.row_widgets [i]._icon.texture = ""
-						end
-					end
 				end
 			else
 				row:Hide()
-				for i = 1, #row.row_widgets do
-					row.row_widgets [i]:SetText ("")
-					if (panel.rows [i].type == "icon") then
-						row.row_widgets [i]._icon.texture = ""
-					end
-				end
 			end
 		end
 	end
 	
 	function panel:Refresh()
-		local filled_lines = total_lines()
+		if (type (panel._totalfunc) == "boolean") then
+			--> not yet initialized
+			return
+		end
+		local filled_lines = panel._totalfunc (panel)
 		local scroll_total_lines = #panel.scrollframe.lines
 		local line_height = options.rowheight
-		
-		FauxScrollFrame_Update (panel.scrollframe, filled_lines, scroll_total_lines, line_height)
 		refresh_fillbox (panel.scrollframe)
+		FauxScrollFrame_Update (panel.scrollframe, filled_lines, scroll_total_lines, line_height)
 	end
 	
 	local scrollframe = CreateFrame ("scrollframe", name .. "Scroll", panel.widget, "FauxScrollFrameTemplate")
@@ -703,132 +1010,47 @@ function DF:NewFillPanel (parent, rows, name, member, w, h, total_lines, fill_ro
 	scrollframe.lines = {}
 	
 	--create lines
-	local size = options.rowheight
-	local amount = math.floor (((h-21) / size))
-	
-	
-	for i = 1, amount do
-	
-		local row = DF:NewPanel (panel, nil, "$parentRow_" .. i, nil, 1, size)
-		row.backdrop = {bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]]}
-		row.color = {1, 1, 1, .2}
-		row:SetPoint ("topleft", scrollframe, "topleft", 0, (i-1) * size * -1)
-		row:SetPoint ("topright", scrollframe, "topright", 0, (i-1) * size * -1)
-		tinsert (scrollframe.lines, row)
-		
-		row.row_widgets = {}
-		
-		for o = 1, #rows do
-		
-			local _type = panel.rows [o].type
+	function panel:UpdateRowAmount()
+		local size = options.rowheight
+		local amount = math.floor (((panel._height-21) / size))
 
-			if (_type == "text") then
+		for i = #scrollframe.lines+1, amount do
+			local row = CreateFrame ("frame", panel:GetName() .. "Row_" .. i, panel.widget)
+			row:SetSize (1, size)
+			row.color = {1, 1, 1, .2}
 			
-				--> create text
-				local text = DF:NewLabel (row, nil, name .. "$parentLabel" .. o, "text" .. o)
-				text:SetPoint ("left", row, "left", anchors [o], 0)
-				
-				--> insert in the table
-				tinsert (row.row_widgets, text)
+			row:SetBackdrop ({bgFile = [[Interface\Tooltips\UI-Tooltip-Background]]})
 			
-			elseif (_type == "entry") then
-			
-				--> create editbox
-				local editbox = DF:NewTextEntry (row, nil, "$parentEntry" .. o, "entry", panel.rows [o].width, 20, panel.rows [o].func, i, o)
-				editbox.align = "left"
-				editbox:SetHook ("OnEnterPressed", function()
-					editbox.widget.focuslost = true
-					editbox:ClearFocus()
-					editbox.func (editbox.index, editbox.text)
-					return true
-				end) 
-				editbox:SetPoint ("left", row, "left", anchors [o], 0)
-				editbox:SetBackdrop ({bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]], edgeFile = "Interface\\ChatFrame\\ChatFrameBackground", edgeSize = 1})
-				editbox:SetBackdropColor (1, 1, 1, 0.1)
-				editbox:SetBackdropBorderColor (1, 1, 1, 0.1)
-				editbox.editbox.current_bordercolor = {1, 1, 1, 0.1}
-				
-				--> insert in the table
-				tinsert (row.row_widgets, editbox)
-			
-			elseif (_type == "button") then
-			
-				--> create button
-				local button = DF:NewButton (row, nil, "$parentButton" .. o, "button", panel.rows [o].width, 20)
-				
-				local func = function()
-					panel.rows [o].func (button.index, o)
-					panel:Refresh()
-				end
-				button:SetClickFunction (func)
-				
-				button:SetPoint ("left", row, "left", anchors [o], 0)
-				
-				--> create icon and the text
-				local icon = DF:NewImage (button, nil, 20, 20)
-				local text = DF:NewLabel (button)
-				
-				button._icon = icon
-				button._text = text
-
-				button:SetHook ("OnEnter", button_on_enter)
-				button:SetHook ("OnLeave", button_on_leave)
-
-				if (panel.rows [o].icon) then
-					icon.texture = panel.rows [o].icon
-					if (panel.rows [o].iconalign) then
-						if (panel.rows [o].iconalign == "center") then
-							icon:SetPoint ("center", button, "center")
-						elseif (panel.rows [o].iconalign == "right") then
-							icon:SetPoint ("right", button, "right")
-						end
-					else
-						icon:SetPoint ("left", button, "left")
-					end
-				end
-				
-				if (panel.rows [o].name and not panel.rows [o].notext) then
-					text:SetPoint ("left", icon, "right", 2, 0)
-					text.text = panel.rows [o].name
-				end
-
-				--> inser in the table
-				tinsert (row.row_widgets, button)
-			
-			elseif (_type == "icon") then
-			
-				--> create button and icon
-				local iconbutton = DF:NewButton (row, nil, "$parentIconButton" .. o, "iconbutton", 22, 20)
-				iconbutton:InstallCustomTexture()
-				
-				iconbutton:SetHook ("OnEnter", button_on_enter)
-				iconbutton:SetHook ("OnLeave", button_on_leave)
-				
-				--iconbutton:InstallCustomTexture()
-				local icon = DF:NewImage (iconbutton, nil, 20, 20, "artwork", nil, "_icon", "$parentIcon" .. o)
-				iconbutton._icon = icon
-				
-				iconbutton:SetPoint ("left", row, "left", anchors [o] + ( (panel.rows [o].width - 22) / 2), 0)
-				icon:SetPoint ("center", iconbutton, "center", 0, 0)
-				
-				--> set functions
-				local function iconcallback (texture)
-					iconbutton._icon.texture = texture
-					panel.rows [o].func (iconbutton.index, texture)
-				end
-				
-				iconbutton:SetClickFunction (function()
-					DF:IconPick (iconcallback, true)
-					return true
-				end)
-				
-				--> insert in the table
-				tinsert (row.row_widgets, iconbutton)
-				
+			if (i%2 == 0) then
+				row:SetBackdropColor (.5, .5, .5, 0.2)
+			else
+				row:SetBackdropColor (1, 1, 1, 0.00)
 			end
-
+			
+			row:SetPoint ("topleft", scrollframe, "topleft", 0, (i-1) * size * -1)
+			row:SetPoint ("topright", scrollframe, "topright", 0, (i-1) * size * -1)
+			tinsert (scrollframe.lines, row)
+			
+			row.text_available = {}
+			row.text_inuse = {}
+			row.text_total = 0
+			
+			row.entry_available = {}
+			row.entry_inuse = {}
+			row.entry_total = 0
+			
+			row.button_available = {}
+			row.button_inuse = {}
+			row.button_total = 0
+			
+			row.icon_available = {}
+			row.icon_inuse = {}
+			row.icon_total = 0
 		end
 	end
+	panel:UpdateRowAmount()
+
+	panel.AlignRows (panel)
 	
 	return panel
 end
@@ -871,7 +1093,7 @@ function DF:ColorPick (frame, r, g, b, alpha, callback)
 end
 
 ------------icon pick
-function DF:IconPick (callback, close_when_select)
+function DF:IconPick (callback, close_when_select, param1, param2)
 
 	if (not DF.IconPickFrame) then 
 	
@@ -980,7 +1202,7 @@ function DF:IconPick (callback, close_when_select)
 		DF.IconPickFrame.buttons = {}
 		
 		local OnClickFunction = function (self) 
-			DF.IconPickFrame.callback (self.icon:GetTexture())
+			DF.IconPickFrame.callback (self.icon:GetTexture(), DF.IconPickFrame.param1, DF.IconPickFrame.param2)
 			if (DF.IconPickFrame.click_close) then
 				close_button:Click()
 			end
@@ -1202,6 +1424,8 @@ function DF:IconPick (callback, close_when_select)
 		
 	end
 	
+	DF.IconPickFrame.param1, DF.IconPickFrame.param2 = param1, param2
+	
 	DF.IconPickFrame:Show()
 	DF.IconPickFrameScroll.update (DF.IconPickFrameScroll)
 	DF.IconPickFrame.callback = callback or DF.IconPickFrame.emptyFunction
@@ -1239,10 +1463,19 @@ local simple_panel_mouse_up = function (self, button)
 	end
 end
 local simple_panel_settitle = function (self, title)
-	self.title:SetText (title)
+	self.Title:SetText (title)
 end
 
-function DF:CreateSimplePanel (parent, w, h, title, name)
+local simple_panel_close_click = function (self)
+	self:GetParent():GetParent():Hide()
+end
+
+local SimplePanel_frame_backdrop = {edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true}
+local SimplePanel_frame_backdrop_color = {0, 0, 0, 0.9}
+local SimplePanel_frame_backdrop_border_color = {0, 0, 0, 1}
+
+local no_options = {}
+function DF:CreateSimplePanel (parent, w, h, title, name, panel_options)
 	
 	if (not name) then
 		name = "DetailsFrameworkSimplePanel" .. simple_panel_counter
@@ -1251,6 +1484,8 @@ function DF:CreateSimplePanel (parent, w, h, title, name)
 	if (not parent) then
 		parent = UIParent
 	end
+	
+	panel_options = panel_options or no_options
 
 	local f = CreateFrame ("frame", name, UIParent)
 	f:SetSize (w or 400, h or 250)
@@ -1258,21 +1493,47 @@ function DF:CreateSimplePanel (parent, w, h, title, name)
 	f:SetFrameStrata ("FULLSCREEN")
 	f:EnableMouse()
 	f:SetMovable (true)
-	tinsert (UISpecialFrames, name)
-
+	f:SetBackdrop (SimplePanel_frame_backdrop)
+	f:SetBackdropColor (unpack (SimplePanel_frame_backdrop_color))
+	f:SetBackdropBorderColor (unpack (SimplePanel_frame_backdrop_border_color))
+	
+	f.DontRightClickClose = panel_options.DontRightClickClose
+	
+	if (not panel_options.NoTUISpecialFrame) then
+		tinsert (UISpecialFrames, name)
+	end
+	
+	local title_bar = CreateFrame ("frame", name .. "TitleBar", f)
+	title_bar:SetPoint ("topleft", f, "topleft", 2, -3)
+	title_bar:SetPoint ("topright", f, "topright", -2, -3)
+	title_bar:SetHeight (20)
+	title_bar:SetBackdrop (SimplePanel_frame_backdrop)
+	title_bar:SetBackdropColor (.2, .2, .2, 1)
+	title_bar:SetBackdropBorderColor (0, 0, 0, 1)
+	f.TitleBar = title_bar
+	
+	local close = CreateFrame ("button", name and name .. "CloseButton", title_bar)
+	close:SetSize (16, 16)
+	close:SetNormalTexture (DF.folder .. "icons")
+	close:SetHighlightTexture (DF.folder .. "icons")
+	close:SetPushedTexture (DF.folder .. "icons")
+	close:GetNormalTexture():SetTexCoord (0, 16/128, 0, 1)
+	close:GetHighlightTexture():SetTexCoord (0, 16/128, 0, 1)
+	close:GetPushedTexture():SetTexCoord (0, 16/128, 0, 1)
+	close:SetAlpha (0.7)
+	close:SetScript ("OnClick", simple_panel_close_click)
+	f.Close = close
+	
+	local title_string = title_bar:CreateFontString (name and name .. "Title", "overlay", "GameFontNormal")
+	title_string:SetTextColor (.8, .8, .8, 1)
+	title_string:SetText (title or "")
+	f.Title = title_string
+	
+	f.Title:SetPoint ("center", title_bar, "center")
+	f.Close:SetPoint ("right", title_bar, "right", -2, 0)
+	
 	f:SetScript ("OnMouseDown", simple_panel_mouse_down)
 	f:SetScript ("OnMouseUp", simple_panel_mouse_up)
-	
-	local bg = f:CreateTexture (nil, "background")
-	bg:SetAllPoints (f)
-	bg:SetTexture (DF.folder .. "background")
-	
-	local close = CreateFrame ("button", name .. "Close", f, "UIPanelCloseButton")
-	close:SetSize (32, 32)
-	close:SetPoint ("topright", f, "topright", 0, -12)
-
-	f.title = DF:CreateLabel (f, title or "", 12, nil, "GameFontNormal")
-	f.title:SetPoint ("top", f, "top", 0, -22)
 	
 	f.SetTitle = simple_panel_settitle
 	
@@ -1324,6 +1585,21 @@ local Panel1PxSetTitle = function (self, text)
 	self.Title:SetText (text or "")
 end
 
+local Panel1PxSetLocked= function (self, lock_state)
+	if (type (lock_state) ~= "boolean") then
+		return
+	end
+	if (lock_state) then
+		-- lock it
+		self.IsLocked = false
+		Panel1PxOnClickLock (self.Lock)
+	else
+		-- unlockit
+		self.IsLocked = true
+		Panel1PxOnClickLock (self.Lock)
+	end
+end
+
 local Panel1PxReadConfig = function (self)
 	local db = self.db
 	if (db) then
@@ -1366,6 +1642,10 @@ function DF:RestoreFramePosition (frame)
 		frame.db.position.y = frame.db.position.y or 0
 		frame:SetPoint ("center", UIParent, "center", frame.db.position.x * UIscale / scale, frame.db.position.y * UIscale / scale)
 	end
+end
+
+local Panel1PxSavePosition= function (self)
+	DF:SavePositionOnScreen (self)
 end
 
 local Panel1PxHasPosition = function (self)
@@ -1446,11 +1726,128 @@ function DF:Create1PxPanel (parent, w, h, title, name, config, title_anchor, no_
 	f.Lock = lock
 	f.Close = close
 	f.HasPosition = Panel1PxHasPosition
+	f.SavePosition = Panel1PxSavePosition
 	
 	f.IsLocked = not f.IsLocked
+	f.SetLocked = Panel1PxSetLocked
 	Panel1PxOnToggleLock (f)
 	
 	return f
+end
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+-- ~prompt
+function DF:ShowPromptPanel (message, func_true, func_false)
+	
+	if (not DF.prompt_panel) then
+		local f = CreateFrame ("frame", "DetailsFrameworkPrompt", UIParent) 
+		f:SetSize (400, 65)
+		f:SetFrameStrata ("DIALOG")
+		f:SetPoint ("center", UIParent, "center", 0, 300)
+		f:SetBackdrop ({edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true})
+		f:SetBackdropColor (0, 0, 0, 0.8)
+		f:SetBackdropBorderColor (0, 0, 0, 1)
+		
+		local prompt = f:CreateFontString (nil, "overlay", "GameFontNormal")
+		prompt:SetPoint ("top", f, "top", 0, -15)
+		prompt:SetJustifyH ("center")
+		f.prompt = prompt
+		
+		local button_true = DF:CreateButton (f, nil, 60, 20, "Yes")
+		button_true:SetPoint ("bottomleft", f, "bottomleft", 5, 5)
+		f.button_true = button_true
+
+		local button_false = DF:CreateButton (f, nil, 60, 20, "No")
+		button_false:SetPoint ("bottomright", f, "bottomright", -5, 5)
+		f.button_false = button_false
+		
+		button_true:SetClickFunction (function()
+			local my_func = button_true.true_function
+			if (my_func) then
+				local okey, errormessage = pcall (my_func, true)
+				if (not okey) then
+					print ("error:", errormessage)
+				end
+				f:Hide()
+			end
+		end)
+		
+		button_false:SetClickFunction (function()
+			local my_func = button_false.false_function
+			if (my_func) then
+				local okey, errormessage = pcall (my_func, true)
+				if (not okey) then
+					print ("error:", errormessage)
+				end
+				f:Hide()
+			end
+		end)
+		
+		f:Hide()
+		DF.promtp_panel = f
+	end
+	
+	assert (type (func_true) == "function" and type (func_false) == "function", "ShowPromptPanel expects two functions.")
+	
+	DF.promtp_panel.prompt:SetText (message)
+	DF.promtp_panel.button_true.true_function = func_true
+	DF.promtp_panel.button_false.false_function = func_false
+	
+	DF.promtp_panel:Show()
+end
+
+
+function DF:ShowTextPromptPanel (message, callback)
+	
+	if (not DF.text_prompt_panel) then
+		
+		local f = CreateFrame ("frame", "DetailsFrameworkPrompt", UIParent) 
+		f:SetSize (400, 100)
+		f:SetFrameStrata ("DIALOG")
+		f:SetPoint ("center", UIParent, "center", 0, 300)
+		f:SetBackdrop ({edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true})
+		f:SetBackdropColor (0, 0, 0, 0.8)
+		f:SetBackdropBorderColor (0, 0, 0, 1)
+		
+		local prompt = f:CreateFontString (nil, "overlay", "GameFontNormal")
+		prompt:SetPoint ("top", f, "top", 0, -15)
+		prompt:SetJustifyH ("center")
+		f.prompt = prompt
+		
+		local button_true = DF:CreateButton (f, nil, 60, 20, "Okey")
+		button_true:SetPoint ("bottomleft", f, "bottomleft", 10, 5)
+		f.button_true = button_true
+
+		local button_false = DF:CreateButton (f, function() f.textbox:ClearFocus(); f:Hide() end, 60, 20, "Cancel")
+		button_false:SetPoint ("bottomright", f, "bottomright", -10, 5)
+		f.button_false = button_false
+		
+		local textbox = DF:CreateTextEntry (f, function()end, 380, 20, "textbox", nil, nil, nil, nil)
+		textbox:SetPoint ("topleft", f, "topleft", 10, -45)
+
+		button_true:SetClickFunction (function()
+			local my_func = button_true.true_function
+			if (my_func) then
+				local okey, errormessage = pcall (my_func, textbox:GetText())
+				textbox:ClearFocus()
+				if (not okey) then
+					print ("error:", errormessage)
+				end
+				f:Hide()
+			end
+		end)
+	
+		f:Hide()
+		DF.text_prompt_panel = f
+	end
+
+	DF.text_prompt_panel:Show()
+	
+	DF.text_prompt_panel.prompt:SetText (message)
+	DF.text_prompt_panel.button_true.true_function = callback
+	DF.text_prompt_panel.textbox:SetText ("")
+	DF.text_prompt_panel.textbox:SetFocus (true)
+	
 end
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1855,18 +2252,22 @@ local chart_panel_align_timelabels = function (self, elapsed_time)
 end
 
 local chart_panel_set_scale = function (self, amt, func, text)
+
 	if (type (amt) ~= "number") then
 		return
 	end
 	
 	local piece = amt / 1000 / 8
+	if (not text or text == "") then
+		text = amt > 1000000 and "M" or amt > 1000 and "K"
+	end
 	
 	for i = 1, 8 do
 		if (func) then
 			self ["dpsamt" .. math.abs (i-9)]:SetText ( func (piece*i) .. (text or ""))
 		else
 			if (piece*i > 1) then
-				self ["dpsamt" .. math.abs (i-9)]:SetText ( floor (piece*i) .. (text or ""))
+				self ["dpsamt" .. math.abs (i-9)]:SetText ( format ("%.1f", piece*i) .. (text or ""))
 			else
 				self ["dpsamt" .. math.abs (i-9)]:SetText ( format ("%.3f", piece*i) .. (text or ""))
 			end
@@ -1993,7 +2394,7 @@ local create_box = function (self, next_box)
 	button:SetScript ("OnClick", function()
 		chart_panel_enable_line (self, thisbox)
 	end)
-	button:SetPoint ("center", box, "center")
+	button:SetPoint ("center", box.widget or box, "center")
 	
 	thisbox.button = button
 	
@@ -2169,7 +2570,7 @@ local chart_panel_add_data = function (self, graphicData, color, name, elapsed_t
 
 	local f = self
 	self = self.Graphic
-	
+
 	local _data = {}
 	local max_value = graphicData.max_value
 	local amount = #graphicData
@@ -2486,6 +2887,174 @@ function DF:CreateChartPanel (parent, w, h, name)
 	
 	f:SetScript ("OnSizeChanged", chart_panel_onresize)
 	chart_panel_onresize (f)
+	
+	return f
+end
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ~gframe
+local gframe_on_enter_line = function (self)
+	self:SetBackdropColor (0, 0, 0, 0)
+
+	local parent = self:GetParent()
+	local ball = self.ball
+	ball:SetBlendMode ("ADD")
+	
+	local on_enter = parent._onenter_line
+	if (on_enter) then
+		return on_enter (self, parent)
+	end
+end
+
+local gframe_on_leave_line = function (self)
+	self:SetBackdropColor (0, 0, 0, .6)
+	
+	local parent = self:GetParent()
+	local ball = self.ball
+	ball:SetBlendMode ("BLEND")
+	
+	local on_leave = parent._onleave_line
+	if (on_leave) then
+		return on_leave (self, parent)
+	end
+end
+
+local gframe_create_line = function (self)
+	local index = #self._lines+1
+	
+	local f = CreateFrame ("frame", nil, self)
+	self._lines [index] = f
+	f.id = index
+	f:SetScript ("OnEnter", gframe_on_enter_line)
+	f:SetScript ("OnLeave", gframe_on_leave_line)
+	
+	f:SetWidth (self._linewidth)
+	
+	if (index == 1) then
+		f:SetPoint ("topleft", self, "topleft")
+		f:SetPoint ("bottomleft", self, "bottomleft")
+	else
+		local previous_line = self._lines [index-1]
+		f:SetPoint ("topleft", previous_line, "topright")
+		f:SetPoint ("bottomleft", previous_line, "bottomright")
+	end
+	
+	local t = f:CreateTexture (nil, "background")
+	t:SetWidth (1)
+	t:SetPoint ("topright", f, "topright")
+	t:SetPoint ("bottomright", f, "bottomright")
+	t:SetTexture (1, 1, 1, .1)
+	f.grid = t
+	
+	local b = f:CreateTexture (nil, "overlay")
+	b:SetTexture ([[Interface\COMMON\Indicator-Yellow]])
+	b:SetSize (16, 16)
+	f.ball = b
+	local anchor = CreateFrame ("frame", nil, f)
+	anchor:SetAllPoints (b)
+	b.tooltip_anchor = anchor
+	
+	local spellicon = f:CreateTexture (nil, "artwork")
+	spellicon:SetPoint ("bottom", b, "bottom", 0, 10)
+	spellicon:SetSize (16, 16)
+	f.spellicon = spellicon
+	
+	local timeline = f:CreateFontString (nil, "overlay", "GameFontNormal")
+	timeline:SetPoint ("bottomright", f, "bottomright", -2, 0)
+	_detalhes:SetFontSize (timeline, 8)
+	f.timeline = timeline
+	
+	return f
+end
+
+local gframe_getline = function (self, index)
+	local line = self._lines [index]
+	if (not line) then
+		line = gframe_create_line (self)
+	end
+	return line
+end
+
+local gframe_reset = function (self)
+	for i, line in ipairs (self._lines) do
+		line:Hide()
+	end
+	if (self.GraphLib_Lines_Used) then
+		for i = #self.GraphLib_Lines_Used, 1, -1 do
+			local line = tremove (self.GraphLib_Lines_Used)
+			tinsert (self.GraphLib_Lines, line)
+			line:Hide()
+		end
+	end
+end
+
+local gframe_update = function (self, lines)
+	
+	local g = LibStub:GetLibrary ("LibGraph-2.0")
+	local h = self:GetHeight()/100
+	local amtlines = #lines
+	local linewidth = self._linewidth
+	
+	local max_value = 0
+	for i = 1, amtlines do
+		if (lines [i].value > max_value) then
+			max_value = lines [i].value
+		end
+	end
+	
+	local o = 1
+	local lastvalue = self:GetHeight()/2
+	
+	for i = 1, min (amtlines, self._maxlines) do
+		
+		local data = lines [i]
+
+		local pvalue = data.value / max_value * 100
+		if (pvalue > 98) then
+			pvalue = 98
+		end
+		pvalue = pvalue * h
+	
+		g:DrawLine (self, (o-1)*linewidth, lastvalue, o*linewidth, pvalue, linewidth, {1, 1, 1, 1}, "overlay")
+		lastvalue = pvalue
+
+		local line = self:GetLine (i)
+		line:Show()
+		line.ball:Show()
+		
+		line.ball:SetPoint ("bottomleft", self, "bottomleft", (o*linewidth)-8, pvalue-8)
+		line.spellicon:SetTexture (nil)
+		line.timeline:SetText (data.text)
+		line.timeline:Show()
+		
+		line.data = data
+		
+		o = o + 1
+	end
+	
+end
+
+function DF:CreateGFrame (parent, w, h, linewidth, onenter, onleave, member, name)
+	local f = CreateFrame ("frame", name, parent)
+	f:SetSize (w or 450, h or 150)
+	f.CustomLine = [[Interface\AddOns\Details\Libs\LibGraph-2.0\line]]
+	
+	if (member) then
+		parent [member] = f
+	end
+	
+	f.CreateLine = gframe_create_line
+	f.GetLine = gframe_getline
+	f.Reset = gframe_reset
+	f.UpdateLines = gframe_update
+	
+	f._lines = {}
+	
+	f._onenter_line = onenter
+	f._onleave_line = onleave
+	
+	f._linewidth = linewidth or 50
+	f._maxlines = floor (f:GetWidth() / f._linewidth)
 	
 	return f
 end

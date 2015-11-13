@@ -35,7 +35,6 @@ if L then
 	L.custom_off_binding_marker_desc = "Mark the Dark Bindings targets with {rt1}{rt2}{rt3}{rt4}{rt5}{rt6}, requires promoted or leader.\n|cFFFF0000Only 1 person in the raid should have this enabled to prevent marking conflicts.|r"
 	L.custom_off_binding_marker_icon = 1
 end
-L = mod:GetLocale()
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -103,12 +102,14 @@ function mod:OnEngage()
 	eyeTarget = nil
 	wipe(windTargets)
 
-	self:Berserk(self:Heroic() and 540 or 480)
+	if not self:LFR() then
+		self:Berserk(self:Heroic() and 540 or 480)
+	end
 	if self:Mythic() then
 		self:CDBar(185345, 9.5) -- Shadow Riposte
 	end
 	-- normal modifier 1.25 for all CDs?
-	self:Bar(182200, self:Easy() and 6.5 or 5.5) -- Fel Chakram
+	self:CDBar(182200, self:Easy() and 6.3 or 5.5) -- Fel Chakram
 	self:CDBar(181956, self:Easy() and 21 or 17) -- Phantasmal Winds
 	self:CDBar(182323, self:Easy() and 34 or 25) -- Phantasmal Wounds
 	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
@@ -148,8 +149,10 @@ do
 		self:TargetMessage(185345, name, "Important", "Long") -- Warning is used in Eye+Winds events, so Long here to be distinct
 	end
 	function mod:ShadowRiposte(args)
-		self:GetBossTarget(printTarget, 0.3, args.sourceGUID)
-		self:CDBar(args.spellId, 27)
+		if self:MobId(args.sourceGUID) == 90316 then -- prevent Dark Simulacrum from messing with the cd
+			self:GetBossTarget(printTarget, 0.3, args.sourceGUID)
+			self:CDBar(args.spellId, 27)
+		end
 	end
 end
 
@@ -207,10 +210,10 @@ function mod:PhantasmalCorruption(args)
 		self:TargetMessage(181824, args.destName, "Urgent", "Warning", nil, nil, true)
 		if self:Me(args.destGUID) then
 			self:Say(181824)
-			self:OpenProximity(181824, 8) -- XXX verify range (spell says 5 yards)
+			self:OpenProximity(181824, 15) -- Range discovered from LFR testing
 		end
 	end
-	self:CDBar(181824, self:Easy() and 19.5 or 16)
+	self:CDBar(181824, self:Easy() and 18 or 16)
 end
 
 function mod:PhantasmalCorruptionRemoved(args)
@@ -237,7 +240,7 @@ end
 
 function mod:FelConduit(args)
 	self:Message(181827, "Urgent", "Alert")
-	self:Bar(181827, self:Easy() and 19.3 or 15.9)
+	self:CDBar(181827, self:Easy() and 19.3 or 15.9)
 end
 
 function mod:RAID_BOSS_WHISPER(event, msg)
@@ -310,12 +313,12 @@ function mod:Stage2() -- Shadow Escape
 	self:ScheduleTimer("Stage1", self:Easy() and 50 or 40) -- event for when Iskar is attackable again?
 	self:Bar("stages", self:Easy() and 50 or 40, CL.phase:format(1), "achievement_boss_hellfire_felarakkoa")
 	self:Bar(181912, 20) -- Focused Blast
-	self:CDBar(181753, self:Easy() and 21 or 15.5) -- Fel Bomb, 15.5-17.4
+	self:CDBar(181753, self:Easy() and 18.6 or 15.5) -- Fel Bomb, 15.5-17.4
 	if shadowEscapeCount > 1 then -- Fel Warden
-		self:Bar(181827, self:Easy() and 7 or 6) -- Fel Conduit
+		self:CDBar(181827, self:Easy() and 7 or 6) -- Fel Conduit
 	end
 	if shadowEscapeCount > 2 then -- Fel Raven
-		self:Bar(181824, self:Easy() and 27 or 22) -- Phantasmal Corruption
+		self:CDBar(181824, self:Easy() and 26 or 22) -- Phantasmal Corruption
 	end
 	if self:Mythic() then
 		self:Bar(185510, 21) -- Dark Bindings

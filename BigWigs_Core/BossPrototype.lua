@@ -7,7 +7,7 @@ local UnitAffectingCombat, UnitIsPlayer, UnitGUID, UnitPosition, UnitDistanceSqu
 local EJ_GetSectionInfo, GetSpellInfo, GetSpellTexture, IsSpellKnown = EJ_GetSectionInfo, GetSpellInfo, GetSpellTexture, IsSpellKnown
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 local SendChatMessage = BigWigsLoader.SendChatMessage
-local format, sub, gsub, band = string.format, string.sub, string.gsub, bit.band
+local format, find, sub, gsub, band = string.format, string.find, string.sub, string.gsub, bit.band
 local type, next, tonumber = type, next, tonumber
 local core = BigWigs
 local C = core.C
@@ -246,7 +246,7 @@ do
 			self[eventMap[self][event][msg]](self, msg, ...)
 		else
 			for emote, func in next, eventMap[self][event] do
-				if msg:find(emote, nil, true) or msg:find(emote) then -- Preserve backwards compat by leaving in the 2nd check
+				if find(msg, emote, nil, true) or find(msg, emote) then -- Preserve backwards compat by leaving in the 2nd check
 					self[func](self, msg, ...)
 				end
 			end
@@ -267,7 +267,7 @@ do
 			self[eventMap[self][event][msg]](self, msg, ...)
 		else
 			for yell, func in next, eventMap[self][event] do
-				if msg:find(yell, nil, true) or msg:find(yell) then -- Preserve backwards compat by leaving in the 2nd check
+				if find(msg, yell, nil, true) or find(msg, yell) then -- Preserve backwards compat by leaving in the 2nd check
 					self[func](self, msg, ...)
 				end
 			end
@@ -330,7 +330,7 @@ do
 		if type(func) ~= "function" and not self[func] then core:Print(format(missingFunction, self.moduleName, func)) return end
 		if not eventMap[self][event] then eventMap[self][event] = {} end
 		for i = 1, select("#", ...) do
-			local id = (select(i, ...))
+			local id = select(i, ...)
 			if (type(id) == "number" and GetSpellInfo(id)) or id == "*" then
 				eventMap[self][event][id] = func
 			else
@@ -340,6 +340,13 @@ do
 		allowedEvents[event] = true
 		bossUtilityFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 		self:SendMessage("BigWigs_OnBossLog", self, event, ...)
+	end
+	function boss:RemoveLog(event, ...)
+		if not event then core:Print(format(missingArgument, self.moduleName)) return end
+		for i = 1, select("#", ...) do
+			local id = select(i, ...)
+			eventMap[self][event][id] = nil
+		end
 	end
 	function boss:Death(func, ...)
 		if not func then core:Print(format(missingArgument, self.moduleName)) return end
@@ -860,11 +867,11 @@ do
 			if band(o, C.DISPEL) ~= C.DISPEL then return true end
 		end
 		if isOffensive then
-			if offDispel:find(dispelType, nil, true) then
+			if find(offDispel, dispelType, nil, true) then
 				return true
 			end
 		else
-			if defDispel:find(dispelType, nil, true) then
+			if find(defDispel, dispelType, nil, true) then
 				return true
 			end
 		end
@@ -949,6 +956,7 @@ do
 	local invalidFlagError = "Module %s tried to check for an invalid flag type %q (%q). Flags must be bits."
 	local noDBError        = "Module %s does not have a .db property, which is weird."
 	checkFlag = function(self, key, flag)
+		if key == false then return true end -- Allow optionless abilities
 		if type(key) == "nil" then core:Print(format(nilKeyError, self.moduleName)) return end
 		if type(flag) ~= "number" then core:Print(format(invalidFlagError, self.moduleName, type(flag), tostring(flag))) return end
 		if silencedOptions[key] then return end
@@ -1121,13 +1129,14 @@ do
 		if type(player) == "table" then
 			local list = table.concat(player, ", ")
 			local meOnly = checkFlag(self, key, C.ME_ONLY)
-			if not list:find(pName, nil, true) then
+			local onMe = find(list, pName, nil, true)
+			if not onMe then
 				if not checkFlag(self, key, C.MESSAGE) or meOnly then wipe(player) return end
 				if not alwaysPlaySound then sound = nil end
 			else
 				if not checkFlag(self, key, C.MESSAGE) and not meOnly then wipe(player) return end
 			end
-			if meOnly then
+			if meOnly or (onMe and #player == 1) then
 				self:SendMessage("BigWigs_Message", self, key, format(L.you, msg), "Personal", texture)
 			else
 				self:SendMessage("BigWigs_Message", self, key, format(L.other, msg, list), color, texture)

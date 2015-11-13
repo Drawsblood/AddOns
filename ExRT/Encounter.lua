@@ -1,32 +1,34 @@
 local GlobalAddonName, ExRT = ...
 
-local GetUnitInfoByUnitFlag = ExRT.mds.GetUnitInfoByUnitFlag
+local GetUnitInfoByUnitFlag = ExRT.F.GetUnitInfoByUnitFlag
 
 local VExRT = nil
 
 local module = ExRT.mod:New("Encounter",ExRT.L.sencounter)
+local ELib,L = ExRT.lib,ExRT.L
+
 module.db.firstBlood = nil
 module.db.isEncounter = nil
 module.db.diff = nil
 module.db.nowInTable = nil
 module.db.afterCombatFix = nil
 module.db.diffNames = {
-	[0] = ExRT.L.sencounterUnknown,
-	[1] = ExRT.L.sencounter5ppl,
-	[2] = ExRT.L.sencounter5pplHC,
-	[3] = ExRT.L.EncounterLegacy..": "..ExRT.L.sencounter10ppl,
-	[4] = ExRT.L.EncounterLegacy..": "..ExRT.L.sencounter25ppl,
-	[5] = ExRT.L.EncounterLegacy..": "..ExRT.L.sencounter10pplHC,
-	[6] = ExRT.L.EncounterLegacy..": "..ExRT.L.sencounter25pplHC,
-	[7] = ExRT.L.sencounterLfr,		--		PLAYER_DIFFICULTY3
-	[8] = ExRT.L.sencounterChall,
-	[9] = ExRT.L.sencounter40ppl,
-	[11] = ExRT.L.sencounter3pplHC,
-	[12] = ExRT.L.sencounter3ppl,
-	[14] = ExRT.L.sencounterWODNormal,	-- Normal,	PLAYER_DIFFICULTY1
-	[15] = ExRT.L.sencounterWODHeroic,	-- Heroic,	PLAYER_DIFFICULTY2
-	[16] = ExRT.L.sencounterWODMythic,	-- Mythic,	PLAYER_DIFFICULTY6
-	[17] = ExRT.L.sencounterLfr,		-- Lfr,		PLAYER_DIFFICULTY3
+	[0] = L.sencounterUnknown,
+	[1] = L.sencounter5ppl,
+	[2] = L.sencounter5pplHC,
+	[3] = L.EncounterLegacy..": "..L.sencounter10ppl,
+	[4] = L.EncounterLegacy..": "..L.sencounter25ppl,
+	[5] = L.EncounterLegacy..": "..L.sencounter10pplHC,
+	[6] = L.EncounterLegacy..": "..L.sencounter25pplHC,
+	[7] = L.sencounterLfr,		--		PLAYER_DIFFICULTY3
+	[8] = L.sencounterChall,
+	[9] = L.sencounter40ppl,
+	[11] = L.sencounter3pplHC,
+	[12] = L.sencounter3ppl,
+	[14] = L.sencounterWODNormal,	-- Normal,	PLAYER_DIFFICULTY1
+	[15] = L.sencounterWODHeroic,	-- Heroic,	PLAYER_DIFFICULTY2
+	[16] = L.sencounterWODMythic,	-- Mythic,	PLAYER_DIFFICULTY6
+	[17] = L.sencounterLfr,		-- Lfr,		PLAYER_DIFFICULTY3
 	[23] = "5ppl: Mythic",
 	[24] = "5ppl: Timewalker",
 }
@@ -37,138 +39,156 @@ module.db.scrollPos = 1
 module.db.playerName = nil
 module.db.pullTime = 0
 
+module.db.chachedDB = nil
+
 function module.options:Load()
+	local table_find = ExRT.F.table_find3
+
 	self:CreateTilte()
 
-	self.dropDown = ExRT.lib.CreateScrollDropDown(self,nil,435,-30,220,205,#module.db.diffPos,nil,nil,"ExRTDropDownMenuModernTemplate")
-	function self.dropDown:SetValue(newValue)
+	self.dropDown = ELib:DropDown(self,205,#module.db.diffPos):Size(220):Point(435,-30)
+	function self.dropDown:SetValue(newValue,resetDB)
 		if module.db.dropDownNow ~= newValue then
 			module.db.scrollPos = 1
 			module.options.ScrollBar:SetValue(1)
 		end
+		if resetDB then
+			module.db.chachedDB = nil
+		end
 		module.db.dropDownNow = newValue
 		local newDiff = module.db.diffPos[newValue]
 		module.options.dropDown:SetText(module.db.diffNames[newDiff])
-		ExRT.lib.ScrollDropDown.Close()
+		ELib:DropDownClose()
 		local myName = UnitName("player")
 		
-		local totalTable = {}
-		for playerName,playerData in pairs(VExRT.Encounter.list) do
-			if not module.db.onlyMy or playerName == module.db.playerName then
-				for i=1,#playerData do
-					local data = playerData[i]
-					local diffID = tonumber( string.sub(data,4,4),16 ) + 1
-					if diffID == newDiff then
-						local encounterID = tonumber( string.sub(data,1,3),16 )
-						local pull = tonumber( string.sub(data,5,14) )
-						local pullTime = tonumber( string.sub(data,15,17),16 )
-						local isKill = string.sub(data,18,18) == "1"
-						local groupSize = tonumber(string.sub(data,19,20))
-						local firstBloodName = string.sub(data,21)
-						if firstBloodName == "" then 
-							firstBloodName = nil
+		local encounters = module.db.chachedDB or {}
+		local currDate = time()
+		
+		if not module.db.chachedDB then
+			for playerName,playerData in pairs(VExRT.Encounter.list) do
+				if not module.db.onlyMy or playerName == module.db.playerName then
+					for i=1,#playerData do
+						local data = playerData[i]
+						local diffID = tonumber( string.sub(data,4,4),16 ) + 1
+						if diffID == newDiff then
+							local encounterID = tonumber( string.sub(data,1,3),16 )
+							local pull = tonumber( string.sub(data,5,14) )
+							local pullTime = tonumber( string.sub(data,15,17),16 )
+							local isKill = string.sub(data,18,18) == "1"
+							local groupSize = tonumber(string.sub(data,19,20))
+							local firstBloodName = string.sub(data,21)
+							if firstBloodName == "" then 
+								firstBloodName = nil
+							end
+							
+							local encounterLine = table_find(encounters,encounterID,"id")
+							if not encounterLine then
+								encounterLine = {
+									id = encounterID,
+									firstBlood = {},
+									pullTable = {},
+									name = VExRT.Encounter.names[encounterID] or "Unknown",
+									pulls = 0,
+									kills = 0,
+								}
+								encounters[#encounters + 1] = encounterLine
+							end
+							
+							encounterLine.first = min( encounterLine.first or currDate, pull )
+							if isKill then
+								encounterLine.killTime = min( encounterLine.killTime or 4095, pullTime )
+								encounterLine.kills = encounterLine.kills + 1
+								if not encounterLine.firstKill then
+									encounterLine.firstKill = encounterLine.pulls + 1
+								end
+								encounterLine.pulls = encounterLine.pulls + 1
+							else
+								encounterLine.wipeTime = max( encounterLine.wipeTime or 0, pullTime )
+								if not pullTime or pullTime > 30 then
+									encounterLine.pulls = encounterLine.pulls + 1
+								end
+							end
+							
+							if firstBloodName then
+								local firstBloodLine = table_find(encounterLine.firstBlood,firstBloodName,"n")
+								if not firstBloodLine then
+									encounterLine.firstBlood[#encounterLine.firstBlood + 1] = { 
+										n = firstBloodName,
+										c = 1,
+									}
+								else
+									firstBloodLine.c = firstBloodLine.c + 1
+								end
+							end
+							
+							encounterLine.pullTable[ #encounterLine.pullTable + 1 ] = {
+								t = pull,
+								d = pullTime,
+								k = isKill,
+								s = groupSize,
+							}
 						end
-						table.insert(totalTable,{encounterID,pull,pullTime,isKill,groupSize,firstBloodName})
-					end
-				end			
-			end
-		end
-		local encounters = {}
-		for i=1,#totalTable do
-			local encounterID = totalTable[i][1]
-			encounters[encounterID] = encounters[encounterID] or {}
-			encounters[encounterID].first = min( encounters[encounterID].first or time(), totalTable[i][2] )
-			
-			if totalTable[i][4] then
-				encounters[encounterID].killTime = min( encounters[encounterID].killTime or 4095, totalTable[i][3] )
-			else
-				encounters[encounterID].wipeTime = max( encounters[encounterID].wipeTime or 0, totalTable[i][3] )
-			end
-			encounters[encounterID].firstBlood = encounters[encounterID].firstBlood or {}
-			local firstBloodName = totalTable[i][6]
-			if firstBloodName then
-				encounters[encounterID].firstBlood[firstBloodName] = encounters[encounterID].firstBlood[firstBloodName] and encounters[encounterID].firstBlood[firstBloodName] + 1 or 1
-			end
-			encounters[encounterID].name = VExRT.Encounter.names[encounterID] or "Unknown"
-			
-			if not encounters[encounterID].pullTable then
-				encounters[encounterID].pullTable = {}
-			end
-			table.insert(encounters[encounterID].pullTable,{totalTable[i][2],totalTable[i][3],totalTable[i][4],totalTable[i][5]})
-		end
-		local encountersSort = {}
-		for encounterID,encounterData in pairs(encounters) do
-			table.insert(encountersSort,{encounterID,encounterData.first})
-			table.sort(encounterData.pullTable,function(a,b) return a[1] < b[1] end)
-			encounterData.pulls = 0
-			encounterData.kills = 0
-			encounterData.firstKill = nil
-			for i=1,#encounterData.pullTable do
-				if not (encounterData.pullTable[i][2] and encounterData.pullTable[i][2] < 30 and encounterData.pullTable[i][2] ~= 0) or encounterData.pullTable[i][3] then
-					encounterData.pulls = encounterData.pulls + 1
-				end
-				if encounterData.pullTable[i][3] then
-					if not encounterData.firstKill then
-						encounterData.firstKill = encounterData.pulls
-					end
-					encounterData.kills = encounterData.kills + 1
+					end			
 				end
 			end
+		
+			sort(encounters,function(a,b) return a.first > b.first end)
 			
-			local newFB = {}
-			for fbName,fbCount in pairs(encounterData.firstBlood) do
-				table.insert(newFB,{fbName,fbCount})
+			for _,encounterData in pairs(encounters) do
+				sort(encounterData.firstBlood,function(a,b) return a.c > b.c end)
+				sort(encounterData.pullTable,function(a,b) return a.t < b.t end)
+				
+				if not encounterData.killTime or encounterData.killTime == 4095 then
+					encounterData.killTime = 0
+				end
+				encounterData.wipeTime = encounterData.wipeTime or 0
 			end
-			table.sort(newFB,function(a,b) return a[2] > b[2] end)
-			encounterData.firstBlood = newFB
 			
-			if not encounterData.killTime or encounterData.killTime == 4095 then
-				encounterData.killTime = 0
-			end
-			encounterData.wipeTime = encounterData.wipeTime or 0
 		end
-		table.sort(encountersSort,function(a,b) return a[2] > b[2] end)
+		
+		module.db.chachedDB = encounters
 			
 		local j = 0
-		for i=module.db.scrollPos,#encountersSort do
+		for i=module.db.scrollPos,#encounters do
 			j = j + 1
-			local encounterID = encountersSort[i][1]
+			local encounterLine = encounters[i]
+			local optionsLine = module.options.line[j]
 		
-			module.options.line[j].boss:SetText(encounters[encounterID].name)
-			module.options.line[j].wipeBK:SetText(encounters[encounterID].firstKill or "-")
-			module.options.line[j].wipe:SetText(encounters[encounterID].pulls)
-			module.options.line[j].kill:SetText(encounters[encounterID].kills)
-			module.options.line[j].firstBlood:SetText(encounters[encounterID].firstBlood[1] and encounters[encounterID].firstBlood[1][1] or "")
-			module.options.line[j].longest:SetText(date("%M:%S",encounters[encounterID].wipeTime))
-			module.options.line[j].fastest:SetText(date("%M:%S",encounters[encounterID].killTime))
-			if encounters[encounterID].wipeTime == 0 then module.options.line[j].longest:SetText("-") end
-			if encounters[encounterID].killTime == 0 then module.options.line[j].fastest:SetText("-") end
+			optionsLine.boss:SetText(encounterLine.name)
+			optionsLine.wipeBK:SetText(encounterLine.firstKill or "-")
+			optionsLine.wipe:SetText(encounterLine.pulls)
+			optionsLine.kill:SetText(encounterLine.kills)
+			optionsLine.firstBlood:SetText(encounterLine.firstBlood[1] and encounterLine.firstBlood[1].n or "")
+			optionsLine.longest:SetText(date("%M:%S",encounterLine.wipeTime))
+			optionsLine.fastest:SetText(date("%M:%S",encounterLine.killTime))
+			if encounterLine.wipeTime == 0 then optionsLine.longest:SetText("-") end
+			if encounterLine.killTime == 0 then optionsLine.fastest:SetText("-") end
 			
-			module.options.line[j].firstBloodB.n = encounters[encounterID].firstBlood
-			module.options.line[j].pullClick.n = encounters[encounterID].pullTable
-			module.options.line[j].pullClick.bossName = encounters[encounterID].name or ""
+			optionsLine.firstBloodB.n = encounterLine.firstBlood
+			optionsLine.pullClick.n = encounterLine.pullTable
+			optionsLine.pullClick.bossName = encounterLine.name or ""
 
-			module.options.line[j]:Show()
+			optionsLine:Show()
 
 			if j>=30 then break end
 		end
 		for i=(j+1),30 do
 			module.options.line[i]:Hide()
 		end
-		module.options.ScrollBar:SetMinMaxValues(1,max(#encountersSort-29,1))
-		module.options.ScrollBar:ReButtonsState()
+		module.options.ScrollBar:SetMinMaxValues(1,max(#encounters-29,1))
+		module.options.ScrollBar:UpdateButtons()
 		module.options.FBframe:Hide()
 		module.options.PullsFrame:Hide()
 	end
 
 	for i=1,#module.db.diffPos do
-		self.dropDown.List[i] = {text = module.db.diffNames[ module.db.diffPos[i] ], justifyH = "CENTER", arg1 = i, func = self.dropDown.SetValue}
+		self.dropDown.List[i] = {text = module.db.diffNames[ module.db.diffPos[i] ], justifyH = "CENTER", arg1 = i, arg2 = true, func = self.dropDown.SetValue}
 	end
 	
 	self.borderList = CreateFrame("Frame",nil,self)
 	self.borderList:SetSize(655,562)
 	self.borderList:SetPoint("TOP", 0, -55)
-	self.borderList:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.mds.defBorder,tile = false,edgeSize = 8})
+	self.borderList:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = ExRT.F.defBorder,tile = false,edgeSize = 8})
 	self.borderList:SetBackdropColor(0,0,0,0.3)
 	self.borderList:SetBackdropBorderColor(.24,.25,.30,1)
 
@@ -181,120 +201,129 @@ function module.options:Load()
 	self.borderList.decorationLine.texture:SetTexture(1,1,1,1)
 	self.borderList.decorationLine.texture:SetGradientAlpha("VERTICAL",.24,.25,.30,1,.27,.28,.33,1)
 
+	local function LineOnEnter(self)
+		if self.pullClick.n then 
+			self.hl:Show() 
+		end 
+	end
+	local function LineOnLeave(self)
+		self.hl:Hide() 
+	end
+	local function LineFirstBloodClick(self)
+		if not self.n or #self.n == 0 then 
+			return 
+		end
+		local x, y = GetCursorPosition()
+		local Es = self:GetEffectiveScale()
+		x, y = x/Es, y/Es
+		module.options.FBframe:ClearAllPoints()
+		module.options.FBframe:SetPoint("BOTTOMLEFT",UIParent,x,y)
+		for i=1,#module.options.FBframe.txtL do
+			if self.n[i] then
+				module.options.FBframe.txtL[i]:SetText(self.n[i].n)
+				module.options.FBframe.txtR[i]:SetText(self.n[i].c)
+				module.options.FBframe.txtR[i]:Show()
+				module.options.FBframe.txtL[i]:Show()				
+			else
+				module.options.FBframe.txtR[i]:Hide()
+				module.options.FBframe.txtL[i]:Hide()
+			end
+		end
+		module.options.FBframe:Show() 
+		module.options.PullsFrame:Hide()
+	end
+	local function LineFirstBloodOnEnter(self)
+		self:GetParent().firstBlood:SetTextColor(1,1,0.5,1)
+	end
+	local function LineFirstBloodOnLeave(self)
+		self:GetParent().firstBlood:SetTextColor(1,1,1,1)
+	end
+	local function LinePullsClick(self)
+		local x, y = GetCursorPosition()
+		local Es = self:GetEffectiveScale()
+		x, y = x/Es, y/Es
+		module.options.PullsFrame:ClearAllPoints()
+		module.options.PullsFrame:SetPoint("BOTTOMLEFT",UIParent,x,y)
+		module.options.PullsFrame.data = self.n
+		module.options.PullsFrame.boss = self.bossName
+		module.options.PullsFrame.ScrollBar:SetValue(1)
+		module.options.PullsFrame:SetBoss()
+		
+		module.options.graphsFrame.data = self.n
+	end
+	local function LinePullsOnEnter(self)
+		self:GetParent().wipe:SetTextColor(1,0.5,0.5,1)
+	end
+	local function LinePullsOnLeave(self)
+		self:GetParent().wipe:SetTextColor(1,1,1,1)
+	end
+	
 	self.line = {}
 	for i=0,30 do
 		self.line[i] = CreateFrame("Frame",nil,self.borderList)     
 		self.line[i]:SetSize(630,18)        
 		self.line[i]:SetPoint("TOPLEFT",5,-3-18*i) 
 
-		self.line[i].boss = ExRT.lib.CreateText(self.line[i],300,18,"LEFT", 0,0,nil,nil,nil,11,nil,nil,1,1,1)
-		self.line[i].wipeBK = ExRT.lib.CreateText(self.line[i],35,18,"LEFT", 250,0,nil,nil,nil,11,nil,nil,1,1,1)
-		self.line[i].wipe = ExRT.lib.CreateText(self.line[i],35,18,"LEFT", 290,0,nil,nil,nil,11,nil,nil,1,1,1)
-		self.line[i].kill = ExRT.lib.CreateText(self.line[i],35,18,"LEFT", 330,0,nil,nil,nil,11,nil,nil,1,1,1)
-		self.line[i].firstBlood = ExRT.lib.CreateText(self.line[i],85,18,"LEFT", 370,0,nil,nil,nil,11,nil,nil,1,1,1)
-		self.line[i].longest = ExRT.lib.CreateText(self.line[i],75,18,"LEFT", 460,0,nil,nil,nil,11,nil,nil,1,1,1)
-		self.line[i].fastest = ExRT.lib.CreateText(self.line[i],75,18,"LEFT", 540,0,nil,nil,nil,11,nil,nil,1,1,1)
+		self.line[i].boss = ELib:Text(self.line[i],"",11):Size(300,18):Point("LEFT",0,0):Color()
+		self.line[i].wipeBK = ELib:Text(self.line[i],"",11):Size(35,18):Point("LEFT",250,0):Color()
+		self.line[i].wipe = ELib:Text(self.line[i],"",11):Size(35,18):Point("LEFT",290,0):Color()
+		self.line[i].kill = ELib:Text(self.line[i],"",11):Size(35,18):Point("LEFT",330,0):Color()
+		self.line[i].firstBlood = ELib:Text(self.line[i],"",11):Size(85,18):Point("LEFT",370,0):Color()
+		self.line[i].longest = ELib:Text(self.line[i],"",11):Size(75,18):Point("LEFT",460,0):Color()
+		self.line[i].fastest = ELib:Text(self.line[i],"",11):Size(75,18):Point("LEFT",540,0):Color()
 		
 		if i>0 then
 			ExRT.lib.CreateHoverHighlight(self.line[i])
 			self.line[i].hl:SetVertexColor(0.3,0.3,0.7,0.7)
-			self.line[i]:SetScript("OnEnter",function(self) 
-				if self.pullClick.n then 
-					self.hl:Show() 
-				end 
-			end)
-			self.line[i]:SetScript("OnLeave",function(self) 
-				self.hl:Hide() 
-			end)		
+			self.line[i]:SetScript("OnEnter",LineOnEnter)
+			self.line[i]:SetScript("OnLeave",LineOnLeave)		
 		
 			self.line[i].firstBloodB = CreateFrame("Button",nil,self.line[i])  
 			self.line[i].firstBloodB:SetSize(85,18) 
 			self.line[i].firstBloodB:SetPoint("TOPLEFT",370,0)
-			self.line[i].firstBloodB:SetScript("OnClick",function(s) 
-				if not s.n or #s.n == 0 then 
-					return 
-				end
-				local x, y = GetCursorPosition()
-				local Es = s:GetEffectiveScale()
-				x, y = x/Es, y/Es
-				module.options.FBframe:ClearAllPoints()
-				module.options.FBframe:SetPoint("BOTTOMLEFT",UIParent,x,y)
-				for i=1,#module.options.FBframe.txtL do
-					if s.n[i] then
-						module.options.FBframe.txtL[i]:SetText(s.n[i][1])
-						module.options.FBframe.txtR[i]:SetText(s.n[i][2])
-						module.options.FBframe.txtR[i]:Show()
-						module.options.FBframe.txtL[i]:Show()				
-					else
-						module.options.FBframe.txtR[i]:Hide()
-						module.options.FBframe.txtL[i]:Hide()
-					end
-				end
-				module.options.FBframe:Show() 
-				module.options.PullsFrame:Hide()
-			end)
-			self.line[i].firstBloodB:SetScript("OnEnter",function(s) 
-				module.options.line[i].firstBlood:SetTextColor(1,1,0.5,1)
-			end)
-			self.line[i].firstBloodB:SetScript("OnLeave",function(s) 
-				module.options.line[i].firstBlood:SetTextColor(1,1,1,1)
-			end)
-
+			self.line[i].firstBloodB:SetScript("OnClick",LineFirstBloodClick)
+			self.line[i].firstBloodB:SetScript("OnEnter",LineFirstBloodOnEnter)
+			self.line[i].firstBloodB:SetScript("OnLeave",LineFirstBloodOnLeave)
 
 			self.line[i].pullClick = CreateFrame("Button",nil,self.line[i])  
 			self.line[i].pullClick:SetSize(35,18) 
 			self.line[i].pullClick:SetPoint("TOPLEFT",290,0)
-			self.line[i].pullClick:SetScript("OnClick",function(s) 
-				local x, y = GetCursorPosition()
-				local Es = s:GetEffectiveScale()
-				x, y = x/Es, y/Es
-				module.options.PullsFrame:ClearAllPoints()
-				module.options.PullsFrame:SetPoint("BOTTOMLEFT",UIParent,x,y)
-				module.options.PullsFrame.data = s.n
-				module.options.PullsFrame.boss = s.bossName
-				module.options.PullsFrame.ScrollBar:SetValue(1)
-				module.options.PullsFrame:SetBoss()
-			end)
-			self.line[i].pullClick:SetScript("OnEnter",function(s) 
-				module.options.line[i].wipe:SetTextColor(1,0.5,0.5,1)
-			end)
-			self.line[i].pullClick:SetScript("OnLeave",function(s) 
-				module.options.line[i].wipe:SetTextColor(1,1,1,1)
-			end)		
+			self.line[i].pullClick:SetScript("OnClick",LinePullsClick)
+			self.line[i].pullClick:SetScript("OnEnter",LinePullsOnEnter)
+			self.line[i].pullClick:SetScript("OnLeave",LinePullsOnLeave)		
 		end
 	end
 	self.line[0].wipe:SetSize(50,18)
 	self.line[0].wipe:SetPoint("LEFT", 287,0)
 
-	self.line[0].boss:SetText(ExRT.L.sencounterBossName)
-	self.line[0].wipeBK:SetText(ExRT.L.sencounterFirstKill)
-	self.line[0].wipe:SetText(ExRT.L.sencounterWipes)
-	self.line[0].kill:SetText(ExRT.L.sencounterKills)
-	self.line[0].firstBlood:SetText(ExRT.L.sencounterFirstBlood)
-	self.line[0].longest:SetText(ExRT.L.sencounterWipeTime)
-	self.line[0].fastest:SetText(ExRT.L.sencounterKillTime)
+	self.line[0].boss:SetText(L.sencounterBossName)
+	self.line[0].wipeBK:SetText(L.sencounterFirstKill)
+	self.line[0].wipe:SetText(L.sencounterWipes)
+	self.line[0].kill:SetText(L.sencounterKills)
+	self.line[0].firstBlood:SetText(L.sencounterFirstBlood)
+	self.line[0].longest:SetText(L.sencounterWipeTime)
+	self.line[0].fastest:SetText(L.sencounterKillTime)
 	
-	self.FBframe = ExRT.lib.CreatePopupFrame(150,97,"",true)
+	self.FBframe = ELib:Popup():Size(150,97)
 	
 	self.FBframe.txtR = {}
 	self.FBframe.txtL = {}
 	for i=1,5 do
-		self.FBframe.txtL[i] = ExRT.lib.CreateText(self.FBframe,100,14,nil,10,-6-14*i,nil,nil,nil,11,"nam1",nil,1,1,1)
-		self.FBframe.txtR[i] = ExRT.lib.CreateText(self.FBframe,40,14,"TOPRIGHT",-10,-6-14*i,"RIGHT",nil,nil,11,"123",nil,1,1,1)	
+		self.FBframe.txtL[i] = ELib:Text(self.FBframe,"nam1",11):Size(100,14):Point(10,-6-14*i):Color()
+		self.FBframe.txtR[i] = ELib:Text(self.FBframe,"123",11):Size(40,14):Point("TOPRIGHT",-10,-6-14*i):Color()
 	end	
 	
-	self.PullsFrame = ExRT.lib.CreatePopupFrame(280,247,"",true)
+	self.PullsFrame = ELib:Popup():Size(280,247)
 	
 	self.PullsFrame.txtL = {}
 	for i=1,16 do
-		self.PullsFrame.txtL[i] = ExRT.lib.CreateText(self.PullsFrame,255,14,nil,5,-6-14*i,nil,nil,nil,11,"",nil,1,1,1)
+		self.PullsFrame.txtL[i] = ELib:Text(self.PullsFrame,"",11):Size(255,14):Point(5,-6-14*i):Color()
 	end	
 	
-	self.PullsFrame.ScrollBar = ExRT.lib.CreateScrollBarModern(self.PullsFrame,16,224,-3,-20,1,1,"TOPRIGHT")
-	self.PullsFrame.ScrollBar:SetScript("OnValueChanged", function(self,event)
+	self.PullsFrame.ScrollBar = ELib:ScrollBar(self.PullsFrame):Size(16,224):Point("TOPRIGHT",-3,-20):Range(1,1):OnChange(function(self,event)
 		event = event - event%1
 		module.options.PullsFrame:SetBoss(event)
-		self:ReButtonsState()
+		self:UpdateButtons()
 	end)
 	
 	function self.PullsFrame:SetBoss(scrollVal)
@@ -304,7 +333,7 @@ function module.options:Load()
 			for i=(scrollVal or 1),#data do
 				j = j + 1
 				if j <= 16 then
-					module.options.PullsFrame.txtL[j]:SetText(date("%d.%m.%Y %H:%M:%S",data[i][1])..(data[i][2] > 0 and " ["..date("%M:%S",data[i][2]).."]" or "")..(data[i][3] and " (kill) " or "")..((data[i][4] > 0 and module.db.diffPos[module.db.dropDownNow or 0] ~= 16) and " GS:"..data[i][4] or ""))
+					module.options.PullsFrame.txtL[j]:SetText(date("%d.%m.%Y %H:%M:%S",data[i].t)..(data[i].d > 0 and " ["..date("%M:%S",data[i].d).."]" or "")..(data[i].k and " (kill) " or "")..((data[i].s > 0 and module.db.diffPos[module.db.dropDownNow or 0] ~= 16) and " GS:"..data[i].s or ""))
 				else
 					break
 				end
@@ -318,7 +347,7 @@ function module.options:Load()
 			
 			module.options.PullsFrame.title:SetText(module.options.PullsFrame.boss)
 			module.options.PullsFrame:Show()
-			module.options.PullsFrame.ScrollBar:ReButtonsState()
+			module.options.PullsFrame.ScrollBar:UpdateButtons()
 			module.options.FBframe:Hide()
 		end		
 	end
@@ -335,40 +364,77 @@ function module.options:Load()
 		end
 	end)
 	
-	self.onlyThisChar = ExRT.lib.CreateCheckBox(self,nil,5,-30,ExRT.L.sencounterOnlyThisChar,nil,nil,nil,"ExRTCheckButtonModernTemplate")
-	self.onlyThisChar:SetScript("OnClick", function(self,event) 
+	self.PullsFrame.graphs = ELib:Button(self.PullsFrame,L.BossWatcherTabGraphics):Size(150,20):Point("BOTTOMLEFT",3,-22):OnClick(function()
+		if not self.graphsFrame.data then
+			print('Error: No Graph data')
+			return
+		end
+		local data = {[1]={}}
+		local v_data = {}
+		for i=1,#self.graphsFrame.data do
+			local line = self.graphsFrame.data[i]
+			local t = line.d
+			if t > 30 then
+				local size = #data[1] + 1
+				data[1][size] = {size,t,format("#%d <%s>",i,date("%d.%m.%Y %H:%M:%S",line.t)),format("%s%d:%02d",line.k and "|cff00ff00" or "",t/60,t%60)}
+				if line.k then
+					v_data[#v_data + 1] = size
+				end
+			end
+		end
+		if #data[1] > 0 then
+			local prev = data[1][ #data[1] ]
+			data[1][#data[1] + 1] = {
+				prev[1] + 1,
+				prev[2],			
+			}
+		end
+		self.graphsFrame.graph.data = data
+		self.graphsFrame.graph.vertical_data = v_data
+		self.graphsFrame.graph:Reload()
+		
+		self.graphsFrame:ShowClick("TOPRIGHT")
+		
+		self.PullsFrame:Hide()
+	end)
+	
+	self.graphsFrame = ELib:Popup(L.BossWatcherTabGraphics):Size(600,400)
+	self.graphsFrame.graph = ExRT.lib.CreateGraph(self.graphsFrame,565,375,"TOPLEFT",30,-20,true)
+	self.graphsFrame.graph:SetScript("OnLeave",function ()	GameTooltip_Hide() end)
+	self.graphsFrame.graph.AddedOordLines = 1
+	self.graphsFrame.graph.IsYIsTime = true
+	
+	self.onlyThisChar = ELib:Check(self,L.sencounterOnlyThisChar):Point(5,-30):OnClick(function(self,event) 
+		module.db.chachedDB = nil
 		if self:GetChecked() then
 			module.db.onlyMy = true
-			module.options.ScrollBar:SetValue(1)
-			module.options.dropDown:SetValue(module.db.dropDownNow)
 		else
 			module.db.onlyMy = nil
-			module.options.ScrollBar:SetValue(1)
-			module.options.dropDown:SetValue(module.db.dropDownNow)
 		end
+		module.options.ScrollBar:SetValue(1)
+		module.options.dropDown:SetValue(module.db.dropDownNow)
 	end)	
 	
-	self.ScrollBar = ExRT.lib.CreateScrollBarModern(self.borderList,16,self.borderList:GetHeight()-27,-4,-22,1,1,"TOPRIGHT")
-	self.ScrollBar:SetScript("OnValueChanged", function(self,event)
-		event = ExRT.mds.Round(event)
+	self.ScrollBar = ELib:ScrollBar(self.borderList):Size(16,self.borderList:GetHeight()-27):Point("TOPRIGHT",-4,-22):Range(1,1):OnChange(function(self,event)
+		event = ExRT.F.Round(event)
 		module.db.scrollPos = event
 		module.options.dropDown:SetValue(module.db.dropDownNow)
-		self:ReButtonsState()
+		self:UpdateButtons()
 	end)
 	self.ScrollBar:SetScript("OnShow",function() 
 		module.options.dropDown:SetValue(module.db.dropDownNow)
-		module.options.ScrollBar:ReButtonsState() 
+		module.options.ScrollBar:UpdateButtons() 
 	end)
 	
-	self.clearButton = ExRT.lib.CreateButton(self,100,20,nil,330,-30,ExRT.L.MarksClear,nil,ExRT.L.EncounterClear,"ExRTButtonModernTemplate")
-	self.clearButton:SetScript("OnClick", function() 
+	self.clearButton = ELib:Button(self,L.MarksClear):Size(100,20):Point(330,-30):Tooltip(L.EncounterClear):OnClick(function() 
 		StaticPopupDialogs["EXRT_ENCOUNTER_CLEAR"] = {
-			text = ExRT.L.EncounterClearPopUp,
-			button1 = ExRT.L.YesText,
-			button2 = ExRT.L.NoText,
+			text = L.EncounterClearPopUp,
+			button1 = L.YesText,
+			button2 = L.NoText,
 			OnAccept = function()
 				table.wipe(VExRT.Encounter.list)
 				table.wipe(VExRT.Encounter.names)
+				module.db.chachedDB = nil
 				if module.options.ScrollBar:GetValue() == 1 then
 					local func = module.options.ScrollBar:GetScript("OnValueChanged")
 					func(module.options.ScrollBar,1)
@@ -417,20 +483,20 @@ function module.main:ADDON_LOADED()
 		local newTable = {}
 		local newTableNames = {}
 		for encID,encData in pairs(VExRT.Encounter.list) do
-			local encHex = ExRT.mds.tohex(encID,3)
+			local encHex = ExRT.F.tohex(encID,3)
 			for diffID,diffData in pairs(encData) do
 				if tonumber(diffID) then
-					local diffHex = ExRT.mds.tohex(diffID - 1)
+					local diffHex = ExRT.F.tohex(diffID - 1)
 					for _,pullData in pairs(diffData) do
 						local pull = pullData.pull
 						local long = "000"
 						local kill = "0"
 						local gs = format("%02d",pullData.gs or 0)
 						if pullData.wipe then
-							long = ExRT.mds.tohex(pullData.wipe - pull,3)
+							long = ExRT.F.tohex(pullData.wipe - pull,3)
 						end
 						if pullData.kill then
-							long = ExRT.mds.tohex(pullData.kill - pull,3)
+							long = ExRT.F.tohex(pullData.kill - pull,3)
 							kill = "1"
 						end
 						local name = pullData.player or 0
@@ -464,6 +530,9 @@ function module.main:ENCOUNTER_START(encounterID, encounterName, difficultyID, g
 	if not DiffInArray(difficultyID) or module.db.afterCombatFix then
 		return
 	end
+	if not VExRT.Encounter.list[module.db.playerName] then
+		VExRT.Encounter.list[module.db.playerName] = {}
+	end
 	module.db.isEncounter = encounterID
 	module.db.diff = difficultyID
 	module.db.pullTime = time()
@@ -471,10 +540,12 @@ function module.main:ENCOUNTER_START(encounterID, encounterName, difficultyID, g
 	if difficultyID == 17 then	--LFR fix
 		difficultyID = 7
 	end
-	VExRT.Encounter.list[module.db.playerName][module.db.nowInTable] = ExRT.mds.tohex(encounterID,3)..ExRT.mds.tohex(difficultyID-1)..format("%010d",module.db.pullTime).."0000"..format("%02d",groupSize or 0)
+	VExRT.Encounter.list[module.db.playerName][module.db.nowInTable] = ExRT.F.tohex(encounterID,3)..ExRT.F.tohex(difficultyID-1)..format("%010d",module.db.pullTime).."0000"..format("%02d",groupSize or 0)
 	VExRT.Encounter.names[encounterID] = encounterName
 	module.db.firstBlood = nil
 	module:RegisterEvents('COMBAT_LOG_EVENT_UNFILTERED')
+	
+	module.db.chachedDB = nil
 end
 
 do
@@ -488,14 +559,16 @@ do
 		if encounterID == module.db.isEncounter then
 			local str = VExRT.Encounter.list[module.db.playerName][module.db.nowInTable]
 			local time_ = min(time() - module.db.pullTime,4095)
-			VExRT.Encounter.list[module.db.playerName][module.db.nowInTable] = string.sub(str,1,14) .. ExRT.mds.tohex(time_,3) .. (success == 1 and "1" or "0") .. string.sub(str,19)
+			VExRT.Encounter.list[module.db.playerName][module.db.nowInTable] = string.sub(str,1,14) .. ExRT.F.tohex(time_,3) .. (success == 1 and "1" or "0") .. string.sub(str,19)
 		end
 		module.db.isEncounter = nil
 		module.db.diff = nil
 		module.db.nowInTable = nil
 		module.db.afterCombatFix = true
-		ExRT.mds.ScheduleTimer(ScheduledAfterCombatFix, 5)
+		ExRT.F.ScheduleTimer(ScheduledAfterCombatFix, 5)
 		module:UnregisterEvents('COMBAT_LOG_EVENT_UNFILTERED')
+		
+		module.db.chachedDB = nil
 	end
 end
 
@@ -507,5 +580,7 @@ function module.main:COMBAT_LOG_EVENT_UNFILTERED(_,event,_,_,_,_,_,destGUID,dest
 		module.db.firstBlood = true
 		VExRT.Encounter.list[module.db.playerName][module.db.nowInTable] = VExRT.Encounter.list[module.db.playerName][module.db.nowInTable] .. destName
 		module:UnregisterEvents('COMBAT_LOG_EVENT_UNFILTERED')
+		
+		module.db.chachedDB = nil
 	end
 end

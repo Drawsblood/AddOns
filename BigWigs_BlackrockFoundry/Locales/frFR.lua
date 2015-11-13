@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Gruul", "frFR")
 if not L then return end
 if L then
@@ -49,7 +50,7 @@ L["custom_off_hands_marker"] = "Marquage Terres avides des tanks"
 L["custom_off_hands_marker_desc"] = "Marque les Terres avides qui ont agrippé les tanks avec {rt7}{rt8}. Nécessite d'être assistant ou chef de raid."
 L["destroy_pillars"] = "Destruction des piliers"
 L["prox"] = "Proximité des tanks"
-L["prox_desc"] = "Ouvre une fenêtre de proximité de 15m indiquant la position des autres tanks afin de vous aidez à gérer la technique Poings de pierre."
+L["prox_desc"] = "Ouvre une fenêtre de proximité de 15m indiquant la position des autres tanks afin de vous aider à gérer la technique Poings de pierre."
 
 end
 

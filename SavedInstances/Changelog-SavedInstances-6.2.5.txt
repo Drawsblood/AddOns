@@ -1,0 +1,75 @@
+------------------------------------------------------------------------
+r467 | oscarucb | 2015-10-21 08:33:28 +0000 (Wed, 21 Oct 2015) | 1 line
+Changed paths:
+   A /tags/6.2.5 (from /trunk:466)
+
+Tagging as 6.2.5
+------------------------------------------------------------------------
+r466 | oscarucb | 2015-10-18 02:47:45 +0000 (Sun, 18 Oct 2015) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+re-enable valor points
+
+------------------------------------------------------------------------
+r465 | oscarucb | 2015-10-17 15:22:45 +0000 (Sat, 17 Oct 2015) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+ticket 155: workaround an intermittent graphical glitch on the tooltip border
+
+------------------------------------------------------------------------
+r464 | oscarucb | 2015-10-17 14:16:13 +0000 (Sat, 17 Oct 2015) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+more minor optimizations
+
+------------------------------------------------------------------------
+r463 | oscarucb | 2015-10-17 11:36:02 +0000 (Sat, 17 Oct 2015) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+minor optimizations to ShowTooltip
+
+------------------------------------------------------------------------
+r462 | oscarucb | 2015-10-16 18:18:30 +0000 (Fri, 16 Oct 2015) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+   M /trunk/config.lua
+
+other minor optimizations
+
+------------------------------------------------------------------------
+r461 | oscarucb | 2015-10-16 17:16:31 +0000 (Fri, 16 Oct 2015) | 3 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+optimize cpairs for faster tooltip display
+now 2-3x faster overall for large number of toons
+
+------------------------------------------------------------------------
+r460 | oscarucb | 2015-10-16 16:35:02 +0000 (Fri, 16 Oct 2015) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+debugging improvements
+
+------------------------------------------------------------------------
+r459 | oscarucb | 2015-10-16 15:52:17 +0000 (Fri, 16 Oct 2015) | 3 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+   M /trunk/config.lua
+
+new option: fit to screen, enabled by default
+automatically shrink the tooltip to ensure it fits entirely on the screen
+
+------------------------------------------------------------------------
+r458 | oscarucb | 2015-10-04 02:44:37 +0000 (Sun, 04 Oct 2015) | 3 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+reduce tooltip display errors in combat
+cosmetic fix to tooltip overlap behavior
+
+------------------------------------------------------------------------

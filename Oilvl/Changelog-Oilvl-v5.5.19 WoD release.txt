@@ -1,0 +1,180 @@
+------------------------------------------------------------------------
+r426 | olzenkhaw | 2015-10-31 02:49:58 +0000 (Sat, 31 Oct 2015) | 1 line
+Changed paths:
+   A /tags/v5.5.19 WoD release (from /trunk:425)
+
+5.5.19 - fixed a small bug.
+------------------------------------------------------------------------
+r425 | olzenkhaw | 2015-10-31 02:49:38 +0000 (Sat, 31 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.19 - fixed a small bug.
+------------------------------------------------------------------------
+r423 | olzenkhaw | 2015-10-30 01:07:48 +0000 (Fri, 30 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.18 - fixed whisper cross realm target bug.
+------------------------------------------------------------------------
+r421 | olzenkhaw | 2015-10-19 11:39:34 +0000 (Mon, 19 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.17 - fixed lag issues
+------------------------------------------------------------------------
+r419 | olzenkhaw | 2015-10-18 13:54:13 +0000 (Sun, 18 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.16 - fixed lag issues
+------------------------------------------------------------------------
+r417 | olzenkhaw | 2015-10-18 02:24:31 +0000 (Sun, 18 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.15 - fixed a small bug.
+------------------------------------------------------------------------
+r416 | olzenkhaw | 2015-10-16 15:21:10 +0000 (Fri, 16 Oct 2015) | 4 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+
+5.6.0 
+ - Auto-cached raid progression details of all members in raid / party.
+ - While chat windows active, click AOTC in raid progression details will insert the aotc link to chat window. Click statistic of boss kills will insert the boss kill to chat window.
+ - Mouseover a boss in Raid Progression Details will show all statistic of all raid members.
+------------------------------------------------------------------------
+r415 | olzenkhaw | 2015-10-16 13:22:08 +0000 (Fri, 16 Oct 2015) | 4 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+
+5.6.0 
+ - Auto-cached raid progression details of all members in raid / party.
+ - While chat windows active, click AOTC in raid progression details will insert the aotc link to chat window. Click statistic of boss kills will insert the boss kill to chat window.
+ - Mouseover a boss in Raid Progression Details will show all statistic of all raid members.
+------------------------------------------------------------------------
+r414 | olzenkhaw | 2015-10-16 09:25:57 +0000 (Fri, 16 Oct 2015) | 4 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+
+5.6.0 
+ - Auto-cached raid progression details of all members in raid / party.
+ - While chat windows active, click AOTC in raid progression details will insert the aotc link to chat window. Click statistic of boss kills will insert the boss kill to chat window.
+ - Mouseover a boss in Raid Progression Details will show all statistic of all raid members.
+------------------------------------------------------------------------
+r413 | olzenkhaw | 2015-10-16 03:18:14 +0000 (Fri, 16 Oct 2015) | 4 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.6.0 
+ - Auto-cached raid progression details of all members in raid / party.
+ - While chat windows active, click AOTC in raid progression details will insert the aotc link to chat window. Click statistic of boss kills will insert the boss kill to chat window.
+ - Mouseover a boss in Raid Progression Details will show all statistic of all raid members.
+------------------------------------------------------------------------
+r411 | olzenkhaw | 2015-10-11 14:51:28 +0000 (Sun, 11 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.14 - fixed a bug.
+------------------------------------------------------------------------
+r409 | olzenkhaw | 2015-10-11 12:46:43 +0000 (Sun, 11 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.13 - Improved gear tooltips in gear list of minimap button tooltips.
+------------------------------------------------------------------------
+r407 | olzenkhaw | 2015-10-06 11:47:37 +0000 (Tue, 06 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.12 - Improved gear tooltips in gear list of minimap button tooltips.
+------------------------------------------------------------------------
+r405 | olzenkhaw | 2015-10-05 14:36:52 +0000 (Mon, 05 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.11 - fixed a bug.
+------------------------------------------------------------------------
+r403 | olzenkhaw | 2015-10-05 12:18:54 +0000 (Mon, 05 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.10 - fixed a bug.
+------------------------------------------------------------------------
+r401 | olzenkhaw | 2015-10-05 11:28:55 +0000 (Mon, 05 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.9 - Improved gear tooltips in gear list of minimap button tooltips.
+------------------------------------------------------------------------
+r399 | olzenkhaw | 2015-10-05 06:27:05 +0000 (Mon, 05 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.8 - Improved gear tooltips in gear list of minimap button tooltips.
+------------------------------------------------------------------------
+r397 | olzenkhaw | 2015-10-02 14:35:16 +0000 (Fri, 02 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+
+5.5.7 - fixed a bug.
+------------------------------------------------------------------------
+r395 | olzenkhaw | 2015-10-02 14:34:24 +0000 (Fri, 02 Oct 2015) | 3 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+
+5.5.7 - fixed a bug.
+
+
+------------------------------------------------------------------------
+r393 | olzenkhaw | 2015-10-02 11:37:09 +0000 (Fri, 02 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.6 - fixed bugs.
+------------------------------------------------------------------------
+r391 | olzenkhaw | 2015-10-01 14:32:51 +0000 (Thu, 01 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.5 - Improved gear tooltips in gear list of minimap button tooltips.
+------------------------------------------------------------------------
+r389 | olzenkhaw | 2015-10-01 02:42:52 +0000 (Thu, 01 Oct 2015) | 3 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.4
+ - fixed bugs in Raid Progression
+ - fixed inspection frame bugs
+------------------------------------------------------------------------
+r387 | olzenkhaw | 2015-09-30 16:44:10 +0000 (Wed, 30 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.3 - fixed bug when open shop menu.
+------------------------------------------------------------------------
+r385 | olzenkhaw | 2015-09-30 02:13:56 +0000 (Wed, 30 Sep 2015) | 2 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.5.2
+ - Color the background of gear list for tiers (mythic:purple, heroic:blue, normal:green) in minimap button tooltips.
+------------------------------------------------------------------------

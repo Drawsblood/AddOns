@@ -1,4 +1,5 @@
-﻿local L = BigWigs:NewBossLocale("Gruul", "zhCN")
+﻿-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
+local L = BigWigs:NewBossLocale("Gruul", "zhCN")
 if not L then return end
 if L then
 L["first_ability"] = "粉碎打击或石化猛击"

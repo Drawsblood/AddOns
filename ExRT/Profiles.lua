@@ -1,6 +1,7 @@
 local GlobalAddonName, ExRT = ...
 
 local module = ExRT.mod:New("Profiles",ExRT.L.Profiles,nil,true)
+local ELib,L = ExRT.lib,ExRT.L
 
 local MAJOR_KEYS = {
 	["Addon"]=true,
@@ -50,11 +51,11 @@ end
 
 function module.options:Load()
 	local function GetCurrentProfileName()
-		return VExRT.Profile=="default" and ExRT.L.ProfilesDefault or VExRT.Profile
+		return VExRT.Profile=="default" and L.ProfilesDefault or VExRT.Profile
 	end
 	local function GetCurrentProfilesList(func)
 		local list = {
-			{ text = ExRT.L.ProfilesDefault, func = func, arg1 = "default", _sort = "0" },
+			{ text = L.ProfilesDefault, func = func, arg1 = "default", _sort = "0" },
 		}
 		for name,_ in pairs(VExRT.Profiles) do
 			if name ~= "default" then
@@ -102,19 +103,17 @@ function module.options:Load()
 
 	self:CreateTilte()
 
-	self.introText = ExRT.lib.CreateText(self,650,200,nil,5,-45,nil,"TOP",nil,11,ExRT.L.ProfilesIntro,nil,1,1,1)
+	self.introText = ELib:Text(self,L.ProfilesIntro,11):Size(650,200):Point(5,-45):Top():Color()
 	
-	self.currentText = ExRT.lib.CreateText(self,650,200,nil,5,-90,nil,"TOP",nil,11,ExRT.L.ProfilesCurrent,nil,1,1,1)
-	self.currentName = ExRT.lib.CreateText(self,650,200,nil,200,-90,nil,"TOP",nil,11,GetCurrentProfileName())
+	self.currentText = ELib:Text(self,L.ProfilesCurrent,11):Size(650,200):Point(5,-90):Top():Color()
+	self.currentName = ELib:Text(self,GetCurrentProfileName(),11):Size(650,200):Point(200,-90):Top()
 
-	self.choseText = ExRT.lib.CreateText(self,650,200,nil,5,-130,nil,"TOP",nil,11,ExRT.L.ProfilesChooseDesc,nil,1,1,1)
+	self.choseText = ELib:Text(self,L.ProfilesChooseDesc,11):Size(650,200):Point(5,-130):Top():Color()
 	
-	self.choseNewText = ExRT.lib.CreateText(self,650,200,nil,15,-158,nil,"TOP",nil,11,ExRT.L.ProfilesNew)
-	self.choseNew = ExRT.lib.CreateEditBox(self,170,20,"TOPLEFT",10,-170,nil,nil,nil,"ExRTInputBoxModernTemplate")
+	self.choseNewText = ELib:Text(self,L.ProfilesNew,11):Size(650,200):Point(5,-158):Top()
+	self.choseNew = ELib:Edit(self):Size(170,20):Point(10,-170)
 	
-	self.choseNewButton = ExRT.lib.CreateButton(self,70,20,nil,0,0,ExRT.L.ProfilesAdd,nil,nil,"ExRTButtonModernTemplate")
-	self.choseNewButton:SetNewPoint("LEFT",self.choseNew,"RIGHT",0,0)
-	self.choseNewButton:SetScript("OnClick",function (self)
+	self.choseNewButton = ELib:Button(self,L.ProfilesAdd):Size(70,20):Point("LEFT",self.choseNew,"RIGHT",0,0):OnClick(function (self)
 		local text = module.options.choseNew:GetText()
 		module.options.choseNew:SetText("")
 		if text == "" or text == "default" or VExRT.Profiles[text] then
@@ -123,9 +122,9 @@ function module.options:Load()
 		VExRT.Profiles[text] = {}
 		
 		StaticPopupDialogs["EXRT_PROFILES_ACTIVATE"] = {
-			text = ExRT.L.ProfilesActivateAlert,
-			button1 = ExRT.L.YesText,
-			button2 = ExRT.L.NoText,
+			text = L.ProfilesActivateAlert,
+			button1 = L.YesText,
+			button2 = L.NoText,
 			OnAccept = function()
 				SaveCurrentProfiletoDB()
 				VExRT.Profile = text
@@ -140,11 +139,11 @@ function module.options:Load()
 		StaticPopup_Show("EXRT_PROFILES_ACTIVATE")
 	end)
 	
-	self.choseSelectText = ExRT.lib.CreateText(self,605,200,nil,325,-158,nil,"TOP",nil,11,ExRT.L.ProfilesSelect)
-	self.choseSelectDropDown = ExRT.lib.CreateScrollDropDown(self,"TOPLEFT",320,-170,235,220,10,GetCurrentProfileName(),nil,"ExRTDropDownMenuModernTemplate")
+	self.choseSelectText = ELib:Text(self,L.ProfilesSelect,11):Size(605,200):Point(325,-158):Top()
+	self.choseSelectDropDown = ELib:DropDown(self,220,10):Point(320,-170):Size(235):SetText(GetCurrentProfileName())
 	
 	local function SelectProfile(_,name)
-		ExRT.lib.ScrollDropDown.Close()
+		ELib:DropDownClose()
 		if name == VExRT.Profile then
 			return
 		end
@@ -158,11 +157,11 @@ function module.options:Load()
 	end
 	
 	local function CopyProfile(_,name)
-		ExRT.lib.ScrollDropDown.Close()
+		ELib:DropDownClose()
 		LoadProfileFromDB(name,true)
 	end
-	self.copyText = ExRT.lib.CreateText(self,605,200,nil,15,-208,nil,"TOP",nil,11,ExRT.L.ProfilesCopy)
-	self.copyDropDown = ExRT.lib.CreateScrollDropDown(self,"TOPLEFT",10,-220,235,220,10,"",nil,"ExRTDropDownMenuModernTemplate")
+	self.copyText = ELib:Text(self,L.ProfilesCopy,11):Size(605,200):Point(15,-208):Top()
+	self.copyDropDown = ELib:DropDown(self,220,10):Point(10,-220):Size(235)
 	function self.copyDropDown:ToggleUpadte()
 		self.List = GetCurrentProfilesList(CopyProfile)
 		for i=1,#self.List do
@@ -176,11 +175,11 @@ function module.options:Load()
 	end
 	
 	local function DeleteProfile(_,name)
-		ExRT.lib.ScrollDropDown.Close()
+		ELib:DropDownClose()
 		StaticPopupDialogs["EXRT_PROFILES_REMOVE"] = {
-			text = ExRT.L.ProfilesDeleteAlert,
-			button1 = ExRT.L.YesText,
-			button2 = ExRT.L.NoText,
+			text = L.ProfilesDeleteAlert,
+			button1 = L.YesText,
+			button2 = L.NoText,
 			OnAccept = function()
 				VExRT.Profiles[name] = nil
 			end,
@@ -191,8 +190,8 @@ function module.options:Load()
 		}
 		StaticPopup_Show("EXRT_PROFILES_REMOVE")
 	end
-	self.deleteText = ExRT.lib.CreateText(self,605,200,nil,15,-258,nil,"TOP",nil,11,ExRT.L.ProfilesDelete)
-	self.deleteDropDown = ExRT.lib.CreateScrollDropDown(self,"TOPLEFT",10,-270,235,220,10,"",nil,"ExRTDropDownMenuModernTemplate")
+	self.deleteText = ELib:Text(self,L.ProfilesDelete,11):Size(605,200):Point(15,-258):Top()
+	self.deleteDropDown = ELib:DropDown(self,220,10):Point(10,-270):Size(235)
 	function self.deleteDropDown:ToggleUpadte()
 		self.List = GetCurrentProfilesList(DeleteProfile)
 		for i=1,#self.List do

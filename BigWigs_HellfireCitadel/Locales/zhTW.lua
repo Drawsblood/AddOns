@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Hellfire Assault", "zhTW")
 if not L then return end
 if L then
@@ -45,7 +46,7 @@ L = BigWigs:NewBossLocale("Fel Lord Zakuun", "zhTW")
 if L then
 L["custom_off_seed_marker"] = "毀滅種子標記"
 L["custom_off_seed_marker_desc"] = "標記毀滅種子為{rt1}{rt2}{rt3}{rt4}{rt5}，需要團隊權限或隊長。"
-L["seed"] = "種子：(%d)"
+L["seed"] = "種子" -- Needs review
 L["tank_proximity"] = "坦克距離雷達"
 L["tank_proximity_desc"] = "為坦克開啟5碼距離雷達，以便對應勁道威猛與重裝上陣。"
 
@@ -59,19 +60,21 @@ end
 
 L = BigWigs:NewBossLocale("Mannoroth", "zhTW")
 if L then
+L["182212"] = "煉獄火傳送門已關閉！" -- Needs review
+L["185147"] = "毀滅領主傳送門已關閉！" -- Needs review
+L["185175"] = "魔化小鬼傳送門已關閉！" -- Needs review
 L["custom_off_gaze_marker"] = "凝視標記"
 L["custom_off_gaze_marker_desc"] = "標記瑪諾洛斯的凝視為{rt1}{rt2}{rt3}，需要團隊權限或隊長。"
-L["doomLord"] = "毀滅領主傳送門已關閉！"
 L["felseeker_message"] = "%s (%d) %d碼"
 L["gaze"] = "凝視：(%d)"
-L["imp"] = "魔化小鬼傳送門已關閉！"
-L["infernal"] = "煉獄火傳送門已關閉！"
 
 end
 
 L = BigWigs:NewBossLocale("Archimonde", "zhTW")
 if L then
 L["chaos_bar"] = "%s -> %s"
+L["chaos_from"] = "%s 從 %s" -- Needs review
+L["chaos_to"] = "%s 到 %s" -- Needs review
 L["custom_off_torment_marker"] = "束縛折磨標記"
 L["custom_off_torment_marker_desc"] = "標記束縛折磨為{rt1}{rt2}{rt3}，需要團隊權限或隊長。"
 L["torment_removed"] = "束縛折磨移除 (%d/%d)"

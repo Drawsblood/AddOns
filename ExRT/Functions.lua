@@ -1,6 +1,6 @@
 local GlobalAddonName, ExRT = ...
 
-ExRT.mds.FUNC_FILE_LOADED = true
+ExRT.F.FUNC_FILE_LOADED = true
 
 local UnitName, GetTime = UnitName, GetTime
 local select, floor, tonumber, tostring, string_sub, string_find, string_len, bit_band, type, unpack, pairs, format, strsplit = select, floor, tonumber, tostring, string.sub, string.find, string.len, bit.band, type, unpack, pairs, format, strsplit
@@ -8,7 +8,7 @@ local RAID_CLASS_COLORS, COMBATLOG_OBJECT_TYPE_MASK, COMBATLOG_OBJECT_CONTROL_MA
 
 do
 	local antiSpamArr = {}
-	function ExRT.mds.AntiSpam(numantispam,addtime)
+	function ExRT.F.AntiSpam(numantispam,addtime)
 		if not antiSpamArr[numantispam] or antiSpamArr[numantispam] < GetTime() then
 			antiSpamArr[numantispam] = GetTime() + addtime
 			return true
@@ -16,7 +16,7 @@ do
 			return false
 		end
 	end
-	function ExRT.mds.ResetAntiSpam(numantispam)
+	function ExRT.F.ResetAntiSpam(numantispam)
 		antiSpamArr[numantispam] = nil
 	end
 end
@@ -25,7 +25,7 @@ do
 	--Used GLOBALS: CUSTOM_CLASS_COLORS
 
 	local classColorArray = nil
-	function ExRT.mds.classColor(class)
+	function ExRT.F.classColor(class)
 		classColorArray = type(CUSTOM_CLASS_COLORS)=="table" and CUSTOM_CLASS_COLORS[class] or RAID_CLASS_COLORS[class]
 		if classColorArray and classColorArray.colorStr then
 			return classColorArray.colorStr
@@ -34,7 +34,7 @@ do
 		end
 	end
 
-	function ExRT.mds.classColorNum(class)
+	function ExRT.F.classColorNum(class)
 		classColorArray = type(CUSTOM_CLASS_COLORS)=="table" and CUSTOM_CLASS_COLORS[class] or RAID_CLASS_COLORS[class]
 		if classColorArray then
 			return classColorArray.r,classColorArray.g,classColorArray.b
@@ -43,16 +43,16 @@ do
 		end
 	end
 	
-	function ExRT.mds.classColorByGUID(guid)
-		local class = ""
+	function ExRT.F.classColorByGUID(guid)
+		local class,_ = ""
 		if guid and guid ~= "" and guid ~= "0000000000000000" then
-			class = select(2,GetPlayerInfoByGUID(guid))
+			_,class = GetPlayerInfoByGUID(guid)
 		end
-		return ExRT.mds.classColor(class)
+		return ExRT.F.classColor(class)
 	end
 end
 
-function ExRT.mds.clearTextTag(text,SpellLinksEnabled)
+function ExRT.F.clearTextTag(text,SpellLinksEnabled)
 	if text then
 		text = string.gsub(text,"|c........","")
 		text = string.gsub(text,"|r","")
@@ -67,7 +67,7 @@ function ExRT.mds.clearTextTag(text,SpellLinksEnabled)
 	end
 end
 
-function ExRT.mds.splitLongLine(text,maxLetters,SpellLinksEnabled)
+function ExRT.F.splitLongLine(text,maxLetters,SpellLinksEnabled)
 	maxLetters = maxLetters or 250
 	local result = {}
 	repeat
@@ -124,7 +124,7 @@ function ExRT.mds.splitLongLine(text,maxLetters,SpellLinksEnabled)
 	return unpack(result)
 end
 
-function ExRT.mds:SetScaleFix(scale)
+function ExRT.F:SetScaleFix(scale)
 	local l = self:GetLeft()
 	local t = self:GetTop()
 	local s = self:GetScale()
@@ -141,7 +141,25 @@ function ExRT.mds:SetScaleFix(scale)
 	if f then f(self) end
 end
 
-function ExRT.mds:GetCursorPos()
+function ExRT.F:SetScaleFixTR(scale)
+	--local l = self:GetLeft() + self:GetWidth() * self:GetEffectiveScale()
+	local l = self:GetRight()
+	local t = self:GetTop()
+	local s = self:GetScale()
+	if not l or not t or not s then return end
+
+	s = scale / s
+
+	self:SetScale(scale)
+	local f = self:GetScript("OnDragStop")
+
+	self:ClearAllPoints()
+	self:SetPoint("TOPRIGHT",UIParent,"BOTTOMLEFT",l / s,t / s)
+
+	if f then f(self) end
+end
+
+function ExRT.F:GetCursorPos()
 	local x_f,y_f = GetCursorPosition()
 	local s = self:GetEffectiveScale()
 	x_f, y_f = x_f/s, y_f/s
@@ -160,9 +178,9 @@ do
 			obj = obj:GetParent()
 		end
 	end
-	function ExRT.mds:IsInFocus(x,y,childs)
+	function ExRT.F:IsInFocus(x,y,childs)
 		if not x then
-			x,y = ExRT.mds.GetCursorPos(self)
+			x,y = ExRT.F.GetCursorPos(self)
 		end
 		local obj = GetMouseFocus()
 		if x > 0 and y > 0 and x < self:GetWidth() and y < self:GetHeight() and (obj == self or (childs and FindAllParents(self,obj))) then
@@ -171,7 +189,7 @@ do
 	end
 end
 
-function ExRT.mds:LockMove(isLocked,touchTexture,dontTouchMouse)
+function ExRT.F:LockMove(isLocked,touchTexture,dontTouchMouse)
 	if isLocked then
 		if touchTexture then touchTexture:SetTexture(0,0,0,0.3) end
 		self:SetMovable(true)
@@ -183,7 +201,7 @@ function ExRT.mds:LockMove(isLocked,touchTexture,dontTouchMouse)
 	end
 end
 
-function ExRT.mds.GetRaidDiffMaxGroup()
+function ExRT.F.GetRaidDiffMaxGroup()
 	local _,instance_type,difficulty = GetInstanceInfo()
 	if (instance_type == "party" or instance_type == "scenario") and not IsInRaid() then
 		return 1
@@ -204,7 +222,7 @@ function ExRT.mds.GetRaidDiffMaxGroup()
 	end	
 end
 
-function ExRT.mds.GetDifficultyForCooldownReset()
+function ExRT.F.GetDifficultyForCooldownReset()
 	local _,_,difficulty = GetInstanceInfo()
 	if difficulty == 3 or difficulty == 4 or difficulty == 5 or difficulty == 6 or difficulty == 7 or difficulty == 14 or difficulty == 15 or difficulty == 16 or difficulty == 17 then
 		return true
@@ -212,24 +230,25 @@ function ExRT.mds.GetDifficultyForCooldownReset()
 	return false
 end
 
-function ExRT.mds.Round(i)
+function ExRT.F.Round(i)
 	return floor(i+0.5)
 end
 
-function ExRT.mds.NumberInRange(i,mi,mx,incMi,incMx)
+function ExRT.F.NumberInRange(i,mi,mx,incMi,incMx)
 	if i and ((incMi and i >= mi) or (not incMi and i > mi)) and ((incMx and i <= mx) or (not incMx and i < mx)) then
 		return true
 	end
 end
 
-function ExRT.mds.delUnitNameServer(unitName)
-	if string_find(unitName,"%-") then 
-		unitName = string_sub(unitName,1,string_find(unitName,"%-")-1) 
+function ExRT.F.delUnitNameServer(unitName)
+	local dashPos = string_find(unitName,"%-") 
+	if dashPos then 
+		unitName = string_sub(unitName,1,dashPos-1) 
 	end
 	return unitName
 end
 
-function ExRT.mds.UnitCombatlogname(unit)
+function ExRT.F.UnitCombatlogname(unit)
 	local name,server = UnitName(unit or "?")
 	if name and server and server~="" then
 		name = name .. "-" .. server
@@ -248,7 +267,7 @@ do
 		Item = 8,		--NEW Item:976:0:4000000003A91C1A
 		Uniq = 9,		--NEW
 	}
-	function ExRT.mds.GetUnitTypeByGUID(guid)
+	function ExRT.F.GetUnitTypeByGUID(guid)
 		if guid then
 			local _type = guid:match("^([A-z]+)%-")
 			if _type then
@@ -258,14 +277,14 @@ do
 	end
 end
 
-function ExRT.mds.UnitIsPlayerOrPet(guid)
-	local id = ExRT.mds.GetUnitTypeByGUID(guid)
+function ExRT.F.UnitIsPlayerOrPet(guid)
+	local id = ExRT.F.GetUnitTypeByGUID(guid)
 	if id == 0 or id == 4 then
 		return true
 	end
 end
 
-function ExRT.mds.GetUnitInfoByUnitFlag(unitFlag,infoType)
+function ExRT.F.GetUnitInfoByUnitFlag(unitFlag,infoType)
 	--> TYPE
 	if infoType == 1 then
 		return bit_band(unitFlag,COMBATLOG_OBJECT_TYPE_MASK)
@@ -293,33 +312,45 @@ function ExRT.mds.GetUnitInfoByUnitFlag(unitFlag,infoType)
 	end
 end
 
-function ExRT.mds.UnitIsFriendlyByUnitFlag(unitFlag)
-	if ExRT.mds.GetUnitInfoByUnitFlag(unitFlag,2) == 256 then
+function ExRT.F.UnitIsFriendlyByUnitFlag(unitFlag)
+	if ExRT.F.GetUnitInfoByUnitFlag(unitFlag,2) == 256 then
 		return true
 	end
 end
 
-function ExRT.mds.UnitIsFriendlyByUnitFlag2(unitFlag)
-	local reaction = ExRT.mds.GetUnitInfoByUnitFlag(unitFlag or 0,3)
+function ExRT.F.UnitIsFriendlyByUnitFlag2(unitFlag)
+	local reaction = ExRT.F.GetUnitInfoByUnitFlag(unitFlag or 0,3)
 	if reaction == 16 then
 		return true
 	elseif reaction == 32 then
-		if ExRT.mds.GetUnitInfoByUnitFlag(unitFlag,2) == 256 then
+		if ExRT.F.GetUnitInfoByUnitFlag(unitFlag,2) == 256 then
 			return true
 		end
 	end
 end
 
-function ExRT.mds.dprint(...)
+function ExRT.F.dprint(...)
 	return nil
 end
-if ExRT.T == "D" then
-	ExRT.mds.dprint = function(...)
+function ExRT.F.dtime(...)
+	return nil
+end
+if ExRT.T == "D" or ExRT.T == "DU" then	--debug or debug ultra
+	ExRT.F.dprint = function(...)
 		print(...)
+	end
+	local debugprofilestop = debugprofilestop
+	local lastTime = nil
+	ExRT.F.dtime = function(arg,...)
+		if arg and lastTime then
+			arg[#arg+1] = {debugprofilestop() - lastTime,...}
+		else
+			lastTime = debugprofilestop()
+		end
 	end
 end
 
-function ExRT.mds.LinkSpell(SpellID,SpellLink)
+function ExRT.F.LinkSpell(SpellID,SpellLink)
 	if not SpellLink then
 		SpellLink = GetSpellLink(SpellID)
 	end
@@ -332,7 +363,7 @@ function ExRT.mds.LinkSpell(SpellID,SpellLink)
 	end
 end
 
-function ExRT.mds.LinkItem(itemID, itemLink)
+function ExRT.F.LinkItem(itemID, itemLink)
 	if not itemLink then
 		if not itemID then 
 			return 
@@ -353,7 +384,7 @@ function ExRT.mds.LinkItem(itemID, itemLink)
 	end
 end
 
-function ExRT.mds.shortNumber(num)
+function ExRT.F.shortNumber(num)
 	if num < 1000 then
 		return tostring(num)
 	elseif num < 1000000 then
@@ -365,14 +396,14 @@ function ExRT.mds.shortNumber(num)
 	end
 end
 
-function ExRT.mds.classIconInText(class,size)
+function ExRT.F.classIconInText(class,size)
 	if CLASS_ICON_TCOORDS[class] then
 		size = size or 0
 		return "|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:"..size..":"..size..":0:0:256:256:".. floor(CLASS_ICON_TCOORDS[class][1]*256) ..":"..floor(CLASS_ICON_TCOORDS[class][2]*256) ..":"..floor(CLASS_ICON_TCOORDS[class][3]*256) ..":"..floor(CLASS_ICON_TCOORDS[class][4]*256) .."|t"
 	end
 end
 
-function ExRT.mds.GUIDtoID(guid)
+function ExRT.F.GUIDtoID(guid)
 	if not guid then 
 		return 0 
 	else
@@ -381,26 +412,26 @@ function ExRT.mds.GUIDtoID(guid)
 	end
 end
 
-function ExRT.mds.table_copy(table1,table2)
+function ExRT.F.table_copy(table1,table2)
 	table.wipe(table2)
 	for key,val in pairs(table1) do
 		table2[key] = val
 	end
 end
 
-function ExRT.mds.table_wipe(arr)
+function ExRT.F.table_wipe(arr)
 	if not arr or type(arr) ~= "table" then
 		return
 	end
 	for key,val in pairs(arr) do
 		if type(val) == "table" then
-			ExRT.mds.table_wipe(val)
+			ExRT.F.table_wipe(val)
 		end
 		arr[key] = nil
 	end
 end
 
-function ExRT.mds.table_find(arr,subj,pos)
+function ExRT.F.table_find(arr,subj,pos)
 	if pos then
 		for j=1,#arr do
 			if arr[j][pos] == subj then
@@ -416,7 +447,7 @@ function ExRT.mds.table_find(arr,subj,pos)
 	end
 end
 
-function ExRT.mds.table_find2(arr,subj)
+function ExRT.F.table_find2(arr,subj)
 	for key,val in pairs(arr) do
 		if val == subj then
 			return key
@@ -424,7 +455,15 @@ function ExRT.mds.table_find2(arr,subj)
 	end
 end
 
-function ExRT.mds.table_len(arr)
+function ExRT.F.table_find3(arr,subj,pos)
+	for j=1,#arr do
+		if arr[j][pos] == subj then
+			return arr[j]
+		end
+	end
+end
+
+function ExRT.F.table_len(arr)
 	local len = 0
 	for _ in pairs(arr) do
 		len = len + 1
@@ -432,35 +471,35 @@ function ExRT.mds.table_len(arr)
 	return len
 end
 
-function ExRT.mds.table_add(arr,add)
+function ExRT.F.table_add(arr,add)
 	for i=1,#add do
 		arr[#arr+1] = add[i]
 	end
 end
 
-function ExRT.mds.table_add2(arr,add)
+function ExRT.F.table_add2(arr,add)
 	for key,val in pairs(add) do
 		arr[key] = val
 	end
 end
 
-function ExRT.mds.tohex(num,size)
+function ExRT.F.tohex(num,size)
 	return format("%0"..(size or "1").."X",num)
 end
 
-function ExRT.mds.UnitInGuild(unit)
-	unit = ExRT.mds.delUnitNameServer(unit)
+function ExRT.F.UnitInGuild(unit)
+	unit = ExRT.F.delUnitNameServer(unit)
 	local gplayers = GetNumGuildMembers() or 0
 	for i=1,gplayers do
 		local name = GetGuildRosterInfo(i)
-		if name and ExRT.mds.delUnitNameServer(name) == unit then
+		if name and ExRT.F.delUnitNameServer(name) == unit then
 			return true
 		end
 	end
 	return false
 end
 
-function ExRT.mds.chatType(toSay)
+function ExRT.F.chatType(toSay)
 	local isInInstance = IsInGroup(LE_PARTY_CATEGORY_INSTANCE)
 	local isInParty = IsInGroup()
 	local isInRaid = IsInRaid()
@@ -475,7 +514,7 @@ function ExRT.mds.chatType(toSay)
 	return chat_type, playerName
 end
 
-function ExRT.mds.IsBonusOnItem(link,bonus)
+function ExRT.F.IsBonusOnItem(link,bonus)
 	if link then 
 		local bonuses = link:match("item:%d+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:[0-9%-]+:([0-9:]+)")
 		if bonuses then
@@ -490,11 +529,11 @@ function ExRT.mds.IsBonusOnItem(link,bonus)
 	end
 end
 
-function ExRT.mds.IsPlayerRLorOfficer(unitName)
-	local shortName = ExRT.mds.delUnitNameServer(unitName)
+function ExRT.F.IsPlayerRLorOfficer(unitName)
+	local shortName = ExRT.F.delUnitNameServer(unitName)
 	for i=1,GetNumGroupMembers() do
 		local name,rank = GetRaidRosterInfo(i)
-		if name and (name == unitName or ExRT.mds.delUnitNameServer(name) == shortName) then
+		if name and (name == unitName or ExRT.F.delUnitNameServer(name) == shortName) then
 			if rank > 0 then
 				return rank
 			else
@@ -509,7 +548,17 @@ function ExRT.mds.IsPlayerRLorOfficer(unitName)
 	-- 2: rl
 end
 
-function ExRT.mds._unp(str)
+function ExRT.F.GetPlayerParty(unitName)
+	for i=1,GetNumGroupMembers() do
+		local name,_,subgroup = GetRaidRosterInfo(i)
+		if name == unitName then
+			return subgroup
+		end
+	end
+	return 9
+end
+
+function ExRT.F._unp(str)
 	if not str or #str < 4 then
 		return 0
 	end
@@ -622,7 +671,7 @@ do
 		end
 	end
 	
-	function ExRT.mds:utf8len(s)
+	function ExRT.F:utf8len(s)
 		local pos = 1
 		local bytes = strlen(s)
 		local len = 0
@@ -637,7 +686,7 @@ do
 	
 	-- functions identically to string.sub except that i and j are UTF-8 characters
 	-- instead of bytes
-	function ExRT.mds:utf8sub(s, i, j)
+	function ExRT.F:utf8sub(s, i, j)
 		-- argument defaults
 		j = j or -1
 	
@@ -646,7 +695,7 @@ do
 		local len = 0
 	
 		-- only set l if i or j is negative
-		local l = (i >= 0 and j >= 0) or ExRT.mds:utf8len(s)
+		local l = (i >= 0 and j >= 0) or ExRT.F:utf8len(s)
 		local startChar = (i >= 0) and i or l + i + 1
 		local endChar   = (j >= 0) and j or l + j + 1
 	
@@ -699,12 +748,11 @@ do
 			self:StopMovingOrSizing() 
 		end)
 		
-		chatWindow.border = ExRT.lib.CreateShadow(chatWindow,20)
+		chatWindow.border = ExRT.lib:Shadow(chatWindow,20)
 		
 		chatWindow.title:SetText(ExRT.L.ChatwindowName)
 		
-		chatWindow.box = ExRT.lib.CreateMultilineEditBox(chatWindow,230,265,"TOPLEFT",10,-23,true)
-		chatWindow.box.EditBox:SetFont( chatWindow.box.EditBox:GetFont(),11 )
+		chatWindow.box = ExRT.lib:MultiEdit(chatWindow):Size(230,265):Point(10,-23):Font('x',11)
 		
 		local chats = {
 			{"ME",ExRT.L.ChatwindowChatSelf},
@@ -718,9 +766,8 @@ do
 			{"OFFICER",ExRT.L.ChatwindowChatOfficer},
 		}
 
-		chatWindow.dropDownText = ExRT.lib.CreateText(chatWindow,350,14,nil,0,0,"LEFT","BOTTOM",nil,10,ExRT.L.ChatwindowChannel,nil,1,1,1,1)
-		chatWindow.dropDown = ExRT.lib.CreateScrollDropDown(chatWindow,"TOPLEFT",255,-60,130,130,#chats,ExRT.L.ChatwindowChatRaid,nil,"ExRTDropDownMenuModernTemplate")
-		ExRT.lib.SetPoint(chatWindow.dropDownText,"BOTTOMLEFT",chatWindow.dropDown,"TOPLEFT",5,2)
+		chatWindow.dropDown = ExRT.lib:DropDown(chatWindow,130,#chats):Size(130):Point(255,-60):SetText(ExRT.L.ChatwindowChatRaid)
+		chatWindow.dropDownText = ExRT.lib:Text(chatWindow,ExRT.L.ChatwindowChannel,10):Size(350,14):Point("BOTTOMLEFT",chatWindow.dropDown,"TOPLEFT",5,2):Color():Shadow()
 		for i=1,#chats do
 			local chatData = chats[i]
 			chatWindow.dropDown.List[i] = {
@@ -731,27 +778,24 @@ do
 				arg2 = chatData[2],
 				func = function (this,arg1,arg2)
 					chatWindow.dropDown:SetText(arg2)
-					ExRT.lib.ScrollDropDown.Close()
+					ExRT.lib:DropDownClose()
 					activeChat = arg1
 				end
 			}
 		end
 		
-		chatWindow.targetText = ExRT.lib.CreateText(chatWindow,350,14,nil,0,0,"LEFT","BOTTOM",nil,10,ExRT.L.ChatwindowNameEB,nil,1,1,1,1)
-		chatWindow.target = ExRT.lib.CreateEditBox(chatWindow,130,20,nil,255,-115,nil,nil,nil,"ExRTInputBoxModernTemplate")
-		ExRT.lib.SetPoint(chatWindow.targetText,"BOTTOMLEFT",chatWindow.target,"TOPLEFT",5,2)
-		chatWindow.target:SetScript("OnTextChanged",function (self)
+		chatWindow.target = ExRT.lib:Edit(chatWindow):Size(130,20):Point(255,-115):OnChange(function (self)
 			activeName = self:GetText()
 		end)
+		chatWindow.targetText = ExRT.lib:Text(chatWindow,ExRT.L.ChatwindowNameEB,10):Size(350,14):Point("BOTTOMLEFT",chatWindow.target,"TOPLEFT",5,2):Bottom():Color():Shadow()
 		
-		chatWindow.button = ExRT.lib.CreateButton(chatWindow,130,22,"TOPLEFT",255,-150,ExRT.L.ChatwindowSend,nil,nil,"ExRTButtonModernTemplate")
-		chatWindow.button:SetScript("OnClick",function (self)
+		chatWindow.button = ExRT.lib:Button(chatWindow,ExRT.L.ChatwindowSend):Size(130,22):Point(255,-150):OnClick(function (self)
 			local lines = {strsplit("\n", chatWindow.box.EditBox:GetText())}
 			local channel = activeChat
 			local whisper = activeName
 			if channel == "TARGET" then
 				channel = "WHISPER"
-				whisper = ExRT.mds.UnitCombatlogname("target")
+				whisper = ExRT.F.UnitCombatlogname("target")
 				if not whisper then
 					return
 				end
@@ -776,11 +820,9 @@ do
 			chatWindow:Hide()
 		end)
 		
-		chatWindow.helpText = ExRT.lib.CreateText(chatWindow,130,100,nil,0,0,"LEFT","TOP",nil,10,ExRT.L.ChatwindowHelp,nil,1,1,1,1)
-		ExRT.lib.SetPoint(chatWindow.helpText,"TOP",chatWindow.button,"BOTTOM",0,-10)
+		chatWindow.helpText = ExRT.lib:Text(chatWindow,ExRT.L.ChatwindowHelp,10):Size(130,100):Point("TOP",chatWindow.button,"BOTTOM",0,-10):Top():Color():Shadow()
 		
-		chatWindow.chk1 = ExRT.lib.CreateCheckBox(chatWindow,nil,255,-260,"Option 1",nil,nil,nil,"ExRTCheckButtonModernTemplate")
-		chatWindow.chk1:SetScript("OnClick",function()
+		chatWindow.chk1 = ExRT.lib:Check(chatWindow,"Option 1"):Point(255,-260):OnClick(function()
 			UpdateLines()
 		end)
 	end
@@ -798,10 +840,10 @@ do
 			if thisLine ~= "" then
 				thisLine = thisLine:gsub("@1@(.-)@1#",option1)
 				if clearTags then
-					thisLine = ExRT.mds.clearTextTag(thisLine)
+					thisLine = ExRT.F.clearTextTag(thisLine)
 				end
 				if strlen(thisLine) > 254 then
-					thisLine = strjoin("\n",ExRT.mds.splitLongLine(thisLine,254))
+					thisLine = strjoin("\n",ExRT.F.splitLongLine(thisLine,254))
 				end
 				editData = editData .. thisLine
 				if i ~= linesCount then
@@ -811,7 +853,7 @@ do
 		end
 		chatWindow.box.EditBox:SetText(editData)
 	end
-	function ExRT.mds.toChatWindow(lines,clearTags,option1Name)
+	function ExRT.F:ToChatWindow(lines,clearTags,option1Name)
 		if not lines or type(lines)~="table" then
 			return
 		end
@@ -838,12 +880,11 @@ do
 	local alertFunc = nil
 	local alertArg1 = nil
 	local function CreateWindow()
-		alertWindow = ExRT.lib.CreatePopupFrame(500,65,"",true)
+		alertWindow = ExRT.lib:Popup():Size(500,65)
 		
-		alertWindow.EditBox = ExRT.lib.CreateEditBox(alertWindow,480,16,"TOP",0,-20,nil,nil,nil,"ExRTInputBoxModernTemplate")
+		alertWindow.EditBox = ExRT.lib:Edit(alertWindow):Size(480,16):Point("TOP",0,-20)
 		
-		alertWindow.OK = ExRT.lib.CreateButton(alertWindow,130,20,"TOP",0,-40,ACCEPT,nil,nil,"ExRTButtonModernTemplate")
-		alertWindow.OK:SetScript("OnClick",function (self)
+		alertWindow.OK = ExRT.lib:Button(alertWindow,ACCEPT):Size(130,20):Point("TOP",0,-40):OnClick(function (self)
 			alertWindow:Hide()
 			local input = alertWindow.EditBox:GetText()
 			alertFunc(alertArg1,input)
@@ -853,7 +894,7 @@ do
 			self:GetParent().OK:Click("LeftButton")
 		end)
 	end
-	function ExRT.mds.ShowInput(text,func,arg1,onlyNum,defText)
+	function ExRT.F.ShowInput(text,func,arg1,onlyNum,defText)
 		if not alertWindow then
 			CreateWindow()
 		end
@@ -894,7 +935,7 @@ do
 		end
 	end
 
-	function ExRT.mds.CreateChatLink(funcName,func,stringName)
+	function ExRT.F.CreateChatLink(funcName,func,stringName)
 		if createChatHook then createChatHook() createChatHook = nil end
 		if not funcName or not stringName or type(func) ~= "function" then
 			return ""

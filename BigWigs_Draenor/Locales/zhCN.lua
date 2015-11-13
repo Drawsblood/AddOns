@@ -1,12 +1,6 @@
-local L = BigWigs:NewBossLocale("Rukhmar", "zhCN")
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
+local L = BigWigs:NewBossLocale("Supreme Lord Kazzak", "zhCN")
 if L then
-end
+L["engage_yell"] = "你将面对燃烧军团的力量！"
 
-L = BigWigs:NewBossLocale("Tarlna the Ageless", "zhCN")
-if L then
 end
-
-L = BigWigs:NewBossLocale("Drov the Ruiner", "zhCN")
-if L then
-end
-

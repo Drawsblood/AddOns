@@ -86,7 +86,7 @@ Version = "Prat |cff8080ff3.0|r (|cff8080ff" .. "DEBUG" .. "|r)"
 --@end-debug@]===]
 
 --@non-debug@
-Version = "Prat |cff8080ff3.0|r (|cff8080ff".."3.5.16".."|r)"
+Version = "Prat |cff8080ff3.0|r (|cff8080ff".."3.6.0".."|r)"
 --@end-non-debug@
 
 
@@ -546,6 +546,7 @@ function addon:ChatEdit_ParseText(editBox, send)
   editBox:SetAttribute("chatType", m.CTYPE)
   editBox:SetAttribute("tellTarget", m.TARGET)
   editBox:SetAttribute("channelTarget", m.CHANNEL)
+  editBox.languague = m.LANGUAGE
 
 
   editBox:SetText(m.MESSAGE)

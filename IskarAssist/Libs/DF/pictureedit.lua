@@ -1,7 +1,9 @@
 
-
-
 local DF = _G ["DetailsFramework"]
+if (not DF or not DetailsFrameworkCanLoad) then
+	return 
+end
+
 local _
 
 	local window = DF:NewPanel (UIParent, nil, "DetailsFrameworkImageEdit", nil, 100, 100, false)
@@ -10,7 +12,6 @@ local _
 	window:SetMovable (true)
 	tinsert (UISpecialFrames, "DetailsFrameworkImageEdit")
 	window:SetFrameStrata ("TOOLTIP")
-	
 	window:SetMaxResize (266, 226)
 	
 	window.hooks = {}
@@ -37,9 +38,9 @@ local _
 		window:StopMovingOrSizing()
 	end)
 	
-	local background_frame_image = background_frame:CreateTexture (nil, "background")
-	background_frame_image:SetAllPoints (background_frame)
-	background_frame_image:SetTexture ([[Interface\AddOns\Details\images\welcome]])
+	background_frame:SetBackdrop ({edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true})
+	background_frame:SetBackdropColor (0, 0, 0, 0.9)
+	background_frame:SetBackdropBorderColor (0, 0, 0, 1)
 	
 	local haveHFlip = false
 	local haveVFlip = false
@@ -70,7 +71,7 @@ local _
 		topSlider:SetHook ("OnValueChange", function (_, _, value)
 			topCoordTexture.image:SetHeight (window.frame:GetHeight()/100*value)
 			if (window.callback_func) then
-				window.accept (true)
+				window.accept (nil, nil, true)
 			end
 		end)
 		
@@ -103,7 +104,7 @@ local _
 			value = math.abs (value-100)
 			bottomCoordTexture.image:SetHeight (math.max (window.frame:GetHeight()/100*value, 1))
 			if (window.callback_func) then
-				window.accept (true)
+				window.accept (nil, nil, true)
 			end
 		end)
 		
@@ -134,7 +135,7 @@ local _
 		leftSlider:SetHook ("OnValueChange", function (_, _, value)
 			leftCoordTexture.image:SetWidth (window.frame:GetWidth()/100*value)
 			if (window.callback_func) then
-				window.accept (true)
+				window.accept (nil, nil, true)
 			end
 		end)
 		
@@ -166,7 +167,7 @@ local _
 			value = math.abs (value-100)
 			rightCoordTexture.image:SetWidth (math.max (window.frame:GetWidth()/100*value, 1))
 			if (window.callback_func) then
-				window.accept (true)
+				window.accept (nil, nil, true)
 			end
 		end)
 		
@@ -189,7 +190,7 @@ local _
 		local alphaFrame
 		local originalColor = {0.9999, 0.8196, 0}
 		
-		local enableTexEdit = function (side, _, button)
+		local enableTexEdit = function (button, b, side)
 			
 			if (alphaFrameShown) then
 				alphaFrame:Hide()
@@ -243,12 +244,12 @@ local _
 			if (default) then
 				edit_texture:SetVertexColor (unpack (default))
 				if (window.callback_func) then
-					window.accept (true)
+					window.accept (nil, nil, true)
 				end
 			else
 				edit_texture:SetVertexColor (ColorPickerFrame:GetColorRGB())
 				if (window.callback_func) then
-					window.accept (true)
+					window.accept (nil, nil, true)
 				end
 			end
 		end
@@ -299,7 +300,7 @@ local _
 		--leftSlider.backdrop = nil
 		--leftSlider.fractional = true
 		
-		local alpha = function(_, _, button)
+		local alpha = function (button)
 		
 			if (ColorPickerFrame:IsShown()) then
 				ColorPickerFrame:Hide()
@@ -329,7 +330,7 @@ local _
 		alphaSlider:SetHook ("OnValueChange", function (_, _, value)
 			edit_texture:SetAlpha (value/100)
 			if (window.callback_func) then
-				window.accept (true)
+				window.accept (nil, nil, true)
 			end
 		end)
 
@@ -373,23 +374,23 @@ local _
 			topCoordTexture:SetHeight (window.frame:GetHeight()/100*topSlider:GetValue())
 			
 			if (window.callback_func) then
-				window.accept (true)
+				window.accept (nil, nil, true)
 			end
 		end)
 		
 
 		
 	--> flip
-		local flip = function (side)
+		local flip = function (button, b, side)
 			if (side == 1) then
 				haveHFlip = not haveHFlip
 				if (window.callback_func) then
-					window.accept (true)
+					window.accept (nil, nil, true)
 				end
 			elseif (side == 2) then
 				haveVFlip = not haveVFlip
 				if (window.callback_func) then
-					window.accept (true)
+					window.accept (nil, nil, true)
 				end
 			end
 		end
@@ -403,7 +404,7 @@ local _
 		flipButtonV:InstallCustomTexture()
 		
 	--> accept
-		window.accept = function (keep_editing)
+		window.accept = function (self, b, keep_editing)
 		
 			if (not keep_editing) then
 				buttonsBackground:Hide()
@@ -468,6 +469,7 @@ window:Hide()
 			window.callback_func = callback
 			window.extra_param = extraParam
 			buttonsBackground:Show()
+			buttonsBackground.widget:SetBackdrop (nil)
 			
 			table.wipe (window.hooks)
 		end
@@ -503,7 +505,7 @@ window:Hide()
 			end
 
 			if (window.callback_func) then
-				window.accept (true)
+				window.accept (nil, nil, true)
 			end
 
 		end

@@ -59,7 +59,6 @@ if L then
 	L.fate_root_you = "Shared Fate - You are rooted!"
 	L.fate_you = "Shared Fate on YOU! - Root on %s"
 end
-L = mod:GetLocale()
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -124,8 +123,8 @@ function mod:OnBossEnable()
 end
 
 local function showProximity()
-	if mod:Ranged() then
-		mod:OpenProximity("proximity", 5) -- XXX Tie this to Surging Shadows?
+	if mod:Ranged() and not mod:LFR() then
+		mod:OpenProximity("proximity", 5)
 	end
 end
 
@@ -162,9 +161,21 @@ do
 		end
 		if self:Me(args.destGUID) then
 			self:TargetBar(179977, 8, args.destName)
-			self:OpenProximity(179977, 20) -- XXX Range is up for debate
-			self:Flash(179977)
-			self:Say(179977)
+			if not self:LFR() then
+				self:OpenProximity(179977, 20) -- XXX Range is up for debate
+				self:Flash(179977)
+				self:Say(179977)
+			end
+		end
+	end
+end
+
+function mod:TouchOfDoomRemoved(args)
+	if self:Me(args.destGUID) then
+		self:StopBar(args.spellName, args.destName)
+		if not self:LFR() then
+			self:CloseProximity(179977)
+			showProximity()
 		end
 	end
 end
@@ -176,14 +187,6 @@ end
 function mod:GoreboundFortitude()
 	-- Enraged Spirit moving to the 'real' realm (becomes Gorebound Spirit)
 	self:Message(-11020, "Neutral", self:Tank() and "Warning" or "Info", CL.spawning:format(self:SpellName(-11020)), false)
-end
-
-function mod:TouchOfDoomRemoved(args)
-	if self:Me(args.destGUID) then
-		self:CloseProximity(args.spellId)
-		showProximity()
-		self:StopBar(args.spellName, args.destName)
-	end
 end
 
 do
@@ -270,7 +273,7 @@ function mod:Digest(args)
 			self:DelayedMessage(args.spellId, 30, "Attention", CL.custom_sec:format(args.spellName, 10), nil, "Alert")
 			self:DelayedMessage(args.spellId, 35, "Urgent", CL.custom_sec:format(args.spellName, 5), nil, "Alert")
 		end
-		self:TargetBar(args.spellId, self:Mythic() and 30 or 40, args.destName)
+		self:TargetBar(args.spellId, self:Mythic() and 35 or 40, args.destName)
 	end
 end
 

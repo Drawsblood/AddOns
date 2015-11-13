@@ -25,7 +25,6 @@ local L = mod:NewLocale("enUS", true)
 if L then
 	L.add_warnings = "Add Spawn Warnings"
 end
-L = mod:GetLocale()
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -35,6 +34,7 @@ function mod:GetOptions()
 	return {
 		--[[ Kilrogg Deadeye ]]--
 		{188929, "FLASH", "SAY"}, -- Heart Seeker
+		188852, -- Blood Splatter
 		182428, -- Vision of Death
 		180224, -- Death Throes
 		{180199, "TANK"}, -- Shred Armor
@@ -77,6 +77,10 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_START", "FelBlaze", 180618)
 
 	self:Log("SPELL_CAST_START", "CinderBreath", 180033)
+
+	self:Log("SPELL_AURA_APPLIED", "BloodSplatterDamage", 188852)
+	self:Log("SPELL_PERIODIC_DAMAGE", "BloodSplatterDamage", 188852)
+	self:Log("SPELL_PERIODIC_MISSED", "BloodSplatterDamage", 188852)
 end
 
 function mod:OnEngage()
@@ -87,7 +91,7 @@ function mod:OnEngage()
 	self:CDBar(180224, 40, CL.count:format(self:SpellName(180224), deathThroesCount)) -- Death Throes
 	self:CDBar(188929, 25) -- Heart Seeker
 	self:CDBar(180199, 10.8) -- Shred Armor
-	self:CDBar(-11269, 15) -- Hulking Terror
+	self:CDBar(-11269, 15, nil, "spell_nature_shamanrage") -- Hulking Terror
 	self:OpenAltPower("altpower", 182159) -- Fel Corruption
 	self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "boss1", "boss2", "boss3", "boss4", "boss5")
@@ -143,6 +147,17 @@ do
 			self:TargetBar(args.spellId, 5, args.destName)
 			self:Flash(args.spellId)
 			self:Say(args.spellId)
+		end
+	end
+end
+
+do
+	local prev = 0
+	function mod:BloodSplatterDamage(args)
+		local t = GetTime()
+		if t-prev > 1.5 and self:Me(args.destGUID) then
+			prev = t
+			self:Message(args.spellId, "Personal", "Alarm", CL.underyou:format(args.spellName))
 		end
 	end
 end

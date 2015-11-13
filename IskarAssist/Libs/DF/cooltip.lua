@@ -1,7 +1,10 @@
 
 local DF = _G ["DetailsFramework"]
-local SharedMedia = LibStub:GetLibrary("LibSharedMedia-3.0")
+if (not DF or not DetailsFrameworkCanLoad) then
+	return 
+end
 
+local SharedMedia = LibStub:GetLibrary("LibSharedMedia-3.0")
 local _
 --lua locals
 local _math_floor= math.floor
@@ -19,7 +22,7 @@ local _GetScreenHeight = GetScreenHeight
 local _UIParent = UIParent
 local _CreateFrame = CreateFrame
 
-local version = 1
+local version = 2
 
 function DF:CreateCoolTip()
 
@@ -50,6 +53,8 @@ function DF:CreateCoolTip()
 		CoolTip.StatusBarTableSub = {}
 		CoolTip.WallpaperTable = {}
 		CoolTip.WallpaperTableSub = {}
+		
+		CoolTip.PopupFrameTable = {}
 		
 		CoolTip.FunctionsTableMain = {} --> menus
 		CoolTip.FunctionsTableSub = {} --> menus
@@ -183,8 +188,8 @@ function DF:CreateCoolTip()
 	
 		CoolTip.frame1 = frame1
 		CoolTip.frame2 = frame2
-		DF:Fade (frame1, 0)
-		DF:Fade (frame2, 0)
+		DF:FadeFrame (frame1, 0)
+		DF:FadeFrame (frame2, 0)
 
 		--> button containers
 		frame1.Lines = {}
@@ -254,11 +259,12 @@ function DF:CreateCoolTip()
 			if (CoolTip.Type ~= 1 and CoolTip.Type ~= 2) then --> menu
 				CoolTip.active = true
 				CoolTip.mouseOver = true
+				CoolTip.had_interaction = true
 				self:SetScript ("OnUpdate", nil)
-				DF:Fade (self, 0)
+				DF:FadeFrame (self, 0)
 				--rever
 				if (CoolTip.sub_menus) then
-					DF:Fade (frame2, 0)
+					DF:FadeFrame (frame2, 0)
 				end
 			end
 		end)
@@ -270,9 +276,10 @@ function DF:CreateCoolTip()
 			if (CoolTip.Type ~= 1 and CoolTip.Type ~= 2) then
 				CoolTip.active = true
 				CoolTip.mouseOver = true
+				CoolTip.had_interaction = true
 				self:SetScript ("OnUpdate", nil)
-				DF:Fade (self, 0)
-				DF:Fade (frame1, 0)
+				DF:FadeFrame (self, 0)
+				DF:FadeFrame (frame1, 0)
 			end
 		end)
 
@@ -280,11 +287,11 @@ function DF:CreateCoolTip()
 					elapsedTime = elapsedTime+elapsed
 					if (elapsedTime > 0.7) then
 						if (not CoolTip.active and not CoolTip.buttonClicked and self == CoolTip.Host) then
-							DF:Fade (self, 1)
-							DF:Fade (frame2, 1)
+							DF:FadeFrame (self, 1)
+							DF:FadeFrame (frame2, 1)
 						elseif (not CoolTip.active) then
-							DF:Fade (self, 1)
-							DF:Fade (frame2, 1)
+							DF:FadeFrame (self, 1)
+							DF:FadeFrame (frame2, 1)
 						end
 						self:SetScript ("OnUpdate", nil)
 						frame2:SetScript ("OnUpdate", nil)
@@ -310,11 +317,11 @@ function DF:CreateCoolTip()
 					elapsedTime = elapsedTime+elapsed
 					if (elapsedTime > 0.7) then
 						if (not CoolTip.active and not CoolTip.buttonClicked and self == CoolTip.Host) then
-							DF:Fade (self, 1)
-							DF:Fade (frame2, 1)
+							DF:FadeFrame (self, 1)
+							DF:FadeFrame (frame2, 1)
 						elseif (not CoolTip.active) then
-							DF:Fade (self, 1)
-							DF:Fade (frame2, 1)
+							DF:FadeFrame (self, 1)
+							DF:FadeFrame (frame2, 1)
 						end
 						self:SetScript ("OnUpdate", nil)
 						frame1:SetScript ("OnUpdate", nil)
@@ -379,12 +386,12 @@ function DF:CreateCoolTip()
 								elapsedTime = elapsedTime+elapsed
 								if (elapsedTime > 0.7) then
 									if (not CoolTip.active and not CoolTip.buttonClicked) then
-										DF:Fade (frame1, 1)
-										DF:Fade (frame2, 1)
+										DF:FadeFrame (frame1, 1)
+										DF:FadeFrame (frame2, 1)
 							
 									elseif (not CoolTip.active) then
-										DF:Fade (frame1, 1)
-										DF:Fade (frame2, 1)
+										DF:FadeFrame (frame1, 1)
+										DF:FadeFrame (frame2, 1)
 									end
 									frame1:SetScript ("OnUpdate", nil)
 								end
@@ -398,6 +405,7 @@ function DF:CreateCoolTip()
 							if (CoolTip.Type ~= 1 and CoolTip.Type ~= 2 and not botao.isDiv) then
 								CoolTip.active = true
 								CoolTip.mouseOver = true
+								CoolTip.had_interaction = true
 
 								frame1:SetScript ("OnUpdate", nil)
 								frame2:SetScript ("OnUpdate", nil)
@@ -410,7 +418,13 @@ function DF:CreateCoolTip()
 									botao.leftIcon:SetBlendMode ("BLEND")
 								end
 
-								if (CoolTip.IndexesSub [botao.index] and CoolTip.IndexesSub [botao.index] > 0) then
+								if (CoolTip.PopupFrameTable [botao.index]) then
+									local on_enter, on_leave, param1, param2 = unpack (CoolTip.PopupFrameTable [botao.index])
+									if (on_enter) then
+										xpcall (on_enter, geterrorhandler(), frame1, param1, param2)
+									end
+								
+								elseif (CoolTip.IndexesSub [botao.index] and CoolTip.IndexesSub [botao.index] > 0) then
 									if (CoolTip.OptionsTable.SubMenuIsTooltip) then
 										CoolTip:ShowSub (botao.index)
 										botao.index = i
@@ -427,11 +441,12 @@ function DF:CreateCoolTip()
 
 								else
 									--hide second frame
-									DF:Fade (frame2, 1)
+									DF:FadeFrame (frame2, 1)
 									CoolTip.last_button = nil
 								end
 							else
 								CoolTip.mouseOver = true
+								CoolTip.had_interaction = true
 							end
 						end)
 						
@@ -449,6 +464,13 @@ function DF:CreateCoolTip()
 								else
 									botao.leftIcon:SetBlendMode ("BLEND")
 									botao.rightIcon:SetBlendMode ("BLEND")
+								end
+								
+								if (CoolTip.PopupFrameTable [botao.index]) then
+									local on_enter, on_leave, param1, param2 = unpack (CoolTip.PopupFrameTable [botao.index])
+									if (on_leave) then
+										xpcall (on_leave, geterrorhandler(), frame1, param1, param2)
+									end
 								end
 								
 								elapsedTime = 0
@@ -469,11 +491,11 @@ function DF:CreateCoolTip()
 								elapsedTime = elapsedTime+elapsed
 								if (elapsedTime > 0.7) then
 									if (not CoolTip.active and not CoolTip.buttonClicked) then
-										DF:Fade (frame1, 1)
-										DF:Fade (frame2, 1)
+										DF:FadeFrame (frame1, 1)
+										DF:FadeFrame (frame2, 1)
 									elseif (not CoolTip.active) then
-										DF:Fade (frame1, 1)
-										DF:Fade (frame2, 1)
+										DF:FadeFrame (frame1, 1)
+										DF:FadeFrame (frame2, 1)
 									end
 									frame2:SetScript ("OnUpdate", nil)
 								end
@@ -489,6 +511,7 @@ function DF:CreateCoolTip()
 							if (CoolTip.Type ~= 1 and CoolTip.Type ~= 2 and not botao.isDiv) then
 								CoolTip.active = true
 								CoolTip.mouseOver = true
+								CoolTip.had_interaction = true
 								
 								botao.background:Show()
 								
@@ -501,10 +524,11 @@ function DF:CreateCoolTip()
 								frame1:SetScript ("OnUpdate", nil)
 								frame2:SetScript ("OnUpdate", nil)
 								
-								DF:Fade (frame1, 0)
-								DF:Fade (frame2, 0)
+								DF:FadeFrame (frame1, 0)
+								DF:FadeFrame (frame2, 0)
 							else
 								CoolTip.mouseOver = true
+								CoolTip.had_interaction = true
 							end
 						end)
 
@@ -975,7 +999,7 @@ function DF:CreateCoolTip()
 			menuButton:SetPoint ("left", frame2, "left")
 			menuButton:SetPoint ("right", frame2, "right")
 			
-			DF:Fade (menuButton, 0)
+			DF:FadeFrame (menuButton, 0)
 			
 			--> string length
 			local stringWidth = menuButton.leftText:GetStringWidth() + menuButton.rightText:GetStringWidth() + menuButton.leftIcon:GetWidth() + menuButton.rightIcon:GetWidth()
@@ -1024,7 +1048,7 @@ function DF:CreateCoolTip()
 	function CoolTip:ShowSub (index)
 	
 		if (CoolTip.OptionsTable.IgnoreSubMenu) then
-			DF:Fade (frame2, 1)
+			DF:FadeFrame (frame2, 1)
 			return
 		end
 	
@@ -1090,7 +1114,7 @@ function DF:CreateCoolTip()
 		end
 		
 		for i = CoolTip.IndexesSub [index] + 1, #frame2.Lines do 
-			DF:Fade (frame2.Lines[i], 1)
+			DF:FadeFrame (frame2.Lines[i], 1)
 		end
 
 		local spacing = 0
@@ -1193,7 +1217,7 @@ function DF:CreateCoolTip()
 			frame2:SetWidth (frame2.w + 44)
 		end
 		
-		DF:Fade (frame2, 0)
+		DF:FadeFrame (frame2, 0)
 		
 		CoolTip:CheckOverlap()
 		
@@ -1222,7 +1246,7 @@ function DF:CreateCoolTip()
 	end
 	
 	function CoolTip:HideSub()
-		DF:Fade (frame2, 1)
+		DF:FadeFrame (frame2, 1)
 	end	
 	
 
@@ -1231,11 +1255,11 @@ function DF:CreateCoolTip()
 		row.leftText:SetHeight (10)
 	end
 
-	--> ~inicio ~start
+	--> ~inicio ~start ~tooltip
 	function CoolTip:monta_tooltip()
 		
 		--> hide sub frame
-		DF:Fade (frame2, 1)
+		DF:FadeFrame (frame2, 1)
 		--> hide select bar
 		CoolTip:HideSelectedTexture (frame1)
 
@@ -1369,7 +1393,7 @@ function DF:CreateCoolTip()
 		end
 		
 		--> unhide frame
-		DF:Fade (frame1, 0)
+		DF:FadeFrame (frame1, 0)
 		CoolTip:SetMyPoint (host)
 		
 		--> fix sparks
@@ -1393,7 +1417,7 @@ function DF:CreateCoolTip()
 		button.divbar:SetDesaturated (true)
 	end
 	
-	--> ~inicio ~start
+	--> ~inicio ~start ~menu
 	function CoolTip:monta_cooltip (host, instancia, options, sub_menus, icones, tamanho1, tamanho2, font, fontsize)
 
 		if (CoolTip.Indexes == 0) then
@@ -1418,12 +1442,12 @@ function DF:CreateCoolTip()
 			frame2.w = 0
 			frame2:SetHeight (6)
 			if (CoolTip.SelectedIndexMain and CoolTip.IndexesSub [CoolTip.SelectedIndexMain] and CoolTip.IndexesSub [CoolTip.SelectedIndexMain] > 0) then
-				DF:Fade (frame2, 0)
+				DF:FadeFrame (frame2, 0)
 			else
-				DF:Fade (frame2, 1)
+				DF:FadeFrame (frame2, 1)
 			end
 		else
-			DF:Fade (frame2, 1)
+			DF:FadeFrame (frame2, 1)
 		end
 		
 		CoolTip.active = true
@@ -1576,7 +1600,7 @@ function DF:CreateCoolTip()
 			frame1.frameWallpaper:Hide()
 		end
 	
-		DF:Fade (frame1, 0)
+		DF:FadeFrame (frame1, 0)
 
 		for i = 1, CoolTip.Indexes do
 			if (CoolTip.SelectedIndexMain and CoolTip.SelectedIndexMain == i) then
@@ -1956,6 +1980,8 @@ function DF:CreateCoolTip()
 			frame2:SetBackdropBorderColor (unpack (default_backdropborder_color))
 
 			--[
+			_table_wipe (CoolTip.PopupFrameTable)
+			
 			_table_wipe (CoolTip.LeftTextTable)
 			_table_wipe (CoolTip.LeftTextTableSub)
 			_table_wipe (CoolTip.RightTextTable)
@@ -2530,6 +2556,17 @@ function DF:CreateCoolTip()
 		end
 	
 ----------------------------------------------------------------------
+	--> popup frame
+		function CoolTip:AddPopUpFrame (func_on_show, func_on_hide, param1, param2)
+			
+			-- act like a sub menu
+			if (CoolTip.Indexes > 0) then
+				CoolTip.PopupFrameTable [CoolTip.Indexes] = {func_on_show or false, func_on_hide or false, param1, param2}
+			end
+			
+		end
+
+----------------------------------------------------------------------
 	--> adds a line.
 	--> only works with cooltip type 1 and 2 (tooltip and tooltip with bars)
 	--> parameters: left text, right text [, L color R, L color G, L color B, L color A [, R color R, R color G, R color B, R color A [, wrap]]] 
@@ -2780,11 +2817,14 @@ function DF:CreateCoolTip()
 	
 		--> serach key: ~start
 		function CoolTip:Show (frame, menuType, color)
+			CoolTip.had_interaction = false
 			return CoolTip:ShowCooltip (frame, menuType, color)
 		end
 		
 		function CoolTip:ShowCooltip (frame, menuType, color)
 
+			CoolTip.had_interaction = false
+		
 			if (frame) then
 				--> details framework
 				if (frame.dframework) then
@@ -2818,8 +2858,8 @@ function DF:CreateCoolTip()
 	function CoolTip:Close()
 		CoolTip.active = false
 		CoolTip.Host = nil
-		DF:Fade (frame1, 1)
-		DF:Fade (frame2, 1)
+		DF:FadeFrame (frame1, 1)
+		DF:FadeFrame (frame2, 1)
 		
 	end
 	

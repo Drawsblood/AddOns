@@ -24,7 +24,7 @@ local tankList = {}
 
 local L = mod:NewLocale("enUS", true)
 if L then
-	L.seed = "Seed (%d)"
+	L.seed = "Seed"
 
 	L.custom_off_seed_marker = "Seed of Destruction marker"
 	L.custom_off_seed_marker_desc = "Mark the Seed of Destruction targets with {rt1}{rt2}{rt3}{rt4}{rt5}, requires promoted or leader."
@@ -34,7 +34,6 @@ if L then
 	L.tank_proximity_desc = "Open a 5 yard proximity showing the other tanks to help you deal with the Heavy Handed & Heavily Armed abilities."
 	L.tank_proximity_icon = 156138 -- Heavy Handed / ability_butcher_heavyhanded
 end
-L = mod:GetLocale()
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -62,24 +61,7 @@ function mod:GetOptions()
 	}
 end
 
-local function updateTanks(self)
-	local _, _, _, myMapId = UnitPosition("player")
-	for unit in self:IterateGroup() do
-		local _, _, _, tarMapId = UnitPosition(unit)
-		if tarMapId == myMapId and self:Tank(unit) then
-			local guid = UnitGUID(unit)
-			if not self:Me(guid) then
-				tankList[#tankList+1] = unit
-			end
-		end
-	end
-end
-
 function mod:OnBossEnable()
-	if IsEncounterInProgress() and self:Tank() then
-		updateTanks(self) -- Backup for disconnecting mid-combat
-	end
-
 	self:Log("SPELL_AURA_APPLIED", "Befouled", 189030, 189031, 189032) -- 189030 = red, 31 = yellow, 32 = green
 	self:Log("SPELL_AURA_REMOVED", "BefouledRemovedCheck", 189030, 189031, 189032)
 	self:Log("SPELL_AURA_APPLIED", "Disembodied", 179407)
@@ -100,7 +82,6 @@ function mod:OnEngage()
 	enraged = nil
 	phaseEnd = GetTime() + 87 -- used to prevent starting new bars the phase change would stop
 	cleaveCount = 1
-	wipe(tankList)
 
 	self:Bar(179406, 25.5, CL.count:format(self:SpellName(179406), cleaveCount)) -- Soul Cleave
 	self:Bar(189009, 36.5) -- Cavitation
@@ -109,7 +90,14 @@ function mod:OnEngage()
 	self:Bar("stages", 87, 179667, "ability_butcher_heavyhanded") -- Disarmed (Phase 2)
 
 	if self:Tank() then
-		updateTanks(self)
+		wipe(tankList)
+		local _, _, _, myMapId = UnitPosition("player")
+		for unit in self:IterateGroup() do
+			local _, _, _, tarMapId = UnitPosition(unit)
+			if tarMapId == myMapId and self:Tank(unit) and not self:Me(UnitGUID(unit)) then
+				tankList[#tankList+1] = self:UnitName(unit) -- Use name instead of unit directly as it can change midfight (generally LFR quitters)
+			end
+		end
 	end
 end
 
@@ -218,16 +206,16 @@ function mod:RumblingFissures(args)
 end
 
 do
-	local list, isOnMe = {}, nil
-	local function seedSay(self, spellName)
+	local list, isOnMe, timer = {}, nil, nil
+	local function seedSay(self, spellId)
+		timer = nil
 		sort(list)
 		for i = 1, #list do
 			local target = list[i]
 			if target == isOnMe then
-				local seed = L.seed:format(i)
-				self:Say(181508, seed)
-				self:Flash(181508)
-				self:TargetMessage(181508, target, "Positive", "Alarm", seed)
+				self:Say(spellId, self:LFR() and L.seed or CL.count_rticon:format(L.seed, i, i))
+				self:Flash(spellId)
+				self:TargetMessage(spellId, target, "Positive", "Alarm", not self:LFR() and CL.count_icon:format(L.seed, i, i))
 			end
 			if self:GetOption("custom_off_seed_marker") then
 				SetRaidTarget(target, i)
@@ -235,7 +223,7 @@ do
 			list[i] = self:ColorName(target)
 		end
 		if not isOnMe then
-			self:TargetMessage(181508, list, "Attention")
+			self:TargetMessage(spellId, list, "Attention")
 		else
 			wipe(list)
 		end
@@ -255,7 +243,10 @@ do
 				self:CDBar(181508, 14.5)
 			end
 			self:Bar(181508, 5, 84474, "spell_shadow_seedofdestruction") -- 84474 = "Explosion"
-			self:ScheduleTimer(seedSay, 0.3, self, args.spellName)
+			timer = self:ScheduleTimer(seedSay, self:Mythic() and 1 or 0.4, self, 181508)
+		elseif timer and #list == 5 then -- Seeds scale with players on non-Mythic
+			self:CancelTimer(timer)
+			seedSay(self, 181508)
 		end
 	end
 

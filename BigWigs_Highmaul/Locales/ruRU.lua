@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Kargath Bladefist", "ruRU")
 if not L then return end
 if L then
@@ -9,6 +10,8 @@ end
 L = BigWigs:NewBossLocale("The Butcher", "ruRU")
 if L then
 L["adds_multiple"] = "Помощники x%d"
+L["tank_proximity"] = "Радар танков"
+L["tank_proximity_desc"] = "Открывает радар близости 5м, показывающий других танков чтобы делить урон от способности Тяжелая рука."
 
 end
 

@@ -1,13 +1,15 @@
 
-local major, minor = "DetailsFramework-1.0", 3
+local dversion = 12
+local major, minor = "DetailsFramework-1.0", dversion
 local DF, oldminor = LibStub:NewLibrary (major, minor)
 
 if (not DF) then
-	DetailsFrameWorkLoadValid = false
+	DetailsFrameworkCanLoad = false
 	return 
 end
 
-DetailsFrameWorkLoadValid = true
+DetailsFrameworkCanLoad = true
+local SharedMedia = LibStub:GetLibrary ("LibSharedMedia-3.0")
 
 local _type = type
 local _unpack = unpack
@@ -22,6 +24,13 @@ DF.PanelCounter = 1
 DF.ButtonCounter = 1
 DF.SliderCounter = 1
 DF.SplitBarCounter = 1
+
+DF.FrameWorkVersion = tostring (dversion)
+function DF:PrintVersion()
+	print ("Details! Framework Version:", DF.FrameWorkVersion)
+end
+
+LibStub:GetLibrary("AceTimer-3.0"):Embed (DF)
 
 do
 	local path = string.match (debugstack (1, 1, 0), "AddOns\\(.+)fw.lua")
@@ -38,6 +47,9 @@ _G ["DetailsFramework"] = DF
 
 DF.embeds = DF.embeds or {}
 local embed_functions = {
+	"RemoveRealName",
+	"table",
+	"BuildDropDownFontList",
 	"SetFontSize",
 	"SetFontFace",
 	"SetFontColor",
@@ -55,6 +67,7 @@ local embed_functions = {
 	"ShowTutorialAlertFrame",
 	"GetNpcIdFromGuid",
 	"ShowFeedbackPanel",
+	"SetAsOptionsPanel",
 	
 	"CreateDropDown",
 	"CreateButton",
@@ -75,9 +88,103 @@ local embed_functions = {
 	"CreateTextEntry",
 	"Create1PxPanel",
 	"CreateFeedbackButton",
-	
+	"CreateOptionsFrame",
+	"NewSpecialLuaEditorEntry",
+	"ShowPromptPanel",
+	"ShowTextPromptPanel",
 	"www_icons",
+	"GetTemplate",
+	"GetFrameworkFolder",
 }
+
+DF.table = {}
+
+function DF:GetFrameworkFolder()
+	return DF.folder
+end
+
+function DF:FadeFrame (frame, t)
+	if (t == 0) then
+		frame.hidden = false
+		frame.faded = false
+		frame.fading_out = false
+		frame.fading_in = false
+		frame:Show()
+		frame:SetAlpha (1)
+		
+	elseif (t == 1) then
+		frame.hidden = true
+		frame.faded = true
+		frame.fading_out = false
+		frame.fading_in = false
+		frame:SetAlpha (0)
+		frame:Hide()
+	end
+end
+
+function DF.table.reverse (t)
+	local new = {}
+	local index = 1
+	for i = #t, 1, -1 do
+		new [index] = t[i]
+		index = index + 1
+	end
+	return new
+end
+
+--> copy from table2 to table1 overwriting values
+function DF.table.copy (t1, t2)
+	for key, value in pairs (t2) do 
+		if (type (value) == "table") then
+			t1 [key] = t1 [key] or {}
+			DF.table.copy (t1 [key], t2 [key])
+		else
+			t1 [key] = value
+		end
+	end
+	return t1
+end
+
+--> copy values that does exist on table2 but not on table1
+function DF.table.deploy (t1, t2)
+	for key, value in pairs (t2) do 
+		if (type (value) == "table") then
+			t1 [key] = t1 [key] or {}
+			DF.table.deploy (t1 [key], t2 [key])
+		elseif (t1 [key] == nil) then
+			t1 [key] = value
+		end
+	end
+end
+
+function DF.table.dump (t, s, deep)
+	s = s or ""
+	deep = deep or 0
+	local space = ""
+	for i = 1, deep do
+		space = space .. "   "
+	end
+	for key, value in pairs (t) do
+		local tpe = _type (value)
+		if (type (key) ~= "string") then
+			key = "unknown?"
+		end		
+		if (tpe == "table") then
+			s = s .. space .. "[" .. key .. "] = |cFFa9ffa9table {|r\n"
+			s = s .. DF.table.dump (value, nil, deep+1)
+			s = s .. space .. "|cFFa9ffa9}|r\n"
+		elseif (tpe == "string") then
+			s = s .. space .. "[" .. key .. "] = '|cFFfff1c1" .. value .. "|r'\n"
+		elseif (tpe == "number") then
+			s = s .. space .. "[" .. key .. "] = |cFFffc1f4" .. value .. "|r\n"
+		elseif (tpe == "function") then
+			s = s .. space .. "[" .. key .. "] = function()\n"
+		elseif (tpe == "boolean") then
+			s = s .. space .. "[" .. key .. "] = |cFF99d0ff" .. (value and "true" or "false") .. "|r\n"
+		end
+	end
+	return s
+end
 
 DF.www_icons = {
 	texture = "feedback_sites",
@@ -85,6 +192,10 @@ DF.www_icons = {
 	curse = {0, 0.7890625, 38/123, 79/128},
 	mmoc = {0, 0.7890625, 80/123, 123/128},
 }
+
+function DF:IntegerToTimer (value)
+	return "" .. floor (value/60) .. ":" .. format ("%02.f", value%60)
+end
 
 function DF:Embed (target)
 	for k, v in pairs (embed_functions) do
@@ -94,11 +205,20 @@ function DF:Embed (target)
 	return target
 end
 
+function DF:RemoveRealName (name)
+	return name:gsub (("%-.*"), "")
+end
+
 function DF:SetFontSize (fontString, ...)
 	local fonte, _, flags = fontString:GetFont()
 	fontString:SetFont (fonte, max (...), flags)
 end
 function DF:SetFontFace (fontString, fontface)
+	local font = SharedMedia:Fetch ("font", fontface, true)
+	if (font) then
+		fontface = font
+	end
+
 	local _, size, flags = fontString:GetFont()
 	fontString:SetFont (fontface, size, flags)
 end
@@ -216,162 +336,6 @@ function DF:CreateFlashAnimation (frame, onFinishFunc, onLoopFunc)
 	frame.Stop = stop
 end
 
------------------------------------------
-
-local fade_IN_finished_func = function (frame)
-	if (frame.fading_in) then
-		frame.hidden = true
-		frame.faded = true
-		frame.fading_in = false
-		frame:Hide()
-	end
-end
-
-local fade_OUT_finished_func = function (frame)
-	if (frame:IsShown() and frame.fading_out) then
-		frame.hidden = false
-		frame.faded = false
-		frame.fading_out = false
-	else
-		frame:SetAlpha(0)
-	end
-end
-
-local just_fade_func = function (frame)
-	frame.hidden = false
-	frame.faded = true
-	frame.fading_in = false
-end
-
-local anim_OUT_alpha_func = function (frame)
-	frame.fading_out = false
-end
-
-local anim_IN_alpha_func = function (frame)
-	frame.fading_in = false
-end
-
-function DF:Fade (frame, tipo, velocidade, parametros)
-	
-	if (_type (frame) == "table") then 
-		if (frame.dframework) then
-			frame = frame.widget
-		end
-	end
-	
-	velocidade = velocidade or 0.3
-	
-	if (upper (tipo) == "IN") then
-
-		if (frame:GetAlpha() == 0 and frame.hidden and not frame.fading_out) then --> ja esta escondida
-			return
-		elseif (frame.fading_in) then --> ja esta com uma animação, se for true
-			return
-		end
-		
-		if (frame.fading_out) then --> se tiver uma animação de aparecer em andamento se for true
-			frame.fading_out = false
-		end
-
-		UIFrameFadeIn (frame, velocidade, frame:GetAlpha(), 0)
-		frame.fading_in = true
-		
-		frame.fadeInfo.finishedFunc = fade_IN_finished_func
-		frame.fadeInfo.finishedArg1 = frame
-		
-	elseif (upper (tipo) == "OUT") then --> aparecer
-		if (frame:GetAlpha() == 1 and not frame.hidden and not frame.fading_in) then --> ja esta na tela
-			return
-		elseif (frame.fading_out) then --> já ta com fading out
-			return
-		end
-		
-		if (frame.fading_in) then --> se tiver uma animação de hidar em andamento se for true
-			frame.fading_in = false
-		end
-		
-		frame:Show()
-		UIFrameFadeOut (frame, velocidade, frame:GetAlpha(), 1.0)
-		frame.fading_out = true
-		
-		frame.fadeInfo.finishedFunc = fade_OUT_finished_func
-		frame.fadeInfo.finishedArg1 = frame
-			
-	elseif (tipo == 0) then --> força o frame a ser mostrado
-		frame.hidden = false
-		frame.faded = false
-		frame.fading_out = false
-		frame.fading_in = false
-		frame:Show()
-		frame:SetAlpha (1)
-		
-	elseif (tipo == 1) then --> força o frame a ser hidado
-		frame.hidden = true
-		frame.faded = true
-		frame.fading_out = false
-		frame.fading_in = false
-		frame:SetAlpha (0)
-		frame:Hide()
-		
-	elseif (tipo == -1) then --> apenas da fade sem hidar
-		if (frame:GetAlpha() == 0 and frame.hidden and not frame.fading_out) then --> ja esta escondida
-			return
-		elseif (frame.fading_in) then --> ja esta com uma animação, se for true
-			return
-		end
-		
-		if (frame.fading_out) then --> se tiver uma animação de aparecer em andamento se for true
-			frame.fading_out = false
-		end
-
-		UIFrameFadeIn (frame, velocidade, frame:GetAlpha(), 0)
-		frame.fading_in = true
-		frame.fadeInfo.finishedFunc = just_fade_func
-		frame.fadeInfo.finishedArg1 = frame
-
-	elseif (upper (tipo) == "ALPHAANIM") then
-
-		local value = velocidade
-		local currentApha = frame:GetAlpha()
-		frame:Show()
-		
-		if (currentApha < value) then
-			if (frame.fading_in) then --> se tiver uma animação de hidar em andamento se for true
-				frame.fading_in = false
-				frame.fadeInfo.finishedFunc = nil
-			end
-			UIFrameFadeOut (frame, 0.3, currentApha, value)
-			frame.fading_out = true
-
-			frame.fadeInfo.finishedFunc = anim_OUT_alpha_func
-			frame.fadeInfo.finishedArg1 = frame
-
-		else
-			if (frame.fading_out) then --> se tiver uma animação de hidar em andamento se for true
-				frame.fading_out = false
-				frame.fadeInfo.finishedFunc = nil
-			end
-			UIFrameFadeIn (frame, 0.3, currentApha, value)
-			frame.fading_in = true
-			
-			frame.fadeInfo.finishedFunc = anim_IN_alpha_func
-			frame.fadeInfo.finishedArg1 = frame
-		end
-
-	elseif (upper (tipo) == "ALPHA") then --> setando um alpha determinado
-		if (frame.fading_in or frame.fading_out) then
-			frame.fadeInfo.finishedFunc = nil
-			UIFrameFadeIn (frame, velocidade, frame:GetAlpha(), frame:GetAlpha())
-		end
-		frame.hidden = false
-		frame.faded = false
-		frame.fading_in = false
-		frame.fading_out = false
-		frame:Show()
-		frame:SetAlpha (velocidade)
-	end
-end
-	
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --> points
 
@@ -451,7 +415,11 @@ end
 	local tn = tonumber
 	function DF:ParseColors (_arg1, _arg2, _arg3, _arg4)
 		if (_type (_arg1) == "table") then
-			_arg1, _arg2, _arg3, _arg4 = _unpack (_arg1)
+			if (not _arg1[1] and _arg1.r) then
+				_arg1, _arg2, _arg3, _arg4 = _arg1.r, _arg1.g, _arg1.b, _arg1.a
+			else
+				_arg1, _arg2, _arg3, _arg4 = _unpack (_arg1)
+			end
 		
 		elseif (_type (_arg1) == "string") then
 		
@@ -492,7 +460,11 @@ end
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --> menus
 	
-	function DF:BuildMenu (parent, menu, x_offset, y_offset, height)
+	function DF:BuildMenu (parent, menu, x_offset, y_offset, height, use_two_points, text_template, dropdown_template, switch_template, switch_is_box, slider_template, button_template)
+		
+		if (not parent.widget_list) then
+			DF:SetAsOptionsPanel (parent)
+		end
 		
 		local cur_x = x_offset
 		local cur_y = y_offset
@@ -503,10 +475,22 @@ end
 		
 		for index, widget_table in ipairs (menu) do 
 		
-			if (widget_table.type == "select" or widget_table.type == "dropdown") then
-				local dropdown = self:NewDropDown (parent, nil, "$parentWidget" .. index, nil, 140, 18, widget_table.values, widget_table.get())
+			if (widget_table.type == "blank" or widget_table.type == "space") then
+				-- do nothing
+		
+			elseif (widget_table.type == "label" or widget_table.type == "text") then
+				local label = DF:CreateLabel (parent, widget_table.get() or widget_table.text, widget_table.text_template or text_template or widget_table.size, widget_table.color, widget_table.font, nil, "$parentWidget" .. index, "overlay")
+				label._get = widget_table.get
+				label.widget_type = "label"
+				label:SetPoint (cur_x, cur_y)
+				tinsert (parent.widget_list, label)
+			
+			elseif (widget_table.type == "select" or widget_table.type == "dropdown") then
+				local dropdown = DF:NewDropDown (parent, nil, "$parentWidget" .. index, nil, 140, 18, widget_table.values, widget_table.get(), dropdown_template)
 				dropdown.tooltip = widget_table.desc
-				local label = self:NewLabel (parent, nil, "$parentLabel" .. index, nil, widget_table.name, "GameFontNormal", 12)
+				dropdown._get = widget_table.get
+				dropdown.widget_type = "select"
+				local label = DF:NewLabel (parent, nil, "$parentLabel" .. index, nil, widget_table.name .. (use_two_points and ": " or ""), "GameFontNormal", widget_table.text_template or text_template or 12)
 				dropdown:SetPoint ("left", label, "right", 2)
 				label:SetPoint (cur_x, cur_y)
 				
@@ -515,12 +499,20 @@ end
 					max_x = size
 				end
 				
+				tinsert (parent.widget_list, dropdown)
+				
 			elseif (widget_table.type == "toggle" or widget_table.type == "switch") then
-				local switch = self:NewSwitch (parent, nil, "$parentWidget" .. index, nil, 60, 20, nil, nil, widget_table.get())
+				local switch = DF:NewSwitch (parent, nil, "$parentWidget" .. index, nil, 60, 20, nil, nil, widget_table.get(), nil, nil, nil, nil, switch_template)
 				switch.tooltip = widget_table.desc
+				switch._get = widget_table.get
+				switch.widget_type = "toggle"
 				switch.OnSwitch = widget_table.set
 				
-				local label = self:NewLabel (parent, nil, "$parentLabel" .. index, nil, widget_table.name, "GameFontNormal", 12)
+				if (switch_is_box) then
+					switch:SetAsCheckBox()
+				end
+				
+				local label = DF:NewLabel (parent, nil, "$parentLabel" .. index, nil, widget_table.name .. (use_two_points and ": " or ""), "GameFontNormal", widget_table.text_template or text_template or 12)
 				switch:SetPoint ("left", label, "right", 2)
 				label:SetPoint (cur_x, cur_y)
 				
@@ -529,13 +521,17 @@ end
 					max_x = size
 				end
 				
+				tinsert (parent.widget_list, switch)
+				
 			elseif (widget_table.type == "range" or widget_table.type == "slider") then
 				local is_decimanls = widget_table.usedecimals
-				local slider = self:NewSlider (parent, nil, "$parentWidget" .. index, nil, 140, 20, widget_table.min, widget_table.max, widget_table.step, widget_table.get(),  is_decimanls)
+				local slider = DF:NewSlider (parent, nil, "$parentWidget" .. index, nil, 140, 20, widget_table.min, widget_table.max, widget_table.step, widget_table.get(),  is_decimanls, nil, nil, slider_template)
 				slider.tooltip = widget_table.desc
+				slider._get = widget_table.get
+				slider.widget_type = "range"
 				slider:SetHook ("OnValueChange", widget_table.set)
 				
-				local label = self:NewLabel (parent, nil, "$parentLabel" .. index, nil, widget_table.name, "GameFontNormal", 12)
+				local label = DF:NewLabel (parent, nil, "$parentLabel" .. index, nil, widget_table.name .. (use_two_points and ": " or ""), "GameFontNormal", widget_table.text_template or text_template or 12)
 				slider:SetPoint ("left", label, "right", 2)
 				label:SetPoint (cur_x, cur_y)
 				
@@ -544,9 +540,13 @@ end
 					max_x = size
 				end
 				
+				tinsert (parent.widget_list, slider)
+				
 			elseif (widget_table.type == "color" or widget_table.type == "color") then
-				local colorpick = self:NewColorPickButton (parent, "$parentWidget" .. index, nil, widget_table.set)
+				local colorpick = DF:NewColorPickButton (parent, "$parentWidget" .. index, nil, widget_table.set, nil, button_template)
 				colorpick.tooltip = widget_table.desc
+				colorpick._get = widget_table.get
+				colorpick.widget_type = "color"
 
 				local default_value, g, b, a = widget_table.get()
 				if (type (default_value) == "table") then
@@ -555,7 +555,7 @@ end
 					colorpick:SetColor (default_value, g, b, a)
 				end
 				
-				local label = self:NewLabel (parent, nil, "$parentLabel" .. index, nil, widget_table.name, "GameFontNormal", 12)
+				local label = DF:NewLabel (parent, nil, "$parentLabel" .. index, nil, widget_table.name .. (use_two_points and ": " or ""), "GameFontNormal", widget_table.text_template or text_template or 12)
 				colorpick:SetPoint ("left", label, "right", 2)
 				label:SetPoint (cur_x, cur_y)
 				
@@ -564,17 +564,25 @@ end
 					max_x = size
 				end
 				
+				tinsert (parent.widget_list, colorpick)
+				
 			elseif (widget_table.type == "execute" or widget_table.type == "button") then
 			
-				local button = self:NewButton (parent, nil, "$parentWidget", nil, 120, 18, widget_table.func, widget_table.param1, widget_table.param2, nil, widget_table.name)
-				button:InstallCustomTexture()
+				local button = DF:NewButton (parent, nil, "$parentWidget" .. index, nil, 120, 18, widget_table.func, widget_table.param1, widget_table.param2, nil, widget_table.name, nil, button_template)
+				if (not button_template) then
+					button:InstallCustomTexture()
+				end
+
 				button:SetPoint (cur_x, cur_y)
 				button.tooltip = widget_table.desc
+				button.widget_type = "execute"
 				
 				local size = button:GetWidth() + 4
 				if (size > max_x) then
 					max_x = size
 				end
+				
+				tinsert (parent.widget_list, button)
 				
 			end
 		
@@ -663,6 +671,34 @@ end
 		DetailsTutorialAlertFrame_SlideInFrame (TutorialAlertFrame, "AUTOQUEST")
 	end
 	
+	local refresh_options = function (self)
+		for _, widget in ipairs (self.widget_list) do
+			if (widget._get) then
+				if (widget.widget_type == "label") then
+					if (widget._get()) then
+						widget:SetText (widget._get())
+					end
+				elseif (widget.widget_type == "select") then
+					widget:Select (widget._get())
+				elseif (widget.widget_type == "toggle" or widget.widget_type == "range") then
+					widget:SetValue (widget._get())
+				elseif (widget.widget_type == "color") then
+					local default_value, g, b, a = widget._get()
+					if (type (default_value) == "table") then
+						widget:SetColor (unpack (default_value))
+					else
+						widget:SetColor (default_value, g, b, a)
+					end
+				end
+			end
+		end
+	end
+	
+	function DF:SetAsOptionsPanel (frame)
+		frame.RefreshOptions = refresh_options
+		frame.widget_list = {}
+	end
+	
 	function DF:CreateOptionsFrame (name, title, template)
 	
 		template = template or 1
@@ -671,6 +707,8 @@ end
 			local options_frame = CreateFrame ("frame", name, UIParent, "ButtonFrameTemplate")
 			tinsert (UISpecialFrames, name)
 			options_frame:SetSize (500, 200)
+			options_frame.RefreshOptions = refresh_options
+			options_frame.widget_list = {}
 			
 			options_frame:SetScript ("OnMouseDown", function(self, button)
 				if (button == "RightButton") then
@@ -709,6 +747,8 @@ end
 			local options_frame = CreateFrame ("frame", name, UIParent)
 			tinsert (UISpecialFrames, name)
 			options_frame:SetSize (500, 200)
+			options_frame.RefreshOptions = refresh_options
+			options_frame.widget_list = {}
 
 			options_frame:SetScript ("OnMouseDown", function(self, button)
 				if (button == "RightButton") then
@@ -764,3 +804,78 @@ end
 			return options_frame
 		end
 	end	
+	
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--> templates
+
+DF.font_templates = {}
+DF.font_templates ["ORANGE_FONT_TEMPLATE"] = {color = "orange", size = 11, font = "Accidental Presidency"}
+DF.font_templates ["OPTIONS_FONT_TEMPLATE"] = {color = "yellow", size = 12, font = "Accidental Presidency"}
+
+DF.dropdown_templates = {}
+DF.dropdown_templates ["OPTIONS_DROPDOWN_TEMPLATE"] = {
+	backdrop = {edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true},
+	backdropcolor = {1, 1, 1, .5},
+	backdropbordercolor = {0, 0, 0, 1},
+	onentercolor = {1, 1, 1, .5},
+	onenterbordercolor = {1, 1, 1, 1},
+}
+
+DF.switch_templates = {}
+DF.switch_templates ["OPTIONS_CHECKBOX_TEMPLATE"] = {
+	backdrop = {edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true},
+	backdropcolor = {1, 1, 1, .5},
+	backdropbordercolor = {0, 0, 0, 1},
+	width = 18,
+	height = 18,
+	enabled_backdropcolor = {1, 1, 1, .5},
+	disabled_backdropcolor = {1, 1, 1, .2},
+	onenterbordercolor = {1, 1, 1, 1},
+}
+DF.switch_templates ["OPTIONS_CHECKBOX_BRIGHT_TEMPLATE"] = {
+	backdrop = {edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true},
+	backdropcolor = {1, 1, 1, .5},
+	backdropbordercolor = {0, 0, 0, 1},
+	width = 18,
+	height = 18,
+	enabled_backdropcolor = {1, 1, 1, .5},
+	disabled_backdropcolor = {1, 1, 1, .5},
+	onenterbordercolor = {1, 1, 1, 1},
+}
+
+DF.button_templates = {}
+DF.button_templates ["OPTIONS_BUTTON_TEMPLATE"] = {
+	backdrop = {edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true},
+	backdropcolor = {1, 1, 1, .5},
+	backdropbordercolor = {0, 0, 0, 1},
+}
+
+DF.slider_templates = {}
+DF.slider_templates ["OPTIONS_SLIDER_TEMPLATE"] = {
+	backdrop = {edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true},
+	backdropcolor = {1, 1, 1, .5},
+	backdropbordercolor = {0, 0, 0, 1},
+	onentercolor = {1, 1, 1, .5},
+	onenterbordercolor = {1, 1, 1, 1},
+	thumbtexture = [[Interface\Tooltips\UI-Tooltip-Background]],
+	thumbwidth = 16,
+	thumbheight = 14,
+	thumbcolor = {0, 0, 0, 0.5},
+}
+
+function DF:GetTemplate (type, template_name)
+	local template_table
+	if (type == "font") then
+		template_table = DF.font_templates
+	elseif (type == "dropdown") then
+		template_table = DF.dropdown_templates
+	elseif (type == "button") then
+		template_table = DF.button_templates
+	elseif (type == "switch") then
+		template_table = DF.switch_templates
+	elseif (type == "slider") then
+		template_table = DF.slider_templates
+	end
+	return template_table [template_name]
+end
+	

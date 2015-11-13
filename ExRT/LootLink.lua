@@ -1,6 +1,7 @@
 local GlobalAddonName, ExRT = ...
 
 local module = ExRT.mod:New("LootLink",ExRT.L.LootLink,nil,true)
+local ELib,L = ExRT.lib,ExRT.L
 
 local VExRT = nil
 
@@ -52,8 +53,7 @@ module.db.cache = {}
 function module.options:Load()
 	self:CreateTilte()
 
-	self.enableChk = ExRT.lib.CreateCheckBox(self,nil,5,-30,ExRT.L.LootLinkEnable,VExRT.LootLink.enabled,nil,nil,"ExRTCheckButtonModernTemplate")
-	self.enableChk:SetScript("OnClick", function(self,event) 
+	self.enableChk = ELib:Check(self,L.LootLinkEnable,VExRT.LootLink.enabled):Point(5,-30):OnClick(function(self) 
 		if self:GetChecked() then
 			VExRT.LootLink.enabled = true
 			module:Enable()
@@ -62,8 +62,8 @@ function module.options:Load()
 			module:Disable()
 		end
 	end)
-		
-	self.shtml1 = ExRT.lib.CreateText(self,650,0,"TOP",0,-70,nil,"TOP",nil,12,ExRT.L.LootLinkSlashHelp)
+	
+	self.shtml1 = ELib:Text(self,L.LootLinkSlashHelp,12):Size(650,0):Point("TOP",0,-70):Top()
 end
 
 
@@ -94,11 +94,11 @@ local function LootLink(linkAnyway)
 	local count = GetNumLootItems()
 	local cache = {}
 	local numLink = 0
-	local chat_type, playerName = ExRT.mds.chatType()
+	local chat_type, playerName = ExRT.F.chatType()
 	for i=1,count do
 		local sourceGUID = GetLootSourceInfo(i)
 		if sourceGUID and (not module.db.cache[sourceGUID] or linkAnyway) then
-			local mobID = ExRT.mds.GUIDtoID(sourceGUID)
+			local mobID = ExRT.F.GUIDtoID(sourceGUID)
 			if (module.db.mobsIDs[mobID] or linkAnyway) then
 				local itemLink =  GetLootSlotLink(i)
 				if itemLink then

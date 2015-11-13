@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Gruul", "deDE")
 if not L then return end
 if L then
@@ -16,7 +17,7 @@ if L then
 L["bombs_dropped"] = "Bomben fallengelassen! (%d)"
 L["bombs_dropped_p2"] = "Ingenieur getötet, Bomben fallengelassen!"
 L["custom_off_firecaller_marker"] = "Feuerrufer markieren"
-L["custom_off_firecaller_marker_desc"] = [=[Markiere Feuerrufer mit {rt7}{rt6}, benötigt Leiter oder Assistent.
+L["custom_off_firecaller_marker_desc"] = [=[Markiert Feuerrufer mit {rt7}{rt6}, benötigt Leiter oder Assistent.
 |cFFFF0000Nur eine Person im Raid sollte diese Option aktiviert haben, um Markierungskonflikte zu verhindern.|r
 |cFFADFF2FTIPP: Wenn der Raid sich dafür entschieden hat, dass du diese Option aktivierst, ist der schnellste Weg mit der Maus über die Mobs zu fahren um sie zu markieren.|r]=]
 L["custom_on_shieldsdown_marker"] = "durchbrochene Schilde markieren"
@@ -46,7 +47,7 @@ end
 L = BigWigs:NewBossLocale("Kromog", "deDE")
 if L then
 L["custom_off_hands_marker"] = "Klammernde Erde der Tanks markieren"
-L["custom_off_hands_marker_desc"] = "Markiere die klammernde Erde, die die Tanks greift, mit {rt7}{rt8}, benötigt Leiter oder Assistent."
+L["custom_off_hands_marker_desc"] = "Markiert die klammernde Erde, die die Tanks greift, mit {rt7}{rt8}, benötigt Leiter oder Assistent."
 L["destroy_pillars"] = "Säulen zerstören"
 L["prox"] = "Näheanzeige für Tanks"
 L["prox_desc"] = "Öffne eine Näheanzeige, die andere Tanks im Abstand von maximal 15 Metern anzeigt, die Anzeige hilft dir mit der Fäuste aus Stein Fähigkeit umzugehen."

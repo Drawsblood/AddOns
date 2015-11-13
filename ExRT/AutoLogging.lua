@@ -3,18 +3,19 @@ local GlobalAddonName, ExRT = ...
 local VExRT = nil
 
 local module = ExRT.mod:New("AutoLogging",ExRT.L.Logging,nil,true)
+local ELib,L = ExRT.lib,ExRT.L
 
 module.db.raidIDs = {
 	[988]=true,	--BF
 	[994]=true,	--H
 	[1026]=true,	--HC
+	[-999]=true,	--All new raids
 }
 
 function module.options:Load()
 	self:CreateTilte()
 
-	self.enableChk = ExRT.lib.CreateCheckBox(self,nil,5,-30,ExRT.L.LoggingEnable,VExRT.Logging.enabled,nil,nil,"ExRTCheckButtonModernTemplate")
-	self.enableChk:SetScript("OnClick", function(self,event) 
+	self.enableChk = ELib:Check(self,L.LoggingEnable,VExRT.Logging.enabled):Point(5,-30):OnClick(function(self) 
 		if self:GetChecked() then
 			VExRT.Logging.enabled = true
 			module:Enable()
@@ -24,15 +25,11 @@ function module.options:Load()
 		end
 	end)
 		
-	self.shtml1 = ExRT.lib.CreateText(self,620,0,"TOP",0,-65,nil,"TOP",nil,12,"- "..ExRT.L.RaidLootT17Highmaul.."\n- "..ExRT.L.RaidLootT17BF.."\n -"..ExRT.L.RaidLootT18HC)
+	self.shtml1 = ELib:Text(self,"- "..L.RaidLootT17Highmaul.."\n- "..L.RaidLootT17BF.."\n -"..L.RaidLootT18HC,12):Size(620,0):Point("TOP",0,-65):Top()
 
-	self.shtml2 = ExRT.lib.CreateText(self,650,0,nil,0,0,nil,"TOP",nil,12,ExRT.L.LoggingHelp1)
-	ExRT.lib.SetPoint(self.shtml2,"TOP",self.shtml1,"BOTTOM",0,-15)
+	self.shtml2 = ELib:Text(self,L.LoggingHelp1,12):Size(650,0):Point("TOP",self.shtml1,"BOTTOM",0,-15):Top()
 	
-	self.disableLFR = ExRT.lib.CreateCheckBox(self,nil,0,0,ExRT.L.RaidCheckDisableInLFR,VExRT.Logging.disableLFR,nil,nil,"ExRTCheckButtonModernTemplate")
-	self.disableLFR:SetNewPoint("TOP",self.shtml2,"BOTTOM",0,-15)
-	self.disableLFR:SetPoint("LEFT",self,5,0)
-	self.disableLFR:SetScript("OnClick", function(self,event) 
+	self.disableLFR =  ELib:Check(self,L.RaidCheckDisableInLFR,VExRT.Logging.disableLFR):Point("TOP",self.shtml2,"BOTTOM",0,-15):Point("LEFT",self,5,0):OnClick(function(self) 
 		if self:GetChecked() then
 			VExRT.Logging.disableLFR = true
 		else
@@ -64,14 +61,23 @@ end
 local function GetCurrentMapAreaID_Fix()
 	if VExRT.Logging.enabled then
 		if VExRT.Logging.disableLFR then
-			local _,_,difficulty = GetInstanceInfo()
+			local _,zoneType,difficulty = GetInstanceInfo()
 			if difficulty == 7 or difficulty == 17 then
 				return 0
 			else
-				return GetCurrentMapAreaID()
+				local zoneID = GetCurrentMapAreaID()
+				if zoneID and zoneID > 1026 and zoneType == 'raid' then
+					zoneID = -999
+				end
+				return zoneID
 			end
 		else
-			return GetCurrentMapAreaID()
+			local zoneID = GetCurrentMapAreaID()
+			local _,zoneType = GetInstanceInfo()
+			if zoneID and zoneID > 1026 and zoneType == 'raid' then
+				zoneID = -999
+			end
+			return zoneID
 		end
 	else
 		return 0
@@ -98,5 +104,5 @@ local function ZoneNewFunction()
 end
 
 function module.main:ZONE_CHANGED_NEW_AREA()
-	ExRT.mds.ScheduleTimer(ZoneNewFunction, 2)
+	ExRT.F.ScheduleTimer(ZoneNewFunction, 2)
 end

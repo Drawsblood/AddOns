@@ -1,0 +1,100 @@
+------------------------------------------------------------------------
+r13694 | funkydude | 2015-10-09 12:01:56 +0000 (Fri, 09 Oct 2015) | 1 line
+Changed paths:
+   A /tags/r13694-release (from /trunk:13693)
+
+Tagging as r13694-release
+------------------------------------------------------------------------
+r13693 | funkydude | 2015-10-09 11:55:29 +0000 (Fri, 09 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Xhulhorac.lua
+   M /trunk/Loader.lua
+
+Xhulhorac: count imps
+------------------------------------------------------------------------
+r13692 | funkydude | 2015-10-09 11:29:23 +0000 (Fri, 09 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/BigWigs.toc
+   M /trunk/Loader.lua
+
+bump version
+------------------------------------------------------------------------
+r13691 | Ironi88 | 2015-10-06 20:48:13 +0000 (Tue, 06 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/Plugins/Bars.lua
+
+Bars.lua: added optional argument for pull timer that takes respawn timer into account (x + time left on respawn timer), usage: /pull x true
+------------------------------------------------------------------------
+r13690 | avi90 | 2015-09-21 22:07:33 +0000 (Mon, 21 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/KilroggDeadeye.lua
+
+KilroggDeadeye: add bar icon for first Hulking Terror
+------------------------------------------------------------------------
+r13689 | funkydude | 2015-09-21 21:30:32 +0000 (Mon, 21 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/Core/BossPrototype.lua
+
+BossPrototype: Show a personal message if you're the only person in the TargetMessage table.
+------------------------------------------------------------------------
+r13688 | funkydude | 2015-09-21 18:02:01 +0000 (Mon, 21 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Council.lua
+
+Council: Tweak bloodboil message
+------------------------------------------------------------------------
+r13686 | funkydude | 2015-09-19 10:46:41 +0000 (Sat, 19 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/BigWigs.toc
+
+bump version
+------------------------------------------------------------------------
+r13685 | Ironi88 | 2015-09-18 21:52:22 +0000 (Fri, 18 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Archimonde.lua
+
+Archimonde.lua: add Light of the Naaru spawn timer
+------------------------------------------------------------------------
+r13684 | elvador | 2015-09-18 14:40:21 +0000 (Fri, 18 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Gorefiend.lua
+
+Gorefiend: Mythic Digest duration hotfixed: 30 -> 35
+------------------------------------------------------------------------
+r13683 | funkydude | 2015-09-18 11:16:37 +0000 (Fri, 18 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/FelLordZakuun.lua
+   M /trunk/Options/Options.lua
+
+FelLordZakuun: Minor tweak for seed timing
+------------------------------------------------------------------------
+r13682 | funkydude | 2015-09-16 20:48:27 +0000 (Wed, 16 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/HellfireAssault.lua
+
+HellfireAssault: Make cannonball a target message, check player range for slam and pulse warnings.
+------------------------------------------------------------------------
+r13681 | funkydude | 2015-09-12 10:37:09 +0000 (Sat, 12 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Socrethar.lua
+
+Socrethar: Tweak add text
+------------------------------------------------------------------------
+r13680 | funkydude | 2015-09-12 10:34:50 +0000 (Sat, 12 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/Loader.lua
+
+bump DBM version
+------------------------------------------------------------------------
+r13678 | funkydude | 2015-09-08 10:50:36 +0000 (Tue, 08 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/BigWigs.toc
+
+bump version
+------------------------------------------------------------------------
+r13677 | funkydude | 2015-09-07 21:52:25 +0000 (Mon, 07 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/HellfireCitadel/Kormrok.lua
+
+Kormrok: Add residue warnings, fix respawn time, fix mythic shadow leap timer.
+------------------------------------------------------------------------

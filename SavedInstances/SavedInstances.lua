@@ -14,7 +14,7 @@ local maxdiff = 23 -- max number of instance difficulties
 local maxcol = 4 -- max columns per player+instance
 
 addon.svnrev = {}
-addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 448 $"):match("%d+"))
+addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 466 $"):match("%d+"))
 
 -- local (optimal) references to provided functions
 local table, math, bit, string, pairs, ipairs, unpack, strsplit, time, type, wipe, tonumber, select, strsub = 
@@ -69,7 +69,7 @@ local maxlvl = MAX_PLAYER_LEVEL_TABLE[#MAX_PLAYER_LEVEL_TABLE]
 local scantt = CreateFrame("GameTooltip", "SavedInstancesScanTooltip", UIParent, "GameTooltipTemplate")
 
 local currency = { 
-  395, -- Justice Points 
+  --395, -- Justice Points 
   396, -- Valor Points
   392, -- Honor Points
   390, -- Conquest Points
@@ -90,6 +90,7 @@ local currency = {
   1101,-- Oil
   994, -- Seal of Tempered Fate
   1129,-- Seal of Inevitable Fate
+  1166,-- Timewarped Badge 
 }
 addon.currency = currency
 
@@ -285,10 +286,10 @@ end
 local function chatMsg(msg)
      DEFAULT_CHAT_FRAME:AddMessage("\124cFFFF0000"..addonName.."\124r: "..msg)
 end
-local function debug(msg)
+local function debug(...)
   --addon.db.dbg = true
   if addon.db.dbg then
-     chatMsg(msg)
+     chatMsg(string.format(...))
   end
 end
 addon.debug = debug
@@ -459,6 +460,7 @@ vars.defaultDB = {
 		Currency1101= true,  -- Oil
 		Currency994 = true,  -- Seal of Tempered Fate
 		Currency1129= true,  -- Seal of Inevitable Fate
+		Currency1166= true,  -- Timewarped Badge
 		CurrencyMax = false,
 		CurrencyEarned = true,
 	},
@@ -524,27 +526,6 @@ function addon:SkinFrame(frame,name)
     end
   end
 end
-
--- ticket 205: temporary workaround for a blizzard RaidInfoFrame bug, which is made more visible by the addon's polling
-if true then 
-  local gsii
-  local function gsii_wrapper(i)
-    local rets = { gsii(i) }
-    -- mask off the high-order bit on instance IDs, which causes the string.format lua error
-    rets[2] = rets[2] and bit.band(rets[2],0x7fffffff)
-    rets[7] = rets[7] and bit.band(rets[2],0x7fffffff)
-    return unpack(rets)
-  end
-  local rifu = _G.RaidInfoFrame_Update
-  _G.RaidInfoFrame_Update = function(...) -- wrapper
-    gsii = _G.GetSavedInstanceInfo
-    _G.GetSavedInstanceInfo = gsii_wrapper
-    rifu(...) -- call down
-    _G.GetSavedInstanceInfo = gsii
-  end
-  RaidInfoScrollFrame.update = _G.RaidInfoFrame_Update
-end
-
 
 -- general helper functions below
 
@@ -859,7 +840,7 @@ function addon:InstancesInCategory(targetcategory)
 	local list = { }
 	for instance, _ in pairs(vars.db.Instances) do
 		if addon:InstanceCategory(instance) == targetcategory then
-			list[#list+1] = instance
+			table.insert(list, instance)
 		end
 	end
 	return list
@@ -1043,16 +1024,23 @@ local function instanceSort(i1, i2)
   end
 end
 
+addon.oi_cache = {}
 function addon:OrderedInstances(category)
 	-- returns a table of the form { "instance1", "instance2", ... }
-	local instances = addon:InstancesInCategory(category)
-	table.sort(instances, instanceSort)
+	local instances = addon.oi_cache[category]
+	if not instances then 
+		instances = addon:InstancesInCategory(category)
+		table.sort(instances, instanceSort)
+		if addon.instancesUpdated then
+			addon.oi_cache[category] = instances
+		end
+	end
 	return instances
 end
 
-
 function addon:OrderedCategories()
 	-- returns a table of the form { "category1", "category2", ... }
+	if addon.oc_cache then return addon.oc_cache end
 	local orderedlist = { }
 	local firstexpansion, lastexpansion, expansionstep, firsttype, lasttype
 	if vars.db.Tooltip.NewFirst then
@@ -1072,16 +1060,17 @@ function addon:OrderedCategories()
 		lasttype = "R"
 	end
 	for i = firstexpansion, lastexpansion, expansionstep do
-		orderedlist[1+#orderedlist] = firsttype .. i
+		table.insert(orderedlist, firsttype .. i)
 		if vars.db.Tooltip.CategorySort == "EXPANSION" then
-			orderedlist[1+#orderedlist] = lasttype .. i
+			table.insert(orderedlist, lasttype .. i)
 		end
 	end
 	if vars.db.Tooltip.CategorySort == "TYPE" then
 		for i = firstexpansion, lastexpansion, expansionstep do
-			orderedlist[1+#orderedlist] = lasttype .. i
+			table.insert(orderedlist, lasttype .. i)
 		end
 	end
+	addon.oc_cache = orderedlist
 	return orderedlist
 end
 
@@ -1148,11 +1137,10 @@ local function DifficultyString(instance, diff, toon, expired, killoverride, tot
 end
 
 -- run about once per session to update our database of instance info
-local instancesUpdated = false
 function addon:UpdateInstanceData()
   --debug("UpdateInstanceData()")
-  if instancesUpdated then return end  -- nil before first use in UI
-  instancesUpdated = true
+  if addon.instancesUpdated then return end  -- nil before first use in UI
+  addon.instancesUpdated = true
   local added = 0
   local lfdid_to_name = {}
   local wbid_to_name = {}
@@ -1256,8 +1244,8 @@ function addon:UpdateInstanceData()
   vars.config:BuildOptions() -- refresh config table
   
   starttime = debugprofilestop()-starttime
-  debug("UpdateInstanceData(): completed in "..string.format("%.6f",starttime/1000.0).." sec : "..
-        added.." added, "..renames.." renames, "..merges.." merges, "..conflicts.." conflicts.")
+  debug("UpdateInstanceData(): completed in %.3f ms : %d added, %d renames, %d merges, %d conflicts.",
+	starttime, added, renames, merges, conflicts)
   if addon.RefreshPending then
     addon.RefreshPending = nil
     core:Refresh()
@@ -1672,7 +1660,7 @@ local function finishIndicator(parent)
   indicatortip:SetAutoHideDelay(0.1, parent)
   indicatortip.OnRelease = function() indicatortip = nil end -- extra-safety: update our variable on auto-release
   indicatortip:SmartAnchorTo(parent)
-  indicatortip:SetFrameLevel(100) -- ensure visibility when forced to overlap main tooltip
+  indicatortip:SetFrameLevel(150) -- ensure visibility when forced to overlap main tooltip
   addon:SkinFrame(indicatortip,"SavedInstancesIndicatorTooltip")
   indicatortip:Show()
 end
@@ -1709,7 +1697,8 @@ local function ShowToonTooltip(cell, arg, ...)
 end
 
 local function ShowQuestTooltip(cell, arg, ...)
-	local toon,qstr,isDaily = unpack(arg)
+	local toon,cnt,isDaily = unpack(arg)
+	local qstr = cnt.." "..(isDaily and L["Daily Quests"] or L["Weekly Quests"])
 	local t = db
 	local scopestr = L["Account"]
 	if toon then 
@@ -1758,7 +1747,8 @@ local function skillsort(s1, s2)
 end
 
 local function ShowSkillTooltip(cell, arg, ...)
-        local toon, cstr = unpack(arg)
+        local toon, cnt = unpack(arg)
+	local cstr = cnt.." "..L["Trade Skill Cooldowns"]
         local t = vars.db.Toons[toon]
         if not t then return end
 	openIndicator(3, "LEFT","RIGHT","RIGHT")
@@ -2171,6 +2161,7 @@ function core:OnInitialize()
 	db.Tooltip.CurrencyValueColor = (db.Tooltip.CurrencyValueColor == nil and true) or db.Tooltip.CurrencyValueColor
 	db.Tooltip.RowHighlight = db.Tooltip.RowHighlight or 0.1
 	db.Tooltip.Scale = db.Tooltip.Scale or 1
+	db.Tooltip.FitToScreen = (db.Tooltip.FitToScreen == nil and true) or db.Tooltip.FitToScreen
 	db.QuestDB = db.QuestDB or vars.defaultDB.QuestDB
 	for _, id in ipairs(addon.currency) do
 	  local name = "Currency"..id
@@ -2260,6 +2251,7 @@ function core:OnEnable()
 	self:RegisterEvent("BONUS_ROLL_RESULT", "BonusRollResult")
 	self:RegisterEvent("PLAYER_LOGOUT", function() addon.logout = true ; addon:UpdateToonData() end) -- update currency spent
 	self:RegisterEvent("LFG_COMPLETION_REWARD", "RefreshLockInfo") -- for random daily dungeon tracking
+	self:RegisterEvent("BOSS_KILL")
 	self:RegisterEvent("ENCOUNTER_END", "EncounterEnd")
 	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
 	self:RegisterEvent("TIME_PLAYED_MSG", function(_,total,level) 
@@ -2378,12 +2370,12 @@ function core:BossModEncounterEnd(modname, bossname)
     t.lastboss = bossname
     t.lastbosstime = now
   end
-  debug((modname or "BossMod").." refresh: "..tostring(bossname)); 
+  debug("%s refresh: %s",(modname or "BossMod"),tostring(bossname)); 
   core:RefreshLockInfo()
 end
 
 function core:EncounterEnd(event, encounterID, encounterName, difficultyID, raidSize, endStatus)
-  debug("EncounterEnd:"..tostring(encounterID)..":"..tostring(encounterName)..":"..tostring(difficultyID)..":"..tostring(raidSize)..":"..tostring(endStatus))
+  debug("EncounterEnd:%s:%s:%s:%s:%s",tostring(encounterID),tostring(encounterName),tostring(difficultyID),tostring(raidSize),tostring(endStatus))
   if endStatus ~= 1 then return end -- wipe
   core:RefreshLockInfo()
   local t = vars.db.Toons[thisToon]
@@ -2397,6 +2389,16 @@ function core:EncounterEnd(event, encounterID, encounterName, difficultyID, raid
   end
   t.lastboss = name
   t.lastbosstime = time()
+end
+
+function core:BOSS_KILL(event, encounterID, encounterName, ...)
+  debug("BOSS_KILL:%s:%s",tostring(encounterID),tostring(encounterName)) -- ..":"..strjoin(":",...))
+  local name = encounterName
+  if name and type(name) == "string" then
+    name = name:gsub(",.*$","") -- remove extraneous trailing boss titles
+    name = strtrim(name)
+    core:BossModEncounterEnd("BOSS_KILL", name)
+  end
 end
 
 function addon:InGroup() 
@@ -2565,7 +2567,7 @@ function addon:HistoryUpdate(forcereset, forcemesg)
   for zk, zi in pairs(vars.db.History) do
     if now > zi.last + addon.histReapTime or
        zi.last > (now + 3600) then -- temporary bug fix
-      debug("Reaping "..zi.desc)
+      debug("Reaping %s",zi.desc)
       vars.db.History[zk] = nil
     else 
       livecnt = livecnt + 1
@@ -2578,8 +2580,14 @@ function addon:HistoryUpdate(forcereset, forcemesg)
   local oldestrem = oldesttime and (oldesttime+addon.histReapTime-now)
   local oldestremt = (oldestrem and SecondsToTime(oldestrem,false,false,1)) or "n/a"
   local oldestremtm = (oldestrem and SecondsToTime(math.floor((oldestrem+59)/60)*60,false,false,1)) or "n/a"
-  debug(livecnt.." live instances, oldest ("..(oldestkey or "none")..") expires in "..oldestremt..". Current Zone="..(newzone or "nil"))
-  --myprint(vars.db.History)
+  if addon.db.dbg then
+    local msg = livecnt.." live instances, oldest ("..(oldestkey or "none")..") expires in "..oldestremt..". Current Zone="..(newzone or "nil")
+    if msg ~= addon.lasthistdbg then
+      addon.lasthistdbg = msg
+      debug(msg)
+    end
+    --myprint(vars.db.History)
+  end
   -- display update
 
   if forcemesg or (vars.db.Tooltip.LimitWarn and zoningin and livecnt >= addon.histLimit-1) then 
@@ -2615,7 +2623,7 @@ function core:memcheck(context)
   local newval = GetAddOnMemoryUsage("SavedInstances")
   core.memusage = core.memusage or 0
   if newval ~= core.memusage then
-    debug(string.format("%.3f",newval - core.memusage).." KB in "..context)
+    debug("%.3f KB in %s",(newval - core.memusage),context)
     core.memusage = newval
   end
 end
@@ -2688,7 +2696,7 @@ end
 function core:Refresh(recoverdaily)
 	-- update entire database from the current character's perspective
         addon:UpdateInstanceData()
-	if not instancesUpdated then addon.RefreshPending = true; return end -- wait for UpdateInstanceData to succeed
+	if not addon.instancesUpdated then addon.RefreshPending = true; return end -- wait for UpdateInstanceData to succeed
 	local nextreset = addon:GetNextDailyResetTime()
         if not nextreset or ((nextreset - time()) > (24*3600 - 5*60)) then  -- allow 5 minutes for quest DB to update after daily rollover
 	  debug("Skipping core:Refresh() near daily reset")
@@ -2797,40 +2805,51 @@ function core:Refresh(recoverdaily)
 end
 
 local function UpdateTooltip(self,elap) 
+	if not tooltip or not tooltip:IsShown() then return end
+	if addon.firstupdate then
+	   -- ticket 155: fix QTip backdrop which somehow gets corrupted sometimes, no idea why
+	   tooltip:SetBackdrop(GameTooltip:GetBackdrop())
+    	   tooltip:SetBackdropColor(GameTooltip:GetBackdropColor()); 
+	   tooltip:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+	   addon.firstupdate = false
+	end
  	addon.updatetooltip_throttle = (addon.updatetooltip_throttle or 10) + elap 
 	if addon.updatetooltip_throttle < 0.5 then return end
 	addon.updatetooltip_throttle = 0
-	if tooltip:IsShown() and tooltip.anchorframe then 
+	if tooltip.anchorframe then 
 	   core:ShowTooltip(tooltip.anchorframe) 
 	end
 end
 
 -- sorted traversal function for character table
+local cpairs
+do
 local cnext_sorted_names = {}
+local cnext_pos
 local function cnext(t,i)
-   -- return them in reverse order
-   if #cnext_sorted_names == 0 then
+   local n = cnext_sorted_names[cnext_pos]
+   if not n then
      return nil
    else
-      local n = cnext_sorted_names[#cnext_sorted_names]
-      table.remove(cnext_sorted_names, #cnext_sorted_names)
-      return n, t[n]
+     cnext_pos = cnext_pos + 1
+     return n, t[n]
    end
 end
 local function cpairs_sort(a,b)
   local an, as = a:match('^(.*) [-] (.*)$')
   local bn, bs = b:match('^(.*) [-] (.*)$')
   if db.Tooltip.SelfFirst and b == thisToon then
-    return true
-  elseif db.Tooltip.SelfFirst and a == thisToon then
     return false
+  elseif db.Tooltip.SelfFirst and a == thisToon then
+    return true
   elseif db.Tooltip.ServerSort and as ~= bs then
-    return as > bs
+    return as < bs
   else
-    return a > b
+    return a < b
   end
 end
-local function cpairs(t)
+cpairs = function(t, usecache)
+ if not usecache then
   wipe(cnext_sorted_names)
   for n,_ in pairs(t) do
     local tn, ts = n:match('^(.*) [-] (.*)$')
@@ -2842,8 +2861,11 @@ local function cpairs(t)
     end
   end
   table.sort(cnext_sorted_names, cpairs_sort)
+ end
   --myprint(cnext_sorted_names)
+  cnext_pos = 1
   return cnext, t, nil
+end
 end
 
 function addon:IsDetached()
@@ -2865,6 +2887,7 @@ function addon:ShowDetached()
       local f = CreateFrame("Frame","SavedInstancesDetachHeader",UIParent,"BasicFrameTemplate")
       f:SetMovable(true)
       f:SetFrameStrata("TOOLTIP")
+      f:SetFrameLevel(100) -- prevent weird interlacings with other tooltips
       f:SetClampedToScreen(true)
       f:EnableMouse(true)
       f:SetUserPlaced(true)
@@ -2884,10 +2907,12 @@ function addon:ShowDetached()
 		  if not tooltip then f:Hide(); return end
 		  local w,h = tooltip:GetSize()
 		  self:SetSize(w*tooltip:GetScale(),(h+20)*tooltip:GetScale())
+		  --[[
 		  tooltip:ClearAllPoints()
 		  tooltip:SetPoint("BOTTOMLEFT",addon.detachframe)
 		  tooltip:SetFrameLevel(addon.detachframe:GetFrameLevel()+1)
 	          tooltip:Show()
+		  --]]
 		end)
       f:SetScript("OnKeyDown", function(self,key) 
         if key == "ESCAPE" then 
@@ -2977,6 +3002,7 @@ local function addColumns(columns, toon, tooltip)
 	end
 	columnCache[ShowAll()][toon] = true
 end
+addon.scaleCache = {}
 
 function core:HeaderFont()
   if not addon.headerfont then
@@ -2994,11 +3020,11 @@ function core:ShowTooltip(anchorframe)
 	local showall = ShowAll()
 	if tooltip and tooltip:IsShown() and 
 	   core.showall == showall and
-	   core.scale == vars.db.Tooltip.Scale
+	   core.scale == (addon.scaleCache[showall] or vars.db.Tooltip.Scale)
 	   then 
 	   return -- skip update
 	end
-	core.scale = vars.db.Tooltip.Scale
+	local starttime = debugprofilestop()
 	core.showall = showall
 	local showexpired = showall or vars.db.Tooltip.ShowExpired
 	if tooltip then QTip:Release(tooltip) end
@@ -3006,15 +3032,19 @@ function core:ShowTooltip(anchorframe)
 	tooltip:SetCellMarginH(0)
 	tooltip.anchorframe = anchorframe
 	tooltip:SetScript("OnUpdate", UpdateTooltip)
+	addon.firstupdate = true
 	tooltip:Clear()
-	tooltip:SetScale(vars.db.Tooltip.Scale)
+	core.scale = addon.scaleCache[showall] or vars.db.Tooltip.Scale
+	tooltip:SetScale(core.scale)
 	tooltip:SetHeaderFont(core:HeaderFont())
 	addon:HistoryUpdate()
-	local histinfo = ""
+	local headText
 	if addon.histLiveCount and addon.histLiveCount > 0 then
-	  histinfo = "  ("..addon.histLiveCount.."/"..(addon.histOldest or "?")..")"
+	  headText = string.format("%s%s (%d/%s)%s",GOLDFONT,addonName,addon.histLiveCount,(addon.histOldest or "?"),FONTEND)
+	else
+	  headText = string.format("%s%s%s",GOLDFONT,addonName,FONTEND)
 	end
-	local headLine = tooltip:AddHeader(GOLDFONT .. addonName .. histinfo .. FONTEND)
+	local headLine = tooltip:AddHeader(headText)
 	tooltip:SetCellScript(headLine, 1, "OnEnter", ShowHistoryTooltip )
 	tooltip:SetCellScript(headLine, 1, "OnLeave", CloseTooltips)
 	addon:UpdateToonData()
@@ -3063,7 +3093,7 @@ function core:ShowTooltip(anchorframe)
 			        lfrbox[lfrboxid] = true
 			      end
 			    end
-			    for toon, t in cpairs(vars.db.Toons) do
+			    for toon, t in cpairs(vars.db.Toons, true) do
 				for diff = 1, maxdiff do
 					if inst[toon] and inst[toon][diff] then
 					    if (inst[toon][diff].Expires > 0) then
@@ -3120,7 +3150,7 @@ function core:ShowTooltip(anchorframe)
 			  	   instancerow[instance] = instancerow[instance] or tooltip:AddLine()
 				end
 				if inst.Show ~= "never" or showall then
-				    for toon, t in cpairs(vars.db.Toons) do
+				    for toon, t in cpairs(vars.db.Toons, true) do
 					for diff = 1, maxdiff do
 					        if inst[toon] and inst[toon][diff] and (inst[toon][diff].Expires > 0 or showexpired) then
 							instancerow[instance] = instancerow[instance] or tooltip:AddLine()
@@ -3144,17 +3174,16 @@ function core:ShowTooltip(anchorframe)
 	-- now printing instance data
 	for instance, row in pairs(instancerow) do
 	        local inst = vars.db.Instances[instance]
-		tooltip:SetCell(instancerow[instance], 1, (instancesaved[instance] and GOLDFONT or GRAYFONT) .. instance .. FONTEND)
+		tooltip:SetCell(row, 1, (instancesaved[instance] and GOLDFONT or GRAYFONT) .. instance .. FONTEND)
 		if addon.LFRInstances[inst.LFDID] then
-		  tooltip:SetLineScript(instancerow[instance], "OnMouseDown", OpenLFR, inst.LFDID)
+		  tooltip:SetLineScript(row, "OnMouseDown", OpenLFR, inst.LFDID)
 		end
-			for toon, t in cpairs(vars.db.Toons) do
+			for toon, t in cpairs(vars.db.Toons, true) do
 				if inst[toon] then
 				  local showcol = localarr("showcol")
 				  local showcnt = 0
 				  for diff = 1, maxdiff do
-				    if instancerow[instance] and 
-				      inst[toon][diff] and (inst[toon][diff].Expires > 0 or showexpired) then
+				    if inst[toon][diff] and (inst[toon][diff].Expires > 0 or showexpired) then
 				      showcnt = showcnt + 1
 				      showcol[diff] = true
 				    end
@@ -3169,21 +3198,22 @@ function core:ShowTooltip(anchorframe)
 				  end
 				  for diff = 1, maxdiff do
 				    if showcol[diff] then
-					tooltip:SetCell(instancerow[instance], columns[toon..base], 
+				        local col = columns[toon..base]
+					tooltip:SetCell(row, col, 
 					    DifficultyString(instance, diff, toon, inst[toon][diff].Expires == 0), span)
-					tooltip:SetCellScript(instancerow[instance], columns[toon..base], "OnEnter", ShowIndicatorTooltip, {instance, toon, diff})
-					tooltip:SetCellScript(instancerow[instance], columns[toon..base], "OnLeave", CloseTooltips)
+					tooltip:SetCellScript(row, col, "OnEnter", ShowIndicatorTooltip, {instance, toon, diff})
+					tooltip:SetCellScript(row, col, "OnLeave", CloseTooltips)
 					if addon.LFRInstances[inst.LFDID] then
-					  tooltip:SetCellScript(instancerow[instance], columns[toon..base], "OnMouseDown", OpenLFR, inst.LFDID)
+					  tooltip:SetCellScript(row, col, "OnMouseDown", OpenLFR, inst.LFDID)
 					else
 					  local link = inst[toon][diff].Link
 					  if link then
-					    tooltip:SetCellScript(instancerow[instance], columns[toon..base], "OnMouseDown", ChatLink, link)
+					    tooltip:SetCellScript(row, col, "OnMouseDown", ChatLink, link)
 					  end
 				        end
 					base = base + 1
 				    elseif columns[toon..diff] and showcnt > 1 then
-					tooltip:SetCell(instancerow[instance], columns[toon..diff], "")
+					tooltip:SetCell(row, columns[toon..diff], "")
 				    end
 				  end
 				end
@@ -3213,7 +3243,7 @@ function core:ShowTooltip(anchorframe)
 	    end
 	    tooltip:SetCell(line, 1, (instancesaved[boxid] and GOLDFONT or GRAYFONT) .. boxname .. FONTEND)
 	    tooltip:SetLineScript(line, "OnMouseDown", OpenLFR, firstid)
-	    for toon, t in cpairs(vars.db.Toons) do
+	    for toon, t in cpairs(vars.db.Toons, true) do
 	      local saved = 0
 	      local diff = 2
 	      for key, instance in pairs(lfrmap) do
@@ -3223,7 +3253,7 @@ function core:ShowTooltip(anchorframe)
 	      end
 	      if saved > 0 then
 	        addColumns(columns, toon, tooltip)
-	        local col = columns[toon.."1"]
+	        local col = columns[toon..1]
 	        tooltip:SetCell(line, col, DifficultyString(pinstance, diff, toon, false, saved, total),4)
 	        tooltip:SetCellScript(line, col, "OnEnter", ShowLFRTooltip, {boxname, toon, lfrmap})
 	        tooltip:SetCellScript(line, col, "OnLeave", CloseTooltips)
@@ -3238,7 +3268,7 @@ function core:ShowTooltip(anchorframe)
 	    addsep()
 	  end
 	  local line = tooltip:AddLine((instancesaved[L["World Bosses"]] and YELLOWFONT or GRAYFONT) .. L["World Bosses"] .. FONTEND)
-	  for toon, t in cpairs(vars.db.Toons) do
+	  for toon, t in cpairs(vars.db.Toons, true) do
 	    local saved = 0
 	    local diff = 2
 	    for _, instance in ipairs(worldbosses) do
@@ -3249,7 +3279,7 @@ function core:ShowTooltip(anchorframe)
 	    end
 	    if saved > 0 then
 	      addColumns(columns, toon, tooltip)
-	      local col = columns[toon.."1"]
+	      local col = columns[toon..1]
 	      tooltip:SetCell(line, col, DifficultyString(worldbosses[1], diff, toon, false, saved, #worldbosses),4)
 	      tooltip:SetCellScript(line, col, "OnEnter", ShowWorldBossTooltip, {worldbosses, toon, saved})
 	      tooltip:SetCellScript(line, col, "OnLeave", CloseTooltips)
@@ -3263,23 +3293,25 @@ function core:ShowTooltip(anchorframe)
 	  if showall or 
 	     (info.Holiday and vars.db.Tooltip.ShowHoliday) or
 	     (info.Random and vars.db.Tooltip.ShowRandom) then
-		for toon, t in cpairs(vars.db.Toons) do
+		for toon, t in cpairs(vars.db.Toons, true) do
 		  local d = info[toon] and info[toon][1]
 		  if d then
 		    addColumns(columns, toon, tooltip)
-		    if not holidayinst[instance] then
+		    local row = holidayinst[instance]
+		    if not row then
 		      if not firstcategory and vars.db.Tooltip.CategorySpaces and firstlfd then
 			 addsep()
 			 firstlfd = false
 		      end
-		      holidayinst[instance] = tooltip:AddLine(YELLOWFONT .. abbreviate(instance) .. FONTEND)
+		      row = tooltip:AddLine(YELLOWFONT .. abbreviate(instance) .. FONTEND)
+		      holidayinst[instance] = row
 		    end
 		    local tstr = SecondsToTime(d.Expires - time(), false, false, 1)
-     		    tooltip:SetCell(holidayinst[instance], columns[toon..1], ClassColorise(t.Class,tstr), "CENTER",maxcol)
+     		    tooltip:SetCell(row, columns[toon..1], ClassColorise(t.Class,tstr), "CENTER",maxcol)
 		    if info.Scenario then
-		      tooltip:SetLineScript(holidayinst[instance], "OnMouseDown", OpenLFS, info.LFDID)
+		      tooltip:SetLineScript(row, "OnMouseDown", OpenLFS, info.LFDID)
 		    else
-		      tooltip:SetLineScript(holidayinst[instance], "OnMouseDown", OpenLFD, info.LFDID)
+		      tooltip:SetLineScript(row, "OnMouseDown", OpenLFD, info.LFDID)
 		    end
 		  end
 		end
@@ -3289,7 +3321,7 @@ function core:ShowTooltip(anchorframe)
 	-- random dungeon
 	if vars.db.Tooltip.TrackLFG or showall then
 		local cd1,cd2 = false,false
-		for toon, t in cpairs(vars.db.Toons) do
+		for toon, t in cpairs(vars.db.Toons, true) do
 			cd2 = cd2 or t.LFG2
 			cd1 = cd1 or (t.LFG1 and (not t.LFG2 or showall))
 			if t.LFG1 or t.LFG2 then
@@ -3306,26 +3338,28 @@ function core:ShowTooltip(anchorframe)
 			cd1 = cd1 and tooltip:AddLine(YELLOWFONT .. LFG_TYPE_RANDOM_DUNGEON..cooldown .. FONTEND)		
 			cd2 = cd2 and tooltip:AddLine(YELLOWFONT .. GetSpellInfo(71041) .. FONTEND)		
 		end
-		for toon, t in cpairs(vars.db.Toons) do
+		for toon, t in cpairs(vars.db.Toons, true) do
 		    local d1 = (t.LFG1 and t.LFG1 - time()) or -1
 		    local d2 = (t.LFG2 and t.LFG2 - time()) or -1
 		    if d1 > 0 and (d2 < 0 or showall) then
+		    	local col = columns[toon..1]
 		        local tstr = SecondsToTime(d1, false, false, 1)
-			tooltip:SetCell(cd1, columns[toon..1], ClassColorise(t.Class,tstr), "CENTER",maxcol)
-		        tooltip:SetCellScript(cd1, columns[toon..1], "OnEnter", ShowSpellIDTooltip, {toon,-1,tstr})
-		        tooltip:SetCellScript(cd1, columns[toon..1], "OnLeave", CloseTooltips)
+			tooltip:SetCell(cd1, col, ClassColorise(t.Class,tstr), "CENTER",maxcol)
+		        tooltip:SetCellScript(cd1, col, "OnEnter", ShowSpellIDTooltip, {toon,-1,tstr})
+		        tooltip:SetCellScript(cd1, col, "OnLeave", CloseTooltips)
 		    end
 		    if d2 > 0 then
+		    	local col = columns[toon..1]
 		        local tstr = SecondsToTime(d2, false, false, 1)
-			tooltip:SetCell(cd2, columns[toon..1], ClassColorise(t.Class,tstr), "CENTER",maxcol)
-		        tooltip:SetCellScript(cd2, columns[toon..1], "OnEnter", ShowSpellIDTooltip, {toon,71041,tstr})
-		        tooltip:SetCellScript(cd2, columns[toon..1], "OnLeave", CloseTooltips)
+			tooltip:SetCell(cd2, col, ClassColorise(t.Class,tstr), "CENTER",maxcol)
+		        tooltip:SetCellScript(cd2, col, "OnEnter", ShowSpellIDTooltip, {toon,71041,tstr})
+		        tooltip:SetCellScript(cd2, col, "OnLeave", CloseTooltips)
 		    end
 		end
 	end
 	if vars.db.Tooltip.TrackDeserter or showall then
 		local show = false
-		for toon, t in cpairs(vars.db.Toons) do
+		for toon, t in cpairs(vars.db.Toons, true) do
 			if t.pvpdesert then
 				show = true
 				addColumns(columns, toon, tooltip)
@@ -3338,19 +3372,20 @@ function core:ShowTooltip(anchorframe)
 			end
 			show = tooltip:AddLine(YELLOWFONT .. DESERTER .. FONTEND)		
 		end
-		for toon, t in cpairs(vars.db.Toons) do
+		for toon, t in cpairs(vars.db.Toons, true) do
 			if t.pvpdesert and time() < t.pvpdesert then
+		    		local col = columns[toon..1]
 				local tstr = SecondsToTime(t.pvpdesert - time(), false, false, 1)
-				tooltip:SetCell(show, columns[toon..1], ClassColorise(t.Class,tstr), "CENTER",maxcol)
-		                tooltip:SetCellScript(show, columns[toon..1], "OnEnter", ShowSpellIDTooltip, {toon,26013,tstr})
-		                tooltip:SetCellScript(show, columns[toon..1], "OnLeave", CloseTooltips)
+				tooltip:SetCell(show, col, ClassColorise(t.Class,tstr), "CENTER",maxcol)
+		                tooltip:SetCellScript(show, col, "OnEnter", ShowSpellIDTooltip, {toon,26013,tstr})
+		                tooltip:SetCellScript(show, col, "OnLeave", CloseTooltips)
 			end
 		end
 	end
 
         do
                 local showd, showw 
-                for toon, t in cpairs(vars.db.Toons) do
+                for toon, t in cpairs(vars.db.Toons, true) do
                         local dc, wc = addon:QuestCount(toon)
                         if dc > 0 and (vars.db.Tooltip.TrackDailyQuests or showall) then
                                 showd = true
@@ -3370,37 +3405,36 @@ function core:ShowTooltip(anchorframe)
                 if showd then
                         showd = tooltip:AddLine(YELLOWFONT .. L["Daily Quests"] .. (adc > 0 and " ("..adc..")" or "") .. FONTEND)
 			if adc > 0 then
-                          tooltip:SetCellScript(showd, 1, "OnEnter", ShowQuestTooltip, {nil,adc.." "..L["Daily Quests"],true})
+                          tooltip:SetCellScript(showd, 1, "OnEnter", ShowQuestTooltip, {nil,adc,true})
                           tooltip:SetCellScript(showd, 1, "OnLeave", CloseTooltips)
 			end
                 end
                 if showw then
                         showw = tooltip:AddLine(YELLOWFONT .. L["Weekly Quests"] .. (awc > 0 and " ("..awc..")" or "") .. FONTEND)
 			if awc > 0 then
-                          tooltip:SetCellScript(showw, 1, "OnEnter", ShowQuestTooltip, {nil,awc.." "..L["Weekly Quests"],false})
+                          tooltip:SetCellScript(showw, 1, "OnEnter", ShowQuestTooltip, {nil,awc,false})
                           tooltip:SetCellScript(showw, 1, "OnLeave", CloseTooltips)
 			end
                 end
-                for toon, t in cpairs(vars.db.Toons) do
+                for toon, t in cpairs(vars.db.Toons, true) do
                         local dc, wc = addon:QuestCount(toon)
-                        if showd and columns[toon..1] and dc > 0 then
-				local qstr = dc
-                                tooltip:SetCell(showd, columns[toon..1], ClassColorise(t.Class,qstr), "CENTER",maxcol)
-                                tooltip:SetCellScript(showd, columns[toon..1], "OnEnter", ShowQuestTooltip, {toon,qstr.." "..L["Daily Quests"],true})
-                                tooltip:SetCellScript(showd, columns[toon..1], "OnLeave", CloseTooltips)
+			local col = columns[toon..1]
+                        if showd and col and dc > 0 then
+                                tooltip:SetCell(showd, col, ClassColorise(t.Class,dc), "CENTER",maxcol)
+                                tooltip:SetCellScript(showd, col, "OnEnter", ShowQuestTooltip, {toon,dc,true})
+                                tooltip:SetCellScript(showd, col, "OnLeave", CloseTooltips)
                         end
-                        if showw and columns[toon..1] and wc > 0 then
-				local qstr = wc
-                                tooltip:SetCell(showw, columns[toon..1], ClassColorise(t.Class,qstr), "CENTER",maxcol)
-                                tooltip:SetCellScript(showw, columns[toon..1], "OnEnter", ShowQuestTooltip, {toon,qstr.." "..L["Weekly Quests"],false})
-                                tooltip:SetCellScript(showw, columns[toon..1], "OnLeave", CloseTooltips)
+                        if showw and col and wc > 0 then
+                                tooltip:SetCell(showw, col, ClassColorise(t.Class,wc), "CENTER",maxcol)
+                                tooltip:SetCellScript(showw, col, "OnEnter", ShowQuestTooltip, {toon,wc,false})
+                                tooltip:SetCellScript(showw, col, "OnLeave", CloseTooltips)
                         end
                 end
         end
 
 	if vars.db.Tooltip.TrackSkills or showall then
 		local show = false
-		for toon, t in cpairs(vars.db.Toons) do
+		for toon, t in cpairs(vars.db.Toons, true) do
 			if t.Skills and next(t.Skills) then
 				show = true
 				addColumns(columns, toon, tooltip)
@@ -3412,15 +3446,16 @@ function core:ShowTooltip(anchorframe)
 			end
 			show = tooltip:AddLine(YELLOWFONT .. L["Trade Skill Cooldowns"] .. FONTEND)		
 		end
-		for toon, t in cpairs(vars.db.Toons) do
+		for toon, t in cpairs(vars.db.Toons, true) do
 			local cnt = 0
 			if t.Skills then
 				for _ in pairs(t.Skills) do cnt = cnt + 1 end
 			end
 			if cnt > 0 then
-				tooltip:SetCell(show, columns[toon..1], ClassColorise(t.Class,cnt), "CENTER",maxcol)
-		                tooltip:SetCellScript(show, columns[toon..1], "OnEnter", ShowSkillTooltip, {toon, cnt.." "..L["Trade Skill Cooldowns"]})
-		                tooltip:SetCellScript(show, columns[toon..1], "OnLeave", CloseTooltips)
+				local col = columns[toon..1]
+				tooltip:SetCell(show, col, ClassColorise(t.Class,cnt), "CENTER",maxcol)
+		                tooltip:SetCellScript(show, col, "OnEnter", ShowSkillTooltip, {toon, cnt})
+		                tooltip:SetCellScript(show, col, "OnLeave", CloseTooltips)
 			end
 		end
         end
@@ -3428,7 +3463,7 @@ function core:ShowTooltip(anchorframe)
 	if vars.db.Tooltip.TrackFarm or showall then
 		local toonfarm = localarr("toonfarm")
 		local show
-		for toon, t in cpairs(vars.db.Toons) do
+		for toon, t in cpairs(vars.db.Toons, true) do
 			if (t.FarmPlanted or 0) > 0 or (t.FarmHarvested or 0) > 0 or
 			   (t.FarmCropReady and next(t.FarmCropReady)) then
 				toonfarm[toon] = (t.FarmHarvested or 0).."/"..(t.FarmPlanted or 0)
@@ -3442,11 +3477,12 @@ function core:ShowTooltip(anchorframe)
 			end
 			show = tooltip:AddLine(YELLOWFONT .. L["Farm Crops"] .. FONTEND)		
 		end
-		for toon, t in cpairs(vars.db.Toons) do
+		for toon, t in cpairs(vars.db.Toons, true) do
 			if toonfarm[toon] then
-				tooltip:SetCell(show, columns[toon..1], ClassColorise(t.Class,toonfarm[toon]), "CENTER",maxcol)
-		                tooltip:SetCellScript(show, columns[toon..1], "OnEnter", ShowFarmTooltip, toon)
-		                tooltip:SetCellScript(show, columns[toon..1], "OnLeave", CloseTooltips)
+				local col = columns[toon..1]
+				tooltip:SetCell(show, col, ClassColorise(t.Class,toonfarm[toon]), "CENTER",maxcol)
+		                tooltip:SetCellScript(show, col, "OnEnter", ShowFarmTooltip, toon)
+		                tooltip:SetCellScript(show, col, "OnLeave", CloseTooltips)
 			end
 		end
         end
@@ -3454,7 +3490,7 @@ function core:ShowTooltip(anchorframe)
 	if vars.db.Tooltip.TrackBonus or showall then
 		local show
 		local toonbonus = localarr("toonbonus")
-		for toon, t in cpairs(vars.db.Toons) do
+		for toon, t in cpairs(vars.db.Toons, true) do
 			if t.BonusRoll and t.BonusRoll[1] then
 				local gold = 0
 				for _,roll in ipairs(t.BonusRoll) do
@@ -3475,13 +3511,14 @@ function core:ShowTooltip(anchorframe)
 			end
 			show = tooltip:AddLine(YELLOWFONT .. L["Roll Bonus"] .. FONTEND)		
 		end
-		for toon, t in cpairs(vars.db.Toons) do
+		for toon, t in cpairs(vars.db.Toons, true) do
 			if toonbonus[toon] then
+				local col = columns[toon..1]
 				local str = toonbonus[toon]
 				if str > 0 then str = "+"..str end
-				tooltip:SetCell(show, columns[toon..1], ClassColorise(t.Class,str), "CENTER",maxcol)
-		                tooltip:SetCellScript(show, columns[toon..1], "OnEnter", ShowBonusTooltip, toon)
-		                tooltip:SetCellScript(show, columns[toon..1], "OnLeave", CloseTooltips)
+				tooltip:SetCell(show, col, ClassColorise(t.Class,str), "CENTER",maxcol)
+		                tooltip:SetCellScript(show, col, "OnEnter", ShowBonusTooltip, toon)
+		                tooltip:SetCellScript(show, col, "OnLeave", CloseTooltips)
 			end
 		end
         end
@@ -3491,7 +3528,7 @@ function core:ShowTooltip(anchorframe)
 	  local setting = vars.db.Tooltip["Currency"..idx]
           if setting or showall then
             local show 
-   	    for toon, t in cpairs(vars.db.Toons) do
+   	    for toon, t in cpairs(vars.db.Toons, true) do
 		-- ci.name, ci.amount, ci.earnedThisWeek, ci.weeklyMax, ci.totalMax
                 local ci = t.currency and t.currency[idx] 
 		local gotsome
@@ -3505,7 +3542,7 @@ function core:ShowTooltip(anchorframe)
 		end
 		if ci and (gotsome or (ci.amount or 0) > 0) and columns[toon..1] then
 		  local name,_,tex = GetCurrencyInfo(idx)
-		  show = " \124T"..tex..":0\124t"..name
+		  show = string.format(" \124T%s:0\124t%s",tex,name)
 		end
 	    end
    	    local currLine
@@ -3516,9 +3553,10 @@ function core:ShowTooltip(anchorframe)
 		end
 		currLine = tooltip:AddLine(YELLOWFONT .. show .. FONTEND)		
 
-   	      for toon, t in cpairs(vars.db.Toons) do
+   	      for toon, t in cpairs(vars.db.Toons, true) do
                 local ci = t.currency and t.currency[idx] 
-		if ci and columns[toon..1] then
+		local col = columns[toon..1]
+		if ci and col then
 		   local earned, weeklymax, totalmax = "","",""
 		   if vars.db.Tooltip.CurrencyMax then
 		     if (ci.weeklyMax or 0) > 0 then
@@ -3543,10 +3581,10 @@ function core:ShowTooltip(anchorframe)
 		   if not vars.db.Tooltip.CurrencyValueColor then
 		     str = ClassColorise(t.Class,str)
 		   end
-		   tooltip:SetCell(currLine, columns[toon..1], str, "CENTER",maxcol)
-		   tooltip:SetCellScript(currLine, columns[toon..1], "OnEnter", ShowCurrencyTooltip, {toon, idx, ci})
-		   tooltip:SetCellScript(currLine, columns[toon..1], "OnLeave", CloseTooltips)
-		   tooltip:SetCellScript(currLine, columns[toon..1], "OnMouseDown", OpenCurrency)
+		   tooltip:SetCell(currLine, col, str, "CENTER",maxcol)
+		   tooltip:SetCellScript(currLine, col, "OnEnter", ShowCurrencyTooltip, {toon, idx, ci})
+		   tooltip:SetCellScript(currLine, col, "OnLeave", CloseTooltips)
+		   tooltip:SetCellScript(currLine, col, "OnMouseDown", OpenCurrency)
 		   tooltip:SetLineScript(currLine, "OnMouseDown", OpenCurrency)
 		  end
                 end
@@ -3587,7 +3625,7 @@ function core:ShowTooltip(anchorframe)
 	if vars.db.Tooltip.ShowCategories then
 		for category, row in pairs(categoryrow) do
 			if (categories > 1 or vars.db.Tooltip.ShowSoloCategory) and categoryshown[category] then
-				tooltip:SetCell(categoryrow[category], 1, YELLOWFONT .. vars.Categories[category] .. FONTEND, "LEFT", tooltip:GetColumnCount())
+				tooltip:SetCell(row, 1, YELLOWFONT .. vars.Categories[category] .. FONTEND, "LEFT", tooltip:GetColumnCount())
 			end
 		end
 	end
@@ -3661,21 +3699,54 @@ function core:ShowTooltip(anchorframe)
         end 
         if fail then -- retry with corrected cache
 		debug("Tooltip cache miss")
-		core:ShowTooltip(anchorframe)
+	        addon.scaleCache[showall] = nil
+		--core:ShowTooltip(anchorframe)
+		-- reschedule continuation to reduce time-slice exceeded errors in combat
+		core:ScheduleTimer("ShowTooltip", 0, anchorframe)
         else -- render it
 	   addon:SkinFrame(tooltip,"SavedInstancesTooltip")
 	   if addon:IsDetached() then
+	   --[[
 	        tooltip.anchorframe = UIParent
 	        tooltip:SmartAnchorTo(UIParent)
 		tooltip:SetAutoHideDelay(nil, UIParent)
+		--]]
 		--tooltip:UpdateScrolling(100000)
+	        tooltip:Show()
+	        QTip.layoutCleaner:CleanupLayouts()
+		tooltip:ClearAllPoints()
+		tooltip:SetPoint("BOTTOMLEFT",addon.detachframe)
+		tooltip:SetFrameLevel(addon.detachframe:GetFrameLevel()+1)
 	   else
 	        tooltip:SmartAnchorTo(anchorframe)
 		tooltip:SetAutoHideDelay(0.1, anchorframe)
-		tooltip.OnRelease = function() tooltip = nil end -- extra-safety: update our variable on auto-release
 	        tooltip:Show()
 	   end
+	   tooltip.OnRelease = function() -- extra-safety: update our variable on auto-release
+	   	tooltip:ClearAllPoints()
+	   	tooltip = nil 
+	   end 
+	   if db.Tooltip.FitToScreen then
+	     -- scale check
+	     QTip.layoutCleaner:CleanupLayouts()
+  	     local scale = tooltip:GetScale()
+	     local w,h = tooltip:GetSize()
+	     local sw,sh = UIParent:GetSize()
+	     w = w*scale;
+	     h = h*scale;
+	     if w > sw or h > sh then
+	       scale = scale / math.max(w/sw, h/sh)
+	       scale = scale*0.95 -- 5% slop to speed convergeance
+	       debug("Downscaling to %.4f",scale)
+	       tooltip:SetScale(scale)
+	       tooltip:Hide()
+	       addon.scaleCache[showall] = scale
+	       core:ScheduleTimer("ShowTooltip", 0, anchorframe) -- re-render fonts
+	     end
+	   end
         end
+  	starttime = debugprofilestop()-starttime
+  	debug("ShowTooltip(): completed in %.3fms", starttime)
 end
 
 local function ResetConfirmed()
@@ -3922,7 +3993,7 @@ function core:record_skill(spellID, expires)
   end
   if expires == 0 then 
     if t.Skills[idx] then -- a cd ended early
-      debug("Clearing Trade skill cd: "..spellName.." ("..spellID..")")
+      debug("Clearing Trade skill cd: %s (%s)",spellName,spellID)
     end
     t.Skills[idx] = nil 
     return
@@ -3937,7 +4008,7 @@ function core:record_skill(spellID, expires)
   local sinfo = t.Skills[idx] or {}
   t.Skills[idx] = sinfo
   local change = expires - (sinfo.Expires or 0)
-  if math.abs(change) > 180 then -- updating expiration guess (more than 3 min update lag)
+  if math.abs(change) > 180 and addon.db.dbg then -- updating expiration guess (more than 3 min update lag)
     debug("Trade skill cd: "..(link or title).." ("..spellID..") "..
           (sinfo.Expires and string.format("%d",change).." sec" or "(new)")..
 	  " Local time: "..date("%c",expires))
@@ -4108,19 +4179,20 @@ end
 function core:UNIT_SPELLCAST_SUCCEEDED(evt, unit, spellName, rank, lineID, spellID)
   if unit ~= "player" then return end
   if trade_spells[spellID] then 
-    debug("UNIT_SPELLCAST_SUCCEEDED: "..GetSpellLink(spellID).." ("..spellID..")")
+    debug("UNIT_SPELLCAST_SUCCEEDED: %s (%s)",GetSpellLink(spellID),spellID)
     if not core:record_skill(spellID) then return end
     core:ScheduleTimer("TradeSkillRescan", 0.5, spellID)
   elseif farm_spells[spellID] then
-    debug("UNIT_SPELLCAST_SUCCEEDED: "..GetSpellLink(spellID).." ("..spellID..")")
+    debug("UNIT_SPELLCAST_SUCCEEDED: %s (%s)",GetSpellLink(spellID),spellID)
     core:record_farm(spellID)
   end
 end
 
 function core:BonusRollResult(event, rewardType, rewardLink, rewardQuantity, rewardSpecID)
   local t = vars.db.Toons[thisToon]
-  debug("BonusRollResult:"..tostring(rewardType)..":"..tostring(rewardLink)..":"..tostring(rewardQuantity)..":"..tostring(rewardSpecID)..
-        " (boss="..tostring(t and t.lastboss).."|"..tostring(t and t.lastbossyell)..")")
+  debug("BonusRollResult:%s:%s:%s:%s (boss=%s|%s)",
+        tostring(rewardType), tostring(rewardLink), tostring(rewardQuantity), tostring(rewardSpecID),
+        tostring(t and t.lastboss), tostring(t and t.lastbossyell))
   if not t then return end
   if not rewardType then return end -- sometimes get a bogus message, ignore it
   t.BonusRoll = t.BonusRoll or {}

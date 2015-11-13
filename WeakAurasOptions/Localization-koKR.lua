@@ -83,8 +83,8 @@ L["Clone option enabled dialog"] = [=[|cFFFF0000자동복제|r 옵션을 활성�
 이 디스플레이를 새로운 |cFF22AA22유동적 그룹|r으로 옮길까요?]=]
 L["Close"] = "닫기"
 L["Collapse"] = "접기"
-L["Collapse all loaded displays"] = "로딩된 모든 디스플레이 접기"
-L["Collapse all non-loaded displays"] = "로딩되지 않은 모든 디스플레이 접기"
+L["Collapse all loaded displays"] = "로드된 모든 디스플레이 접기"
+L["Collapse all non-loaded displays"] = "로드되지 않은 모든 디스플레이 접기"
 L["Color"] = "색상"
 L["Compress"] = "누르기"
 L["Concentration"] = "집중"
@@ -103,21 +103,21 @@ L["Creating options: "] = "옵션 생성:"
 L["Crop X"] = "X 자르기"
 L["Crop Y"] = "Y 자르기"
 L["Crusader"] = "성전사"
-L["Custom Code"] = "개인추가 코드"
-L["Custom Trigger"] = "개인추가 조건"
-L["Custom trigger event tooltip"] = [=[개인추가 조건을 체크할 이벤트를 선택하세요.
+L["Custom Code"] = "사용자 설정 코드"
+L["Custom Trigger"] = "사용자 설정 조건"
+L["Custom trigger event tooltip"] = [=[사용자 설정 조건을 체크할 이벤트를 선택하세요.
 콤마와 공백을 사용해 여러 이벤트를 선택할 수 있습니다.
 
 |cFF4444FF예제:|r
 UNIT_POWER, UNIT_AURA PLAYER_TARGET_CHANGED]=]
-L["Custom trigger status tooltip"] = [=[개인추가 조건을 체크할 이벤트를 선택하세요.
+L["Custom trigger status tooltip"] = [=[사용자 설정 조건을 체크할 이벤트를 선택하세요.
 상태 형식 조건이면, 특정 이벤트는 독립 변수없이 WeakAuras에 의해 불러와집니다.
 콤마와 공백을 사용해 여러 이벤트를 선택할 수 있습니다.
 
 |cFF4444FF예제:|r
 UNIT_POWER, UNIT_AURA PLAYER_TARGET_CHANGED]=]
-L["Custom Untrigger"] = "개인추가 비활성 조건"
-L["Custom untrigger event tooltip"] = [=[개인추가 숨김 조건을 체크할 이벤트를 선택하세요.
+L["Custom Untrigger"] = "사용자 설정 비활성 조건"
+L["Custom untrigger event tooltip"] = [=[사용자 설정 숨김 조건을 체크할 이벤트를 선택하세요.
 발생 조건과 다른 이벤트도 상관 없습니다.
 콤마와 공백을 사용해 여러 이벤트를 선택할 수 있습니다.
 
@@ -142,10 +142,10 @@ L["Display Text"] = "디스플레이 텍스트"
 L["Distribute Horizontally"] = "가로로 퍼뜨리기"
 L["Distribute Vertically"] = "세로로 퍼뜨리기"
 L["Do not copy any settings"] = "설정을 복사하지 않음"
-L["Do not group this display"] = "이 디스플레이 그룹하지 않음"
+L["Do not group this display"] = "이 디스플레이 그룹화하지 않음"
 L["Duplicate"] = "복사"
 L["Duration Info"] = "지속시간 정보"
-L["Duration (s)"] = "지속시간 (s)"
+L["Duration (s)"] = "지속시간 (초)"
 L["Dynamic Group"] = "유동적 그룹"
 L["Dynamic text tooltip"] = [=[이 텍스트를 유동적으로 만들 수 있는 특별 코드들입니다:
 
@@ -154,13 +154,13 @@ L["Dynamic text tooltip"] = [=[이 텍스트를 유동적으로 만들 수 있�
 |cFFFF0000%n|r - 이름 - 디스플레이의 이름 (보통 오라 이름), 또는 유동적 이름이 없을 때 디스플레이의 ID
 |cFFFF0000%i|r - 아이콘 - 디스플레이와 연관된 아이콘
 |cFFFF0000%s|r - 중첩 - 오라의 중첩 횟수 (보통)
-|cFFFF0000%c|r - 개인추가 - 표시될 string 값을 반환하는 개인 Lua function 정의를 허용합니다]=]
+|cFFFF0000%c|r - 사용자 설정 - 표시할 string 값을 반환하는 사용자 설정 Lua 함수 정의를 허용합니다]=]
 L["Enabled"] = "활성화됨"
 L["Enter an aura name, partial aura name, or spell id"] = "오라 이름 / 오라의 부분 이름 / 주문ID를 입력하세요,"
 L["Event Type"] = "이벤트 유형"
 L["Expand"] = "확장"
-L["Expand all loaded displays"] = "로딩된 모든 디스플레이 확장"
-L["Expand all non-loaded displays"] = "로딩되지 않은 모드 디스플레이 확장"
+L["Expand all loaded displays"] = "로드된 모든 디스플레이 확장"
+L["Expand all non-loaded displays"] = "로드되지 않은 모드 디스플레이 확장"
 L["Expand Text Editor"] = "텍스트 편집창 확장"
 L["Expansion is disabled because this group has no children"] = "이 그룹은 자식이 없기 떄문에 확장이 비활성화되었습니다"
 L["Export"] = "내보내기"
@@ -199,8 +199,8 @@ L["Group aura count description"] = [=[디스플레이 조건을 충족하기 �
 |cFF00CC00> 1/2|r %s의 절반 이상이 영향 받을 때 발생
 |cFF00CC00>= 0|r 상관없이, 항상 발생
 ]=]
-L["Group Member Count"] = "그룹 멤버 수"
-L["Group (verb)"] = "그룹"
+L["Group Member Count"] = "그룹원 수"
+L["Group (verb)"] = "그룹화하기"
 L["Height"] = "높이"
 L["Hide this group's children"] = "이 그룹의 자식 숨기기"
 L["Hide When Not In Group"] = "파티중이 아닐 때 숨기기"
@@ -220,10 +220,10 @@ L["Main"] = "메인"
 L["Main Trigger"] = "메인 조건"
 L["Mana (%)"] = "마나 (%)"
 L["Manage displays defined by Addons"] = "애드온에 의해 정의된 디스플레이 관리"
-L["Message Prefix"] = "메세지 접두사"
-L["Message Suffix"] = "메세지 접미사"
+L["Message Prefix"] = "메시지 접두사"
+L["Message Suffix"] = "메시지 접미사"
 L["Metamorphosis"] = "탈태"
-L["Mirror"] = "거울효과"
+L["Mirror"] = "뒤집기"
 L["Model"] = "모델"
 L["Moonkin/Tree/Flight(Feral)"] = "달빛야수/생명의 나무/폭풍날개(야성)"
 L["Move Down"] = "아래로 이동"
@@ -238,9 +238,9 @@ L["Multiselect multiple tooltip"] = [=[|cFF777777무시|r - |cFF777777단일|r -
 선택한 것중 하나라도 일치할 때 불러옴]=]
 L["Multiselect single tooltip"] = [=[|cFF777777무시|r - |cFF00FF00단일|r - |cFF777777다중|r
 선택한 한가지만 일치할 때 불러옴]=]
-L["Must be spelled correctly!"] = "정확한 주문이어야 합니다!"
+L["Must be spelled correctly!"] = "철자가 정확해야 합니다!"
 L["Name Info"] = "이름 정보"
--- L["Negator"] = ""
+L["Negator"] = "Not" -- Needs review
 L["New"] = "새로 만들기"
 L["Next"] = "다음"
 L["No"] = "아니오"
@@ -347,9 +347,9 @@ L["This condition will not be tested"] = "이 상태는 테스트되지 않음"
 L["This display is currently loaded"] = "이 디스플레이 현재 로드됨"
 L["This display is not currently loaded"] = "이 디스플레이 현재 로드되지 않음"
 L["This display will only show when |cFF00FF00%s"] = "|cFF00FF00%s 일때만 이 디스플레이 보임"
-L["This display will only show when |cFFFF0000 Not %s"] = "|cFFFF0000 Not %s 이지 않을때만 이 디스플레이 보임"
+L["This display will only show when |cFFFF0000 Not %s"] = "|cFFFF0000 Not %s 일때만 이 디스플레이 보임"
 L["This region of type \"%s\" has no configuration options."] = "\"%s\" 형식은 설정 옵션이 없습니다."
--- L["Time in"] = ""
+L["Time in"] = "시간 단위"
 L["Timer"] = "타이머"
 L["Timer Settings"] = "타이머 설정"
 L["Toggle the visibility of all loaded displays"] = "로드된 모든 디스플레이 표시 전환"
@@ -364,7 +364,7 @@ L["Total Time Precision"] = "전체 시간 정확도"
 L["Tracking"] = "추적"
 L["Travel"] = "날쌘 동물"
 L["Trigger"] = "조건"
-L["Trigger %d"] = "조건 %d"
+L["Trigger %d"] = "%d 조건"
 L["Triggers"] = "조건"
 L["Type"] = "유형"
 L["Ungroup"] = "그룹해제"

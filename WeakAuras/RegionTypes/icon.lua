@@ -1,3 +1,8 @@
+-- WoW API
+local _G = _G
+
+-- GLOBALS: WeakAuras
+
 local SharedMedia = LibStub("LibSharedMedia-3.0");
 local MSQ = LibStub("Masque", true);
 
@@ -105,10 +110,11 @@ local function create(parent, data)
     cooldown:SetDrawEdge(false);
 
     local stacksFrame = CreateFrame("frame", nil, region);
-    stacksFrame:SetFrameLevel(cooldown:GetFrameLevel() + 1);
     local stacks = stacksFrame:CreateFontString(nil, "OVERLAY");
+    local cooldownFrameLevel = cooldown:GetFrameLevel() + 1
+    stacksFrame:SetFrameLevel(cooldownFrameLevel)
+    stacksFrame:SetFrameLevel(cooldownFrameLevel)
     region.stacks = stacks;
-
     region.values = {};
     region.duration = 0;
     region.expirationTime = math.huge;
@@ -118,6 +124,8 @@ end
 
 local function modify(parent, region, data)
     local button, icon, cooldown, stacks = region.button, region.icon, region.cooldown, region.stacks;
+
+    region.useAuto = data.auto and WeakAuras.CanHaveAuto(data);
 
     if MSQ and not region.MSQGroup then
         region.MSQGroup = MSQ:Group("WeakAuras", region.frameId);
@@ -163,7 +171,10 @@ local function modify(parent, region, data)
         local selfPoint = WeakAuras.inverse_point_types[data.stacksPoint];
         stacks:SetPoint(selfPoint, icon, data.stacksPoint, -0.5 * sxo, -0.5 * syo);
     end
-    stacks:SetFont(fontPath, data.fontSize, data.fontFlags == "MONOCHROME" and "OUTLINE, MONOCHROME" or data.fontFlags);
+    stacks:SetFont(fontPath,
+                   data.fontSize <= 35 and data.fontSize or 35,
+                   data.fontFlags == "MONOCHROME" and "OUTLINE, MONOCHROME" or data.fontFlags);
+    stacks:SetTextHeight(data.fontSize);
     stacks:SetTextColor(data.textColor[1], data.textColor[2], data.textColor[3], data.textColor[4]);
 
     local texWidth = 0.25 * data.zoom;
@@ -204,9 +215,7 @@ local function modify(parent, region, data)
     local textStr;
     local function UpdateText()
         textStr = data.displayStacks or "";
-        for symbol, v in pairs(WeakAuras.dynamic_texts) do
-            textStr = textStr:gsub(symbol, region.values[v.value] or "");
-        end
+        textStr = WeakAuras.ReplacePlaceHolders(textStr, region.values);
 
         if(stacks.displayStacks ~= textStr) then
             if stacks:GetFont() then
@@ -253,8 +262,7 @@ local function modify(parent, region, data)
 
     function region:SetIcon(path)
         local iconPath = (
-            WeakAuras.CanHaveAuto(data)
-            and data.auto
+            region.useAuto
             and path ~= ""
             and path
             or data.displayIcon
@@ -268,7 +276,7 @@ local function modify(parent, region, data)
     region:SetIcon()
 
     function region:SetName(name)
-        region.values.name = WeakAuras.CanHaveAuto(data) and name or data.id;
+        region.values.name = name or data.id;
         UpdateText();
     end
 
@@ -282,7 +290,7 @@ local function modify(parent, region, data)
             end
             progress = progress > 0.0001 and progress or 0.0001;
         end
-        
+
         local remainingStr = "";
         if(remaining == math.huge) then
             remainingStr = " ";

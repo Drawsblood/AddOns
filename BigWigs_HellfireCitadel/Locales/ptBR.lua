@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Hellfire Assault", "ptBR")
 if not L then return end
 if L then
@@ -62,6 +63,8 @@ L["kazrogal"] = "Kaz'rogal" -- Needs review
 L["kuroh"] = "Adjunta Kuroh" -- Needs review
 L["orb"] = "Orbe da Destruição" -- Needs review
 L["peacekeeper"] = "Constructo Pacificador" -- Needs review
+L["talonpriest"] = "Sacerdote da Garra Corrompido" -- Needs review
+L["weaponlord"] = "Mestre das Armas Mehlkhior" -- Needs review
 
 end
 

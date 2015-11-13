@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Hellfire Assault", "frFR")
 if not L then return end
 if L then
@@ -45,7 +46,7 @@ L = BigWigs:NewBossLocale("Fel Lord Zakuun", "frFR")
 if L then
 L["custom_off_seed_marker"] = "Marquage Graine de destruction"
 L["custom_off_seed_marker_desc"] = "Marque les cibles de Graine de destruction avec {rt1}{rt2}{rt3}{rt4}{rt5}. Nécessite d'être assistant ou chef de raid."
-L["seed"] = "Graine (%d)"
+L["seed"] = "Graine"
 L["tank_proximity"] = "Proximité des tanks"
 L["tank_proximity_desc"] = "Ouvre une fenêtre de proximité de 5m indiquant la position des autres tanks afin de vous aider à gérer la technique Main lourde & Lourdement armé."
 
@@ -59,21 +60,38 @@ end
 
 L = BigWigs:NewBossLocale("Mannoroth", "frFR")
 if L then
+L["182212"] = "Portail des infernaux fermé !"
+L["185147"] = "Portail des seigneurs funestes fermé !"
+L["185175"] = "Portail des diablotins fermé !"
+L["custom_off_doom_marker"] = "Marquage Marque funeste"
+L["custom_off_doom_marker_desc"] = "En difficulté Mythique, marque les cibles de Marque funeste avec {rt1}{rt2}{rt3}. Nécessite d'être assistant ou chef de raid."
 L["custom_off_gaze_marker"] = "Marquage Regard de Mannoroth"
 L["custom_off_gaze_marker_desc"] = "Marque les cibles de Regard de Mannoroth avec {rt1}{rt2}{rt3}. Nécessite d'être assistant ou chef de raid."
-L["doomLord"] = "Portail des seigneurs funestes fermé !"
+L["custom_off_wrath_marker"] = "Marquage Courroux de Gul’dan"
+L["custom_off_wrath_marker_desc"] = "Marque les cibles de Courroux de Gul’dan avec {rt8}{rt7}{rt6}{rt5}{rt4}. Nécessite d'être assistant ou chef de raid."
 L["felseeker_message"] = "%s (%d) %dm"
 L["gaze"] = "Regard (%d)"
-L["imp"] = "Portail des diablotins fermé !"
-L["infernal"] = "Portail des infernaux fermé !"
 
 end
 
 L = BigWigs:NewBossLocale("Archimonde", "frFR")
 if L then
 L["chaos_bar"] = "%s -> %s"
+L["chaos_from"] = "%s depuis %s"
+L["chaos_helper_message"] = "Votre position Chaos : %d" -- Needs review
+L["chaos_to"] = "%s vers %s"
+L["custom_off_chaos_helper"] = "Assistant Chaos créé"
+L["custom_off_chaos_helper_desc"] = "Pour la difficulté Mythique uniquement. Cette fonctionnalité vous indique quel numéro de chaos vous êtes, affiche un message normal et le fait dire à votre personnage. Selon la stratégie que vous utilisez, cette fonctionnalité peut se révéler être utile ou pas." -- Needs review
+L["custom_off_infernal_marker"] = "Marquage Infernal"
+L["custom_off_infernal_marker_desc"] = "Marque les infernaux créés par Pluie du chaos avec {rt1}{rt2}{rt3}{rt4}{rt5}. Nécessite d'être assistant ou chef de raid."
+L["custom_off_legion_marker"] = "Marquage Marque de la Légion"
+L["custom_off_legion_marker_desc"] = "Marque les cibles de Marque de la Légion avec {rt1}{rt2}{rt3}{rt4}. Nécessite d'être assistant ou chef de raid."
 L["custom_off_torment_marker"] = "Marquage Tourment enchaîné"
 L["custom_off_torment_marker_desc"] = "Marque les cibles de Tourment enchaîné avec {rt1}{rt2}{rt3}. Nécessite d'être assistant ou chef de raid."
+L["infernal_count"] = "%s (%d/%d)"
+L["markofthelegion_self"] = "Marque de la Légion sur vous"
+L["markofthelegion_self_bar"] = "Vous explosez !"
+L["markofthelegion_self_desc"] = "Compte à rebours spécial quand une Marque de la Légion est sur vous."
 L["torment_removed"] = "Tourment enchaîné enlevé (%d/%d)"
 
 end
@@ -94,6 +112,8 @@ L["kazrogal"] = "Kaz'rogal"
 L["kuroh"] = "Subalterne Kuroh"
 L["orb"] = "Orbe de destruction"
 L["peacekeeper"] = "Assemblage garde-paix"
+L["talonpriest"] = "Prêtre de la serre corrompu"
+L["weaponlord"] = "Seigneur des armes Mehlkhior"
 
 end
 

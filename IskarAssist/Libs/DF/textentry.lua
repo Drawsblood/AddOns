@@ -1,9 +1,10 @@
 
-
-
 local DF = _G ["DetailsFramework"]
-local _
+if (not DF or not DetailsFrameworkCanLoad) then
+	return 
+end
 
+local _
 local _rawset = rawset --> lua local
 local _rawget = rawget --> lua local
 local _setmetatable = setmetatable --> lua local
@@ -258,6 +259,9 @@ DF.TextEntryCounter = 1
 			self.editbox:SetBackdropBorderColor (unpack (self.enabled_border_color))
 			self.editbox:SetBackdropColor (unpack (self.enabled_backdrop_color))
 			self.editbox:SetTextColor (unpack (self.enabled_text_color))
+			if (self.editbox.borderframe) then
+				self.editbox.borderframe:SetBackdropColor (unpack (self.editbox.borderframe.onleave_backdrop))
+			end
 		end
 	end
 	
@@ -272,6 +276,10 @@ DF.TextEntryCounter = 1
 			self.editbox:SetBackdropBorderColor (.5, .5, .5, .5)
 			self.editbox:SetBackdropColor (.5, .5, .5, .5)
 			self.editbox:SetTextColor (.5, .5, .5, .5)
+			
+			if (self.editbox.borderframe) then
+				self.editbox.borderframe:SetBackdropColor (.5, .5, .5, .5)
+			end
 		end
 	end
 	
@@ -299,13 +307,6 @@ DF.TextEntryCounter = 1
 			textentry:SetBackdropBorderColor (1, 1, 1, 1)
 		end
 		
-		local parent = textentry:GetParent().MyObject
-		if (parent and parent.type == "panel") then
-			if (parent.GradientEnabled) then
-				parent:RunGradient()
-			end
-		end
-		
 	end
 	
 	local OnLeave = function (textentry)
@@ -325,13 +326,7 @@ DF.TextEntryCounter = 1
 		if (textentry:IsEnabled()) then 
 			textentry:SetBackdropBorderColor (unpack (textentry.current_bordercolor))
 		end
-		
-		local parent = textentry:GetParent().MyObject
-		if (parent and parent.type == "panel") then
-			if (parent.GradientEnabled) then
-				parent:RunGradient (false)
-			end
-		end
+
 	end
 	
 	local OnHide = function (textentry)
@@ -472,13 +467,42 @@ DF.TextEntryCounter = 1
 	end
 	
 ------------------------------------------------------------------------------------------------------------
---> object constructor
 
-function DF:CreateTextEntry (parent, func, w, h, member, name)
-	return DF:NewTextEntry (parent, parent, name, member, w, h, func)
+function TextEntryMetaFunctions:SetTemplate (template)
+	if (template.width) then
+		self:SetWidth (template.width)
+	end
+	if (template.height) then
+		self:SetHeight (template.height)
+	end
+	
+	if (template.backdrop) then
+		self:SetBackdrop (template.backdrop)
+	end
+	if (template.backdropcolor) then
+		local r, g, b, a = DF:ParseColors (template.backdropcolor)
+		self:SetBackdropColor (r, g, b, a)
+		self.onleave_backdrop = {r, g, b, a}
+	end
+	if (template.backdropbordercolor) then
+		local r, g, b, a = DF:ParseColors (template.backdropbordercolor)
+		self:SetBackdropBorderColor (r, g, b, a)
+		self.editbox.current_bordercolor[1] = r
+		self.editbox.current_bordercolor[2] = g
+		self.editbox.current_bordercolor[3] = b
+		self.editbox.current_bordercolor[4] = a
+		self.onleave_backdrop_border_color = {r, g, b, a}
+	end
 end
 
-function DF:NewTextEntry (parent, container, name, member, w, h, func, param1, param2, space)
+------------------------------------------------------------------------------------------------------------
+--> object constructor
+
+function DF:CreateTextEntry (parent, func, w, h, member, name, with_label, entry_template, label_template)
+	return DF:NewTextEntry (parent, parent, name, member, w, h, func, nil, nil, nil, with_label, entry_template, label_template)
+end
+
+function DF:NewTextEntry (parent, container, name, member, w, h, func, param1, param2, space, with_label, entry_template, label_template)
 	
 	if (not name) then
 		name = "DetailsFrameworkTextEntryNumber" .. DF.TextEntryCounter
@@ -538,7 +562,7 @@ function DF:NewTextEntry (parent, container, name, member, w, h, func, param1, p
 		for funcName, funcAddress in pairs (idx) do 
 			if (not TextEntryMetaFunctions [funcName]) then
 				TextEntryMetaFunctions [funcName] = function (object, ...)
-					local x = loadstring ( "return _G."..object.editbox:GetName()..":"..funcName.."(...)")
+					local x = loadstring ( "return _G['"..object.editbox:GetName().."']:"..funcName.."(...)")
 					return x (...)
 				end
 			end
@@ -570,6 +594,8 @@ function DF:NewTextEntry (parent, container, name, member, w, h, func, param1, p
 	TextEntryObject.enabled_border_color = {TextEntryObject.editbox:GetBackdropBorderColor()}
 	TextEntryObject.enabled_backdrop_color = {TextEntryObject.editbox:GetBackdropColor()}
 	TextEntryObject.enabled_text_color = {TextEntryObject.editbox:GetTextColor()}
+	TextEntryObject.onleave_backdrop = {TextEntryObject.editbox:GetBackdropColor()}
+	TextEntryObject.onleave_backdrop_border_color = {TextEntryObject.editbox:GetBackdropBorderColor()}
 	
 	TextEntryObject.func = func
 	TextEntryObject.param1 = param1
@@ -598,8 +624,31 @@ function DF:NewTextEntry (parent, container, name, member, w, h, func, param1, p
 		
 	_setmetatable (TextEntryObject, TextEntryMetaFunctions)
 	
-	return TextEntryObject	
+	if (with_label) then
+		local label = DF:CreateLabel (TextEntryObject.editbox, with_label, nil, nil, nil, "label", nil, "overlay")
+		label.text = with_label
+		TextEntryObject.editbox:SetPoint ("left", label.widget, "right", 2, 0)
+		if (label_template) then
+			label:SetTemplate (label_template)
+		end
+		with_label = label
+	end
 	
+	if (entry_template) then
+		TextEntryObject:SetTemplate (entry_template)
+	end	
+	
+	return TextEntryObject, with_label
+	
+end
+
+function DF:NewSpellEntry (parent, func, w, h, param1, param2, member, name)
+	local editbox = DF:NewTextEntry (parent, parent, name, member, w, h, func, param1, param2)
+	
+	editbox:SetHook ("OnEditFocusGained", SpellEntryOnEditFocusGained)
+	editbox:SetHook ("OnTextChanged", SpellEntryOnTextChanged)
+	
+	return editbox	
 end
 
 local function_gettext = function (self)
@@ -648,17 +697,32 @@ function DF:NewSpecialLuaEditorEntry (parent, w, h, member, name, nointent)
 	borderframe.ClearFocus = function_clearfocus
 	borderframe.SetFocus = function_setfocus
 	
+	borderframe.Enable = TextEntryMetaFunctions.Enable
+	borderframe.Disable = TextEntryMetaFunctions.Disable
+	
+	borderframe.SetTemplate = TextEntryMetaFunctions.SetTemplate
+	
 	if (not nointent) then
 		IndentationLib.enable (scrollframe.editbox, nil, 4)
 	end
 	
 	borderframe:SetBackdrop ({bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]], 
 		tile = 1, tileSize = 16, edgeSize = 16, insets = {left = 5, right = 5, top = 5, bottom = 5}})
+	
+	scrollframe.editbox.current_bordercolor = {1, 1, 1, 0.7}
+	borderframe:SetBackdropBorderColor (1, 1, 1, 0.7)
 	borderframe:SetBackdropColor (0.090195, 0.090195, 0.188234, 1)
-	borderframe:SetBackdropBorderColor (1, 1, 1, 1)
+	
+	borderframe.enabled_border_color = {borderframe:GetBackdropBorderColor()}
+	borderframe.enabled_backdrop_color = {borderframe:GetBackdropColor()}
+	borderframe.enabled_text_color = {scrollframe.editbox:GetTextColor()}
+
+	borderframe.onleave_backdrop = {scrollframe.editbox:GetBackdropColor()}
+	borderframe.onleave_backdrop_border_color = {scrollframe.editbox:GetBackdropBorderColor()}
 	
 	borderframe.scroll = scrollframe
 	borderframe.editbox = scrollframe.editbox
+	borderframe.editbox.borderframe = borderframe
 	
 	return borderframe
 end

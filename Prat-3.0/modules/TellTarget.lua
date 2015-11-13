@@ -98,7 +98,7 @@ Prat:AddModuleToLoad(function()
 	["No target selected."] = "대상이 선택되지 않았습니다.",
 	["Target does not exist."] = "대상이 존재하지 않습니다.",
 	["Target is not a player."] = "대상이 플레이어가 아닙니다.",
-	TellTarget = "대상에게말하기",
+	TellTarget = "대상에게 말하기",
 	["/tt"] = true,
 }
 

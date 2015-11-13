@@ -151,7 +151,7 @@ local function GetDescription(id, short)
 		return short and L["XP"] or L["Experience"]
 	elseif id == "MaxXP" then
 		return short and L["Max. XP"] or L["Maximum Experience"]
-	elseif id == "CompletedQuestXP" then
+	elseif id == "QuestCompleteXP" then
 		return short and L["Abbrev_Quest Complete"] or L["Quest Complete"]
 	elseif id == "QuestIncompleteXP" then
 		return short and L["Abbrev_Quest Incomplete"] or L["Quest Incomplete"]
@@ -171,7 +171,7 @@ local function GetDescription(id, short)
 		return short and L["Rep"] or L["Reputation"]
 	elseif id == "MaxReputation" then
 		return short and L["Max. Rep"] or L["Maximum Reputation"]
-	elseif id == "CompletedQuestRep" then
+	elseif id == "QuestCompleteRep" then
 		return short and L["Abbrev_Quest Complete"] or L["Quest Complete"]
 	elseif id == "QuestIncompleteRep" then
 		return short and L["Abbrev_Quest Incomplete"] or L["Quest Incomplete"]
@@ -281,18 +281,18 @@ ScriptEnv.GetColor = GetColor
 local function GetColorById(id)
 	if id == "XP" then
 		return GetColor(GetValue("XP"), 0, GetValue("MaxXP"))
-	elseif id == "CompletedQuestXP" then
-		return GetColor(GetValue("CompletedQuestXP"), 0, GetValue("MaxXP") - GetValue("XP"))
+	elseif id == "QuestCompleteXP" then
+		return GetColor(GetValue("QuestCompleteXP"), 0, GetValue("MaxXP") - GetValue("XP"))
 	elseif id == "QuestIncompleteXP" then
-		return GetColor(GetValue("QuestIncompleteXP"), 0, GetValue("MaxXP") - GetValue("XP") - GetValue("CompletedQuestXP"))
+		return GetColor(GetValue("QuestIncompleteXP"), 0, GetValue("MaxXP") - GetValue("XP") - GetValue("QuestCompleteXP"))
 	elseif id == "Rested" then
 		return GetColor(GetValue("Rested"), 0, GetValue("MaxXP") * 1.5)
 	elseif id == "Reputation" then
 		return GetColor(GetValue("Reputation"), 0, GetValue("MaxReputation"))
-	elseif id == "CompletedQuestRep" then
-		return GetColor(GetValue("CompletedQuestRep"), 0, GetValue("MaxReputation") - GetValue("Reputation"))
+	elseif id == "QuestCompleteRep" then
+		return GetColor(GetValue("QuestCompleteRep"), 0, GetValue("MaxReputation") - GetValue("Reputation"))
 	elseif id == "QuestIncompleteRep" then
-		return GetColor(GetValue("QuestIncompleteRep"), 0, GetValue("MaxReputation") - GetValue("Reputation") - GetValue("CompletedQuestReputation"))
+		return GetColor(GetValue("QuestIncompleteRep"), 0, GetValue("MaxReputation") - GetValue("Reputation") - GetValue("QuestCompleteRep"))
 	elseif id == "Standing" then
 		local faction = Addon:GetFaction()
 		local _, _, standing, _, _, _, _, _, _, _, _, _, _, _, friendID = Factions:GetFactionInfo(faction)

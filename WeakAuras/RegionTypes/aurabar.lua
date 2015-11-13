@@ -669,9 +669,7 @@ local function UpdateText(region, data)
 
   -- Replace %-marks
   textStr = data.displayTextLeft or "";
-  for symbol, v in pairs(WeakAuras.dynamic_texts) do
-    textStr = textStr:gsub(symbol, region.values[v.value] or "");
-  end
+  textStr = WeakAuras.ReplacePlaceHolders(textStr, region.values);
 
   -- Update left text
   if not text.displayTextLeft or #text.displayTextLeft ~= #textStr then
@@ -684,9 +682,7 @@ local function UpdateText(region, data)
 
   -- Replace %-marks
   textStr = data.displayTextRight or "";
-  for symbol, v in pairs(WeakAuras.dynamic_texts) do
-    textStr = textStr:gsub(symbol, region.values[v.value] or "");
-  end
+  textStr = WeakAuras.ReplacePlaceHolders(textStr, region.values);
 
   -- Update right text
   if not timer.displayTextRight or #timer.displayTextRight ~= #textStr then
@@ -806,6 +802,8 @@ local function modify(parent, region, data)
   -- Localize
   local bar, border, timer, text, iconFrame, icon, stacks = region.bar, region.border, region.timer, region.text, region.iconFrame, region.icon, region.stacks;
 
+  region.useAuto = data.auto and WeakAuras.CanHaveAuto(data);
+
   -- Adjust framestrata
     if data.frameStrata == 1 then
         region:SetFrameStrata(region:GetParent():GetFrameStrata());
@@ -871,9 +869,11 @@ local function modify(parent, region, data)
   -- Bar or Border (+Backdrop) in front
   if data.barInFront then
     iconFrame:SetFrameLevel(5);
+    iconFrame:SetFrameLevel(5);
     bar:SetFrameLevel(5);
     border:SetFrameLevel(2);
   else
+    iconFrame:SetFrameLevel(2);
     iconFrame:SetFrameLevel(2);
     bar:SetFrameLevel(2);
     border:SetFrameLevel(5);
@@ -901,7 +901,10 @@ local function modify(parent, region, data)
   -- Update text visibility
   if data.text then
     -- Update text font
-    text:SetFont(SharedMedia:Fetch("font", data.textFont), data.textSize, data.textFlags and data.textFlags ~= "None" and data.textFlags);
+    text:SetFont(SharedMedia:Fetch("font", data.textFont),
+                 data.textSize <= 35 and data.textSize or 35,
+                 data.textFlags and data.textFlags ~= "None" and data.textFlags);
+    text:SetTextHeight(data.textSize);
     text:SetTextColor(data.textColor[1], data.textColor[2], data.textColor[3], data.textColor[4]);
     text:SetWordWrap(false);
     animRotate(text, textDegrees);
@@ -913,7 +916,10 @@ local function modify(parent, region, data)
   -- Update timer visibility
   if data.timer then
     -- Update timer font
-    timer:SetFont(SharedMedia:Fetch("font", data.timerFont), data.timerSize, data.timerFlags and data.timerFlags ~= "None" and data.timerFlags);
+    timer:SetFont(SharedMedia:Fetch("font", data.timerFont),
+                  data.timerSize <= 35 and data.timerSize or 35,
+                  data.timerFlags and data.timerFlags ~= "None" and data.timerFlags);
+    timer:SetTextHeight(data.timerSize);
     timer:SetTextColor(data.timerColor[1], data.timerColor[2], data.timerColor[3], data.timerColor[4]);
     animRotate(timer, textDegrees);
     timer:Show();
@@ -934,8 +940,7 @@ local function modify(parent, region, data)
         function region:SetIcon(path)
       -- Set icon options
             local iconPath = (
-                WeakAuras.CanHaveAuto(data)
-                and data.auto
+                region.useAuto
                 and path ~= ""
                 and path
                 or data.displayIcon
@@ -957,7 +962,10 @@ local function modify(parent, region, data)
     -- Update stack text visibility
     if data.icon and data.stacks then
       -- Update stack font
-      stacks:SetFont(SharedMedia:Fetch("font", data.stacksFont), data.stacksSize, data.stacksFlags and data.stacksFlags ~= "None" and data.stacksFlags);
+      stacks:SetFont(SharedMedia:Fetch("font", data.stacksFont),
+                     data.stacksSize <= 35 and data.stacksSize or 35,
+                     data.stacksFlags and data.stacksFlags ~= "None" and data.stacksFlags);
+      stacks:SetTextHeight(data.stacksSize);
       stacks:SetTextColor(data.stacksColor[1], data.stacksColor[2], data.stacksColor[3], data.stacksColor[4]);
       animRotate(stacks, textDegrees);
 
@@ -1110,7 +1118,7 @@ local function modify(parent, region, data)
 
   -- Name update function
     function region:SetName(name)
-        region.values.name = WeakAuras.CanHaveAuto(data) and name or data.id;
+        region.values.name = name or data.id;
         UpdateText(self, data);
     end
 --  region:SetName("");

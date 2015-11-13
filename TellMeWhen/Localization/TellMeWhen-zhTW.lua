@@ -974,6 +974,7 @@ L["GENERIC_NUMREQ_CHECK_DESC"] = "勾選以啟用並設定%s"
 L["GENERICTOTEM"] = "圖騰 %d"
 L["GLOBAL_GROUP_GENERIC_DESC"] = "|cff00c300共用群組|r是指在你這個魔獸世界帳號中的TellMeWhen設定檔的所有角色都可共同使用的群組。"
 L["GLYPHTOCHECK"] = "要檢查的雕紋"
+L["GROUP"] = "組"
 L["GROUPADDONSETTINGS"] = "群組設定"
 L["GROUPADDONSETTINGS_DESC"] = "包含群組的設定以及插件的綜合設定."
 L["GROUPCONDITIONS"] = "群組條件"
@@ -1112,9 +1113,9 @@ L["ICONMENU_CASTSHOWWHEN"] = "何時顯示法術施放"
 L["ICONMENU_CHECKNEXT"] = "擴展子元"
 L["ICONMENU_CHECKNEXT_DESC"] = [=[選中此框該圖示將檢查添加在列表中的任意整合圖示所包含的全部圖示,它可能是任何級別的檢查.
 
-此外,該圖示不會顯示已經在另一個整合圖示顯示的任何圖示.在主選項或群組設定中可以變更更新排序.
+此外,該圖示不會顯示已經在另一個整合圖示顯示的任何圖示.
 
-譯者註:因為很多人不明白這個功能,舉個例子,假設你有3個設定完全一樣的整合圖示(每個圖示中都是圖示1 圖示2 圖示3),全部都勾上了這個選項,如果整合圖示中,圖示1 圖示2 圖示3都可以顯示,並且顯示排序為 圖示3>圖示1>圖示2,那麼在整合圖示1將會顯示圖示3,整合圖示2則是顯示圖示1,整合圖示3顯示圖示2(理論上就是這樣的效果,具體的細節請自行發掘).]=]
+譯者註:因為很多人不明白這個功能,舉個例子,假設你有3個設定完全一樣的整合圖示(每個圖示中都是圖示1 圖示2 圖示3),全部都勾上了這個選項,如果整合圖示中,圖示1 圖示2 圖示3都可以顯示,並且顯示排序為 圖示3>圖示1>圖示2,那麼在整合圖示1將會顯示圖示3,整合圖示2則是顯示圖示1,整合圖示3顯示圖示2(理論上就是這樣的效果,具體的細節請自行發掘).]=] -- Needs review
 L["ICONMENU_CHECKREFRESH"] = "法術刷新偵測"
 L["ICONMENU_CHECKREFRESH_DESC"] = [=[暴雪的戰鬥記錄在涉及法術刷新和恐懼(或者某些在造成一定傷害量後才會中斷的法術)存在嚴重缺陷,戰鬥記錄會認為法術在造成傷害時已經刷新,儘管事實上並非如此.
 
@@ -1731,6 +1732,7 @@ L["RaidWarningFrame"] = "團隊警告框架"
 L["rare"] = "稀有"
 L["rareelite"] = "稀有精英"
 L["REACTIVECNDT_DESC"] = "此條件僅檢查技能的觸發/可用情況.並非它的冷卻."
+L["REDO"] = "重作" -- Needs review
 L["REDO_ICON"] = "重作"
 L["REDO_ICON_DESC"] = "重作最近一次圖示設定的復原動作."
 L["ReducedHealing"] = "治療效果降低"
@@ -2165,8 +2167,8 @@ L["UIPANEL_GROUPS_DESC"] = "在此設定檔中的各個群組的相關設定."
 L["UIPANEL_GROUPS_GLOBAL"] = "|cff00c300共用|r群組"
 L["UIPANEL_GROUPS_GLOBAL_DESC"] = "群組的設定可用於你在這個魔獸世界帳號下所有的TellMeWhen角色。"
 L["UIPANEL_GROUPSORT"] = "圖示排列"
-L["UIPANEL_GROUPSORT_alpha"] = "不透明度(無視%s)"
-L["UIPANEL_GROUPSORT_alpha_DESC"] = "群組將根據圖示的不透明度來排序,無論圖示是否被 %s 設定所隱藏."
+L["UIPANEL_GROUPSORT_alpha"] = "不透明度" -- Needs review
+L["UIPANEL_GROUPSORT_alpha_DESC"] = "群組將根據圖示的不透明度來排序" -- Needs review
 L["UIPANEL_GROUPSORT_DESC"] = [=[基於群組所有圖示的屬性並對它們的位置進行排序的相關設定.
 
 譯者註:因為是新功能,稍微講解一下.
@@ -2182,8 +2184,8 @@ L["UIPANEL_GROUPSORT_id_DESC"] = "群組將根據圖示ID數字來排序."
 L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "這個排序方法已經被停用,因為上面使用的是根據圖示ID進行排序,所選方法永遠不會被執行和排序."
 L["UIPANEL_GROUPSORT_METHODNAME"] = "圖示排序優先級%d"
 L["UIPANEL_GROUPSORT_METHODNAME_DESC"] = "在一個群組的圖示位置進行排序時,這個將作為優先級%d來使用."
-L["UIPANEL_GROUPSORT_shown"] = "顯示(無視%s)"
-L["UIPANEL_GROUPSORT_shown_DESC"] = "群組將根據圖示是否顯示來排序,無論圖示是否被 %s 設定所隱藏."
+L["UIPANEL_GROUPSORT_shown"] = "顯示" -- Needs review
+L["UIPANEL_GROUPSORT_shown_DESC"] = "群組將根據圖示是否顯示來排序." -- Needs review
 L["UIPANEL_GROUPSORT_SORTASCENDING"] = "低"
 L["UIPANEL_GROUPSORT_SORTASCENDING_DESC"] = "勾選此項將根據所選屬性的數值從低到高來排序."
 L["UIPANEL_GROUPSORT_SORTDESCENDING"] = "高"
@@ -2255,6 +2257,7 @@ L["UIPANEL_TREE"] = "天賦樹"
 L["UIPANEL_TREE_DESC"] = "勾選來允許該組在某個天賦樹激活時顯示,或者不勾選讓它在天賦樹沒激活時隱藏."
 L["UIPANEL_UPDATEINTERVAL"] = "更新頻率"
 L["UIPANEL_WARNINVALIDS"] = "提示無效圖示"
+L["UNDO"] = "復原" -- Needs review
 L["UNDO_ICON"] = "復原"
 L["UNDO_ICON_DESC"] = "復原最近一次圖示設定的變更動作."
 L["UNITCONDITIONS"] = "單位條件"

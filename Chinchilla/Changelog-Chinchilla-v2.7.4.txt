@@ -1,0 +1,15 @@
+tag v2.7.4
+59532cdec674397d55ff6c05c6e1219d28a05091
+Ethan Centaurai <ethancentaurai@outlook.com>
+2015-09-03 21:09:55 +0100
+
+Tagging as v2.7.4.
+
+
+--------------------
+
+Ethan Centaurai:
+	- Bump Interface number to 60200.
+	- ShowHide: Fixed an oversight that broke the "unread invites" option. Closes ticket 187.
+	- ShowHide: Revert back to the reparenting method to hide frames. Should fix problems with the durability indicator.
+	- Ping: Fixed a rare error that occurred when a player's class cannot be found for whatever reason.

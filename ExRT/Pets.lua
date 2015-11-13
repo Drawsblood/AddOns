@@ -1,6 +1,6 @@
 local GlobalAddonName, ExRT = ...
 
-local UnitGUID, UnitCombatlogname = UnitGUID, ExRT.mds.UnitCombatlogname
+local UnitGUID, UnitCombatlogname = UnitGUID, ExRT.F.UnitCombatlogname
 
 local module = ExRT.mod:New("Pets",nil,true)
 module.db.petsDB = {}
@@ -28,9 +28,9 @@ function module.main:UNIT_PET(arg)
 	end
 end
 
-ExRT.mds.Pets = {}
+ExRT.F.Pets = {}
 
-function ExRT.mds.Pets:getOwnerName(petName,thirdDB)
+function ExRT.F.Pets:getOwnerName(petName,thirdDB)
 	local db = thirdDB or module.db.petsDB
 	for i,val in pairs(db) do
 		if petName == val[3] then
@@ -39,7 +39,7 @@ function ExRT.mds.Pets:getOwnerName(petName,thirdDB)
 	end
 end
 
-function ExRT.mds.Pets:getOwnerNameByGUID(petGUID,thirdDB)
+function ExRT.F.Pets:getOwnerNameByGUID(petGUID,thirdDB)
 	local db = thirdDB or module.db.petsDB
 	for i,val in pairs(db) do
 		if petGUID == i then
@@ -48,7 +48,7 @@ function ExRT.mds.Pets:getOwnerNameByGUID(petGUID,thirdDB)
 	end
 end
 
-function ExRT.mds.Pets:getOwnerGUID(petGUID,thirdDB)
+function ExRT.F.Pets:getOwnerGUID(petGUID,thirdDB)
 	local db = thirdDB or module.db.petsDB
 	for i,val in pairs(db) do
 		if petGUID == i then
@@ -57,7 +57,7 @@ function ExRT.mds.Pets:getOwnerGUID(petGUID,thirdDB)
 	end
 end
 
-function ExRT.mds.Pets:getOwnerGUIDByName(petName,thirdDB)
+function ExRT.F.Pets:getOwnerGUIDByName(petName,thirdDB)
 	local db = thirdDB or module.db.petsDB
 	for i,val in pairs(db) do
 		if petName == val[3] then
@@ -66,6 +66,6 @@ function ExRT.mds.Pets:getOwnerGUIDByName(petName,thirdDB)
 	end
 end
 
-function ExRT.mds.Pets:getPetsDB()
+function ExRT.F.Pets:getPetsDB()
 	return module.db.petsDB
 end

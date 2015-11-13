@@ -1,12 +1,6 @@
-local L = BigWigs:NewBossLocale("Rukhmar", "ptBR")
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
+local L = BigWigs:NewBossLocale("Supreme Lord Kazzak", "ptBR")
 if L then
-end
+L["engage_yell"] = "Você enfrenta o poder da Legião Ardente!" -- Needs review
 
-L = BigWigs:NewBossLocale("Tarlna the Ageless", "ptBR")
-if L then
 end
-
-L = BigWigs:NewBossLocale("Drov the Ruiner", "ptBR")
-if L then
-end
-

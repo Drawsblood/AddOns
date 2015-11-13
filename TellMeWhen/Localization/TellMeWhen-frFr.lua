@@ -78,6 +78,7 @@ L["FALSE"] = "Faux"
 L["Feared"] = "Peur"
 L["FIRE"] = "Feu"
 L["GCD"] = "Temps de recharge global"
+L["GROUP"] = "Groupe"
 L["GROUPICON"] = "Groupe : %s, Icône : %d"
 L["ICONALPHAPANEL_FAKEHIDDEN"] = "Toujours Masquer"
 L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = "Tout le temps cacher l’icône tout en la laissant active afin de permettre aux conditions des autres icônes d'effectuer des vérifications sur l’icône masquée." -- Needs review

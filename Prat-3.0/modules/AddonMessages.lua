@@ -103,7 +103,7 @@ L:AddLocale("deDE",
 	show_desc = "Anzeige versteckter AddOn-Meldungen in jedem Chatfenster ein-/ausschalten.",
 	show_name = "AddOn-Meldungen anzeigen",
 	show_perframedesc = "Anzeige versteckter AddOn-Meldungen ein-/ausschalten.",
-	show_perframename = "Chatfenster %d Addon Meldungen anzeigen",
+	show_perframename = "Addon-Meldungen in Chatfenster %d anzeigen",
 }
 
 )
@@ -111,10 +111,10 @@ L:AddLocale("koKR",
 {
 	["Addon message options."] = "애드온 메시지 옵션.",
 	AddonMsgs = "애드온 메시지",
-	-- show_desc = "",
+	show_desc = "각 대화창에 숨겨진 애드온 메시지 표시 켜거나 끄기.",
 	show_name = "애드온 메시지 보기",
-	-- show_perframedesc = "",
-	show_perframename = "대화창%d 애드온메시지 보이기",
+	show_perframedesc = "숨겨진 애드온 메시지 표시 켜기/끄기 전환.",
+	show_perframename = "대화창%d 애드온 메시지 보이기",
 }
 
 )

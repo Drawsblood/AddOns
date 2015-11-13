@@ -1,3 +1,4 @@
+-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
 local L = BigWigs:NewBossLocale("Kargath Bladefist", "deDE")
 if not L then return end
 if L then
@@ -9,6 +10,8 @@ end
 L = BigWigs:NewBossLocale("The Butcher", "deDE")
 if L then
 L["adds_multiple"] = "Adds x%d"
+L["tank_proximity"] = "Näheanzeige für Tanks"
+L["tank_proximity_desc"] = "Öffnet eine Näheanzeige, die andere Tanks im Abstand von maximal 5 Metern anzeigt, die Anzeige hilft dir mit der Fähigkeit \"Grobschlächtig\" umzugehen."
 
 end
 

@@ -81,27 +81,27 @@ Prat:AddModuleToLoad(function()
   )
   L:AddLocale("deDE",
   {
-	allevents_desc = "Aktivieren, um alle Chat Ereignisse abzuwickeln",
-	allevents_name = "Alle Ereignisse abwickeln",
+	allevents_desc = "Prat-Verarbeitung für alle Chat-Ereignisse aktivieren.",
+	allevents_name = "Alle Ereignisse verarbeiten",
 	["Chat window event name options."] = "Optionen zu Ereignisnamen in Chatfenstern.",
 	EventNames = "Ereignisnamen",
 	Show = "Anzeigen",
 	show_desc = "Anzeige der Ereignisnamen in jedem Fenster ein- und ausschalten",
-	["Show events on chatframes"] = "Ereignisse bei Chatrahmen anzeigen",
+	["Show events on chatframes"] = "Ereignisse in Chatfenstern anzeigen",
 	show_name = "Ereignisnamen anzeigen",
 }
 
   )
   L:AddLocale("koKR",
   {
-	-- allevents_desc = "",
-	-- allevents_name = "",
+	allevents_desc = "모든 대화 이벤트에 Prat 처리과정을 적용시킵니다.",
+	allevents_name = "모든 이벤트 처리",
 	["Chat window event name options."] = "대화창에 이벤트 이름을 표시합니다..",
 	EventNames = "이벤트이름",
-	Show = "보기",
-	show_desc = "각 대화창에 이벤트 이름 보이기를 끄고켭니다.",
+	Show = "표시",
+	show_desc = "각 대화창에 이벤트 이름 표시를 끄고 켭니다.",
 	["Show events on chatframes"] = "대화창에 이벤트를 보입니다.",
-	show_name = "이벤트 이름 보이기",
+	show_name = "이벤트 이름 표시",
 }
 
   )

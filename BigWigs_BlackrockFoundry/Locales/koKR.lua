@@ -1,4 +1,5 @@
-﻿local L = BigWigs:NewBossLocale("Gruul", "koKR")
+﻿-- These localization strings are translated on WoWAce: http://www.wowace.com/addons/big-wigs/localization/
+local L = BigWigs:NewBossLocale("Gruul", "koKR")
 if not L then return end
 if L then
 L["first_ability"] = "내려치기 강타 또는 석화의 강타" -- Needs review
@@ -7,6 +8,7 @@ end
 
 L = BigWigs:NewBossLocale("Oregorger", "koKR")
 if L then
+L["roll_message"] = "구르기 %d - %d 광물!" -- Needs review
 
 end
 
@@ -45,6 +47,11 @@ end
 
 L = BigWigs:NewBossLocale("Kromog", "koKR")
 if L then
+L["custom_off_hands_marker"] = "휘감는 대지의 룬 방어 전담 징표" -- Needs review
+L["custom_off_hands_marker_desc"] = "방어 전담 플레이어를 움켜쥔 휘감는 대지의 룬을 {rt7}{rt8} 징표로 설정합니다. 공격대장이거나 권한이 필요합니다." -- Needs review
+L["destroy_pillars"] = "기둥 파괴" -- Needs review
+L["prox"] = "방어 전담 근접 표시" -- Needs review
+L["prox_desc"] = "바위 주먹을 다른 방어 전담과 같이 맞기 위해 15미터 근접 표시창을 표시합니다." -- Needs review
 
 end
 
@@ -76,6 +83,7 @@ L["random"] = "무작위 기차"
 L["train"] = "기차"
 L["trains"] = "기차 경고"
 L["trains_desc"] = "각 라인마다 다음 기차가 언제 올 지에 대해서 타이머와 메시지를 표시합니다. 라인은 보스부터 입구쪽으로 '보스 1 2 3 4 입구'로 숫자가 매겨져 있습니다."
+L["train_you"] = "현재 선로에 열차! (%d)" -- Needs review
 
 end
 
@@ -103,11 +111,12 @@ if L then
 L["beasttender"] = "천둥군주 야수치유사" -- Needs review
 L["brute"] = "잿가루 작업장 투사" -- Needs review
 L["earthbinder"] = "강철 대지결속사" -- Needs review
-L["enforcer"] = "그론링 노동자" -- Needs review
+L["enforcer"] = "검은바위 집행자"
 L["furnace"] = "열기 조절 장치" -- Needs review
 L["furnace_msg1"] = "흠, 누군가 해야하지 않겠어?" -- Needs review
 L["furnace_msg2"] = "마시멜로우 타임!" -- Needs review
 L["gnasher"] = "어둠파편 갈갈이" -- Needs review
+L["gronnling"] = "그론링 노동자"
 L["guardian"] = "작업장 수호병" -- Needs review
 L["hauler"] = "오그론 운반자" -- Needs review
 L["mistress"] = "제련여제 플레임핸드" -- Needs review
