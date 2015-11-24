@@ -9,7 +9,7 @@
 ## X-Curse-Project-Name: LibStub
 ## X-Curse-Project-ID: libstub
 ## X-Curse-Repository-ID: wow/libstub/mainline
-## X-Curse-Packaged-Version: r38
+## X-Curse-Packaged-Version: r39
 ## X-Curse-Project-Name: Iskar Assist
 ## X-Curse-Project-ID: iskar-assist
 ## X-Curse-Repository-ID: wow/iskar-assist/mainline

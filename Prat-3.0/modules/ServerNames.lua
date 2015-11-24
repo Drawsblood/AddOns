@@ -96,9 +96,9 @@ Prat:AddModuleToLoad(function()
 	autoabbreviate_name = "자동-줄임",
 	colon_desc = "서버 대체 이름 뒤에 콜론 추가 기능을 끄거나 켭니다.",
 	colon_name = "콜론 표시",
-	randomclr_desc = "서버이름에 무작위 색상 사용",
+	randomclr_desc = "서버 이름에 무작위 색상 사용",
 	randomclr_name = "무작위 색상",
-	["Server name abbreviation options."] = "서버이름 줄이기 옵션.",
+	["Server name abbreviation options."] = "서버 이름 줄이기 옵션",
 	ServerNames = "서버이름",
 }
 

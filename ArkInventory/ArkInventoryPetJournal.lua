@@ -978,6 +978,7 @@ function ArkInventory:LISTEN_PET_BATTLE_OPENING_DONE( event, ... )
 		local power = C_PetBattles.GetPower( player, i )
 		local speed = C_PetBattles.GetSpeed( player, i )
 		local breed = ""
+		
 		if BreedAvailable then
 			breed = string.format( " %s", GetBreedID_Battle( { ["petOwner"] = player, ["petIndex"] = i } ) )
 		end
@@ -1053,6 +1054,7 @@ function ArkInventory:LISTEN_PET_BATTLE_OPENING_DONE( event, ... )
 						for _, pd in ArkInventory.PetJournal.Iterate( ) do
 							
 							if ( pd.sd.speciesID == speciesID ) then
+								
 								local q = pd.rarity
 								--ArkInventory.Output( "s=[", speciesID, "], ", h, ", [", rarity, "] / ", pd.link, " [", q, "]" )
 								if ( rarity >= q ) then
@@ -1071,6 +1073,7 @@ function ArkInventory:LISTEN_PET_BATTLE_OPENING_DONE( event, ... )
 								end
 								
 							end
+							
 						end
 						
 						if not upgrade then

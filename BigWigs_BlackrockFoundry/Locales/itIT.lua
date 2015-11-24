@@ -45,6 +45,8 @@ end
 
 L = BigWigs:NewBossLocale("Kromog", "itIT")
 if L then
+L["custom_off_hands_marker"] = "Marcatore Difensore Terra Ghermitrice"
+L["custom_off_hands_marker_desc"] = "Evidenzia le Terre Ghermitrici che avvolgono i difensori con {rt7}{rt8}, richiede Capo Incursione o Assistente Incursione."
 
 end
 

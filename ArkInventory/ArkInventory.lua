@@ -1,6 +1,6 @@
 ﻿-- (c) 2006-2015, all rights reserved.
--- $Revision: 1358 $
--- $Date: 2015-07-13 00:18:12 +1000 (Mon, 13 Jul 2015) $
+-- $Revision: 1366 $
+-- $Date: 2015-11-21 23:24:14 +1100 (Sat, 21 Nov 2015) $
 
 
 local _G = _G
@@ -6946,7 +6946,7 @@ function ArkInventory.Frame_Item_Update_Quest( frame )
 	
 end
 
-function ArkInventory.SetTexture( obj, texture, r, g, b, a )
+function ArkInventory.SetTexture( obj, texture, r, g, b, a, c )
 	
 	if not obj then
 		return
@@ -6965,12 +6965,16 @@ function ArkInventory.SetTexture( obj, texture, r, g, b, a )
 	elseif( tonumber( texture ) ) then
 		obj:SetToFileData( texture )
 	else
-		obj:SetTexture( texture or ArkInventory.Const.Texture.Missing )
+		if c then
+			SetPortraitToTexture( obj, texture or ArkInventory.Const.Texture.Missing )
+		else
+			obj:SetTexture( texture or ArkInventory.Const.Texture.Missing )
+		end
 	end
 	
 end
 
-function ArkInventory.SetItemButtonTexture( frame, texture, r, g, b, a )
+function ArkInventory.SetItemButtonTexture( frame, texture, r, g, b, a, c )
 	
 	if not frame then
 		return
@@ -6982,7 +6986,7 @@ function ArkInventory.SetItemButtonTexture( frame, texture, r, g, b, a )
 		return
 	end
 	
-	ArkInventory.SetTexture( obj, texture, r, g, b, a )
+	ArkInventory.SetTexture( obj, texture, r, g, b, a, c )
 	
 	obj:SetTexCoord( 0.075, 0.935, 0.075, 0.935 )
 	
@@ -9510,16 +9514,17 @@ function ArkInventory.BlizzardAPIHook( disable )
 		"SetLootItem", "SetLootRollItem",
 		"SetMerchantCompareItem", "SetMerchantItem",
 		"SetQuestItem", "SetQuestCurrency", "SetQuestLogItem", "SetQuestLogSpecialItem",
-		"SetSendMailItem", "SetTradePlayerItem", "SetTradeSkillItem", "SetTradeTargetItem",
+		"SetSendMailItem", "SetTradePlayerItem", "SetTradeTargetItem",
 		"SetVoidDepositItem", "SetVoidItem", "SetVoidWithdrawalItem"
 	}
     
 	if disable or not ArkInventory.db.global.option.tooltip.show then
 		
-		ArkInventory.MyUnhook( "GameTooltip_ShowCompareItem", "TooltipShowCompare" )
-		ArkInventory.MyUnhook( "GameTooltip", "SetCurrencyToken" )
-		ArkInventory.MyUnhook( "GameTooltip", "SetBackpackToken" )
 		ArkInventory.MyUnhook( "GameTooltip", "SetMerchantCostItem" )
+		ArkInventory.MyUnhook( "GameTooltip", "SetBackpackToken" )
+		ArkInventory.MyUnhook( "GameTooltip", "SetCurrencyToken" )
+		ArkInventory.MyUnhook( "GameTooltip", "SetTradeSkillItem" )
+		ArkInventory.MyUnhook( "GameTooltip_ShowCompareItem", "TooltipShowCompare" )
 		
 		for _, obj in pairs( ArkInventory.Global.Tooltip.WOW ) do
 			if obj then
@@ -9561,6 +9566,7 @@ function ArkInventory.BlizzardAPIHook( disable )
 		ArkInventory.MySecureHook( GameTooltip, "SetMerchantCostItem", ArkInventory.TooltipHookSetMerchantCostItem )
 		ArkInventory.MySecureHook( GameTooltip, "SetBackpackToken", ArkInventory.TooltipHookSetBackpackToken )
 		ArkInventory.MySecureHook( GameTooltip, "SetCurrencyToken", ArkInventory.TooltipHookSetCurrencyToken )
+		ArkInventory.MySecureHook( GameTooltip, "SetTradeSkillItem", ArkInventory.TooltipHookSetTradeSkillItem )
 		ArkInventory.MySecureHook( "GameTooltip_ShowCompareItem", ArkInventory.TooltipShowCompare )
 		
 	end

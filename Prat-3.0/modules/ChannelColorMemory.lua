@@ -74,8 +74,8 @@ Prat:AddModuleToLoad(function()
   )
   L:AddLocale("koKR",
   {
-	ChannelColorMemory = "채널색깔기억",
-	["Remembers the colors of each channel name."] = "각 채널이름의 색깔을 기억합니다.",
+	ChannelColorMemory = "채널 색상 기억",
+	["Remembers the colors of each channel name."] = "각 채널 이름의 색상을 기억합니다.",
 	["(%w+)%s?(.*)"] = "(%S+)%s?(.*)",
 }
 

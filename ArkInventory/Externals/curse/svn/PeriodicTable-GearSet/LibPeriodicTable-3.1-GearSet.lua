@@ -1,7 +1,7 @@
 ﻿-- (c) 2007 Nymbia.  see LGPLv2.1.txt for full details.
 --DO NOT MAKE CHANGES TO THIS FILE BEFORE READING THE WIKI PAGE REGARDING CHANGING THESE FILES
 if not LibStub("LibPeriodicTable-3.1", true) then error("PT3 must be loaded before data") end
-LibStub("LibPeriodicTable-3.1"):AddData("GearSet", gsub("$Rev: 492 $", "(%d+)", function(n) return n+90000 end), {
+LibStub("LibPeriodicTable-3.1"):AddData("GearSet", gsub("$Rev: 504 $", "(%d+)", function(n) return n+90000 end), {
 -- Gray Sets
 	["GearSet.Gray.Cloth.Brocade Cloth"]="3378,3379,1775,1776,1772,1777,1778",
 	["GearSet.Gray.Cloth.Calico Cloth"]="3374,3375,1498,1499,1495,1501",
@@ -634,7 +634,7 @@ LibStub("LibPeriodicTable-3.1"):AddData("GearSet", gsub("$Rev: 492 $", "(%d+)", 
 	["GearSet.Tier 13.384.Shaman.Spiritwalker's Regalia"]="78761,78780,78806,78818,78836",
 	["GearSet.Tier 13.384.Shaman.Spiritwalker's Vestments"]="78767,78786,78813,78820,78834",
 	["GearSet.Tier 13.384.Warlock.Vestments of the Faceless Shroud"]="78776,78797,78816,78825,78844",
-	["GearSet.Tier 13.384.Warrior.Colossal Dragonplate Armor"]="78753,78784,78800,78829",
+	["GearSet.Tier 13.384.Warrior.Colossal Dragonplate Armor"]="78753,78764,78784,78800,78829",
 	["GearSet.Tier 13.384.Warrior.Colossal Dragonplate Battlegear"]="78752,78763,78783,78801,78830",
 
 	["GearSet.Tier 13.397.Death Knight.Necrotic Boneplate Armor"]="77008,77009,77010,77011,77012",
@@ -691,7 +691,7 @@ LibStub("LibPeriodicTable-3.1"):AddData("GearSet", gsub("$Rev: 492 $", "(%d+)", 
 	["GearSet.Tier 14.483.Paladin.White Tiger Battlegear"]="86679,86680,86681,86682,86683",
 	["GearSet.Tier 14.483.Paladin.White Tiger Plate"]="86659,86660,86661,86662,86663",
 	["GearSet.Tier 14.483.Paladin.White Tiger Vestments"]="86684,86685,86686,86687,86688",
-	["GearSet.Tier 14.483.Priest.Regalia of the Guardian Serpent"]="85364,85365,85366,85367,85368",
+	["GearSet.Tier 14.483.Priest.Guardian Serpent Regalia"]="86704,86705,86706,86707,86708",
 	["GearSet.Tier 14.483.Priest.Vestments of the Guardian Serpent"]="86699,86700,86701,86702,86703",
 	["GearSet.Tier 14.483.Rogue.Battlegear of the Thousandfold Blades"]="86639,86640,86641,86642,86643",
 	["GearSet.Tier 14.483.Shaman.Battlegear of the Firebird"]="86624,86625,86626,86627,86628",
@@ -739,7 +739,7 @@ LibStub("LibPeriodicTable-3.1"):AddData("GearSet", gsub("$Rev: 492 $", "(%d+)", 
 	["GearSet.Tier 14.509.Paladin.White Tiger Battlegear"]="87099,87100,87101,87102,87103",
 	["GearSet.Tier 14.509.Paladin.White Tiger Plate"]="87109,87110,87111,87112,87113",
 	["GearSet.Tier 14.509.Paladin.White Tiger Vestments"]="87104,87105,87106,87107,87108",
-	["GearSet.Tier 14.509.Priest.Regalia of the Guardian Serpent"]="85364,85365,85366,85367,85368",
+	["GearSet.Tier 14.509.Priest.Guardian Serpent Regalia"]="87119,87120,87121,87122,87123",
 	["GearSet.Tier 14.509.Priest.Vestments of the Guardian Serpent"]="87114,87115,87116,87117,87118",
 	["GearSet.Tier 14.509.Rogue.Battlegear of the Thousandfold Blades"]="87124,87125,87126,87127,87128",
 	["GearSet.Tier 14.509.Shaman.Battlegear of the Firebird"]="87134,87135,87136,87137,87138",

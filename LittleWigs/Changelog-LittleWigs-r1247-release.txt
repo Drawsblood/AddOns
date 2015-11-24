@@ -1,0 +1,147 @@
+------------------------------------------------------------------------
+r1247 | funkydude | 2015-11-17 11:40:45 +0000 (Tue, 17 Nov 2015) | 1 line
+Changed paths:
+   A /tags/r1247-release (from /trunk:1246)
+
+Tagging as r1247-release
+------------------------------------------------------------------------
+r1246 | funkydude | 2015-11-17 11:36:07 +0000 (Tue, 17 Nov 2015) | 1 line
+Changed paths:
+   M /trunk/LittleWigs.toc
+   M /trunk/TBC/MagistersTerrace/KaelthasSunstrider.lua
+   M /trunk/TBC/MagistersTerrace/PriestessDelrissa.lua
+   M /trunk/TBC/MagistersTerrace/SelinFireheart.lua
+   M /trunk/TBC/MagistersTerrace/Vexallus.lua
+   M /trunk/TBC/MagistersTerrace/modules.xml
+   M /trunk/WotLK/PitOfSaron/ForgemasterGarfrost.lua
+   M /trunk/WotLK/PitOfSaron/IckAndKrick.lua
+   M /trunk/WotLK/PitOfSaron/Tyrannus.lua
+   A /trunk/WotLK/PitOfSaron/modules.xml
+   M /trunk/modules.xml
+
+Update Magisters Terrace and Pit of Saron.
+------------------------------------------------------------------------
+r1244 | funkydude | 2015-11-13 14:25:16 +0000 (Fri, 13 Nov 2015) | 1 line
+Changed paths:
+   M /trunk/Cataclysm/GrimBatol/Erudax.lua
+   M /trunk/Cataclysm/ThroneTides/Mindbender.lua
+
+Fix some errors in the Cataclysm modules.
+------------------------------------------------------------------------
+r1243 | funkydude | 2015-11-12 18:48:40 +0000 (Thu, 12 Nov 2015) | 1 line
+Changed paths:
+   M /trunk/Cataclysm/EndTime/Baine.lua
+   M /trunk/Cataclysm/EndTime/Jaina.lua
+   M /trunk/Cataclysm/EndTime/Murozond.lua
+   M /trunk/Cataclysm/EndTime/Sylvanas.lua
+   M /trunk/Cataclysm/EndTime/Tyrande.lua
+   M /trunk/Cataclysm/GrimBatol/Drahga.lua
+   M /trunk/Cataclysm/GrimBatol/Erudax.lua
+   M /trunk/Cataclysm/GrimBatol/Forgemaster.lua
+   M /trunk/Cataclysm/GrimBatol/Umbriss.lua
+   M /trunk/Cataclysm/LostCity/Augh.lua
+   M /trunk/Cataclysm/LostCity/Barim.lua
+   M /trunk/Cataclysm/LostCity/Lockmaw.lua
+   M /trunk/Cataclysm/LostCity/Siamat.lua
+   M /trunk/Cataclysm/Stonecore/Azil.lua
+   M /trunk/Cataclysm/Stonecore/Corborus.lua
+   M /trunk/Cataclysm/Stonecore/Ozruk.lua
+   M /trunk/Cataclysm/Stonecore/Slabhide.lua
+   M /trunk/Cataclysm/ThroneTides/Mindbender.lua
+   M /trunk/Cataclysm/ThroneTides/Naz'jar.lua
+   M /trunk/Cataclysm/ThroneTides/Ulthok.lua
+   M /trunk/Cataclysm/VortexPinnacle/Altairus.lua
+   M /trunk/Cataclysm/VortexPinnacle/Asaad.lua
+   M /trunk/Cataclysm/VortexPinnacle/Ertan.lua
+   M /trunk/LittleWigs.toc
+   M /trunk/modules.xml
+
+Update Cataclysm Timewalking modules to the latest API.
+------------------------------------------------------------------------
+r1242 | funkydude | 2015-11-12 13:49:54 +0000 (Thu, 12 Nov 2015) | 1 line
+Changed paths:
+   A /trunk/Cataclysm
+   A /trunk/Cataclysm/EndTime
+   A /trunk/Cataclysm/EndTime/Baine.lua
+   A /trunk/Cataclysm/EndTime/Jaina.lua
+   A /trunk/Cataclysm/EndTime/Murozond.lua
+   A /trunk/Cataclysm/EndTime/Sylvanas.lua
+   A /trunk/Cataclysm/EndTime/Tyrande.lua
+   A /trunk/Cataclysm/EndTime/locales.xml
+   A /trunk/Cataclysm/EndTime/modules.xml
+   A /trunk/Cataclysm/GrimBatol
+   A /trunk/Cataclysm/GrimBatol/Drahga.lua
+   A /trunk/Cataclysm/GrimBatol/Erudax.lua
+   A /trunk/Cataclysm/GrimBatol/Forgemaster.lua
+   A /trunk/Cataclysm/GrimBatol/Locales
+   A /trunk/Cataclysm/GrimBatol/Locales/deDE.lua
+   A /trunk/Cataclysm/GrimBatol/Locales/esES.lua
+   A /trunk/Cataclysm/GrimBatol/Locales/esMX.lua
+   A /trunk/Cataclysm/GrimBatol/Locales/frFR.lua
+   A /trunk/Cataclysm/GrimBatol/Locales/koKR.lua
+   A /trunk/Cataclysm/GrimBatol/Locales/ruRU.lua
+   A /trunk/Cataclysm/GrimBatol/Locales/zhCN.lua
+   A /trunk/Cataclysm/GrimBatol/Locales/zhTW.lua
+   A /trunk/Cataclysm/GrimBatol/Umbriss.lua
+   A /trunk/Cataclysm/GrimBatol/locales.xml
+   A /trunk/Cataclysm/GrimBatol/modules.xml
+   A /trunk/Cataclysm/LostCity
+   A /trunk/Cataclysm/LostCity/Augh.lua
+   A /trunk/Cataclysm/LostCity/Barim.lua
+   A /trunk/Cataclysm/LostCity/Locales
+   A /trunk/Cataclysm/LostCity/Locales/deDE.lua
+   A /trunk/Cataclysm/LostCity/Locales/esES.lua
+   A /trunk/Cataclysm/LostCity/Locales/esMX.lua
+   A /trunk/Cataclysm/LostCity/Locales/frFR.lua
+   A /trunk/Cataclysm/LostCity/Locales/koKR.lua
+   A /trunk/Cataclysm/LostCity/Locales/ruRU.lua
+   A /trunk/Cataclysm/LostCity/Locales/zhCN.lua
+   A /trunk/Cataclysm/LostCity/Locales/zhTW.lua
+   A /trunk/Cataclysm/LostCity/Lockmaw.lua
+   A /trunk/Cataclysm/LostCity/Siamat.lua
+   A /trunk/Cataclysm/LostCity/locales.xml
+   A /trunk/Cataclysm/LostCity/modules.xml
+   A /trunk/Cataclysm/Stonecore
+   A /trunk/Cataclysm/Stonecore/Azil.lua
+   A /trunk/Cataclysm/Stonecore/Corborus.lua
+   A /trunk/Cataclysm/Stonecore/Locales
+   A /trunk/Cataclysm/Stonecore/Locales/deDE.lua
+   A /trunk/Cataclysm/Stonecore/Locales/esES.lua
+   A /trunk/Cataclysm/Stonecore/Locales/esMX.lua
+   A /trunk/Cataclysm/Stonecore/Locales/frFR.lua
+   A /trunk/Cataclysm/Stonecore/Locales/koKR.lua
+   A /trunk/Cataclysm/Stonecore/Locales/ruRU.lua
+   A /trunk/Cataclysm/Stonecore/Locales/zhCN.lua
+   A /trunk/Cataclysm/Stonecore/Locales/zhTW.lua
+   A /trunk/Cataclysm/Stonecore/Ozruk.lua
+   A /trunk/Cataclysm/Stonecore/Slabhide.lua
+   A /trunk/Cataclysm/Stonecore/locales.xml
+   A /trunk/Cataclysm/Stonecore/modules.xml
+   A /trunk/Cataclysm/ThroneTides
+   A /trunk/Cataclysm/ThroneTides/Mindbender.lua
+   A /trunk/Cataclysm/ThroneTides/Naz'jar.lua
+   A /trunk/Cataclysm/ThroneTides/Ulthok.lua
+   A /trunk/Cataclysm/ThroneTides/locales.xml
+   A /trunk/Cataclysm/ThroneTides/modules.xml
+   A /trunk/Cataclysm/VortexPinnacle
+   A /trunk/Cataclysm/VortexPinnacle/Altairus.lua
+   A /trunk/Cataclysm/VortexPinnacle/Asaad.lua
+   A /trunk/Cataclysm/VortexPinnacle/Ertan.lua
+   A /trunk/Cataclysm/VortexPinnacle/locales.xml
+   A /trunk/Cataclysm/VortexPinnacle/modules.xml
+   M /trunk/modules.xml
+
+Import the 6 Cataclysm timewalking dungeons for patch 6.2.3
+------------------------------------------------------------------------
+r1241 | nevcairiel | 2015-09-08 18:22:38 +0000 (Tue, 08 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/TBC/ShadowLabyrinth/Murmur.lua
+   M /trunk/TBC/TheUnderbog/Hungarfen.lua
+   M /trunk/WotLK/AzjolNerub/Anubarak.lua
+   M /trunk/WotLK/AzjolNerub/Krikthir.lua
+   M /trunk/WotLK/HallsOfStone/MaidenOfGrief.lua
+   M /trunk/WotLK/HallsOfStone/SjonnirTheIronshaper.lua
+   M /trunk/WotLK/UtgardeKeep/Ingvar.lua
+
+Fix a few typos and other global leaks
+------------------------------------------------------------------------

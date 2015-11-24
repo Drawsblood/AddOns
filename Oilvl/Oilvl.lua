@@ -3767,13 +3767,31 @@ local tierslots = {INVTYPE_HEAD,INVTYPE_SHOULDER,INVTYPE_CHEST,INVTYPE_HAND,INVT
 local hfctierID = {124155, 124161, 124166, 124172, 124178, 124319, 124329, 124334, 124340, 124346, 124284, 124292, 124296, 124301, 124307, 124247, 124256, 124262, 124268, 124273, 124156, 124162, 124167, 124173, 124179, 124317, 124327, 124332, 124338, 124344, 124293, 124297, 124302, 124303, 124308, 124248, 124257, 124263, 124269, 124274, 124246, 124255, 124261, 124267, 124272, 124154, 124160, 124165, 124171, 124177, 124318, 124328, 124333, 124339, 124345}
 local function checkhfctierID(id) for i = 1, #hfctierID do if hfctierID[i] == id then return true end end return false end
 local function checkhfcNtier(slot) 
-	if slot then if slot[1] >= 695 and slot[1] < 710 and checkhfctierID(slot[8]) then return true else return false end end 
+	if slot then if 	(slot[1] == 695 
+					or	slot[1] == 700
+					or	slot[1] == 705 
+					or	slot[1] == 701 
+					or	slot[1] == 706
+					or	slot[1] == 711) 					
+	and checkhfctierID(slot[8]) then return true else return false end end 
 end
 local function checkhfcHtier(slot) 
-	if slot then if slot[1] >= 710 and slot[1] < 725 and checkhfctierID(slot[8]) then return true else return false end end 
+	if slot then if 	(slot[1] == 710 
+					or	slot[1] == 715
+					or	slot[1] == 720 
+					or	slot[1] == 716 
+					or	slot[1] == 721
+					or	slot[1] == 726)
+	and checkhfctierID(slot[8]) then return true else return false end end 
 end
 local function checkhfcMtier(slot) 
-	if slot then if slot[1] >= 725 and checkhfctierID(slot[8]) then return true else return false end end 
+	if slot then if 	(slot[1] == 725
+					or	slot[1] == 730
+					or	slot[1] == 735 
+					or	slot[1] == 731 
+					or	slot[1] == 736
+					or	slot[1] == 741)
+	and checkhfctierID(slot[8]) then return true else return false end end 
 end
 
 local function otooltip6sort(method)

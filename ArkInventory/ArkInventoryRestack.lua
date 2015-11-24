@@ -8,36 +8,56 @@ local error = _G.error
 local table = _G.table
 
 
-
 function ArkInventory.RestackString( )
+	
 	if ArkInventory.db.global.option.restack.blizzard then
 		return ArkInventory.Localise["CLEANUP"]
 	else
 		return ArkInventory.Localise["RESTACK"]
 	end
+	
 end
 
-local function RestackAbort( loc_id )
-	ArkInventory.OutputError( ArkInventory.RestackString( ), ": ", ArkInventory.Global.Location[loc_id].Name, " " , ArkInventory.Localise["ABORTED"] )
-	exit( )
+local function RestackMessageStart( loc_id )
+	
+	if ArkInventory.db.global.option.message.restack[loc_id] then
+		ArkInventory.Output( ArkInventory.RestackString( ), ": ", ArkInventory.Global.Location[loc_id].Name, " - " , ArkInventory.Localise["START"] )
+	end
+	
+end
+
+local function RestackMessageComplete( loc_id )
+	
+	if ArkInventory.db.global.option.message.restack[loc_id] then
+		ArkInventory.Output( ArkInventory.RestackString( ), ": ", ArkInventory.Global.Location[loc_id].Name, " - " , ArkInventory.Localise["COMPLETE"] )
+	end
+	
+end
+
+local function RestackMessageAbort( l1, l2 )
+	
+	local l2 = l2 or l1
+	
+	if l1 == l2 then
+		ArkInventory.OutputWarning( ArkInventory.RestackString( ), ": ", ArkInventory.Global.Location[l1].Name, " - ", ArkInventory.Localise["ABORTED"] )
+	else
+		ArkInventory.OutputWarning( ArkInventory.RestackString( ), ": ", ArkInventory.Global.Location[l1].Name, " - ", ArkInventory.Localise["ABORTED"], ": ", string.format( ArkInventory.Localise["RESTACK_FAIL_CLOSED"], ArkInventory.Global.Location[l2].Name ) )
+	end
+	
 end
 
 local function RestackBagCheck( loc_id, bag_id )
 	
-	local count = GetContainerNumSlots( bag_id )
+	local abort = false
+	local numSlots = GetContainerNumSlots( bag_id )
+	local freeSlots, bagType = GetContainerNumFreeSlots( bag_id )
 	
-	if count == 0 then
-		return nil, 0
-	end
-	
-	local _, bt = GetContainerNumFreeSlots( bag_id )
-	
-	if bt == nil then
+	if bagType == nil then
 		-- no longer at location, abort
-		RestackAbort( loc_id )
+		abort = loc_id
 	end
 	
-	return bt, count
+	return abort, bagType, numSlots
 	
 end
 
@@ -46,7 +66,9 @@ local function FindStack( loc_id, cl, cb, bp, cs, id )
 	
 	--ArkInventory.Output( "FindStack( ", loc_id, ", ", cl, ".", cb, ".", cs, ", ", id, " )" )
 	
+	local abort = false
 	local recheck = false
+	
 	local cl = cl or loc_id
 	local cb = cb or 9999
 	local bp = bp or -1
@@ -58,16 +80,21 @@ local function FindStack( loc_id, cl, cb, bp, cs, id )
 			
 			for slot_id = GetContainerNumSlots( bag_id ), 1, -1 do
 				
-				RestackBagCheck( loc_id, bag_id )
+				if RestackBagCheck( loc_id, bag_id ) then
+					abort = cl
+					return abort, recheck, false
+				end
 				
 				if cl == ArkInventory.Const.Location.Bank and not ArkInventory.Global.Mode.Bank then
 					-- no longer at bank, abort
-					RestackAbort( loc_id )
+					abort = cl
+					return abort, recheck, false
 				end
 				
 				if cl == ArkInventory.Const.Location.Vault and not ArkInventory.Global.Mode.Vault then
 					-- no longer at vault, abort
-					RestackAbort( loc_id )
+					abort = cl
+					return abort, recheck, false
 				end
 				
 				if select( 3, GetContainerItemInfo( bag_id, slot_id ) ) then
@@ -91,7 +118,7 @@ local function FindStack( loc_id, cl, cb, bp, cs, id )
 							if item_id == id then
 								
 								--ArkInventory.Output( "found> ", loc_id, ".", bag_id, ".", slot_id )
-								return true, bag_id, slot_id, recheck
+								return abort, recheck, true, bag_id, slot_id
 								
 							end
 							
@@ -113,7 +140,7 @@ local function FindStack( loc_id, cl, cb, bp, cs, id )
 	end
 	
 	--ArkInventory.Output( "no stacks found" )
-	return false, nil, nil, recheck
+	return abort, recheck, false
 	
 end
 
@@ -121,7 +148,9 @@ local function FindPartialStack( loc_id, cl, cb, bp, cs, id )
 	
 	--ArkInventory.OutputDebug( "FindPartialStack( ", cl, ".", cb, ".", cs, ", ", id, " )" )
 	
+	local abort = false
 	local recheck = false
+	
 	local cl = cl or loc_id
 	local cb = cb or 9999
 	local bp = bp or -1
@@ -136,7 +165,8 @@ local function FindPartialStack( loc_id, cl, cb, bp, cs, id )
 			
 			if not ArkInventory.Global.Mode.Vault or bag_id ~= GetCurrentGuildBankTab( ) then
 				-- no longer at the vault or changed tabs, abort
-				RestackAbort( loc_id )
+				abort = cl
+				return abort, recheck, false
 			end
 			
 			if select( 3, GetGuildBankItemInfo( bag_id, slot_id ) ) then
@@ -163,7 +193,7 @@ local function FindPartialStack( loc_id, cl, cb, bp, cs, id )
 							
 							if count < stack then
 								--ArkInventory.OutputDebug( "found > ", bag_id, ".", slot_id )
-								return true, bag_id, slot_id, count
+								return abort, recheck, true, bag_id, slot_id
 							end
 							
 						end
@@ -181,7 +211,7 @@ local function FindPartialStack( loc_id, cl, cb, bp, cs, id )
 			return FindPartialStack( loc_id, cl, cb, bp, cs, id )
 		end
 		
-		return false, nil, nil, recheck
+		return abort, recheck, false
 		
 	end
 	
@@ -193,16 +223,21 @@ local function FindPartialStack( loc_id, cl, cb, bp, cs, id )
 				
 				for slot_id = GetContainerNumSlots( bag_id ), 1, -1 do
 					
-					RestackBagCheck( loc_id, bag_id )
+					if RestackBagCheck( loc_id, bag_id ) then
+						abort = cl
+						return abort, recheck, false
+					end
 					
 					if cl == ArkInventory.Const.Location.Bank and not ArkInventory.Global.Mode.Bank then
 						-- no longer at bank, abort
-						RestackAbort( cl )
+						abort = cl
+						return abort, recheck, false
 					end
 					
 					if cl == ArkInventory.Const.Location.Vault and not ArkInventory.Global.Mode.Vault then
 						-- no longer at vault, abort
-						RestackAbort( cl )
+						abort = cl
+						return abort, recheck, false
 					end
 					
 					if select( 3, GetContainerItemInfo( bag_id, slot_id ) ) then
@@ -230,7 +265,7 @@ local function FindPartialStack( loc_id, cl, cb, bp, cs, id )
 									
 									if count < stack then
 										--ArkInventory.Output( "found > ", bag_id, ".", slot_id )
-										return true, bag_id, slot_id, recheck
+										return abort, recheck, true, bag_id, slot_id
 									end
 									
 								end
@@ -256,7 +291,7 @@ local function FindPartialStack( loc_id, cl, cb, bp, cs, id )
 			return FindStack( ArkInventory.Const.Location.Bag, cl, cb, bp, cs, id )
 		end
 		
-		return false, nil, nil, recheck
+		return abort, recheck, false
 		
 	end
 	
@@ -264,7 +299,9 @@ end
 
 local function FindProfessionItem( loc_id, cl, cb, bp, cs, ct )
 	
+	local abort = false
 	local recheck = false
+	
 	local cl = cl or loc_id
 	local cb = cb or 9999
 	local bp = bp or -1
@@ -274,13 +311,19 @@ local function FindProfessionItem( loc_id, cl, cb, bp, cs, ct )
 	--ArkInventory.Output( "find prof ", loc_id, ", ", cl, ".", cb, ".", cs, " ", ct )
 	
 	if ct == 0 then
-		ArkInvetory.OutputError( "code failure: checking for profession item of type 0" )
-		RestackAbort( loc_id )
+		ArkInventory.OutputError( "code failure: checking for profession item of type 0" )
+		abort = cl
+		return abort, recheck, false
 	end
 	
 	for zz, bag_id in ipairs( ArkInventory.Global.Location[loc_id].Bags ) do
 		
-		local bt, count = RestackBagCheck( loc_id, bag_id )
+		local ab, bt, count = RestackBagCheck( loc_id, bag_id )
+		
+		if ab then
+			abort = cl
+			return abort, recheck, false
+		end
 		
 		if not ArkInventory.Global.Me.bagoptions[loc_id][bag_id].restack.ignore then
 			
@@ -288,11 +331,15 @@ local function FindProfessionItem( loc_id, cl, cb, bp, cs, ct )
 				
 				for slot_id = count, 1, -1 do
 					
-					RestackBagCheck( loc_id, bag_id )
+					if RestackBagCheck( loc_id, bag_id ) then
+						abort = cl
+						return abort, recheck, false
+					end
 					
 					if loc_id == ArkInventory.Const.Location.Bank and not ArkInventory.Global.Mode.Bank then
 						-- no longer at bank, abort
-						RestackAbort( loc_id )
+						abort = cl
+						return abort, recheck, false
 					end
 					
 					if select( 3, GetContainerItemInfo( bag_id, slot_id ) ) then
@@ -326,7 +373,7 @@ local function FindProfessionItem( loc_id, cl, cb, bp, cs, ct )
 									
 									if check_item and bit.band( it, ct ) > 0 then
 										--ArkInventory.Output( "prof> ", loc_id, ".", bag_id, ".", slot_id )
-										return true, bag_id, slot_id, recheck
+										return abort, recheck, true, bag_id, slot_id
 									end
 									
 								end
@@ -346,21 +393,31 @@ local function FindProfessionItem( loc_id, cl, cb, bp, cs, ct )
 	end
 	
 	if loc_id == ArkInventory.Const.Location.Bank and ArkInventory.db.global.option.restack.bank then
-		local ok, sb, ss, rc = FindProfessionItem( ArkInventory.Const.Location.Bag, loc_id, nil, nil, nil, ct )
+		
+		local ab, rc, ok, sb, ss = FindProfessionItem( ArkInventory.Const.Location.Bag, loc_id, nil, nil, nil, ct )
+		
+		if ab then
+			abort = cl
+		end
+		
 		if rc then
 			recheck = true
 		end
-		return ok, sb, ss, recheck
+		
+		return abort, recheck, ok, sb, ss
+		
 	end
 	
 	--ArkInventory.Output( "no profession items found in ", loc_id )
-	return false, nil, nil, recheck
+	return abort, recheck, false
 	
 end
 
 local function FindCraftingItem( loc_id, cl, cb, bp, cs )
 	
+	local abort = false
 	local recheck = false
+	
 	local cl = cl or loc_id
 	local cb = cb or 9999
 	local bp = bp or -999
@@ -368,7 +425,12 @@ local function FindCraftingItem( loc_id, cl, cb, bp, cs )
 	
 	for zz, bag_id in ipairs( ArkInventory.Global.Location[loc_id].Bags ) do
 		
-		local bt, count = RestackBagCheck( loc_id, bag_id )
+		local ab, bt, count = RestackBagCheck( loc_id, bag_id )
+		
+		if ab then
+			abort = cl
+			return abort, recheck, false
+		end
 		
 		if not ArkInventory.Global.Me.bagoptions[loc_id][bag_id].restack.ignore then
 			
@@ -379,11 +441,15 @@ local function FindCraftingItem( loc_id, cl, cb, bp, cs )
 				
 				for slot_id = count, 1, -1 do
 					
-					RestackBagCheck( loc_id, bag_id )
+					if RestackBagCheck( loc_id, bag_id ) then
+						abort = cl
+						return abort, recheck, false
+					end
 					
 					if loc_id == ArkInventory.Const.Location.Bank and not ArkInventory.Global.Mode.Bank then
 						-- no longer at bank, abort
-						RestackAbort( loc_id )
+						abort = cl
+						return abort, recheck, false
 					end
 					
 					if select( 3, GetContainerItemInfo( bag_id, slot_id ) ) then
@@ -401,8 +467,8 @@ local function FindCraftingItem( loc_id, cl, cb, bp, cs )
 					
 							ArkInventory.TooltipSetItem( ArkInventory.Global.Tooltip.Scan, bag_id, slot_id )
 							if ArkInventory.TooltipContains( ArkInventory.Global.Tooltip.Scan, ArkInventory.Localise["CRAFTING_REAGENT"] ) then
-								--ArkInventory.Output( "craft> ", loc_id, ".", bag_id, ".", slot_id )
-								return true, bag_id, slot_id, recheck
+								--ArkInventory.Output( "craft @ ", loc_id, ".", bag_id, ".", slot_id )
+								return abort, recheck, true, bag_id, slot_id
 							end
 							
 						end
@@ -418,33 +484,48 @@ local function FindCraftingItem( loc_id, cl, cb, bp, cs )
 	end
 	
 	if loc_id == ArkInventory.Const.Location.Bank and ArkInventory.db.global.option.restack.deposit then
-		local ok, sb, ss, rc = FindCraftingItem( ArkInventory.Const.Location.Bag, loc_id )
+		
+		local ab, rc, ok, sb, ss = FindCraftingItem( ArkInventory.Const.Location.Bag, loc_id )
+		
+		if ab then
+			abort = cl
+		end
+		
 		if rc then
 			recheck = true
 		end
-		return ok, sb, ss, recheck
+		
+		return abort, recheck, ok, sb, ss
+		
 	end
 	
 	--ArkInventory.Output( "no crafting items found in ", loc_id )
-	return false, nil, nil, recheck
+	return abort, recheck, false
 	
 end
 
 local function CompactBags( loc_id )
 	
+	local abort = false
 	local recheck = false
 	
 	for zz, bag_id in ipairs( ArkInventory.Global.Location[loc_id].Bags ) do
 		
 		if not ArkInventory.Global.Me.bagoptions[loc_id][bag_id].restack.ignore then
 			
+			--ArkInventory.Output( "CompactBags( ", loc_id, ".", bag_id, " )" )
+			
 			for slot_id = GetContainerNumSlots( bag_id ), 1, -1 do
 				
-				RestackBagCheck( loc_id, bag_id )
+				if RestackBagCheck( loc_id, bag_id ) then
+					abort = loc_id
+					return abort, recheck
+				end
 				
 				if loc_id == ArkInventory.Const.Location.Bank and not ArkInventory.Global.Mode.Bank then
 					-- no longer at bank, abort
-					RestackAbort( loc_id )
+					abort = loc_id
+					return abort, recheck
 				end
 				
 				--ArkInventory.Output( "checking ", loc_id, ".", bag_id, ".", slot_id )
@@ -470,7 +551,12 @@ local function CompactBags( loc_id )
 							
 							--ArkInventory.Output( "partial stack of ", count, "x", h, " found at ", bag_id, ".", slot_id )
 							
-							local ok, pb, ps, rc = FindPartialStack( loc_id, loc_id, bag_id, zz, slot_id, item_id )
+							local ab, rc, ok, pb, ps = FindPartialStack( loc_id, loc_id, bag_id, zz, slot_id, item_id )
+							
+							if ab then
+								abort = loc_id
+								return abort, recheck
+							end
 							
 							if rc then
 								recheck = true
@@ -501,11 +587,14 @@ local function CompactBags( loc_id )
 		
 	end
 	
-	return recheck
+	return abort, recheck
 	
 end
 
 local function CompactVault( )
+	
+	local abort = false
+	local recheck = false
 	
 	local loc_id = ArkInventory.Const.Location.Vault
 	local bag_id = GetCurrentGuildBankTab( )
@@ -514,16 +603,15 @@ local function CompactVault( )
 	
 	if not ( IsGuildLeader( ) or ( canView and canDeposit ) ) then
 		ArkInventory.Output( string.format( ArkInventory.Localise["RESTACK_FAIL_ACCESS"], ArkInventory.Localise["LOCATION_VAULT"], bag_id ) )
-		return
+		return abort, recheck
 	end
-	
-	local recheck = false
 	
 	for slot_id = MAX_GUILDBANK_SLOTS_PER_TAB, 1, -1 do
 		
 		if not ArkInventory.Global.Mode.Vault or bag_id ~= GetCurrentGuildBankTab( ) then
 			-- no longer at the vault or changed tabs, abort
-			RestackAbort( loc_id )
+			abort = loc_id
+			return abort, recheck
 		end
 		
 		--ArkInventory.OutputDebug( "checking vault ", bag_id, ".", slot_id )
@@ -551,7 +639,12 @@ local function CompactVault( )
 					
 					--ArkInventory.OutputDebug( "partial > ", bag_id, ".", slot_id )
 					
-					local ok, pb, ps, rc = FindPartialStack( loc_id, loc_id, bag_id, nil, slot_id, item_id )
+					local ab, rc, ok, pb, ps = FindPartialStack( loc_id, loc_id, bag_id, nil, slot_id, item_id )
+					
+					if ab then
+						abort = loc_id
+						return abort
+					end
 					
 					if rc then
 						recheck = true
@@ -582,28 +675,36 @@ local function CompactVault( )
 		
 	end
 	
-	if recheck then
-		coroutine.yield( )
-		return CompactVault( )
-	end
+	return abort, recheck
 	
 end
 
 local function ConsolidateBag( loc_id, bag_id, bag_pos )
 	
+	local abort = false
 	local recheck = false
 	
 	if not ArkInventory.Global.Me.bagoptions[loc_id][bag_id].restack.ignore then
 		
-		local bt, count = RestackBagCheck( loc_id, bag_id )
+		--ArkInventory.Output( "ConsolidateBag( ", loc_id, ".", bag_id, " )" )
 		
-		--ArkInventory.Output( "bag> ", loc_id, ".", bag_id, "(", bag_pos, ") ", bt, " / ", count )
+		local ab, bt, count = RestackBagCheck( loc_id, bag_id )
+		
+		if ab then
+			abort = loc_id
+			return abort, recheck
+		end
+		
+		--ArkInventory.Output( "bag> ", loc_id, ".", bag_id, " (", bag_pos, ") ", bt, " / ", count )
+		
+		local ok = true
 		
 		for slot_id = count, 1, -1 do
 			
 			if loc_id == ArkInventory.Const.Location.Bank and not ArkInventory.Global.Mode.Bank then
 				-- no longer at bank, abort
-				RestackAbort( )
+				abort = loc_id
+				return abort, recheck
 			end
 			
 			--ArkInventory.Output( "chk> ", loc_id, ".", bag_id, ".", slot_id )
@@ -612,7 +713,7 @@ local function ConsolidateBag( loc_id, bag_id, bag_pos )
 				
 				-- this slot is locked, move on and check it again next time
 				recheck = true
-				--ArkInventory.Output( "locked> ", loc_id, ".", bag_id, ".", slot_id )
+				--ArkInventory.Output( "locked @ ", loc_id, ".", bag_id, ".", slot_id )
 				
 			else
 				
@@ -620,13 +721,13 @@ local function ConsolidateBag( loc_id, bag_id, bag_pos )
 				
 				if not h then
 					
-					--ArkInventory.Output( "empty> ", loc_id, ".", bag_id, ".", slot_id )
+					--ArkInventory.Output( "empty @ ", loc_id, ".", bag_id, ".", slot_id )
 					
-					local ok, sb, ss, rc
+					local ab, rc, sb, ss
 					if bt == 0 then
-						ok, sb, ss, rc = FindCraftingItem( loc_id, loc_id, bag_id, bag_pos, slot_id )
+						ab, rc, ok, sb, ss = FindCraftingItem( loc_id, loc_id, bag_id, bag_pos, slot_id )
 					else
-						ok, sb, ss, rc = FindProfessionItem( loc_id, loc_id, bag_id, bag_pos, slot_id, bt )
+						ab, rc, ok, sb, ss = FindProfessionItem( loc_id, loc_id, bag_id, bag_pos, slot_id, bt )
 					end
 					
 					if rc then
@@ -647,16 +748,23 @@ local function ConsolidateBag( loc_id, bag_id, bag_pos )
 					end
 					
 				else
+					
 					--ArkInventory.Output( "item> ", loc_id, ".", bag_id, ".", slot_id, " ", h )
+					
 				end
 				
+			end
+			
+			if not ok then
+				-- no reagent/profession item found so no point checking the rest of the slots for this bag
+				break
 			end
 			
 		end
 		
 	end
 	
-	return recheck
+	return abort, recheck
 	
 end
 
@@ -664,21 +772,36 @@ local function Consolidate( loc_id )
 	
 	--ArkInventory.Output( "Consolidate ", loc_id )
 	
+	local abort = false
 	local recheck = false
 	
 	-- fill up profession bags with profession items
 	for zz, bag_id in ipairs( ArkInventory.Global.Location[loc_id].Bags ) do
 		
-		local bt, count = RestackBagCheck( loc_id, bag_id )
-		
 		if not ArkInventory.Global.Me.bagoptions[loc_id][bag_id].restack.ignore then
 			
+			local ab, bt, count = RestackBagCheck( loc_id, bag_id )
+			
+			if ab then
+				abort = loc_id
+				return abort, recheck
+			end
+			
 			if count > 0 and bt ~= 0 then
+				
 				--ArkInventory.Output( "Consolidate ", loc_id, ".", bag_id, " ", bt )
 				
-				if ConsolidateBag( loc_id, bag_id, zz ) then
+				local ab, rc = ConsolidateBag( loc_id, bag_id, zz )
+				
+				if ab then
+					abort = ab
+					return abort, recheck
+				end
+				
+				if rc then
 					recheck = true
 				end
+				
 			end
 			
 		end
@@ -692,11 +815,22 @@ local function Consolidate( loc_id )
 			-- fill up reagent bank with crafting items
 			
 			local bag_id = REAGENTBANK_CONTAINER
-			local bt = RestackBagCheck( loc_id, bag_id )
 			
 			if not ArkInventory.Global.Me.bagoptions[loc_id][bag_id].restack.ignore then
 				
-				if ConsolidateBag( loc_id, bag_id ) then
+				if RestackBagCheck( loc_id, bag_id ) then
+					abort = loc_id
+					return abort, recheck
+				end
+				
+				local ab, rc = ConsolidateBag( loc_id, bag_id )
+				
+				if ab then
+					abort = ab
+					return abort, recheck
+				end
+				
+				if rc then
 					recheck = true
 				end
 				
@@ -710,14 +844,28 @@ local function Consolidate( loc_id )
 			
 			for zz, bag_id in ipairs( ArkInventory.Global.Location[loc_id].Bags ) do
 				
-				local bt = RestackBagCheck( loc_id, bag_id )
-				
 				if not ArkInventory.Global.Me.bagoptions[loc_id][bag_id].restack.ignore then
 					
+					local ab, bt = RestackBagCheck( loc_id, bag_id )
+					
+					if ab then
+						abort = ab
+						return abort, recheck
+					end
+					
 					if bt == 0 and bag_id ~= REAGENTBANK_CONTAINER then
-						if ConsolidateBag( loc_id, bag_id, zz ) then
+						
+						local ab, rc = ConsolidateBag( loc_id, bag_id, zz )
+						
+						if ab then
+							abort = ab
+							return abort, recheck
+						end
+
+						if rc then
 							recheck = true
 						end
+						
 					end
 					
 				end
@@ -728,7 +876,7 @@ local function Consolidate( loc_id )
 		
 	end
 	
-	return recheck
+	return abort, recheck
 	
 end
 
@@ -736,42 +884,53 @@ local function RestackRun( loc_id )
 	
 	-- DO NOT USE CACHED DATA FOR RESTACKING, PULL THE DATA DIRECTLY FROM WOW AGAIN, THE UI WILL CATCH UP
 	
+	local ok = false
+	local abort, recheck
+	
 	if loc_id == ArkInventory.Const.Location.Bag then
 		
-		if ArkInventory.db.global.option.message.restack[loc_id] then
-			ArkInventory.Output( ArkInventory.RestackString( ), ": ", ArkInventory.Global.Location[loc_id].Name, " " , ArkInventory.Localise["START"] )
-		end
+		RestackMessageStart( loc_id )
 		
 		if ArkInventory.db.global.option.restack.blizzard then
 			
 			SortBags( )
-			coroutine.yield( )
+--			coroutine.yield( )
 			
 		else
 			
-			local recheck
-			
 			repeat
 				
-				recheck = false
+				ok = true
 				
-				if CompactBags( loc_id ) then
-					recheck = true
+				abort, recheck = CompactBags( loc_id )
+				
+				if abort then
+					RestackMessageAbort( loc_id )
+					break
+				end
+				
+				if recheck then
+					ok = false
 					coroutine.yield( )
 				end
 				
-				if Consolidate( loc_id ) then
-					recheck = true
+				abort, recheck = Consolidate( loc_id )
+				
+				if abort then
+					RestackMessageAbort( loc_id )
+					break
+				end
+				
+				if recheck then
+					ok = false
 					coroutine.yield( )
 				end
 				
-			until not recheck
+			until ok
 			
 		end
 		
-		if ArkInventory.db.global.option.message.restack[loc_id] then
-			ArkInventory.Output( ArkInventory.RestackString( ), ": ", ArkInventory.Global.Location[loc_id].Name, " " , ArkInventory.Localise["COMPLETE"] )
-		end
+		RestackMessageComplete( loc_id )
 		
 	end
 	
@@ -780,21 +939,19 @@ local function RestackRun( loc_id )
 		
 		if ArkInventory.Global.Mode.Bank then
 			
-			if ArkInventory.db.global.option.message.restack[loc_id] then
-				ArkInventory.Output( ArkInventory.RestackString( ), ": ", ArkInventory.Global.Location[loc_id].Name, " " , ArkInventory.Localise["START"] )
-			end
+			RestackMessageStart( loc_id )
 			
 			if ArkInventory.db.global.option.restack.blizzard then
 				
 				SortBankBags( )
-				coroutine.yield( )
+--				coroutine.yield( )
 				
 				if IsReagentBankUnlocked( ) then
 					
 					if ArkInventory.db.global.option.restack.deposit then
 						ArkInventory.Output( ArkInventory.RestackString( ), ": ", REAGENTBANK_DEPOSIT, " " , ArkInventory.Localise["ENABLED"] )
 						DepositReagentBank( )
-						coroutine.yield( )
+--						coroutine.yield( )
 					else
 						ArkInventory.Output( ArkInventory.RestackString( ), ": ", REAGENTBANK_DEPOSIT, " " , ArkInventory.Localise["DISABLED"] )
 					end
@@ -802,37 +959,46 @@ local function RestackRun( loc_id )
 					local bag_id = ArkInventory.Global.Location[loc_id].tabReagent
 					if not ArkInventory.Global.Me.bagoptions[loc_id][bag_id].restack.ignore then
 						SortReagentBankBags( )
-						coroutine.yield( )
+--						coroutine.yield( )
 					end
 					
 				end
 				
 			else
 				
-				local recheck
-				
 				repeat
 					
-					recheck = false
+					ok = true
 					
-					if CompactBags( loc_id ) then
-						recheck = true
+					abort, recheck = CompactBags( loc_id )
+					
+					if abort then
+						RestackMessageAbort( loc_id )
+						break
+					end
+					
+					if recheck then
+						ok = false
 						coroutine.yield( )
 					end
 					
-					if Consolidate( loc_id ) then
-						recheck = true
+					abort, recheck = Consolidate( loc_id )
+					
+					if abort then
+						RestackMessageAbort( loc_id )
+						break
+					end
+					
+					if recheck then
+						ok = false
 						coroutine.yield( )
 					end
 					
-				until not recheck
+				until ok
 				
 			end
 			
-			
-			if ArkInventory.db.global.option.message.restack[loc_id] then
-				ArkInventory.Output( ArkInventory.RestackString( ), ": ", ArkInventory.Global.Location[loc_id].Name, " " , ArkInventory.Localise["COMPLETE"] )
-			end
+			RestackMessageComplete( loc_id )
 			
 		end
 		
@@ -843,29 +1009,34 @@ local function RestackRun( loc_id )
 		
 		if ArkInventory.Global.Mode.Vault then
 			
-			if ArkInventory.db.global.option.message.restack[loc_id] then
-				ArkInventory.Output( ArkInventory.RestackString( ), ": ", ArkInventory.Global.Location[loc_id].Name, " " , ArkInventory.Localise["START"] )
-			end
+			RestackMessageStart( loc_id )
 			
-			CompactVault( )
+			repeat
+				
+				abort, recheck = CompactVault( )
+				
+				if abort then
+					RestackMessageAbort( loc_id )
+					break
+				end
+				
+				-- do not yield here
+				
+			until not recheck
 			
-			if ArkInventory.db.global.option.message.restack[loc_id] then
-				ArkInventory.Output( ArkInventory.RestackString( ), ": ", ArkInventory.Global.Location[loc_id].Name, " " , ArkInventory.Localise["COMPLETE"] )
-			end
+			RestackMessageComplete( loc_id )
 			
 		end
 		
 	end
 	
-	
 end
 
 function ArkInventory.RestackResume( loc_id )
 	
-	--ArkInventory.Output( "ResumeThreads ", loc_id )
+	--ArkInventory.Output( "RestackResume ", loc_id )
 	
 	if type( ArkInventory.Global.Thread.Restack[loc_id] ) == "thread" and coroutine.status( ArkInventory.Global.Thread.Restack[loc_id] ) == "suspended" then
-		-- resume current thread
 		local ok, errmsg = coroutine.resume( ArkInventory.Global.Thread.Restack[loc_id] )
 		if not ok then
 			error( errmsg )

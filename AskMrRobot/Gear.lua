@@ -40,6 +40,7 @@ end
 local function findMatchingItemFromTable(item, list, bestLink, bestItem, bestDiff, bestLoc, usedItems, tableType)
 	if not list then return nil end
 	
+	local found = false
 	for k,v in pairs(list) do
 		local listItem = Amr.ParseItemLink(v)
 		if listItem then
@@ -52,9 +53,10 @@ local function findMatchingItemFromTable(item, list, bestLink, bestItem, bestDif
 					bestItem = listItem
 					bestDiff = diff
 					bestLoc = string.format("%s_%s", tableType, k)
+					found = true
 				end
 			end
-			if diff == 0 then break end
+			if found then break end
 		end
 	end
 	
@@ -506,6 +508,12 @@ local function tryEquipNextItem()
 	
 	-- find the best matching item
 	
+	-- inventory
+	bestItem, bestDiff, bestLink = scanBagForItem(item, BACKPACK_CONTAINER, bestItem, bestDiff, bestLink)
+	for bagId = 1, NUM_BAG_SLOTS do
+		bestItem, bestDiff, bestLink = scanBagForItem(item, bagId, bestItem, bestDiff, bestLink)
+	end
+
 	-- equipped items, but skip slots we have just equipped (to avoid e.g. just moving 2 of the same item back and forth between mh oh weapon slots)
 	for slotNum = 1, #Amr.SlotIds do
 		local slotId = Amr.SlotIds[slotNum]
@@ -523,12 +531,6 @@ local function tryEquipNextItem()
 				end
 			end
 		end
-	end
-	
-	-- inventory
-	bestItem, bestDiff, bestLink = scanBagForItem(item, BACKPACK_CONTAINER, bestItem, bestDiff, bestLink)
-	for bagId = 1, NUM_BAG_SLOTS do
-		bestItem, bestDiff, bestLink = scanBagForItem(item, bagId, bestItem, bestDiff, bestLink)
 	end
 	
 	-- bank
@@ -688,7 +690,7 @@ local function startEquipGearSet(spec)
 			spec = spec,
 			itemsToEquip = itemsToEquip,
 			remaining = remaining,
-			doneSlots = {},
+			doneSlots = _pendingEquip and _pendingEquip.spec == spec and _pendingEquip.doneSlots or {},
 			nextSlot = firstSlot
 		}
 

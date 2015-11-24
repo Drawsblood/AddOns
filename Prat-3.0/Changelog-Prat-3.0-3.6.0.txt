@@ -1,8 +1,0 @@
-2015-11-07  sylvanaar  <sylvanaar@mindspring.com>
-
-[a7b9987a257f] [3.6.0]
-* .pkgmeta:
-
-Remove the pullout from .pkgmeta
-
-

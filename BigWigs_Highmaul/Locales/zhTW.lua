@@ -10,6 +10,8 @@ end
 L = BigWigs:NewBossLocale("The Butcher", "zhTW")
 if L then
 L["adds_multiple"] = "小怪 x%d"
+L["tank_proximity"] = "坦克距離雷達"
+L["tank_proximity_desc"] = "為坦克開啟5碼距離雷達，以便對應勁道威猛的順劈攻擊。"
 
 end
 

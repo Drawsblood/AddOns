@@ -1,0 +1,42 @@
+------------------------------------------------------------------------
+r194 | zensunim | 2015-11-22 12:45:15 +0000 (Sun, 22 Nov 2015) | 7 lines
+Changed paths:
+   A /tags/4.37.6 (from /trunk:193)
+
+* Added WoD spells for Hellfire Citadel - Thanks Oscarucb
+* Updated French localization - Thanks Blubibulga & Dabeuliou
+* Updated German localization - Thanks Pas06
+* Updated Italian localization - Thanks Asixandur
+* Updated Russian localization - Thanks user_kh
+* Updated Simplified Chinese localization - Thanks Wowuicn, lsjyzjl, and Mini_Dragon
+* Updated Spanish localization - Thanks Pablous
+------------------------------------------------------------------------
+r193 | zensunim | 2015-11-22 12:44:22 +0000 (Sun, 22 Nov 2015) | 1 line
+Changed paths:
+   M /trunk/GTFO.lua
+   M /trunk/GTFO.toc
+
+Fixed version numbers
+------------------------------------------------------------------------
+r192 | zensunim | 2015-11-17 16:41:22 +0000 (Tue, 17 Nov 2015) | 7 lines
+Changed paths:
+   M /trunk/GTFO.lua
+   M /trunk/GTFO.toc
+   M /trunk/GTFO.xml
+   M /trunk/GTFO_Spells_WOD.lua
+   M /trunk/Localization/deDE.lua
+   M /trunk/Localization/esES.lua
+   M /trunk/Localization/esMX.lua
+   M /trunk/Localization/frFR.lua
+   A /trunk/Localization/itIT.lua
+   M /trunk/Localization/ruRU.lua
+   M /trunk/Localization/zhCN.lua
+
+* Added WoD spells for Hellfire Citadel - Thanks Oscarucb
+* Updated French localization - Thanks Blubibulga & Dabeuliou
+* Updated German localization - Thanks Pas06
+* Updated Italian localization - Thanks Asixandur
+* Updated Russian localization - Thanks user_kh
+* Updated Simplified Chinese localization - Thanks Wowuicn, lsjyzjl, and Mini_Dragon
+* Updated Spanish localization - Thanks Pablous
+------------------------------------------------------------------------

@@ -609,9 +609,9 @@ function Amr.ParseItemLink(itemLink)
 		table.sort(item.bonusIds)
     end
 	
-	-- if numBonuses is 0 and there is a number after it, that is the upgrade id for old items now I guess?
-	if numBonuses == 0 then
-		local upgradeId = tonumber(parts[14])
+	-- if there is another part after bonus ids, that is the upgrade id	
+	if numBonuses and #parts >= 14 + numBonuses then
+		local upgradeId = tonumber(parts[14 + numBonuses])
 		item.upgradeId = upgradeId and upgradeId or 0
 	else
 		item.upgradeId = 0

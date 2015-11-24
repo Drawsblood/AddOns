@@ -109,7 +109,7 @@ L:AddLocale("deDE",
 )
 L:AddLocale("koKR",  
 {
-	["Addon message options."] = "애드온 메시지 옵션.",
+	["Addon message options."] = "애드온 메시지 옵션",
 	AddonMsgs = "애드온 메시지",
 	show_desc = "각 대화창에 숨겨진 애드온 메시지 표시 켜거나 끄기.",
 	show_name = "애드온 메시지 보기",

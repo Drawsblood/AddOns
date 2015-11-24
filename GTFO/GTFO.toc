@@ -2,10 +2,10 @@
 ## Title: GTFO
 ## Notes: GTFO, you're dying!
 ## Author: Zensunim of Dragonblight
-## Version: 4.37.5
+## Version: 4.37.6
 ## DefaultState: Enabled
 ## SavedVariables: GTFOData
-## X-Curse-Packaged-Version: 4.37.5
+## X-Curse-Packaged-Version: 4.37.6
 ## X-Curse-Project-Name: GTFO
 ## X-Curse-Project-ID: gtfo
 ## X-Curse-Repository-ID: wow/gtfo/mainline

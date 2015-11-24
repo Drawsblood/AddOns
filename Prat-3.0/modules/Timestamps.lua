@@ -169,7 +169,7 @@ Prat:AddModuleToLoad(function()
 	["Chat window timestamp options."] = "대화창 시간 표시 옵션",
 	colortimestamp_desc = "시간 표시에 색깔 입히기를 켜거나 끕니다.",
 	colortimestamp_name = "시간 표시 색상",
-	["Format All Timestamps"] = "모든 시간 표시 초기화",
+	["Format All Timestamps"] = "모든 시간 표시 형식",
 	["HH:MM (12-hour)"] = "HH:MM (12시간제)",
 	["HH:MM (24-hour)"] = "HH:MM (24시간제)",
 	["HH:MM:SS (12-hour)"] = "HH:MM:SS (12시간제)",

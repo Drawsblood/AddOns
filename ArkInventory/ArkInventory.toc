@@ -1,5 +1,5 @@
 ﻿## Interface: 60200
-## X-Curse-Packaged-Version: 3.5.11
+## X-Curse-Packaged-Version: 3.05.12
 ## X-Curse-Project-Name: ArkInventory
 ## X-Curse-Project-ID: ark-inventory
 ## X-Curse-Repository-ID: wow/ark-inventory/mainline
@@ -8,7 +8,7 @@
 ## Title-zhCN: [背包]ArkInventory 整合背包银行
 ## Author: Arkayenro - Khaz'goroth
 ## Email: arkayenro at gmail dot com
-## Version: 30511
+## Version: 30512
 ## X-ReleaseType:
 ## SavedVariables: ARKINVDB
 
@@ -20,7 +20,7 @@
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Always: delayed
 
-## RequiredDeps: Blizzard_GuildBankUI, Blizzard_VoidStorageUI, Blizzard_Collections
+## RequiredDeps: Blizzard_GuildBankUI, Blizzard_VoidStorageUI, Blizzard_Collections, Blizzard_TradeSkillUI
 
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibPeriodicTable-3.1, LibSharedMedia-3.0, LibDataBroker-1.1, LibDialog-1.0, Masque, BattlePetBreedID
 ## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibPeriodicTable-3.1, LibSharedMedia-3.0, LibDataBroker-1.1, LibDialog-1.0

@@ -1,0 +1,28 @@
+------------------------------------------------------------------------
+r511 | arkayenro | 2015-11-23 11:18:20 +0000 (Mon, 23 Nov 2015) | 5 lines
+Changed paths:
+   A /tags/3.05.12 (from /trunk:510)
+
+*3.05.12 (23-NOV-2015)*
+ * fixed - issue with aborting a restack when leaving bank/vault
+ * fixed - issue with item counts on merchant cost itemstring
+ * added - workaround/fix for issue with item counts on tradeskill results and reagents due to invalid hyperlink returned by blizzard
+
+------------------------------------------------------------------------
+r510 | arkayenro | 2015-11-23 11:16:31 +0000 (Mon, 23 Nov 2015) | 5 lines
+Changed paths:
+   M /trunk/ArkInventory.lua
+   M /trunk/ArkInventory.toc
+   M /trunk/ArkInventoryPetJournal.lua
+   M /trunk/ArkInventoryRestack.lua
+   M /trunk/ArkInventoryStorage.lua
+   M /trunk/ArkInventoryTooltip.lua
+   M /trunk/Locale/enUS.lua
+   M /trunk/VersionHistory.txt
+
+*3.05.12 (23-NOV-2015)*
+ * fixed - issue with aborting a restack when leaving bank/vault
+ * fixed - issue with item counts on merchant cost itemstring
+ * added - workaround/fix for issue with item counts on tradeskill results and reagents due to invalid hyperlink returned by blizzard
+
+------------------------------------------------------------------------

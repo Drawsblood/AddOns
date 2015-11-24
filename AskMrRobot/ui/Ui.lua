@@ -60,9 +60,15 @@ function Amr.ColorToHex(color, alpha)
 end
 
 local function getFontPath(style)
-	local region = Amr.RegionNames[GetCurrentRegion()]
-	if region == "KR" or region == "CN" or region == "TW" then
-		return "Fonts\\FRIZQT__.TTF"
+	local locale = GetLocale()
+	if locale == "koKR" then
+		return "Fonts\\2002.TTF"
+	elseif locale == "zhCN" then
+		return "Fonts\\ARKai_T.ttf"
+	elseif locale == "zhTW" then
+		return "Fonts\\bLEI00D.ttf"
+	elseif locale == "ruRU" then
+		return "Fonts\\FRIZQT___CYR.TTF"
 	else
 		return "Interface\\AddOns\\" .. Amr.ADDON_NAME .. "\\Media\\Ubuntu-" .. style .. ".ttf"
 	end

@@ -12,6 +12,11 @@
  * faq - https://github.com/arkayenro/arkinventory/wiki/FAQ
  
 
+*3.05.12 (23-NOV-2015)*
+ * fixed - issue with aborting a restack when leaving bank/vault
+ * fixed - issue with item counts on merchant cost itemstring
+ * added - workaround/fix for issue with item counts on tradeskill results and reagents due to invalid hyperlink returned by blizzard
+ 
 *3.05.11 (21-JUL-2015)*
  * updated - draenor flying capability
 

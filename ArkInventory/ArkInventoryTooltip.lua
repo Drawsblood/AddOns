@@ -541,11 +541,20 @@ function ArkInventory.TooltipHook( ... )
 	tooltip.ARK_Data[3] = arg3
 	tooltip.ARK_Data[4] = arg4
 	
+	--ArkInventory.Output( tooltip.ARK_Data )
+	
 	local _, h
 	
 	if not h and tooltip["GetItem"] then
+		
 		_, h = tooltip:GetItem( )
-		--ArkInventory.Output( gsub(h, "\124", "\124\124") )
+		--ArkInventory.Output( "[", _, "] = ", gsub( h, "\124", "\124\124" ) )
+		
+		-- check for broken hyperlink bug
+		if _ == "" then
+			h = nil
+		end
+		
 	end
 	
 	if not h and tooltip["GetSpell"] then
@@ -596,12 +605,12 @@ function ArkInventory.TooltipHookSetMerchantCostItem( ... )
 	
 	if not tooltip then return end
 	
-	local icon, amount, link, name, v1, v2, v3, v4, v5 = GetMerchantItemCostItem( arg1, arg2 )
+	local icon, amount, h, name, v1, v2, v3, v4, v5 = GetMerchantItemCostItem( arg1, arg2 )
 	
-	if link then
+	if h then
 		ArkInventory.TooltipHook( tooltip, h )
 	else
-		--ArkInventory.Output( "GetMerchantItemCostItem = ", icon, " / ", amount, " / ", link, " / ", name )
+		--ArkInventory.Output( "GetMerchantItemCostItem = ", icon, " / ", amount, " / ", h, " / ", name )
 	end
 	
 end
@@ -616,6 +625,26 @@ function ArkInventory.TooltipHookSetBackpackToken( ... )
 	local h = GetCurrencyLink( currencyID )
 	
 	ArkInventory.TooltipHook( tooltip, h )
+	
+end
+
+function ArkInventory.TooltipHookSetTradeSkillItem( ... )
+	
+	local tooltip, arg1, arg2 = ...
+	
+	if tooltip and arg1 then
+		
+		local h
+		
+		if arg2 then
+			h = GetTradeSkillReagentItemLink( arg1,  arg2 )
+		else
+			h = GetTradeSkillItemLink( arg1 )
+		end
+		
+		ArkInventory.TooltipHook( tooltip, h )
+		
+	end
 	
 end
 

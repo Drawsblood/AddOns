@@ -3557,8 +3557,11 @@ function ArkInventory.ObjectInfo( h )
 		
 		local bid = false
 		if osd[14] > 0 then
+			
 			bid = { }
+			
 			for x = 15, 14 + osd[14] do
+				
 				bid[osd[x]] = true
 --[[
 				66 = upgraded to rare?
@@ -3568,6 +3571,7 @@ function ArkInventory.ObjectInfo( h )
 				** item level returned is not adjusted, requires tooltip scan
 ]]--
 			end
+			
 		end
 		
 		

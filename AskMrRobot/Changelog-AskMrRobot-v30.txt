@@ -1,0 +1,8 @@
+2015-11-19  yellowfive  <yellowfive>
+
+[dfea9df158c1] [v30]
+* AskMrRobot-Serializer/AskMrRobot-Serializer.lua, AskMrRobot.toc:
+
+small bug fix to item upgrades
+
+

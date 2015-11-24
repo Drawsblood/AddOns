@@ -38,7 +38,7 @@ function mod:OnBossEnable()
 end
 
 function mod:OnEnable()
-	sporeannounced = nil
+	sporesannounced = nil
 end
 
 -------------------------------------------------------------------------------

@@ -1220,6 +1220,21 @@ GTFO.SpellID["181082"] = {
 	sound = 1;
 };
 
+GTFO.SpellID["185686"] = {
+	--desc = "Fiery Residue (Kormrok - Mythic)";
+	sound = 1;
+};
+
+GTFO.SpellID["185687"] = {
+	--desc = "Foul Residue (Kormrok - Mythic)";
+	sound = 1;
+};
+
+GTFO.SpellID["181208"] = {
+	--desc = "Shadow Residue (Kormrok - Mythic)";
+	sound = 1;
+};
+
 GTFO.SpellID["180246"] = {
 	--desc = "Pound (Kormrok)";
 	soundFunction = function() -- Warn only on multiple hits

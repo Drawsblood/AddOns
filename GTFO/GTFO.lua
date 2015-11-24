@@ -11,14 +11,15 @@ Note: Place your own custom spells and setups in GTFO_Custom.lua
 
 Special thanks: 
 		Smacker (Power Auras)
-		Freydis88, GusBackus, and Zaephyr81 (German Translations)
+		Freydis88, GusBackus, Zaephyr81, and pas06 (German Translations)
 		pcki11 D_Angel, and user_kh (Russian Translations)
-		lsjyzjl, Wowuicn, and xazhaoyang (Simplified and Traditional Chinese Translations)
-		Blubibulga and TrAsHeR (French Translations)
+		lsjyzjl, Wowuicn, xazhaoyang and Mini_Dragon (Simplified and Traditional Chinese Translations)
+		Blubibulga, TrAsHeR, and Dabeuliou (French Translations)
 		Sunyruru and Maknae (Korean Translations)
 		Pablous (Spanish Translations)
 		Andyca, and BNSSNB (Traditional Chinese Translations)
 		Phalk and Omukeka (Brazilian Portuguese Translations)
+		Asixandur (Italian Translations)
 
 
 Change Log:
@@ -867,6 +868,15 @@ Change Log:
 	v4.37.5
 		- Added WoD spells for Hellfire Citadel
 		- Added WoD spells for Draenor (world)		
+	v4.37.6
+		- Added WoD spells for Hellfire Citadel - Thanks Oscarucb
+		- Updated French localization - Thanks Blubibulga & Dabeuliou
+		- Updated German localization - Thanks Pas06
+		- Updated Italian localization - Thanks Asixandur
+		- Updated Russian localization - Thanks user_kh
+		- Updated Simplified Chinese localization - Thanks Wowuicn, lsjyzjl, and Mini_Dragon
+		- Updated Spanish localization - Thanks Pablous
+		
 		
 ]]--
 GTFO = {
@@ -884,8 +894,8 @@ GTFO = {
 		IgnoreOptions = { };
 		TrivialDamagePercent = 2; -- Minimum % of HP lost required for an alert to be trivial
 	};
-	Version = "4.37.5"; -- Version number (text format)
-	VersionNumber = 43705; -- Numeric version number for checking out-of-date clients
+	Version = "4.37.6"; -- Version number (text format)
+	VersionNumber = 43706; -- Numeric version number for checking out-of-date clients
 	DataLogging = nil; -- Indicate whether or not the addon needs to run the datalogging function (for hooking)
 	DataCode = "4"; -- Saved Variable versioning, change this value to force a reset to default
 	CanTank = nil; -- The active character is capable of tanking

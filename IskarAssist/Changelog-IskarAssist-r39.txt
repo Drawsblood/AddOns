@@ -1,6 +1,14 @@
+2015-11-19  Tercio  <Tercio>
+
+[d75348442f8d] [tip]
+* IskarAssist.lua:
+
+- bug fixes.
+
+
 2015-10-29  Tercio  <Tercio>
 
-[6a190dcba085] [tip]
+[6a190dcba085]
 * IskarAssist.lua:
 
 - Text changes to make more clear how to rezise the panel.
@@ -231,14 +239,6 @@ v0.15 release
 2015-06-24  Tercio  <Tercio>
 
 [53b219b984a0]
-* IskarAssist.lua:
-
-- Fixed a bug where cound't pass the eye and debuffs wans't show when the frames are sorted alphabetically.
-- Options panel can't be opened during combat any more.
-- Added dispel ready icon on healers.
-
-
-[dfeff7163ed7]
 * IskarAssist.lua:
 
 - Fixed a bug where cound't pass the eye and debuffs wans't show when the frames are sorted alphabetically.

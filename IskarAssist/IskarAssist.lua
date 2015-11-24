@@ -34,7 +34,7 @@ local anzu_texture
 local player_class
 local block_backdrop_eye = {bgFile = [[Interface\RaidFrame\Raid-Bar-Hp-Fill]], tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0},
 edgeFile = "Interface\\AddOns\\IskarAssist\\border_2", edgeSize = 20}
-local iskar_version = "v0.16.2"
+local iskar_version = "v0.16.3"
 
 local iskar_encounter_id = 1788 --iskar
 local iskar_npcid = 90316 --iskar
@@ -464,7 +464,7 @@ function IKA:CreateFrames (show_after_cretion)
 		tinsert (f.player_blocks, b)
 
 		-- protected button (secure)
-			local button = CreateFrame ("button", "IskarAssistBlock" .. #f.player_blocks, f, "SecureActionButtonTemplate")
+			local button = CreateFrame ("button", "IskarAssistActionButtonForBlock" .. #f.player_blocks, f, "SecureActionButtonTemplate")
 			button:SetPoint ("topleft", b, "topleft")
 			button:SetPoint ("bottomright", b, "bottomright")
 			button:SetFrameLevel (b:GetFrameLevel() + 4)
@@ -740,7 +740,8 @@ function IKA:CreateFrames (show_after_cretion)
 		
 		max_size = max (max_size, 25)
 		
-		local name = playername:gsub (("%-.*"), "")
+		local name = playername --> make a copy of the variable
+		name = name:gsub (("%-.*"), "")
 		block.playername:SetText (name)
 		
 		for i = 1, 12 do
@@ -756,6 +757,12 @@ function IKA:CreateFrames (show_after_cretion)
 		f:SetClassColor (block, unitid)
 		
 		--> set the action for clicks
+		if (not playername or playername == "") then
+			print ("|cFFFFAA00Iskar Assist|r:", "Warning: player name is invalid:", playername, unitid, block_index, GetUnitName (unitid or "", true))
+		end
+		
+		block.button:SetFrameLevel (block:GetFrameLevel() + 4)
+		
 		block.button:SetAttribute ("macrotext1", "/targetexact " .. (playername or "") .. "\n/click ExtraActionButton1\n/targetlasttarget") -- /say %t\n
 		--block.button:SetAttribute ("macrotext1", "/targetexact Ditador") -- /say %t\n
 		--block.button:SetAttribute ("macrotext1", "/targetexact " .. (playername or "") .. "\n/click ExtraActionButton1") -- /say %t\n -- (tests)
@@ -2162,7 +2169,7 @@ frame_event:SetScript ("OnEvent", function (self, event, ...)
 					f:ClearFrames()
 					
 					if (eendStatus == 1) then
-						f:HideMe()
+						--f:HideMe()
 					end
 					
 					f.fel_conduit_cooldown:SetBarCooldown (nil, nil, true)

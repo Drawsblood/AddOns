@@ -55,6 +55,7 @@ if not L then return end
 	L["RESTACK_TEXT"] = "consolidate items into as few stacks as possible and then try to fill up any empty slots in special bags where possible"
 	L["RESTACK_FAIL_WAIT"] = "Already in progress please wait for completion"
 	L["RESTACK_FAIL_ACCESS"] = "You don't have enough authority to tab %2$s in the %1$s" -- %1$s = guild bank, %2$s = tab number
+	L["RESTACK_FAIL_CLOSED"] = "%1$s was closed" -- %1$s = location
 	
 	
 --	vault tab tooltips
