@@ -1,6 +1,36 @@
+2016-01-02  Tercioo  <Tercioo>
+
+[f33d78296084] [tip]
+* IskarAssist.lua, Libs/CallbackHandler-1.0/CallbackHandler-1.0.lua, Libs/DF/button.lua, Libs/DF/cooltip.lua, Libs/DF/dropdown.lua, Libs/DF/fw.lua, Libs/DF/label.lua, Libs/DF/normal_bar.lua, Libs/DF/panel.lua, Libs/DF/picture.lua, Libs/DF/slider.lua, Libs/DF/split_bar.lua, Libs/DF/textentry.lua, Libs/LibDBIcon-1.0/LibDBIcon-1.0.lua, Libs/LibDataBroker-1.1/LibDataBroker-1.1.lua, Libs/LibSharedMedia-3.0/lib.xml:
+
+- libs and framework updates.
+
+
+2015-12-22  Tercioo  <Tercioo>
+
+[f061f4334742]
+* IskarAssist.lua, Libs/DF/button.lua, Libs/DF/fw.lua, Libs/DF/panel.lua:
+
+- framework update
+
+
+2015-12-02  Tercio  <Tercio>
+
+[a9239d870350]
+* IskarAssist.lua:
+
+- code cleanup.
+
+
+[4fba674d2513]
+* IskarAssist.lua:
+
+- code cleanup.
+
+
 2015-11-19  Tercio  <Tercio>
 
-[d75348442f8d] [tip]
+[d75348442f8d]
 * IskarAssist.lua:
 
 - bug fixes.
@@ -209,40 +239,5 @@ v0.15 release
 * IskarAssist.lua:
 
 - Added warlock dispell.
-
-
-2015-06-30  Tercio  <Tercio>
-
-[f8fd38081fb2]
-* IskarAssist.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-TreeGroup.lua, Libs/libs.xml:
-
-- middle click now select the player.
-- added options to select which debuff want to show.
-- several bug fixes.
-
-
-2015-06-26  Tercio  <Tercio>
-
-[ef7381b3d334]
-* IskarAssist.lua, Libs/AceAddon-3.0/AceAddon-3.0.lua, Libs/AceAddon-3.0/AceAddon-3.0.xml, Libs/AceConfig-3.0/AceConfig-3.0.lua, Libs/AceConfig-3.0/AceConfig-3.0.xml, Libs/AceConfig-3.0/AceConfigCmd-3.0/AceConfigCmd-3.0.lua, Libs/AceConfig-3.0/AceConfigCmd-3.0/AceConfigCmd-3.0.xml, Libs/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.lua, Libs/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.xml, Libs/AceConfig-3.0/AceConfigRegistry-3.0/AceConfigRegistry-3.0.lua, Libs/AceConfig-3.0/AceConfigRegistry-3.0/AceConfigRegistry-3.0.xml, Libs/AceDB-3.0/AceDB-3.0.lua, Libs/AceDB-3.0/AceDB-3.0.xml, Libs/AceDBOptions-3.0/AceDBOptions-3.0.lua, Libs/AceDBOptions-3.0/AceDBOptions-3.0.xml, Libs/AceGUI-3.0/AceGUI-3.0.lua, Libs/AceGUI-3.0/AceGUI-3.0.xml, Libs/AceGUI-3.0/widgets/AceGUIContainer-BlizOptionsGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-DropDownGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-Frame.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-InlineGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-ScrollFrame.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-SimpleGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-TabGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-TreeGroup.lua, Libs/AceGUI-3.0/widgets/AceGUIContainer-Window.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Button.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-CheckBox.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-ColorPicker.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-DropDown-Items.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-DropDown.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-EditBox.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Heading.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Icon.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-InteractiveLabel.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Keybinding.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Label.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-MultiLineEditBox.lua, Libs/AceGUI-3.0/widgets/AceGUIWidget-Slider.lua, Libs/AceLocale-3.0/AceLocale-3.0.lua, Libs/AceLocale-3.0/AceLocale-3.0.xml, Libs/LibDBIcon-1.0/LibDBIcon-1.0.lua, Libs/LibDataBroker-1.1/LibDataBroker-1.1.lua, Libs/libs.xml:
-
-- added missing libraries.
-- added sort like grid unit frames.
-
-
-[a08d72b025aa]
-* IskarAssist.lua, Libs/DF/addon.lua, Libs/DF/fw.lua, Libs/DF/panel.lua:
-
-- added sort like grid unit frames.
-
-
-2015-06-24  Tercio  <Tercio>
-
-[53b219b984a0]
-* IskarAssist.lua:
-
-- Fixed a bug where cound't pass the eye and debuffs wans't show when the frames are sorted alphabetically.
-- Options panel can't be opened during combat any more.
-- Added dispel ready icon on healers.
 
 

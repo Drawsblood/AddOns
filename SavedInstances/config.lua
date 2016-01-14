@@ -9,7 +9,7 @@ local Config = LibStub("AceConfig-3.0")
 
 local db
 
-addon.svnrev["config.lua"] = tonumber(("$Revision: 462 $"):match("%d+"))
+addon.svnrev["config.lua"] = tonumber(("$Revision: 473 $"):match("%d+"))
 
 addon.diff_strings = {
 	D1 = DUNGEON_DIFFICULTY1, -- 5 man
@@ -181,6 +181,12 @@ function module:BuildOptions()
 			guiHidden = true,
 			type = "execute",
 			func = function() module:ShowConfig() end,
+		},
+		time = { 
+			name = L["Dump time debugging information"],
+			guiHidden = true,
+			type = "execute",
+			func = function() addon:timedebug() end,
 		},
 		show = { 
 			name = L["Show/Hide the SavedInstances tooltip"],

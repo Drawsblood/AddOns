@@ -131,8 +131,8 @@ Prat:AddModuleToLoad(function()
   )
   L:AddLocale("zhCN",
   {
-	autoabbreviate_desc = "把服务器名缩到3个字符", -- Needs review
-	autoabbreviate_name = "自动缩写", -- Needs review
+	autoabbreviate_desc = "把服务器名缩到3个字符",
+	autoabbreviate_name = "自动缩写",
 	colon_desc = "在服务器后添加冒号",
 	colon_name = "显示冒号",
 	randomclr_desc = "为每个服务器使用随机颜色",

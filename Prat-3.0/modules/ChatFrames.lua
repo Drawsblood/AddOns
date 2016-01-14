@@ -253,23 +253,23 @@ L:AddLocale("ruRU",
 )
 L:AddLocale("zhCN",  
 {
-	["Chat window frame parameter options"] = "聊天窗口参数选项", -- Needs review
-	framealpha_desc = "控制鼠标移过时聊天框架的透明度.", -- Needs review
-	framealpha_name = "设定聊天框架透明度", -- Needs review
-	Frames = "框架", -- Needs review
-	mainchatonload_desc = "加载时自动选择并激活第1个聊天框架.", -- Needs review
-	mainchatonload_name = "加载时焦点于主聊天框架.", -- Needs review
-	maxchatheight_desc = "设定所有聊天窗口的最大高度.", -- Needs review
-	maxchatheight_name = "设定最大高度", -- Needs review
-	maxchatwidth_desc = "设定所有聊天窗口的最大宽度.", -- Needs review
-	maxchatwidth_name = "设定最大宽度", -- Needs review
-	minchatheight_desc = "设定所有聊天窗口的最小高度.", -- Needs review
-	minchatheight_name = "设定最小高度.", -- Needs review
-	minchatwidth_desc = "设定所有聊天窗口的最小宽度.", -- Needs review
-	minchatwidth_name = "设定最小宽度.", -- Needs review
+	["Chat window frame parameter options"] = "聊天窗口参数选项",
+	framealpha_desc = "控制鼠标移过时聊天框架的透明度.",
+	framealpha_name = "设定聊天框架透明度",
+	Frames = "框架",
+	mainchatonload_desc = "加载时自动选择并激活第1个聊天框架.",
+	mainchatonload_name = "加载时焦点于主聊天框架.",
+	maxchatheight_desc = "设定所有聊天窗口的最大高度.",
+	maxchatheight_name = "设定最大高度",
+	maxchatwidth_desc = "设定所有聊天窗口的最大宽度.",
+	maxchatwidth_name = "设定最大宽度",
+	minchatheight_desc = "设定所有聊天窗口的最小高度.",
+	minchatheight_name = "设定最小高度.",
+	minchatwidth_desc = "设定所有聊天窗口的最小宽度.",
+	minchatwidth_name = "设定最小宽度.",
 	-- rememberframepositions_desc = "",
 	-- rememberframepositions_name = "",
-	removeclamp_desc = "允许聊天框架移动至屏幕边缘齐平", -- Needs review
+	removeclamp_desc = "允许聊天框架移动至屏幕边缘齐平",
 	-- removeclamp_name = "",
 }
 

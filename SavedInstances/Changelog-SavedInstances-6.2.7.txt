@@ -1,0 +1,72 @@
+------------------------------------------------------------------------
+r477 | oscarucb | 2015-12-19 10:19:27 +0000 (Sat, 19 Dec 2015) | 1 line
+Changed paths:
+   A /tags/6.2.7 (from /trunk:476)
+
+Tagging as 6.2.7
+------------------------------------------------------------------------
+r476 | oscarucb | 2015-12-19 09:52:15 +0000 (Sat, 19 Dec 2015) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+adjust ticket 177 fix to also handle Brazilian servers, which have the same problem
+
+------------------------------------------------------------------------
+r475 | oscarucb | 2015-12-16 05:27:07 +0000 (Wed, 16 Dec 2015) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+add a faction indicator to toon tooltip
+
+------------------------------------------------------------------------
+r474 | oscarucb | 2015-12-16 04:48:16 +0000 (Wed, 16 Dec 2015) | 3 lines
+Changed paths:
+   M /trunk
+   M /trunk/.pkgmeta
+   M /trunk/SavedInstances.lua
+   M /trunk/SavedInstances.toc
+
+use AceBucket to reduce redundant lockout scanning during event storms (notably when zoning into a raid)
+installing this revision will require restarting your client
+
+------------------------------------------------------------------------
+r473 | oscarucb | 2015-12-15 11:39:18 +0000 (Tue, 15 Dec 2015) | 5 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+   M /trunk/config.lua
+
+Fix ticket 177/191: Intermittent reset time glitches for Oceanic players
+Due to a Blizzard bug, the GetQuestResetTime() API reports wrong results for Oceanic characters in PST instances. This was causing SI to incorrectly use the US continental daily/weekly reset time for some saves on Oceanic players.
+Luckily, GetGameTime() and CalendarGetDate() still seem to report correctly for the Oceanic home realm in this situation, so SI now uses a heuristic to detect the bug and adjust the time accordingly.
+Add an '/si time' command to dump time debugging information
+
+------------------------------------------------------------------------
+r472 | oscarucb | 2015-12-09 04:26:56 +0000 (Wed, 09 Dec 2015) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+fix expiration display glitch on mouse-over tooltip for multi-region accounts
+
+------------------------------------------------------------------------
+r471 | oscarucb | 2015-11-28 11:43:51 +0000 (Sat, 28 Nov 2015) | 3 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+Revert the fix to obsolete ticket 103 to fix ticket 178/195 (intermittent LFR reset rollovers)
+Add Ashran deserter debuff
+
+------------------------------------------------------------------------
+r470 | oscarucb | 2015-11-18 12:05:36 +0000 (Wed, 18 Nov 2015) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+show lockout IDs for mythic 5-mans
+
+------------------------------------------------------------------------
+r468 | oscarucb | 2015-11-18 01:44:53 +0000 (Wed, 18 Nov 2015) | 2 lines
+Changed paths:
+   M /trunk/SavedInstances.lua
+
+update valor currency
+
+------------------------------------------------------------------------

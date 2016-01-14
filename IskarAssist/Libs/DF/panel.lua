@@ -18,8 +18,6 @@ local cleanfunction = function() end
 local PanelMetaFunctions = {}
 local APIFrameFunctions
 
-local simple_panel_counter = 1
-
 ------------------------------------------------------------------------------------------------------------
 --> metatables
 
@@ -1433,7 +1431,29 @@ function DF:IconPick (callback, close_when_select, param1, param2)
 	
 end	
 
-local simple_panel_counter = 1
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+function DF:ShowPanicWarning (text)
+	if (not DF.PanicWarningWindow) then
+		DF.PanicWarningWindow = CreateFrame ("frame", "DetailsFrameworkPanicWarningWindow", UIParent)
+		DF.PanicWarningWindow:SetHeight (80)
+		DF.PanicWarningWindow:SetBackdrop ({bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true})
+		DF.PanicWarningWindow:SetBackdropColor (1, 0, 0, 0.2)
+		DF.PanicWarningWindow:SetPoint ("topleft", UIParent, "topleft", 0, -250)
+		DF.PanicWarningWindow:SetPoint ("topright", UIParent, "topright", 0, -250)
+		
+		DF.PanicWarningWindow.text = DF.PanicWarningWindow:CreateFontString (nil, "overlay", "GameFontNormal")
+		DF.PanicWarningWindow.text:SetPoint ("center", DF.PanicWarningWindow, "center")
+		DF.PanicWarningWindow.text:SetTextColor (1, 0.6, 0)
+	end
+	
+	DF.PanicWarningWindow.text:SetText (text)
+	DF.PanicWarningWindow:Show()
+end
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 local simple_panel_mouse_down = function (self, button)
 	if (button == "RightButton") then
 		if (self.IsMoving) then
@@ -1478,8 +1498,8 @@ local no_options = {}
 function DF:CreateSimplePanel (parent, w, h, title, name, panel_options)
 	
 	if (not name) then
-		name = "DetailsFrameworkSimplePanel" .. simple_panel_counter
-		simple_panel_counter = simple_panel_counter + 1
+		name = "DetailsFrameworkSimplePanel" .. DF.SimplePanelCounter
+		DF.SimplePanelCounter = DF.SimplePanelCounter + 1
 	end
 	if (not parent) then
 		parent = UIParent
@@ -1536,8 +1556,6 @@ function DF:CreateSimplePanel (parent, w, h, title, name, panel_options)
 	f:SetScript ("OnMouseUp", simple_panel_mouse_up)
 	
 	f.SetTitle = simple_panel_settitle
-	
-	simple_panel_counter = simple_panel_counter + 1
 	
 	return f
 end
@@ -1813,17 +1831,21 @@ function DF:ShowTextPromptPanel (message, callback)
 		prompt:SetPoint ("top", f, "top", 0, -15)
 		prompt:SetJustifyH ("center")
 		f.prompt = prompt
-		
-		local button_true = DF:CreateButton (f, nil, 60, 20, "Okey")
+
+		local button_text_template = DF:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE")
+		local options_dropdown_template = DF:GetTemplate ("dropdown", "OPTIONS_DROPDOWN_TEMPLATE")
+
+		local button_true = DF:CreateButton (f, nil, 60, 20, "Okey", nil, nil, nil, nil, nil, nil, options_dropdown_template, button_text_template)
 		button_true:SetPoint ("bottomleft", f, "bottomleft", 10, 5)
 		f.button_true = button_true
 
-		local button_false = DF:CreateButton (f, function() f.textbox:ClearFocus(); f:Hide() end, 60, 20, "Cancel")
+		local button_false = DF:CreateButton (f, function() f.textbox:ClearFocus(); f:Hide() end, 60, 20, "Cancel", nil, nil, nil, nil, nil, nil, options_dropdown_template, button_text_template)
 		button_false:SetPoint ("bottomright", f, "bottomright", -10, 5)
 		f.button_false = button_false
 		
-		local textbox = DF:CreateTextEntry (f, function()end, 380, 20, "textbox", nil, nil, nil, nil)
+		local textbox = DF:CreateTextEntry (f, function()end, 380, 20, "textbox", nil, nil, options_dropdown_template)
 		textbox:SetPoint ("topleft", f, "topleft", 10, -45)
+		f.EntryBox = textbox
 
 		button_true:SetClickFunction (function()
 			local my_func = button_true.true_function
@@ -1843,9 +1865,10 @@ function DF:ShowTextPromptPanel (message, callback)
 
 	DF.text_prompt_panel:Show()
 	
+	DetailsFrameworkPrompt.EntryBox:SetText ("")
 	DF.text_prompt_panel.prompt:SetText (message)
 	DF.text_prompt_panel.button_true.true_function = callback
-	DF.text_prompt_panel.textbox:SetText ("")
+	
 	DF.text_prompt_panel.textbox:SetFocus (true)
 	
 end

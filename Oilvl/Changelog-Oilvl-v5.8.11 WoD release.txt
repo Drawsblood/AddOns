@@ -1,0 +1,125 @@
+------------------------------------------------------------------------
+r465 | olzenkhaw | 2016-01-05 22:57:14 +0000 (Tue, 05 Jan 2016) | 1 line
+Changed paths:
+   A /tags/v5.8.11 WoD release (from /trunk:464)
+
+v5.8.11 - fixed bugs.
+------------------------------------------------------------------------
+r464 | olzenkhaw | 2016-01-05 22:56:54 +0000 (Tue, 05 Jan 2016) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+
+v5.8.11 - fixed bugs.
+------------------------------------------------------------------------
+r462 | olzenkhaw | 2016-01-02 06:06:10 +0000 (Sat, 02 Jan 2016) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+
+v5.8.10 - fixed bugs.
+------------------------------------------------------------------------
+r460 | olzenkhaw | 2016-01-02 01:52:25 +0000 (Sat, 02 Jan 2016) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+
+v5.8.9 - Added Low level enchanted and Low level socketed in character frame / inspect frame
+------------------------------------------------------------------------
+r458 | olzenkhaw | 2016-01-02 01:21:14 +0000 (Sat, 02 Jan 2016) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+
+5.8.8 - Add not enchanted and not socketed beside ! in char frame and inspect frame if the items are not enchanted or socketed.
+------------------------------------------------------------------------
+r456 | olzenkhaw | 2016-01-01 09:54:33 +0000 (Fri, 01 Jan 2016) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+   M /trunk/Oilvlconfig.lua
+
+v5.8.7 - display enchantment and gem effect in character frame and inspection frame. No gem will display blue !. No ecnhant will display yellow !.
+------------------------------------------------------------------------
+r454 | olzenkhaw | 2015-12-30 07:06:38 +0000 (Wed, 30 Dec 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+
+5.8.6 - SendToX will also send fully upgraded item level
+------------------------------------------------------------------------
+r452 | olzenkhaw | 2015-12-26 04:21:43 +0000 (Sat, 26 Dec 2015) | 2 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+5.8.5
+ - SendToX will also send upgrade number.
+------------------------------------------------------------------------
+r450 | olzenkhaw | 2015-12-09 00:53:44 +0000 (Wed, 09 Dec 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+v5.8.4 - fixed script too long error.
+------------------------------------------------------------------------
+r448 | olzenkhaw | 2015-12-07 06:03:11 +0000 (Mon, 07 Dec 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+
+5.8.3 - fixed nil error.
+------------------------------------------------------------------------
+r446 | olzenkhaw | 2015-12-07 05:15:27 +0000 (Mon, 07 Dec 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+
+v5.8.2 - Shows average item level and number of fully upgraded gears / total upgradable gears below level text in Character frame and Inspect Frame.
+------------------------------------------------------------------------
+r444 | olzenkhaw | 2015-12-06 08:40:08 +0000 (Sun, 06 Dec 2015) | 1 line
+Changed paths:
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+
+v5.8.1 - fixed Inspection Window bug.
+------------------------------------------------------------------------
+r442 | olzenkhaw | 2015-12-06 08:08:27 +0000 (Sun, 06 Dec 2015) | 3 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+
+v5.8.0
+ - display number of full upgrade / total upgradable gear at bottomleft of unit in OiLvL window.
+ - fixed bugs
+------------------------------------------------------------------------
+r440 | olzenkhaw | 2015-12-06 01:13:11 +0000 (Sun, 06 Dec 2015) | 2 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+   M /trunk/OilvlPlayer.lua
+
+v5.7.0
+ - Show item level and upgrade level in inspection frame
+------------------------------------------------------------------------
+r438 | olzenkhaw | 2015-12-05 05:13:30 +0000 (Sat, 05 Dec 2015) | 3 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+
+v5.6.2 
+- optimized raid progression detail
+- added upgrade level (in green color) in minimap button gear list
+------------------------------------------------------------------------
+r437 | olzenkhaw | 2015-12-04 08:13:16 +0000 (Fri, 04 Dec 2015) | 3 lines
+Changed paths:
+   M /trunk/Oilvl.lua
+   M /trunk/Oilvl.toc
+
+v5.6.2 
+- optimized raid progression detail
+- added upgrade level (in green color) in minimap button gear list
+------------------------------------------------------------------------

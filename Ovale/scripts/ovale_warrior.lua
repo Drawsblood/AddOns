@@ -22,6 +22,7 @@ Include(ovale_warrior_spells)
 AddCheckBox(opt_interrupt L(interrupt) default specialization=arms)
 AddCheckBox(opt_melee_range L(not_in_melee_range) specialization=arms)
 AddCheckBox(opt_potion_strength ItemName(draenic_strength_potion) default specialization=arms)
+AddCheckBox(opt_legendary_ring_strength ItemName(legendary_ring_strength) default specialization=arms)
 
 AddFunction ArmsUsePotionStrength
 {
@@ -30,7 +31,6 @@ AddFunction ArmsUsePotionStrength
 
 AddFunction ArmsUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -106,6 +106,8 @@ AddFunction ArmsDefaultCdActions
 	unless 0 > 5 and ArmsMovementCdPostConditions()
 	{
 		#use_item,name=thorasus_the_stone_heart_of_draenor,if=(buff.bloodbath.up|(!talent.bloodbath.enabled&debuff.colossus_smash.up))
+		if { BuffPresent(bloodbath_buff) or not Talent(bloodbath_talent) and target.DebuffPresent(colossus_smash_debuff) } and CheckBoxOn(opt_legendary_ring_strength) Item(legendary_ring_strength usable=1)
+		#use_item,slot=trinket1,if=(buff.bloodbath.up|(!talent.bloodbath.enabled&debuff.colossus_smash.up))
 		if BuffPresent(bloodbath_buff) or not Talent(bloodbath_talent) and target.DebuffPresent(colossus_smash_debuff) ArmsUseItemActions()
 		#potion,name=draenic_strength,if=(target.health.pct<20&buff.recklessness.up)|target.time_to_die<25
 		if target.HealthPercent() < 20 and BuffPresent(recklessness_buff) or target.TimeToDie() < 25 ArmsUsePotionStrength()
@@ -393,6 +395,7 @@ AddIcon checkbox=opt_warrior_arms_aoe help=cd specialization=arms
 # heroic_leap
 # heroic_throw
 # impending_victory
+# legendary_ring_strength
 # mortal_strike
 # pummel
 # quaking_palm
@@ -412,7 +415,6 @@ AddIcon checkbox=opt_warrior_arms_aoe help=cd specialization=arms
 # t18_class_trinket
 # taste_for_blood_talent
 # thunder_clap
-# wait
 # war_stomp
 # whirlwind
 ]]
@@ -437,6 +439,7 @@ Include(ovale_warrior_spells)
 AddCheckBox(opt_interrupt L(interrupt) default specialization=fury)
 AddCheckBox(opt_melee_range L(not_in_melee_range) specialization=fury)
 AddCheckBox(opt_potion_strength ItemName(draenic_strength_potion) default specialization=fury)
+AddCheckBox(opt_legendary_ring_strength ItemName(legendary_ring_strength) default specialization=fury)
 
 AddFunction FurySingleMindedFuryUsePotionStrength
 {
@@ -445,7 +448,6 @@ AddFunction FurySingleMindedFuryUsePotionStrength
 
 AddFunction FurySingleMindedFuryUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -547,7 +549,9 @@ AddFunction FurySingleMindedFuryDefaultCdActions
 	unless 0 > 5 and FurySingleMindedFuryMovementCdPostConditions()
 	{
 		#use_item,name=thorasus_the_stone_heart_of_draenor,if=(spell_targets.whirlwind>1|!raid_event.adds.exists)&((talent.bladestorm.enabled&cooldown.bladestorm.remains=0)|buff.recklessness.up|target.time_to_die<25)
-		if { Enemies() > 1 or not False(raid_event_adds_exists) } and { Talent(bladestorm_talent) and not SpellCooldown(bladestorm) > 0 or BuffPresent(recklessness_buff) or target.TimeToDie() < 25 } FurySingleMindedFuryUseItemActions()
+		if { Enemies() > 1 or not False(raid_event_adds_exists) } and { Talent(bladestorm_talent) and not SpellCooldown(bladestorm) > 0 or BuffPresent(recklessness_buff) or target.TimeToDie() < 25 } and CheckBoxOn(opt_legendary_ring_strength) Item(legendary_ring_strength usable=1)
+		#use_item,slot=trinket1,if=(spell_targets.whirlwind>1|!raid_event.adds.exists)&((talent.bladestorm.enabled&cooldown.bladestorm.remains=0)|buff.recklessness.up|buff.avatar.up|buff.bloodbath.up|target.time_to_die<25)
+		if { Enemies() > 1 or not False(raid_event_adds_exists) } and { Talent(bladestorm_talent) and not SpellCooldown(bladestorm) > 0 or BuffPresent(recklessness_buff) or BuffPresent(avatar_buff) or BuffPresent(bloodbath_buff) or target.TimeToDie() < 25 } FurySingleMindedFuryUseItemActions()
 		#potion,name=draenic_strength,if=(target.health.pct<20&buff.recklessness.up)|target.time_to_die<=30
 		if target.HealthPercent() < 20 and BuffPresent(recklessness_buff) or target.TimeToDie() <= 30 FurySingleMindedFuryUsePotionStrength()
 		#run_action_list,name=single_target,if=(raid_event.adds.cooldown<60&raid_event.adds.count>2&spell_targets.whirlwind=1)|raid_event.movement.cooldown<5
@@ -1014,6 +1018,7 @@ AddIcon checkbox=opt_warrior_fury_aoe help=cd specialization=fury
 # anger_management_talent
 # arcane_torrent_rage
 # avatar
+# avatar_buff
 # battle_shout
 # battle_stance
 # berserker_rage
@@ -1036,6 +1041,7 @@ AddIcon checkbox=opt_warrior_fury_aoe help=cd specialization=fury
 # heroic_leap
 # heroic_throw
 # impending_victory
+# legendary_ring_strength
 # meat_cleaver_buff
 # pummel
 # quaking_palm
@@ -1074,6 +1080,7 @@ Include(ovale_warrior_spells)
 AddCheckBox(opt_interrupt L(interrupt) default specialization=fury)
 AddCheckBox(opt_melee_range L(not_in_melee_range) specialization=fury)
 AddCheckBox(opt_potion_strength ItemName(draenic_strength_potion) default specialization=fury)
+AddCheckBox(opt_legendary_ring_strength ItemName(legendary_ring_strength) default specialization=fury)
 
 AddFunction FuryTitansGripUsePotionStrength
 {
@@ -1082,7 +1089,6 @@ AddFunction FuryTitansGripUsePotionStrength
 
 AddFunction FuryTitansGripUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -1184,7 +1190,9 @@ AddFunction FuryTitansGripDefaultCdActions
 	unless 0 > 5 and FuryTitansGripMovementCdPostConditions()
 	{
 		#use_item,name=thorasus_the_stone_heart_of_draenor,if=(spell_targets.whirlwind>1|!raid_event.adds.exists)&((talent.bladestorm.enabled&cooldown.bladestorm.remains=0)|buff.recklessness.up|target.time_to_die<25)
-		if { Enemies() > 1 or not False(raid_event_adds_exists) } and { Talent(bladestorm_talent) and not SpellCooldown(bladestorm) > 0 or BuffPresent(recklessness_buff) or target.TimeToDie() < 25 } FuryTitansGripUseItemActions()
+		if { Enemies() > 1 or not False(raid_event_adds_exists) } and { Talent(bladestorm_talent) and not SpellCooldown(bladestorm) > 0 or BuffPresent(recklessness_buff) or target.TimeToDie() < 25 } and CheckBoxOn(opt_legendary_ring_strength) Item(legendary_ring_strength usable=1)
+		#use_item,slot=trinket1,if=(spell_targets.whirlwind>1|!raid_event.adds.exists)&((talent.bladestorm.enabled&cooldown.bladestorm.remains=0)|buff.recklessness.up|buff.avatar.up|buff.bloodbath.up|target.time_to_die<25)
+		if { Enemies() > 1 or not False(raid_event_adds_exists) } and { Talent(bladestorm_talent) and not SpellCooldown(bladestorm) > 0 or BuffPresent(recklessness_buff) or BuffPresent(avatar_buff) or BuffPresent(bloodbath_buff) or target.TimeToDie() < 25 } FuryTitansGripUseItemActions()
 		#potion,name=draenic_strength,if=(target.health.pct<20&buff.recklessness.up)|target.time_to_die<=30
 		if target.HealthPercent() < 20 and BuffPresent(recklessness_buff) or target.TimeToDie() <= 30 FuryTitansGripUsePotionStrength()
 		#run_action_list,name=single_target,if=(raid_event.adds.cooldown<60&raid_event.adds.count>2&spell_targets.whirlwind=1)|raid_event.movement.cooldown<5
@@ -1651,6 +1659,7 @@ AddIcon checkbox=opt_warrior_fury_aoe help=cd specialization=fury
 # anger_management_talent
 # arcane_torrent_rage
 # avatar
+# avatar_buff
 # battle_shout
 # battle_stance
 # berserker_rage
@@ -1673,6 +1682,7 @@ AddIcon checkbox=opt_warrior_fury_aoe help=cd specialization=fury
 # heroic_leap
 # heroic_throw
 # impending_victory
+# legendary_ring_strength
 # meat_cleaver_buff
 # pummel
 # quaking_palm
@@ -1711,6 +1721,7 @@ Include(ovale_warrior_spells)
 AddCheckBox(opt_interrupt L(interrupt) default if_stance=warrior_gladiator_stance specialization=protection)
 AddCheckBox(opt_melee_range L(not_in_melee_range) if_stance=warrior_gladiator_stance specialization=protection)
 AddCheckBox(opt_potion_armor ItemName(draenic_armor_potion) default if_stance=warrior_gladiator_stance specialization=protection)
+AddCheckBox(opt_legendary_ring_strength ItemName(legendary_ring_strength) default if_stance=warrior_gladiator_stance specialization=protection)
 
 AddFunction ProtectionGladiatorUsePotionArmor
 {
@@ -1719,7 +1730,6 @@ AddFunction ProtectionGladiatorUsePotionArmor
 
 AddFunction ProtectionGladiatorUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -1811,6 +1821,8 @@ AddFunction ProtectionGladiatorDefaultCdActions
 		#bloodbath
 		Spell(bloodbath)
 		#use_item,name=thorasus_the_stone_heart_of_draenor,if=buff.bloodbath.up|buff.avatar.up|buff.shield_charge.up|target.time_to_die<15
+		if { BuffPresent(bloodbath_buff) or BuffPresent(avatar_buff) or BuffPresent(shield_charge_buff) or target.TimeToDie() < 15 } and CheckBoxOn(opt_legendary_ring_strength) Item(legendary_ring_strength usable=1)
+		#use_item,slot=trinket1,if=buff.bloodbath.up|buff.avatar.up|buff.shield_charge.up|target.time_to_die<15
 		if BuffPresent(bloodbath_buff) or BuffPresent(avatar_buff) or BuffPresent(shield_charge_buff) or target.TimeToDie() < 15 ProtectionGladiatorUseItemActions()
 		#blood_fury,if=buff.bloodbath.up|buff.avatar.up|buff.shield_charge.up|target.time_to_die<10
 		if BuffPresent(bloodbath_buff) or BuffPresent(avatar_buff) or BuffPresent(shield_charge_buff) or target.TimeToDie() < 10 Spell(blood_fury_ap)
@@ -2030,6 +2042,7 @@ AddIcon checkbox=opt_warrior_protection_aoe help=cd specialization=protection
 # heroic_leap
 # heroic_strike
 # heroic_throw
+# legendary_ring_strength
 # pummel
 # quaking_palm
 # revenge
@@ -2072,7 +2085,6 @@ AddFunction ProtectionUsePotionArmor
 
 AddFunction ProtectionUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }

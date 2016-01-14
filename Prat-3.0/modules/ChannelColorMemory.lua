@@ -100,7 +100,7 @@ Prat:AddModuleToLoad(function()
   {
 	ChannelColorMemory = "频道颜色存储",
 	["Remembers the colors of each channel name."] = "记住每个频道名称的颜色",
-	["(%w+)%s?(.*)"] = true, -- Needs review
+	["(%w+)%s?(.*)"] = true,
 }
 
   )

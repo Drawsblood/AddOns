@@ -816,7 +816,7 @@ Click to paste into the chat.]=] ] = "当前值: '%s'Click to paste into the cha
 	MapYPos = "地图Y坐标",
 	MapZone = "地图区域",
 	["module:buildUserSubsIndex(): warning: module patterns not defined!"] = "模块:buildUserSubsIndex(): 警告: 模块模板未定义!",
-	MouseoverTargetName = "鼠标滑过目标名", -- Needs review
+	MouseoverTargetName = "鼠标滑过目标名",
 	["<noguild>"] = "<无公会>",
 	["NO MATCHFUNC FOUND"] = "未发现匹配函数",
 	["no substitution name given"] = "无特定置换名称",
@@ -825,7 +825,7 @@ Click to paste into the chat.]=] ] = "当前值: '%s'Click to paste into the cha
 	["no user defined subs found"] = "未发现用户定义置换",
 	["no value given for subtitution \"%s\""] = "置换 \"%s\"没有赋值",
 	["Options for setting and removing user defined substitutions. (NB: users may define custom values for existing substitutions, but they will revert to the default value if the user definition is deleted.)"] = "设置和移除用户定义置换的选项.(注:用户可以为已存在的置换定义自定义值,如果用户定义被删除将恢复默认值)",
-	PlayerAverageItemLevel = "替换", -- Needs review
+	PlayerAverageItemLevel = "替换",
 	PlayerCurrentMana = "玩家当前法力",
 	PlayerHealthDeficit = "玩家生命不足",
 	PlayerHP = "玩家血量",

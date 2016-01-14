@@ -531,8 +531,8 @@ Prat:AddModuleToLoad(function()
 	["Prat_Playernames: Stored Player Data Cleared"] = "Prat_玩家名称: 玩家数据存储已清除",
 	["Query the server for all player names we do not know. Note: This happpens pretty slowly, and this data is not saved."] = "为所有未知玩家查询服务器,注意:这将非常缓慢,并且数据不会被存储",
 	Random = "随机",
-	realidcolor_desc = "实名名字颜色", -- Needs review
-	realidcolor_name = "实名颜色", -- Needs review
+	realidcolor_desc = "实名名字颜色",
+	realidcolor_name = "实名颜色",
 	["Reset Settings"] = "重置设置",
 	["Restore default settings, and delete stored character data."] = "恢复默认设置并删除已存角色数据",
 	["Set common color of unknown player names."] = "设置未知玩家名称共有颜色",

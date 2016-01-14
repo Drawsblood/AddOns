@@ -216,30 +216,30 @@ verwende stattdessen Alt+Hoch und Alt+Runter, um durch den Chatverlauf zu scroll
   )
   L:AddLocale("zhCN",
   {
-	["Attach edit box to..."] = "把输入框附加到……", -- Needs review
-	["Attach to..."] = "附加到……", -- Needs review
-	["Background color"] = "背景颜色", -- Needs review
-	["Background Inset"] = "背景嵌入", -- Needs review
-	["Background texture"] = "背景纹理", -- Needs review
-	["Border color"] = "边框颜色", -- Needs review
-	["Border texture"] = "边框纹理", -- Needs review
+	["Attach edit box to..."] = "把输入框附加到……",
+	["Attach to..."] = "附加到……",
+	["Background color"] = "背景颜色",
+	["Background Inset"] = "背景嵌入",
+	["Background texture"] = "背景纹理",
+	["Border color"] = "边框颜色",
+	["Border texture"] = "边框纹理",
 	Bottom = "底部",
-	["Color border by channel"] = "频道颜色边框", -- Needs review
+	["Color border by channel"] = "频道颜色边框",
 	currently_broken_alt_behavior = [=[在现在WoW客户端里，方向键的行为已损坏，
 
-使用Alt+上和Alt+下来替代上下键浏览历史]=], -- Needs review
-	["Edge Size"] = "边缘尺寸", -- Needs review
+使用Alt+上和Alt+下来替代上下键浏览历史]=],
+	["Edge Size"] = "边缘尺寸",
 	Editbox = "输入框",
 	["Editbox options."] = "输入框选项",
-	Font = "字体", -- Needs review
-	["Free-floating"] = "自由浮动", -- Needs review
-	["Free-floating, Locked"] = "自由浮动，锁定", -- Needs review
-	["Requires the Alt key to be held down to move the cursor in chat"] = "需要在聊天中按住Alt键移动光标", -- Needs review
-	["Select the font to use for the edit box"] = "选择输入框的字体", -- Needs review
-	["Sets the frame's border color to the color of your currently active channel"] = "设置边框颜色到你当前激活的频道颜色", -- Needs review
-	["Tile Size"] = "平铺尺寸", -- Needs review
+	Font = "字体",
+	["Free-floating"] = "自由浮动",
+	["Free-floating, Locked"] = "自由浮动，锁定",
+	["Requires the Alt key to be held down to move the cursor in chat"] = "需要在聊天中按住Alt键移动光标",
+	["Select the font to use for the edit box"] = "选择输入框的字体",
+	["Sets the frame's border color to the color of your currently active channel"] = "设置边框颜色到你当前激活的频道颜色",
+	["Tile Size"] = "平铺尺寸",
 	Top = "顶部",
-	["Use Alt key for cursor movement"] = "使用Alt键令光标移动", -- Needs review
+	["Use Alt key for cursor movement"] = "使用Alt键令光标移动",
 }
 
   )
@@ -247,20 +247,20 @@ verwende stattdessen Alt+Hoch und Alt+Runter, um durch den Chatverlauf zu scroll
   {
 	-- ["Attach edit box to..."] = "",
 	-- ["Attach to..."] = "",
-	-- ["Background color"] = "",
+	["Background color"] = "Color de fondo",
 	-- ["Background Inset"] = "",
-	-- ["Background texture"] = "",
-	-- ["Border color"] = "",
-	-- ["Border texture"] = "",
+	["Background texture"] = "Textura de fondo",
+	["Border color"] = "Color del borde",
+	["Border texture"] = "Textura del borde",
 	Bottom = "Abajo",
-	-- ["Color border by channel"] = "",
+	["Color border by channel"] = "Color del borde por canal",
 	-- currently_broken_alt_behavior = "",
-	-- ["Edge Size"] = "",
+	["Edge Size"] = "Tamaño del borde",
 	Editbox = "Caja de edición",
 	["Editbox options."] = "Opciones de la caja de edición.",
-	-- Font = "",
-	-- ["Free-floating"] = "",
-	-- ["Free-floating, Locked"] = "",
+	Font = "Fuente",
+	["Free-floating"] = "Flotar-libre",
+	["Free-floating, Locked"] = "Flotar-libre, Bloqueado",
 	-- ["Requires the Alt key to be held down to move the cursor in chat"] = "",
 	-- ["Select the font to use for the edit box"] = "",
 	-- ["Sets the frame's border color to the color of your currently active channel"] = "",

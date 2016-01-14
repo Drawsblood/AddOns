@@ -34,7 +34,7 @@ local anzu_texture
 local player_class
 local block_backdrop_eye = {bgFile = [[Interface\RaidFrame\Raid-Bar-Hp-Fill]], tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0},
 edgeFile = "Interface\\AddOns\\IskarAssist\\border_2", edgeSize = 20}
-local iskar_version = "v0.16.3"
+local iskar_version = "v0.16.4b"
 
 local iskar_encounter_id = 1788 --iskar
 local iskar_npcid = 90316 --iskar
@@ -1508,13 +1508,6 @@ function IKA:CreateFrames (show_after_cretion)
 				end
 			end
 		
-		elseif (token == "SPELL_CAST_START") then
-			--if (spellname == spell_fel_conduit) then
-			--	return fel_conduit_cooldown:SetBarCooldown (15, 20)
-			--elseif (spellname == spell_fel_bomb) then
-			--	return fel_bomb_cooldown:SetBarCooldown (18, 23)
-			--end
-		
 		elseif (token == "SPELL_CAST_SUCCESS") then
 			if (dispel_spells [spellname] and f.dispell_ready) then
 				if (f.dispell_ready [who_name]) then
@@ -1859,17 +1852,6 @@ function IKA:CreateFrames (show_after_cretion)
 				desc = "Show " .. aura_phantasmal_bomb .. " aura.\n\n|cFFFFFF00Important|r: only works on vertical alignment.",
 				name = "|T" .. phantasmal_bomb_icon .. ":14:14:0:0:64:64:5:59:5:59|t" .. " " .. aura_phantasmal_bomb
 			},
-			--[[
-			{
-				type = "toggle",
-				get = function() return IKA.db.profile.show_cooldown_bars end,
-				set = function (self, fixedparam, value) 
-					IKA.db.profile.show_cooldown_bars = not IKA.db.profile.show_cooldown_bars
-				end,
-				desc = "When enabled, two cooldown bars is shown for |T" .. spell_fel_conduit_icon .. ":14:14:0:0:64:64:5:59:5:59|t" .. spell_fel_conduit .. " and |T" .. phantasmal_bomb_icon .. ":14:14:0:0:64:64:5:59:5:59|t" .. spell_fel_bomb .. "",
-				name = "Show Cooldown Bars"
-			},
-			--]]
 			--feedback
 			{
 				type = "execute",

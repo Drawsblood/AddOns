@@ -289,17 +289,17 @@ L:AddLocale("ruRU",
 L:AddLocale("zhCN",  
 {
 	BBCode = "BB代码",
-	BOTTOMLEFT = "左下", -- Needs review
-	BOTTOMRIGHT = "右下", -- Needs review
-	buttonpos_desc = "复制按钮在聊天框的位置", -- Needs review
-	buttonpos_name = "按钮位置", -- Needs review
+	BOTTOMLEFT = "左下",
+	BOTTOMRIGHT = "右下",
+	buttonpos_desc = "复制按钮在聊天框的位置",
+	buttonpos_name = "按钮位置",
 	ChatFrame = "聊天框",
 	["Copy all of the text in the selected chat frame into an edit box"] = "在选定的聊天框复制全部文本到输入框",
 	CopyChat = "聊天复制",
 	["Copy Text"] = "复制文本",
 	["Copy Text Format"] = "复制文本格式",
 	["Copy text from the active chat window."] = "从活跃的聊天窗口复制文本",
-	["Copy To Editbox"] = "复制到编辑框", -- Needs review
+	["Copy To Editbox"] = "复制到编辑框",
 	HTML = "超文本标记语言",
 	["Message From : %s"] = "信息来自: %s",
 	Plain = "简洁",
@@ -307,8 +307,8 @@ L:AddLocale("zhCN",
 	showbutton_desc = "在聊天框显示按钮",
 	showbutton_name = "复制按钮",
 	[" Text"] = "文本",
-	TOPLEFT = "左上", -- Needs review
-	TOPRIGHT = "右上", -- Needs review
+	TOPLEFT = "左上",
+	TOPRIGHT = "右上",
 	["Wowace.com Forums"] = "Wowace.com论坛",
 }
 

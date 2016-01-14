@@ -9,7 +9,7 @@
 ## X-Curse-Project-Name: LibItemUpgradeInfo-1.0
 ## X-Curse-Project-ID: libitemupgradeinfo-1-0
 ## X-Curse-Repository-ID: wow/libitemupgradeinfo-1-0/mainline
-## X-Curse-Packaged-Version: v5.5.21 WoD release
+## X-Curse-Packaged-Version: v5.8.11 WoD release
 ## X-Curse-Project-Name: O Item Level (OiLvL)
 ## X-Curse-Project-ID: o-item-level
 ## X-Curse-Repository-ID: wow/o-item-level/mainline

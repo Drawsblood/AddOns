@@ -85,7 +85,7 @@ local function GetMockUpValue(id)
 end
 ScriptEnv.GetMockUpValue = GetMockUpValue
 
-local function GetValue(id)
+local function GetValue(id, ...)
 	if ScriptEnv.mockUpValues then
 		return GetMockUpValue(id)
 	end
@@ -128,8 +128,20 @@ local function GetValue(id)
 		local _, _, standing = Factions:GetFactionInfo(Addon:GetFaction())
 
 		return Factions:GetStandingLabel(standing)
-	elseif id == "Faction" then
-		return Factions:GetFactionName(Addon:GetFaction())
+	elseif id == "Faction" then		
+		local name = Factions:GetFactionName(Addon:GetFaction())
+	
+		local maxLength = select(1, ...)
+	
+		if type(maxLength) == "number" and name and name:len() > maxLength then
+			local short = Options:GetShortName(Addon:GetFaction())
+			
+			if short then
+				name = short
+			end
+		end
+	
+		return name
 	elseif id == "TimeToStanding" then
 		return RepHistory:GetTimeToLevel(Addon:GetFaction())
 	elseif id == "KillsToStanding" then

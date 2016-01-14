@@ -20,8 +20,9 @@ else
 end
 
 local addon = BigBrother
+local profile
 addon.vars = vars
-vars.svnrev["BigBrother.lua"] = tonumber(("$Revision: 389 $"):match("%d+"))
+vars.svnrev["BigBrother.lua"] = tonumber(("$Revision: 405 $"):match("%d+"))
 
 local bit, math, date, string, select, table, time, tonumber, unpack, wipe, pairs, ipairs = 
       bit, math, date, string, select, table, time, tonumber, unpack, wipe, pairs, ipairs
@@ -759,6 +760,7 @@ function addon:OnProfileDisable()
 end
 
 function addon:OnProfileEnable()
+  profile = self.db.profile
 end
 
 function addon:SendMessageList(Pre,List,Where)
@@ -1239,31 +1241,35 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timestamp, subevent, hideCaster, ...)
   spellID, spellname, spellschool, 
   extraspellID = ...
 
-  if self.db.profile.GroupOnly and 
-     bit.band(srcflags or 0, COMBATLOG_OBJECT_AFFILIATION_OUTSIDER) > 0 and
-     bit.band(dstflags or 0, COMBATLOG_OBJECT_AFFILIATION_OUTSIDER) > 0 and
+  srcflags = srcflags or 0
+  dstflags = dstflags or 0
+
+  if profile.GroupOnly and 
+     bit.band(srcflags, COMBATLOG_OBJECT_AFFILIATION_OUTSIDER) > 0 and
+     bit.band(dstflags, COMBATLOG_OBJECT_AFFILIATION_OUTSIDER) > 0 and
      not ccinfo.spellid[dstGUID] then
      -- print("skipped event from "..(srcname or "nil").." on "..(dstname or "nil"))
     return
   end
 
-  local is_playersrc = bit.band(srcflags or 0, playersrcmask) > 0
-  local is_playerdst = bit.band(dstflags or 0, COMBATLOG_OBJECT_TYPE_PLAYER) > 0  
-  local is_hostiledst = bit.band(dstflags or 0, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0
-  if BigBrother.debug then
+  local is_playersrc = bit.band(srcflags, playersrcmask) > 0
+  local is_playerdst = bit.band(dstflags, COMBATLOG_OBJECT_TYPE_PLAYER) > 0  
+  local is_hostiledst = bit.band(dstflags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0
+  if addon.debug then
     print((spellname or "nil")..":"..(spellID or "nil")..":"..(subevent or "nil")..":"..
        (srcname or "nil")..":"..(srcGUID or "nil")..":"..(srcflags or "nil")..":"..(srcRaidFlags or "nil")..":"..
        (dstname or "nil")..":"..(dstGUID or "nil")..":"..(dstflags or "nil")..":"..(dstRaidFlags or "nil")..":"..
        "is_playersrc:"..((is_playersrc and "true") or "false")..":"..(extraspellID or "nil"))
   end
-  if is_playersrc and subevent == "SPELL_SUMMON" then
+  if subevent == "SPELL_SUMMON" and is_playersrc then
     petToOwner[dstGUID] = srcGUID    
     return 
   elseif subevent == "UNIT_DIED" or subevent == "UNIT_DESTROYED" then
     petToOwner[dstGUID] = nil
     return 
   end
-  if self.db.profile.PolyBreak 
+  local PolyBreak = profile.PolyBreak
+  if PolyBreak 
 	  and dstGUID and ccinfo.time[dstGUID]
 	  and (string.find(subevent, "_DAMAGE") or  -- newest direct damage
 	       (subevent == "SPELL_AURA_APPLIED" -- newest dot application with no prev direct damage
@@ -1308,24 +1314,24 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timestamp, subevent, hideCaster, ...)
 	     spellID = ccinfo.spellid[dstGUID]
 	     spellname = GetSpellInfo(spellID)
 	  end
-  elseif self.db.profile.PolyBreak and is_playersrc and is_hostiledst
+  elseif PolyBreak and is_playersrc and is_hostiledst
 	  and (subevent == "SPELL_AURA_APPLIED" or subevent == "SPELL_AURA_REFRESH")
 	  and spellID ~= 24131 -- ignore the dot component of wyvern sting
 	  and ccSpellNames[spellname] then
 	    local expires 
 	    local now = GetTime()
-	    self.db.profile.cctime = self.db.profile.cctime or {}
+	    profile.cctime = profile.cctime or {}
 	    for _,unit in pairs({srcname.."-target", "target", "focus", "mouseover" }) do
 	      if UnitExists(unit) and UnitGUID(unit) == dstGUID then
 	        expires = select(7, UnitDebuff(unit, spellname))
 		break
 	      end
 	    end
-            local usualtime = self.db.profile.cctime[spellname]
+            local usualtime = profile.cctime[spellname]
 	    if expires then
 	      local duration = expires - now
 	      if not usualtime or duration > usualtime then
-	        self.db.profile.cctime[spellname] = duration
+	        profile.cctime[spellname] = duration
 	      end
 	    else
 	      expires = now + (usualtime or 60)
@@ -1338,7 +1344,7 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timestamp, subevent, hideCaster, ...)
 	      ccinfo.spellid[dstGUID] = spellID
 	    end
   end
-  if self.db.profile.PolyBreak 
+  if PolyBreak 
 	  and (subevent == "SPELL_AURA_BROKEN" or subevent == "SPELL_AURA_BROKEN_SPELL" or subevent == "SPELL_AURA_REMOVED")
 	  and is_hostiledst
 	  and spellID ~= 24131 -- ignore the dot component of wyvern sting
@@ -1419,38 +1425,38 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timestamp, subevent, hideCaster, ...)
 		   end
 		   sendspam(spam, nil, tname)
 		end
-  elseif self.db.profile.Misdirect and is_playersrc 
-     and subevent == "SPELL_CAST_SUCCESS" and (spellID == 34477 or spellID == 57934 or spellID == 110588) then
+  elseif not is_playersrc then -- rest is all direct player actions
+     return
+  elseif subevent == "SPELL_CAST_SUCCESS" and (spellID == 34477 or spellID == 57934 or spellID == 110588) and profile.Misdirect then
 	sendspam(L["%s cast %s on %s"]:format(SRC, SPELL(spellID), DST), nil, dstname)
-  elseif self.db.profile.CombatRez and is_playersrc 
-     and subevent == "SPELL_RESURRECT" and brezSpellNames[spellname] then
-	sendspam(L["%s cast %s on %s"]:format(SRC, SPELL(spellID), DST))		
-  elseif self.db.profile.NonCombatRez and is_playersrc 
-     and subevent == "SPELL_RESURRECT" and rezSpellNames[spellname] then
-	-- would like to report at spell cast start, but unfortunately the SPELL_CAST_SUCCESS combat log event for all rezzes has a nil target
-	sendspam(L["%s cast %s on %s"]:format(SRC, SPELL(spellID), DST))		
-  elseif self.db.profile.Taunt and is_playersrc and not is_playerdst and 
-        ((subevent == "SPELL_CAST_SUCCESS" and tauntSpellNames[spellname] and spellname ~= deathgrip) or 
-	 (subevent == "SPELL_AURA_APPLIED" and spellname == deathgrip)) then -- trigger off death grip "taunted" debuff, which is not applied with Glyph of Tranquil Grip
+  elseif subevent == "SPELL_RESURRECT" then
+  	if brezSpellNames[spellname] and profile.CombatRez then
+	  sendspam(L["%s cast %s on %s"]:format(SRC, SPELL(spellID), DST))		
+	elseif rezSpellNames[spellname] and profile.NonCombatRez then
+	  -- would like to report at spell cast start, but unfortunately the SPELL_CAST_SUCCESS combat log event for all rezzes has a nil target
+	  sendspam(L["%s cast %s on %s"]:format(SRC, SPELL(spellID), DST))		
+	end
+  elseif ((subevent == "SPELL_CAST_SUCCESS" and tauntSpellNames[spellname] and spellname ~= deathgrip) or 
+	 (subevent == "SPELL_AURA_APPLIED" and spellname == deathgrip)) and -- trigger off death grip "taunted" debuff, which is not applied with Glyph of Tranquil Grip
+         profile.Taunt and not is_playerdst then
 	sendspam(L["%s taunted %s with %s"]:format(SRC, DST, SPELL(spellID)), nil, srcname)
-  elseif self.db.profile.Taunt and is_playersrc 
-     and not is_playerdst and subevent == "SPELL_AURA_APPLIED" and aoetauntSpellNames[spellname] then
+  elseif subevent == "SPELL_AURA_APPLIED" and aoetauntSpellNames[spellname] and profile.Taunt and not is_playerdst then
 	sendspam(L["%s aoe-taunted %s with %s"]:format(SRC, DST, SPELL(spellID)), nil, srcname)
-  elseif self.db.profile.Taunt and is_playersrc and not is_playerdst 
-     and subevent == "SPELL_MISSED" and (tauntSpellNames[spellname] or aoetauntSpellNames[spellname]) 
+  elseif subevent == "SPELL_MISSED" and (tauntSpellNames[spellname] or aoetauntSpellNames[spellname]) 
 	  and not (spellID == 49576 and extraspellID == "IMMUNE") -- ignore immunity messages from death grip caused by mobs immune to the movement component
-	  and not spellID == 2649 then -- ignore hunter pet growl
+	  and not spellID == 2649 -- ignore hunter pet growl
+          and profile.Taunt and not is_playerdst  then
     	local missType = extraspellID
 	sendspam(L["%s taunt FAILED on %s (%s)"]:format(SRC, DST, missType), nil, srcname)
-  elseif self.db.profile.Interrupt and is_playersrc and subevent == "SPELL_INTERRUPT" then
+  elseif subevent == "SPELL_INTERRUPT" and profile.Interrupt then
 	sendspam(L["%s interrupted %s casting %s"]:format(SRC, DST, SPELL(extraspellID)))
-  elseif self.db.profile.Dispel and is_playersrc and is_hostiledst and subevent == "SPELL_DISPEL" then
+  elseif subevent == "SPELL_DISPEL" and profile.Dispel and is_hostiledst then
         local extra = ""
 	if spellID and spellID > 0 then
 	  extra = " ("..SPELL(spellID)..")"
 	end
 	sendspam(L["%s dispelled %s on %s"]:format(SRC, SPELL(extraspellID or spellID), DST)..extra)
-  elseif self.db.profile.Dispel and is_playersrc and is_hostiledst and subevent == "SPELL_STOLEN" then
+  elseif subevent == "SPELL_STOLEN" and profile.Dispel and is_hostiledst then
 	sendspam(L["%s stole %s from %s"]:format(SRC, SPELL(extraspellID or spellID), DST))
   end
 end

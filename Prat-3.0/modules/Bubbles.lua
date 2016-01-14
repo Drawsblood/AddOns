@@ -188,21 +188,21 @@ Prat:AddModuleToLoad(function()
   )
   L:AddLocale("zhCN",
   {
-	color_desc = "把聊天泡泡颜色设为与聊天类型一致", -- Needs review
-	color_name = "泡泡颜色", -- Needs review
-	font_desc = "使用与聊天框相同的字体", -- Needs review
-	font_name = "使用聊天字体", -- Needs review
-	fontsize_desc = "设置聊天泡泡字体大小", -- Needs review
-	fontsize_name = "字体大小", -- Needs review
-	format_desc = "聊天泡泡文字应用 Prat's 格式", -- Needs review
-	format_name = "格式化文字", -- Needs review
-	icons_desc = "在聊天泡泡里显示团队图标。", -- Needs review
-	icons_name = "显示团队图标", -- Needs review
-	module_desc = "聊天泡泡相关自定义", -- Needs review
-	module_name = "泡泡", -- Needs review
+	color_desc = "把聊天泡泡颜色设为与聊天类型一致",
+	color_name = "泡泡颜色",
+	font_desc = "使用与聊天框相同的字体",
+	font_name = "使用聊天字体",
+	fontsize_desc = "设置聊天泡泡字体大小",
+	fontsize_name = "字体大小",
+	format_desc = "聊天泡泡文字应用 Prat's 格式",
+	format_name = "格式化文字",
+	icons_desc = "在聊天泡泡里显示团队图标。",
+	icons_name = "显示团队图标",
+	module_desc = "聊天泡泡相关自定义",
+	module_name = "泡泡",
 	shorten_desc = [=[缩短每个聊天气泡至一行. 鼠标移过气泡时展开文本.
-]=], -- Needs review
-	shorten_name = "缩短气泡", -- Needs review
+]=],
+	shorten_name = "缩短气泡",
 	-- transparent_desc = "",
 	-- transparent_name = "",
 }

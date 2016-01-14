@@ -20,6 +20,7 @@ Include(ovale_hunter_spells)
 
 AddCheckBox(opt_interrupt L(interrupt) default specialization=beast_mastery)
 AddCheckBox(opt_potion_agility ItemName(draenic_agility_potion) default specialization=beast_mastery)
+AddCheckBox(opt_legendary_ring_agility ItemName(legendary_ring_agility) default specialization=beast_mastery)
 AddCheckBox(opt_trap_launcher SpellName(trap_launcher) default specialization=beast_mastery)
 
 AddFunction BeastMasteryUsePotionAgility
@@ -29,7 +30,6 @@ AddFunction BeastMasteryUsePotionAgility
 
 AddFunction BeastMasteryUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -134,8 +134,8 @@ AddFunction BeastMasteryDefaultCdActions
 	#counter_shot
 	BeastMasteryInterruptActions()
 	#use_item,name=maalus_the_blood_drinker
-	BeastMasteryUseItemActions()
-	#use_item,name=mirror_of_the_blademaster
+	if CheckBoxOn(opt_legendary_ring_agility) Item(legendary_ring_agility usable=1)
+	#use_item,slot=trinket1
 	BeastMasteryUseItemActions()
 	#arcane_torrent,if=focus.deficit>=30
 	if FocusDeficit() >= 30 Spell(arcane_torrent_focus)
@@ -305,6 +305,7 @@ Include(ovale_hunter_spells)
 
 AddCheckBox(opt_interrupt L(interrupt) default specialization=marksmanship)
 AddCheckBox(opt_potion_agility ItemName(draenic_agility_potion) default specialization=marksmanship)
+AddCheckBox(opt_legendary_ring_agility ItemName(legendary_ring_agility) default specialization=marksmanship)
 AddCheckBox(opt_trap_launcher SpellName(trap_launcher) default specialization=marksmanship)
 
 AddFunction MarksmanshipUsePotionAgility
@@ -314,7 +315,6 @@ AddFunction MarksmanshipUsePotionAgility
 
 AddFunction MarksmanshipUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -404,6 +404,8 @@ AddFunction MarksmanshipDefaultCdActions
 	#counter_shot
 	MarksmanshipInterruptActions()
 	#use_item,name=maalus_the_blood_drinker
+	if CheckBoxOn(opt_legendary_ring_agility) Item(legendary_ring_agility usable=1)
+	#use_item,slot=trinket1
 	MarksmanshipUseItemActions()
 	#arcane_torrent,if=focus.deficit>=30
 	if FocusDeficit() >= 30 Spell(arcane_torrent_focus)
@@ -559,6 +561,7 @@ AddIcon checkbox=opt_hunter_marksmanship_aoe help=cd specialization=marksmanship
 # glyph_of_explosive_trap
 # incendiary_ammo
 # kill_shot
+# legendary_ring_agility
 # lone_wolf_talent
 # multishot
 # poisoned_ammo
@@ -593,6 +596,7 @@ Include(ovale_hunter_spells)
 
 AddCheckBox(opt_interrupt L(interrupt) default specialization=survival)
 AddCheckBox(opt_potion_agility ItemName(draenic_agility_potion) default specialization=survival)
+AddCheckBox(opt_legendary_ring_agility ItemName(legendary_ring_agility) default specialization=survival)
 AddCheckBox(opt_trap_launcher SpellName(trap_launcher) default specialization=survival)
 
 AddFunction SurvivalUsePotionAgility
@@ -602,7 +606,6 @@ AddFunction SurvivalUsePotionAgility
 
 AddFunction SurvivalUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -706,8 +709,10 @@ AddFunction SurvivalDefaultCdActions
 	#berserking
 	Spell(berserking)
 	#use_item,name=maalus_the_blood_drinker
-	SurvivalUseItemActions()
+	if CheckBoxOn(opt_legendary_ring_agility) Item(legendary_ring_agility usable=1)
 	#use_item,name=beating_heart_of_the_mountain
+	SurvivalUseItemActions()
+	#use_item,slot=trinket1
 	SurvivalUseItemActions()
 	#potion,name=draenic_agility,if=(((cooldown.stampede.remains<1)&(cooldown.a_murder_of_crows.remains<1))&(trinket.stat.any.up|buff.archmages_greater_incandescence_agi.up))|target.time_to_die<=25
 	if SpellCooldown(stampede) < 1 and SpellCooldown(a_murder_of_crows) < 1 and { BuffPresent(trinket_stat_any_buff) or BuffPresent(archmages_greater_incandescence_agi_buff) } or target.TimeToDie() <= 25 SurvivalUsePotionAgility()
@@ -899,6 +904,7 @@ AddIcon checkbox=opt_hunter_survival_aoe help=cd specialization=survival
 # glaive_toss
 # glyph_of_explosive_trap
 # incendiary_ammo
+# legendary_ring_agility
 # lock_and_load_buff
 # lone_wolf_talent
 # multishot

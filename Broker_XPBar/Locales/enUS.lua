@@ -60,7 +60,7 @@ L["Custom code instructions"] = [[|cffffd100Custom code instructions:|r
 The code has to end with a return string statement.
 
 |cffffd100Functions:|r
-|cffe54100GetValue|r(|cff04adcbid|r) - Get the value of the specified |cff04adcbid|r.
+|cffe54100GetValue|r(|cff04adcbid|r [, |cff04adcbmaxLength|r]) - Get the value of the specified |cff04adcbid|r. Only when |cff04adcbid|r is |cff00ff00"Faction"|r |cff04adcbmaxLength|r specifies at which length to use the short faction name set in options.
 |cffe54100Check|r(|cff04adcbid|r) - Returns |cffeda55fvalid|r, |cffeda55ftext|r. Boolean |cffeda55fvalid|r is false if check fails. The |cffeda55ftext|r represents an appropriate message if |cffeda55fvalid|r is false. Only accepts |cff00ff00"XP"|r (false at max. level) and |cff00ff00"Reputation"|r (false at max. reputation or when no faction is watched) as |cff04adcbid|r.
 |cffe54100FormatNumber|r(|cff04adcbvalue|r, |cff04adcbuseAbbrev|r) - Returns formatted string of |cff04adcbvalue|r using numbers settings. Set |cff04adcbuseAbbrev|r for abbreviation.
 |cffe54100Percentage|r(|cff04adcbvalue|r, |cff04adcbminValue|r, |cff04adcbmaxValue|r) - Convert |cff04adcbvalue|r to integer percentage in range |cff04adcbminValue|r..|cff04adcbmaxValue|r.
@@ -105,7 +105,9 @@ L["Don't use any texture but use opaque colors for bars."] = true
 L["Experience"] = true
 L["Experience per Hour"] = true
 L["Faction"] = true
+L["Faction to set a short name for."] = true
 L["Faction Tracking"] = true
+L["Factions"] = true
 L["Font"] = true
 L["Font Size"] = true
 L["Frame"] = true
@@ -254,6 +256,8 @@ L["Set the y-Offset of the bars."] = true
 L["Setup custom texts for bars and label."] = true
 L["Shadow"] = true
 L["Shift-Click"] = true
+L["Short Name"] = true
+L["Short name for selected faction."] = true
 L["Show a notification with configurable output target."] = true
 L["Show a test notification."] = true
 L["Show a test Toast notification."] = true

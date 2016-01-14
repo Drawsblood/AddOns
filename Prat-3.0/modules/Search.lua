@@ -119,18 +119,18 @@ Suche]=],
     )
     L:AddLocale("zhCN",
     {
-	err_notfound = "没找到", -- Needs review
-	err_tooshort = "搜索文字太短", -- Needs review
-	find_results = "查找结果：", -- Needs review
-	module_desc = "增加搜索聊天框的能力", -- Needs review
+	err_notfound = "没找到",
+	err_tooshort = "搜索文字太短",
+	find_results = "查找结果：",
+	module_desc = "增加搜索聊天框的能力",
 	module_info = [=[此模块增加 /find 和 /findall 命令搜索聊天历史
 
 用法:
 
  /find <文字>
 
- /findall <文字>]=], -- Needs review
-	module_name = "搜索", -- Needs review
+ /findall <文字>]=],
+	module_name = "搜索",
 }
 
     )

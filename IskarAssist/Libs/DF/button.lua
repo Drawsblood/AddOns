@@ -385,14 +385,14 @@ local ButtonMetaFunctions = {}
 	end
 
 -- icon
-	function ButtonMetaFunctions:SetIcon (texture, width, height, layout, texcoord, overlay, textdistance, leftpadding)
+	function ButtonMetaFunctions:SetIcon (texture, width, height, layout, texcoord, overlay, textdistance, leftpadding, textheight)
 		if (not self.icon) then
 			self.icon = self:CreateTexture (nil, "artwork")
 			self.icon:SetSize (self.height*0.8, self.height*0.8)
 			self.icon:SetPoint ("left", self.widget, "left", 4 + (leftpadding or 0), 0)
 			self.icon.leftpadding = leftpadding or 0
 			self.widget.text:ClearAllPoints()
-			self.widget.text:SetPoint ("left", self.icon, "right", textdistance or 2, 0)
+			self.widget.text:SetPoint ("left", self.icon, "right", textdistance or 2, 0 + (textheight or 0))
 		end
 		
 		self.icon:SetTexture (texture)
@@ -854,7 +854,10 @@ local ButtonMetaFunctions = {}
 		local x, y = GetCursorPosition()
 		x = _math_floor (x)
 		y = _math_floor (y)
-		if ((button.mouse_down+0.4 > GetTime() and (x == button.x and y == button.y)) or (x == button.x and y == button.y)) then
+		if (
+			(x == button.x and y == button.y) or
+			(button.mouse_down+0.5 > GetTime() and button:IsMouseOver())
+		) then
 			if (buttontype == "LeftButton") then
 				button.MyObject.func (button, buttontype, button.MyObject.param1, button.MyObject.param2)
 			else
@@ -929,14 +932,15 @@ function DF:NewButton (parent, container, name, member, w, h, func, param1, para
 		DF.ButtonCounter = DF.ButtonCounter + 1
 		
 	elseif (not parent) then
-		return nil
+		return error ("Details! FrameWork: parent not found.", 2)
 	end
 	if (not container) then
 		container = parent
 	end
 	
 	if (name:find ("$parent")) then
-		name = name:gsub ("$parent", parent:GetName())
+		local parentName = DF.GetParentName (parent)
+		name = name:gsub ("$parent", parentName)
 	end
 
 	local ButtonObject = {type = "button", dframework = true}

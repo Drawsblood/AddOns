@@ -38,6 +38,7 @@ MT.defaults = {
 		visextend = true, viserrors = true, vismacrobox = true,
 		visshorten = true, visbind = true, visdrake = false,
 		--escape = true,
+		confirmdelete = true,
 		x = (UIParent:GetWidth() - 638) / 2,
 		y = (UIParent:GetHeight() - 424) / 2,
 		scale = UIParent:GetScale(),
@@ -228,6 +229,7 @@ function MT:eventHandler(this, event, arg1, ...)
 				end
 				if not found then tinsert(MT.orphans, i) end
 			end
+			--[[
 			if #MT.orphans > 0 then
 				local d = StaticPopupDialogs.MACROTOOLKIT_DELETEBACKUP
 				d.text = format(L["Macro Toolkit has found %d orphaned macros. Restore?"], #MT.orphans)
@@ -240,6 +242,7 @@ function MT:eventHandler(this, event, arg1, ...)
 				d.OnCancel = function() for _, m in ipairs(MT.orphans) do MT.db.char.extended[tostring(m)] = nil end end
 				StaticPopup_Show("MACROTOOLKIT_DELETEBACKUP")
 			end
+			--]]
 		end
 		--if #MT.db.global.extra > 0 then
 		if countTables(MT.db.global.extra) > 0 then
@@ -529,9 +532,17 @@ function MT:ExtendMacro(save, macrobody, idx, exists)
 	local showtooltip = select(3, string.find(body, "(#showtooltip.-)\n"))
 	local show = select(3, string.find(body, "(#show .-)\n"))
 	showtooltip = checktooltip(showtooltip, body)
+	if showtooltip then 
+		if strlenutf8(showtooltip) > 113 then
+			StaticPopupDialogs["MACROTOOLKIT_TOOLONG"].text = L["Macro Toolkit can only handle tooltip commands up to a maximum of 113 characters. Your tooltip will not work as expected unless you shorten it"]
+			StaticPopup_Show("MACROTOOLKIT_TOOLONG")
+			showtooltip = nil
+		end
+	end
 	if showtooltip then showtooltip = format("%s\n", showtooltip) else showtooltip = "" end
 	if show then show = format("%s\n", show) else show = "" end
-	if not exists then 
+
+	if not exists then
 		MT:UpdateExtended(idx or MTF.selectedMacro, body, index)
 		securebutton:SetAttribute("macrotext", body)
 		securebutton:SetAttribute("dynamic", MT:IsDynamic(idx or MTF.selectedMacro))

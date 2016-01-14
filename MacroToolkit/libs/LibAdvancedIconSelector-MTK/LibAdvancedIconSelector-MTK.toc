@@ -4,7 +4,7 @@
 ## Author: Darthyl of Bronzebeard-US, Deepac
 ## Interface: 60000
 ## OptionalDeps: Ace3, LibDebug
-## X-Curse-Packaged-Version: v6.2.0.0
+## X-Curse-Packaged-Version: v6.2.0.2
 ## X-Curse-Project-Name: Macro Toolkit
 ## X-Curse-Project-ID: macro-toolkit
 ## X-Curse-Repository-ID: wow/macro-toolkit/mainline

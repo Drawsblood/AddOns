@@ -2,7 +2,7 @@ local addonName, vars = ...
 SavedInstances = vars
 local addon = vars
 local addonAbbrev = "SI"
-vars.core = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0", "AceTimer-3.0")
+vars.core = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
 local core = vars.core
 local L = vars.L
 vars.LDB = LibStub("LibDataBroker-1.1", true)
@@ -14,7 +14,7 @@ local maxdiff = 23 -- max number of instance difficulties
 local maxcol = 4 -- max columns per player+instance
 
 addon.svnrev = {}
-addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 468 $"):match("%d+"))
+addon.svnrev["SavedInstances.lua"] = tonumber(("$Revision: 476 $"):match("%d+"))
 
 -- local (optimal) references to provided functions
 local table, math, bit, string, pairs, ipairs, unpack, strsplit, time, type, wipe, tonumber, select, strsub = 
@@ -283,13 +283,13 @@ function addon:QuestInfo(questid)
   return l, "\124cffffff00\124Hquest:"..questid..":90\124h["..l.."]\124h\124r"
 end
 
-local function chatMsg(msg)
-     DEFAULT_CHAT_FRAME:AddMessage("\124cFFFF0000"..addonName.."\124r: "..msg)
+local function chatMsg(...)
+     DEFAULT_CHAT_FRAME:AddMessage("\124cFFFF0000"..addonName.."\124r: "..string.format(...))
 end
 local function debug(...)
   --addon.db.dbg = true
   if addon.db.dbg then
-     chatMsg(string.format(...))
+     chatMsg(...)
   end
 end
 addon.debug = debug
@@ -308,6 +308,27 @@ local GTToffset = time() - GetTime()
 local function GetTimeToTime(val)
   if not val then return nil end
   return val + GTToffset
+end
+
+function addon:timedebug()
+ chatMsg("Version: %s (%s)", addon.version, addon.revision)
+ chatMsg("Realm: %s (%s)", GetRealmName(), addon:GetRegion())
+ chatMsg("Zone: %s (%s)", GetRealZoneText(), addon:GetCurrentMapAreaID())
+ chatMsg("time()=%s GetTime()=%s", time(), GetTime())
+ chatMsg("Local time: %s local", date("%A %c"))
+ chatMsg("GetGameTime: %s:%s server",GetGameTime())
+ chatMsg("CalendarGetDate: %s %s/%s/%s server",CalendarGetDate())
+ chatMsg("GetQuestResetTime: %s",SecondsToTime(GetQuestResetTime()))
+ chatMsg(date("Daily reset: %a %c local (based on GetQuestResetTime)",time()+GetQuestResetTime())) 
+ chatMsg("Local to Server offset: %d hours",SavedInstances:GetServerOffset())
+ local t = SavedInstances:GetNextDailyResetTime()
+ chatMsg("Next daily reset: %s local, %s server",date("%a %c",t), date("%a %c",t+3600*SavedInstances:GetServerOffset()))
+ local t = SavedInstances:GetNextWeeklyResetTime()
+ chatMsg("Next weekly reset: %s local, %s server",date("%a %c",t), date("%a %c",t+3600*SavedInstances:GetServerOffset()))
+ local t = SavedInstances:GetNextDailySkillResetTime()
+ chatMsg("Next skill reset: %s local, %s server",date("%a %c",t), date("%a %c",t+3600*SavedInstances:GetServerOffset()))
+ local t = SavedInstances:GetNextDarkmoonResetTime()
+ chatMsg("Next darkmoon reset: %s local, %s server",date("%a %c",t), date("%a %c",t+3600*SavedInstances:GetServerOffset()))
 end
 
 -- abbreviate expansion names (which apparently are not localized in any western character set)
@@ -623,6 +644,21 @@ function addon:GetNextDailyResetTime()
      -- also right after a daylight savings rollover, when it returns negative values >.<
      resettime > 24*3600+30 then -- can also be wrong near reset in an instance
     return nil
+  end
+  -- ticket 177/191: GetQuestResetTime() is wrong for Oceanic+Brazilian characters in PST instances
+  local serverHour, serverMinute = GetGameTime()
+  local serverResetTime = (serverHour*3600 + serverMinute*60 + resettime) % 86400 -- GetGameTime of the reported reset
+  local diff = serverResetTime - 10800 -- how far from 3AM server
+  if math.abs(diff) > 18000  -- more than 5 hours - ignore TZ differences of US continental servers
+     and addon:GetRegion() == "US" then
+     local diffhours = math.floor((diff + 1800)/3600)
+     resettime = resettime - diffhours*3600
+     if resettime < -900 then -- reset already passed, next reset
+        resettime = resettime + 86400
+     elseif resettime > 86400+900 then
+        resettime = resettime - 86400
+     end
+     debug("Adjusting GetQuestResetTime() discrepancy of %d seconds (%d hours). Reset in %d seconds", diff, diffhours, resettime)
   end
   return time() + resettime
 end
@@ -1354,6 +1390,7 @@ function addon:UpdateToonData()
 	   end
 	end
 
+	local nextreset = addon:GetNextDailyResetTime()
 	for instance, i in pairs(vars.db.Instances) do
 		for toon, t in pairs(vars.db.Toons) do
 			if i[toon] then
@@ -1373,7 +1410,6 @@ function addon:UpdateToonData()
 		  local id = i.LFDID
 		  GetLFGDungeonInfo(id) -- forces update
 		  local donetoday, money = GetLFGDungeonRewards(id)
-		  local expires = addon:GetNextDailyResetTime()
 		  if donetoday and i.Random and (
 		    (i.LFDID == 258) or  -- random classic dungeon
 		    (i.LFDID == 995 or i.LFDID == 744) or  -- timewalking dungeons
@@ -1382,13 +1418,13 @@ function addon:UpdateToonData()
 		   ) then -- donetoday flag is falsely set for some level/dungeon combos where no daily incentive is available
 		     donetoday = false
 		  end
-		  if expires and donetoday and (i.Holiday or (money and money > 0)) then
+		  if nextreset and donetoday and (i.Holiday or (money and money > 0)) then
 		    i[thisToon] = i[thisToon] or {}
 		    i[thisToon][1] = i[thisToon][1] or {}
 		    local d = i[thisToon][1]
 		    d.ID = -1
 		    d.Locked = false
-		    d.Expires = expires
+		    d.Expires = nextreset
 		  end
 		end
 	end
@@ -1418,8 +1454,12 @@ function addon:UpdateToonData()
         t.LFG1 = GetTimeToTime(GetLFGRandomCooldownExpiration()) or t.LFG1
 	t.LFG2 = GetTimeToTime(select(7,UnitDebuff("player",GetSpellInfo(71041)))) or t.LFG2 -- GetLFGDeserterExpiration()
 	if t.LFG2 then addon:updateSpellTip(71041) end
-	t.pvpdesert = GetTimeToTime(select(7,UnitDebuff("player",GetSpellInfo(26013)))) or t.pvpdesert
-	if t.pvpdesert then addon:updateSpellTip(26013) end
+	addon.pvpdesertids = addon.pvpdesertids or { 26013,   -- BG queue
+						     194958 } -- Ashran
+	for _,id in ipairs(addon.pvpdesertids) do
+	  t.pvpdesert = GetTimeToTime(select(7,UnitDebuff("player",GetSpellInfo(id)))) or t.pvpdesert
+	  if t.pvpdesert then addon:updateSpellTip(id) end
+	end
 	for toon, ti in pairs(vars.db.Toons) do
 		if ti.LFG1 and (ti.LFG1 < now) then ti.LFG1 = nil end
 		if ti.LFG2 and (ti.LFG2 < now) then ti.LFG2 = nil end
@@ -1435,7 +1475,6 @@ function addon:UpdateToonData()
 	t.RBGrating = tonumber(rating) or t.RBGrating
 	core:scan_item_cds()
 	-- Daily Reset
-	local nextreset = addon:GetNextDailyResetTime()
 	if nextreset and nextreset > time() then
 	 for toon, ti in pairs(vars.db.Toons) do
 	  if not ti.DailyResetTime or (ti.DailyResetTime < time()) then 
@@ -1509,6 +1548,15 @@ function addon:UpdateToonData()
 	if zone and #zone > 0 then
 	  t.Zone = zone
 	end
+	local lrace, race = UnitRace("player")
+	local faction, lfaction = UnitFactionGroup("player")
+	t.Faction = faction
+	if race == "Pandaren" then
+	  t.Race = lrace.." ("..lfaction..")"
+	else
+	  t.Race = lrace
+	end
+	   
 	t.LastSeen = time()
 end
 
@@ -1672,7 +1720,13 @@ local function ShowToonTooltip(cell, arg, ...)
 	local t = vars.db.Toons[toon]
 	if not t then return end
 	openIndicator(2, "LEFT","RIGHT")
-	indicatortip:SetCell(indicatortip:AddHeader(),1,ClassColorise(t.Class, toon))
+        local ftex = ""
+        if t.Faction == "Alliance" then
+          ftex = "\124TInterface\\TargetingFrame\\UI-PVP-Alliance:0:0:0:0:100:100:0:50:0:55\124t "
+        elseif t.Faction == "Horde" then
+          ftex = "\124TInterface\\TargetingFrame\\UI-PVP-Horde:0:0:0:0:100:100:10:70:0:55\124t"
+        end
+	indicatortip:SetCell(indicatortip:AddHeader(),1,ftex..ClassColorise(t.Class, toon))
 	indicatortip:SetCell(1,2,ClassColorise(t.Class, LEVEL.." "..t.Level.." "..(t.LClass or "")))
 	indicatortip:AddLine(STAT_AVERAGE_ITEM_LEVEL,("%d "):format(t.IL or 0)..STAT_AVERAGE_ITEM_LEVEL_EQUIPPED:format(t.ILe or 0))
 	if t.RBGrating and t.RBGrating > 0 then
@@ -1684,6 +1738,11 @@ local function ShowToonTooltip(cell, arg, ...)
 	if t.Zone then
 	  indicatortip:AddLine(ZONE,t.Zone)
 	end
+	--[[
+	if t.Race then
+	  indicatortip:AddLine(RACE,t.Race)
+	end
+	]]
 	if t.LastSeen then
 	  local when = date("%c",t.LastSeen)
 	  indicatortip:AddLine(L["Last updated"],when)
@@ -1702,14 +1761,18 @@ local function ShowQuestTooltip(cell, arg, ...)
 	local qstr = cnt.." "..(isDaily and L["Daily Quests"] or L["Weekly Quests"])
 	local t = db
 	local scopestr = L["Account"]
+	local reset
 	if toon then 
 	  t = vars.db.Toons[toon]
 	  if not t then return end
-	  scopestr = ClassColorise(vars.db.Toons[toon].Class, toon)
+	  scopestr = ClassColorise(t.Class, toon)
+          reset = (isDaily and t.DailyResetTime) or (not isDaily and t.WeeklyResetTime)
 	end
 	openIndicator(2, "LEFT","RIGHT")
 	indicatortip:AddHeader(scopestr, qstr)
-        local reset = (isDaily and addon:GetNextDailyResetTime()) or (not isDaily and addon:GetNextWeeklyResetTime())
+	if not reset then
+          reset = (isDaily and addon:GetNextDailyResetTime()) or (not isDaily and addon:GetNextWeeklyResetTime())
+	end
 	if reset then
 	  indicatortip:AddLine(YELLOWFONT .. L["Time Left"] .. ":" .. FONTEND,
 	      SecondsToTime(reset - time()))
@@ -1887,9 +1950,11 @@ local function ShowWorldBossTooltip(cell, arg, ...)
 	openIndicator(2, "LEFT","RIGHT")
 	local line = indicatortip:AddHeader()
 	local toonstr = (db.Tooltip.ShowServer and toon) or strsplit(' ', toon)
+	local t = vars.db.Toons[toon]
+	local reset = t.WeeklyResetTime or addon:GetNextWeeklyResetTime()
 	indicatortip:SetCell(line, 1, ClassColorise(vars.db.Toons[toon].Class, toonstr), indicatortip:GetHeaderFont(), "LEFT")
 	indicatortip:SetCell(line, 2, GOLDFONT .. L["World Bosses"] .. FONTEND, indicatortip:GetHeaderFont(), "RIGHT")
-	indicatortip:AddLine(YELLOWFONT .. L["Time Left"] .. ":" .. FONTEND, SecondsToTime(addon:GetNextWeeklyResetTime() - time()))
+	indicatortip:AddLine(YELLOWFONT .. L["Time Left"] .. ":" .. FONTEND, SecondsToTime(reset - time()))
 	for _, instance in ipairs(worldbosses) do
 	  local thisinstance = vars.db.Instances[instance]
 	  if thisinstance then
@@ -1910,13 +1975,15 @@ local function ShowLFRTooltip(cell, arg, ...)
 	local boxname = arg[1]
 	local toon = arg[2]
 	local lfrmap = arg[3]
-	if not boxname or not toon or not lfrmap then return end
+	local t = vars.db.Toons[toon]
+	if not boxname or not t or not lfrmap then return end
 	openIndicator(3, "LEFT", "LEFT","RIGHT")
 	local line = indicatortip:AddHeader()
 	local toonstr = (db.Tooltip.ShowServer and toon) or strsplit(' ', toon)
+	local reset = t.WeeklyResetTime or addon:GetNextWeeklyResetTime()
 	indicatortip:SetCell(line, 1, ClassColorise(vars.db.Toons[toon].Class, toonstr), indicatortip:GetHeaderFont(), "LEFT", 1)
 	indicatortip:SetCell(line, 2, GOLDFONT .. boxname .. FONTEND, indicatortip:GetHeaderFont(), "RIGHT", 2)
-	indicatortip:AddLine(YELLOWFONT .. L["Time Left"] .. ":" .. FONTEND, nil, SecondsToTime(addon:GetNextWeeklyResetTime() - time()))
+	indicatortip:AddLine(YELLOWFONT .. L["Time Left"] .. ":" .. FONTEND, nil, SecondsToTime(reset - time()))
 	for i=1,20 do
 	  local instance = lfrmap[boxname..":"..i]
 	  local diff = 2
@@ -1970,7 +2037,11 @@ local function ShowIndicatorTooltip(cell, arg, ...)
 	if info.Expires > 0 then
 	  indicatortip:AddLine(YELLOWFONT .. L["Time Left"] .. ":" .. FONTEND, nil, SecondsToTime(thisinstance[toon][diff].Expires - time()))
 	end
-	if thisinstance.Raid and info.ID > 0 and (diff == 5 or diff == 6 or diff == 16) then -- heroic raid
+	if (info.ID or 0) > 0 and (
+	  (thisinstance.Raid and (diff == 5 or diff == 6 or diff == 16)) -- raid: 10 heroic, 25 heroic or mythic
+	  or 
+	  (diff == 23) -- mythic 5-man
+	  ) then 
 	  local n = indicatortip:AddLine()
 	  indicatortip:SetCell(n, 1, YELLOWFONT .. ID .. ":" .. FONTEND, "LEFT", 1)
 	  indicatortip:SetCell(n, 2, info.ID, "RIGHT", 2)
@@ -2237,18 +2308,18 @@ function addon:SetupVersion()
 end
 
 function core:OnEnable()
-	self:RegisterEvent("UPDATE_INSTANCE_INFO", function() core:Refresh(nil) end)
-	self:RegisterEvent("LOOT_CLOSED", function() core:QuestRefresh(nil) end)
-	self:RegisterEvent("LFG_UPDATE_RANDOM_INFO", function() addon:UpdateInstanceData(); addon:UpdateToonData() end)
-	self:RegisterEvent("RAID_INSTANCE_WELCOME", RequestRaidInfo)
+	self:RegisterBucketEvent("UPDATE_INSTANCE_INFO", 2, function() core:Refresh(nil) end)
+	self:RegisterBucketEvent("LOOT_CLOSED", 1, function() core:QuestRefresh(nil) end)
+	self:RegisterBucketEvent("LFG_UPDATE_RANDOM_INFO", 1, function() addon:UpdateInstanceData(); addon:UpdateToonData() end)
+	self:RegisterBucketEvent("RAID_INSTANCE_WELCOME", 1, RequestRaidInfo)
 	self:RegisterEvent("CHAT_MSG_SYSTEM", "CheckSystemMessage")
 	self:RegisterEvent("CHAT_MSG_CURRENCY", "CheckSystemMessage")
 	self:RegisterEvent("CHAT_MSG_LOOT", "CheckSystemMessage")
-	self:RegisterEvent("CURRENCY_DISPLAY_UPDATE", function() addon:UpdateCurrency() end)
+	self:RegisterBucketEvent("CURRENCY_DISPLAY_UPDATE", 0.25, function() addon:UpdateCurrency() end)
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-	self:RegisterEvent("TRADE_SKILL_UPDATE")
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", RequestRaidInfo)
-	self:RegisterEvent("LFG_LOCK_INFO_RECEIVED", RequestRaidInfo)
+	self:RegisterBucketEvent("TRADE_SKILL_UPDATE", 1)
+	self:RegisterBucketEvent("PLAYER_ENTERING_WORLD", 1, RequestRaidInfo)
+	self:RegisterBucketEvent("LFG_LOCK_INFO_RECEIVED", 1, RequestRaidInfo)
 	self:RegisterEvent("BONUS_ROLL_RESULT", "BonusRollResult")
 	self:RegisterEvent("PLAYER_LOGOUT", function() addon.logout = true ; addon:UpdateToonData() end) -- update currency spent
 	self:RegisterEvent("LFG_COMPLETION_REWARD", "RefreshLockInfo") -- for random daily dungeon tracking
@@ -2592,7 +2663,7 @@ function addon:HistoryUpdate(forcereset, forcemesg)
   -- display update
 
   if forcemesg or (vars.db.Tooltip.LimitWarn and zoningin and livecnt >= addon.histLimit-1) then 
-      chatMsg(L["Warning: You've entered about %i instances recently and are approaching the %i instance per hour limit for your account. More instances should be available in %s."]:format(livecnt, addon.histLimit, oldestremt))
+      chatMsg(L["Warning: You've entered about %i instances recently and are approaching the %i instance per hour limit for your account. More instances should be available in %s."],livecnt, addon.histLimit, oldestremt)
   end
   addon.histLiveCount = livecnt
   addon.histOldest = oldestremt
@@ -2707,8 +2778,10 @@ function core:Refresh(recoverdaily)
 	local temp = localarr("RefreshTemp")
 	for name, instance in pairs(vars.db.Instances) do -- clear current toons lockouts before refresh
 	  local id = instance.LFDID
-	  if instance[thisToon] and 
-	    not (id and addon.LFRInstances[id] and select(2,GetLFGDungeonNumEncounters(id)) == 0) then -- ticket 103
+	  if instance[thisToon] 
+	    -- disabled for ticket 178/195:
+	    --and not (id and addon.LFRInstances[id] and select(2,GetLFGDungeonNumEncounters(id)) == 0) -- ticket 103
+	    then
 	    temp[name] = instance[thisToon] -- use a temp to reduce memory churn
 	    for diff,info in pairs(temp[name]) do
 	      wipe(info)

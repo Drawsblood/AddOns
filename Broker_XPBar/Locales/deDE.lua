@@ -60,7 +60,7 @@ L["Custom code instructions"] = [[|cffffd100Anleitung zur Programmierung des Fre
 Der Code muss mit einer return-Anweisung enden, die eine Zeichenkette zurückliefert.
 
 |cffffd100Funktionen:|r
-|cffe54100GetValue|r(|cff04adcbid|r) - Hole Wert der spezifizierten |cff04adcbid|r.
+|cffe54100GetValue|r(|cff04adcbid|r [, |cff04adcbmaxLength|r]) - Hole Wert der spezifizierten |cff04adcbid|r. Nur wenn |cff04adcbid|r |cff00ff00"Faction"|r ist, spezifiziert |cff04adcbmaxLength|r ab welcher Länge der in den Optionen gespeicherte Kurzname verwendet werden soll.
 |cffe54100Check|r(|cff04adcbid|r) - Liefert |cffeda55fvalid|r, |cffeda55ftext|r. Boolsches |cffeda55fvalid|r ist falsch (false), wenn Test fehlschlägt. Der |cffeda55ftext|r repräsentiert eine passende Nachricht, wenn |cffeda55fvalid|r falsch ist. Nur |cff00ff00"XP"|r (falsch auf max. Level) und |cff00ff00"Reputation"|r (falsch bei max. Ruf oder wenn keine Fraktion beobachtet) sind gültige |cff04adcbid|r.
 |cffe54100FormatNumber|r(|cff04adcbvalue|r, |cff04adcbuseAbbrev|r) - Liefert formatierte Zeichenkette von |cff04adcbvalue|r unter Verwendung der Einstellungen für Zahlen. Setze |cff04adcbuseAbbrev|r für abgekürzte Zahlendarstellung.
 |cffe54100Percentage|r(|cff04adcbvalue|r, |cff04adcbminValue|r, |cff04adcbmaxValue|r) - Konvertiert |cff04adcbvalue|r zu ganzahligem Prozentwert im Wertebereich |cff04adcbminValue|r..|cff04adcbmaxValue|r.
@@ -105,7 +105,9 @@ L["Don't use any texture but use opaque colors for bars."] = "Keine Textur für 
 L["Experience"] = "Erfahrung"
 L["Experience per Hour"] = "Erfahrung pro Stunde"
 L["Faction"] = "Fraktion"
+L["Faction to set a short name for."] = "Fraktion für die ein Kurzname gesetzt werden soll."
 L["Faction Tracking"] = "Fraktion verfolgen"
+L["Factions"] = "Fraktionen"
 L["Font"] = "Schriftart"
 L["Font Size"] = "Schriftgröße"
 L["Frame"] = "Frame"
@@ -254,6 +256,8 @@ L["Set the y-Offset of the bars."] = "Setzt den y-Versatz der Leisten."
 L["Setup custom texts for bars and label."] = "Konfiguration der Freitexte für Leisten und Broker-Anzeige."
 L["Shadow"] = "Schatten"
 L["Shift-Click"] = "Umschalt-Klick"
+L["Short Name"] = "Kurzname"
+L["Short name for selected faction."] = "Kurzname für gewählte Fraktion."
 L["Show a notification with configurable output target."] = "Zeige Benachrichtigung mit konfigurierbarem Ausgabeziel."
 L["Show a test notification."] = "Zeige Testbenachrichtigung."
 L["Show a test Toast notification."] = "Zeige Testbenachrichtigung für Toast."

@@ -209,9 +209,9 @@ L:AddLocale("zhCN",
 	formatting_name = "聊天格式",
 	load_desc = "控制这个模块的载入状态",
 	load_disabled = "禁用",
-	load_disabledonrestart = "停用 (重载)", -- Needs review
+	load_disabledonrestart = "停用 (重载)",
 	load_enabled = "启用",
-	load_enabledonrestart = "启用 (重载)", -- Needs review
+	load_enabledonrestart = "启用 (重载)",
 	load_no = "不加载",
 	modulecontrol_desc = "控制Prat模块的读取和启用",
 	modulecontrol_name = "模块控制",
@@ -298,7 +298,7 @@ L:AddLocale("ptBR",
 	-- load_enabledonrestart = "",
 	load_no = "Não Carregar",
 	modulecontrol_desc = "Controlar carregamento de módulos permitidos pelo Prat",
-	modulecontrol_name = "Controle de Módulo", -- Needs review
+	modulecontrol_name = "Controle de Módulo",
 	prat = "Prat",
 	reload_required = "Essa alteração pode não ter efeitos até você %s sua IU.",
 }

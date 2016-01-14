@@ -33,6 +33,7 @@ local BLACK = {r = 0, g = 0, b = 0, a = 1}
 
 local dimension = 250
 
+local Factions
 local Notifications
 local TextEngine
 
@@ -111,6 +112,7 @@ local defaults = {
 		SideBySideSeparator    = " | ",
 		Notification           = false,
 		ToastNotification      = true,
+		factions               = {},
 	},
 	char = {
 	},	
@@ -175,6 +177,7 @@ local showtext = {
 }
 
 -- cache faction info
+local factionTable = {}
 local lookupOptIndexToFaction = {}
 local lookupFactionToOptIndex = {}
 
@@ -243,8 +246,13 @@ local textsConfig = {
 	useMockUpValues = false,
 }
 
+local shortNamesConfig = {
+	faction = 1,
+}
+
 -- module handling
 function Options:OnInitialize()
+	Factions      = Addon:GetModule("Factions")
 	Notifications = Addon:GetModule("Notifications")
 	TextEngine    = Addon:GetModule("TextEngine")
 	
@@ -1239,6 +1247,41 @@ function Options:Setup()
 					},
 				},
 			},
+			factions = {
+				type = 'group',
+				name = L["Factions"],
+				desc = L["Faction specific settings."],
+				order = 10,
+				args = {
+					faction = {
+						type = "select", 
+						name = L["Faction"],
+						desc = L["Faction to set a short name for."],
+						get  = function() return shortNamesConfig.faction end,
+						set  = function(info, value)							
+							shortNamesConfig.faction = value
+							
+							self:Update()
+						end,
+						handler = self,
+						values = "QueryFactions", 
+						order = 1,
+					},
+					shortName = { 
+						type = 'input',
+						name = L["Short Name"],
+						desc = L["Short name for selected faction."],
+						get  = function() return self:GetShortName(lookupOptIndexToFaction[shortNamesConfig.faction]) or "" end,
+						set  = function(info, value)
+							self:SetShortName(lookupOptIndexToFaction[shortNamesConfig.faction], value)
+						end,
+						disabled = function(info)
+							return shortNamesConfig.faction == 1
+						end,
+						order = 2,
+					},
+				},
+			},
 			faction = {
 				type = "select", 
 				name = L["Faction"],
@@ -1295,12 +1338,10 @@ end
 
 -- faction helper
 function Options:QueryFactions()
-	local Factions = Addon:GetModule("Factions")
-	
-	local factionTable = {}
-	local sortingTable = {}
+	local sortingTable = NS:NewTable()
 
 	-- reset lookup table
+	NS:ClearTable(factionTable)
 	NS:ClearTable(lookupOptIndexToFaction)
 	NS:ClearTable(lookupFactionToOptIndex)
 	
@@ -1330,6 +1371,8 @@ function Options:QueryFactions()
 		lookupFactionToOptIndex[v[1]]          = #factionTable
 	end
 
+	NS:ReleaseTable(sortingTable)
+	
 	return factionTable
 end
 
@@ -1380,6 +1423,27 @@ function Options:SetColor(id, r, g, b, a)
 	
 	-- fire event when setting changed
 	self.callbacks:Fire(ADDON .. "_SETTING_CHANGED", id, value, current)
+end
+
+function Options:GetShortName(faction)
+	return self.db.profile.factions[faction]
+end
+
+function Options:SetShortName(faction, value)
+	local current = self:GetShortName(option)
+
+	if value == "" or value == Factions:GetFactionName(faction) then
+		value = nil
+	end
+	
+	if current == value then
+		return
+	end
+	
+	self.db.profile.factions[faction] = value
+
+	-- fire event when setting changed
+	self.callbacks:Fire(ADDON .. "_SETTING_CHANGED", option, value, current)
 end
 
 function Options:GetCharSetting(option)

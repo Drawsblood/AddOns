@@ -2,7 +2,7 @@
 local addonName, vars = ...
 vars.SpellData = {}
 vars.svnrev = {}
-vars.svnrev["SpellData.lua"] = tonumber(("$Revision: 400 $"):match("%d+"))
+vars.svnrev["SpellData.lua"] = tonumber(("$Revision: 404 $"):match("%d+"))
 
 
 vars.SpellData.foods = {
@@ -231,6 +231,7 @@ vars.SpellData.tauntSpells = {
   20736, -- Distracting Shot (Hunter)  
   116189, -- Provoke (Monk)
   17735, -- Suffering (Warlock Voidwalker)
+  171014, -- Seethe (Warlock Abyssal)
   2649,  -- Growl (Hunter Pet)
   --53477, -- Taunt (Hunter Pet)
 }

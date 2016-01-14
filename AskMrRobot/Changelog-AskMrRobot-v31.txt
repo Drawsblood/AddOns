@@ -1,0 +1,8 @@
+2015-11-25  yellowfive  <yellowfive>
+
+[b1a30665d511] [v31]
+* AskMrRobot-Serializer/AskMrRobot-Serializer.lua, AskMrRobot.toc:
+
+bumped serializer version
+
+

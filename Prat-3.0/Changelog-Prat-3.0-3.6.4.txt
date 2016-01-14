@@ -1,0 +1,8 @@
+2015-12-21  sylvanaar  <sylvanaar@mindspring.com>
+
+[74be06d13c79] [3.6.4]
+* services/chatsections.lua:
+
+Fix exception
+
+

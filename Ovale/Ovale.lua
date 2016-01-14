@@ -42,7 +42,7 @@ local API_UnitIsDead = UnitIsDead
 local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
 local INFINITY = math.huge
 
-local OVALE_VERSION = "6.2.15"
+local OVALE_VERSION = "6.2.16"
 local REPOSITORY_KEYWORD = "@" .. "project-version" .. "@"
 
 -- Table of strings to display once per session.

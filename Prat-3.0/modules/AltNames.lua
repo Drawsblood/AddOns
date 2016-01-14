@@ -731,7 +731,7 @@ Prat:AddModuleToLoad(function()
 	AltNames = "马甲名称",
 	["Alts:"] = "马甲:",
 	autoguildalts_desc = [=[后台自动从公会信息中导入
-]=], -- Needs review
+]=],
 	-- autoguildalts_name = "",
 	["Be quiet"] = "禁言",
 	["character removed: %s"] = "删除角色: %s",
@@ -794,14 +794,14 @@ Prat:AddModuleToLoad(function()
 	quiet_desc = "是否在聊天框报告",
 	quiet_name = "无声_名字",
 	Right = "右边",
-	["(.-)'s? [Aa]lt"] = true, -- Needs review
+	["(.-)'s? [Aa]lt"] = true,
 	["%s alts imported from LOKWhoIsWho"] = "%s马甲从LOKWhoIsWho导入",
 	["searched for: %s - total matches: %s"] = "搜索: %s - 完全匹配: %s",
 	["<search term> (eg, /altnames find fin)"] = "<搜索条件>(例, /altnames find 顶尖战士)",
 	["Search the list of linked characters for matching main or alt names."] = "搜索已联结的角色列表匹配本尊或马甲名称",
 	["Show alts in tooltip"] = "在提示里显示马甲",
 	["Show main in tooltip"] = "在提示里显示本尊",
-	["([^%s%p%d%c%z]+)'s alt"] = true, -- Needs review
+	["([^%s%p%d%c%z]+)'s alt"] = true,
 	Start = "起始",
 	["%s total alts linked to mains"] = "%s全部马甲联结到本尊",
 	["The colour of an alt's main name that will be displayed"] = "马甲的本尊名称将显示的颜色",
@@ -842,7 +842,7 @@ Prat:AddModuleToLoad(function()
 	Disabled = "Desactivado",
 	["Display a player's alts in the tooltip"] = "Mostrar los alters de los jugadores en el tooltip",
 	["Display a player's main name in the tooltip"] = "Mostrar el nombre del main del jugador en el tooltip",
-	-- ["Display main names in the same colour as that of the alt's class (taking the data from the PlayerNames module if it is enabled)"] = "",
+	["Display main names in the same colour as that of the alt's class (taking the data from the PlayerNames module if it is enabled)"] = "Mostrar nombres de personajes principales (mains) en el mismo color que la clase del alter (obteniendo los datos del módulo PlayerNames si está habilitado)",
 	["Display main names in the same colour as that of the main's class (taking the data from the PlayerNames module if it is enabled)"] = "Mostrar nombres principales en el mismo color que el de su clase principal (tomando los datos del módulo PlayerNames si está habilitado)",
 	["Don't overwrite existing alt <-> main links when importing or adding new alts."] = "No sobreescribir enlaces alternativo <-> principal existentes al importar o añadir nuevos alternativos.",
 	["Don't overwrite existing links"] = "No sobreescribir enlaces existentes",

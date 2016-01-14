@@ -21,6 +21,7 @@ Include(ovale_mage_spells)
 
 AddCheckBox(opt_interrupt L(interrupt) default specialization=arcane)
 AddCheckBox(opt_potion_intellect ItemName(draenic_intellect_potion) default specialization=arcane)
+AddCheckBox(opt_legendary_ring_intellect ItemName(legendary_ring_intellect) default specialization=arcane)
 AddCheckBox(opt_arcane_mage_burn_phase L(arcane_mage_burn_phase) default specialization=arcane)
 AddCheckBox(opt_time_warp SpellName(time_warp) specialization=arcane)
 
@@ -31,7 +32,6 @@ AddFunction ArcaneUsePotionIntellect
 
 AddFunction ArcaneUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -367,6 +367,8 @@ AddFunction ArcaneCooldownsCdActions
 	#potion,name=draenic_intellect,if=buff.arcane_power.up&(!talent.prismatic_crystal.enabled|pet.prismatic_crystal.active)
 	if BuffPresent(arcane_power_buff) and { not Talent(prismatic_crystal_talent) or TotemPresent(prismatic_crystal) } ArcaneUsePotionIntellect()
 	#use_item,slot=finger2
+	if CheckBoxOn(opt_legendary_ring_intellect) Item(legendary_ring_intellect usable=1)
+	#use_item,slot=trinket1
 	ArcaneUseItemActions()
 }
 
@@ -418,20 +420,20 @@ AddFunction ArcaneCrystalSequenceCdPostConditions
 
 AddFunction ArcaneInitBurnMainActions
 {
-	#start_burn_phase,if=buff.arcane_charge.stack>=4&(legendary_ring.cooldown.up|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&(cooldown.prismatic_crystal.up|!talent.prismatic_crystal.enabled)&(cooldown.arcane_power.up|(glyph.arcane_power.enabled&cooldown.arcane_power.remains>60))&(cooldown.evocation.remains-2*buff.arcane_missiles.stack*spell_haste-gcd.max*talent.prismatic_crystal.enabled)*0.75*(1-0.1*(cooldown.arcane_power.remains<5))*(1-0.1*(talent.nether_tempest.enabled|talent.supernova.enabled))*(10%action.arcane_blast.execute_time)<mana.pct-20-2.5*active_enemies*(9-active_enemies)+(cooldown.evocation.remains*1.8%spell_haste)
-	if DebuffStacks(arcane_charge_debuff) >= 4 and { not ItemCooldown(legendary_ring_intellect) > 0 or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { not SpellCooldown(prismatic_crystal) > 0 or not Talent(prismatic_crystal_talent) } and { not SpellCooldown(arcane_power) > 0 or Glyph(glyph_of_arcane_power) and SpellCooldown(arcane_power) > 60 } and { SpellCooldown(evocation) - 2 * BuffStacks(arcane_missiles_buff) * { 100 / { 100 + SpellHaste() } } - GCD() * TalentPoints(prismatic_crystal_talent) } * 0.75 * { 1 - 0.1 * { SpellCooldown(arcane_power) < 5 } } * { 1 - 0.1 * { Talent(nether_tempest_talent) or Talent(supernova_talent) } } * { 10 / ExecuteTime(arcane_blast) } < ManaPercent() - 20 - 2.5 * Enemies() * { 9 - Enemies() } + SpellCooldown(evocation) * 1.8 / { 100 / { 100 + SpellHaste() } } and not GetState(burn_phase) > 0 SetState(burn_phase 1)
+	#start_burn_phase,if=buff.arcane_charge.stack>=4&(legendary_ring.cooldown.remains<gcd.max|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&(cooldown.prismatic_crystal.up|!talent.prismatic_crystal.enabled)&(cooldown.arcane_power.up|(glyph.arcane_power.enabled&cooldown.arcane_power.remains>60))&(cooldown.evocation.remains-2*buff.arcane_missiles.stack*spell_haste-gcd.max*talent.prismatic_crystal.enabled)*0.75*(1-0.1*(cooldown.arcane_power.remains<5))*(1-0.1*(talent.nether_tempest.enabled|talent.supernova.enabled))*(10%action.arcane_blast.execute_time)<mana.pct-20-2.5*active_enemies*(9-active_enemies)+(cooldown.evocation.remains*1.8%spell_haste)
+	if DebuffStacks(arcane_charge_debuff) >= 4 and { ItemCooldown(legendary_ring_intellect) < GCD() or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { not SpellCooldown(prismatic_crystal) > 0 or not Talent(prismatic_crystal_talent) } and { not SpellCooldown(arcane_power) > 0 or Glyph(glyph_of_arcane_power) and SpellCooldown(arcane_power) > 60 } and { SpellCooldown(evocation) - 2 * BuffStacks(arcane_missiles_buff) * { 100 / { 100 + SpellHaste() } } - GCD() * TalentPoints(prismatic_crystal_talent) } * 0.75 * { 1 - 0.1 * { SpellCooldown(arcane_power) < 5 } } * { 1 - 0.1 * { Talent(nether_tempest_talent) or Talent(supernova_talent) } } * { 10 / ExecuteTime(arcane_blast) } < ManaPercent() - 20 - 2.5 * Enemies() * { 9 - Enemies() } + SpellCooldown(evocation) * 1.8 / { 100 / { 100 + SpellHaste() } } and not GetState(burn_phase) > 0 SetState(burn_phase 1)
 }
 
 AddFunction ArcaneInitBurnShortCdActions
 {
-	#start_burn_phase,if=buff.arcane_charge.stack>=4&(legendary_ring.cooldown.up|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&(cooldown.prismatic_crystal.up|!talent.prismatic_crystal.enabled)&(cooldown.arcane_power.up|(glyph.arcane_power.enabled&cooldown.arcane_power.remains>60))&(cooldown.evocation.remains-2*buff.arcane_missiles.stack*spell_haste-gcd.max*talent.prismatic_crystal.enabled)*0.75*(1-0.1*(cooldown.arcane_power.remains<5))*(1-0.1*(talent.nether_tempest.enabled|talent.supernova.enabled))*(10%action.arcane_blast.execute_time)<mana.pct-20-2.5*active_enemies*(9-active_enemies)+(cooldown.evocation.remains*1.8%spell_haste)
-	if DebuffStacks(arcane_charge_debuff) >= 4 and { not ItemCooldown(legendary_ring_intellect) > 0 or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { not SpellCooldown(prismatic_crystal) > 0 or not Talent(prismatic_crystal_talent) } and { not SpellCooldown(arcane_power) > 0 or Glyph(glyph_of_arcane_power) and SpellCooldown(arcane_power) > 60 } and { SpellCooldown(evocation) - 2 * BuffStacks(arcane_missiles_buff) * { 100 / { 100 + SpellHaste() } } - GCD() * TalentPoints(prismatic_crystal_talent) } * 0.75 * { 1 - 0.1 * { SpellCooldown(arcane_power) < 5 } } * { 1 - 0.1 * { Talent(nether_tempest_talent) or Talent(supernova_talent) } } * { 10 / ExecuteTime(arcane_blast) } < ManaPercent() - 20 - 2.5 * Enemies() * { 9 - Enemies() } + SpellCooldown(evocation) * 1.8 / { 100 / { 100 + SpellHaste() } } and not GetState(burn_phase) > 0 SetState(burn_phase 1)
+	#start_burn_phase,if=buff.arcane_charge.stack>=4&(legendary_ring.cooldown.remains<gcd.max|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&(cooldown.prismatic_crystal.up|!talent.prismatic_crystal.enabled)&(cooldown.arcane_power.up|(glyph.arcane_power.enabled&cooldown.arcane_power.remains>60))&(cooldown.evocation.remains-2*buff.arcane_missiles.stack*spell_haste-gcd.max*talent.prismatic_crystal.enabled)*0.75*(1-0.1*(cooldown.arcane_power.remains<5))*(1-0.1*(talent.nether_tempest.enabled|talent.supernova.enabled))*(10%action.arcane_blast.execute_time)<mana.pct-20-2.5*active_enemies*(9-active_enemies)+(cooldown.evocation.remains*1.8%spell_haste)
+	if DebuffStacks(arcane_charge_debuff) >= 4 and { ItemCooldown(legendary_ring_intellect) < GCD() or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { not SpellCooldown(prismatic_crystal) > 0 or not Talent(prismatic_crystal_talent) } and { not SpellCooldown(arcane_power) > 0 or Glyph(glyph_of_arcane_power) and SpellCooldown(arcane_power) > 60 } and { SpellCooldown(evocation) - 2 * BuffStacks(arcane_missiles_buff) * { 100 / { 100 + SpellHaste() } } - GCD() * TalentPoints(prismatic_crystal_talent) } * 0.75 * { 1 - 0.1 * { SpellCooldown(arcane_power) < 5 } } * { 1 - 0.1 * { Talent(nether_tempest_talent) or Talent(supernova_talent) } } * { 10 / ExecuteTime(arcane_blast) } < ManaPercent() - 20 - 2.5 * Enemies() * { 9 - Enemies() } + SpellCooldown(evocation) * 1.8 / { 100 / { 100 + SpellHaste() } } and not GetState(burn_phase) > 0 SetState(burn_phase 1)
 }
 
 AddFunction ArcaneInitBurnCdActions
 {
-	#start_burn_phase,if=buff.arcane_charge.stack>=4&(legendary_ring.cooldown.up|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&(cooldown.prismatic_crystal.up|!talent.prismatic_crystal.enabled)&(cooldown.arcane_power.up|(glyph.arcane_power.enabled&cooldown.arcane_power.remains>60))&(cooldown.evocation.remains-2*buff.arcane_missiles.stack*spell_haste-gcd.max*talent.prismatic_crystal.enabled)*0.75*(1-0.1*(cooldown.arcane_power.remains<5))*(1-0.1*(talent.nether_tempest.enabled|talent.supernova.enabled))*(10%action.arcane_blast.execute_time)<mana.pct-20-2.5*active_enemies*(9-active_enemies)+(cooldown.evocation.remains*1.8%spell_haste)
-	if DebuffStacks(arcane_charge_debuff) >= 4 and { not ItemCooldown(legendary_ring_intellect) > 0 or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { not SpellCooldown(prismatic_crystal) > 0 or not Talent(prismatic_crystal_talent) } and { not SpellCooldown(arcane_power) > 0 or Glyph(glyph_of_arcane_power) and SpellCooldown(arcane_power) > 60 } and { SpellCooldown(evocation) - 2 * BuffStacks(arcane_missiles_buff) * { 100 / { 100 + SpellHaste() } } - GCD() * TalentPoints(prismatic_crystal_talent) } * 0.75 * { 1 - 0.1 * { SpellCooldown(arcane_power) < 5 } } * { 1 - 0.1 * { Talent(nether_tempest_talent) or Talent(supernova_talent) } } * { 10 / ExecuteTime(arcane_blast) } < ManaPercent() - 20 - 2.5 * Enemies() * { 9 - Enemies() } + SpellCooldown(evocation) * 1.8 / { 100 / { 100 + SpellHaste() } } and not GetState(burn_phase) > 0 SetState(burn_phase 1)
+	#start_burn_phase,if=buff.arcane_charge.stack>=4&(legendary_ring.cooldown.remains<gcd.max|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&(cooldown.prismatic_crystal.up|!talent.prismatic_crystal.enabled)&(cooldown.arcane_power.up|(glyph.arcane_power.enabled&cooldown.arcane_power.remains>60))&(cooldown.evocation.remains-2*buff.arcane_missiles.stack*spell_haste-gcd.max*talent.prismatic_crystal.enabled)*0.75*(1-0.1*(cooldown.arcane_power.remains<5))*(1-0.1*(talent.nether_tempest.enabled|talent.supernova.enabled))*(10%action.arcane_blast.execute_time)<mana.pct-20-2.5*active_enemies*(9-active_enemies)+(cooldown.evocation.remains*1.8%spell_haste)
+	if DebuffStacks(arcane_charge_debuff) >= 4 and { ItemCooldown(legendary_ring_intellect) < GCD() or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { not SpellCooldown(prismatic_crystal) > 0 or not Talent(prismatic_crystal_talent) } and { not SpellCooldown(arcane_power) > 0 or Glyph(glyph_of_arcane_power) and SpellCooldown(arcane_power) > 60 } and { SpellCooldown(evocation) - 2 * BuffStacks(arcane_missiles_buff) * { 100 / { 100 + SpellHaste() } } - GCD() * TalentPoints(prismatic_crystal_talent) } * 0.75 * { 1 - 0.1 * { SpellCooldown(arcane_power) < 5 } } * { 1 - 0.1 * { Talent(nether_tempest_talent) or Talent(supernova_talent) } } * { 10 / ExecuteTime(arcane_blast) } < ManaPercent() - 20 - 2.5 * Enemies() * { 9 - Enemies() } + SpellCooldown(evocation) * 1.8 / { 100 / { 100 + SpellHaste() } } and not GetState(burn_phase) > 0 SetState(burn_phase 1)
 }
 
 ### actions.init_crystal
@@ -649,6 +651,7 @@ Include(ovale_mage_spells)
 
 AddCheckBox(opt_interrupt L(interrupt) default specialization=fire)
 AddCheckBox(opt_potion_intellect ItemName(draenic_intellect_potion) default specialization=fire)
+AddCheckBox(opt_legendary_ring_intellect ItemName(legendary_ring_intellect) default specialization=fire)
 AddCheckBox(opt_time_warp SpellName(time_warp) specialization=fire)
 
 AddFunction FireUsePotionIntellect
@@ -658,7 +661,6 @@ AddFunction FireUsePotionIntellect
 
 AddFunction FireUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -916,6 +918,8 @@ AddFunction FireCombustSequenceCdActions
 		#arcane_torrent
 		Spell(arcane_torrent_mana)
 		#use_item,slot=finger2
+		if CheckBoxOn(opt_legendary_ring_intellect) Item(legendary_ring_intellect usable=1)
+		#use_item,slot=trinket1
 		FireUseItemActions()
 		#potion,name=draenic_intellect
 		FireUsePotionIntellect()
@@ -988,10 +992,10 @@ AddFunction FireCrystalSequenceCdPostConditions
 
 AddFunction FireInitCombustMainActions
 {
-	#start_pyro_chain,if=talent.meteor.enabled&cooldown.meteor.up&((cooldown.combustion.remains<gcd.max*3&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
-	if Talent(meteor_talent) and not SpellCooldown(meteor) > 0 and { SpellCooldown(combustion) < GCD() * 3 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
-	#start_pyro_chain,if=talent.prismatic_crystal.enabled&cooldown.prismatic_crystal.up&((cooldown.combustion.remains<gcd.max*2&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
-	if Talent(prismatic_crystal_talent) and not SpellCooldown(prismatic_crystal) > 0 and { SpellCooldown(combustion) < GCD() * 2 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
+	#start_pyro_chain,if=talent.meteor.enabled&cooldown.meteor.up&(legendary_ring.cooldown.remains<gcd.max|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&((cooldown.combustion.remains<gcd.max*3&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
+	if Talent(meteor_talent) and not SpellCooldown(meteor) > 0 and { ItemCooldown(legendary_ring_intellect) < GCD() or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { SpellCooldown(combustion) < GCD() * 3 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
+	#start_pyro_chain,if=talent.prismatic_crystal.enabled&cooldown.prismatic_crystal.up&(legendary_ring.cooldown.remains<gcd.max|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&((cooldown.combustion.remains<gcd.max*2&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
+	if Talent(prismatic_crystal_talent) and not SpellCooldown(prismatic_crystal) > 0 and { ItemCooldown(legendary_ring_intellect) < GCD() or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { SpellCooldown(combustion) < GCD() * 2 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
 	#start_pyro_chain,if=talent.prismatic_crystal.enabled&!glyph.combustion.enabled&cooldown.prismatic_crystal.remains>20&((cooldown.combustion.remains<gcd.max*2&buff.pyroblast.up&buff.heating_up.up&action.fireball.in_flight)|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
 	if Talent(prismatic_crystal_talent) and not Glyph(glyph_of_combustion) and SpellCooldown(prismatic_crystal) > 20 and { SpellCooldown(combustion) < GCD() * 2 and BuffPresent(pyroblast_buff) and BuffPresent(heating_up_buff) and InFlightToTarget(fireball) or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
 	#start_pyro_chain,if=!talent.prismatic_crystal.enabled&!talent.meteor.enabled&((cooldown.combustion.remains<gcd.max*4&buff.pyroblast.up&buff.heating_up.up&action.fireball.in_flight)|(buff.pyromaniac.up&cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*(gcd.max+talent.kindling.enabled)))
@@ -1000,10 +1004,10 @@ AddFunction FireInitCombustMainActions
 
 AddFunction FireInitCombustShortCdActions
 {
-	#start_pyro_chain,if=talent.meteor.enabled&cooldown.meteor.up&((cooldown.combustion.remains<gcd.max*3&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
-	if Talent(meteor_talent) and not SpellCooldown(meteor) > 0 and { SpellCooldown(combustion) < GCD() * 3 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
-	#start_pyro_chain,if=talent.prismatic_crystal.enabled&cooldown.prismatic_crystal.up&((cooldown.combustion.remains<gcd.max*2&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
-	if Talent(prismatic_crystal_talent) and not SpellCooldown(prismatic_crystal) > 0 and { SpellCooldown(combustion) < GCD() * 2 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
+	#start_pyro_chain,if=talent.meteor.enabled&cooldown.meteor.up&(legendary_ring.cooldown.remains<gcd.max|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&((cooldown.combustion.remains<gcd.max*3&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
+	if Talent(meteor_talent) and not SpellCooldown(meteor) > 0 and { ItemCooldown(legendary_ring_intellect) < GCD() or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { SpellCooldown(combustion) < GCD() * 3 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
+	#start_pyro_chain,if=talent.prismatic_crystal.enabled&cooldown.prismatic_crystal.up&(legendary_ring.cooldown.remains<gcd.max|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&((cooldown.combustion.remains<gcd.max*2&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
+	if Talent(prismatic_crystal_talent) and not SpellCooldown(prismatic_crystal) > 0 and { ItemCooldown(legendary_ring_intellect) < GCD() or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { SpellCooldown(combustion) < GCD() * 2 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
 	#start_pyro_chain,if=talent.prismatic_crystal.enabled&!glyph.combustion.enabled&cooldown.prismatic_crystal.remains>20&((cooldown.combustion.remains<gcd.max*2&buff.pyroblast.up&buff.heating_up.up&action.fireball.in_flight)|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
 	if Talent(prismatic_crystal_talent) and not Glyph(glyph_of_combustion) and SpellCooldown(prismatic_crystal) > 20 and { SpellCooldown(combustion) < GCD() * 2 and BuffPresent(pyroblast_buff) and BuffPresent(heating_up_buff) and InFlightToTarget(fireball) or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
 	#start_pyro_chain,if=!talent.prismatic_crystal.enabled&!talent.meteor.enabled&((cooldown.combustion.remains<gcd.max*4&buff.pyroblast.up&buff.heating_up.up&action.fireball.in_flight)|(buff.pyromaniac.up&cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*(gcd.max+talent.kindling.enabled)))
@@ -1012,10 +1016,10 @@ AddFunction FireInitCombustShortCdActions
 
 AddFunction FireInitCombustCdActions
 {
-	#start_pyro_chain,if=talent.meteor.enabled&cooldown.meteor.up&((cooldown.combustion.remains<gcd.max*3&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
-	if Talent(meteor_talent) and not SpellCooldown(meteor) > 0 and { SpellCooldown(combustion) < GCD() * 3 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
-	#start_pyro_chain,if=talent.prismatic_crystal.enabled&cooldown.prismatic_crystal.up&((cooldown.combustion.remains<gcd.max*2&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
-	if Talent(prismatic_crystal_talent) and not SpellCooldown(prismatic_crystal) > 0 and { SpellCooldown(combustion) < GCD() * 2 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
+	#start_pyro_chain,if=talent.meteor.enabled&cooldown.meteor.up&(legendary_ring.cooldown.remains<gcd.max|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&((cooldown.combustion.remains<gcd.max*3&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
+	if Talent(meteor_talent) and not SpellCooldown(meteor) > 0 and { ItemCooldown(legendary_ring_intellect) < GCD() or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { SpellCooldown(combustion) < GCD() * 3 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
+	#start_pyro_chain,if=talent.prismatic_crystal.enabled&cooldown.prismatic_crystal.up&(legendary_ring.cooldown.remains<gcd.max|legendary_ring.cooldown.remains>target.time_to_die+15|!legendary_ring.has_cooldown)&((cooldown.combustion.remains<gcd.max*2&buff.pyroblast.up&(buff.heating_up.up^action.fireball.in_flight))|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
+	if Talent(prismatic_crystal_talent) and not SpellCooldown(prismatic_crystal) > 0 and { ItemCooldown(legendary_ring_intellect) < GCD() or ItemCooldown(legendary_ring_intellect) > target.TimeToDie() + 15 or not ItemCooldown(legendary_ring_intellect) > 0 } and { SpellCooldown(combustion) < GCD() * 2 and BuffPresent(pyroblast_buff) and { BuffPresent(heating_up_buff) xor InFlightToTarget(fireball) } or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
 	#start_pyro_chain,if=talent.prismatic_crystal.enabled&!glyph.combustion.enabled&cooldown.prismatic_crystal.remains>20&((cooldown.combustion.remains<gcd.max*2&buff.pyroblast.up&buff.heating_up.up&action.fireball.in_flight)|(buff.pyromaniac.up&(cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*gcd.max)))
 	if Talent(prismatic_crystal_talent) and not Glyph(glyph_of_combustion) and SpellCooldown(prismatic_crystal) > 20 and { SpellCooldown(combustion) < GCD() * 2 and BuffPresent(pyroblast_buff) and BuffPresent(heating_up_buff) and InFlightToTarget(fireball) or BuffPresent(pyromaniac_buff) and SpellCooldown(combustion) < BuffRemaining(pyromaniac_buff) / GCD() * GCD() } and not GetState(pyro_chain) > 0 SetState(pyro_chain 1)
 	#start_pyro_chain,if=!talent.prismatic_crystal.enabled&!talent.meteor.enabled&((cooldown.combustion.remains<gcd.max*4&buff.pyroblast.up&buff.heating_up.up&action.fireball.in_flight)|(buff.pyromaniac.up&cooldown.combustion.remains<ceil(buff.pyromaniac.remains%gcd.max)*(gcd.max+talent.kindling.enabled)))
@@ -1235,6 +1239,7 @@ AddIcon checkbox=opt_mage_fire_aoe help=cd specialization=fire
 # incanters_flow_talent
 # inferno_blast
 # kindling_talent
+# legendary_ring_intellect
 # living_bomb
 # living_bomb_debuff
 # living_bomb_talent
@@ -1273,6 +1278,7 @@ Include(ovale_mage_spells)
 
 AddCheckBox(opt_interrupt L(interrupt) default specialization=frost)
 AddCheckBox(opt_potion_intellect ItemName(draenic_intellect_potion) default specialization=frost)
+AddCheckBox(opt_legendary_ring_intellect ItemName(legendary_ring_intellect) default specialization=frost)
 AddCheckBox(opt_time_warp SpellName(time_warp) specialization=frost)
 
 AddFunction FrostUsePotionIntellect
@@ -1282,7 +1288,6 @@ AddFunction FrostUsePotionIntellect
 
 AddFunction FrostUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -1443,6 +1448,8 @@ AddFunction FrostCooldownsCdActions
 	#potion,name=draenic_intellect,if=buff.bloodlust.up|buff.icy_veins.up
 	if BuffPresent(burst_haste_buff any=1) or BuffPresent(icy_veins_buff) FrostUsePotionIntellect()
 	#use_item,slot=finger2
+	if CheckBoxOn(opt_legendary_ring_intellect) Item(legendary_ring_intellect usable=1)
+	#use_item,slot=trinket1
 	FrostUseItemActions()
 }
 
@@ -1772,6 +1779,7 @@ AddIcon checkbox=opt_mage_frost_aoe help=cd specialization=frost
 # icy_veins
 # icy_veins_buff
 # incanters_flow_buff
+# legendary_ring_intellect
 # mirror_image
 # prismatic_crystal
 # prismatic_crystal_talent

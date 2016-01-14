@@ -1,8 +1,0 @@
-2015-11-13  sylvanaar  <sylvanaar@mindspring.com>
-
-[76e924777dd9] [3.6.1]
-* Prat-3.0.toc:
-
-Fix storage for the scrollback
-
-

@@ -126,8 +126,16 @@ local checkPanel = {
 			get = function() return MT.db.profile.noskin end,
 			set = function(info, value) MT.db.profile.noskin = value end,
 		},
-		allcharmacros = {
+		confirmdeletion = {
 			order = 7,
+			type = "toggle",
+			name = L["Confirm macro deletion"],
+			width = "full",
+			get = function() return MT.db.profile.confirmdelete end,
+			set = function(info, value) MT.db.profile.confirmdelete = value end,
+		},
+		allcharmacros = {
+			order = 8,
 			type = "toggle",
 			name = L["Make all character specific macros available to all characters"],
 			width = "full",
@@ -142,12 +150,12 @@ local checkPanel = {
 				end,
 			},
 		allcharmacrosdesc1 = {
-			order = 8,
+			order = 9,
 			type = "description",
 			name = L["This may impact performance and loading time on low end machines"],
 		},
 		allcharmacrosdesc2 = {
-			order = 9,
+			order = 10,
 			type = "description",
 			name = L["You will need to log into each of your characters with Macro Toolkit enabled to update Macro Toolkit's copy of that character's macros"],
 		},

@@ -383,6 +383,8 @@ function Addon:TriggerAction(action, args)
 	elseif action == "menu" then
 		-- open options menu
 		InterfaceOptionsFrame_OpenToCategory(self.FULLNAME)
+		-- call twice because otherwise first time options are opened it will not switch to the addon
+		InterfaceOptionsFrame_OpenToCategory(self.FULLNAME)
 	elseif action == "debug" then
 		if args[2] and string.lower(args[2]) == "on" then
 			self:Output("debug mode turned on")

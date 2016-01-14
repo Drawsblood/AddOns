@@ -255,8 +255,8 @@ L:AddLocale("zhCN",
 	["Control whether text is added to the frame at the top or the bottom."] = "控制文本被添加到框体顶端还是底端",
 	lowdown_desc = "为每个聊天窗口自动跳至底端",
 	lowdown_name = "启用回到底端",
-	modified_speed = "设置 Shift+鼠标滚轮 速度", -- Needs review
-	modified_speed_desc = "设定按住Shift键时鼠标滚轮滚动的行数", -- Needs review
+	modified_speed = "设置 Shift+鼠标滚轮 速度",
+	modified_speed_desc = "设定按住Shift键时鼠标滚轮滚动的行数",
 	mousewheel_desc = "为每个聊天窗口选取鼠标滚轮支持",
 	mousewheel_name = "启用鼠标滚轮",
 	Scroll = "滚动",

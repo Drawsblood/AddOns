@@ -104,6 +104,7 @@ L["Macro name font"] = "Tipo de letra dos nomes das macros" -- Needs review
 L["Macro shortened by %d character"] = "Macro reduzida em %d caractere(s)"
 L["Macro shortened by %d characters"] = "Macro reduzida em %d caractere(s)"
 L["Macro slots available"] = "Espa\195\167os de macros dispon\195\173veis" -- Needs review
+L["Macro Toolkit can only handle tooltip commands up to a maximum of 113 characters. Your tooltip will not work as expected unless you shorten it"] = "Macro Toolkit can only handle tooltip commands up to a maximum of 113 characters. Your tooltip will not work as expected unless you shorten it" -- Requires localization
 L["Macro Toolkit has found %d orphaned macros. Restore?"] = "Macro Toolkit encontrou %d macros orf\195\163ns. Restaurar?" -- Needs review
 L["Macro Toolkit slash commands"] = "Comandos com barra do Marco Toolkit" -- Needs review
 L["Make all character specific macros available to all characters"] = "Tornar dispon\195\173vel para todos os personagens as macros espec\195\173ficas deste personagem" -- Needs review

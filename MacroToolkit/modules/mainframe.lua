@@ -13,6 +13,42 @@ function MT:FrameOnKeyDown(this, key)
 	end
 end
 
+local function deleteMacro()
+	PlaySound("igMainMenuOptionCheckBoxOn")
+	local selectedMacro = MacroToolkitFrame.selectedMacro
+	local numMacros
+	if selectedMacro > 1000 then
+		local commandName = format("CLICK MTSB%d:LeftButton", MacroToolkitFrame.extra)
+		local k1, k2 = GetBindingKey(commandName)
+		if MacroToolkitBindingFrame then MacroToolkitBindingFrame.selected = nil end
+		if k1 then MT:UnbindKey(k1) end
+		if k2 then MT:UnbindKey(k2) end
+		SaveBindings(GetCurrentBindingSet())
+		MT.db.global.extra[tostring(selectedMacro)] = nil
+		numMacros = MT:CountExtra()
+	else
+		if MacroToolkitText.extended then
+			local mindex = MT:GetCurrentIndex()
+			if mindex then MT:DeleteExtended(mindex) end
+		end
+		DeleteMacro(selectedMacro)
+		numMacros = select(PanelTemplates_GetSelectedTab(MacroToolkitFrame), GetNumMacros())
+	end
+	if selectedMacro > (numMacros + MacroToolkitFrame.macroBase) then selectedMacro = selectedMacro - 1 end
+	if selectedMacro <= MacroToolkitFrame.macroBase then MacroToolkitFrame.selectedMacro = nil
+	else MacroToolkitFrame.selectedMacro = selectedMacro end
+	MT:MacroFrameUpdate()
+	MacroToolkitText:ClearFocus()
+end
+
+local function confirmDelete()
+	if MT.db.profile.confirmdelete then
+		StaticPopupDialogs.MACROTOOLKIT_DELETEBACKUP.OnAccept = function() deleteMacro() end
+		StaticPopupDialogs.MACROTOOLKIT_DELETEBACKUP.text = format(L["Are you sure you want to delete %s?"], MacroToolkitSelMacroName:GetText())
+		StaticPopup_Show("MACROTOOLKIT_DELETEBACKUP")
+	else deleteMacro() end
+end
+
 function MT:CreateMTFrame()
 	local mtframe = CreateFrame("Frame", "MacroToolkitFrame", UIParent, "ButtonFrameTemplate")
 
@@ -468,34 +504,7 @@ function MT:CreateMTFrame()
 	mtdel:SetSize(80, 22)
 	mtdel:SetFrameLevel(lvl)
 	mtdel:SetPoint("BOTTOMLEFT", 4, 4)
-	mtdel:SetScript("OnClick",
-		function()
-			PlaySound("igMainMenuOptionCheckBoxOn")
-			local selectedMacro = mtframe.selectedMacro
-			local numMacros
-			if selectedMacro > 1000 then
-				local commandName = format("CLICK MTSB%d:LeftButton", mtframe.extra)
-				local k1, k2 = GetBindingKey(commandName)
-				if MacroToolkitBindingFrame then MacroToolkitBindingFrame.selected = nil end
-				if k1 then MT:UnbindKey(k1) end
-				if k2 then MT:UnbindKey(k2) end
-				SaveBindings(GetCurrentBindingSet())
-				MT.db.global.extra[tostring(selectedMacro)] = nil
-				numMacros = MT:CountExtra()
-			else
-				if mtmscrollchild.extended then
-					local mindex = MT:GetCurrentIndex()
-					if mindex then MT:DeleteExtended(mindex) end
-				end
-				DeleteMacro(selectedMacro)
-				numMacros = select(PanelTemplates_GetSelectedTab(mtframe), GetNumMacros())
-			end
-			if selectedMacro > (numMacros + mtframe.macroBase) then selectedMacro = selectedMacro - 1 end
-			if selectedMacro <= mtframe.macroBase then mtframe.selectedMacro = nil
-			else mtframe.selectedMacro = selectedMacro end
-			MT:MacroFrameUpdate()
-			mtmscrollchild:ClearFocus()
-		end)
+	mtdel:SetScript("OnClick", function() confirmDelete() end)
 
 	local mtmb = CreateFrame("Button", "MacroToolkitMacroBox", mtframe, "UIPanelButtonTemplate")
 	mtmb:SetText("MacroBox")

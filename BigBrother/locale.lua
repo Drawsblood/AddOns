@@ -158,7 +158,7 @@ La["Guardian Elixirs"] = "Élixirs des gardiens" -- Needs review
 La["Guild"] = "Guilde"
 La["Hibernate"] = "Hibernation"
 -- La["Ignore Ready checks in LFG/LFR"] = ""
--- La["Instance"] = ""
+La["Instance"] = "Instance" -- Needs review
 La["Intellect"] = "Intelligence" -- Needs review
 La["Interrupt"] = "Interruption"
 La["Misdirect"] = "Détournement"
@@ -239,7 +239,7 @@ elseif locale == "deDE" then do end
 La["A new version of Big Brother (%s) is available for download at:"] = "Eine neue Version von Big Brother (%s) ist zum Download verfügbar auf:"
 La["A quick report that shows who does not have flasks, elixirs or food."] = "Eine Schnellprüfung, wer keine Fläschchen, Elixiere oder Essen-Buffs hat."
 La["Armor"] = "Rüstung"
--- La["Augment Runes"] = ""
+La["Augment Runes"] = "Verstärkungsrunen"
 La["Auras"] = "Auren"
 La["Battle Elixirs"] = "Kampfelixier"
 La["Battleground"] = "Schlachtfeld"

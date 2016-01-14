@@ -133,8 +133,8 @@ Prat:AddModuleToLoad(function()
   )
   L:AddLocale("zhCN",
   {
-	allevents_desc = "为所有聊天事件开启Phat处理", -- Needs review
-	allevents_name = "处理所有事件", -- Needs review
+	allevents_desc = "为所有聊天事件开启Phat处理",
+	allevents_name = "处理所有事件",
 	["Chat window event name options."] = "聊天窗口项目名称选项",
 	EventNames = "事件名称",
 	Show = "显示",

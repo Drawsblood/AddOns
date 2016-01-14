@@ -104,6 +104,7 @@ L["Macro name font"] = "Macro name font" -- Requires localization
 L["Macro shortened by %d character"] = "\229\183\168\233\155\134\231\184\174\231\159\173\228\186\134 %d \229\128\139\229\173\151\231\172\166" -- Needs review
 L["Macro shortened by %d characters"] = "\229\183\168\233\155\134\231\184\174\231\159\173\228\186\134 %d \229\128\139\229\173\151\231\172\166" -- Needs review
 L["Macro slots available"] = "Macro slots available" -- Requires localization
+L["Macro Toolkit can only handle tooltip commands up to a maximum of 113 characters. Your tooltip will not work as expected unless you shorten it"] = "Macro Toolkit can only handle tooltip commands up to a maximum of 113 characters. Your tooltip will not work as expected unless you shorten it" -- Requires localization
 L["Macro Toolkit has found %d orphaned macros. Restore?"] = "Macro Toolkit has found %d orphaned macros. Restore?" -- Requires localization
 L["Macro Toolkit slash commands"] = "Macro Toolkit \231\154\132\230\150\156\230\157\160\229\145\189\228\187\164" -- Needs review
 L["Make all character specific macros available to all characters"] = "Make all character specific macros available to all characters" -- Requires localization

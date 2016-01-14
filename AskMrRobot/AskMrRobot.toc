@@ -1,11 +1,11 @@
 ## Interface: 60200
 ## Title: Ask Mr. Robot
 ## Author: Team Robot, Inc.
-## Version: 30
+## Version: 31
 ## Notes: Gear import/export, combat logging, and more.
 ## URL: www.askmrrobot.com
 ## SavedVariables: AskMrRobotDb2
-## X-Curse-Packaged-Version: v30
+## X-Curse-Packaged-Version: v31
 ## X-Curse-Project-Name: AskMrRobot
 ## X-Curse-Project-ID: askmrrobot
 ## X-Curse-Repository-ID: wow/askmrrobot/mainline

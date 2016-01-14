@@ -32,7 +32,7 @@ do
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local xp = GetValue("XP")
@@ -52,7 +52,7 @@ return Colorize(color, FormatNumber(xp, true)) .. "/" .. Colorize(color, FormatN
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local xp = GetValue("XP")
@@ -73,7 +73,7 @@ return Colorize(color, FormatNumber(xp, true)) .. " (" .. Colorize(color, percen
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local xp = GetValue("XP")
@@ -94,7 +94,7 @@ return Colorize(color, FormatNumber(xp, true)) .. "/" .. Colorize(color, FormatN
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local xp = GetValue("XP")
@@ -116,7 +116,7 @@ return Colorize(color, FormatNumber(togo, true)) .. " (" .. Colorize(color, perc
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local xp = GetValue("XP")
@@ -141,7 +141,7 @@ return Colorize(color, FormatNumber(xp, true)) .. "/" .. Colorize(color, FormatN
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local xp = GetValue("XP")
@@ -164,7 +164,7 @@ return FormatNumber(xp, true) .. "/" .. FormatNumber(total, true) .. " (" .. per
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local xp = GetValue("XP")
@@ -192,7 +192,7 @@ return Colorize(color, FormatNumber(xp, true)) .. "/" .. Colorize(color, FormatN
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local xp = GetValue("XP")
@@ -218,7 +218,7 @@ return FormatNumber(xp, true) .. "/" .. FormatNumber(total, true) .. " (" .. per
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 return GetDescription("TimeToLevel", true) .. ": " .. GetValue("TimeToLevel")
@@ -234,7 +234,7 @@ return GetDescription("TimeToLevel", true) .. ": " .. GetValue("TimeToLevel")
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local ktl = GetValue("KillsToLevel")	
@@ -252,7 +252,7 @@ return GetDescription("KillsToLevel", true) .. ": " .. FormatNumber(ktl, true)
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local xpph = math.floor(GetValue("XPPerHour"))	
@@ -282,7 +282,7 @@ return GetDescription("KillsPerHour", true) .. ": " .. FormatNumber(kph, true)
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local xp = GetValue("XP")
@@ -303,7 +303,7 @@ return Colorize(color, FormatNumber(xp, true)) .. "/" .. Colorize(color, FormatN
 local valid, fallbackText = Check("XP")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local xp = GetValue("XP")
@@ -329,7 +329,7 @@ return FormatNumber(xp, true) .. "/" .. FormatNumber(total, true) .. " (" .. per
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local rep = GetValue("Reputation")
@@ -349,7 +349,7 @@ return Colorize(color, FormatNumber(rep, true)) .. "/" .. Colorize(color, Format
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local rep = GetValue("Reputation")
@@ -370,7 +370,7 @@ return Colorize(color, FormatNumber(rep, true)) .. " (" .. Colorize(color, perce
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local rep = GetValue("Reputation")
@@ -391,7 +391,7 @@ return Colorize(color, FormatNumber(rep, true)) .. "/" .. Colorize(color, Format
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local rep = GetValue("Reputation")
@@ -413,7 +413,7 @@ return Colorize(color, FormatNumber(togo, true)) .. " (" .. Colorize(color, perc
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local rep = GetValue("Reputation")
@@ -437,7 +437,7 @@ return Colorize(color, FormatNumber(rep, true)) .. "/" .. Colorize(color, Format
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local rep = GetValue("Reputation")
@@ -460,7 +460,7 @@ return FormatNumber(rep, true) .. "/" .. FormatNumber(total, true) .. " (" .. pe
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local rep = GetValue("Reputation")
@@ -486,7 +486,7 @@ return Colorize(standingColor, faction) .. ": " .. Colorize(color, FormatNumber(
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local rep = GetValue("Reputation")
@@ -510,7 +510,7 @@ return faction .. ": " .. FormatNumber(rep, true) .. "/" .. FormatNumber(total, 
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 return GetDescription("TimeToStanding", true) .. ": " .. GetValue("TimeToStanding")
@@ -526,7 +526,7 @@ return GetDescription("TimeToStanding", true) .. ": " .. GetValue("TimeToStandin
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 return GetDescription("KillsToStanding", true) .. ": " .. GetValue("KillsToStanding")
@@ -542,7 +542,7 @@ return GetDescription("KillsToStanding", true) .. ": " .. GetValue("KillsToStand
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local rph = math.floor(GetValue("ReputationPerHour"))
@@ -572,7 +572,7 @@ return GetDescription("KillsPerHour", true) .. ": " .. FormatNumber(kph, true)
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local rep = GetValue("Reputation")
@@ -593,7 +593,7 @@ return Colorize(color, FormatNumber(rep, true)) .. "/" .. Colorize(color, Format
 local valid, fallbackText = Check("Reputation")
 
 if not valid then
-	return fallbackText
+    return fallbackText
 end
 
 local rep = GetValue("Reputation")

@@ -1,21 +1,66 @@
-Ovale Spell Priority 6.2.15
+Ovale Spell Priority 6.2.16
 ===========================
 
-Changes from version 6.2.14:
+Changes from version 6.2.15:
 ----------------------------
 
--   Update zhTW localization data.
+-   Only suggest the legendary ring if it is equipped and usable.
 
--   Mage: Properly translate "buff.shatterlance.up" from the class trinket.
-
-    Shatterlance is a hidden buff, so check for the conditions that proc it.
-
--   Regenerate scripts based on SimulationCraft git master from 2015-09-17.
+-   Regenerate scripts to re-add suggesting on-use trinket actions.
 
 -   Merge branch 'simulationcraft'.
 
-    Pull in changes from SimulationCraft git master from 2015-09-17.
+    Add "use_item" actions to SimC APLs so that script code for on-use
+    trinkets is properly generated.
 
--   Import Tier18M profiles from SimulationCraft git master from 2015-09-17.
+-   Add "use_item" to APLs to properly generate code for on-use trinkets.
 
--   Translate SimC "legendary_ring.cooldown.{up|down}" correctly.
+-   Suggest using the legendary ring separately from trinkets.
+
+    Also fix a bug where non-spell actions were not emitted by the SplitByTag
+    functions.
+
+-   The engineering glove enhancement was removed ages ago.
+
+-   Import latest release.sh from curseforge-packager project.
+
+-   Update localized strings from CurseForge app from 2015-12-30.
+
+-   Regenerate scripts based on SimulationCraft git master from 2015-12-17.
+
+-   Avoid emitting "call_action_list" as a missing symbol.
+
+    Filter out special actions from the list of actions that are regarded as
+    requiring symbols.
+
+-   Add trinket information for the Soul Capacitor.
+
+-   Add item ID for the Empty Drinking Horn.
+
+-   Translate SimC's "equipped.<item>" to allow checking for equipped items.
+
+-   Translate SimC's "eclipse_dir.<name>" expressions for balance druids.
+
+-   Translate SimC's "solar_max" for balance druids.
+
+-   Teach OvaleSimulationCraft about "@" absolute value operator.
+
+    Limit its translation to simple inequalities involving absolute values by
+    converting to the appropriate union or intersection of one-sided
+    inequalities. The latter are more suitable for translating into the
+    equivalent Ovale timespan concept.
+
+    This fixes the translation of "@" used in balance druid APLs involving
+    "@eclipse_energy".
+
+-   Druid: Move Cenarion Ward back to short CD icon for Guardian druids.
+
+    Cenarion Ward should not be used on cooldown since it wastes a GCD that
+    could be used to generate rage and is situational in providing a burst
+    heal for the tank.
+
+-   Merge branch 'simulationcraft'
+
+    Pull in changes from SimulationCraft git master from 2015-12-17.
+
+-   Import Tier18M profiles from SimulationCraft git master from 2015-12-17.

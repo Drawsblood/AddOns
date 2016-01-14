@@ -381,25 +381,25 @@ Prat:AddModuleToLoad(function()
 	["Extra data for WHISPER (target) and CHANNEL (channel name or num)"] = "密语(目标)和频道(频道名称或数字)的扩展数据",
 	["Filter Name"] = "过滤器名字",
 	Forward = "转发",
-	ForwardCustom = "自定义传送", -- Needs review
+	ForwardCustom = "自定义传送",
 	ForwardMessage = "信息转发",
-	ForwardMessageCustom = "私有频道", -- Needs review
+	ForwardMessageCustom = "私有频道",
 	["Forward the message to a chat channel."] = "转发信息到聊天频道",
-	["Forward the message to a custom chat channel."] = "输出到一个私人频道", -- Needs review
+	["Forward the message to a custom chat channel."] = "输出到一个私人频道",
 	["Hilight Color"] = "颜色高亮",
 	["Hilight Match Text"] = "高亮匹配文本",
 	Inbound = "输入范围",
-	inchannels_desc = "在当前频道搜索", -- Needs review
-	inchannels_name = "搜索频道", -- Needs review
-	["Is this pattern enabled for use?"] = "这个样式启用了吗？", -- Needs review
-	["Match Options"] = "适配选项", -- Needs review
+	inchannels_desc = "在当前频道搜索",
+	inchannels_name = "搜索频道",
+	["Is this pattern enabled for use?"] = "这个样式启用了吗？",
+	["Match Options"] = "适配选项",
 	module_desc = "支持自定义过滤的模块",
 	module_name = "自定义过滤",
 	["Only output the message portion of the chat text, leave out the channel, and playername etc."] = "仅在聊天文本中输出部分信息，移除频道和玩家姓名等",
 	Outbound = "输出范围",
 	["Output Channel"] = "输出频道",
 	["Output Message Only"] = "只输出信息",
-	["Pattern Info"] = "样式信息", -- Needs review
+	["Pattern Info"] = "样式信息",
 	["Pattern Options"] = "模块选项",
 	["Play a sound when this message is output to the chatframe"] = "当信息在聊天框输出时播放声音",
 	["Play Sound"] = "播放声音",
@@ -413,7 +413,7 @@ Prat:AddModuleToLoad(function()
 	["Send to a secondary output"] = "发送二次输出",
 	["<string>"] = true,
 	["Supplied pattern is a format string instead of a pattern"] = "支持模板是格式字符串而非模板",
-	["Your name for this filter"] = "这个过滤器的名字", -- Needs review
+	["Your name for this filter"] = "这个过滤器的名字",
 }
 
   )

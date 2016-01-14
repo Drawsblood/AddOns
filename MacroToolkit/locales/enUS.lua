@@ -138,6 +138,9 @@ L["Do not skin for ElvUI"] = true
 L["Requires a UI reload to take effect"] = true
 L["Conditional execution"] = true
 L["Cannot execute secure commands"] = true
+L["Macro Toolkit can only handle tooltip commands up to a maximum of 113 characters. Your tooltip will not work as expected unless you shorten it"] = true
+L["Are you sure you want to delete %s?"] = true
+L["Confirm macro deletion"] = true
 
 --conditions
 L["Condition Builder"] = true

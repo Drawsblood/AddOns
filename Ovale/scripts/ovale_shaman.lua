@@ -150,6 +150,7 @@ Include(ovale_shaman_spells)
 
 AddCheckBox(opt_interrupt L(interrupt) default specialization=elemental)
 AddCheckBox(opt_potion_intellect ItemName(draenic_intellect_potion) default specialization=elemental)
+AddCheckBox(opt_legendary_ring_intellect ItemName(legendary_ring_intellect) default specialization=elemental)
 AddCheckBox(opt_bloodlust SpellName(bloodlust) specialization=elemental)
 
 AddFunction ElementalUsePotionIntellect
@@ -159,7 +160,6 @@ AddFunction ElementalUsePotionIntellect
 
 AddFunction ElementalUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -214,6 +214,8 @@ AddFunction ElementalDefaultCdActions
 	#bloodlust,if=target.health.pct<25|time>0.500
 	if target.HealthPercent() < 25 or TimeInCombat() > 0.5 ElementalBloodlust()
 	#use_item,name=nithramus_the_allseer
+	if CheckBoxOn(opt_legendary_ring_intellect) Item(legendary_ring_intellect usable=1)
+	#use_item,slot=trinket1
 	ElementalUseItemActions()
 	#potion,name=draenic_intellect,if=buff.ascendance.up|target.time_to_die<=30
 	if BuffPresent(ascendance_caster_buff) or target.TimeToDie() <= 30 ElementalUsePotionIntellect()
@@ -420,6 +422,7 @@ AddIcon checkbox=opt_shaman_elemental_aoe help=cd specialization=elemental
 # lava_beam
 # lava_burst
 # lava_surge_buff
+# legendary_ring_intellect
 # lightning_bolt
 # lightning_shield
 # lightning_shield_buff
@@ -458,6 +461,7 @@ Include(ovale_shaman_spells)
 AddCheckBox(opt_interrupt L(interrupt) default specialization=enhancement)
 AddCheckBox(opt_melee_range L(not_in_melee_range) specialization=enhancement)
 AddCheckBox(opt_potion_agility ItemName(draenic_agility_potion) default specialization=enhancement)
+AddCheckBox(opt_legendary_ring_agility ItemName(legendary_ring_agility) default specialization=enhancement)
 AddCheckBox(opt_bloodlust SpellName(bloodlust) specialization=enhancement)
 
 AddFunction EnhancementUsePotionAgility
@@ -467,7 +471,6 @@ AddFunction EnhancementUsePotionAgility
 
 AddFunction EnhancementUseItemActions
 {
-	Item(HandSlot usable=1)
 	Item(Trinket0Slot usable=1)
 	Item(Trinket1Slot usable=1)
 }
@@ -529,6 +532,8 @@ AddFunction EnhancementDefaultCdActions
 	#bloodlust,if=target.health.pct<25|time>0.500
 	if target.HealthPercent() < 25 or TimeInCombat() > 0.5 EnhancementBloodlust()
 	#use_item,name=maalus_the_blood_drinker
+	if CheckBoxOn(opt_legendary_ring_agility) Item(legendary_ring_agility usable=1)
+	#use_item,slot=trinket1
 	EnhancementUseItemActions()
 	#potion,name=draenic_agility,if=(talent.storm_elemental_totem.enabled&(pet.storm_elemental_totem.remains>=25|(cooldown.storm_elemental_totem.remains>target.time_to_die&pet.fire_elemental_totem.remains>=25)))|(!talent.storm_elemental_totem.enabled&pet.fire_elemental_totem.remains>=25)|target.time_to_die<=30
 	if Talent(storm_elemental_totem_talent) and { TotemRemaining(storm_elemental_totem) >= 25 or SpellCooldown(storm_elemental_totem) > target.TimeToDie() and TotemRemaining(fire_elemental_totem) >= 25 } or not Talent(storm_elemental_totem_talent) and TotemRemaining(fire_elemental_totem) >= 25 or target.TimeToDie() <= 30 EnhancementUsePotionAgility()
@@ -763,6 +768,7 @@ AddIcon checkbox=opt_shaman_enhancement_aoe help=cd specialization=enhancement
 # glyph_of_chain_lightning
 # heroism
 # lava_lash
+# legendary_ring_agility
 # lightning_bolt
 # lightning_shield
 # lightning_shield_buff

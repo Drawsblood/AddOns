@@ -198,8 +198,8 @@ L:AddLocale("ruRU",
 )
 L:AddLocale("zhCN",  
 {
-	afkdnd_desc = "节流AFK和DND消息.", -- Needs review
-	afkdnd_name = "节流AFK和DND消息.", -- Needs review
+	afkdnd_desc = "节流AFK和DND消息.",
+	afkdnd_name = "节流AFK和DND消息.",
 	["A module to provide basic chat filtering."] = "提供基础的聊天过滤的模块",
 	bgjoin_desc = "过滤战场频道离开/加入信息",
 	bgjoin_name = "过滤战场出/入",
@@ -208,8 +208,8 @@ L:AddLocale("zhCN",
 	leavejoin_name = "过滤频道离开/加入",
 	notices_desc = "滤掉其他自定义频道通知信息,例如改变频道所有者",
 	notices_name = "频道通知过滤",
-	tradespam_desc = "节流消息以防止连续多次收到同样的消息", -- Needs review
-	tradespam_name = "屏蔽垃圾", -- Needs review
+	tradespam_desc = "节流消息以防止连续多次收到同样的消息",
+	tradespam_name = "屏蔽垃圾",
 }
 
 )

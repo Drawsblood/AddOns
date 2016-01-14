@@ -186,7 +186,7 @@ L:AddLocale("frFR",
 )
 L:AddLocale("deDE", 
 {
-	alpha_desc = "Transparenz der Chat-Menüs und Navigationspfeile für alle Chat-Fenster einstellen.",
+	alpha_desc = "Transparenz der Chatmenüs und Navigationspfeile für alle Chatfenster einstellen.",
 	alpha_name = "Transparenz einstellen",
 	Buttons = "Schaltflächen",
 	chatmenu_desc = "Chatmenü ein- und ausschalten.",
@@ -195,7 +195,7 @@ L:AddLocale("deDE",
 	Default = "Standard",
 	["Right, Inside Frame"] = "Rechts, innerhalb des Rahmens",
 	["Right, Outside Frame"] = "Rechts, außerhalb des Rahmens",
-	scrollReminder_desc = "Erinnerungsschaltfläche anzeigen, wenn nicht am unteren Ende des Chat-Fensters.",
+	scrollReminder_desc = "Erinnerungsschaltfläche anzeigen, wenn nicht am unteren Ende des Chatfensters.",
 	scrollReminder_name = "ScrollDown-Erinnerung anzeigen",
 	["Set Position"] = "Position einstellen",
 	["Sets position of chat menu and arrows for all chat windows."] = "Stellt die Position des Chatmenüs und der Navigationspfeile für alle Chatfenster ein.",
@@ -312,13 +312,13 @@ L:AddLocale("zhCN",
 	["Set Position"] = "设置位置",
 	["Sets position of chat menu and arrows for all chat windows."] = "设置所有聊天窗口的聊天目录及箭头位置",
 	["Show Arrows"] = "显示箭头",
-	showbnet_desc = "显示社交菜单", -- Needs review
-	showbnet_name = "显示社交菜单", -- Needs review
+	showbnet_desc = "显示社交菜单",
+	showbnet_name = "显示社交菜单",
 	["Show Chat%d Arrows"] = "显示聊天%d箭头",
-	showmenu_desc = "显示聊天菜单", -- Needs review
-	showmenu_name = "显示菜单", -- Needs review
-	showminimize_desc = "显示最小化按钮", -- Needs review
-	showminimize_name = "显示最小化按钮", -- Needs review
+	showmenu_desc = "显示聊天菜单",
+	showmenu_name = "显示菜单",
+	showminimize_desc = "显示最小化按钮",
+	showminimize_name = "显示最小化按钮",
 	["Toggle showing chat arrows for each chat window."] = "为各个聊天窗口显示上下翻页箭头",
 	["Toggles navigation arrows on and off."] = "切换导航箭头开与关",
 }

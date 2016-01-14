@@ -176,7 +176,7 @@ end
 
 function MT:ShareMacro(sharetype, channel, player)
 	local name, texture, body
-	if MacroToolkitFrame.selectedMacro > 100 then
+	if MacroToolkitFrame.selectedMacro > 1000 then
 		local em = MT.db.global.extra[tostring(MacroToolkitFrame.selectedMacro)]
 		name, texture, body = em.name, em.texture, em.body
 	else name, texture, body = GetMacroInfo(MacroToolkitFrame.selectedMacro) end
@@ -206,7 +206,7 @@ local function addmacro(name, texture, body)
 			else es = true end
 		else cs = true end
 	end
-	if es then MT.db.global.extra[100 + es + 1] = {name = name, texture = texture, body = body}
+	if es then MT.db.global.extra[1000 + es + 1] = {name = name, texture = texture, body = body}
 	else CreateMacro(name, texture, body, cs) end
 	MT:MacroFrameUpdate()
 	StaticPopupDialogs.MACROTOOLKIT_ALERT.text = L["Macro added"]
